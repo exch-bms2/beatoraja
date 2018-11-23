@@ -861,96 +861,87 @@ public class JSONSkinLoader extends SkinLoader {
 						((MusicSelectSkin) skin).setCenterBar(sk.songlist.center);
 						((MusicSelectSkin) skin).setClickableBar(sk.songlist.clickable);
 
-						SkinImage[] lamp = new SkinImage[sk.songlist.lamp.length];
 						for (int i = 0; i < sk.songlist.lamp.length; i++) {
 							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.lamp[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
-									lamp[i] = new SkinImage(
+									SkinImage lamp = new SkinImage(
 											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle);
-									setDestination(skin, lamp[i], sk.songlist.lamp[i]);
+									setDestination(skin, lamp, sk.songlist.lamp[i]);
+									barobj.setLamp(i, lamp);
 									break;
 								}
 							}
 						}
-						barobj.setLamp(lamp);
-						SkinImage[] playerlamp = new SkinImage[sk.songlist.playerlamp.length];
 						for (int i = 0; i < sk.songlist.playerlamp.length; i++) {
 							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.playerlamp[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
-									playerlamp[i] = new SkinImage(
+									SkinImage playerlamp = new SkinImage(
 											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle);
-									setDestination(skin, playerlamp[i], sk.songlist.playerlamp[i]);
+									setDestination(skin, playerlamp, sk.songlist.playerlamp[i]);
+									barobj.setPlayerLamp(i, playerlamp);
 									break;
 								}
 							}
 						}
-						barobj.setPlayerLamp(playerlamp);
-						SkinImage[] rivallamp = new SkinImage[sk.songlist.rivallamp.length];
 						for (int i = 0; i < sk.songlist.rivallamp.length; i++) {
 							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.rivallamp[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
-									rivallamp[i] = new SkinImage(
+									SkinImage rivallamp = new SkinImage(
 											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle);
-									setDestination(skin, rivallamp[i], sk.songlist.rivallamp[i]);
+									setDestination(skin, rivallamp, sk.songlist.rivallamp[i]);
+									barobj.setRivalLamp(i, rivallamp);
 									break;
 								}
 							}
 						}
-						barobj.setRivalLamp(rivallamp);
 
-						SkinImage[] trophy = new SkinImage[sk.songlist.trophy.length];
 						for (int i = 0; i < sk.songlist.trophy.length; i++) {
 							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.trophy[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
-									trophy[i] = new SkinImage(
+									SkinImage trophy = new SkinImage(
 											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle);
-									setDestination(skin, trophy[i], sk.songlist.trophy[i]);
+									setDestination(skin, trophy, sk.songlist.trophy[i]);
+									barobj.setTrophy(i, trophy);
 									break;
 								}
 							}
 						}
-						barobj.setTrophy(trophy);
 
-						SkinImage[] label = new SkinImage[sk.songlist.label.length];
 						for (int i = 0; i < sk.songlist.label.length; i++) {
 							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.label[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
-									label[i] = new SkinImage(
+									SkinImage label = new SkinImage(
 											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle);
-									setDestination(skin, label[i], sk.songlist.label[i]);
+									setDestination(skin, label, sk.songlist.label[i]);
+									barobj.setLabel(i, label);
 									break;
 								}
 							}
 						}
-						barobj.setLabel(label);
 
-						SkinText[] skinTexts = new SkinText[sk.songlist.text.length];
 						for (int i = 0; i < sk.songlist.text.length; i++) {
 							for (JsonSkin.Text text : sk.text) {
 								if (sk.songlist.text[i].id.equals(text.id)) {
-									skinTexts[i] = createText(text, p);
-									if (skinTexts[i] != null) {
-										setDestination(skin, skinTexts[i], sk.songlist.text[i]);
+									SkinText skinTexts = createText(text, p);
+									if (skinTexts != null) {
+										setDestination(skin, skinTexts, sk.songlist.text[i]);
+										barobj.setText(i, skinTexts);
 									}
 									break;
 								}
 							}
 						}
-						for(int i = 0; i < barobj.getText().length && i < skinTexts.length; i++) {
-							barobj.getText()[i] = skinTexts[i];
-						}
 
-						SkinNumber[] numbers = new SkinNumber[sk.songlist.level.length];
 						for (int i = 0; i < sk.songlist.level.length; i++) {
 							for (JsonSkin.Value value : sk.value) {
 								if (sk.songlist.level[i].id.equals(value.id)) {
@@ -965,15 +956,15 @@ public class JSONSkinLoader extends SkinLoader {
 											nimages[k][j] = numimages[k * d + j];
 										}
 									}
-									numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
+									SkinNumber numbers = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
 											d > 10 ? 2 : 0, value.ref);
-									numbers[i].setAlign(value.align);
-									setDestination(skin, numbers[i], sk.songlist.level[i]);
+									numbers.setAlign(value.align);
+									setDestination(skin, numbers, sk.songlist.level[i]);
+									barobj.setBarlevel(i, numbers);
 									break;
 								}
 							}
 						}
-						barobj.setBarlevel(numbers);
 
 						// graph
 						for (JsonSkin.Graph img : sk.graph) {

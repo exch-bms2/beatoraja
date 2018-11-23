@@ -164,9 +164,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 								}
 							}
 
-							skinbar.getBarlevel()[values[1]] = new SkinNumber(pn, mn, values[10], values[9],
-									values[13] + 1, 0, values[11]);
-							skinbar.getBarlevel()[values[1]].setAlign(values[12]);
+							skinbar.setBarlevel(values[1], new SkinNumber(pn, mn, values[10], values[9],
+									values[13] + 1, 0, values[11]));
+							skinbar.getBarlevel(values[1]).setAlign(values[12]);
 						} else {
 							int d = images.length % 10 == 0 ? 10 : 11;
 
@@ -177,9 +177,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 								}
 							}
 
-							skinbar.getBarlevel()[values[1]] = new SkinNumber(nimages, values[10], values[9],
-									values[13], d > 10 ? 2 : 0, values[11]);
-							skinbar.getBarlevel()[values[1]].setAlign(values[12]);
+							skinbar.setBarlevel(values[1], new SkinNumber(nimages, values[10], values[9],
+									values[13], d > 10 ? 2 : 0, values[11]));
+							skinbar.getBarlevel(values[1]).setAlign(values[12]);
 						}
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -191,8 +191,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				if (skinbar.getBarlevel()[values[1]] != null) {
-					skinbar.getBarlevel()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
+				if (skinbar.getBarlevel(values[1]) != null) {
+					skinbar.getBarlevel(values[1]).setDestination(values[2], values[3] * dstw / srcw,
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 							values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
@@ -207,7 +207,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
-					skinbar.getLamp()[lamps[0]] = new SkinImage(images, values[10], values[9]);
+					skinbar.setLamp(lamps[0], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -219,7 +219,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				int[] lamps = lampg[values[1]];
 				for (int i = 0; i < lamps.length; i++) {
-					if (skinbar.getLamp()[lamps[i]] != null) {
+					if (skinbar.getLamp(lamps[i]) != null) {
 						if (values[5] < 0) {
 							values[3] += values[5];
 							values[5] = -values[5];
@@ -228,13 +228,13 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						skinbar.getLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
+						skinbar.getLamp(lamps[i]).setDestination(values[2], values[3] * dstw / srcw,
 								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], readOffset(str, 21));
 					} else {
-						skinbar.getLamp()[lamps[i]] = skinbar.getLamp()[lamps[0]];
+						skinbar.setLamp(lamps[i], skinbar.getLamp(lamps[0]));
 					}
 				}
 			}
@@ -246,7 +246,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
-					skinbar.getPlayerLamp()[lamps[0]] = new SkinImage(images, values[10], values[9]);
+					skinbar.setPlayerLamp(lamps[0], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -258,7 +258,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				int[] lamps = lampg[values[1]];
 				for (int i = 0; i < lamps.length; i++) {
-					if (skinbar.getPlayerLamp()[lamps[i]] != null) {
+					if (skinbar.getPlayerLamp(lamps[i]) != null) {
 						if (values[5] < 0) {
 							values[3] += values[5];
 							values[5] = -values[5];
@@ -267,13 +267,13 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						skinbar.getPlayerLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
+						skinbar.getPlayerLamp(lamps[i]).setDestination(values[2], values[3] * dstw / srcw,
 								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], readOffset(str, 21));
 					} else {
-						skinbar.getPlayerLamp()[lamps[i]] = skinbar.getPlayerLamp()[lamps[0]];
+						skinbar.setPlayerLamp(lamps[i], skinbar.getPlayerLamp(lamps[0]));
 					}
 				}
 			}
@@ -285,7 +285,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
-					skinbar.getRivalLamp()[lamps[0]] = new SkinImage(images, values[10], values[9]);
+					skinbar.setRivalLamp(lamps[0], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -297,7 +297,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				int[] lamps = lampg[values[1]];
 				for (int i = 0; i < lamps.length; i++) {
-					if (skinbar.getRivalLamp()[lamps[i]] != null) {
+					if (skinbar.getRivalLamp(lamps[i]) != null) {
 						if (values[5] < 0) {
 							values[3] += values[5];
 							values[5] = -values[5];
@@ -306,13 +306,13 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						skinbar.getRivalLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
+						skinbar.getRivalLamp(lamps[i]).setDestination(values[2], values[3] * dstw / srcw,
 								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], readOffset(str, 21));
 					} else {
-						skinbar.getRivalLamp()[lamps[i]] = skinbar.getRivalLamp()[lamps[0]];
+						skinbar.setRivalLamp(lamps[i], skinbar.getRivalLamp(lamps[0]));
 					}
 				}
 			}
@@ -325,7 +325,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
-					skinbar.getTrophy()[values[1]] = new SkinImage(images, values[10], values[9]);
+					skinbar.setTrophy(values[1], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -335,7 +335,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				if (skinbar.getTrophy()[values[1]] != null) {
+				if (skinbar.getTrophy(values[1]) != null) {
 					if (values[5] < 0) {
 						values[3] += values[5];
 						values[5] = -values[5];
@@ -344,7 +344,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getTrophy()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
+					skinbar.getTrophy(values[1]).setDestination(values[2], values[3] * dstw / srcw,
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
@@ -361,7 +361,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
-					skinbar.getLabel()[values[1]] = new SkinImage(images, values[10], values[9]);
+					skinbar.setLabel(values[1], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -371,7 +371,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				if (skinbar.getLabel()[values[1]] != null) {
+				if (skinbar.getLabel(values[1]) != null) {
 					if (values[5] < 0) {
 						values[3] += values[5];
 						values[5] = -values[5];
@@ -380,7 +380,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getLabel()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
+					skinbar.getLabel(values[1]).setDestination(values[2], values[3] * dstw / srcw,
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
@@ -490,7 +490,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					bartext = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
 				}
 				bartext.setAlign(values[4]);
-				skinbar.getText()[values[1]] = bartext;
+				skinbar.setText(values[1], bartext);
 				// System.out.println("Text Added - " +
 				// (values[3]));
 			}
@@ -499,7 +499,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				skinbar.getText()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
+				skinbar.getText(values[1]).setDestination(values[2], values[3] * dstw / srcw,
 						- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 						values[8], values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));

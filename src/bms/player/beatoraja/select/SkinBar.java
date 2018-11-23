@@ -96,40 +96,69 @@ public class SkinBar extends SkinObject {
     	return null;
     }
 
-    public SkinImage[] getLamp() {
-        return lamp;
+    public SkinImage getLamp(int id) {
+        if(id >= 0 && id < this.lamp.length) {
+            return this.lamp[id];
+        }
+        return null;
     }
 
-    public SkinImage[] getPlayerLamp() {
-        return mylamp;
+    public SkinImage getPlayerLamp(int id) {
+        if(id >= 0 && id < this.mylamp.length) {
+            return this.mylamp[id];
+        }
+        return null;
     }
 
-    public SkinImage[] getRivalLamp() {
-        return rivallamp;
+    public SkinImage getRivalLamp(int id) {
+        if(id >= 0 && id < this.rivallamp.length) {
+            return this.rivallamp[id];
+        }
+        return null;
     }
 
-    public SkinImage[] getTrophy() {
-        return trophy;
+    public SkinImage getTrophy(int id) {
+        if(id >= 0 && id < this.trophy.length) {
+            return this.trophy[id];
+        }
+        return null;
     }
 
-    public SkinText[] getText() {
-        return text;
+    public SkinText getText(int id) {
+        if(id >= 0 && id < this.text.length) {
+            return this.text[id];
+        }
+        return null;
     }
 
-    public void setTrophy(SkinImage[] trophy) {
-        this.trophy = trophy;
+    public void setTrophy(int id, SkinImage trophy) {
+        if(id >= 0 && id < this.trophy.length) {
+            this.trophy[id] = trophy;
+        }
     }
 
-    public void setLamp(SkinImage[] lamp) {
-        this.lamp = lamp;
+    public void setLamp(int id, SkinImage lamp) {
+        if(id >= 0 && id < this.lamp.length) {
+            this.lamp[id] = lamp;
+        }
     }
 
-    public void setPlayerLamp(SkinImage[] lamp) {
-        this.mylamp = lamp;
+    public void setPlayerLamp(int id, SkinImage mylamp) {
+        if(id >= 0 && id < this.mylamp.length) {
+            this.mylamp[id] = mylamp;
+        }
     }
 
-    public void setRivalLamp(SkinImage[] lamp) {
-        this.rivallamp = lamp;
+    public void setText(int id, SkinText text) {
+        if(id >= 0 && id < this.text.length) {
+            this.text[id] = text;
+        }
+    }
+
+    public void setRivalLamp(int id, SkinImage rivallamp) {
+        if(id >= 0 && id < this.rivallamp.length) {
+            this.rivallamp[id] = rivallamp;
+        }
     }
 
     @Override
@@ -150,12 +179,17 @@ public class SkinBar extends SkinObject {
         disposeAll(rivallamp);
     }
 
-    public SkinNumber[] getBarlevel() {
-        return barlevel;
+    public SkinNumber getBarlevel(int id) {
+        if(id >= 0 && id < this.barlevel.length) {
+            return this.barlevel[id];
+        }
+        return null;
     }
 
-    public void setBarlevel(SkinNumber[] barlevel) {
-        this.barlevel = barlevel;
+    public void setBarlevel(int id, SkinNumber barlevel) {
+        if(id >= 0 && id < this.barlevel.length) {
+            this.barlevel[id] = barlevel;
+        }
     }
 
     public int getPosition() {
@@ -167,12 +201,17 @@ public class SkinBar extends SkinObject {
         return ((MusicSelector) state).getBarRender().mousePressed(this, button, x, y);
 	}
 
-    public SkinImage[] getLabel() {
-        return label;
+    public SkinImage getLabel(int id) {
+        if(id >= 0 && id < this.label.length) {
+            return this.label[id];
+        }
+        return null;
     }
 
-    public void setLabel(SkinImage[] label) {
-        this.label = label;
+    public void setLabel(int id, SkinImage label) {
+        if(id >= 0 && id < this.label.length) {
+            this.label[id] = label;
+        }
     }
 
 	public SkinDistributionGraph getGraph() {
