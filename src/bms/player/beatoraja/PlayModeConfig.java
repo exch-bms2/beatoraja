@@ -14,16 +14,6 @@ import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
  */
 public class PlayModeConfig {
 
-    public float hispeed = 1.0f;
-    public int duration = 500;
-    public float hispeedmargin = 0.25f;
-    public float lanecover = 0.2f;
-    public boolean enablelanecover = true;
-    public float lift = 0.1f;
-    public boolean enablelift = false;
-    public float hidden = 0.1f;
-    public boolean enablehidden = false;
-
     private PlayConfig playconfig = new PlayConfig();
     /**
      * キーボード設定
@@ -81,43 +71,6 @@ public class PlayModeConfig {
     public void validate(int keys) {
         if(playconfig == null) {
             playconfig = new PlayConfig();
-        }
-        // データ移行用
-        if(duration != 500) {
-            playconfig.setDuration(duration);
-            duration = 500;
-        }
-        if(!enablelanecover) {
-            playconfig.setEnablelanecover(enablelanecover);
-            enablelanecover = true;
-        }
-        if(enablelift) {
-            playconfig.setEnablelift(enablelift);
-            enablelift = false;
-        }
-        if(enablehidden) {
-            playconfig.setEnablehidden(enablehidden);
-            enablehidden = false;
-        }
-        if(hispeed != 1.0f) {
-            playconfig.setHispeed(hispeed);
-            hispeed = 1.0f;
-        }
-        if(hispeedmargin != 0.25f) {
-            playconfig.setHispeedMargin(hispeedmargin);
-            hispeedmargin = 0.25f;
-        }
-        if(lanecover != 0.2f) {
-            playconfig.setLanecover(lanecover);
-            lanecover = 0.2f;
-        }
-        if(lift != 0.1f) {
-            playconfig.setLift(lift);
-            lift = 0.1f;
-        }
-        if(hidden != 0.1f) {
-            playconfig.setHidden(hidden);
-            hidden = 0.1f;
         }
 
         playconfig.validate();
