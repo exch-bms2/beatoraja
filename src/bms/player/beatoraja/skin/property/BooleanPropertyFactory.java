@@ -318,48 +318,42 @@ public class BooleanPropertyFactory {
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
 				public boolean get(MainState state) {
-					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getStagefile().length() > 0;
+					return state.main.getPlayerResource().getBMSResource().getStagefile() != null;
 				}
 			};
 		case OPTION_NO_STAGEFILE:
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
 				public boolean get(MainState state) {
-					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getStagefile().length() == 0;
+					return state.main.getPlayerResource().getBMSResource().getStagefile() == null;
 				}
 			};
 		case OPTION_BACKBMP:
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
 				public boolean get(MainState state) {
-					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBackbmp().length() > 0;
+					return state.main.getPlayerResource().getBMSResource().getBackbmp() != null;
 				}
 			};
 		case OPTION_NO_BACKBMP:
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
 				public boolean get(MainState state) {
-					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBackbmp().length() == 0;
+					return state.main.getPlayerResource().getBMSResource().getBackbmp() == null;
 				}
 			};
 		case OPTION_BANNER:
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
 				public boolean get(MainState state) {
-					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBanner().length() > 0;
+					return state.main.getPlayerResource().getBMSResource().getBanner() != null;
 				}
 			};
 		case OPTION_NO_BANNER:
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
 				public boolean get(MainState state) {
-					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBanner().length() == 0;
+					return state.main.getPlayerResource().getBMSResource().getBanner() == null;
 				}
 			};
 		case OPTION_NO_TEXT:
