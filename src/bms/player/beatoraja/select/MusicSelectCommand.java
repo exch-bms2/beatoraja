@@ -301,20 +301,22 @@ public enum MusicSelectCommand {
             Bar current = selector.getBarRender().getSelected();
             if(current instanceof SongBar) {
             	final SongData song = ((SongBar) current).getSongData();
-				if (song != null && song.getUrl() != null) {
-					try {
-						URI uri = new URI(song.getUrl());
-						Desktop.getDesktop().browse(uri);
-					} catch (Throwable e) {
-						e.printStackTrace();
+            	if(song != null) {
+					if (song.getUrl() != null && song.getUrl().length() > 0) {
+						try {
+							URI uri = new URI(song.getUrl());
+							Desktop.getDesktop().browse(uri);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
 					}
-				}
-				if (song != null && song.getAppendurl() != null) {
-					try {
-						URI uri = new URI(song.getAppendurl());
-						Desktop.getDesktop().browse(uri);
-					} catch (Throwable e) {
-						e.printStackTrace();
+					if (song.getAppendurl() != null && song.getAppendurl().length() > 0 && !song.getAppendurl().equals(song.getUrl())) {
+						try {
+							URI uri = new URI(song.getAppendurl());
+							Desktop.getDesktop().browse(uri);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
 					}
 				}
             }
