@@ -597,6 +597,16 @@ public class MusicSelector extends MainState {
 
 	public void selectedBarMoved() {
 		execute(MusicSelectCommand.RESET_REPLAY);
+		loadSelectedSongImages();
+
+		main.setTimerOn(TIMER_SONGBAR_CHANGE);
+		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
+				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
+		preview.start(null);
+		showNoteGraph = false;
+	}
+
+	public void loadSelectedSongImages() {
 		// banner
 		// stagefile
 		final Bar current = bar.getSelected();
@@ -604,12 +614,6 @@ public class MusicSelector extends MainState {
 				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
 		main.getPlayerResource().getBMSResource().setStagefile(
 				current instanceof SongBar ? ((SongBar) current).getStagefile() : null);
-
-		main.setTimerOn(TIMER_SONGBAR_CHANGE);
-		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
-				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
-		preview.start(null);
-		showNoteGraph = false;
 	}
 
 	public void selectSong(PlayMode mode) {
