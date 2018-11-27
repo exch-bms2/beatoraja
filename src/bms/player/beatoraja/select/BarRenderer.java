@@ -344,6 +344,13 @@ public class BarRenderer {
 			baro.getText(0).prepareFont(String.valueOf(chars));
 			baro.getText(1).prepareFont(String.valueOf(chars));
 		}
+
+		// check terminated loader thread and load song images
+		if(loader != null && loader.getState() == Thread.State.TERMINATED){
+			select.loadSelectedSongImages();
+			loader = null;
+		}
+
 		// draw song bar
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
