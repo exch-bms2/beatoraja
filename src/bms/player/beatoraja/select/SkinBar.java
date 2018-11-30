@@ -14,30 +14,43 @@ public class SkinBar extends SkinObject {
     /**
      * 選択時のBarのSkinImage
      */
-    private SkinImage[] barimageon = new SkinImage[60];
+    private SkinImage[] barimageon = new SkinImage[BAR_COUNT];
     /**
      * 非選択時のBarのSkinImage
      */
-    private SkinImage[] barimageoff = new SkinImage[60];
+    private SkinImage[] barimageoff = new SkinImage[BAR_COUNT];
+    
+    public static final int BAR_COUNT = 60;
+
     /**
      * トロフィーのSkinImage。描画位置はBarの相対座標
      */
-    private SkinImage[] trophy = new SkinImage[3];
+    private SkinImage[] trophy = new SkinImage[BARTROPHY_COUNT];
+    
+    public static final int BARTROPHY_COUNT = 3;
+
     /**
      * BarのSkinText。描画位置はBarの相対座標。
      * Indexは0:通常 1:新規 2:SongBar(通常) 3:SongBar(新規) 4:FolderBar(通常) 5:FolderBar(新規) 6:TableBar or HashBar
      * 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
      * 3以降で定義されてなければ0か1を用いる
      */
-    private SkinText[] text = new SkinText[11];
+    private SkinText[] text = new SkinText[BARTEXT_COUNT];
+    
+    public static final int BARTEXT_COUNT = 11;
     /**
      * レベルのSkinNumber。描画位置はBarの相対座標
      */
-    private SkinNumber[] barlevel = new SkinNumber[7];
+    private SkinNumber[] barlevel = new SkinNumber[BARLEVEL_COUNT];
+    
+    public static final int BARLEVEL_COUNT = 7;
+
     /**
      * 譜面ラベルのSkinImage。描画位置はBarの相対座標
      */
-    private SkinImage[] label = new SkinImage[5];
+    private SkinImage[] label = new SkinImage[BARLABEL_COUNT];
+    
+    public static final int BARLABEL_COUNT = 5;
 
     private SkinDistributionGraph graph;
 
@@ -49,15 +62,17 @@ public class SkinBar extends SkinObject {
     /**
      * ランプ画像
      */
-    private SkinImage[] lamp = new SkinImage[11];
+    private SkinImage[] lamp = new SkinImage[BARLAMP_COUNT];
     /**
      * ライバルランプ表示時のプレイヤーランプ画像
      */
-    private SkinImage[] mylamp = new SkinImage[11];
+    private SkinImage[] mylamp = new SkinImage[BARLAMP_COUNT];
     /**
      * ライバルランプ表示時のライバルランプ画像
      */
-    private SkinImage[] rivallamp = new SkinImage[11];
+    private SkinImage[] rivallamp = new SkinImage[BARLAMP_COUNT];
+
+    public static final int BARLAMP_COUNT = 11;
 
     public SkinBar(int position) {
         this.position = position;

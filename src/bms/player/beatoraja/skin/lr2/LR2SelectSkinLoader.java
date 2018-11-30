@@ -138,6 +138,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARLEVEL_COUNT) {
+					return;
+				}
 				int divx = values[7];
 				if (divx <= 0) {
 					divx = 1;
@@ -204,6 +207,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARLAMP_COUNT) {
+					return;
+				}
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
@@ -243,6 +249,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARLAMP_COUNT) {
+					return;
+				}
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
@@ -282,6 +291,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARLAMP_COUNT) {
+					return;
+				}
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
@@ -323,6 +335,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARTROPHY_COUNT) {
+					return;
+				}
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					skinbar.setTrophy(values[1], new SkinImage(images, values[10], values[9]));
@@ -359,6 +374,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARLABEL_COUNT) {
+					return;
+				}
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					skinbar.setLabel(values[1], new SkinImage(images, values[10], values[9]));
@@ -483,6 +501,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				// 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
 				// 3以降で定義されてなければ0か1が用いられる
 				int[] values = parseInt(str);
+				if(values[1] < 0 && values[1] >= SkinBar.BARTEXT_COUNT) {
+					return;
+				}
 				SkinText bartext = null;
 				if (values[2] < fontlist.size && fontlist.get(values[2]) != null) {
 					bartext = new SkinTextImage(fontlist.get(values[2]));
