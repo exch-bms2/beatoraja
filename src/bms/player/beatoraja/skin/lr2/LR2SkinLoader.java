@@ -38,7 +38,7 @@ public abstract class LR2SkinLoader extends SkinLoader {
 		}
 		String[] str = line.split(",", -1);
 		if (str.length > 0) {
-			if (str[0].equals("#IF")) {
+			if (str[0].equalsIgnoreCase("#IF")) {
 				ifs = true;
 				for (int i = 1; i < str.length; i++) {
 					boolean b = false;
@@ -73,7 +73,7 @@ public abstract class LR2SkinLoader extends SkinLoader {
 				}
 
 				skip = !ifs;
-			} else if (str[0].equals("#ELSEIF")) {
+			} else if (str[0].equalsIgnoreCase("#ELSEIF")) {
 				if (ifs) {
 					skip = true;
 				} else {
@@ -108,21 +108,21 @@ public abstract class LR2SkinLoader extends SkinLoader {
 
 					skip = !ifs;
 				}
-			} else if (str[0].equals("#ELSE")) {
+			} else if (str[0].equalsIgnoreCase("#ELSE")) {
 				skip = ifs;
-			} else if (str[0].equals("#ENDIF")) {
+			} else if (str[0].equalsIgnoreCase("#ENDIF")) {
 				skip = false;
 				ifs = false;
 			}
 			if (!skip) {
-				if (str[0].equals("#SETOPTION")) {
+				if (str[0].equalsIgnoreCase("#SETOPTION")) {
 					int index = Integer.parseInt(str[1]);
 					op.put(index, Integer.parseInt(str[2]) >= 1 ? 1 : 0);
 				}
 
 				Command command = null;
 				for (Command cm : commands) {
-					if (str[0].substring(1).equals(cm.name())) {
+					if (str[0].substring(1).equalsIgnoreCase(cm.name())) {
 						command = cm;
 						break;
 					}
