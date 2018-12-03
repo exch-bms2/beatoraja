@@ -3,8 +3,8 @@ package bms.player.beatoraja.audio;
 import bms.model.*;
 import bms.player.beatoraja.ResourcePool;
 
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.*;
@@ -40,11 +40,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	private float volume = 1.0f;
 	/**
-	 *
+	 * 音源全体のピッチ
 	 */
-	private float gloablPitch = 1.0f;
+	private float globalPitch = 1.0f;
 	/**
-	 * 
+	 * オーディオキャッシュデータ
 	 */
 	private final AudioCache cache;
 
@@ -206,7 +206,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		Array<SliceWav<T>>[] slicesound = new Array[wavcount];
 
-		IntMap<List<Note>> notemap = new IntMap<List<Note>>();
+		IntMap<Array<Note>> notemap = new IntMap<Array<Note>>();
 		final int lanes = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
@@ -226,7 +226,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 		}
 
-		for (IntMap.Entry<List<Note>> waventry : notemap) {
+		for (IntMap.Entry<Array<Note>> waventry : notemap) {
 			final int wavid = waventry.key;
 			if (progress >= 1) {
 				break;
@@ -285,13 +285,13 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		progress = 1;
 	}
 
-	private void addNoteList(IntMap<List<Note>> notemap, Note n) {
+	private void addNoteList(IntMap<Array<Note>> notemap, Note n) {
 		if (n.getWav() < 0) {
 			return;
 		}
-		List<Note> notes = notemap.get(n.getWav());
+		Array<Note> notes = notemap.get(n.getWav());
 		if (notes == null) {
-			notes = new ArrayList<Note>();
+			notes = new Array<Note>();
 			notemap.put(n.getWav(), notes);
 		}
 
@@ -398,11 +398,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void setGlobalPitch(float pitch) {
-		this.gloablPitch = pitch;
+		this.globalPitch = pitch;
 	}
 
 	public float getGlobalPitch() {
-		return this.gloablPitch;
+		return this.globalPitch;
 	}
 
 	public float getProgress() {
@@ -537,7 +537,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 		
 		public int hashCode() {
-			return Objects.hash(path, start, duration);
+			return java.util.Objects.hash(path, start, duration);
 		}
 	}
 }
