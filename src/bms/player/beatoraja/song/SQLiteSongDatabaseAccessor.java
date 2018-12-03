@@ -89,6 +89,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "[path] TEXT," + "[type] INTEGER," + "[banner] TEXT," + "[parent] TEXT," + "[date] INTEGER,"
 						+ "[max] INTEGER," + "[adddate] INTEGER," + "PRIMARY KEY(path));");
 			}
+			
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
 		}
@@ -143,6 +144,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
@@ -433,7 +435,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);",
 						dir.getFileName().toString(), "", "", s, 1, "",
-						SongUtils.crc32(dir.getParent().toString(), bmsroot, root.toString()),
+						SongUtils.crc32(dir.toAbsolutePath().getParent().toString(), bmsroot, root.toString()),
 						Files.getLastModifiedTime(dir).toMillis() / 1000, null,
 						Calendar.getInstance().getTimeInMillis() / 1000);
 			}
@@ -506,12 +508,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					if (bmsondecoder == null) {
 						bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
 					}
-					model = bmsondecoder.decode(path.toFile());
+					model = bmsondecoder.decode(path);
 				} else {
 					if (bmsdecoder == null) {
 						bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
 					}
-					model = bmsdecoder.decode(path.toFile());
+					model = bmsdecoder.decode(path);
 				}
 
 				if (model == null) {

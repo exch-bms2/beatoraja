@@ -8,7 +8,7 @@ public class SongUtils {
 
 	public static String crc32(String path, String[] rootdirs, String bmspath) {
 		for (String s : rootdirs) {
-			if (Paths.get(s).getParent().toString().equals(path)) {
+			if (Paths.get(s).toAbsolutePath().getParent().toString().equals(path)) {
 				return "e2977170";
 			}
 		}
@@ -29,6 +29,4 @@ public class SongUtils {
 		}
 		return Integer.toHexString(~crc); // same as crc ^ 0xFFFFFFFF
 	}
-	
-	
 }

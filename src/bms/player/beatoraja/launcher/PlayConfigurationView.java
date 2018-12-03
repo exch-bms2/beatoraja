@@ -683,16 +683,21 @@ public class PlayConfigurationView implements Initializable {
 		chooser.setTitle("楽曲のルートフォルダを選択してください");
 		File f = chooser.showDialog(null);
 		if (f != null) {
+			final String defaultPath = new File(".").getAbsoluteFile().getParent() + File.separatorChar;;
+			String targetPath = f.getAbsolutePath();
+			if(targetPath.startsWith(defaultPath)) {
+				targetPath = f.getAbsolutePath().substring(defaultPath.length());
+			}
 			boolean unique = true;
 			for (String path : bmsroot.getItems()) {
-				if (path.equals(f.getPath()) || f.getPath().startsWith(path + File.separatorChar)) {
+				if (path.equals(targetPath) || targetPath.startsWith(path + File.separatorChar)) {
 					unique = false;
 					break;
 				}
 			}
 			if (unique) {
-				bmsroot.getItems().add(f.getPath());
-				loadBMSPath(f.getPath());
+				bmsroot.getItems().add(targetPath);
+				loadBMSPath(targetPath);
 			}
 		}
 	}
@@ -712,16 +717,21 @@ public class PlayConfigurationView implements Initializable {
 		if (db.hasFiles()) {
 			for (File f : db.getFiles()) {
 				if (f.isDirectory()) {
+					final String defaultPath = new File(".").getAbsoluteFile().getParent() + File.separatorChar;;
+					String targetPath = f.getAbsolutePath();
+					if(targetPath.startsWith(defaultPath)) {
+						targetPath = f.getAbsolutePath().substring(defaultPath.length());
+					}
 					boolean unique = true;
 					for (String path : bmsroot.getItems()) {
-						if (path.equals(f.getPath()) || f.getPath().startsWith(path + File.separatorChar)) {
+						if (path.equals(targetPath) || targetPath.startsWith(path + File.separatorChar)) {
 							unique = false;
 							break;
 						}
 					}
 					if (unique) {
-						bmsroot.getItems().add(f.getPath());
-						loadBMSPath(f.getPath());
+						bmsroot.getItems().add(targetPath);
+						loadBMSPath(targetPath);
 					}
 				}
 			}
