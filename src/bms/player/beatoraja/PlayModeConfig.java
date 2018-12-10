@@ -189,6 +189,9 @@ public class PlayModeConfig {
                             Keys.CONTROL_LEFT };
                     break;
                 case BEAT_10K:
+                    keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.SHIFT_LEFT,
+                            Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
+                    break;
                 case BEAT_14K:
                 default:
                     keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
@@ -306,6 +309,9 @@ public class PlayModeConfig {
                                 BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
                         break;
                     case BEAT_10K:
+                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                                BMKeys.UP, BMKeys.DOWN, -1,-1,-1,-1,-1,-1,-1 };
+                        break;
                     case BEAT_14K:
                         keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
                                 BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, -1,-1,-1,-1,-1,-1,-1,-1,-1 };
@@ -332,6 +338,9 @@ public class PlayModeConfig {
                         Arrays.fill(keys, -1);
                         break;
                     case BEAT_10K:
+                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                                BMKeys.UP, BMKeys.DOWN};
+                        break;
                     case BEAT_14K:
                         keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
                                 BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
@@ -466,6 +475,16 @@ public class PlayModeConfig {
         public void setKeyAssign(Mode mode, boolean enable) {
             switch (mode) {
                 case BEAT_5K:
+                    // 5keys
+                    keys = new Input[7];
+                    for (int i = 0; i < 5; i++) {
+                        keys[i] = new Input(Input.Type.NOTE, 53 + i);
+                    }
+                    keys[5] = new Input(Input.Type.NOTE, 49);
+                    keys[6] = new Input(Input.Type.NOTE, 51);
+                    start = new Input(Input.Type.NOTE, 47);
+                    select = new Input(Input.Type.NOTE, 48);
+                    break;
                 case BEAT_7K:
                 default:
                     // 7keys
@@ -479,6 +498,22 @@ public class PlayModeConfig {
                     select = new Input(Input.Type.NOTE, 48);
                     break;
                 case BEAT_10K:
+                    keys = new Input[14];
+                    for (int i = 0; i < 5; i++) {
+                        // 1P keys
+                        keys[i] = new Input(Input.Type.NOTE, 53 + i);
+                        // 2P keys
+                        keys[7 + i] = new Input(Input.Type.NOTE, 65 + i);
+                    }
+                    // 1P turntables
+                    keys[5] = new Input(Input.Type.NOTE, 49);
+                    keys[6] = new Input(Input.Type.NOTE, 51);
+                    // 2P turntables
+                    keys[12] = new Input(Input.Type.NOTE, 73);
+                    keys[13] = new Input(Input.Type.NOTE, 75);
+                    start = new Input(Input.Type.NOTE, 47);
+                    select = new Input(Input.Type.NOTE, 48);
+                    break;
                 case BEAT_14K:
                     keys = new Input[18];
                     for (int i = 0; i < 7; i++) {

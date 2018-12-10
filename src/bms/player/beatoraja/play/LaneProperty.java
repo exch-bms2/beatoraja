@@ -51,11 +51,11 @@ public class LaneProperty {
 			scratchToKey = new int[][] { {7,8} };
 			break;
 		case BEAT_10K:
-			keyToLane = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5, 6, 7, 8, 9, 10, -1, -1, 11, 11 };
-			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {7,8}, {9}, {10}, {11}, {12}, {13}, {16,17} };
+			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11, 11 };
+			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5,6}, {7}, {8}, {9}, {10}, {11}, {12,13} };
 			laneToScratch = new int[] { -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, 1 };
 			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0 };
-			scratchToKey = new int[][] { {7,8}, {16,17} };
+			scratchToKey = new int[][] { {5,6}, {12,13} };
 			break;
 		case BEAT_14K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15 };

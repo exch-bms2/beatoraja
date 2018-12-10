@@ -1120,8 +1120,10 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	enum PlayMode {
-		BEAT_7K("5/7KEYS"),
-		BEAT_14K("10/14KEYS"),
+		BEAT_5K("5KEYS"),
+		BEAT_7K("7KEYS"),
+		BEAT_10K("10KEYS"),
+		BEAT_14K("14KEYS"),
 		POPN_9K("9KEYS"),
 		KEYBOARD_24K("24KEYS"),
 		KEYBOARD_24K_DOUBLE("24KEYS DOUBLE");

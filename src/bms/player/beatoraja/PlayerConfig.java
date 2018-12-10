@@ -132,6 +132,8 @@ public class PlayerConfig {
 
 	private PlayModeConfig mode7 = new PlayModeConfig(Mode.BEAT_7K);
 
+	private PlayModeConfig mode10 = new PlayModeConfig(Mode.BEAT_10K);
+
 	private PlayModeConfig mode14 = new PlayModeConfig(Mode.BEAT_14K);
 
 	private PlayModeConfig mode9 = new PlayModeConfig(Mode.POPN_9K);
@@ -290,6 +292,7 @@ public class PlayerConfig {
 		case BEAT_7K:
 			return getMode7();
 		case BEAT_10K:
+			return getMode10();
 		case BEAT_14K:
 			return getMode14();
 		case POPN_9K:
@@ -310,8 +313,9 @@ public class PlayerConfig {
 		case 5:
 			return getMode5();
 		case 14:
-		case 10:
 			return getMode14();
+		case 10:
+			return getMode10();
 		case 9:
 			return getMode9();
 		case 25:
@@ -337,6 +341,18 @@ public class PlayerConfig {
 
 	public void setMode7(PlayModeConfig mode7) {
 		this.mode7 = mode7;
+	}
+
+	public PlayModeConfig getMode10() {
+		if(mode10 == null || mode10.getController().length < 2) {
+			mode10 = new PlayModeConfig(Mode.BEAT_10K);
+			Logger.getGlobal().warning("mode10のPlayConfigを再構成");
+		}
+		return mode10;
+	}
+
+	public void setMode10(PlayModeConfig mode10) {
+		this.mode10 = mode10;
 	}
 
 	public PlayModeConfig getMode14() {
@@ -592,6 +608,9 @@ public class PlayerConfig {
 		if(mode14 == null) {
 			mode14 = new PlayModeConfig(Mode.BEAT_14K);
 		}
+		if(mode10 == null) {
+			mode10 = new PlayModeConfig(Mode.BEAT_10K);
+		}
 		if(mode9 == null) {
 			mode9 = new PlayModeConfig(Mode.POPN_9K);
 		}
@@ -603,6 +622,7 @@ public class PlayerConfig {
 		}
 		mode5.validate(7);
 		mode7.validate(9);
+		mode10.validate(14);
 		mode14.validate(18);
 		mode9.validate(9);
 		mode24.validate(26);
