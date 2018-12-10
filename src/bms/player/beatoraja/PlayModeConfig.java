@@ -183,6 +183,7 @@ public class PlayModeConfig {
                 case BEAT_5K:
                     keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.SHIFT_LEFT,
                             Keys.CONTROL_LEFT };
+                    break;
                 case BEAT_7K:
                     keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
                             Keys.CONTROL_LEFT };
@@ -294,6 +295,9 @@ public class PlayModeConfig {
             if(player == 0) {
                 switch (mode) {
                     case BEAT_5K:
+                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                                BMKeys.UP, BMKeys.DOWN };
+                        break;
                     case BEAT_7K:
                     case POPN_5K:
                     case POPN_9K:

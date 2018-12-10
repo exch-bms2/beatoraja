@@ -37,11 +37,11 @@ public class LaneProperty {
 	public LaneProperty(Mode mode) {
 		switch (mode) {
 		case BEAT_5K:
-			keyToLane = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5 };
-			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {7,8} };
+			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 5 };
+			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5,6} };
 			laneToScratch = new int[] { -1, -1, -1, -1, -1, 0 };
 			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 0 };
-			scratchToKey = new int[][] { {7,8} };
+			scratchToKey = new int[][] { {5,6} };
 			break;
 		case BEAT_7K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
