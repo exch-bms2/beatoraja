@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
 
 import bms.model.Mode;
@@ -141,6 +142,11 @@ public class PlayerConfig {
 	private PlayModeConfig mode24 = new PlayModeConfig(Mode.KEYBOARD_24K);
 
 	private PlayModeConfig mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
+	
+	/**
+	 * 選択中の選曲時ソート
+	 */
+	private int sort;
 
 	/**
 	 * 選曲時でのキー入力方式
@@ -402,6 +408,14 @@ public class PlayerConfig {
 	public Mode getMode()  {
 		return mode;
 	}
+	
+	public int getSort() {
+		return this.sort ;
+	}
+
+	public void setSort(int sort) {
+		this.sort = sort;
+	}
 
 	public int getMusicselectinput() {
 		return musicselectinput;
@@ -627,6 +641,8 @@ public class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
+		
+		sort = MathUtils.clamp(sort, 0 , BarSorter.values().length - 1);
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
 		random = MathUtils.clamp(random, 0, 9);
