@@ -1,22 +1,18 @@
 package bms.player.beatoraja;
 
-import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.io.*;
 import java.nio.file.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.skin.SkinPropertyMapper;
 import org.lwjgl.input.Mouse;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -34,8 +30,7 @@ import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.external.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
-import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.CourseResult;
@@ -44,12 +39,9 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
-import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.*;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
-import twitter4j.*;
-import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * アプリケーションのルートクラス
@@ -58,7 +50,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.6.4";
+	public static final String VERSION = "beatoraja 0.6.7";
 
 	private static final boolean debug = false;
 
@@ -86,8 +78,6 @@ public class MainController extends ApplicationAdapter {
 	private MessageRenderer messageRenderer;
 
 	private MainState current;
-	// TODO currentStateの多重定義は好ましくないため、削除予定
-	private static MainState currentState;
 	/**
 	 * 状態の開始時間
 	 */
@@ -176,7 +166,7 @@ public class MainController extends ApplicationAdapter {
 
 		Array<IRStatus> irarray = new Array<IRStatus>();
 		for(PlayerConfig.IRConfig irconfig : player.getIrconfig()) {
-			IRConnection ir = IRConnection.getIRConnection(irconfig.getIrname());
+			IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
 			if(ir != null) {
 				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
 					ir = null;
@@ -291,7 +281,6 @@ public class MainController extends ApplicationAdapter {
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;
-			currentState = newState;
 			starttime = System.nanoTime();
 			nowmicrotime = ((System.nanoTime() - starttime) / 1000);
 			current.prepare();
@@ -718,31 +707,6 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			setMicroTimer(id, Long.MIN_VALUE);
 		}
-	}
-
-	public static String getClearTypeName() {
-		String[] clearTypeName = { "NO PLAY", "FAILED", "ASSIST EASY CLEAR", "LIGHT ASSIST EASY CLEAR", "EASY CLEAR",
-				"CLEAR", "HARD CLEAR", "EXHARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
-
-		int clear = IntegerPropertyFactory.getIntegerProperty(NUMBER_CLEAR).get(currentState);
-		if(clear >= 0 && clear < clearTypeName.length) {
-			return clearTypeName[clear];
-		}
-
-		return "";
-	}
-
-	public static String getRankTypeName() {
-		String rankTypeName = "";
-		if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_AAA_1P).get(currentState)) rankTypeName += "AAA";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_AA_1P).get(currentState)) rankTypeName += "AA";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_A_1P).get(currentState)) rankTypeName += "A";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_B_1P).get(currentState)) rankTypeName += "B";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_C_1P).get(currentState)) rankTypeName += "C";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_D_1P).get(currentState)) rankTypeName += "D";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_E_1P).get(currentState)) rankTypeName += "E";
-		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_F_1P).get(currentState)) rankTypeName += "F";
-		return rankTypeName;
 	}
 
 	private UpdateThread updateSong;

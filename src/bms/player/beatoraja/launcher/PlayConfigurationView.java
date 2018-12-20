@@ -6,16 +6,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.apache.commons.dbutils.QueryRunner;
@@ -28,42 +22,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainLoader;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayModeConfig;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
-import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerConfig.IRConfig;
-import bms.player.beatoraja.ScoreDatabaseAccessor;
-import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.audio.PortAudioDriver;
-import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
-import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.player.beatoraja.song.SongInformationAccessor;
+import bms.player.beatoraja.song.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -367,7 +339,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(audioFreqOption, audioPlaySpeedControls);
 		initComboBox(audioFastForward, audioPlaySpeedControls);
 
-		irname.getItems().setAll(IRConnection.getAllAvailableIRConnectionName());
+		irname.getItems().setAll(IRConnectionManager.getAllAvailableIRConnectionName());
 		irname.getItems().add(null);
 
 		newVersionCheck();
@@ -931,7 +903,7 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	public void updateIRConnection() {
-    	String homeurl = IRConnection.getHomeURL(irname.getValue());
+    	String homeurl = IRConnectionManager.getHomeURL(irname.getValue());
 		irhome.setText(homeurl);
 		irhome.setOnAction((event) -> {
             Desktop desktop = Desktop.getDesktop();
