@@ -130,16 +130,20 @@
                         <VBox.margin>
                             <Insets left="10.0" />
                         </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" />
-                        <NumericSpinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
-                            </valueFactory>
-                        </NumericSpinner>
                         <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
                         <NumericSpinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
+                            </valueFactory>
+                        </NumericSpinner>
+                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" >
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </Label>
+                        <NumericSpinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
+                            <valueFactory>
+                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
                             </valueFactory>
                         </NumericSpinner>
                     </HBox>
