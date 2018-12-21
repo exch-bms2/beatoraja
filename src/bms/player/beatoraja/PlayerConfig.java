@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 
+import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
@@ -849,8 +850,7 @@ public class PlayerConfig {
 		}
 		
 		public boolean validate() {
-			// TODO 存在しないIR名の除外
-			if(irname == null || irname.length() == 0) {
+			if(irname == null || irname.length() == 0 || IRConnectionManager.getIRConnectionClass(irname) == null) {
 				return false;
 			}
 			
