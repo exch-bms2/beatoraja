@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.Config;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
@@ -38,49 +39,45 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		}
 	}
 
+	static final String[] exts = { ".wav", ".ogg", ".mp3", ".flac" };
+
 	@Override
 	protected Sound getKeySound(Path p) {
-		String name = p.toString();
-		final int index = name.lastIndexOf('.');
-		if (index !=-1 ) {
-			name = name.substring(0, index);
+		String path = p.toString();
+		final int index = path.lastIndexOf('.');
+		final String name = path.substring(0, index < 0 ? path.length() : index);
+		final String ext = index < 0 ? "" : path.substring(index, path.length());
+		if (p.toFile().exists()) {
+			return getKeySound(name, ext);
 		}
-		final Path wavfile = Paths.get(name + ".wav");
 
-		if (Files.exists(wavfile)) {
-			try {
-				return Gdx.audio.newSound(new PCMHandleStream(wavfile));
-			} catch (GdxRuntimeException e) {
-				Logger.getGlobal().warning("音源(wav)ファイル読み込み失敗。" + e.getMessage());
-//				e.printStackTrace();
+		for (String _ext : exts) {
+			if (!_ext.equals(ext) && p.resolve(name + _ext).toFile().exists()) {
+				return getKeySound(name, _ext);
 			}
 		}
-		final Path flacfile = Paths.get(name + ".flac");
-		if (Files.exists(flacfile)) {
-			try {
-				return Gdx.audio.newSound(new PCMHandleStream(flacfile));
-			} catch (GdxRuntimeException e) {
-				Logger.getGlobal().warning("音源(flac)ファイル読み込み失敗。" + e.getMessage());
-//				e.printStackTrace();
-			}
+
+		return null;
+	}
+
+	private Sound getKeySound(String name, String ext) {
+		switch (ext) {
+			case ".wav":
+			case ".flac":
+				return getKeySound(new PCMHandleStream(name + ext));
+			case ".ogg":
+			case ".mp3":
+				return getKeySound(Gdx.files.internal(name + ext));
 		}
-		final Path oggfile = Paths.get(name + ".ogg");
-		if (Files.exists(oggfile)) {
-			try {
-				return Gdx.audio.newSound(Gdx.files.internal(oggfile.toString()));
-			} catch (GdxRuntimeException e) {
-				Logger.getGlobal().warning("音源(ogg)ファイル読み込み失敗。" + e.getMessage());
-				// e.printStackTrace();
-			}
-		}
-		final Path mp3file = Paths.get(name + ".mp3");
-		if (Files.exists(mp3file)) {
-			try {
-				return Gdx.audio.newSound(Gdx.files.internal(mp3file.toString()));
-			} catch (GdxRuntimeException e) {
-				Logger.getGlobal().warning("音源(mp3)ファイル読み込み失敗。" + e.getMessage());
-				// e.printStackTrace();
-			}
+		return null;
+
+	}
+
+	private Sound getKeySound(FileHandle handle) {
+		try {
+			return Gdx.audio.newSound(handle);
+		} catch (GdxRuntimeException e) {
+			Logger.getGlobal().warning("音源ファイル読み込み失敗" + e.getMessage());
 		}
 		return null;
 	}
@@ -240,6 +237,10 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			this.p = p;
 		}
 		
+		public PCMHandleStream(String path) {
+			this(Paths.get(path));
+		}
+
 		@Override
 		public InputStream read() {
 			try {
