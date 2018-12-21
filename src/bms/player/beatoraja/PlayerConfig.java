@@ -104,6 +104,7 @@ public class PlayerConfig {
 	 * プレイ中のゲージ切替
 	 */
 	private int gaugeAutoShift = GAUGEAUTOSHIFT_NONE;
+	private boolean shiftsAssistEasy = true;
 
 	public static final int GAUGEAUTOSHIFT_NONE = 0;
 	public static final int GAUGEAUTOSHIFT_CONTINUE = 1;
@@ -238,6 +239,14 @@ public class PlayerConfig {
 
 	public void setGaugeAutoShift(int gaugeAutoShift) {
 		this.gaugeAutoShift = gaugeAutoShift;
+	}
+
+	public boolean getShiftsAssistEasy() {
+		return shiftsAssistEasy;
+	}
+
+	public void setShiftsAssistEasy(boolean shiftsAssistEasy) {
+		this.shiftsAssistEasy = shiftsAssistEasy;
 	}
 
 	public int getLnmode() {

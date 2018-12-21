@@ -601,6 +601,9 @@ public class BMSPlayer extends MainState {
 						? (gauge.getType() >= GrooveGauge.CLASS ? GrooveGauge.EXHARDCLASS + 1 : GrooveGauge.HAZARD + 1)
 						: (gauge.isCourseGauge() ? Math.min(Math.max(config.getGauge(), GrooveGauge.NORMAL) + GrooveGauge.CLASS - GrooveGauge.NORMAL, GrooveGauge.EXHARDCLASS) + 1 : config.getGauge() + 1);
 				int type = gauge.isCourseGauge() ? GrooveGauge.CLASS : 0;
+				if(!config.getShiftsAssistEasy() && gauge.getType() != GrooveGauge.ASSISTEASY) {
+					type = GrooveGauge.ASSISTEASY + 1;
+				}
 				for(int i = type;i < len;i++) {
 					if(gauge.getGauge(i).getValue() > 0f && gauge.getGauge(i).isQualified()) {
 						type = i;
@@ -623,7 +626,7 @@ public class BMSPlayer extends MainState {
 					break;
 				case PlayerConfig.GAUGEAUTOSHIFT_SURVIVAL_TO_GROOVE:
 					if(!gauge.isCourseGauge()) {
-						// ARS処理
+						// GAS処理
 						gauge.setType(GrooveGauge.NORMAL);
 					}
 					break;

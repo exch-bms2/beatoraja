@@ -203,6 +203,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> gaugeautoshift;
 	@FXML
+	private CheckBox shiftsassisteasy;
+	@FXML
 	private Spinner<Integer> exjudge;
 	@FXML
 	private CheckBox nomine;
@@ -537,6 +539,8 @@ public class PlayConfigurationView implements Initializable {
 		bpmguide.setSelected(player.isBpmguide());
 		legacy.setSelected(player.isLegacynote());
 		gaugeautoshift.setValue(player.getGaugeAutoShift());
+		shiftsassisteasy.setSelected(player.getShiftsAssistEasy());
+
 		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		nomine.setSelected(player.isNomine());
 		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
@@ -650,6 +654,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setBpmguide(bpmguide.isSelected());
 		player.setLegacynote(legacy.isSelected());
 		player.setGaugeAutoShift(gaugeautoshift.getValue());
+		player.setShiftsAssistEasy(shiftsassisteasy.isSelected());
 		player.setJudgewindowrate(getValue(exjudge));
 		player.setNomine(nomine.isSelected());
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));
