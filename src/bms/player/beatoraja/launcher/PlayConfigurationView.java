@@ -764,6 +764,10 @@ public class PlayConfigurationView implements Initializable {
 			String table = tableurl.getSelectionModel().getSelectedItem();
 			tableurl.getItems().remove(index);
 			tableurl.getItems().add(index - 1, table);
+
+			SelectionModel m = tableurl.getSelectionModel();
+			m.select(index - 1);
+			tableurl.setSelectionModel((MultipleSelectionModel)m);
 		}
 	}
 
@@ -773,6 +777,10 @@ public class PlayConfigurationView implements Initializable {
 			String table = tableurl.getSelectionModel().getSelectedItem();
 			tableurl.getItems().remove(index);
 			tableurl.getItems().add(index + 1, table);
+
+			SelectionModel m = tableurl.getSelectionModel();
+			m.select(index + 1);
+			tableurl.setSelectionModel((MultipleSelectionModel)m);
 		}
 	}
 
