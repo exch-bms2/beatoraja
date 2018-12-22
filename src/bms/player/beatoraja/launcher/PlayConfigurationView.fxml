@@ -428,20 +428,22 @@
                                          </rowConstraints>
                                          <Label text="%TARGET_SCORE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                                          <ComboBox fx:id="target" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                         <Label text="Gauge Auto Shift" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                                         <ComboBox fx:id="gaugeautoshift" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                         <Label text="%AUTO_SAVE_REPLAY1" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                         <ComboBox fx:id="autosavereplay1" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                         <Label text="%AUTO_SAVE_REPLAY2" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                         <ComboBox fx:id="autosavereplay2" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                         <Label text="%AUTO_SAVE_REPLAY3" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                                         <ComboBox fx:id="autosavereplay3" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                         <Label text="%AUTO_SAVE_REPLAY4" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                         <ComboBox fx:id="autosavereplay4" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                         <Label text="%SEVEN_TO_NINE_PATTERN" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="seventoninepattern" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                         <Label text="%SEVEN_TO_NINE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="seventoninetype" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                         <Label text="Gauge Auto Shift" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                         <ComboBox fx:id="gaugeautoshift" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                         <Label text="%BOTTOM_SHIFTABLE_GAUGE" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                         <ComboBox fx:id="bottomshiftablegauge" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                         <Label text="%AUTO_SAVE_REPLAY1" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                         <ComboBox fx:id="autosavereplay1" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                         <Label text="%AUTO_SAVE_REPLAY2" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                         <ComboBox fx:id="autosavereplay2" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                         <Label text="%AUTO_SAVE_REPLAY3" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="autosavereplay3" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                         <Label text="%AUTO_SAVE_REPLAY4" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="autosavereplay4" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                         <Label text="%SEVEN_TO_NINE_PATTERN" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                         <ComboBox fx:id="seventoninepattern" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                         <Label text="%SEVEN_TO_NINE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                         <ComboBox fx:id="seventoninetype" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                                      </GridPane>
                                  </VBox>
                            </content>

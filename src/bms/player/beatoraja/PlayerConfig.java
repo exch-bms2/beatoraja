@@ -13,6 +13,7 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 
 import bms.player.beatoraja.ir.IRConnectionManager;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
@@ -105,6 +106,10 @@ public class PlayerConfig {
 	 * プレイ中のゲージ切替
 	 */
 	private int gaugeAutoShift = GAUGEAUTOSHIFT_NONE;
+	/**
+	 * GASで遷移可能なゲージの下限  ASSIST EASY, EASY, NORMALから選択
+	 */
+	private int bottomShiftableGauge = GrooveGauge.ASSISTEASY;
 
 	public static final int GAUGEAUTOSHIFT_NONE = 0;
 	public static final int GAUGEAUTOSHIFT_CONTINUE = 1;
@@ -239,6 +244,14 @@ public class PlayerConfig {
 
 	public void setGaugeAutoShift(int gaugeAutoShift) {
 		this.gaugeAutoShift = gaugeAutoShift;
+	}
+
+	public int getBottomShiftableGauge() {
+		return bottomShiftableGauge;
+	}
+
+	public void setBottomShiftableGauge(int bottomShiftableGauge) {
+		this.bottomShiftableGauge = bottomShiftableGauge;
 	}
 
 	public int getLnmode() {
