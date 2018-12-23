@@ -5,7 +5,14 @@ import bms.player.beatoraja.ResourcePool;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.*;
 
@@ -34,7 +41,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * キー音読み込み進捗状況
 	 */
-	private float progress = 0;
+	private AtomicInteger progress = new AtomicInteger();
+	/**
+	 * NoteMap Size
+	 */
+	private int noteMapSize = 0;
 	/**
 	 * キー音ボリューム
 	 */
@@ -192,11 +203,13 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param model
 	 */
 	public synchronized void setModel(BMSModel model) {
+		Logger.getGlobal().info("音源ファイル読み込み開始。");
 		final int wavcount = model.getWavList().length;
 		wavmap = (T[]) new Object[wavcount];
 		slicesound = new SliceWav[wavcount][];
 
-		progress = 0;
+		progress = new AtomicInteger();
+		noteMapSize = 0;
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
 
@@ -206,7 +219,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		Array<SliceWav<T>>[] slicesound = new Array[wavcount];
 
-		IntMap<Array<Note>> notemap = new IntMap<Array<Note>>();
+		IntMap<List<Note>> notemap = new IntMap<List<Note>>();
 		final int lanes = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
@@ -226,24 +239,26 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 		}
 
-		for (IntMap.Entry<Array<Note>> waventry : notemap) {
-			final int wavid = waventry.key;
-			if (progress >= 1) {
-				break;
+		noteMapSize = notemap.size;
+		Map<Integer, List<Note>> map = new HashMap<>();
+		notemap.iterator().forEachRemaining(m -> map.put(m.key, m.value));
+		map.entrySet().parallelStream().forEach(waventry -> {
+			final int wavid = waventry.getKey();
+			if (progress.get() >= noteMapSize) {
+				return;
 			}
 			if (wavid < 0) {
-				continue;
+				return;
 			}
 			String name = model.getWavList()[wavid];
-			for (Note note : waventry.value) {
-				if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
-					// 音切りなしのケース
-					Path p = dpath.resolve(name);
-					wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
-					if (wavmap[wavid] == null) {
-						break;
-					}
-				} else {
+			Optional<Note> notSlicesoundNote = waventry.getValue().parallelStream()
+					.filter(m -> m.getMicroStarttime() == 0 && m.getMicroDuration() == 0).findFirst();
+			if (notSlicesoundNote.isPresent()) {
+				Path p = dpath.resolve(name);
+				T wav = cache.get(new AudioKey(p.toString(), notSlicesoundNote.get()));
+				wavmap[wavid] = wav;
+			} else {
+				for (Note note : waventry.getValue()) {
 					// 音切りありのケース
 					boolean b = true;
 					if (slicesound[note.getWav()] == null) {
@@ -261,13 +276,13 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 						if (sliceaudio != null) {
 							slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
 						} else {
-							break;
+							return;
 						}
 					}
 				}
 			}
-			progress += 1f / notemap.size;
-		}
+			progress.incrementAndGet();
+		});
 
 		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
 		for (int i = 0; i < wavmap.length; i++) {
@@ -282,16 +297,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		cache.disposeOld();
 		Logger.getGlobal().info("AudioCache容量 : " + cache.size() + " 開放 : " + (prevsize - cache.size()));
 
-		progress = 1;
+		progress.set(noteMapSize);
 	}
 
-	private void addNoteList(IntMap<Array<Note>> notemap, Note n) {
+	private void addNoteList(IntMap<List<Note>> notemap, Note n) {
 		if (n.getWav() < 0) {
 			return;
 		}
-		Array<Note> notes = notemap.get(n.getWav());
+		List<Note> notes = notemap.get(n.getWav());
 		if (notes == null) {
-			notes = new Array<Note>();
+			notes = new ArrayList<Note>();
 			notemap.put(n.getWav(), notes);
 		}
 
@@ -304,7 +319,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void abort() {
-		progress = 1;
+		progress.set(noteMapSize);
 	}
 
 	public void play(Note n, float volume, int pitch) {
@@ -406,7 +421,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public float getProgress() {
-		return progress;
+		return (float)progress.get() / (float)noteMapSize;
 	}
 
 	public void disposeOld() {
