@@ -60,53 +60,65 @@ public abstract class PCM<T> {
 		this.sample = sample;
 	}
 
-	public static PCM load(Path p) {
+	public static PCM load(Path p, AudioDriver driver) {
 		try {
-			PCMLoader loader = new PCMLoader();
+			PCMLoader loader = new PCMLoader(driver);
 			loader.loadPCM(p);
+			
+			PCM pcm = null;
 			if(loader.bitsPerSample > 16) {
 //				System.out.println("FLOAT");
-				return FloatPCM.loadPCM(loader);				
+				pcm = FloatPCM.loadPCM(loader);				
 			} else if(loader.bitsPerSample == 16 && loader.pcm.isDirect()) {
-				return ShortDirectPCM.loadPCM(loader);
+				pcm = ShortDirectPCM.loadPCM(loader);
 			} else {
-				return ShortPCM.loadPCM(loader);
+				pcm = ShortPCM.loadPCM(loader);
 			}
+			
+			// TODO PCMLoader側での逐次変換が実装されたら削除
+			if(pcm != null && ((AbstractAudioDriver)driver).channels != 0 && pcm.channels != ((AbstractAudioDriver)driver).channels) {
+				pcm = pcm.changeChannels(((AbstractAudioDriver)driver).channels);
+			}
+			if(pcm != null && ((AbstractAudioDriver)driver).sampleRate != 0 && pcm.sampleRate != ((AbstractAudioDriver)driver).sampleRate) {
+				pcm = pcm.changeSampleRate(((AbstractAudioDriver)driver).sampleRate);
+			}
+			return pcm;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		return null;
 	}
 	
-	public static PCM load(String name) {
+	public static PCM load(String name, AudioDriver driver) {
 		int index = name.lastIndexOf('.');
 		if(index >= 0) {
 			name = name.substring(0, index);			
 		}
 		final Path wavfile = Paths.get(name + ".wav");
 		if (Files.exists(wavfile)) {
-			PCM pcm = PCM.load(wavfile);
+			PCM pcm = PCM.load(wavfile,driver);
 			if(pcm != null) {
 				return pcm;
 			}
 		}
 		final Path flacfile = Paths.get(name + ".flac");
 		if (Files.exists(flacfile)) {
-			PCM pcm = PCM.load(flacfile);
+			PCM pcm = PCM.load(flacfile,driver);
 			if(pcm != null) {
 				return pcm;
 			}
 		}
 		final Path oggfile = Paths.get(name + ".ogg");
 		if (Files.exists(oggfile)) {
-			PCM pcm = PCM.load(oggfile);
+			PCM pcm = PCM.load(oggfile,driver);
 			if(pcm != null) {
 				return pcm;
 			}
 		}
 		final Path mp3file = Paths.get(name + ".mp3");
 		if (Files.exists(mp3file)) {
-			PCM pcm = PCM.load(mp3file);
+			PCM pcm = PCM.load(mp3file,driver);
 			if(pcm != null) {
 				return pcm;
 			}
@@ -165,12 +177,14 @@ public abstract class PCM<T> {
 		int sampleRate = 0;
 		int bitsPerSample = 0;
 		
-		public PCMLoader() {
-			
+		private final AudioDriver driver;
+		
+		public PCMLoader(AudioDriver driver) {
+			this.driver = driver;
 		};
 		
 		public void loadPCM(Path p) throws IOException {
-			// TODO この場でsampleRateを引数に取って変換し、メモリ確保のコストを減らす
+			// TODO prefferedSampleRate, prefferedChannelsを使って逐次変換し、メモリ確保のコストを減らす
 			// final long time = System.nanoTime();
 			pcm = null;
 
@@ -183,7 +197,7 @@ public abstract class PCM<T> {
 					{
 						channels = input.channels;
 						sampleRate = input.sampleRate;
-						bitsPerSample = input.bitsPerSample;;
+						bitsPerSample = input.bitsPerSample;
 						
 						if(sampleRate == 16) {
 							pcm = getDirectByteBuffer(input.dataRemaining).order(ByteOrder.LITTLE_ENDIAN);

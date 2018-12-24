@@ -58,6 +58,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * オーディオキャッシュデータ
 	 */
 	private final AudioCache cache;
+	
+	int sampleRate;
+	int channels;
 
 	public AbstractAudioDriver(int maxgen) {
 		cache = new AudioCache(Math.max(maxgen, 1));
@@ -479,7 +482,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				return getKeySound(Paths.get(key.path));
 			} else {
 				if (wav == null) {
-					wav = PCM.load(key.path);
+					wav = PCM.load(key.path, AbstractAudioDriver.this);
 				}
 
 				if (wav != null) {

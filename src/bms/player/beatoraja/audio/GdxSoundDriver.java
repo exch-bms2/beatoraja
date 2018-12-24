@@ -228,7 +228,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		public int channel = -1;
 	}
 	
-	private static class PCMHandleStream extends FileHandleStream {
+	private class PCMHandleStream extends FileHandleStream {
 		
 		private final Path p;
 		
@@ -244,7 +244,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		@Override
 		public InputStream read() {
 			try {
-				return new WavFileInputStream(PCM.load(p));
+				return new WavFileInputStream(PCM.load(p,GdxSoundDriver.this));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
