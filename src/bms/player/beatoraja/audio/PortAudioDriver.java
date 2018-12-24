@@ -179,6 +179,10 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 								final short[] sample = (short[]) input.pcm.sample;
 								wav_l += ((float) sample[input.pos + input.pcm.start]) * input.volume / Short.MAX_VALUE;
 								wav_r += ((float) sample[input.pos+1 + input.pcm.start]) * input.volume / Short.MAX_VALUE;																
+							} else if(input.pcm instanceof BytePCM) {
+								final byte[] sample = (byte[]) input.pcm.sample;
+								wav_l += ((float) (sample[input.pos + input.pcm.start] - 128)) * input.volume / Byte.MAX_VALUE;
+								wav_r += ((float) (sample[input.pos+1 + input.pcm.start] - 128)) * input.volume / Byte.MAX_VALUE;																
 							}
 							input.posf += gpitch * input.pitch;
 							int inc = (int)input.posf;

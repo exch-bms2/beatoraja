@@ -359,9 +359,8 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 				result = 0x00ff & header[pos];
 				pos++;
 			} else if (pos < 44 + pcm.len * 2) {
-				short s = 0;
 				if(pcm instanceof ShortPCM) {
-					s = ((short[])pcm.sample)[(pos - 44) / 2 + pcm.start];
+					short s = ((short[])pcm.sample)[(pos - 44) / 2 + pcm.start];
 					if (pos % 2 == 0) {
 						result = (s & 0x00ff);
 					} else {
@@ -370,12 +369,14 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 				} else if(pcm instanceof ShortDirectPCM) {
 					result = ((ByteBuffer)pcm.sample).get(pos - 44 + pcm.start * 2) & 0xff;
 				} else if(pcm instanceof FloatPCM) {
-					s = (short) (((float[])pcm.sample)[(pos - 44) / 2 + pcm.start] * Short.MAX_VALUE);					
+					short s = (short) (((float[])pcm.sample)[(pos - 44) / 2 + pcm.start] * Short.MAX_VALUE);					
 					if (pos % 2 == 0) {
 						result = (s & 0x00ff);
 					} else {
 						result = ((s & 0xff00) >>> 8);
 					}
+				} else if(pcm instanceof BytePCM) {
+					result = pos % 2 != 0 ? (((byte[])pcm.sample)[(pos - 44) / 2 + pcm.start]) & 0x000000ff : 0;
 				}
 				pos++;
 			}

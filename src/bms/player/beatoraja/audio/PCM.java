@@ -69,10 +69,16 @@ public abstract class PCM<T> {
 			if(loader.bitsPerSample > 16) {
 //				System.out.println("FLOAT");
 				pcm = FloatPCM.loadPCM(loader);				
-			} else if(loader.bitsPerSample == 16 && loader.pcm.isDirect()) {
-				pcm = ShortDirectPCM.loadPCM(loader);
+			} else if(loader.bitsPerSample == 16) {
+				if(loader.pcm.isDirect()) {
+					pcm = ShortDirectPCM.loadPCM(loader);
+				} else {
+					pcm = ShortPCM.loadPCM(loader);					
+				}
 			} else {
-				pcm = ShortPCM.loadPCM(loader);
+				// TODO BytePCMのバグが解消されたら切替
+//				pcm = BytePCM.loadPCM(loader);					
+				pcm = ShortPCM.loadPCM(loader);					
 			}
 			
 			// TODO PCMLoader側での逐次変換が実装されたら削除
