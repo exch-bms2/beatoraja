@@ -37,6 +37,8 @@ public class CourseEditorView implements Initializable {
 	@FXML
 	private ComboBox<CourseData.CourseDataConstraint> gaugeType;;
 	@FXML
+	private ComboBox<CourseData.CourseDataConstraint> lnType;;
+	@FXML
 	private Spinner<Double> bronzemiss;
 	@FXML
 	private Spinner<Double> bronzescore;
@@ -64,6 +66,7 @@ public class CourseEditorView implements Initializable {
 		hispeedType.getItems().setAll(null, NO_SPEED);
 		judgeType.getItems().setAll(null, NO_GOOD, NO_GREAT);
 		gaugeType.getItems().setAll(null, GAUGE_LR2,  GAUGE_5KEYS,  GAUGE_7KEYS,  GAUGE_9KEYS,  GAUGE_24KEYS);
+		lnType.getItems().setAll(null, LN,  CN,  HCN);
 		
 		courses.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
 			if(oldVal != newVal) {
@@ -132,6 +135,9 @@ public class CourseEditorView implements Initializable {
 		if(gaugeType.getValue() != null) {
 			constraint.add(gaugeType.getValue());
 		}
+		if(lnType.getValue() != null) {
+			constraint.add(lnType.getValue());
+		}
 		selectedCourse.setConstraint(constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]));
 		CourseData.TrophyData[] trophy = new CourseData.TrophyData[3];
 		trophy[0] = new CourseData.TrophyData("bronzemedal", getValue(bronzemiss).floatValue(), getValue(bronzescore).floatValue());
@@ -168,6 +174,11 @@ public class CourseEditorView implements Initializable {
 			case GAUGE_9KEYS:
 			case GAUGE_LR2:
 				gaugeType.setValue(constraint);
+				break;
+			case LN:
+			case CN:
+			case HCN:
+				lnType.setValue(constraint);
 				break;
 			}
 		}

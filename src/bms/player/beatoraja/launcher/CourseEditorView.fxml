@@ -71,6 +71,7 @@
                         <ComboBox fx:id="hispeedType" prefHeight="31.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.hgrow="SOMETIMES" />
                         <ComboBox fx:id="judgeType" prefHeight="31.0" prefWidth="300.0" GridPane.hgrow="SOMETIMES" GridPane.rowIndex="1" />
                         <ComboBox fx:id="gaugeType" prefHeight="31.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.hgrow="SOMETIMES" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="lnType" prefHeight="31.0" prefWidth="300.0" GridPane.hgrow="SOMETIMES" GridPane.rowIndex="2" />
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
