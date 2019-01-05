@@ -1,17 +1,10 @@
 package bms.player.beatoraja;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.io.*;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -19,15 +12,12 @@ import java.util.zip.GZIPOutputStream;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
+import bms.model.BMSDecoder;
 import bms.model.Mode;
 import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.SongData;
-import bms.table.BMSTableElement;
-import bms.table.Course;
 import bms.table.Course.Trophy;
-import bms.table.DifficultyTable;
-import bms.table.DifficultyTableElement;
-import bms.table.DifficultyTableParser;
+import bms.table.*;
 
 /**
  * 難易度表データアクセス用クラス
@@ -36,36 +26,20 @@ import bms.table.DifficultyTableParser;
  */
 public class TableDataAccessor {
 	
-	private String tabledir = "table";
+	private final String tabledir;
 
 	public TableDataAccessor(String tabledir) {
 		this.tabledir = tabledir;
 	}
 
 	public void updateTableData(String[] urls) {
-		final ConcurrentLinkedDeque< Thread> tasks = new ConcurrentLinkedDeque<Thread>();
-		for (final String url : urls) {
-			Thread task = new Thread(() -> {
-                TableAccessor tr = new DifficultyTableAccessor(tabledir, url);
-                TableData td = tr.read();
-                if(td != null) {
-                    write(td);
-                }
-            });
-			tasks.add(task);
-			task.start();
-		}
-		
-		while(!tasks.isEmpty()) {
-			if(!tasks.getFirst().isAlive()) {
-				tasks.removeFirst();
-			} else {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-				}
-			}
-		}
+		Arrays.stream(urls).parallel().forEach(url -> {
+            TableAccessor tr = new DifficultyTableAccessor(tabledir, url);
+            TableData td = tr.read();
+            if(td != null) {
+                write(td);
+            }
+		});		
 	}
 	
 	/**
@@ -83,7 +57,7 @@ public class TableDataAccessor {
 			json.setElementType(CourseData.class, "trophy", ArrayList.class);
 			json.setOutputType(OutputType.json);
 			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
-					new GZIPOutputStream(new FileOutputStream(tabledir + "/" + td.getName() + ".bmt"))), "UTF-8");
+					new GZIPOutputStream(new FileOutputStream(tabledir + "/" + getFileName(td.getUrl()) + ".bmt"))), "UTF-8");
 			fw.write(json.prettyPrint(td));
 			fw.flush();
 			fw.close();
@@ -124,14 +98,14 @@ public class TableDataAccessor {
 	/**
 	 * 指定のキャッシュされた難易度表データを読み込む
 	 * 
-	 * @param name 難易度表名
+	 * @param name 難易度表URL
 	 * @return キャッシュされた難易度表データ。存在しない場合はnull
 	 */
-	public TableData read(String name) {
+	public TableData read(String url) {
 		TableData td = null;
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
-				if (p.getFileName().toString().equals(name + ".bmt")) {
+				if (p.getFileName().toString().equals(getFileName(url) + ".bmt")) {
 					try {
 						Json json = new Json();
 						json.setIgnoreUnknownFields(true);
@@ -150,6 +124,18 @@ public class TableDataAccessor {
 
 		}
 		return td;
+	}
+	
+	private String getFileName(String name) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			digest.update(name.getBytes());
+			return BMSDecoder.convertHexString(digest.digest());
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	public static abstract class TableAccessor {
