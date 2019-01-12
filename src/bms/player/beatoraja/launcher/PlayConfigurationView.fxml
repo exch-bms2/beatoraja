@@ -182,6 +182,12 @@
                                 <Insets />
                             </HBox.margin>
                         </CheckBox>
+                        <Label prefHeight="24.0" prefWidth="200.0" text="%ANALOG_SCRATCH_THRESHOLD" />
+                        <NumericSpinner fx:id="analogScratchThreshold" editable="true" prefWidth="80.0">
+                            <valueFactory>
+                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="100" min="1" />
+                            </valueFactory>
+                        </NumericSpinner>
                     </HBox>
                 </VBox>
             </AnchorPane>

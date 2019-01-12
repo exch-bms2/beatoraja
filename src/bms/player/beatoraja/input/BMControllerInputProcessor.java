@@ -45,6 +45,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	
 	private boolean jkoc;
 	private boolean analogScratch;
+	private int analogScratchThreshold;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, String name, Controller controller,
 									  ControllerConfig controllerConfig) {
@@ -61,6 +62,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		this.select = controllerConfig.getSelect();
 		this.jkoc = controllerConfig.getJKOC();
 		this.analogScratch = controllerConfig.isAnalogScratch();
+		this.analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
 	}
 
 	public String getName() {
@@ -233,8 +235,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 			oldAnalogScratchX = analogScratchX;
 		}
 
-		// counter > 100 ... Stop Scratching.
-		if (counter > 100 && activeAnalogScratch) {
+		// counter > Threshold ... Stop Scratching.
+		if (counter > this.analogScratchThreshold && activeAnalogScratch) {
 			activeAnalogScratch = false;
 			counter = 0;
 		}
