@@ -259,6 +259,11 @@ public class PlayModeConfig {
          * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
          */
         private boolean analogScratch = false;
+        
+        /**
+         * アナログスクラッチ停止閾値
+         */
+        private int analogScratchThreshold = 100;
 
         public ControllerConfig() {
             this(Mode.BEAT_7K, 0, true);
@@ -390,6 +395,17 @@ public class PlayModeConfig {
 
         public void setAnalogScratch(boolean analogScratch) {
             this.analogScratch = analogScratch;
+        }
+        
+        public int getAnalogScratchThreshold() {
+            return this.analogScratchThreshold;
+        }
+
+        public void setAnalogScratchThreshold(int analogScratchThreshold) {
+            this.analogScratchThreshold = 
+            	analogScratchThreshold > 0 ? 
+            		analogScratchThreshold <= 100 ? analogScratchThreshold : 100 
+    			:1;
         }
     }
 

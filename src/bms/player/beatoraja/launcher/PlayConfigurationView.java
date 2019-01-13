@@ -234,6 +234,8 @@ public class PlayConfigurationView implements Initializable {
     private CheckBox jkoc_hack;
 	@FXML
 	private CheckBox analogScratch;
+	@FXML
+	private NumericSpinner<Integer> analogScratchThreshold;
     @FXML
     private CheckBox usecim;
     @FXML
@@ -836,6 +838,7 @@ public class PlayConfigurationView implements Initializable {
 			for(ControllerConfig controller : conf.getController()) {
 				controller.setJKOC(jkoc_hack.isSelected());
 		        controller.setAnalogScratch(analogScratch.isSelected());
+		        controller.setAnalogScratchThreshold(analogScratchThreshold.getValue());
 			}
 		}
 		ic = inputconfig.getValue();
@@ -843,6 +846,7 @@ public class PlayConfigurationView implements Initializable {
 		for(ControllerConfig controller : conf.getController()) {
 	        jkoc_hack.setSelected(controller.getJKOC());
 	        analogScratch.setSelected(controller.isAnalogScratch());
+	        analogScratchThreshold.getValueFactory().setValue(controller.getAnalogScratchThreshold());
 		}
 	}
 
