@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.Validatable;
@@ -39,9 +39,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 	private final QueryRunner qr;
 	
-	private static final SongData[] EMPTYSONG = new SongData[0];
-	private static final FolderData[] EMPTYFOLDER = new FolderData[0];
-
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
@@ -112,7 +109,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			e.printStackTrace();
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
-		return EMPTYSONG;
+		return SongData.EMPTY;
 	}
 
 	/**
@@ -148,7 +145,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return EMPTYSONG;
+		return SongData.EMPTY;
 	}
 
 	public SongData[] getSongDatas(String sql, String score, String scorelog, String info) {
@@ -180,7 +177,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			e.printStackTrace();			
 		}
 
-		return EMPTYSONG;
+		return SongData.EMPTY;
 
 	}
 
@@ -194,7 +191,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return EMPTYSONG;
+		return SongData.EMPTY;
 	}
 	
 	/**
@@ -214,7 +211,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return EMPTYFOLDER;
+		return FolderData.EMPTY;
 	}
 
 	/**
@@ -277,7 +274,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 */
 	class SongDatabaseUpdater {
 
-		private int count = 0;
+		private AtomicInteger count = new AtomicInteger();;
 
 		private Map<String, String> tags = new HashMap<String, String>();
 		private Map<String, Integer> favorites = new HashMap<String, Integer>();
@@ -301,7 +298,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		public void updateSongDatas(Path[] paths) {
 			long time = System.currentTimeMillis();
 			updatetime = Calendar.getInstance().getTimeInMillis() / 1000;
-			count = 0;
+			count.set(0);
 			if(info != null) {
 				info.startUpdate();
 			}
@@ -328,21 +325,14 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						favorites.put(record.getMd5(), record.getFavorite());
 					}
 				}
-				for (Path f : paths) {
-					this.processDirectory(conn, f, true);
-				}
-				while (!tasks.isEmpty()) {
-					final BMSFolderThread task = tasks.getFirst();
-					if (!task.isAlive()) {
-						count += task.count;
-						tasks.removeFirst();
-					} else {
-						try {
-							Thread.sleep(50);
-						} catch (InterruptedException e) {
-						}
+				
+				Arrays.stream(paths).parallel().forEach((p) -> {
+					try {
+						this.processDirectory(conn, p, true);
+					} catch (IOException | SQLException e) {
+						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 					}
-				}
+				});
 				conn.commit();
 			} catch (Exception e) {
 				Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
@@ -354,10 +344,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 			long nowtime = System.currentTimeMillis();
 			Logger.getGlobal().info("楽曲更新完了 : Time - " + (nowtime - time) + " 1曲あたりの時間 - "
-					+ (count > 0 ? (nowtime - time) / count : "不明"));
+					+ (count.get() > 0 ? (nowtime - time) / count.get() : "不明"));
 		}
-
-		private final ConcurrentLinkedDeque<BMSFolderThread> tasks = new ConcurrentLinkedDeque<BMSFolderThread>();
 
 		private void processDirectory(Connection conn, final Path dir, boolean updateFolder)
 				throws IOException, SQLException {
@@ -367,12 +355,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					folderhandler, SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
 			boolean txt = false;
 			final List<Path> bmsfiles = new ArrayList<Path>();
-			final List<Path> dirs = new ArrayList<Path>();
+			final List<BMSFolder> dirs = new ArrayList<BMSFolder>();
 			String previewpath = null;
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
 				for (Path p : paths) {
 					if(Files.isDirectory(p)) {
-						dirs.add(p);
+						dirs.add(new BMSFolder(p));
 					} else {
 						final String s = p.getFileName().toString().toLowerCase();
 						if (!txt && s.endsWith(".txt")) {
@@ -400,14 +388,13 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			if (containsBMS) {
 				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles, records,
 						updateFolder, txt, updatetime, previewpath, tags, favorites, info);
-				tasks.addLast(task);
-				task.start();
+				task.run();
+				count.addAndGet(task.count);
 			}
 
 			final int len = folders.size();
-			for (Path f : dirs) {
-				boolean b = true;
-				final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
+			for (BMSFolder bf : dirs) {
+				final String s = (bf.path.startsWith(root) ? root.relativize(bf.path).toString() : bf.path.toString())
 						+ File.separatorChar;
 				for (int i = 0; i < len;i++) {
 					final FolderData record = folders.get(i);
@@ -415,17 +402,24 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 //						long t = System.nanoTime();
 						folders.set(i, null);
 //						System.out.println(System.nanoTime() - t);
-						if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
-							b = false;
+						if (!updateAll && record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
+							bf.updateFolder = false;
 						}
 						break;
 					}
 				}
-
-				if(!containsBMS) {
-					this.processDirectory(conn, f, b);
-				}
 			}
+			
+			if(!containsBMS) {
+				dirs.parallelStream().forEach((bf) -> {
+					try {
+						this.processDirectory(conn, bf.path, bf.updateFolder);
+					} catch (IOException | SQLException e) {
+						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
+					}					
+				});
+			}
+
 			// folderテーブルの更新
 			if (updateFolder) {
 				final String s = (dir.startsWith(root) ? root.relativize(dir).toString() : dir.toString())
@@ -450,8 +444,19 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 		}
 	}
+	
+	private static class BMSFolder {
+		
+		public final Path path;
+		public boolean updateFolder = true;
+		
+		public BMSFolder(Path path) {
+			this.path = path;
+		}
+		
+	}
 
-	class BMSFolderThread extends Thread {
+	class BMSFolderThread {
 
 		private final List<Path> bmsfiles;
 		private final List<SongData> records;
