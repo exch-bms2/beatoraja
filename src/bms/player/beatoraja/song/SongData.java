@@ -18,6 +18,8 @@ import bms.tool.mdprocessor.IpfsInformation;
  */
 public class SongData implements Validatable, IpfsInformation {
 	
+	public static final SongData[] EMPTY = new SongData[0];
+	
 	public static final int FEATURE_UNDEFINEDLN = 1;
 	public static final int FEATURE_MINENOTE = 2;
 	public static final int FEATURE_RANDOM = 4;

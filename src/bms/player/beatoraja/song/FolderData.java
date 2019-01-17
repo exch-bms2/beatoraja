@@ -1,7 +1,14 @@
 package bms.player.beatoraja.song;
 
+/**
+ * フォルダデータ
+ * 
+ * @author exch
+ */
 public class FolderData {
 
+	public static final FolderData[] EMPTY = new FolderData[0];
+	
 	private String title;
 	private String subtitle;
 	private String command;
