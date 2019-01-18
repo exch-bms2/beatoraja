@@ -93,8 +93,19 @@ public class BarRenderer {
 		this.select = select;
 		TableDataAccessor tdaccessor = new TableDataAccessor(main.getConfig().getTablepath());
 
-		TableData[] tds = tdaccessor.readAll();
-
+		TableData[] unsortedtables = tdaccessor.readAll();
+		Array<TableData> sortedtables = new Array(unsortedtables.length);
+		
+		for(String url : select.main.getConfig().getTableURL()) {
+			for(TableData td : unsortedtables) {
+				if(url.equals(td.getUrl())) {
+					sortedtables.add(td);
+					break;
+				}
+			}
+		}
+		TableData[] tds = sortedtables.toArray(TableData.class);
+				
 		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(main.getConfig().getTablepath());
 
 		Array<TableBar> table = new Array<TableBar>();
