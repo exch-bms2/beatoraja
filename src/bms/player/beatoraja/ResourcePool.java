@@ -44,7 +44,7 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @param key リソースのキー
 	 * @return リソース。読めなかった場合はnullを返す
 	 */
- 	public V get(K key) {
+ 	public synchronized V get(K key) {
 		ResourceCacheElement<V> ie = image.get(key);
 		if(ie == null) {
 			V resource = load(key);
@@ -64,7 +64,7 @@ public abstract class ResourcePool<K, V> implements Disposable {
  	/**
  	 * 世代数を進め、最大世代数を経過したリソースを開放する
  	 */
-	public void disposeOld() {
+	public synchronized void disposeOld() {
 		removes.clear();
 		for(ObjectMap.Entry<K, ResourceCacheElement<V>> entry : image) {
 			ResourceCacheElement<V> ie = entry.value;
