@@ -29,6 +29,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 	public GdxSoundDriver(Config config) {
 		super(config.getSongResourceGen());
+		channels = 2;
 		for (int i = 0; i < sounds.length; i++) {
 			sounds[i] = new SoundInstance();
 		}
