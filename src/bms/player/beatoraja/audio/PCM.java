@@ -170,10 +170,8 @@ public abstract class PCM<T> {
 	public abstract PCM<T> slice(long starttime, long duration);
 	
 	protected static ByteBuffer getDirectByteBuffer(int capacity) {
-		if(USE_UNSAFE) {
-			return BufferUtils.newUnsafeByteBuffer(capacity);				
-		}
-		return ByteBuffer.allocateDirect(capacity);
+		ByteBuffer result = USE_UNSAFE ? BufferUtils.newUnsafeByteBuffer(capacity) : ByteBuffer.allocateDirect(capacity);
+		return result.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
 	static class PCMLoader {
@@ -205,8 +203,8 @@ public abstract class PCM<T> {
 						sampleRate = input.sampleRate;
 						bitsPerSample = input.bitsPerSample;
 						
-						if(sampleRate == 16) {
-							pcm = getDirectByteBuffer(input.dataRemaining).order(ByteOrder.LITTLE_ENDIAN);
+						if(bitsPerSample == 16) {
+							pcm = getDirectByteBuffer(input.dataRemaining);
 							StreamUtils.copyStream(input, pcm);
 						} else {
 							OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
@@ -218,6 +216,7 @@ public abstract class PCM<T> {
 						break;					
 					}
 					case 85:
+						// mp3
 					{
 						try {
 							Bitstream bitstream = new Bitstream(new ByteArrayInputStream(
@@ -247,7 +246,7 @@ public abstract class PCM<T> {
 							}
 							bitstream.close();
 							byte[] bytes = output.toByteArray();
-							pcm = getDirectByteBuffer(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
+							pcm = getDirectByteBuffer(bytes.length).put(bytes);
 							bitsPerSample = 16;
 						} catch (BitstreamException e) {
 							e.printStackTrace();
@@ -261,6 +260,7 @@ public abstract class PCM<T> {
 					Logger.getGlobal().warning("WAV処理中の例外 - file : " + p + " error : "+ e.getMessage());
 				}
 			} else if (name.endsWith(".ogg")) {
+				// ogg
 				try (OggInputStream input = new OggInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
 					// final long time = System.nanoTime();
 					// OptimizedByteArrayOutputStream output = new
@@ -278,11 +278,12 @@ public abstract class PCM<T> {
 					sampleRate = input.getSampleRate();
 					bitsPerSample = 16;
 					
-					pcm = getDirectByteBuffer(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);;
+					pcm = getDirectByteBuffer(output.size()).put(output.getBuffer(), 0, output.size());
 //					System.out.println(name + " - length : " + input.getLength() + " ( " + input.getLength() * 16 + " ) " + " , bytes : " + bytes);
 				} catch (Throwable ex) {
 				}
 			} else if (name.endsWith(".mp3")) {
+				// mp3
 				try {
 					Bitstream bitstream = new Bitstream(new BufferedInputStream(Files.newInputStream(p)));
 					ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
@@ -310,11 +311,12 @@ public abstract class PCM<T> {
 					}
 					bitstream.close();
 					byte[] bytes = output.toByteArray();
-					pcm = getDirectByteBuffer(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
+					pcm = getDirectByteBuffer(bytes.length).put(bytes);
 					bitsPerSample = 16;
 				} catch (Throwable ex) {
 				}
 			} else if (name.endsWith(".flac")) {
+				// flac
 				try {
 					FLACDecoder input = new FLACDecoder(new BufferedInputStream(Files.newInputStream(p)));
 					input.readMetadata();
@@ -330,7 +332,7 @@ public abstract class PCM<T> {
 					input.decodeFrames();
 					
 					if(bitsPerSample == 16) {
-						pcm = getDirectByteBuffer(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);						
+						pcm = getDirectByteBuffer(output.size()).put(output.getBuffer(), 0, output.size());						
 					} else {
 						pcm = ByteBuffer.wrap(output.getBuffer()).order(ByteOrder.LITTLE_ENDIAN);
 						pcm.limit(output.size());						
@@ -368,6 +370,8 @@ public abstract class PCM<T> {
 				throw new IOException(p.toString() + " : 0 sample rate");			
 			}
 			pcm.limit(bytes);
+			
+//			System.out.println(p.getFileName().toString() + " - " + sampleRate + " Hz, " + bitsPerSample + " bits, " + channels + " channels");
 		}
 		
 	}
