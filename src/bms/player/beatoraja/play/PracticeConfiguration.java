@@ -272,7 +272,7 @@ public class PracticeConfiguration {
 		}
 
 		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
-				property.endtime);
+				property.endtime, property.freq / 100f);
 	}
 
 	/**
