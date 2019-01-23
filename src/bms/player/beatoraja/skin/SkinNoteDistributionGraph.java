@@ -120,10 +120,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if(state instanceof BMSPlayer) {
 			
 		}
-		draw(sprite, time, state, getDestination(time, state), -1, -1);
+		draw(sprite, time, state, getDestination(time, state), -1, -1, -1);
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
 		if (r == null) {
 			return;
 		}
@@ -183,7 +183,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 		// 現在カーソル描画
 		if (state instanceof BMSPlayer && state.main.isTimerOn(SkinProperty.TIMER_PLAY)) {
-			int dx = (int) (state.main.getNowTime(SkinProperty.TIMER_PLAY) * r.width / (data.length * 1000));
+			float currenttime = state.main.getNowTime(SkinProperty.TIMER_PLAY);
+			if (freq > 0) {
+				currenttime *= freq;
+			}
+			int dx = (int) (currenttime * r.width / (data.length * 1000));
 			sprite.draw(nowcursor, r.x + dx, r.y, 1, r.height);
 		}
 
