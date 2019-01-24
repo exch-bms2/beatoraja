@@ -15,28 +15,44 @@ Music Select :
 3 ... Change LN mode (Long Note -> Charge Note -> Hell Charge Note -> ...)
 4 ... Select replay log
 5 ... Show Detail Option
-6 ... Enter Key Configurattion Mode
+6 ... Open Key Config
 8 ... Show songs which are in the same folder
 
 F3 ... Open folder which contains selected song with system file viewer 
+F8 ... Set song as favorite song
+F9 ... Set chart as favorite chart
+F10 ... Autoplay all songs in folder
+F12 ... Open skin settings
 
 1 KEY ... play
 3 KEY ... practice
 5 KEY ... Auto play 
 7 KEY ... Replay (If replay log exists)
 
+START KEY (hold) ... Options menu 1
+SELECT KEY (hold) ... Options menu 2
+START+SELECT KEY (hold) ... Options menu 3
 
-Autoplay / Replay
-1 ... x0.25 play speed
-2 ... x0.5 play speed
-3 ... x2 play speed
-4 ... x4 play speed
+
+Play :
+START KEY x2 ... Toggle Sudden+
+START KEY + SCR (hold) ... Adjust Sudden+ height
+SELECT KEY + SCR (hold) ... Adjust green number
+START+SELECT KEY (hold) ... Return to music select
+
+
+Autoplay / Replay :
+1 (hold) ... x0.25 play speed
+2 (hold) ... x0.5 play speed
+3 (hold) ... x2 play speed
+4 (hold) ... x4 play speed
 
 
 Music Result :
 1,2,3,4 ... Save Replay log
 
 1,3 KEY ... Back to Music select
-5 KEY ... Retry same song with same pattern option
-7 KEY ... Retry same song with same note pattern
+5 KEY (hold) ... Retry same song with same pattern option
+7 KEY (hold) ... Retry same song with same note pattern
 
+6 KEY ... Toggle gauge display
