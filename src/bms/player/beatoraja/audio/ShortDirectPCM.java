@@ -23,7 +23,7 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 		
 		switch(loader.bitsPerSample) {
 		case 8:
-			sample = getDirectByteBuffer(bytes * 2).order(ByteOrder.LITTLE_ENDIAN);
+			sample = getDirectByteBuffer(bytes * 2);
 			for (int i = 0; i < bytes; i++) {
 				sample.putShort((short) ((((short) pcm.get()) - 128) * 256));
 			}
@@ -33,17 +33,17 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 			if(pcm.isDirect()) {
 				sample = pcm;
 			} else {
-				sample = getDirectByteBuffer(bytes).order(ByteOrder.LITTLE_ENDIAN).put(pcm.array(), 0, bytes);				
+				sample = getDirectByteBuffer(bytes).put(pcm.array(), 0, bytes);				
 			}
 			break;
 		case 24:
-			sample = getDirectByteBuffer(bytes * 2 / 3).order(ByteOrder.LITTLE_ENDIAN);
+			sample = getDirectByteBuffer(bytes * 2 / 3);
 			for (int i = 0, len = bytes / 3; i < len; i++) {
 				sample.putShort(pcm.getShort(i * 3 + 1));
 			}
 			break;
 		case 32:
-			sample = getDirectByteBuffer(bytes / 2).order(ByteOrder.LITTLE_ENDIAN);
+			sample = getDirectByteBuffer(bytes / 2);
 			for (int i = 0, len = bytes / 4; i < len; i++) {
 				sample.putShort((short) (pcm.getFloat() * Short.MAX_VALUE));
 			}
