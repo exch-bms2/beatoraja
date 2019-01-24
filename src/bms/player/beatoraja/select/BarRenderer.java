@@ -97,15 +97,22 @@ public class BarRenderer {
 		Array<TableData> sortedtables = new Array(unsortedtables.length);
 		
 		for(String url : select.main.getConfig().getTableURL()) {
-			for(TableData td : unsortedtables) {
-				if(url.equals(td.getUrl())) {
+			for(int i = 0;i < unsortedtables.length;i++) {
+				final TableData td = unsortedtables[i];
+				if(td != null && url.equals(td.getUrl())) {
 					sortedtables.add(td);
+					unsortedtables[i] = null;
 					break;
 				}
 			}
 		}
-		TableData[] tds = sortedtables.toArray(TableData.class);
-				
+		
+		for(TableData td : unsortedtables) {
+			if(td != null) {
+				sortedtables.add(td);
+			}
+		}
+		
 		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(main.getConfig().getTablepath());
 
 		Array<TableBar> table = new Array<TableBar>();
@@ -114,12 +121,12 @@ public class BarRenderer {
 		durationlow = main.getConfig().getScrollDurationLow();
 		durationhigh = main.getConfig().getScrollDurationHigh();
 
-		for (int i = 0; i < tds.length; i++) {
-			if(tds[i].getName().equals("BMS Search")) {
-				bmssearch = new TableBar(select, tds[i], bmssearcha);
+		for (TableData td : sortedtables) {
+			if(td.getName().equals("BMS Search")) {
+				bmssearch = new TableBar(select, td, bmssearcha);
 				table.add(bmssearch);
 			} else {
-				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), tds[i].getUrl())));
+				table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
 			}
 		}
 
