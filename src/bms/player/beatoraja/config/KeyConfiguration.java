@@ -263,7 +263,7 @@ public class KeyConfiguration extends MainState {
 			if (input.isExitPressed()) {
 				input.setExitPressed(false);
 				main.saveConfig();
-				main.changeState(MainController.STATE_SELECTMUSIC);
+				main.changeState(MainStateType.MUSICSELECT);
 			}
 
 			if (input.isDeletePressed()) {

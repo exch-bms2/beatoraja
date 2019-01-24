@@ -511,7 +511,7 @@ public class BMSPlayer extends MainState {
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				input.setEnable(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_SELECTMUSIC);
+				main.changeState(MainStateType.MUSICSELECT);
 			}
 			break;
 			// GET READY
@@ -662,9 +662,9 @@ public class BMSPlayer extends MainState {
 				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
-					main.changeState(MainController.STATE_RESULT);
+					main.changeState(MainStateType.RESULT);
 				} else {
-					main.changeState(MainController.STATE_SELECTMUSIC);
+					main.changeState(MainStateType.MUSICSELECT);
 				}
 			}
 			break;
@@ -692,17 +692,17 @@ public class BMSPlayer extends MainState {
 				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
-					main.changeState(MainController.STATE_RESULT);
+					main.changeState(MainStateType.RESULT);
 				} else {
 					if (resource.mediaLoadFinished()) {
 						main.getAudioProcessor().stop((Note) null);
 					}
 					if (resource.getCourseBMSModels() != null && resource.nextCourse()) {
-						main.changeState(MainController.STATE_PLAYBMS);
+						main.changeState(MainStateType.PLAY);
 					} else if(resource.nextSong()){
-						main.changeState(MainController.STATE_DECIDE);
+						main.changeState(MainStateType.DECIDE);
 					} else {
-						main.changeState(MainController.STATE_SELECTMUSIC);
+						main.changeState(MainStateType.MUSICSELECT);
 					}
 				}
 			}

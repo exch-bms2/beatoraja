@@ -217,4 +217,8 @@ public abstract class MainState {
 			main.getAudioProcessor().stop(path);
 		}
 	}
+	
+	public enum MainStateType {
+		MUSICSELECT,DECIDE,PLAY,RESULT,COURSERESULT,CONFIG,SKINCONFIG;
+	}
 }

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.decide;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 
@@ -39,7 +40,7 @@ public class MusicDecide extends MainState {
         }
 		if (main.isTimerOn(TIMER_FADEOUT)) {
 			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
-				main.changeState(cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);
+				main.changeState(cancel ? MainStateType.MUSICSELECT : MainStateType.PLAY);
 			}
 		} else {
 			if (nowtime > getSkin().getScene()) {

@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.StringBuilder;
 
+import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -50,7 +51,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.6.7";
+	public static final String VERSION = "beatoraja 0.6.8";
 
 	private static final boolean debug = false;
 
@@ -231,44 +232,36 @@ public class MainController extends ApplicationAdapter {
 		return player;
 	}
 
-	public static final int STATE_SELECTMUSIC = 0;
-	public static final int STATE_DECIDE = 1;
-	public static final int STATE_PLAYBMS = 2;
-	public static final int STATE_RESULT = 3;
-	public static final int STATE_GRADE_RESULT = 4;
-	public static final int STATE_CONFIG = 5;
-	public static final int STATE_SKIN_SELECT = 6;
-
-	public void changeState(int state) {
+	public void changeState(MainStateType state) {
 		MainState newState = null;
 		switch (state) {
-		case STATE_SELECTMUSIC:
+		case MUSICSELECT:
 			if (this.bmsfile != null) {
 				exit();
 			} else {
 				newState = selector;
 			}
 			break;
-		case STATE_DECIDE:
+		case DECIDE:
 			newState = decide;
 			break;
-		case STATE_PLAYBMS:
+		case PLAY:
 			if (bmsplayer != null) {
 				bmsplayer.dispose();
 			}
 			bmsplayer = new BMSPlayer(this, resource);
 			newState = bmsplayer;
 			break;
-		case STATE_RESULT:
+		case RESULT:
 			newState = result;
 			break;
-		case STATE_GRADE_RESULT:
+		case COURSERESULT:
 			newState = gresult;
 			break;
-		case STATE_CONFIG:
+		case CONFIG:
 			newState = keyconfig;
 			break;
-		case STATE_SKIN_SELECT:
+		case SKINCONFIG:
 			newState = skinconfig;
 			break;
 		}
@@ -328,14 +321,14 @@ public class MainController extends ApplicationAdapter {
 		skinconfig = new SkinConfiguration(this);
 		if (bmsfile != null) {
 			if(resource.setBMSFile(bmsfile, auto)) {
-				changeState(STATE_PLAYBMS);
+				changeState(MainStateType.PLAY);
 			} else {
 				// ダミーステートに移行してすぐexitする
-				changeState(STATE_CONFIG);
+				changeState(MainStateType.CONFIG);
 				exit();
 			}
 		} else {
-			changeState(STATE_SELECTMUSIC);
+			changeState(MainStateType.MUSICSELECT);
 		}
 
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));

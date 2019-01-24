@@ -12,16 +12,18 @@ import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+/**
+ * スキンコンフィグ
+ * 
+ * @author excln
+ */
 public class SkinConfiguration extends MainState {
 
 	private SkinConfigurationSkin skin;
@@ -52,7 +54,7 @@ public class SkinConfiguration extends MainState {
 		if (main.getInputProcessor().isExitPressed()) {
 			main.getInputProcessor().setExitPressed(false);
 			main.saveConfig();
-			main.changeState(MainController.STATE_SELECTMUSIC);
+			main.changeState(MainStateType.MUSICSELECT);
 		}
 	}
 

@@ -12,7 +12,6 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -180,7 +179,7 @@ public class CourseResult extends AbstractResult {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
-				main.changeState(MainController.STATE_SELECTMUSIC);
+				main.changeState(MainStateType.MUSICSELECT);
 			}
 		} else if (time > getSkin().getScene()) {
 			main.switchTimer(TIMER_FADEOUT, true);

@@ -311,7 +311,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 						preview.stop();
-						main.changeState(MainController.STATE_DECIDE);
+						main.changeState(MainStateType.DECIDE);
 						banners.disposeOld();
 						stagefiles.disposeOld();
 					} else {
@@ -341,7 +341,7 @@ public class MusicSelector extends MainState {
 						resource.setAutoPlaySongs(paths.toArray(Path.class), false);
 						if(resource.nextSong()) {
 							preview.stop();
-							main.changeState(MainController.STATE_DECIDE);
+							main.changeState(MainStateType.DECIDE);
 							banners.disposeOld();
 							stagefiles.disposeOld();
 						}
@@ -357,10 +357,10 @@ public class MusicSelector extends MainState {
 
 		if (input.getNumberState()[6]) {
 			preview.stop();
-			main.changeState(MainController.STATE_CONFIG);
+			main.changeState(MainStateType.CONFIG);
 		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
 			preview.stop();
-			main.changeState(MainController.STATE_SKIN_SELECT);
+			main.changeState(MainStateType.SKINCONFIG);
 		}
 
 		musicinput.input();
@@ -449,7 +449,7 @@ public class MusicSelector extends MainState {
 			course.getCourseData().setSong(resource.getCourseBMSModels());
 			resource.setCourseData(course.getCourseData());
 			resource.setBMSFile(files[0], mode);
-			main.changeState(MainController.STATE_DECIDE);
+			main.changeState(MainStateType.DECIDE);
 			banners.disposeOld();
 			stagefiles.disposeOld();
 		} else {

@@ -15,6 +15,7 @@ import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
+import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
@@ -195,16 +196,16 @@ public class MusicResult extends AbstractResult {
 								}
 							}
 							// 不合格リザルト
-							main.changeState(MainController.STATE_GRADE_RESULT);
+							main.changeState(MainStateType.COURSERESULT);
 						} else {
 							// コーススコアがない場合は選曲画面へ
-							main.changeState(MainController.STATE_SELECTMUSIC);
+							main.changeState(MainStateType.MUSICSELECT);
 						}
 					} else if (resource.nextCourse()) {
-						main.changeState(MainController.STATE_PLAYBMS);
+						main.changeState(MainStateType.PLAY);
 					} else {
 						// 合格リザルト
-						main.changeState(MainController.STATE_GRADE_RESULT);
+						main.changeState(MainStateType.COURSERESULT);
 					}
 				} else {
 					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
@@ -225,15 +226,15 @@ public class MusicResult extends AbstractResult {
 						// オプションを変更せず同じ譜面でリプレイ
 						resource.getReplayData().pattern = null;
 						resource.reloadBMSFile();
-						main.changeState(MainController.STATE_PLAYBMS);
+						main.changeState(MainStateType.PLAY);
 					} else if (resource.getPlayMode() == PlayMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
 						Logger.getGlobal().info("同じ譜面でリプレイ");
 						resource.reloadBMSFile();
-						main.changeState(MainController.STATE_PLAYBMS);
+						main.changeState(MainStateType.PLAY);
 					} else {
-						main.changeState(MainController.STATE_SELECTMUSIC);
+						main.changeState(MainStateType.MUSICSELECT);
 					}
 				}
 			}
