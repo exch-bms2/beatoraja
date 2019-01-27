@@ -302,7 +302,7 @@ public class GrooveGauge {
 					}else if(model.getTotal()>=150.0){
 						fix1=2.5f;
 					}else if(model.getTotal()>=130.0){
-						fix1=33.33f;
+						fix1=3.333f;
 					}else if(model.getTotal()>=120.0){
 						fix1=5.0f;
 					}else{
