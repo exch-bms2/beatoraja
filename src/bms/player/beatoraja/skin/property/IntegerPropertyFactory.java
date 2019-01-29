@@ -412,7 +412,7 @@ public class IntegerPropertyFactory {
 				}
 				return Integer.MIN_VALUE;
 			};
-		case NUMBER_DENSITY_ENDPEAK:
+		case NUMBER_DENSITY_AVERAGE:
 			return (state) -> {
 				final SongData song = state.main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
@@ -420,11 +420,43 @@ public class IntegerPropertyFactory {
 				}
 				return Integer.MIN_VALUE;
 			};
-		case NUMBER_DENSITY_ENDPEAK_AFTERDOT:
+		case NUMBER_DENSITY_AVERAGE_AFTERDOT:
 			return (state) -> {
 				final SongData song = state.main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return ((int) (song.getInformation().getDensity() * 100)) % 100;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_DENSITY_END:
+			return (state) -> {
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return (int) song.getInformation().getEnddensity();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_DENSITY_END_AFTERDOT:
+			return (state) -> {
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return ((int) (song.getInformation().getEnddensity() * 100)) % 100;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_DENSITY_PEAK:
+			return (state) -> {
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return (int) song.getInformation().getPeakdensity();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_DENSITY_PEAK_AFTERDOT:
+			return (state) -> {
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return ((int) (song.getInformation().getPeakdensity() * 100)) % 100;
 				}
 				return Integer.MIN_VALUE;
 			};
