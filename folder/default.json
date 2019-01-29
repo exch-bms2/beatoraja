@@ -1217,6 +1217,44 @@
 			]
 		}
 	]
+},
+
+{
+  "name":"NEW",
+  "folder":[
+		{
+			"name":"TODAY",
+			"sql":"strftime('%s', 'now') - adddate < 86400"
+		},
+		{
+			"name":"2 DAYS AGO",
+			"sql":"strftime('%s', 'now') - adddate >= 86400*1 AND strftime('%s', 'now') - adddate < 86400*2"
+		},
+		{
+			"name":"3 DAYS AGO",
+			"sql":"strftime('%s', 'now') - adddate >= 86400*2 AND strftime('%s', 'now') - adddate < 86400*3"
+		},
+		{
+			"name":"4 DAYS AGO",
+			"sql":"strftime('%s', 'now') - adddate >= 86400*3 AND strftime('%s', 'now') - adddate < 86400*4"
+		},
+		{
+			"name":"5 DAYS AGO",
+			"sql":"strftime('%s', 'now') - adddate >= 86400*4 AND strftime('%s', 'now') - adddate < 86400*5"
+		},
+		{
+			"name":"6 DAYS AGO",
+			"sql":"strftime('%s', 'now') - adddate >= 86400*5 AND strftime('%s', 'now') - adddate < 86400*6"
+		},
+		{
+			"name":"7 DAYS AGO",
+			"sql":"strftime('%s', 'now') - adddate >= 86400*6 AND strftime('%s', 'now') - adddate < 86400*7"
+		},
+		{
+			"name":"THIS WEEK",
+			"sql":"strftime('%s', 'now') - adddate < 86400*7"
+		}
+	]
 }
 
 ]
