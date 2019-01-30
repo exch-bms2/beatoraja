@@ -83,7 +83,9 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_SCRATCH = 1;
 	public static final int SOUND_FOLDEROPEN = 2;
 	public static final int SOUND_FOLDERCLOSE = 3;
-	public static final int SOUND_CHANGEOPTION = 4;
+	public static final int SOUND_OPTIONCHANGE = 4;
+	public static final int SOUND_OPTIONOPEN = 5;
+	public static final int SOUND_OPTIONCLOSE = 6;
 
 	private PlayMode play = null;
 
@@ -220,7 +222,9 @@ public class MusicSelector extends MainState {
 		setSound(SOUND_SCRATCH, "scratch.wav", SoundType.SOUND, false);
 		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND,false);
 		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND,false);
-		setSound(SOUND_CHANGEOPTION, "o-change.wav", SoundType.SOUND,false);
+		setSound(SOUND_OPTIONCHANGE, "o-change.wav", SoundType.SOUND,false);
+		setSound(SOUND_OPTIONOPEN, "o-open.wav", SoundType.SOUND,false);
+		setSound(SOUND_OPTIONCLOSE, "o-close.wav", SoundType.SOUND,false);
 
 		play = null;
 		showNoteGraph = false;

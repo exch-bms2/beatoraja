@@ -35,6 +35,9 @@ public class MusicSelectInputProcessor {
     private final int durationlow = 300;
     private final int durationhigh = 50;
 
+    boolean isOptionKeyPressed = false;
+    boolean isOptionKeyReleased = false;
+
     // ノーツ表示時間変更のカウンタ
     private long timeChangeDuration;
     private int countChangeDuration;
@@ -96,6 +99,15 @@ public class MusicSelectInputProcessor {
 
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
+        if(!input.startPressed() && !input.isSelectPressed() && !input.getNumberState()[5]){
+            //オプションキー入力なし
+            isOptionKeyReleased = true;
+            if(isOptionKeyPressed) {
+                isOptionKeyPressed = false;
+                select.play(SOUND_OPTIONCLOSE);
+            }
+        }
+
         if (numberstate[4] && numtime[4] != 0
                 || (!input.startPressed() && !input.isSelectPressed() && !input.getNumberState()[5] && property.isPressed(keystate, keytime, NEXT_REPLAY, true))) {
             // change replay
@@ -106,33 +118,38 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show play option
             select.setPanelState(1);
+            if(isOptionKeyReleased) {
+                isOptionKeyPressed = true;
+                isOptionKeyReleased = false;
+                select.play(SOUND_OPTIONOPEN);
+            }
             if (property.isPressed(keystate, keytime, OPTION1_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_OPTION_1P);
             }
             if (property.isPressed(keystate, keytime, OPTION1_UP, true)) {
                 config.setRandom((config.getRandom() + 9) % 10);
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, GAUGE_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_GAUGE_1P);
             }
             if (property.isPressed(keystate, keytime, GAUGE_UP, true)) {
                 config.setGauge((config.getGauge() + 5) % 6);
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_OPTION_DP);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_UP, true)) {
                 config.setDoubleoption((config.getDoubleoption() + 2) % 3);
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, OPTION2_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_OPTION_2P);
             }
             if (property.isPressed(keystate, keytime, OPTION2_UP, true)) {
                 config.setRandom2((config.getRandom2() + 9) % 10);
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, HSFIX_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_HSFIX);
@@ -191,38 +208,48 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show assist option
             select.setPanelState(2);
+            if(isOptionKeyReleased) {
+                isOptionKeyPressed = true;
+                isOptionKeyReleased = false;
+                select.play(SOUND_OPTIONOPEN);
+            }
             if (property.isPressed(keystate, keytime, JUDGEWINDOW_UP, true)) {
                 config.setJudgewindowrate(config.getJudgewindowrate() == 100 ? 400 : 100);
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, CONSTANT, true)) {
                 config.setConstant(!config.isConstant());
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, JUDGEAREA, true)) {
                 config.setShowjudgearea(!config.isShowjudgearea());
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, LEGACYNOTE, true)) {
                 config.setLegacynote(!config.isLegacynote());
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, MARKNOTE, true)) {
                 config.setMarkprocessednote(!config.isMarkprocessednote());
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, BPMGUIDE, true)) {
                 config.setBpmguide(!config.isBpmguide());
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, NOMINE, true)) {
                 config.setNomine(!config.isNomine());
-                select.play(SOUND_CHANGEOPTION);
+                select.play(SOUND_OPTIONCHANGE);
             }
         } else if (input.getNumberState()[5] || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
             // show detail option
             select.setPanelState(3);
+            if(isOptionKeyReleased) {
+                isOptionKeyPressed = true;
+                isOptionKeyReleased = false;
+                select.play(SOUND_OPTIONOPEN);
+            }
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_BGA_SHOW);
             }
