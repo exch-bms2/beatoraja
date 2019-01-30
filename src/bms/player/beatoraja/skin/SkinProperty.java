@@ -440,8 +440,12 @@ public class SkinProperty {
 	public static final int NUMBER_TOTALNOTE_BSS = 353;
 	public static final int NUMBER_TOTALNOTE_MINE = 354;
 
-	public static final int NUMBER_DENSITY_ENDPEAK = 364;
-	public static final int NUMBER_DENSITY_ENDPEAK_AFTERDOT = 365;
+	public static final int NUMBER_DENSITY_PEAK = 360;
+	public static final int NUMBER_DENSITY_PEAK_AFTERDOT = 361;
+	public static final int NUMBER_DENSITY_END = 362;
+	public static final int NUMBER_DENSITY_END_AFTERDOT = 363;
+	public static final int NUMBER_DENSITY_AVERAGE = 364;
+	public static final int NUMBER_DENSITY_AVERAGE_AFTERDOT = 365;
 
 	public static final int NUMBER_SONGGAUGE_TOTAL = 368;
 
