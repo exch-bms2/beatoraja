@@ -1,7 +1,5 @@
 package bms.player.beatoraja.play;
 
-import bms.model.Mode;
-
 /**
  * 判定の設定値
  *
@@ -127,31 +125,61 @@ public enum JudgeProperty {
     		
     	};
     	
+    	/**
+    	 * JUDGERANKの倍率(VERYHARD, HARD, NORMAL, EASY, VERYEASY)
+    	 */
     	public final int[] judgerank;
     	
         private static int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint, boolean pms) {
     		final int[][] judge = new int[org.length][2];
+    		final boolean[] fix = pms ? new boolean[]{true, false, false, true, true} : new boolean[]{false, false, false, false, true};
     		for (int i = 0; i < judge.length; i++) {
     			for(int j = 0;j < 2;j++) {
-    				if((judgeWindowRate <= 100 && i < 3) || (judgeWindowRate > 100 && i < 2)) {
-    					if(i > constraint) {
-    						judge[i][j] = judge[i - 1][j];
-    					} else {
-    						//PMS時はjudgerankによらずにPG幅固定
-    						judge[i][j] = org[i][j] * (pms && i == 0 ? 100 : judgerank) / 100 * judgeWindowRate / 100;
-    						if(Math.abs(judge[i][j]) > Math.abs(org[3][j]) && judgeWindowRate <= 100) {
-    							judge[i][j] = org[3][j];
-    						}
-    					}
-    				} else if(judgeWindowRate <= 100 || (i == 4 && j == 0)) {
-    					judge[i][j] = org[i][j];
-    				} else {
-    					int sign = org[i][j] >= 0 ? 1 : -1;
-    					int difference = Math.abs(org[i][j] * (i < 3 ? judgerank : 100) / 100) - Math.abs(org[i - 1][j] * (i - 1 < 3 ? judgerank : 100) / 100);
-    					judge[i][j] = sign * (Math.abs(judge[i - 1][j]) + difference);
-    				}
+					judge[i][j] = fix[i] ? org[i][j] : org[i][j] * judgerank / 100;
     			}
     		}
+
+    		int fixmin = -1;
+    		for (int i = 0; i < Math.min(org.length, 4); i++) {
+    			if(fix[i]) {
+    				fixmin = i;
+    				continue;
+    			}
+        		int fixmax = -1;
+    			for(int j = i + 1;j < 4;j++) {
+        			if(fix[j]) {
+        				fixmax = j;
+        				break;
+        			}
+    			}
+        		
+    			for(int j = 0;j < 2;j++) {
+					if(fixmin != -1 && Math.abs(judge[i][j]) < Math.abs(judge[fixmin][j])) {
+						judge[i][j] = judge[fixmin][j];
+					}
+					if(fixmax != -1 && Math.abs(judge[i][j]) > Math.abs(judge[fixmax][j])) {
+						judge[i][j] = judge[fixmax][j];
+					}
+    			}
+    		}
+
+    		// judgeWindowRateによる補正
+    		for (int i = 0; i < Math.min(org.length, 2); i++) {
+    			for(int j = 0;j < 2;j++) {
+					judge[i][j] *= judgeWindowRate / 100;
+					if(Math.abs(judge[i][j]) > Math.abs(judge[2][j])) {
+						judge[i][j] = judge[2][j];
+					}
+    			}
+    		}
+    		
+    		// constraintによる判定補正
+    		for (int i = constraint; i < Math.min(org.length - 1, 2); i++) {
+    			for(int j = 0;j < 2;j++) {
+					judge[i + 1][j] = judge[i][j];    				
+    			}
+    		}
+    		
     		return judge;
         }
         
