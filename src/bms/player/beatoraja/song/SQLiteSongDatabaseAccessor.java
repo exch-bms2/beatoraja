@@ -306,16 +306,19 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				conn.setAutoCommit(false);
 				// ルートディレクトリに含まれないフォルダの削除
 				StringBuilder dsql = new StringBuilder();
+				Object[] param = new String[bmsroot.length];
 				for (int i = 0; i < bmsroot.length; i++) {
-					dsql.append("path NOT LIKE '").append(bmsroot[i]).append("%'");
+					dsql.append("path NOT LIKE ?");
+					param[i] = bmsroot[i] + "%";
 					if (i < bmsroot.length - 1) {
 						dsql.append(" AND ");
 					}
 				}
+				
 				qr.update(conn,
 						"DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND "
-								+ dsql.toString());
-				qr.update(conn, "DELETE FROM song WHERE " + dsql.toString());
+								+ dsql.toString(), param);
+				qr.update(conn, "DELETE FROM song WHERE " + dsql.toString(), param);
 				// 楽曲のタグ,FAVORITEの保持
 				for (SongData record : qr.query(conn, "SELECT md5, tag, favorite FROM song", songhandler)) {
 					if (record.getTag().length() > 0) {
