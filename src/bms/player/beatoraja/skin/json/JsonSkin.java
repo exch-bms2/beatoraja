@@ -14,6 +14,7 @@ public class JsonSkin {
 		public int input;
 		public int scene;
 		public int close;
+		public int loadend;
 		public int playstart;
 		public int judgetimer = 1;
 		public int finishmargin = 0;
@@ -37,6 +38,7 @@ public class JsonSkin {
 		public NoteSet note;
 		public Gauge gauge;
 		public HiddenCover[] hiddenCover = new HiddenCover[0];
+		public LiftCover[] liftCover = new LiftCover[0];
 		public BGA bga;
 		public Judge[] judge = new Judge[0];
 		public SongList songlist;
@@ -127,6 +129,7 @@ public class JsonSkin {
 		public int align;
 		public int digit;
 		public int padding;
+		public int zeropadding;
 		public int ref;
 		public IntegerProperty value;
 		public Value[] offset;
@@ -296,6 +299,21 @@ public class JsonSkin {
 		public int cycle;
 		public int disapearLine = -1;
 		public boolean isDisapearLineLinkLift = true;
+	}
+
+	public static class LiftCover {
+		public String id;
+		public String src;
+		public int x;
+		public int y;
+		public int w;
+		public int h;
+		public int divx = 1;
+		public int divy = 1;
+		public TimerProperty timer;
+		public int cycle;
+		public int disapearLine = -1;
+		public boolean isDisapearLineLinkLift = false;
 	}
 
 	public static class BGA {

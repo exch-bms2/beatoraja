@@ -260,6 +260,7 @@ public class JSONSkinLoader extends SkinLoader {
 			if (type.isPlay()) {
 				skin = new PlaySkin(src, dstr);
 				((PlaySkin) skin).setClose(sk.close);
+				((PlaySkin) skin).setLoadend(sk.loadend);
 				((PlaySkin) skin).setPlaystart(sk.playstart);
 				((PlaySkin) skin).setJudgetimer(sk.judgetimer);
 				((PlaySkin) skin).setFinishMargin(sk.finishmargin);
@@ -410,10 +411,10 @@ public class JSONSkinLoader extends SkinLoader {
 
 								SkinNumber num = null;
 								if(value.value != null) {
-									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
+									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding,
 											value.value);
 								} else {
-									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
+									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding,
 											value.ref);
 								}
 
@@ -747,6 +748,22 @@ public class JSONSkinLoader extends SkinLoader {
 							}
 							offsets[dst.offsets.length] = OFFSET_LIFT;
 							offsets[dst.offsets.length + 1] = OFFSET_HIDDEN_COVER;
+							dst.offsets = offsets;
+							break;
+						}
+					}
+					// lift cover (playskin only)
+					for (JsonSkin.LiftCover img : sk.liftCover) {
+						if (dst.id.equals(img.id)) {
+							Texture tex = getTexture(img.src, p);
+							obj = new SkinHidden(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy), img.timer, img.cycle);
+							((SkinHidden) obj).setDisapearLine((float) (img.disapearLine * skin.getScaleY()));
+							((SkinHidden) obj).setDisapearLineLinkLift(img.isDisapearLineLinkLift);
+							int[] offsets = new int[dst.offsets.length + 2];
+							for(int i = 0; i < dst.offsets.length; i++) {
+								offsets[i] = dst.offsets[i];
+							}
+							offsets[dst.offsets.length] = OFFSET_LIFT;
 							dst.offsets = offsets;
 							break;
 						}
