@@ -153,7 +153,11 @@ public class SkinConfiguration extends MainState {
 		}
 	}
 
-	private void setNextSkin() {
+	private void setNextSkin() { setOtherSkin(1); }
+
+	private void setPrevSkin() { setOtherSkin(-1); }
+
+	private void setOtherSkin(int indexDiff) {
 		if (availableSkins.isEmpty()) {
 			Logger.getGlobal().warning("利用可能なスキンがありません");
 			return;
@@ -164,24 +168,7 @@ public class SkinConfiguration extends MainState {
 			main.getPlayerConfig().getSkin()[type.getId()] = config;
 		}
 
-		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex + 1) % availableSkins.size();
-		config.setPath(availableSkins.get(index).getPath().toString());
-		config.setProperties(new SkinConfig.Property());
-		selectSkin(index);
-	}
-
-	private void setPrevSkin() {
-		if (availableSkins.isEmpty()) {
-			Logger.getGlobal().warning("利用可能なスキンがありません");
-			return;
-		}
-
-		if (config == null) {
-			config = new SkinConfig();
-			main.getPlayerConfig().getSkin()[type.getId()] = config;
-		}
-
-		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex - 1 + availableSkins.size()) % availableSkins.size();
+		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex + indexDiff + availableSkins.size()) % availableSkins.size();
 		config.setPath(availableSkins.get(index).getPath().toString());
 		config.setProperties(new SkinConfig.Property());
 		selectSkin(index);
