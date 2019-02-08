@@ -4,6 +4,7 @@ import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
@@ -37,9 +38,11 @@ public class SkinConfiguration extends MainState {
 	private int customOptionOffset;
 	private int customOptionOffsetMax;
 	private Skin selectedSkin;
+	private PlayerConfig player;
 
-	public SkinConfiguration(MainController main) {
+	public SkinConfiguration(MainController main, PlayerConfig player) {
 		super(main);
+		this.player = player;
 	}
 
 	public void create() {
@@ -131,6 +134,7 @@ public class SkinConfiguration extends MainState {
 	}
 
 	private void changeSkinType(SkinType type) {
+		saveSkinHistory();
 		this.type = type != null ? type : SkinType.PLAY_7KEYS;
 		this.config = main.getPlayerConfig().getSkin()[this.type.getId()];
 		availableSkins = new ArrayList<>();
@@ -166,6 +170,8 @@ public class SkinConfiguration extends MainState {
 		if (config == null) {
 			config = new SkinConfig();
 			main.getPlayerConfig().getSkin()[type.getId()] = config;
+		} else {
+			saveSkinHistory();
 		}
 
 		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex + indexDiff + availableSkins.size()) % availableSkins.size();
@@ -180,6 +186,13 @@ public class SkinConfiguration extends MainState {
 			selectedSkinHeader = availableSkins.get(selectedSkinIndex);
 			customOptions = new ArrayList<>();
 			customOptionOffset = 0;
+			// Loading properties from SkinHistory
+			for (SkinConfig skinc : player.getSkinHistory()) {
+				if (skinc.getPath().equals(selectedSkinHeader.getPath().toString())) {
+					config.setProperties(skinc.getProperties());
+					break;
+				}
+			}
 			if (config.getProperties() == null) {
 				config.setProperties(new SkinConfig.Property());
 			}
@@ -190,6 +203,29 @@ public class SkinConfiguration extends MainState {
 		} else {
 			selectedSkinHeader = null;
 			customOptions = null;
+		}
+	}
+
+	private void saveSkinHistory() {
+		if(config != null && config.getPath() != null) {
+			int index = -1;
+			for (int i = 0; i < player.getSkinHistory().length; i++) {
+				if (player.getSkinHistory()[i].getPath().equals(config.getPath())) {
+					index = i;
+					break;
+				}
+			}
+
+			SkinConfig sc = new SkinConfig();
+			sc.setPath(config.getPath());
+			sc.setProperties(config.getProperties());
+			if (index >= 0) {
+				player.getSkinHistory()[index] = sc;
+			} else {
+				SkinConfig[] history = Arrays.copyOf(player.getSkinHistory(), player.getSkinHistory().length + 1);
+				history[history.length - 1] = sc;
+				player.setSkinHistory(history);
+			}
 		}
 	}
 
