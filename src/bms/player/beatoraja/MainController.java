@@ -318,7 +318,7 @@ public class MainController extends ApplicationAdapter {
 		result = new MusicResult(this);
 		gresult = new CourseResult(this);
 		keyconfig = new KeyConfiguration(this);
-		skinconfig = new SkinConfiguration(this);
+		skinconfig = new SkinConfiguration(this, player);
 		if (bmsfile != null) {
 			if(resource.setBMSFile(bmsfile, auto)) {
 				changeState(MainStateType.PLAY);

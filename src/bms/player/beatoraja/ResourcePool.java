@@ -1,8 +1,9 @@
 package bms.player.beatoraja;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * リソースプール。イメージデータやオーディオデータ等の読み込みコストが大きく、
@@ -21,7 +22,7 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	/**
 	 * リソース
 	 */
-	private ObjectMap<K, ResourceCacheElement<V>> image = new ObjectMap<K, ResourceCacheElement<V>> ();
+	private ConcurrentHashMap<K, ResourceCacheElement<V>> resourceMap = new ConcurrentHashMap<K, ResourceCacheElement<V>> ();
 
 	public ResourcePool(int maxgen) {
 		this.maxgen = maxgen;
@@ -34,7 +35,7 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @return キーに対応するリソースが存在する場合はtrue
 	 */
 	public boolean exists(K key) {
-		return image.get(key) != null;
+		return resourceMap.containsKey(key);
 	}
 
 	/**
@@ -44,40 +45,39 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @param key リソースのキー
 	 * @return リソース。読めなかった場合はnullを返す
 	 */
- 	public synchronized V get(K key) {
-		ResourceCacheElement<V> ie = image.get(key);
+ 	public V get(K key) {
+ 		ResourceCacheElement<V> ie = resourceMap.get(key);
 		if(ie == null) {
 			V resource = load(key);
 			if(resource != null) {
 				ie = new ResourceCacheElement<V>(resource);
-				image.put(key, ie);
+				resourceMap.put(key, ie);
 			}
 		} else {
 			ie.gen = 0;
-		}
+		} 			
 		
-		return ie != null ? ie.image : null;
+		return ie != null ? ie.resource : null;
 	}
-
+ 	
  	private final Array<K> removes = new Array<K>();
 
  	/**
  	 * 世代数を進め、最大世代数を経過したリソースを開放する
  	 */
-	public synchronized void disposeOld() {
+	public void disposeOld() {
 		removes.clear();
-		for(ObjectMap.Entry<K, ResourceCacheElement<V>> entry : image) {
-			ResourceCacheElement<V> ie = entry.value;
-			if(ie.gen == maxgen) {
-				dispose(ie.image);
-				removes.add(entry.key);
+		resourceMap.forEach((key, value) -> {
+			if(value.gen == maxgen) {
+				dispose(value.resource);
+				removes.add(key);
 			} else {
-				ie.gen++;
-			}
-		}
+				value.gen++;
+			}			
+		});
 		
 		for(K key : removes) {
-			image.remove(key);
+			resourceMap.remove(key);
 		}
 	}
 
@@ -86,14 +86,14 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @return リソースの
 	 */
 	public int size() {
-		return image.size;
+		return resourceMap.size();
 	}
 	
 	public void dispose() {
-		for(ObjectMap.Entry<K, ResourceCacheElement<V>> entry : image) {
-			dispose(entry.value.image);
-		}
-		image.clear();
+		resourceMap.forEach((key, value) -> {
+			dispose(value.resource);			
+		});
+		resourceMap.clear();
 	}
 	
 	/**
@@ -118,14 +118,14 @@ public abstract class ResourcePool<K, V> implements Disposable {
 		/**
 		 * リソース
 		 */
-		public final R image;
+		public final R resource;
 		/**
 		 * 世代
 		 */
 		public int gen;
 		
-		public ResourceCacheElement(R image) {
-			this.image = image;
+		public ResourceCacheElement(R resource) {
+			this.resource = resource;
 		}
 	}
 }

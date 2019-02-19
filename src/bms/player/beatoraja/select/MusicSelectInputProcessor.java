@@ -11,6 +11,9 @@ import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static bms.player.beatoraja.select.MusicSelector.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -327,6 +330,13 @@ public class MusicSelectInputProcessor {
                         (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
+                    select.play(SOUND_FOLDEROPEN);
+                } else if (current instanceof GradeBar) {
+                    List<Bar> songbars = Arrays.asList(((GradeBar) current).getSongDatas()).stream()
+                            .distinct()
+                            .map(SongBar::new)
+                            .collect(Collectors.toList());
+                    bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
                     select.play(SOUND_FOLDEROPEN);
                 }
             }

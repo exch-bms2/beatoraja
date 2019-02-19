@@ -5,14 +5,9 @@ import bms.player.beatoraja.ResourcePool;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.*;
 
@@ -471,24 +466,26 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			super(maxgen);
 		}
 
-		private String path;
-		private PCM wav;
+		private ObjectMap<String, PCM> pcmMap = new ObjectMap<String, PCM>();
 
 		@Override
 		protected T load(AudioKey key) {
-			if (!key.path.equals(path)) {
-				wav = null;
-			}
 			if (key.start == 0 && key.duration == 0) {
 				// 音切りなしのケース
 				return getKeySound(Paths.get(key.path));
 			} else {
-				if (wav == null) {
-					wav = PCM.load(key.path, AbstractAudioDriver.this);
+				PCM wav = null;
+				synchronized(pcmMap) {
+					wav = pcmMap.get(key.path);
+					if (wav == null) {
+						wav = PCM.load(key.path, AbstractAudioDriver.this);
+						if(wav != null) {
+							pcmMap.put(key.path, wav);
+						}
+					}					
 				}
 
 				if (wav != null) {
-					path = key.path;
 					try {
 						final PCM slicewav = wav.slice(key.start, key.duration);
 						return slicewav != null ? getKeySound(slicewav) : null;
@@ -504,6 +501,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 			return null;
 		}
+
+		
+		@Override
+		public synchronized void disposeOld() {
+			pcmMap.clear();
+			super.disposeOld();
+		}
+
 
 		@Override
 		protected void dispose(T resource) {
