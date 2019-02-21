@@ -249,14 +249,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				return;
 			}
 			String name = model.getWavList()[wavid];
-			Optional<Note> notSlicesoundNote = waventry.getValue().parallelStream()
-					.filter(m -> m.getMicroStarttime() == 0 && m.getMicroDuration() == 0).findFirst();
-			if (notSlicesoundNote.isPresent()) {
-				Path p = dpath.resolve(name);
-				T wav = cache.get(new AudioKey(p.toString(), notSlicesoundNote.get()));
-				wavmap[wavid] = wav;
-			} else {
-				for (Note note : waventry.getValue()) {
+			for (Note note : waventry.getValue()) {
+				// 音切りあり・なし両方のデータが必要になるケースがある
+				if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
+					// 音切りなしのケース
+					Path p = dpath.resolve(name);
+					wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
+					if (wavmap[wavid] == null) {
+						break;
+					}
+				} else {
 					// 音切りありのケース
 					boolean b = true;
 					if (slicesound[note.getWav()] == null) {
