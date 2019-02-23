@@ -204,6 +204,8 @@ public class Config implements Validatable {
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
+			"http://www.ribbit.xyz/bms/tables/normal.html",
+			"http://www.ribbit.xyz/bms/tables/insane.html",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=normal",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=hard",
