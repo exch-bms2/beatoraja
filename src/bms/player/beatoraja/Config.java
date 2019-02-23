@@ -212,7 +212,7 @@ public class Config implements Validatable {
 			"http://dpbmsdelta.web.fc2.com/table/insane.html",
 			"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
 			"http://stellawingroad.web.fc2.com/new/pms.html",
-			"http://sky.geocities.jp/exclusion_bms/table24k/table.html",
+			"https://excln.github.io/table24k/table.html",
 	};
 
 	public Config() {
