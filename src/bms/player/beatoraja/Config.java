@@ -204,6 +204,8 @@ public class Config implements Validatable {
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
+			"http://www.ribbit.xyz/bms/tables/normal.html",
+			"http://www.ribbit.xyz/bms/tables/insane.html",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=normal",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=hard",
@@ -212,7 +214,7 @@ public class Config implements Validatable {
 			"http://dpbmsdelta.web.fc2.com/table/insane.html",
 			"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
 			"http://stellawingroad.web.fc2.com/new/pms.html",
-			"http://sky.geocities.jp/exclusion_bms/table24k/table.html",
+			"https://excln.github.io/table24k/table.html",
 	};
 
 	public Config() {
