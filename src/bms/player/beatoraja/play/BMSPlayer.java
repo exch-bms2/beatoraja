@@ -448,6 +448,7 @@ public class BMSPlayer extends MainState {
 			if (main.isTimerOn(TIMER_PLAY)) {
 				resource.reloadBMSFile();
 				model = resource.getBMSModel();
+				main.getPlayerResource().getSongdata().setBMSModel(model);
 				lanerender.init(model);
 				keyinput.setKeyBeamStop(false);
 				main.setTimerOff(TIMER_PLAY);
