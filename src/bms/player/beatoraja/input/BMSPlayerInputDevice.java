@@ -1,23 +1,36 @@
 package bms.player.beatoraja.input;
 
-public class BMSPlayerInputDevice {
+/**
+ * 入力デバイス
+ *
+ * @author excln
+ */
+public abstract class BMSPlayerInputDevice {
 
+	protected final BMSPlayerInputProcessor bmsPlayerInputProcessor;
+	/**
+	 * 入力デバイスの種類
+	 */
+	public final Type type;
+
+	/**
+	 * デバイスの入力状態をクリアする
+	 */
+	public abstract void clear();
+
+	protected BMSPlayerInputDevice(BMSPlayerInputProcessor bmsPlayerInputProcessor, Type type) {
+		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
+		this.type = type;
+	}
+
+	/**
+	 * 入力デバイスのタイプ
+	 *
+	 * @author excln
+	 */
 	public enum Type {
 		KEYBOARD,
 		BM_CONTROLLER,
 		MIDI
-	}
-
-	protected Type type;
-
-	public Type getType() {
-		return type;
-	}
-
-	public void clear() {
-	}
-
-	protected BMSPlayerInputDevice(Type type) {
-		this.type = type;
 	}
 }

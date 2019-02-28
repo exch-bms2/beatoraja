@@ -7,11 +7,15 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+/**
+ * MIDIデバイス入力処理用クラス
+ *
+ * @author excln
+ */
 public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoCloseable {
 
 	static final int MaxKeys = 128;
 
-	BMSPlayerInputProcessor bmsPlayerInputProcessor;
 	ArrayList<MidiDevice> devices = new ArrayList<>();
 	MidiReceiver receiver = new MidiReceiver();
 
@@ -33,8 +37,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	Consumer<Boolean> pitchBendUp, pitchBendDown;
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
-		super(Type.MIDI);
-		this.bmsPlayerInputProcessor = inputProcessor;
+		super(inputProcessor, Type.MIDI);
 		MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
 		for (MidiDevice.Info info : infos) {
 			try {

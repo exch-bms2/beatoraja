@@ -3,22 +3,18 @@ package bms.player.beatoraja.input;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerListener;
-import com.badlogic.gdx.controllers.PovDirection;
-import com.badlogic.gdx.math.Vector3;
 
 /**
  * 専用コントローラー入力処理用クラス
  *
  * @author exch
  */
-public class BMControllerInputProcessor extends BMSPlayerInputDevice implements ControllerListener {
+public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
-	private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
+	// TODO アナログデバイスと設計(クラス)を分けたい
 
 	private final Controller controller;
 	/**
@@ -38,19 +34,63 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	 * セレクトキーアサイン
 	 */
 	private int select = BMKeys.BUTTON_10;
-
+	/**
+	 * 各AXIS値(-1.0 - 1.0)
+	 */
 	private float[] axis = new float[4];
+	/**
+	 * 各ボタン状態
+	 */
+	private final boolean[] buttonstate = new boolean[BMKeys.MAXID];
+	/**
+	 * 各ボタン状態に変更があったかどうか
+	 */
+	private final boolean[] buttonchanged = new boolean[BMKeys.MAXID];
+	/**
+	 * 各ボタン状態の変更時間(ms)
+	 */
+	private final long[] buttontime = new long[BMKeys.MAXID];
+	/**
+	 * ボタン状態変更後の再度変更を受け付ける時間(ms)
+	 */
+	private int duration = 16;
 
+	/**
+	 * 最後に押したボタン
+	 */
 	private int lastPressedButton = -1;
-	
+	/**
+	 * JKOC_HACK (UP,DOWNの誤反応対策用？)
+ 	 */
 	private boolean jkoc;
+	/**
+	 * アナログ皿かどうか
+	 */
 	private boolean analogScratch;
+	/**
+	 * アナログ皿の閾値
+	 */
 	private int analogScratchThreshold;
+	/**
+	 * スクラッチ停止カウンタ
+	 */
+	private long counter = 1;
+	/**
+	 * アナログスクラッチ位置(-1<->0<->1)
+	 */
+	private float oldAnalogScratchX = 10;
+	/**
+	 * アナログスクラッチ 入力フラグ
+	 */
+	private boolean activeAnalogScratch = false;
+	/**
+	 * アナログスクラッチ 右回転フラグ
+	 */
+	private boolean rightMoveScratching = false;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, String name, Controller controller,
 									  ControllerConfig controllerConfig) {
-		super(Type.BM_CONTROLLER);
-		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
+		super(bmsPlayerInputProcessor, Type.BM_CONTROLLER);
 		this.name = name;
 		this.controller = controller;
 		this.setConfig(controllerConfig);
@@ -69,52 +109,6 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		return name;
 	}
 
-	public boolean accelerometerMoved(Controller arg0, int arg1, Vector3 arg2) {
-		Logger.getGlobal().info("controller : " + controller.getName() + " accelerometer moved :" + arg1 + " - "
-				+ arg2.x + " " + arg2.y + " " + arg2.z);
-		return false;
-	}
-
-	public boolean axisMoved(Controller arg0, int arg1, float arg2) {
-		return false;
-	}
-
-	public boolean buttonDown(Controller arg0, int keycode) {
-		return false;
-	}
-
-	public boolean buttonUp(Controller arg0, int keycode) {
-		return false;
-	}
-
-	public void connected(Controller arg0) {
-	}
-
-	public void disconnected(Controller arg0) {
-	}
-
-	public boolean povMoved(Controller arg0, int arg1, PovDirection arg2) {
-		Logger.getGlobal()
-				.info("controller : " + controller.getName() + "pov moved : " + arg1 + " - " + arg2.ordinal());
-		return false;
-	}
-
-	public boolean xSliderMoved(Controller arg0, int arg1, boolean arg2) {
-		Logger.getGlobal().info("controller : " + controller.getName() + "xslider moved : " + arg1 + " - " + arg2);
-		return false;
-	}
-
-	public boolean ySliderMoved(Controller arg0, int arg1, boolean arg2) {
-		Logger.getGlobal().info("controller : " + controller.getName() + "yslider moved : " + arg1 + " - " + arg2);
-		return false;
-	}
-
-	private final boolean[] buttonstate = new boolean[BMKeys.MAXID];
-	private final boolean[] buttonchanged = new boolean[BMKeys.MAXID];
-	private final long[] buttontime = new long[BMKeys.MAXID];
-
-	private int duration = 16;
-
 	public void clear() {
 		// Arrays.fill(buttonstate, false);
 		// Arrays.fill(axis, 0);
@@ -123,24 +117,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		lastPressedButton = -1;
 	}
 
-	/**
-	 * スクラッチ停止カウンタ
-	 */
-	private long counter = 1;
-	/**
-	 * アナログスクラッチ位置(-1<->0<->1)
-	 */
-	private float oldAnalogScratchX = 10;
-	/**
-	 * アナログスクラッチ 入力フラグ
-	 */
-	private boolean activeAnalogScratch = false;
-	/**
-	 * アナログスクラッチ 右回転フラグ
-	 */
-	private boolean rightMoveScratching = false;
-
 	public void poll(final long presstime) {
+		// AXISの更新
 		for (int i = 0; i < 4; i++) {
 			axis[i] = controller.getAxis(i);
 		}
