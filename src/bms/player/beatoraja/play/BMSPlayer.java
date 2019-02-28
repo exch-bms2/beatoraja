@@ -342,17 +342,11 @@ public class BMSPlayer extends MainState {
 		setSound(SOUND_GUIDE_SE_GD, "guide-gd.wav", SoundType.SOUND, false);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		input.setMinimumInputDutration(conf.getInputduration());
-		PlayModeConfig pc = config.getPlayConfig(model.getMode());
 		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
-			input.setPlayConfig(pc);
-		}
-		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
+			input.setPlayConfig(config.getPlayConfig(model.getMode()));
+		} else if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
 			input.setEnable(false);
 		}
-		input.setKeyboardConfig(pc.getKeyboardConfig());
-		input.setControllerConfig(pc.getController());
-		input.setMidiConfig(pc.getMidiConfig());
 		lanerender = new LaneRenderer(this, model);
 		for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
 			if (i == NO_SPEED) {

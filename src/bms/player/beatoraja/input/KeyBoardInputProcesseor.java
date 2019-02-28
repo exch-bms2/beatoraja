@@ -84,6 +84,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void setConfig(KeyboardConfig config) {
 		this.keys = config.getKeyAssign().clone();
+		this.duration = config.getDuration();
 		this.control = new int[] { config.getStart(), config.getSelect() };
 	}
 
@@ -214,10 +215,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void setLastPressedKey(int lastPressedKey) {
 		this.lastPressedKey = lastPressedKey;
-	}
-
-	public void setMinimumDuration(int duration) {
-		this.duration = duration;
 	}
 
 	public void setEnable(boolean enable) {

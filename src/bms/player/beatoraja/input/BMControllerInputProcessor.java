@@ -100,6 +100,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.buttons = controllerConfig.getKeyAssign().clone();
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
+		this.duration = controllerConfig.getDuration();
 		this.jkoc = controllerConfig.getJKOC();
 		this.analogScratch = controllerConfig.isAnalogScratch();
 		this.analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
@@ -240,10 +241,6 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 	public void setLastPressedButton(int lastPressedButton) {
 		this.lastPressedButton = lastPressedButton;
-	}
-
-	public void setMinimumDuration(int duration) {
-		this.duration = duration;
 	}
 
 	public static class BMKeys {
