@@ -107,10 +107,6 @@ public class Config implements Validatable {
 	 */
 	private int maxFramePerSecond = 240;
 	/**
-	 * 最小入力感覚
-	 */
-	private int inputduration = 10;
-	/**
 	 * 選曲バー移動速度の最初
 	 */
 	private int scrolldurationlow = 300;
@@ -193,7 +189,7 @@ public class Config implements Validatable {
 	private int autosavereplay[] = {0,0,0,0};
 
 	private int skinPixmapGen = 4;
-	private int stagefilePixmapGen = 3;
+	private int stagefilePixmapGen = 2;
 	private int bannerPixmapGen = 2;
 	private int songResourceGen = 1;
 
@@ -204,15 +200,17 @@ public class Config implements Validatable {
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
+			"http://www.ribbit.xyz/bms/tables/normal.html",
+			"http://www.ribbit.xyz/bms/tables/insane.html",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=normal",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=hard",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=fc",
-			"http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
-			"http://dpbmsdelta.web.fc2.com/table/insane.html",
-			"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+			"https://mocha-repository.info/table/dpn_header.json",
+			"https://mocha-repository.info/table/dpi_header.json",
+			"https://mocha-repository.info/table/ln_header.json",
 			"http://stellawingroad.web.fc2.com/new/pms.html",
-			"http://sky.geocities.jp/exclusion_bms/table24k/table.html",
+			"https://excln.github.io/table24k/table.html",
 	};
 
 	public Config() {
@@ -343,14 +341,6 @@ public class Config implements Validatable {
 
 	public void setSoundpath(String soundpath) {
 		this.soundpath = soundpath;
-	}
-
-	public int getInputduration() {
-		return inputduration;
-	}
-
-	public void setInputduration(int inputduration) {
-		this.inputduration = inputduration;
 	}
 
 	public int getScrollDurationLow(){
@@ -602,7 +592,6 @@ public class Config implements Validatable {
 		keyvolume = MathUtils.clamp(keyvolume, 0f, 1f);
 		bgvolume = MathUtils.clamp(bgvolume, 0f, 1f);
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
-		inputduration = MathUtils.clamp(inputduration, 0, 100);
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
 

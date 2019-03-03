@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.*;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.Config;
@@ -62,7 +63,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	private Sound getKeySound(String name, String ext) {
-		switch (ext) {
+		switch (ext.toLowerCase(Locale.ROOT)) {
 			case ".wav":
 			case ".flac":
 				return getKeySound(new PCMHandleStream(name + ext));

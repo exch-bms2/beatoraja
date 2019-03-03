@@ -9,7 +9,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerConfig;
@@ -17,6 +20,8 @@ import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
+
 import com.badlogic.gdx.utils.Queue;
 
 public enum MusicSelectCommand {
@@ -284,8 +289,32 @@ public enum MusicSelectCommand {
             Bar current = selector.getBarRender().getSelected();
             try {
                 if (Desktop.isDesktopSupported()) {
-                    if(current instanceof SongBar && ((SongBar) current).existsSong()) {
-                        Desktop.getDesktop().open(Paths.get(((SongBar) current).getSongData().getPath()).getParent().toFile());
+					if (current instanceof SongBar) {
+						final SongBar songbar = (SongBar) current;
+						if (songbar.existsSong()) {
+							Desktop.getDesktop().open(Paths.get(songbar.getSongData().getPath()).getParent().toFile());
+						} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
+							String[] md5 = songbar.getSongData().getOrg_md5().toArray(
+									new String[songbar.getSongData().getOrg_md5().size()]);
+							SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
+							for (SongData sd : songdata) {
+								if (sd.getPath() != null) {
+									Desktop.getDesktop().open(Paths.get(sd.getPath()).getParent().toFile());
+									break;
+								}
+							}
+						} else {
+							Matcher m = Pattern.compile(".[^\\(\\[～~]*").matcher(current.getTitle());
+							if (m.find()) {
+								SongData[] songdata = selector.getSongDatabase().getSongDatasByText(m.group());
+								for (SongData sd : songdata) {
+									if (sd.getPath() != null) {
+										Desktop.getDesktop().open(Paths.get(sd.getPath()).getParent().toFile());
+										break;
+									}
+								}
+							}
+						}
                     } else if(current instanceof FolderBar) {
                         Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());
                     }

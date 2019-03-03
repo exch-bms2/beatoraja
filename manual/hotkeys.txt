@@ -45,7 +45,7 @@ Autoplay / Replay :
 1 (hold) ... x0.25 play speed
 2 (hold) ... x0.5 play speed
 3 (hold) ... x2 play speed
-4 (hold) ... x4 play speed
+4 (hold) ... x3 play speed
 
 
 Music Result :

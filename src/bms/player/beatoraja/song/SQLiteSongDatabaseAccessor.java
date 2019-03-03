@@ -31,7 +31,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 	private SQLiteDataSource ds;
 
-	private Path root;
+	private final Path root;
 	private String[] bmsroot;
 
 	private final ResultSetHandler<List<SongData>> songhandler = new BeanListHandler<SongData>(SongData.class);
@@ -261,8 +261,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				paths[i] = Paths.get(bmsroot[i]);
 			}
 		} else {
-			paths = new Path[1];
-			paths[0] = Paths.get(path);
+			paths = new Path[]{Paths.get(path)};
 		}
 		updater.updateSongDatas(paths);
 	}
@@ -276,12 +275,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 		private AtomicInteger count = new AtomicInteger();;
 
-		private Map<String, String> tags = new HashMap<String, String>();
-		private Map<String, Integer> favorites = new HashMap<String, Integer>();
-		private boolean updateAll;
+		private final boolean updateAll;
 
-		private long updatetime;
-		
 		private SongInformationAccessor info;
 
 		public SongDatabaseUpdater(boolean updateAll, SongInformationAccessor info) {
@@ -297,12 +292,13 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		 */
 		public void updateSongDatas(Path[] paths) {
 			long time = System.currentTimeMillis();
-			updatetime = Calendar.getInstance().getTimeInMillis() / 1000;
+			SongDatabaseUpdaterProperty property = new SongDatabaseUpdaterProperty(Calendar.getInstance().getTimeInMillis() / 1000, updateAll, info);
 			count.set(0);
 			if(info != null) {
 				info.startUpdate();
 			}
 			try (Connection conn = ds.getConnection()) {
+				property.conn = conn;
 				conn.setAutoCommit(false);
 				// ルートディレクトリに含まれないフォルダの削除
 				StringBuilder dsql = new StringBuilder();
@@ -322,16 +318,17 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				// 楽曲のタグ,FAVORITEの保持
 				for (SongData record : qr.query(conn, "SELECT md5, tag, favorite FROM song", songhandler)) {
 					if (record.getTag().length() > 0) {
-						tags.put(record.getMd5(), record.getTag());
+						property.tags.put(record.getMd5(), record.getTag());
 					}
 					if (record.getFavorite() > 0) {
-						favorites.put(record.getMd5(), record.getFavorite());
+						property.favorites.put(record.getMd5(), record.getFavorite());
 					}
 				}
 				
 				Arrays.stream(paths).parallel().forEach((p) -> {
 					try {
-						this.processDirectory(conn, p, true);
+						BMSFolder folder = new BMSFolder(p);
+						folder.processDirectory(property);
 					} catch (IOException | SQLException e) {
 						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 					}
@@ -350,17 +347,28 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					+ (count.get() > 0 ? (nowtime - time) / count.get() : "不明"));
 		}
 
-		private void processDirectory(Connection conn, final Path dir, boolean updateFolder)
+	}
+	
+	private class BMSFolder {
+		
+		public final Path path;
+		public boolean updateFolder = true;
+		private boolean txt = false;
+		private final List<Path> bmsfiles = new ArrayList<Path>();
+		private final List<BMSFolder> dirs = new ArrayList<BMSFolder>();
+		private String previewpath = null;
+		
+		public BMSFolder(Path path) {
+			this.path = path;
+		}
+		
+		private void processDirectory(SongDatabaseUpdaterProperty property)
 				throws IOException, SQLException {
-			final List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", songhandler,
-					SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
-			final List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?",
-					folderhandler, SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
-			boolean txt = false;
-			final List<Path> bmsfiles = new ArrayList<Path>();
-			final List<BMSFolder> dirs = new ArrayList<BMSFolder>();
-			String previewpath = null;
-			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
+			final List<SongData> records = qr.query(property.conn, "SELECT path,date FROM song WHERE folder = ?", songhandler,
+					SongUtils.crc32(path.toString(), bmsroot, root.toString()));
+			final List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
+					folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
+			try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
 				for (Path p : paths) {
 					if(Files.isDirectory(p)) {
 						dirs.add(new BMSFolder(p));
@@ -388,12 +396,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 
 			final boolean containsBMS = bmsfiles.size() > 0;
-			if (containsBMS) {
-				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles, records,
-						updateFolder, txt, updatetime, previewpath, tags, favorites, info);
-				task.run();
-				count.addAndGet(task.count);
-			}
+			property.count.addAndGet(this.processBMSFolder(records, property));
 
 			final int len = folders.size();
 			for (BMSFolder bf : dirs) {
@@ -405,7 +408,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 //						long t = System.nanoTime();
 						folders.set(i, null);
 //						System.out.println(System.nanoTime() - t);
-						if (!updateAll && record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
+						if (!property.updateAll && record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
 							bf.updateFolder = false;
 						}
 						break;
@@ -416,7 +419,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			if(!containsBMS) {
 				dirs.parallelStream().forEach((bf) -> {
 					try {
-						this.processDirectory(conn, bf.path, bf.updateFolder);
+						bf.processDirectory(property);
 					} catch (IOException | SQLException e) {
 						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 					}					
@@ -425,15 +428,15 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 			// folderテーブルの更新
 			if (updateFolder) {
-				final String s = (dir.startsWith(root) ? root.relativize(dir).toString() : dir.toString())
+				final String s = (path.startsWith(root) ? root.relativize(path).toString() : path.toString())
 						+ File.separatorChar;
 				// System.out.println("folder更新 : " + s);
-				qr.update(conn,
+				qr.update(property.conn,
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);",
-						dir.getFileName().toString(), "", "", s, 1, "",
-						SongUtils.crc32(dir.toAbsolutePath().getParent().toString(), bmsroot, root.toString()),
-						Files.getLastModifiedTime(dir).toMillis() / 1000, null,
+								path.getFileName().toString(), "", "", s, 1, "",
+						SongUtils.crc32(path.toAbsolutePath().getParent().toString(), bmsroot, root.toString()),
+						Files.getLastModifiedTime(path).toMillis() / 1000, null,
 						Calendar.getInstance().getTimeInMillis() / 1000);
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
@@ -441,53 +444,14 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				if(record != null) {
 					// System.out.println("Song Database : folder deleted - " +
 					// record.getPath());
-					qr.update(conn, "DELETE FROM folder WHERE path LIKE ?", record.getPath() + "%");
-					qr.update(conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
+					qr.update(property.conn, "DELETE FROM folder WHERE path LIKE ?", record.getPath() + "%");
+					qr.update(property.conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
 				}
 			}
 		}
-	}
-	
-	private static class BMSFolder {
 		
-		public final Path path;
-		public boolean updateFolder = true;
-		
-		public BMSFolder(Path path) {
-			this.path = path;
-		}
-		
-	}
-
-	class BMSFolderThread {
-
-		private final List<Path> bmsfiles;
-		private final List<SongData> records;
-		private final boolean updateAll;
-		private final boolean txt;
-		private final Connection conn;
-		private final long updatetime;
-		private final String preview;
-		private final Map<String, String> tags;
-		private final Map<String, Integer> favorites;
-		private int count;
-		private final SongInformationAccessor info;
-
-		public BMSFolderThread(Connection conn, List<Path> bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
-							   long updatetime, String preview, Map<String, String> tags, Map<String, Integer> favorites, SongInformationAccessor info) {
-			this.bmsfiles = bmsfiles;
-			this.records = records;
-			this.updateAll = updateAll;
-			this.txt = txt;
-			this.conn = conn;
-			this.updatetime = updatetime;
-			this.preview = preview;
-			this.tags = tags;
-			this.favorites = favorites;
-			this.info = info;
-		}
-
-		public void run() {
+		private int processBMSFolder(List<SongData> records, SongDatabaseUpdaterProperty property) {
+			int count = 0;
 			BMSDecoder bmsdecoder = null;
 			BMSONDecoder bmsondecoder = null;
 			final int len = records.size();
@@ -499,7 +463,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					if (record != null && record.getPath().equals(pathname)) {
 						records.set(i, null);
 						try {
-							if (!updateAll && record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
+							if (!property.updateAll && record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
 								update = false;
 							}
 						} catch (IOException e) {
@@ -555,13 +519,13 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 							}
 						}
 					}
-					if((sd.getPreview() == null || sd.getPreview().length() == 0) && preview != null) {
-						sd.setPreview(preview);
+					if((sd.getPreview() == null || sd.getPreview().length() == 0) && previewpath != null) {
+						sd.setPreview(previewpath);
 					}
-					final String tag = tags.get(sd.getMd5());
-					final Integer favorite = favorites.get(sd.getMd5());
+					final String tag = property.tags.get(sd.getMd5());
+					final Integer favorite = property.favorites.get(sd.getMd5());
 					try {
-						qr.update(conn,
+						qr.update(property.conn,
 								"INSERT OR REPLACE INTO song "
 										+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 										+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
@@ -576,18 +540,18 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 								sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
 								sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
 								Files.getLastModifiedTime(path).toMillis() / 1000,
-								favorite != null ? favorite.intValue() : 0, sd.getNotes(), updatetime,
+								favorite != null ? favorite.intValue() : 0, sd.getNotes(), property.updatetime,
 								sd.getCharthash());
 					} catch (SQLException | IOException e) {
 						e.printStackTrace();
 					}
-					if(info != null) {
-						info.update(model);
+					if(property.info != null) {
+						property.info.update(model);
 					}
 					count++;
 				} else {
 					try {
-						qr.update(conn, "DELETE FROM song WHERE path = ?", pathname);
+						qr.update(property.conn, "DELETE FROM song WHERE path = ?", pathname);
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
@@ -597,12 +561,31 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			for (SongData record : records) {
 				if(record != null) {
 					try {
-						qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
+						qr.update(property.conn, "DELETE FROM song WHERE path = ?", record.getPath());
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 			}
+			
+			return count;
 		}
+	}
+	
+	private static class SongDatabaseUpdaterProperty {
+		private final Map<String, String> tags = new HashMap<String, String>();
+		private final Map<String, Integer> favorites = new HashMap<String, Integer>();
+		private final SongInformationAccessor info;
+		private final long updatetime;
+		private final boolean updateAll;
+		private final AtomicInteger count = new AtomicInteger();
+		private Connection conn;
+		
+		public SongDatabaseUpdaterProperty(long updatetime, boolean updateAll, SongInformationAccessor info) {
+			this.updatetime = updatetime;
+			this.updateAll = updateAll;
+			this.info = info;
+		}
+
 	}
 }

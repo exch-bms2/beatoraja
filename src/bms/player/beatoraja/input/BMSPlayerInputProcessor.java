@@ -130,13 +130,6 @@ public class BMSPlayerInputProcessor {
 	long[] cursortime = new long[4];
 
 	private Type type = Type.KEYBOARD;
-	
-	public void setMinimumInputDutration(int minduration) {
-		kbinput.setMinimumDuration(minduration);
-		for (BMControllerInputProcessor bm : bminput) {
-			bm.setMinimumDuration(minduration);
-		}
-	}
 
 	public void setKeyboardConfig(KeyboardConfig config) {
 		kbinput.setConfig(config);

@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input.Keys;
 
 import bms.model.Mode;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
+import com.badlogic.gdx.math.MathUtils;
 
 /**
  * プレイコンフィグ。モード毎に保持するべき値についてはこちらに格納する
@@ -82,6 +83,7 @@ public class PlayModeConfig {
         if (keyboard.keys.length != keys) {
             keyboard.keys = Arrays.copyOf(keyboard.keys, keys);
         }
+        keyboard.duration = MathUtils.clamp(keyboard.duration, 0, 100);
 
         int index = 0;
         for (ControllerConfig c : controller) {
@@ -97,6 +99,7 @@ public class PlayModeConfig {
                 }
                 c.keys = newkeys;
             }
+            c.duration = MathUtils.clamp(c.duration, 0, 100);
         }
 
         if (midi.keys == null) {
@@ -138,7 +141,6 @@ public class PlayModeConfig {
         this.playconfig = playconfig;
     }
 
-
     /**
      * キーボード設定定義用クラス
      *
@@ -151,6 +153,8 @@ public class PlayModeConfig {
         private int start;
 
         private int select;
+
+        private int duration = 16;
 
         public KeyboardConfig() {
             this(Mode.BEAT_14K, true);
@@ -233,6 +237,14 @@ public class PlayModeConfig {
         public void setSelect(int select) {
             this.select = select;
         }
+
+        public int getDuration() {
+            return duration;
+        }
+
+        public void setDuration(int inputduration) {
+            this.duration = duration;
+        }
     }
 
     /**
@@ -250,16 +262,15 @@ public class PlayModeConfig {
 
         private int select;
 
+        private int duration = 16;
         /**
          * JKOC Hack (boolean) private variable
          */
         private boolean jkoc_hack = false;
-
         /**
          * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
          */
         private boolean analogScratch = false;
-        
         /**
          * アナログスクラッチ停止閾値
          */
@@ -379,6 +390,14 @@ public class PlayModeConfig {
 
         public void setSelect(int select) {
             this.select = select;
+        }
+
+        public int getDuration() {
+            return duration;
+        }
+
+        public void setDuration(int inputduration) {
+            this.duration = duration;
         }
 
         public boolean getJKOC()  {

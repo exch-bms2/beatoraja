@@ -440,8 +440,6 @@ public class PlayConfigurationView implements Initializable {
 
 		folderlamp.setSelected(config.isFolderlamp());
 
-		inputduration.getValueFactory().setValue(config.getInputduration());
-
 		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
 
@@ -582,8 +580,6 @@ public class PlayConfigurationView implements Initializable {
         config.setCacheSkinImage(usecim.isSelected());
         config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());
-
-		config.setInputduration(getValue(inputduration));
 
 		config.setScrollDutationLow(getValue(scrolldurationlow));
 		config.setScrollDutationHigh(getValue(scrolldurationhigh));
@@ -833,9 +829,12 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void updateInputConfig() {
+    	// TODO 各デバイス毎の最小入力感覚設定
 		if (ic != null) {
 			PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
+			conf.getKeyboardConfig().setDuration(getValue(inputduration));
 			for(ControllerConfig controller : conf.getController()) {
+				controller.setDuration(getValue(inputduration));
 				controller.setJKOC(jkoc_hack.isSelected());
 		        controller.setAnalogScratch(analogScratch.isSelected());
 		        controller.setAnalogScratchThreshold(analogScratchThreshold.getValue());
@@ -843,7 +842,9 @@ public class PlayConfigurationView implements Initializable {
 		}
 		ic = inputconfig.getValue();
 		PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
+		inputduration.getValueFactory().setValue(conf.getKeyboardConfig().getDuration());
 		for(ControllerConfig controller : conf.getController()) {
+			inputduration.getValueFactory().setValue(controller.getDuration());
 	        jkoc_hack.setSelected(controller.getJKOC());
 	        analogScratch.setSelected(controller.isAnalogScratch());
 	        analogScratchThreshold.getValueFactory().setValue(controller.getAnalogScratchThreshold());

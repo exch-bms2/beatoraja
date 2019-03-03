@@ -16,11 +16,6 @@ import com.badlogic.gdx.Input.Keys;
  */
 public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements InputProcessor {
 
-	/**
-	 * 
-	 */
-	private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
-	
 	private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
 			Keys.BACKSLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
@@ -75,8 +70,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	private int duration;
 
 	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
-		super(Type.KEYBOARD);
-		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
+		super(bmsPlayerInputProcessor, Type.KEYBOARD);
 		this.setConfig(config);
 		this.resolution = resolution;
 		
@@ -90,6 +84,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void setConfig(KeyboardConfig config) {
 		this.keys = config.getKeyAssign().clone();
+		this.duration = config.getDuration();
 		this.control = new int[] { config.getStart(), config.getSelect() };
 	}
 
@@ -220,10 +215,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void setLastPressedKey(int lastPressedKey) {
 		this.lastPressedKey = lastPressedKey;
-	}
-
-	public void setMinimumDuration(int duration) {
-		this.duration = duration;
 	}
 
 	public void setEnable(boolean enable) {
