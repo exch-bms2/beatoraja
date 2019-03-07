@@ -96,8 +96,10 @@ public abstract class SkinObject implements Disposable {
 	private long starttime;
 	private long endtime;
 
-	private Rectangle r = new Rectangle();
-	private Color c = new Color();
+	protected boolean draw;
+	protected Rectangle region = new Rectangle();
+	protected Color color = new Color();
+	protected int angle;
 	private SkinOffset[] off = new SkinOffset[0];
 
 	private Rectangle fixr = null;
@@ -333,95 +335,95 @@ public abstract class SkinObject implements Disposable {
 		if (fixr == null) {
 			getRate();
 			if(rate == 0) {
-				r.set(dst[index].region);
+				region.set(dst[index].region);
 			} else {
 				if(acc == 3) {
 					final Rectangle r1 = dst[index].region;
-					r.x = r1.x;
-					r.y = r1.y;
-					r.width = r1.width;
-					r.height = r1.height;
+					region.x = r1.x;
+					region.y = r1.y;
+					region.width = r1.width;
+					region.height = r1.height;
 				} else {
 					final Rectangle r1 = dst[index].region;
 					final Rectangle r2 = dst[index + 1].region;
-					r.x = r1.x + (r2.x - r1.x) * rate;
-					r.y = r1.y + (r2.y - r1.y) * rate;
-					r.width = r1.width + (r2.width - r1.width) * rate;
-					r.height = r1.height + (r2.height - r1.height) * rate;
+					region.x = r1.x + (r2.x - r1.x) * rate;
+					region.y = r1.y + (r2.y - r1.y) * rate;
+					region.width = r1.width + (r2.width - r1.width) * rate;
+					region.height = r1.height + (r2.height - r1.height) * rate;
 				}
 			}
 
 			for(SkinOffset off : this.off) {
 				if (off != null) {
 					if(!relative) {
-						r.x += off.x - off.w / 2;
-						r.y += off.y - off.h / 2;
+						region.x += off.x - off.w / 2;
+						region.y += off.y - off.h / 2;
 					}
-					r.width += off.w;
-					r.height += off.h;
+					region.width += off.w;
+					region.height += off.h;
 				}
 			}
-			return r;
+			return region;
 		} else {
 			if (offset.length == 0) {
 				return fixr;
 			}
-			r.set(fixr);
+			region.set(fixr);
 			for(SkinOffset off : this.off) {
 				if (off != null) {
 					if(!relative) {
-						r.x += off.x - off.w / 2;
-						r.y += off.y - off.h / 2;
+						region.x += off.x - off.w / 2;
+						region.y += off.y - off.h / 2;
 					}
-					r.width += off.w;
-					r.height += off.h;
+					region.width += off.w;
+					region.height += off.h;
 				}
 			}
-			return r;
+			return region;
 		}
 	}
 
 	public Color getColor() {
 		if (fixc != null) {
-			c.set(fixc);
+			color.set(fixc);
 			for(SkinOffset off :this.off) {
 				if(off != null) {
-					float a = c.a + (off.a / 255.0f);
+					float a = color.a + (off.a / 255.0f);
 					a = a > 1 ? 1 : (a < 0 ? 0 : a);
-					c.a = a;
+					color.a = a;
 				}
 			}
-			return c;
+			return color;
 		}
 		getRate();
 		if(rate == 0) {
-			c.set(dst[index].color);			
+			color.set(dst[index].color);			
 		} else {
 			if(acc == 3) {
 				final Color r1 = dst[index].color;
-				c.r = r1.r;
-				c.g = r1.g;
-				c.b = r1.b;
-				c.a = r1.a;
-				return c;
+				color.r = r1.r;
+				color.g = r1.g;
+				color.b = r1.b;
+				color.a = r1.a;
+				return color;
 			} else {
 				final Color r1 = dst[index].color;
 				final Color r2 = dst[index + 1].color;
-				c.r = r1.r + (r2.r - r1.r) * rate;
-				c.g = r1.g + (r2.g - r1.g) * rate;
-				c.b = r1.b + (r2.b - r1.b) * rate;
-				c.a = r1.a + (r2.a - r1.a) * rate;
-				return c;
+				color.r = r1.r + (r2.r - r1.r) * rate;
+				color.g = r1.g + (r2.g - r1.g) * rate;
+				color.b = r1.b + (r2.b - r1.b) * rate;
+				color.a = r1.a + (r2.a - r1.a) * rate;
+				return color;
 			}
 		}
 		for(SkinOffset off :this.off) {
 			if(off != null) {
-				float a = c.a + (off.a / 255.0f);
+				float a = color.a + (off.a / 255.0f);
 				a = a > 1 ? 1 : (a < 0 ? 0 : a);
-				c.a = a;
+				color.a = a;
 			}
 		}
-		return c;
+		return color;
 	}
 
 	public int getAngle() {
@@ -474,6 +476,17 @@ public abstract class SkinObject implements Disposable {
 		}
 		this.rate = 0;
 		this.index = 0;
+	}
+	
+	public void prepare(long time, MainState state) {
+		for (BooleanProperty draw : dstdraw) {
+			if(!draw.get(state)) {
+				this.draw = false;
+				return;
+			}
+		}
+		draw = true;
+
 	}
 
 	public abstract void draw(SkinObjectRenderer sprite, long time, MainState state);
