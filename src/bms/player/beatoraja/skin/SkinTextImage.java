@@ -91,26 +91,22 @@ public class SkinTextImage extends SkinText {
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
-		Rectangle r = this.getDestination(time, state);
-		if (r != null) {
-			final Color c = getColor();
-			// System.out.println("SkinTextImage描画:" + text + " - " + x + " " +
-			// y +
-			// " " + w + " " + h);
-			float width = textwidth * r.height / source.getSize() + source.getMargin() * texts.size;
+		// System.out.println("SkinTextImage描画:" + text + " - " + x + " " +
+		// y +
+		// " " + w + " " + h);
+		float width = textwidth * region.height / source.getSize() + source.getMargin() * texts.size;
 
-			final float scale = r.width < width ? r.width / width : 1;
-			final float x = (getAlign() == 2 ? r.x - width * scale : (getAlign() == 1 ? r.x - width * scale / 2 : r.x));
-			float dx = 0;
-			for (int i = 0;i < texts.size;i++) {
-				final TextureRegion ch = texts.get(i);
-				final float tw = ch.getRegionWidth() * scale * r.height / source.getSize();
-				// System.out.println("SkinTextImage描画:" + text.charAt(i) +
-				// " -
-				// " + (x + dx) + " " + y + " " + tw + " " + h);
-				draw(sprite, ch, x + dx + offsetX, r.y + offsetY, tw, r.height, c, 0, state);
-				dx += tw + source.getMargin() * scale;
-			}
+		final float scale = region.width < width ? region.width / width : 1;
+		final float x = (getAlign() == 2 ? region.x - width * scale : (getAlign() == 1 ? region.x - width * scale / 2 : region.x));
+		float dx = 0;
+		for (int i = 0;i < texts.size;i++) {
+			final TextureRegion ch = texts.get(i);
+			final float tw = ch.getRegionWidth() * scale * region.height / source.getSize();
+			// System.out.println("SkinTextImage描画:" + text.charAt(i) +
+			// " -
+			// " + (x + dx) + " " + y + " " + tw + " " + h);
+			draw(sprite, ch, x + dx + offsetX, region.y + offsetY, tw, region.height, color, 0, state);
+			dx += tw + source.getMargin() * scale;
 		}
 	}
 

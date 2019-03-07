@@ -57,35 +57,31 @@ public class SkinTextBitmap extends SkinText {
 		if (font == null)
 			return;
 
-		Rectangle r = this.getDestination(time, state);
-		if (r != null) {
-			float scale = this.size / source.getOriginalSize();
-			font.getData().setScale(scale);
-			final Color c = getColor();
-			final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
-			if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD ||
-					source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
-				sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
-				setLayout(c, r);
-				sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight(), shader -> {
-					shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
-					shader.setUniformf("u_outlineColor", getOutlineColor());
-					shader.setUniformf("u_shadowColor", getShadowColor());
-					shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
-					shader.setUniformf("u_shadowOffset",
-							new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
-				});
-			} else {
-				sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
-				if (!getShadowOffset().isZero()) {
-					setLayout(new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r);
-					sprite.draw(font, layout, x + getShadowOffset().x + offsetX, r.y - getShadowOffset().y + offsetY + r.getHeight());
-				}
-				setLayout(c, r);
-				sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
+		float scale = this.size / source.getOriginalSize();
+		font.getData().setScale(scale);
+		final float x = (getAlign() == 2 ? region.x - region.width : (getAlign() == 1 ? region.x - region.width / 2 : region.x));
+		if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD ||
+				source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
+			sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
+			setLayout(color, region);
+			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight(), shader -> {
+				shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
+				shader.setUniformf("u_outlineColor", getOutlineColor());
+				shader.setUniformf("u_shadowColor", getShadowColor());
+				shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
+				shader.setUniformf("u_shadowOffset",
+						new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
+			});
+		} else {
+			sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
+			if (!getShadowOffset().isZero()) {
+				setLayout(new Color(color.r / 2, color.g / 2, color.b / 2, color.a), region);
+				sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
 			}
-			font.getData().setScale(1);
+			setLayout(color, region);
+			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight());
 		}
+		font.getData().setScale(1);
 	}
 
 	private void setLayout(Color c, Rectangle r) {

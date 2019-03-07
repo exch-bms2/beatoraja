@@ -58,6 +58,21 @@ public class SkinJudge extends SkinObject {
     	return shift;
     }
 
+	@Override
+	public void prepare(long time, MainState state) {
+		super.prepare(time, state);
+    	for(SkinImage judge : judge) {
+    		if(judge != null) {
+    			judge.prepare(time, state);
+    		}
+    	}
+    	for(SkinNumber count : count) {
+    		if(count != null) {
+    			count.prepare(time, state);
+    		}
+    	}
+	}
+
     @Override
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;

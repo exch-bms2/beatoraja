@@ -48,6 +48,14 @@ public class SkinNote extends SkinObject {
 	}
 
 	@Override
+	public void prepare(long time, MainState state) {
+		super.prepare(time, state);
+		for(SkinLane lane : lanes) {
+			lane.prepare(time, state);
+		}
+	}
+
+	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final BMSPlayer player = (BMSPlayer) state;
 		if (player.getLanerender() != null) {

@@ -169,7 +169,7 @@ public class SkinGauge extends SkinObject {
 		final int notes = (type == HARD || type == EXHARD || type == HAZARD || type ==GrooveGauge.CLASS || type == EXCLASS || type == EXHARDCLASS)
 						&& value > 0 && ((int) (value * parts / max)) < 1
 						? 1 : (int) (value * parts / max);
-		sprite.setColor(getColor());
+		sprite.setColor(color);
 		sprite.setBlend(getBlend());
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		for (int i = 1; i <= parts; i++) {
