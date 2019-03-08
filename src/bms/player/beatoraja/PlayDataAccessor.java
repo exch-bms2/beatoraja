@@ -537,7 +537,7 @@ public class PlayDataAccessor {
 	 *            LNモード
 	 */
 	public void wrireReplayData(ReplayData rd, BMSModel model, int lnmode, int index) {
-		File replaydir = new File("replay");
+		File replaydir = new File(this.getReplayDataFolder());
 		if (!replaydir.exists()) {
 			replaydir.mkdirs();
 		}
@@ -658,7 +658,7 @@ public class PlayDataAccessor {
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
-		return playerpath + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar
+		return this.getReplayDataFolder() + File.separatorChar
 				+ (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "");
 	}
 
@@ -679,9 +679,12 @@ public class PlayDataAccessor {
 				}
 			}
 		}
-		return playerpath + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar
+		return this.getReplayDataFolder() + File.separatorChar
 				+ (ln ? replay[lnmode] : "") + hash + (sb.length() > 0 ? "_" + sb.toString() : "")
 				+ (index > 0 ? "_" + index : "");
 	}
 
+	private String getReplayDataFolder() {
+		return playerpath + File.separatorChar + player + File.separatorChar + "replay";
+	}
 }
