@@ -96,10 +96,10 @@ public abstract class SkinObject implements Disposable {
 	private long starttime;
 	private long endtime;
 
-	protected boolean draw;
-	protected Rectangle region = new Rectangle();
-	protected Color color = new Color();
-	protected int angle;
+	public boolean draw;
+	public Rectangle region = new Rectangle();
+	public Color color = new Color();
+	public int angle;
 	private SkinOffset[] off = new SkinOffset[0];
 
 	private Rectangle fixr = null;
@@ -485,6 +485,10 @@ public abstract class SkinObject implements Disposable {
 	}
 	
 	public void prepare(long time, MainState state) {
+		prepare(time, state, 0, 0);
+	}
+
+	public void prepare(long time, MainState state, float offsetX, float offsetY) {
 		for (BooleanProperty draw : dstdraw) {
 			if(!draw.get(state)) {
 				this.draw = false;
@@ -493,23 +497,62 @@ public abstract class SkinObject implements Disposable {
 		}
 		draw = true;
 		prepareRegion(time, state);
+		region.x += offsetX;
+		region.y += offsetY;
+		if (mouseRect != null && !mouseRect.contains(state.main.getInputProcessor().getMouseX() -region.x,
+				state.main.getInputProcessor().getMouseY() - region.y)) {
+			draw = false;
+			return;
+		}
+
 		prepareColor();
 		prepareAngle();
 	}
 
+	public void draw(SkinObjectRenderer sprite) {
+		// TODO このメソッドをabstract化予定
+	}
+
 	public abstract void draw(SkinObjectRenderer sprite, long time, MainState state);
 
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image) {
+		if (color.a == 0f || image == null) {
+			return;
+		}
+		
+		tmpRect.set(region);
+		if(stretch != null) {
+			stretch.stretchRect(tmpRect, tmpImage, image);
+		}
+		sprite.setColor(color);
+		sprite.setBlend(dstblend);
+		sprite.setType(dstfilter != 0 && imageType == SkinObjectRenderer.TYPE_NORMAL ? 
+				(tmpRect.width == tmpImage.getRegionWidth() && tmpRect.height == tmpImage.getRegionHeight() ?
+				SkinObjectRenderer.TYPE_NORMAL : SkinObjectRenderer.TYPE_BILINEAR) : imageType);
+		
+		if (angle != 0) {
+			sprite.draw(tmpImage, tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height, centerx , centery, angle);
+		} else {
+			sprite.draw(tmpImage, tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height);
+		}
+	}
+
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height) {
+		draw(sprite, image, x, y, width, height, color, angle);
+	}
+
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height, MainState state) {
-		draw(sprite, image, x, y, width, height, color, angle, state);
+		draw(sprite, image, x, y, width, height, color, angle);
 	}
 
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle, MainState state) {
+		draw(sprite, image, x, y, width, height, color, angle);		
+	}
+
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
+			Color color, int angle) {
 		if (color == null || color.a == 0f || image == null) {
-			return;
-		}
-		if (mouseRect != null && !mouseRect.contains(state.main.getInputProcessor().getMouseX() - x,
-				state.main.getInputProcessor().getMouseY() - y)) {
 			return;
 		}
 		tmpRect.set(x, y, width, height);
