@@ -369,6 +369,34 @@ public class BarRenderer {
 			loader = null;
 		}
 
+		// calcurate song bar position
+		for (int i = 0; i < barlength; i++) {
+			final BarArea ba = bararea[i];
+			boolean on = (i == skin.getCenterBar());
+			if (baro.getBarImages(on, i) == null) {
+				continue;
+			}
+			float dx = 0;
+			float dy = 0;
+			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
+			if (r != null) {
+				if (duration != 0) {
+					int nextindex = i + (angle >= 0 ? 1 : -1);
+					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
+							: null;
+					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
+					if (r2 != null) {
+						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
+								: ((float) (duration - System.currentTimeMillis())) / angle;
+						dx = (r2.x - r.x) * a;
+						dy = (r2.y - r.y) * a;
+					}
+				}
+				ba.x = (int) (r.x + dx);
+				ba.y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
+			}
+		}
+
 		// draw song bar
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
@@ -399,25 +427,9 @@ public class BarRenderer {
 				ba.value = -1;
 			}
 
-			float dx = 0;
-			float dy = 0;
 			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
 			if (r != null) {
-				if (duration != 0) {
-					int nextindex = i + (angle >= 0 ? 1 : -1);
-					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
-							: null;
-					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
-					if (r2 != null) {
-						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
-								: ((float) (duration - System.currentTimeMillis())) / angle;
-						dx = (r2.x - r.x) * a;
-						dy = (r2.y - r.y) * a;
-					}
-				}
-				ba.x = (int) (r.x + dx);
-				ba.y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
-				baro.getBarImages(on, i).draw(sprite, time, select, ba.value, (int) dx, (int) dy);
+				baro.getBarImages(on, i).draw(sprite, time, select, ba.value, ba.x - r.x, ba.y - r.y - (baro.getPosition() == 1 ? r.height : 0));
 			} else {
 				ba.value = -1;
 			}
