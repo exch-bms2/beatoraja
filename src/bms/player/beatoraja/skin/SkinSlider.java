@@ -110,11 +110,15 @@ public class SkinSlider extends SkinObject {
 		currentValue = ref != null ? ref.get(state) : 0;
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite) {
 		draw(sprite, currentImage, region.x
 				+ (direction == 1 ? currentValue * range : (direction == 3 ? -currentValue * range : 0)), region.y
 				+ (direction == 0 ? currentValue * range : (direction == 2 ? -currentValue * range : 0)),
-				region.width, region.height, state);
+				region.width, region.height);		
+	}
+
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		draw(sprite);
 	}
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {

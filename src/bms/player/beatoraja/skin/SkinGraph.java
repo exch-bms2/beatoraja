@@ -94,15 +94,19 @@ public class SkinGraph extends SkinObject {
 		currentValue = ref != null ? ref.get(state) : 0;
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite) {
 		if (direction == 1) {
 			current.setRegion(currentImage, 0, currentImage.getRegionHeight() - (int) (currentImage.getRegionHeight() * currentValue),
 					currentImage.getRegionWidth(), (int) (currentImage.getRegionHeight() * currentValue));
-			draw(sprite, current, region.x, region.y, region.width, region.height * currentValue, state);
+			draw(sprite, current, region.x, region.y, region.width, region.height * currentValue);
 		} else {
 			current.setRegion(currentImage, 0, 0, (int) (currentImage.getRegionWidth() * currentValue), currentImage.getRegionHeight());
-			draw(sprite, current, region.x, region.y, region.width * currentValue, region.height, state);
-		}					
+			draw(sprite, current, region.x, region.y, region.width * currentValue, region.height);
+		}							
+	}
+
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		draw(sprite);
 	}
 
 	public void dispose() {
