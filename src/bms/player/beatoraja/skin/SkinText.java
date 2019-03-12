@@ -42,6 +42,8 @@ public abstract class SkinText extends SkinObject {
     private Vector2 shadowOffset;
     private float shadowSmoothness;
     
+    private String currentText;
+
     public SkinText(int id) {
     	ref = StringPropertyFactory.getStringProperty(id);
     }
@@ -73,22 +75,28 @@ public abstract class SkinText extends SkinObject {
     public abstract void prepareFont(String text);
 
     protected abstract void prepareText(String text);
-
-    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-       final String  value = ref != null ? ref.get(state) : null;
-        if(value == null || value.length() == 0) {
+    
+    public void prepare(long time, MainState state) {
+    	super.prepare(time, state);
+        currentText = ref != null ? ref.get(state) : null;
+        if(currentText == null || currentText.length() == 0) {
+        	draw = false;
             return;
-        }        	
-        Rectangle r = this.getDestination(time,state);
-        if(r != null) {
-            if(value != text) {
-                setText(value);
-            }
-            draw(sprite, time, state, 0,0);
         }
     }
 
-    public abstract void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY);
+    public void draw(SkinObjectRenderer sprite) {
+        if(currentText != text) {
+            setText(currentText);
+        }
+        draw(sprite, 0,0);
+    }
+
+    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+    	draw(sprite);
+    }
+
+    public abstract void draw(SkinObjectRenderer sprite, float offsetX, float offsetY);
     
     public boolean isEditable() {
         return editable;

@@ -1,25 +1,20 @@
 package bms.player.beatoraja.skin;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 
-import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 /**
@@ -53,7 +48,7 @@ public class SkinTextBitmap extends SkinText {
 		font = source.getFont();
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
+	public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
 		if (font == null)
 			return;
 

@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -68,7 +67,7 @@ public class SkinTextFont extends SkinText {
 	}
 	
 	@Override
-    public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
+    public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
         if(generator == null) {
             return;
         }

@@ -83,8 +83,8 @@ public class BarRenderer {
 
 	private static class BarArea {
 		public Bar sd;
-		public int x;
-		public int y;
+		public float x;
+		public float y;
 		public int value = -1;
 	}
 
@@ -478,7 +478,7 @@ public class BarRenderer {
 				}
 			}
 			baro.getText(songstatus).setText(ba.sd.getTitle());
-			baro.getText(songstatus).draw(sprite, time, select, ba.x, ba.y);
+			baro.getText(songstatus).draw(sprite, ba.x, ba.y);
 		}
 
 		for (int i = 0; i < barlength; i++) {
