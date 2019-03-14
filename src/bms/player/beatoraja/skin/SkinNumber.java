@@ -47,6 +47,8 @@ public class SkinNumber extends SkinObject {
 	private float length;
 
 	private TextureRegion[] currentImages;
+	private TextureRegion[] imageSet;
+
 	private float shift;
 
 	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int rid) {
@@ -142,8 +144,9 @@ public class SkinNumber extends SkinObject {
 			return;
 		}
 
-		if(this.value != value) {
+		if(this.value != value || this.imageSet != image) {
 			this.value = value;
+			this.imageSet = image;
 			shiftbase = 0;
 			value = Math.abs(value);
 			for (int j = currentImages.length - 1; j >= 0; j--) {
