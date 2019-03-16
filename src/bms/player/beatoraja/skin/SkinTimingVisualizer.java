@@ -36,6 +36,9 @@ public class SkinTimingVisualizer extends SkinObject {
 	private int[][] judgeArea;
 
 	private int currentindex = -1;
+	
+	private int index;
+	private long[] recent;
 	/**
 	 *
 	 * @param width スキン描画幅
@@ -65,24 +68,28 @@ public class SkinTimingVisualizer extends SkinObject {
 		this.drawDecay = drawDecay == 1 ? true : false;
 	}
 
-	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		if (state instanceof BMSPlayer) {
-			draw(sprite, time, (BMSPlayer) state, getDestination(time, state));
-		}
-	}
-
-	private void draw(SkinObjectRenderer sprite, long time, BMSPlayer state, Rectangle r) {
-		if (r == null) {
+	public void prepare(long time, MainState state) {
+		if(!(state instanceof BMSPlayer)) {
+			draw = false;
 			return;
 		}
-
+		super.prepare(time, state);
 		final PlayerResource resource = state.main.getPlayerResource();
 		if(resource.getBMSModel() != model) {
 			model = resource.getBMSModel();
 			judgeArea = getJudgeArea(resource);			
 		}
+		
+		index = ((BMSPlayer)state).getJudgeManager().getRecentJudgesIndex();
+		recent = ((BMSPlayer)state).getJudgeManager().getRecentJudges();
+	}
+	
+	@Override
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		draw(sprite);
+	}
 
+	public void draw(SkinObjectRenderer sprite) {
 		// 背景テクスチャ生成
 		if (backtex == null) {
 			int pwidth = center * 2 + 1;
@@ -112,9 +119,6 @@ public class SkinTimingVisualizer extends SkinObject {
 			shape.dispose();
 			shape = null;
 		}
-
-		int index = state.getJudgeManager().getRecentJudgesIndex();
-		long[] recent = state.getJudgeManager().getRecentJudges();
 
 		if (shape == null) {
 			shape = new Pixmap(width, recent.length * 2, Pixmap.Format.RGBA8888);
@@ -150,8 +154,8 @@ public class SkinTimingVisualizer extends SkinObject {
 			shapetex.getTexture().draw(shape, 0, 0);
 		}
 
-		draw(sprite, backtex, r.x, r.y, r.width, r.height, state);
-		draw(sprite, shapetex, r.x, r.y, r.width, r.height, state);
+		draw(sprite, backtex);
+		draw(sprite, shapetex);
 	}
 
 	static int[][] getJudgeArea(PlayerResource resource) {

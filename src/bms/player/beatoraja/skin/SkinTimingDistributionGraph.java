@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -31,7 +33,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 	private Color averageColor;
 	private Color devColor;
 
-
+	private MusicResult state;
 
 	public SkinTimingDistributionGraph(int width, int lineWidth,
 			String graphColor, String averageColor, String devColor, String PGColor, String GRColor, String GDColor, String BDColor,
@@ -55,18 +57,22 @@ public class SkinTimingDistributionGraph extends SkinObject {
 		this.drawDev = (drawDev == 1);
 	}
 
-	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		if (state instanceof MusicResult) {
-			draw(sprite, time, (MusicResult) state, getDestination(time, state));
-		}
-	}
-
-	private void draw(SkinObjectRenderer sprite, long time, MusicResult state, Rectangle r) {
-		if (r == null) {
+	public void prepare(long time, MainState state) {
+		if(!(state instanceof MusicResult)) {
+			draw = false;
 			return;
 		}
+		this.state = (MusicResult) state;
+		super.prepare(time, state);
+		
+	}
+	
+	@Override
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		draw(sprite);
+	}
 
+	public void draw(SkinObjectRenderer sprite) {
 		// Texture生成は一度だけ
 		if (tex == null) {
 			TimingDistribution td = state.getTimingDistribution();
@@ -131,7 +137,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			shape.dispose();
 		}
 
-		draw(sprite, tex, r.x, r.y, r.width, r.height, state);
+		draw(sprite, tex);
 
 	}
 
