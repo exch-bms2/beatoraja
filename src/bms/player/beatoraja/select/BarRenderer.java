@@ -339,7 +339,7 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, int time) {
+	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, long time) {
 		if (skin == null) {
 			return;
 		}
