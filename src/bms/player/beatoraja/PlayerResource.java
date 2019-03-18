@@ -192,7 +192,7 @@ public class PlayerResource {
 			generator = decoder.getBMSGenerator();
 		}
 
-		marginTime = BMSModelUtils.setStartNoteSection(model, 1000);
+		marginTime = BMSModelUtils.setStartNoteTime(model, 1000);
 		BMSPlayerRule.validate(model, bmson);
 		return model;
 	}

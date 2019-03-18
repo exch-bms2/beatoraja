@@ -140,12 +140,12 @@ public class BMSPlayer extends MainState {
 			if (autoplay.isReplayMode()) {
 				model = resource.getGenerator().generate(replay.rand);
 				// 暫定処置
-				BMSModelUtils.setStartNoteSection(model, 1000);
+				BMSModelUtils.setStartNoteTime(model, 1000);
 				BMSPlayerRule.validate(model, false);
 			} else if (resource.getReplayData().pattern != null) {
 				model = resource.getGenerator().generate(resource.getReplayData().rand);
 				// 暫定処置
-				BMSModelUtils.setStartNoteSection(model, 1000);
+				BMSModelUtils.setStartNoteTime(model, 1000);
 				BMSPlayerRule.validate(model, false);
 			}
 			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
