@@ -141,12 +141,6 @@ public class SkinDistributionGraph extends SkinObject {
         }
     }
 
-
-    @Override
-    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-    	draw(sprite);
-    }
-
     public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, float offsetx, float offsety) {
     	prepare(time, state, current, offsetx, offsety);
     	if(draw) {

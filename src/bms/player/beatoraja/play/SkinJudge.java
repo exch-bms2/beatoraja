@@ -121,11 +121,6 @@ public class SkinJudge extends SkinObject {
     }
 
     @Override
-    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-    	draw(sprite);
-    }
-
-    @Override
     public void dispose() {
     	disposeAll(judge);
     	disposeAll(count);

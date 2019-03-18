@@ -84,11 +84,6 @@ public class SkinTimingVisualizer extends SkinObject {
 		recent = ((BMSPlayer)state).getJudgeManager().getRecentJudges();
 	}
 	
-	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
 	public void draw(SkinObjectRenderer sprite) {
 		// 背景テクスチャ生成
 		if (backtex == null) {

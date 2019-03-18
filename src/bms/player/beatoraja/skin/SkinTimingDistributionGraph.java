@@ -67,11 +67,6 @@ public class SkinTimingDistributionGraph extends SkinObject {
 		
 	}
 	
-	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
 	public void draw(SkinObjectRenderer sprite) {
 		// Texture生成は一度だけ
 		if (tex == null) {

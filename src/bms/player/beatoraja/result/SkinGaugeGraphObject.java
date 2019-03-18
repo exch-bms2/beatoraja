@@ -95,11 +95,6 @@ public class SkinGaugeGraphObject extends SkinObject {
 	}
 
 	@Override
-	public void draw(SkinObjectRenderer sprite, long timea, MainState statea) {
-		draw(sprite);
-	}
-
-	@Override
 	public void draw(SkinObjectRenderer sprite) {
 
 		if (shapetex != null) {

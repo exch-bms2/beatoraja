@@ -196,7 +196,7 @@ public class Skin {
 		for (SkinObject obj : objectarray) {
 			obj.prepare(time, state);
 			if (obj.draw) {
-				obj.draw(renderer, time, state);
+				obj.draw(renderer);
 			}
 		}
 	}

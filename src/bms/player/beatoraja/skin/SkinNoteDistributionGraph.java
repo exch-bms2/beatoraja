@@ -126,11 +126,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 
 	public void prepare(long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
+		super.prepare(time, state);			
 		if(r != null) {
 			region.set(r);
 			draw = true;
-		} else {
-			super.prepare(endtime, state);			
 		}
 		this.state = state;
 		this.starttime = starttime;
@@ -139,11 +138,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		render = time >= delay ? 1.0f : (float) time / delay;
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
-	public void draw(SkinObjectRenderer sprite) {		
+	public void draw(SkinObjectRenderer sprite) {	
 		
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
@@ -180,9 +175,9 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			updateTexture();
 		}
 
-		draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height, state);
+		draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height, state);
+		draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height);
 		// スタートカーソル描画
 		if (starttime >= 0) {
 			int dx = (int) (starttime * region.width / (data.length * 1000));

@@ -59,11 +59,6 @@ public class SkinBGA extends SkinObject {
 	}
 
 	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
-	@Override
 	public void dispose() {
 
 	}

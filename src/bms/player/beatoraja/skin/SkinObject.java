@@ -509,11 +509,7 @@ public abstract class SkinObject implements Disposable {
 		prepareAngle();
 	}
 
-	public void draw(SkinObjectRenderer sprite) {
-		// TODO このメソッドをabstract化予定
-	}
-
-	public abstract void draw(SkinObjectRenderer sprite, long time, MainState state);
+	public abstract void draw(SkinObjectRenderer sprite);
 
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image) {
 		if (color.a == 0f || image == null) {
@@ -539,15 +535,6 @@ public abstract class SkinObject implements Disposable {
 
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height) {
 		draw(sprite, image, x, y, width, height, color, angle);
-	}
-
-	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height, MainState state) {
-		draw(sprite, image, x, y, width, height, color, angle);
-	}
-
-	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
-			Color color, int angle, MainState state) {
-		draw(sprite, image, x, y, width, height, color, angle);		
 	}
 
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
