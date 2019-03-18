@@ -19,6 +19,9 @@ import com.badlogic.gdx.math.Rectangle;
 public class SkinNote extends SkinObject {
 
 	private SkinLane[] lanes;
+	
+	private LaneRenderer renderer;
+	private long time;
 
 	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote) {
 		lanes = new SkinLane[note.length];
@@ -49,18 +52,27 @@ public class SkinNote extends SkinObject {
 
 	@Override
 	public void prepare(long time, MainState state) {
+		if(renderer == null) {
+			final BMSPlayer player = (BMSPlayer) state;
+			if (player.getLanerender() == null) {
+				draw = false;
+				return;
+			}
+			renderer = player.getLanerender();
+		}
+		this.time = time;
 		super.prepare(time, state);
 		for(SkinLane lane : lanes) {
 			lane.prepare(time, state);
 		}
 	}
 
-	@Override
+	public void draw(SkinObjectRenderer sprite) {
+		renderer.drawLane(sprite, time, lanes);
+	}
+	
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		final BMSPlayer player = (BMSPlayer) state;
-		if (player.getLanerender() != null) {
-			player.getLanerender().drawLane(sprite, time, lanes);
-		}
+		draw(sprite);
 	}
 
 	@Override
@@ -124,7 +136,9 @@ public class SkinNote extends SkinObject {
 			this.processednote = processednote;
 		}
 
-		@Override
+		public void draw(SkinObjectRenderer sprite) {
+		}
+
 		public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		}
 		

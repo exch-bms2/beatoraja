@@ -7,8 +7,6 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.StretchType;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -18,6 +16,9 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  * @author exch
  */
 public class SkinBGA extends SkinObject {
+	
+	private BMSPlayer player;
+	private long time;
 
 	public SkinBGA(int bgaExpand) {
 		switch (bgaExpand) {
@@ -32,24 +33,34 @@ public class SkinBGA extends SkinObject {
 			break;
 		}
 	}
-
+	
 	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		final PlayerResource resource = state.main.getPlayerResource();
+	public void prepare(long time, MainState state) {
+		if(player == null) {
+			player = (BMSPlayer)state;
+		}
+		this.time = time;
+		super.prepare(time, state);
+	}
+
+	public void draw(SkinObjectRenderer sprite) {
+		final PlayerResource resource = player.main.getPlayerResource();
 		if (resource.getPlayMode() == PlayMode.PRACTICE) {
-			Rectangle r = getDestination(time, state);
-			if (r != null) {
-				((BMSPlayer) state).getPracticeConfiguration().draw(r, sprite, time, state);
-			}
+			player.getPracticeConfiguration().draw(region, sprite, time, player);
 		} else if (resource.getBGAManager() != null) {
-			final int s = ((BMSPlayer) state).getState();
+			final int s = player.getState();
 			resource.getBGAManager().drawBGA(
 					this,
 					sprite,
-					getDestination(time, state),
+					region,
 					s == BMSPlayer.STATE_PRELOAD || s == BMSPlayer.STATE_PRACTICE || s == BMSPlayer.STATE_READY ? -1
-							: state.main.getNowTime(TIMER_PLAY));
-		}
+							: player.main.getNowTime(TIMER_PLAY));
+		}		
+	}
+
+	@Override
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		draw(sprite);
 	}
 
 	@Override

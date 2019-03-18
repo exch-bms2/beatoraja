@@ -44,6 +44,8 @@ public class SkinHidden extends SkinObject {
 
 	private TimerProperty timer;
 	private int cycle;
+	
+	private int imageindex;
 
 	public SkinHidden(TextureRegion[] image, int timer, int cycle) {
 		this.timer = timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null;
@@ -65,39 +67,50 @@ public class SkinHidden extends SkinObject {
 		}
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+	@Override
+	public void prepare(long time, MainState state) {
 		if(originalImages == null) {
+			draw = false;
 			return;
 		}
 		if(this.state != state) {
 			this.state = state;
 			disapearLineAddedLift = disapearLine;
 		}
+		super.prepare(time, state);
 		if(isDisapearLineLinkLift && disapearLine >= 0 && previousLift != state.getOffsetValue(OFFSET_LIFT).y) {
 			disapearLineAddedLift = disapearLine + state.getOffsetValue(OFFSET_LIFT).y;
 			previousLift = state.getOffsetValue(OFFSET_LIFT).y;
 		}
-		Rectangle r = this.getDestination(time,state);
+		
+		imageindex = getImageIndex(originalImages.length, time, state);
+	}
+
+	public void draw(SkinObjectRenderer sprite) {
 		//描画領域上端が消失ラインより下なら描画処理を行わない
-		if (r != null && ((r.y + r.height > disapearLineAddedLift && disapearLine >= 0) || disapearLine < 0)) {
+		if (((region.y + region.height > disapearLineAddedLift && disapearLine >= 0) || disapearLine < 0)) {
 			//描画領域と消失ラインが重なっている場合
-			if(r.y < disapearLineAddedLift && disapearLine >= 0) {
+			if(region.y < disapearLineAddedLift && disapearLine >= 0) {
 				//前回と位置が異なる場合は画像加工処理を行う
-				if(previousY != r.y) {
+				if(previousY != region.y) {
 					for(int i = 0; i < trimmedImages.length; i++) {
 						trimmedImages[i] = new TextureRegion(originalImages[i]);
 					}
 					for(int i = 0; i < trimmedImages.length; i++) {
-						trimmedImages[i].setRegionHeight( (int) Math.round(originalImages[i].getRegionHeight() * (r.y + r.height - disapearLineAddedLift) / r.height));
+						trimmedImages[i].setRegionHeight( (int) Math.round(originalImages[i].getRegionHeight() * (region.y + region.height - disapearLineAddedLift) / region.height));
 					}
-					previousY = r.y;
+					previousY = region.y;
 				}
-				draw(sprite, trimmedImages[getImageIndex(trimmedImages.length, time, state)], r.x, disapearLineAddedLift, r.width, r.y + r.height - disapearLineAddedLift, state);
+				draw(sprite, trimmedImages[imageindex], region.x, disapearLineAddedLift, region.width, region.y + region.height - disapearLineAddedLift);
 			//画像加工処理が必要ない場合
 			} else {
-				draw(sprite, originalImages[getImageIndex(originalImages.length, time, state)], r.x, r.y, r.width, r.height, state);
+				draw(sprite, originalImages[imageindex], region.x, region.y, region.width, region.height);
 			}
 		}
+	}
+	
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		draw(sprite);
 	}
 
 	public void dispose() {
