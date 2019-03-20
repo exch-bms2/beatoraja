@@ -298,20 +298,22 @@ public class MusicSelector extends MainState {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
-						Array<String> urls = new Array(main.getConfig().getTableURL());
+						if(!(dir.last() instanceof SameFolderBar)) {
+							Array<String> urls = new Array(main.getConfig().getTableURL());
 
-						boolean isdtable = false;
-						for(DirectoryBar bar: dir){
-							if (bar instanceof TableBar) {
-								String currenturl = ((TableBar) bar).getUrl();
-								if (currenturl != null && urls.contains(currenturl, false)) {
-									isdtable = true;
-									resource.setTablename(bar.getTitle());
+							boolean isdtable = false;
+							for (DirectoryBar bar : dir) {
+								if (bar instanceof TableBar) {
+									String currenturl = ((TableBar) bar).getUrl();
+									if (currenturl != null && urls.contains(currenturl, false)) {
+										isdtable = true;
+										resource.setTablename(bar.getTitle());
+									}
 								}
-							}
-							if (bar instanceof HashBar && isdtable) {
-								resource.setTablelevel(bar.getTitle());
-								break;
+								if (bar instanceof HashBar && isdtable) {
+									resource.setTablelevel(bar.getTitle());
+									break;
+								}
 							}
 						}
 						preview.stop();
