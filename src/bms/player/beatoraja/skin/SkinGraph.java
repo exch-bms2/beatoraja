@@ -105,10 +105,6 @@ public class SkinGraph extends SkinObject {
 		}							
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
 	public void dispose() {
 		if (source != null) {
 			source.dispose();

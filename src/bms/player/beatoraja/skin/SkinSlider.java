@@ -117,13 +117,9 @@ public class SkinSlider extends SkinObject {
 				region.width, region.height);		
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (isChangable()) {
-			switch (getSliderAngle()) {
+			switch (direction) {
 			case 0:
 				if (region.x <= x && region.x + region.width >= x && region.y <= y && region.y + range >= y) {
 					if(writer != null) {

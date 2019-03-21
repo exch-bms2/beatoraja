@@ -7,9 +7,6 @@ import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
-
-import java.util.Arrays;
 
 /**
  * 数字オブジェクト
@@ -26,7 +23,9 @@ public class SkinNumber extends SkinObject {
 	 * マイナス値用イメージ
 	 */
 	private SkinSource mimage;
-
+	/**
+	 * 数値参照先
+	 */
 	private IntegerProperty ref;
 	/**
 	 * 表示桁数
@@ -186,17 +185,6 @@ public class SkinNumber extends SkinObject {
 					draw(sprite, currentImages[j], region.x + region.width * j - shift, region.y, region.width, region.height);
 				}
 			}
-		}
-	}
-
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
-	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state) {
-		prepare(time, state, value, 0,0);
-		if(draw) {
-			draw(sprite);
 		}
 	}
 

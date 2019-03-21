@@ -6,7 +6,6 @@ import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 
@@ -90,10 +89,6 @@ public abstract class SkinText extends SkinObject {
             setText(currentText);
         }
         draw(sprite, 0,0);
-    }
-
-    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-    	draw(sprite);
     }
 
     public abstract void draw(SkinObjectRenderer sprite, float offsetX, float offsetY);

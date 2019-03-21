@@ -125,10 +125,6 @@ public class SkinImage extends SkinObject {
     	}                    				
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		draw(sprite);
-	}
-
 	public void draw(SkinObjectRenderer sprite, long time, MainState state, float offsetX, float offsetY) {
 		prepare(time, state, offsetX, offsetY);
 		if(draw) {
