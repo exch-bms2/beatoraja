@@ -55,13 +55,6 @@ public class LaneRenderer {
 	private double minbpm;
 	private double maxbpm;
 	
-	private TextureRegion[] noteimage;
-	private TextureRegion[][] longnote;
-	private TextureRegion[] mnoteimage;
-	private TextureRegion[] hnoteimage;
-	private TextureRegion[] pnoteimage;
-	private Rectangle[] laneregion;
-
 	private TextureRegion blank;
 
 	//PMSのリズムに合わせたノートの拡大用
@@ -100,13 +93,6 @@ public class LaneRenderer {
 				playconfig.setHidden(0);
 			}
 		}
-
-		noteimage = new TextureRegion[model.getMode().key];
-		longnote = new TextureRegion[model.getMode().key][10];
-		mnoteimage = new TextureRegion[model.getMode().key];
-		hnoteimage = new TextureRegion[model.getMode().key];
-		pnoteimage = new TextureRegion[model.getMode().key];
-		laneregion = new Rectangle[model.getMode().key];
 	}
 
 	public void init(BMSModel model) {
@@ -259,30 +245,6 @@ public class LaneRenderer {
 	}
 
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes) {
-		for (int i = 0; i < lanes.length; i++) {
-			if (i >= noteimage.length) {
-				break;
-			}
-			if (lanes[i].note != null) {
-				noteimage[i] = lanes[i].note.getImage(time, main);
-			}
-			for (int type = 0; type < 10; type++) {
-				if (lanes[i].longnote[type] != null) {
-					longnote[i][type] = lanes[i].longnote[type].getImage(time, main);
-				}
-			}
-			if (lanes[i].minenote != null) {
-				mnoteimage[i] = lanes[i].minenote.getImage(time, main);
-			}
-			if (lanes[i].hiddennote != null) {
-				hnoteimage[i] = lanes[i].hiddennote.getImage(time, main);
-			}
-			if (lanes[i].processednote != null) {
-				pnoteimage[i] = lanes[i].processednote.getImage(time, main);
-			}
-			laneregion[i] = lanes[i].getDestination(time, main);
-		}
-
 		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
@@ -305,15 +267,15 @@ public class LaneRenderer {
 		final double region = nscroll > 0 ? (240000 / nbpm / hispeed) / nscroll : 0;
 		// double sect = (bpm / 60) * 4 * 1000;
 		// TODO hu,hlをレーン毎に変更
-		final double hu = laneregion[0].y + laneregion[0].height;
-		final double hl = playconfig.isEnablelift() ? laneregion[0].y + laneregion[0].height * playconfig.getLift() : laneregion[0].y;
+		final double hu = lanes[0].region.y + lanes[0].region.height;
+		final double hl = playconfig.isEnablelift() ? lanes[0].region.y + lanes[0].region.height * playconfig.getLift() : lanes[0].region.y;
 		final double rxhs = (hu - hl) * hispeed;
 		double y = hl;
 
 		final float lanecover = playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0;
 		currentduration = (int) Math.round(region * (1 - lanecover));
 		
-		main.main.getOffset(OFFSET_LIFT).y = (float) (hl - laneregion[0].y);
+		main.main.getOffset(OFFSET_LIFT).y = (float) (hl - lanes[0].region.y);
 		main.main.getOffset(OFFSET_LANECOVER).y = (float) ((hl - hu) * lanecover);
 		// TODO HIDDENとLIFT混在の必要性とHIDDENの必要性
 		final SkinOffset hidden = main.main.getOffset(OFFSET_HIDDEN_COVER);
@@ -333,7 +295,7 @@ public class LaneRenderer {
 		if (config.isShowjudgearea()) {
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
-			for (int lane = 0; lane < laneregion.length; lane++) {
+			for (int lane = 0; lane < lanes.length; lane++) {
 				final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion(lane);
 				for (int i = pos; i < timelines.length; i++) {
 					final TimeLine tl = timelines[i];
@@ -344,7 +306,7 @@ public class LaneRenderer {
 						for (int j = color.length - 1; j >= 0; j--) {
 							sprite.setColor(color[j]);
 							int nj = j > 0 ? judgetime[j - 1][1] : 0;
-							sprite.draw(blank, laneregion[lane].x, (float) (hl + nj * rate), laneregion[lane].width,
+							sprite.draw(blank, lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
 									(float) ((judgetime[j][1] - nj) * rate));
 						}
 						break;
@@ -414,7 +376,7 @@ public class LaneRenderer {
 				nbpm = tl.getBPM();
 			} else if (pos == i - 1) {
 				boolean b = true;
-				for (int lane = 0; lane < laneregion.length; lane++) {
+				for (int lane = 0; lane < lanes.length; lane++) {
 					final Note note = tl.getNote(lane);
 					if (note != null && ((note instanceof LongNote
 							&& (((LongNote) note).isEnd() ? (LongNote) note : ((LongNote) note).getPair())
@@ -452,25 +414,25 @@ public class LaneRenderer {
 				}
 			}
 			// ノート描画
-			for (int lane = 0; lane < laneregion.length; lane++) {
+			for (int lane = 0; lane < lanes.length; lane++) {
 				final float scale = lanes[lane].scale;
 				final Note note = tl.getNote(lane);
 				if (note != null) {
 					//4分のタイミングでノートを拡大する
-					float dstx = laneregion[lane].x;
+					float dstx = lanes[lane].region.x;
 					float dsty = (float) y;
-					float dstw = laneregion[lane].width;
+					float dstw = lanes[lane].region.width;
 					float dsth = scale;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
 						if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
 							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
 							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
-							dstx -= (dstw - laneregion[lane].width) / 2;
+							dstx -= (dstw - lanes[lane].region.width) / 2;
 							dsty -= (dsth - scale) / 2;
 						} else if((now - main.getNowQuarterNoteTime()) >= noteExpansionTime && (now - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
 							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
 							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-							dstx -= (dstw - laneregion[lane].width) / 2;
+							dstx -= (dstw - lanes[lane].region.width) / 2;
 							dsty -= (dsth - scale) / 2;
 						}
 					}
@@ -479,12 +441,12 @@ public class LaneRenderer {
 						if (lanes[lane].dstnote2 != Integer.MIN_VALUE) {
 							if (tl.getMicroTime() >= microtime && (note.getState() == 0 || note.getState() >= 4)) {
 								final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
-								? pnoteimage[lane] : noteimage[lane];
+								? lanes[lane].processedImage : lanes[lane].noteImage;
 								sprite.draw(s, dstx, dsty, dstw, dsth);
 							}
 						} else if (tl.getMicroTime() >= microtime || (conf.isShowpastnote() && note.getState() == 0)) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
-									? pnoteimage[lane] : noteimage[lane];
+									? lanes[lane].processedImage : lanes[lane].noteImage;
 							sprite.draw(s, dstx, dsty, dstw, dsth);
 						}
 					} else if (note instanceof LongNote) {
@@ -515,8 +477,8 @@ public class LaneRenderer {
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
-								this.drawLongNote(sprite, dstx, (float) (dsty + dy), dstw,
-										(float) (dsty < (laneregion[lane].y - (dsth - scale) / 2) ? dsty - (laneregion[lane].y - (dsth - scale) / 2) : dy), dsth, lane,
+								this.drawLongNote(sprite, lanes[lane].longImage, dstx, (float) (dsty + dy), dstw,
+										(float) (dsty < (lanes[lane].region.y - (dsth - scale) / 2) ? dsty - (lanes[lane].region.y - (dsth - scale) / 2) : dy), dsth, lane,
 										ln);
 							}
 							// System.out.println(dy);
@@ -524,8 +486,7 @@ public class LaneRenderer {
 					} else if (note instanceof MineNote) {
 						// draw mine note
 						if (tl.getMicroTime() >= microtime) {
-							final TextureRegion s = mnoteimage[lane];
-							sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
+							sprite.draw(lanes[lane].mineImage, lanes[lane].region.x, (float) y, lanes[lane].region.width, scale);								
 						}
 					}
 				}
@@ -533,7 +494,7 @@ public class LaneRenderer {
 				if (conf.isShowhiddennote() && tl.getMicroTime() >= microtime) {
 					final Note hnote = tl.getHiddenNote(lane);
 					if (hnote != null) {
-						sprite.draw(hnoteimage[lane], laneregion[lane].x, (float) y, laneregion[lane].width, scale);
+						sprite.draw(lanes[lane].hiddenImage, lanes[lane].region.x, (float) y, lanes[lane].region.width, scale);
 					}
 				}
 			}
@@ -548,7 +509,7 @@ public class LaneRenderer {
 			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] ) * 1000;
 			double stopTime;
 			double orgy2 = lanes[0].dstnote2;
-			if(orgy2 < -laneregion[0].height) orgy2 = -laneregion[0].height;
+			if(orgy2 < -lanes[0].region.height) orgy2 = -lanes[0].region.height;
 			if(orgy2 > orgy) orgy2 = orgy;
 			final double rxhs2 = (hu - hl);
 			int nowPos = timelines.length - 1;
@@ -586,32 +547,32 @@ public class LaneRenderer {
 					}
 				}
 				// ノート描画
-				for (int lane = 0; lane < laneregion.length; lane++) {
+				for (int lane = 0; lane < lanes.length; lane++) {
 					final float scale = lanes[lane].scale;
 					final Note note = tl.getNote(lane);
 					if (note != null) {
 						if (note instanceof NormalNote) {
 							// draw normal note
 							//4分のタイミングでノートを拡大する
-							float dstx = laneregion[lane].x;
+							float dstx = lanes[lane].region.x;
 							float dsty = (float) y;
-							float dstw = laneregion[lane].width;
+							float dstw = lanes[lane].region.width;
 							float dsth = scale;
 							if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
 								if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
 									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
 									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
-									dstx -= (dstw - laneregion[lane].width) / 2;
+									dstx -= (dstw - lanes[lane].region.width) / 2;
 									dsty -= (dsth - scale) / 2;
 								} else if((now - main.getNowQuarterNoteTime()) >= noteExpansionTime && (now - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
 									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
 									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-									dstx -= (dstw - laneregion[lane].width) / 2;
+									dstx -= (dstw - lanes[lane].region.width) / 2;
 									dsty -= (dsth - scale) / 2;
 								}
 							}
 							if ( ((note.getState() == 0 || note.getState() >= 4) && tl.getMicroTime() <= microtime) && y >= orgy2) {
-								final TextureRegion s = noteimage[lane];
+								final TextureRegion s = lanes[lane].noteImage;
 								if(y > orgy) sprite.draw(s, dstx, (float) (orgy - (dsth - scale) / 2), dstw, dsth);
 								else sprite.draw(s, dstx, dsty, dstw, dsth);
 							}
@@ -638,33 +599,32 @@ public class LaneRenderer {
 		return mainbpm;
 	}
 
-	final private void drawLongNote(SkinObjectRenderer sprite, float x, float y, float width, float height, float scale,
+	final private void drawLongNote(SkinObjectRenderer sprite, TextureRegion[] longImage, float x, float y, float width, float height, float scale,
 			int lane, LongNote ln) {
-		final TextureRegion[] longnote = this.longnote[lane];
 		if ((model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 			// HCN
 			final JudgeManager judge = main.getJudgeManager();
 			sprite.draw(
-					longnote[judge.getProcessingLongNotes()[lane] == ln.getPair() ? 6
+					longImage[judge.getProcessingLongNotes()[lane] == ln.getPair() ? 6
 							: (judge.getPassingLongNotes()[lane] == ln && ln.getState() != 0
 									? (judge.getHellChargeJudges()[lane] ? 8 : 9) : 7)],
 					x, y - height + scale, width, height - scale);
-			sprite.draw(longnote[4], x, y, width, scale);
-			sprite.draw(longnote[5], x, y - height, width, scale);
+			sprite.draw(longImage[4], x, y, width, scale);
+			sprite.draw(longImage[5], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 			// CN
-			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
+			sprite.draw(longImage[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
 					y - height + scale, width, height - scale);
-			sprite.draw(longnote[0], x, y, width, scale);
-			sprite.draw(longnote[1], x, y - height, width, scale);
+			sprite.draw(longImage[0], x, y, width, scale);
+			sprite.draw(longImage[1], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 			// LN
-			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
+			sprite.draw(longImage[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
 					y - height + scale, width, height - scale);
-			sprite.draw(longnote[1], x, y - height, width, scale);
+			sprite.draw(longImage[1], x, y - height, width, scale);
 		}
 	}
 
