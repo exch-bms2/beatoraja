@@ -194,25 +194,17 @@ public class Skin {
 			renderer = new SkinObjectRenderer(sprite);
 		}
 		for (SkinObject obj : objectarray) {
-			if (isDraw(obj, state)) {
-				obj.draw(renderer, time, state);
+			obj.prepare(time, state);
+			if (obj.draw) {
+				obj.draw(renderer);
 			}
 		}
-	}
-
-	private final boolean isDraw(SkinObject obj, MainState state) {
-		for (BooleanProperty draw : obj.getDrawCondition()) {
-			if(!draw.get(state)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
-			if (isDraw(obj, state) && obj.mousePressed(state, button, x, y)) {
+			if (obj.draw && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
 		}
@@ -221,7 +213,7 @@ public class Skin {
 	public void mouseDragged(MainState state, int button, int x, int y) {
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
-			if (obj instanceof SkinSlider && isDraw(obj, state) && obj.mousePressed(state, button, x, y)) {
+			if (obj instanceof SkinSlider && obj.draw && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
 		}

@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -68,26 +67,22 @@ public class SkinTextFont extends SkinText {
 	}
 	
 	@Override
-    public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
+    public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
         if(generator == null) {
             return;
         }
-        Rectangle r = this.getDestination(time,state);
-        if(r != null) {
-            if(font != null) {
-                Color c = getColor();
-                font.getData().setScale(r.height / parameter.size);
-                
-                sprite.setType(getFilter() != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
+        if(font != null) {
+            font.getData().setScale(region.height / parameter.size);
+            
+            sprite.setType(getFilter() != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
 
-                final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
-                if(!getShadowOffset().isZero()) {
-                    setLayout(new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r);
-                    sprite.draw(font, layout, x + getShadowOffset().x + offsetX, r.y - getShadowOffset().y + offsetY + r.getHeight());
-                }
-                setLayout(c, r);
-                sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
+            final float x = (getAlign() == 2 ? region.x - region.width : (getAlign() == 1 ? region.x - region.width / 2 : region.x));
+            if(!getShadowOffset().isZero()) {
+                setLayout(new Color(color.r / 2, color.g / 2, color.b / 2, color.a), region);
+                sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
             }
+            setLayout(color, region);
+            sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight());
         }
     }
 

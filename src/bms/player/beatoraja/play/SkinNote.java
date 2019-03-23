@@ -19,6 +19,9 @@ import com.badlogic.gdx.math.Rectangle;
 public class SkinNote extends SkinObject {
 
 	private SkinLane[] lanes;
+	
+	private LaneRenderer renderer;
+	private long time;
 
 	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote) {
 		lanes = new SkinLane[note.length];
@@ -48,13 +51,26 @@ public class SkinNote extends SkinObject {
 	}
 
 	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		final BMSPlayer player = (BMSPlayer) state;
-		if (player.getLanerender() != null) {
-			player.getLanerender().drawLane(sprite, time, lanes);
+	public void prepare(long time, MainState state) {
+		if(renderer == null) {
+			final BMSPlayer player = (BMSPlayer) state;
+			if (player.getLanerender() == null) {
+				draw = false;
+				return;
+			}
+			renderer = player.getLanerender();
+		}
+		this.time = time;
+		super.prepare(time, state);
+		for(SkinLane lane : lanes) {
+			lane.prepare(time, state);
 		}
 	}
 
+	public void draw(SkinObjectRenderer sprite) {
+		renderer.drawLane(sprite, time, lanes);
+	}
+	
 	@Override
 	public void dispose() {
 		if (lanes != null) {
@@ -88,38 +104,90 @@ public class SkinNote extends SkinObject {
 		 * 処理済ノーツ画像
 		 */
 		SkinSource processednote;
+		
+		TextureRegion noteImage;
+		TextureRegion[] longImage = new TextureRegion[10];
+		TextureRegion mineImage;
+		TextureRegion hiddenImage;
+		TextureRegion processedImage;
 
 		public SkinLane(SkinSource note, SkinSource[] longnote, SkinSource minenote) {
-			this.note = note;
-			this.longnote = longnote;
-			this.minenote = minenote;
-
-			Pixmap hn = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
-			hn.setColor(Color.ORANGE);
-			hn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
-			hn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
-			Pixmap pn = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
-			pn.setColor(Color.CYAN);
-			pn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
-			pn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
-			hiddennote = new SkinSourceImage(new TextureRegion(new Texture(hn)));
-			processednote = new SkinSourceImage(new TextureRegion(new Texture(pn)));
-			hn.dispose();
-			pn.dispose();			
+			init(note, longnote, minenote, null, null);
 		}
 
 		public SkinLane(SkinSource note, SkinSource[] longnote, SkinSource minenote, SkinSource hiddennote, SkinSource processednote) {
+			init(note, longnote, minenote, hiddennote, processednote);
+		}
+		
+		private void init(SkinSource note, SkinSource[] longnote, SkinSource minenote, SkinSource hiddennote, SkinSource processednote) {
+			if(note == null) {
+				Pixmap p = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
+				p.setColor(Color.WHITE);
+				p.fillRectangle(0, 0, p.getWidth(), p.getHeight());
+				note = new SkinSourceImage(new TextureRegion(new Texture(p)));
+				p.dispose();	
+			}
 			this.note = note;
-			this.longnote = longnote;
+			
+			for(int i = 0;i < this.longnote.length;i++) {
+				
+				if(longnote != null && i < longnote.length && longnote[i] != null) {
+					this.longnote[i] = longnote[i];				
+				} else {
+					Pixmap p = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
+					p.setColor(Color.YELLOW);
+					p.fillRectangle(0, 0, p.getWidth(), p.getHeight());
+					this.longnote[i] = new SkinSourceImage(new TextureRegion(new Texture(p)));
+					p.dispose();	
+				}
+			}
+			
+			if(minenote == null) {
+				Pixmap p = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
+				p.setColor(Color.RED);
+				p.fillRectangle(0, 0, p.getWidth(), p.getHeight());
+				minenote = new SkinSourceImage(new TextureRegion(new Texture(p)));
+				p.dispose();	
+			}
 			this.minenote = minenote;
+			
+			if(hiddennote == null) {
+				Pixmap hn = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
+				hn.setColor(Color.ORANGE);
+				hn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
+				hn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
+				hiddennote = new SkinSourceImage(new TextureRegion(new Texture(hn)));
+				hn.dispose();				
+			}
 			this.hiddennote = hiddennote;
+			
+			if(processednote == null) {
+				Pixmap p = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
+				p.setColor(Color.CYAN);
+				p.drawRectangle(0, 0, p.getWidth(), p.getHeight());
+				p.drawRectangle(1, 1, p.getWidth() - 2, p.getHeight() - 2);
+				processednote = new SkinSourceImage(new TextureRegion(new Texture(p)));
+				p.dispose();	
+			}
 			this.processednote = processednote;
+			
 		}
 
 		@Override
-		public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+		public void prepare(long time, MainState state) {
+			noteImage = note.getImage(time, state);
+			for (int type = 0; type < 10; type++) {
+				longImage[type] = longnote[type].getImage(time, state);
+			}
+			mineImage = minenote.getImage(time, state);
+			hiddenImage = hiddennote.getImage(time, state);
+			processedImage = processednote.getImage(time, state);
+			super.prepare(time, state);
 		}
-		
+
+		public void draw(SkinObjectRenderer sprite) {
+		}
+
 		@Override
 		public void dispose() {
 			if (note != null) {

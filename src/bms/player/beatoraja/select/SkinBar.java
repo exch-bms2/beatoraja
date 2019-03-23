@@ -73,6 +73,9 @@ public class SkinBar extends SkinObject {
     private SkinImage[] rivallamp = new SkinImage[BARLAMP_COUNT];
 
     public static final int BARLAMP_COUNT = 11;
+    
+    private MusicSelector selector;
+    private long time;
 
     public SkinBar(int position) {
         this.position = position;
@@ -177,8 +180,73 @@ public class SkinBar extends SkinObject {
     }
 
     @Override
+    public void prepare(long time, MainState state) {
+    	if(selector == null) {
+    		selector = ((MusicSelector) state);
+    		if(selector == null) {
+    			draw = false;
+    			return;
+    		}
+    	}
+    	this.time = time;
+    	super.prepare(time, state);
+    	for(SkinImage bar : barimageon) {
+    		if(bar != null) {
+    			bar.prepare(time, state);
+    		}
+    	}
+    	for(SkinImage bar : barimageoff) {
+    		if(bar != null) {
+    			bar.prepare(time, state);
+    		}
+    	}
+    	for(SkinImage trophy : trophy) {
+    		if(trophy != null) {
+    			trophy.prepare(time, state);
+    		}
+    	}
+    	for(SkinText text : text) {
+    		if(text != null) {
+    			text.prepare(time, state);
+    		}
+    	}
+    	for(SkinNumber barlevel : barlevel) {
+    		if(barlevel != null) {
+    			barlevel.prepare(time, state);
+    		}
+    	}
+    	for(SkinImage label : label) {
+    		if(label != null) {
+    			label.prepare(time, state);
+    		}
+    	}
+    	for(SkinImage lamp : lamp) {
+    		if(lamp != null) {
+    			lamp.prepare(time, state);
+    		}
+    	}
+    	for(SkinImage mylamp : mylamp) {
+    		if(mylamp != null) {
+    			mylamp.prepare(time, state);
+    		}
+    	}
+    	for(SkinImage rivallamp : rivallamp) {
+    		if(rivallamp != null) {
+    			rivallamp.prepare(time, state);
+    		}
+    	}
+    	
+    	if(graph != null) {
+    		graph.prepare(time, state);
+    	}
+    }
+
+    public void draw(SkinObjectRenderer sprite) {
+        selector.getBarRender().render(sprite, (MusicSelectSkin) selector.getSkin(), this, time);
+    }
+
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-        ((MusicSelector)state).getBarRender().render(sprite, (MusicSelectSkin) state.getSkin(), this, (int)time);
+    	draw(sprite);
     }
 
     @Override

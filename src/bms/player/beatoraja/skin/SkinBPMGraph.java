@@ -4,18 +4,18 @@ import bms.model.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.skin.SkinObject;
 
 import java.util.*;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * BPM推移のグラフ
  *
- * @author exch
+ * @author niente1899
  */
 public class SkinBPMGraph extends SkinObject {
 
@@ -78,13 +78,15 @@ public class SkinBPMGraph extends SkinObject {
 		}
 	}
 
-	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		final SongData song = state.main.getPlayerResource().getSongdata();
-		final BMSModel model = song != null ? song.getBMSModel() : null;
-
+	public void prepare(long time, MainState state) {
 		this.time = time;
 		this.state = state;
+		super.prepare(time, state);
+	}
+
+	public void draw(SkinObjectRenderer sprite) {
+		final SongData song = state.main.getPlayerResource().getSongdata();
+		final BMSModel model = song != null ? song.getBMSModel() : null;
 
 		if(current == null || song != current || (this.model == null && model != null) || shapetex == null) {
 			current = song;
@@ -92,30 +94,25 @@ public class SkinBPMGraph extends SkinObject {
 			updateGraph(model);
 		}
 
-		Rectangle graph = getDestination(time, state);
-		if (graph == null) {
-			return;
-		}
 		final float render = time >= delay ? 1.0f : (float) time / delay;
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		draw(sprite, shapetex, graph.x, graph.y + graph.height, (int)(graph.width * render), -graph.height, state);
+		draw(sprite, shapetex, region.x, region.y + region.height, (int)(region.width * render), -region.height);
 	}
 
 	private void updateGraph(BMSModel model) {
-		Rectangle graph = getDestination(time, state);
 		Pixmap shape;
-		if (model == null || graph == null) {
+		if (model == null) {
 			shape = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 			shapetex = new TextureRegion(new Texture(shape));
 		} else {
-			int width = (int) Math.abs(graph.width);
-			int height = (int) Math.abs(graph.height);
-			shape = new Pixmap((int) width, (int) height, Pixmap.Format.RGBA8888);
+			final int width = (int) Math.abs(region.width);
+			final int height = (int) Math.abs(region.height);
+			shape = new Pixmap(width, height, Pixmap.Format.RGBA8888);
 
 			double mainBPM = model.getBpm();
 			Map<Double, Integer> bpmNoteCountMap = new HashMap<Double, Integer>();
 			List<Double> BPMList = new ArrayList<Double>();
-			List<Integer> BPMTimeList = new ArrayList<Integer>();
+			IntArray BPMTimeList = new IntArray();
 			double nowBPM = model.getBpm();
 			BPMList.add(model.getBpm());
 			BPMTimeList.add(0);
@@ -173,8 +170,8 @@ public class SkinBPMGraph extends SkinObject {
 				shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
 			}
 			//横線
-			x1 = (int) (width * BPMTimeList.get(BPMTimeList.size()-1) / lastTime);
-			y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(BPMTimeList.size()-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
+			x1 = (int) (width * BPMTimeList.get(BPMTimeList.size -1) / lastTime);
+			y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(BPMTimeList.size -1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
 			x2 = (int) width;
 			y2 = y1;
 			Color lineColor = otherLineColor;

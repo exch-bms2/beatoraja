@@ -6,6 +6,8 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.select.MusicSelectCommand;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -305,6 +307,10 @@ public class MusicResult extends AbstractResult {
 						break;
 					}
 				}
+
+				if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
+					this.execute(MusicResultCommand.OPEN_RANKING_ON_IR);
+				}
 			}
 		}
 	}
@@ -499,4 +505,9 @@ public class MusicResult extends AbstractResult {
 	public IRScoreData getNewScore() {
 		return main.getPlayerResource().getScoreData();
 	}
+
+	public void execute(MusicResultCommand command) {
+		command.execute(this);
+	}
+
 }

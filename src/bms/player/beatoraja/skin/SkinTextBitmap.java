@@ -1,25 +1,20 @@
 package bms.player.beatoraja.skin;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 
-import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 /**
@@ -53,39 +48,35 @@ public class SkinTextBitmap extends SkinText {
 		font = source.getFont();
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
+	public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
 		if (font == null)
 			return;
 
-		Rectangle r = this.getDestination(time, state);
-		if (r != null) {
-			float scale = this.size / source.getOriginalSize();
-			font.getData().setScale(scale);
-			final Color c = getColor();
-			final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
-			if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD ||
-					source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
-				sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
-				setLayout(c, r);
-				sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight(), shader -> {
-					shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
-					shader.setUniformf("u_outlineColor", getOutlineColor());
-					shader.setUniformf("u_shadowColor", getShadowColor());
-					shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
-					shader.setUniformf("u_shadowOffset",
-							new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
-				});
-			} else {
-				sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
-				if (!getShadowOffset().isZero()) {
-					setLayout(new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r);
-					sprite.draw(font, layout, x + getShadowOffset().x + offsetX, r.y - getShadowOffset().y + offsetY + r.getHeight());
-				}
-				setLayout(c, r);
-				sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
+		float scale = this.size / source.getOriginalSize();
+		font.getData().setScale(scale);
+		final float x = (getAlign() == 2 ? region.x - region.width : (getAlign() == 1 ? region.x - region.width / 2 : region.x));
+		if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD ||
+				source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
+			sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
+			setLayout(color, region);
+			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight(), shader -> {
+				shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
+				shader.setUniformf("u_outlineColor", getOutlineColor());
+				shader.setUniformf("u_shadowColor", getShadowColor());
+				shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
+				shader.setUniformf("u_shadowOffset",
+						new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
+			});
+		} else {
+			sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
+			if (!getShadowOffset().isZero()) {
+				setLayout(new Color(color.r / 2, color.g / 2, color.b / 2, color.a), region);
+				sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
 			}
-			font.getData().setScale(1);
+			setLayout(color, region);
+			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight());
 		}
+		font.getData().setScale(1);
 	}
 
 	private void setLayout(Color c, Rectangle r) {

@@ -8,8 +8,12 @@ import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 
+/**
+ * スキンオブジェクト:スライダー
+ * 
+ * @author exch
+ */
 public class SkinSlider extends SkinObject {
 
 	/**
@@ -34,6 +38,9 @@ public class SkinSlider extends SkinObject {
 	 * ユーザーによる値変更を受け付けるかどうか
 	 */
 	private boolean changable;
+
+	private TextureRegion currentImage;
+	private float currentValue;
 
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type) {
 		source = new SkinSourceImage(image, timer ,cycle);
@@ -87,59 +94,64 @@ public class SkinSlider extends SkinObject {
 		writer = null;
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		if(source == null) {
+	public void prepare(long time, MainState state) {
+		if (source == null) {
+			draw = false;
+			return;
+		}		
+		super.prepare(time, state);
+		if(!draw) {
 			return;
 		}
-		Rectangle r = this.getDestination(time,state);
-		if (r != null) {
-			TextureRegion image = source.getImage(time, state);
-			float value = ref != null ? ref.get(state) : 0;
-			draw(sprite, image, r.x
-					+ (direction == 1 ? value * range : (direction == 3 ? -value * range : 0)), r.y
-					+ (direction == 0 ? value * range : (direction == 2 ? -value * range : 0)),
-					r.width, r.height, state);
+		if((currentImage = source.getImage(time, state)) == null) {
+			draw = false;
+			return;			
 		}
+		currentValue = ref != null ? ref.get(state) : 0;
+	}
+
+	public void draw(SkinObjectRenderer sprite) {
+		draw(sprite, currentImage, region.x
+				+ (direction == 1 ? currentValue * range : (direction == 3 ? -currentValue * range : 0)), region.y
+				+ (direction == 0 ? currentValue * range : (direction == 2 ? -currentValue * range : 0)),
+				region.width, region.height);		
 	}
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (isChangable()) {
-			Rectangle r = getDestination(state.main.getNowTime(), state);
-			if (r != null) {
-				switch (getSliderAngle()) {
-				case 0:
-					if (r.x <= x && r.x + r.width >= x && r.y <= y && r.y + range >= y) {
-						if(writer != null) {
-							writer.set(state, (y - r.y) / range);
-						}
-						return true;
+			switch (direction) {
+			case 0:
+				if (region.x <= x && region.x + region.width >= x && region.y <= y && region.y + range >= y) {
+					if(writer != null) {
+						writer.set(state, (y - region.y) / range);
 					}
-					break;
-				case 1:
-					if (r.x <= x && r.x + range >= x && r.y <= y && r.y + r.height >= y) {
-						if(writer != null) {
-							writer.set(state, (x - r.x) / range);
-						}
-						return true;
-					}
-					break;
-				case 2:
-					if (r.x <= x && r.x + r.width >= x && r.y - range <= y && r.y >= y) {
-						if(writer != null) {
-							writer.set(state, (r.y - y) / range);
-						}
-						return true;
-					}
-					break;
-				case 3:
-					if (r.x <= x && r.x + range >= x && r.y <= y && r.y + r.height >= y) {
-						if(writer != null) {
-							writer.set(state, (r.x + range - x) / range);
-						}
-						return true;
-					}
-					break;
+					return true;
 				}
+				break;
+			case 1:
+				if (region.x <= x && region.x + range >= x && region.y <= y && region.y + region.height >= y) {
+					if(writer != null) {
+						writer.set(state, (x - region.x) / range);
+					}
+					return true;
+				}
+				break;
+			case 2:
+				if (region.x <= x && region.x + region.width >= x && region.y - range <= y && region.y >= y) {
+					if(writer != null) {
+						writer.set(state, (region.y - y) / range);
+					}
+					return true;
+				}
+				break;
+			case 3:
+				if (region.x <= x && region.x + range >= x && region.y <= y && region.y + region.height >= y) {
+					if(writer != null) {
+						writer.set(state, (region.x + range - x) / range);
+					}
+					return true;
+				}
+				break;
 			}
 		}
 		return false;

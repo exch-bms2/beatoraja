@@ -81,6 +81,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	 * 処理済みノート数 プレイ時は処理済みノート数に変化があった時だけ更新する
 	 */
 	private int pastNotes = 0;
+	
+	private int starttime;
+	private int endtime;
+	private float freq;
+	private float render;
 
 	private static final Color TRANSPARENT_COLOR = Color.valueOf("00000000");
 
@@ -95,10 +100,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	public SkinNoteDistributionGraph(Pixmap[] chips, int type, int delay, int backTexOff, int orderReverse, int noGap) {
 		this.chips = chips;
 		this.type = type;
-		this.isBackTexOff = backTexOff == 1 ? true : false;
+		this.isBackTexOff = backTexOff == 1;
 		this.delay = delay;
-		this.isOrderReverse = orderReverse == 1 ? true : false;
-		this.isNoGap = noGap == 1 ? true : false;
+		this.isOrderReverse = orderReverse == 1;
+		this.isNoGap = noGap == 1;
 		pastNotes = 0;
 
 		Pixmap bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -115,23 +120,26 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		bp.dispose();
 
 	}
-
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		if(state instanceof BMSPlayer) {
-			
-		}
-		draw(sprite, time, state, getDestination(time, state), -1, -1, -1);
+	
+	public void prepare(long time, MainState state) {
+		prepare(time, state, null, -1, -1, -1);
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
-		if (r == null) {
-			return;
+	public void prepare(long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
+		super.prepare(time, state);			
+		if(r != null) {
+			region.set(r);
+			draw = true;
 		}
-		
-		if(this.state != state) {
-			this.state = state;
-		}
+		this.state = state;
+		this.starttime = starttime;
+		this.endtime = endtime;
+		this.freq = freq;
+		render = time >= delay ? 1.0f : (float) time / delay;
+	}
 
+	public void draw(SkinObjectRenderer sprite) {	
+		
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 		
@@ -167,19 +175,18 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			updateTexture();
 		}
 
-		draw(sprite, backtex, r.x, r.y + r.height, r.width, -r.height, state);
-		final float render = time >= delay ? 1.0f : (float) time / delay;
+		draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		draw(sprite, shapetex, r.x, r.y + r.height, r.width * render, -r.height, state);
+		draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height);
 		// スタートカーソル描画
 		if (starttime >= 0) {
-			int dx = (int) (starttime * r.width / (data.length * 1000));
-			sprite.draw(startcursor, r.x + dx, r.y, 1, r.height);
+			int dx = (int) (starttime * region.width / (data.length * 1000));
+			sprite.draw(startcursor, region.x + dx, region.y, 1, region.height);
 		}
 		// エンドカーソル描画
 		if (endtime >= 0) {
-			int dx = (int) (endtime * r.width / (data.length * 1000));
-			sprite.draw(endcursor, r.x + dx, r.y, 1, r.height);
+			int dx = (int) (endtime * region.width / (data.length * 1000));
+			sprite.draw(endcursor, region.x + dx, region.y, 1, region.height);
 		}
 		// 現在カーソル描画
 		if (state instanceof BMSPlayer && state.main.isTimerOn(SkinProperty.TIMER_PLAY)) {
@@ -187,12 +194,18 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			if (freq > 0) {
 				currenttime *= freq;
 			}
-			int dx = (int) (currenttime * r.width / (data.length * 1000));
-			sprite.draw(nowcursor, r.x + dx, r.y, 1, r.height);
+			int dx = (int) (currenttime * region.width / (data.length * 1000));
+			sprite.draw(nowcursor, region.x + dx, region.y, 1, region.height);
 		}
-
 	}
 	
+	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
+		prepare(time, state, r, starttime, endtime, freq);
+		if(draw) {
+			draw(sprite);
+		}
+	}
+
 	private void updateGraph(int[][] distribution) {
 		data = distribution;
 		max = 20;

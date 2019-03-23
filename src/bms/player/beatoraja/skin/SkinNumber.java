@@ -7,7 +7,6 @@ import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * 数字オブジェクト
@@ -24,7 +23,9 @@ public class SkinNumber extends SkinObject {
 	 * マイナス値用イメージ
 	 */
 	private SkinSource mimage;
-
+	/**
+	 * 数値参照先
+	 */
 	private IntegerProperty ref;
 	/**
 	 * 表示桁数
@@ -36,7 +37,6 @@ public class SkinNumber extends SkinObject {
 	private int align;
 
 	private int value = Integer.MIN_VALUE;
-	private int[] values;
 	private int shiftbase;
 
 	private SkinOffset[] offsets;
@@ -44,6 +44,11 @@ public class SkinNumber extends SkinObject {
 	 * 現在の描画幅
 	 */
 	private float length;
+
+	private TextureRegion[] currentImages;
+	private TextureRegion[] imageSet;
+
+	private float shift;
 
 	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int rid) {
 		this(image, null, timer, cycle, keta, zeropadding, rid);
@@ -99,85 +104,102 @@ public class SkinNumber extends SkinObject {
 
 	public void setKeta(int keta) {
 		this.keta = keta;
-		this.values = new int[keta];
+		this.currentImages = new TextureRegion[keta];
 	}
 	
 	public void setOffsets(SkinOffset[] offsets) {
 		this.offsets = offsets;
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		int value = Integer.MIN_VALUE;
-		if (ref != null) {
-			value = ref.get(state);
-		}
-		if (value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
-			draw(sprite, time, value, state);
-		}
+	public void prepare(long time, MainState state) {
+		prepare(time, state, 0, 0);
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state) {
-		draw(sprite, time, value, state, 0,0);
+	public void prepare(long time, MainState state, float offsetX, float offsetY) {
+		prepare(time, state, ref != null ? ref.get(state) : Integer.MIN_VALUE, offsetX, offsetY);
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state, float offsetX, float offsetY) {
-		Rectangle r = this.getDestination(time, state);
-		if (r == null) {
+	public void prepare(long time, MainState state, int value, float offsetX, float offsetY) {
+		if (value == Integer.MIN_VALUE || value == Integer.MAX_VALUE) {
 			length = 0;
+			draw = false;
 			return;
 		}
 		final SkinSource images = (value >= 0 || mimage == null) ? this.image : mimage;
 		if (images == null) {
+			length = 0;
+			draw = false;
+			return;
+		}
+		super.prepare(time, state, offsetX, offsetY);
+		if(!draw) {
 			length = 0;
 			return;
 		}
 		TextureRegion[] image = images.getImages(time, state);
 		if(image == null) {
 			length = 0;
+			draw = false;
 			return;
 		}
 
-		if(this.value != value) {
+		if(this.value != value || this.imageSet != image) {
 			this.value = value;
+			this.imageSet = image;
 			shiftbase = 0;
 			value = Math.abs(value);
-			for (int j = values.length - 1; j >= 0; j--) {
+			for (int j = currentImages.length - 1; j >= 0; j--) {
 				if(mimage != null && zeropadding > 0) {
 					if(j == 0) {
-						values[j] = 11;
-					} else if(value > 0 || j == values.length - 1) {
-						values[j] = value % 10;
+						currentImages[j] = image[11];
+					} else if(value > 0 || j == currentImages.length - 1) {
+						currentImages[j] = image[value % 10];
 					} else {
-						values[j] = zeropadding == 2 ? 10 : 0;
+						currentImages[j] = image[zeropadding == 2 ? 10 : 0];
 					}
 				} else {
-					if (value > 0 || j == values.length - 1) {
-						values[j] = value % 10;
+					if (value > 0 || j == currentImages.length - 1) {
+						currentImages[j] = image[value % 10];
 					} else {
-						values[j] = (zeropadding == 2 ? 10 : (zeropadding == 1 ? 0 : (mimage != null
-								&& (values[j + 1] != 11 && values[j + 1] != -1) ? 11 : -1)));
+						currentImages[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null
+								&& (currentImages[j + 1] != image[11] && currentImages[j + 1] != null) ? image[11] : null)));
 					}
 				}
-				if(values[j] == -1) {
+				if(currentImages[j] == null) {
 					shiftbase++;
 				} else {
 				}
 				value /= 10;
 			}
 		}
-		length = r.width * (values.length - shiftbase);
-		float shift = align == 0 ? 0 : (align == 1 ? r.width * shiftbase : r.width * 0.5f * shiftbase);
-		for (int j = 0; j < values.length; j++) {
-			if (values[j] != -1) {
+		length = region.width * (currentImages.length - shiftbase);
+		shift = align == 0 ? 0 : (align == 1 ? region.width * shiftbase : region.width * 0.5f * shiftbase);
+	}
+
+	public void draw(SkinObjectRenderer sprite) {
+		for (int j = 0; j < currentImages.length; j++) {
+			if (currentImages[j] != null) {
 				if(offsets != null && j < offsets.length) {
-					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift + offsets[j].x, r.y + offsetY + offsets[j].y, r.width + offsets[j].w, r.height + offsets[j].h, state);
+					draw(sprite, currentImages[j], region.x + region.width * j - shift + offsets[j].x, region.y + offsets[j].y, region.width + offsets[j].w, region.height + offsets[j].h);
 				} else {
-					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height, state);
+					draw(sprite, currentImages[j], region.x + region.width * j - shift, region.y, region.width, region.height);
 				}
 			}
 		}
 	}
-	
+
+	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state, float offsetX, float offsetY) {
+		prepare(time, state, value, offsetX,offsetY);
+		if(draw) {
+			draw(sprite);
+		}
+	}
+
+	/**
+	 * 現在表示中の数値の幅を返す。
+	 *
+	 * @return 現在表示中の数値の幅
+	 */
 	public float getLength() {
 		return length;
 	}

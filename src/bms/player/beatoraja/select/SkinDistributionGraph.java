@@ -10,9 +10,7 @@ import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * フォルダのランプ分布、ランク分布に使用される棒グラフ
@@ -24,6 +22,9 @@ public class SkinDistributionGraph extends SkinObject {
     private SkinSource[] lampimage;
 
     private int type;
+
+    private TextureRegion[] currentImage;
+    private DirectoryBar currentBar;
 
     private static final String[] LAMP = { "ff404040", "ff000080", "ff800080", "ffff00ff", "ff40ff40", "ff00c0f0", "ffffffff",
             "ff88ffff", "ffffff88", "ff8888ff", "ff0000ff" };
@@ -77,6 +78,7 @@ public class SkinDistributionGraph extends SkinObject {
                 lampimage[i] = new SkinSourceImage(image[i],timer,cycle);
             }
         }
+        currentImage = new TextureRegion[lampimage.length];
     }
 
     public SkinDistributionGraph(int type, TextureRegion[][] image, TimerProperty timer, int cycle) {
@@ -92,41 +94,58 @@ public class SkinDistributionGraph extends SkinObject {
                 lampimage[i] = new SkinSourceImage(image[i],timer,cycle);
             }
         }
+        currentImage = new TextureRegion[lampimage.length];
     }
 
-    @Override
-    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+	public void prepare(long time, MainState state) {
     	final Bar bar = ((MusicSelector)state).getSelectedBar();
     	if(!(bar instanceof DirectoryBar)) {
+    		draw = false;
     		return;
     	}
-    	draw(sprite, time, state, (DirectoryBar)bar, 0, 0);
-    }
+        prepare(time, state, (DirectoryBar)bar, 0, 0);
+	}
+	
+	public void prepare(long time, MainState state, DirectoryBar current, float offsetX, float offsetY) {
+        if (!state.main.getPlayerResource().getConfig().isFolderlamp()) {
+    		draw = false;
+    		return;        	
+        }
+		super.prepare(time, state, offsetX, offsetY);
+		for(int i = 0;i < currentImage.length;i++) {
+	        currentImage[i] = lampimage[i].getImage(time,state);
+		}
+		this.currentBar = current;
+	}
 
-    public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, int offsetx, int offsety) {
-        final Rectangle r = getDestination(time, state);
-        if (r != null && state.main.getPlayerResource().getConfig().isFolderlamp()) {
-            int[] lamps = current.getLamps();
-            int[] ranks = current.getRanks();
-            int count = 0;
-            for (int lamp : lamps) {
-                count += lamp;
-            }
+    public void draw(SkinObjectRenderer sprite) {
+        int[] lamps = currentBar.getLamps();
+        int[] ranks = currentBar.getRanks();
+        int count = 0;
+        for (int lamp : lamps) {
+            count += lamp;
+        }
 
-            if (count != 0) {
-                if(type == 0) {
-                    for (int i = 10, x = 0; i >= 0; i--) {
-                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count + offsetx, r.y + offsety, lamps[i] * r.width / count, r.height);                    		
-                        x += lamps[i];
-                    }
-                } else {
-                    for (int i = 27, x = 0; i >= 0; i--) {
-                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count + offsetx, r.y + offsety, ranks[i] * r.width / count, r.height);                    		
-                        x += ranks[i];
-                    }
+        if (count != 0) {
+            if(type == 0) {
+                for (int i = 10, x = 0; i >= 0; i--) {
+                    sprite.draw(currentImage[i], region.x + x * region.width / count, region.y, lamps[i] * region.width / count, region.height);                    		
+                    x += lamps[i];
+                }
+            } else {
+                for (int i = 27, x = 0; i >= 0; i--) {
+                    sprite.draw(currentImage[i], region.x + x * region.width / count, region.y, ranks[i] * region.width / count, region.height);                    		
+                    x += ranks[i];
                 }
             }
         }
+    }
+
+    public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, float offsetx, float offsety) {
+    	prepare(time, state, current, offsetx, offsety);
+    	if(draw) {
+    		draw(sprite);
+    	}
     }
 
     @Override

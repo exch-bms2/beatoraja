@@ -154,6 +154,11 @@ public class CourseEditorView implements Initializable {
 		
 		courseName.setText(selectedCourse.getName());
 		release.setSelected(selectedCourse.isRelease());
+		gradeType.setValue(null);
+		judgeType.setValue(null);
+		hispeedType.setValue(null);
+		gaugeType.setValue(null);
+		lnType.setValue(null);
 		for(CourseData.CourseDataConstraint constraint : course.getConstraint()) {
 			switch(constraint) {
 			case CLASS:

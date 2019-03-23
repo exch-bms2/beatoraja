@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.input.KeyCommand;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
@@ -240,6 +241,10 @@ public class CourseResult extends AbstractResult {
 					break;
 				}
 			}
+
+			if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
+				this.execute(CourseResultCommand.OPEN_RANKING_ON_IR);
+			}
 		}
 	}
 
@@ -347,5 +352,9 @@ public class CourseResult extends AbstractResult {
 	
 	public IRScoreData getNewScore() {
 		return main.getPlayerResource().getCourseScoreData();
+	}
+
+	public void execute(CourseResultCommand command) {
+		command.execute(this);
 	}
 }

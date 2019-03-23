@@ -7,7 +7,6 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.IntArray;
 
@@ -35,7 +34,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	 */
 	private int lineWidth = 2;
 	
-	private int currentType;
+	private int currentType = -1;
 
 	public int getDelay() {
 		return delay;
@@ -62,23 +61,44 @@ public class SkinGaugeGraphObject extends SkinObject {
 	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
 
 	private int color;
-	private FloatArray gauge;
-
-	@Override
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		Rectangle graph = getDestination(time, state);
-		if (graph == null) {
-			return;
-		}
+	private FloatArray gaugehistory;
+	private IntArray section;
+	private Gauge gg;
+	
+	private float render;
+	private boolean redraw;
+	
+	public void prepare(long time, MainState state) {
+		render = time >= delay ? 1.0f : (float) time / delay;
 		
 		final PlayerResource resource = state.main.getPlayerResource();
 		int type = resource.getGrooveGauge().getType();
 		if(state instanceof AbstractResult) {
 			type = ((AbstractResult) state).gaugeType;
 		}
+		
+		if(currentType != type) {
+			redraw = true;
+			currentType = type;			
+			gaugehistory = resource.getGauge()[currentType];
+			section = new IntArray();
+			if (state instanceof CourseResult) {
+				gaugehistory = new FloatArray();
+				for (FloatArray[] l : resource.getCourseGauge()) {
+					gaugehistory.addAll(l[currentType]);
+					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l[currentType].size);
+				}
+			}
+			gg = resource.getGrooveGauge().getGauge(currentType);
+		}
+		super.prepare(time, state);
+	}
+
+	@Override
+	public void draw(SkinObjectRenderer sprite) {
 
 		if (shapetex != null) {
-			if (currentType == type && shapetex.getTexture().getWidth() == (int) graph.getWidth() && shapetex.getTexture().getHeight() == (int) graph.getHeight()) {
+			if (!redraw && shapetex.getTexture().getWidth() == (int) region.getWidth() && shapetex.getTexture().getHeight() == (int) region.getHeight()) {
 				// shape.setColor(Color.BLACK);
 				// shape.fill();
 			} else {
@@ -89,51 +109,41 @@ public class SkinGaugeGraphObject extends SkinObject {
 			}
 		}
 		if (shapetex == null) {
-			currentType = type;
-			Pixmap shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
+			redraw = false;
+			Pixmap shape = new Pixmap((int) region.width, (int) region.height, Pixmap.Format.RGBA8888);
 			// ゲージグラフ描画
 			color = typetable[currentType];
-			gauge = resource.getGauge()[currentType];
-			IntArray section = new IntArray();
-			if (state instanceof CourseResult) {
-				gauge = new FloatArray();
-				for (FloatArray[] l : resource.getCourseGauge()) {
-					gauge.addAll(l[currentType]);
-					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l[currentType].size);
-				}
-			}
 			shape.setColor(graphcolor[color]);
 			shape.fill();
-			final Gauge gg = resource.getGrooveGauge().getGauge(currentType);
 			final float border = gg.getProperty().border;
 			final float max = gg.getProperty().max;
 			Color borderline = this.borderline;
 			if (border > 0) {
 				shape.setColor(bordercolor);
-				shape.fillRectangle(0, (int) (graph.height * border / max), (int) (graph.width),
-						(int) (graph.height * (max - border) / max));
+				shape.fillRectangle(0, (int) (region.height * border / max), (int) (region.width),
+						(int) (region.height * (max - border) / max));
 			} else {
 				borderline = graphline[color];
 			}
 			backtex = new Texture(shape);
 			shape.dispose();
 
-			shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
+			shape = new Pixmap((int) region.width, (int) region.height, Pixmap.Format.RGBA8888);
 			Float f1 = null;
 
-			for (int i = 0; i < gauge.size; i++) {
+			for (int i = 0; i < gaugehistory.size; i++) {
 				if (section.contains(i)) {
 					shape.setColor(Color.valueOf("ffffff"));
-					shape.drawLine((int) (graph.width * (i - 1) / gauge.size), 0,
-							(int) (graph.width * (i - 1) / gauge.size), (int) graph.height);
+					shape.drawLine((int) (region.width * (i - 1) / gaugehistory.size), 0,
+							(int) (region.width * (i - 1) / gaugehistory.size), (int) region.height);
 				}
-				Float f2 = gauge.get(i);
+				Float f2 = gaugehistory.get(i);
 				if (f1 != null) {
-					final int x1 = (int) (graph.width * (i - 1) / gauge.size);
-					final int y1 = (int) ((f1 / max) * (graph.height - lineWidth));
-					final int x2 = (int) (graph.width * i / gauge.size);
-					final int y2 = (int) ((f2 / max) * (graph.height - lineWidth));
-					final int yb = (int) ((border / max) * (graph.height - lineWidth));
+					final int x1 = (int) (region.width * (i - 1) / gaugehistory.size);
+					final int y1 = (int) ((f1 / max) * (region.height - lineWidth));
+					final int x2 = (int) (region.width * i / gaugehistory.size);
+					final int y2 = (int) ((f2 / max) * (region.height - lineWidth));
+					final int yb = (int) ((border / max) * (region.height - lineWidth));
 					if (f1 < border) {
 						if (f2 < border) {
 							shape.setColor(graphline[color]);
@@ -166,11 +176,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shape.dispose();
 		}
 
-		sprite.draw(backtex, graph.x, graph.y + graph.height, graph.width, -graph.height);
-		final float render = time >= delay ? 1.0f : (float) time / delay;
+		sprite.draw(backtex, region.x, region.y + region.height, region.width, -region.height);
 		// setRegionにfloatを渡すと表示がおかしくなる
-		shapetex.setRegion(0, 0, (int)(graph.width * render), (int)graph.height);
-		sprite.draw(shapetex, graph.x, graph.y + graph.height, (int)(graph.width * render), -graph.height);
+		shapetex.setRegion(0, 0, (int)(region.width * render), (int)region.height);
+		sprite.draw(shapetex, region.x, region.y + region.height, (int)(region.width * render), -region.height);
 	}
 
 	@Override

@@ -83,8 +83,8 @@ public class BarRenderer {
 
 	private static class BarArea {
 		public Bar sd;
-		public int x;
-		public int y;
+		public float x;
+		public float y;
 		public int value = -1;
 	}
 
@@ -339,7 +339,7 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, int time) {
+	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, long time) {
 		if (skin == null) {
 			return;
 		}
@@ -367,6 +367,34 @@ public class BarRenderer {
 		if(loader != null && loader.getState() == Thread.State.TERMINATED){
 			select.loadSelectedSongImages();
 			loader = null;
+		}
+
+		// calcurate song bar position
+		for (int i = 0; i < barlength; i++) {
+			final BarArea ba = bararea[i];
+			boolean on = (i == skin.getCenterBar());
+			if (baro.getBarImages(on, i) == null) {
+				continue;
+			}
+			float dx = 0;
+			float dy = 0;
+			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
+			if (r != null) {
+				if (duration != 0) {
+					int nextindex = i + (angle >= 0 ? 1 : -1);
+					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
+							: null;
+					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
+					if (r2 != null) {
+						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
+								: ((float) (duration - System.currentTimeMillis())) / angle;
+						dx = (r2.x - r.x) * a;
+						dy = (r2.y - r.y) * a;
+					}
+				}
+				ba.x = (int) (r.x + dx);
+				ba.y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
+			}
 		}
 
 		// draw song bar
@@ -399,25 +427,9 @@ public class BarRenderer {
 				ba.value = -1;
 			}
 
-			float dx = 0;
-			float dy = 0;
 			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
 			if (r != null) {
-				if (duration != 0) {
-					int nextindex = i + (angle >= 0 ? 1 : -1);
-					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
-							: null;
-					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
-					if (r2 != null) {
-						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
-								: ((float) (duration - System.currentTimeMillis())) / angle;
-						dx = (r2.x - r.x) * a;
-						dy = (r2.y - r.y) * a;
-					}
-				}
-				ba.x = (int) (r.x + dx);
-				ba.y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
-				baro.getBarImages(on, i).draw(sprite, time, select, ba.value, (int) dx, (int) dy);
+				baro.getBarImages(on, i).draw(sprite, time, select, ba.value, ba.x - r.x, ba.y - r.y - (baro.getPosition() == 1 ? r.height : 0));
 			} else {
 				ba.value = -1;
 			}
@@ -466,7 +478,7 @@ public class BarRenderer {
 				}
 			}
 			baro.getText(songstatus).setText(ba.sd.getTitle());
-			baro.getText(songstatus).draw(sprite, time, select, ba.x, ba.y);
+			baro.getText(songstatus).draw(sprite, ba.x, ba.y);
 		}
 
 		for (int i = 0; i < barlength; i++) {

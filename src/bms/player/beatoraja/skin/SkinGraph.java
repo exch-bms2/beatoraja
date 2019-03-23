@@ -7,10 +7,11 @@ import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
- * グラフイメージ
+ * スキンオブジェクト:グラフ
+ * 
+ * @author exch
  */
 public class SkinGraph extends SkinObject {
 
@@ -28,6 +29,9 @@ public class SkinGraph extends SkinObject {
 	private int direction = 1;
 
 	private final TextureRegion current = new TextureRegion();
+	
+	private TextureRegion currentImage;
+	private float currentValue;
 
 	public SkinGraph(int imageid, int id) {
 		source = new SkinSourceReference(imageid);
@@ -73,25 +77,32 @@ public class SkinGraph extends SkinObject {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = new RateProperty(id, min, max);
 	}
-
-	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		if (source != null) {
-			Rectangle r = this.getDestination(time, state);
-			if (r != null) {
-				float value = ref != null ? ref.get(state) : 0;
-				final TextureRegion image = source.getImage(time, state);
-				if(image != null) {
-					if (direction == 1) {
-						current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
-								image.getRegionWidth(), (int) (image.getRegionHeight() * value));
-						draw(sprite, current, r.x, r.y, r.width, r.height * value, state);
-					} else {
-						current.setRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image.getRegionHeight());
-						draw(sprite, current, r.x, r.y, r.width * value, r.height, state);
-					}					
-				}
-			}
+	
+	public void prepare(long time, MainState state) {
+		if (source == null) {
+			draw = false;
+			return;
+		}		
+		super.prepare(time, state);
+		if(!draw) {
+			return;
 		}
+		if((currentImage = source.getImage(time, state)) == null) {
+			draw = false;
+			return;			
+		}
+		currentValue = ref != null ? ref.get(state) : 0;
+	}
+
+	public void draw(SkinObjectRenderer sprite) {
+		if (direction == 1) {
+			current.setRegion(currentImage, 0, currentImage.getRegionHeight() - (int) (currentImage.getRegionHeight() * currentValue),
+					currentImage.getRegionWidth(), (int) (currentImage.getRegionHeight() * currentValue));
+			draw(sprite, current, region.x, region.y, region.width, region.height * currentValue);
+		} else {
+			current.setRegion(currentImage, 0, 0, (int) (currentImage.getRegionWidth() * currentValue), currentImage.getRegionHeight());
+			draw(sprite, current, region.x, region.y, region.width * currentValue, region.height);
+		}							
 	}
 
 	public void dispose() {
