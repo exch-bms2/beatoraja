@@ -267,23 +267,14 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private SkinConfigurationView skinController;
 	@FXML
+	private IRConfigurationView irController;
+	@FXML
 	private CourseEditorView courseController;
 
 	private Config config;
 	private PlayerConfig player;
 	@FXML
 	private CheckBox folderlamp;
-
-	@FXML
-	private ComboBox<String> irname;
-	@FXML
-	private Hyperlink irhome;
-	@FXML
-	private TextField iruserid;
-	@FXML
-	private PasswordField irpassword;
-	@FXML
-	private ComboBox<Integer> irsend;
 
 	private MainLoader loader;
 
@@ -336,16 +327,12 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay2, autosaves);
 		initComboBox(autosavereplay3, autosaves);
 		initComboBox(autosavereplay4, autosaves);
-		initComboBox(irsend, new String[] { arg1.getString("IR_SEND_ALWAYS"), arg1.getString("IR_SEND_FINISH"), arg1.getString("IR_SEND_UPDATE")});
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio"});
 		audio.getItems().setAll(0, 2);
 
 		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
 		initComboBox(audioFreqOption, audioPlaySpeedControls);
 		initComboBox(audioFastForward, audioPlaySpeedControls);
-
-		irname.getItems().setAll(IRConnectionManager.getAllAvailableIRConnectionName());
-		irname.getItems().add(null);
 
 		newVersionCheck();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
@@ -521,13 +508,7 @@ public class PlayConfigurationView implements Initializable {
 		markprocessednote.setSelected(player.isMarkprocessednote());
 		target.setValue(player.getTarget());
 
-		// TODO 複数IR編集への対応
-		IRConfig ir = player.getIrconfig().length > 0 ? player.getIrconfig()[0] : new IRConfig();
-		irname.setValue(ir.getIrname());
-		updateIRConnection();
-		iruserid.setText(ir.getUserid());
-		irpassword.setText(ir.getPassword());
-		irsend.setValue(ir.getIrsend());			
+		irController.update(player);
 
 		txtTwitterPIN.setDisable(true);
 		twitterPINButton.setDisable(true);
@@ -634,17 +615,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTarget(target.getValue());
 
-		// TODO 複数IR編集への対応
-		if(player.getIrconfig().length == 0) {
-			IRConfig[] irs = new IRConfig[1];
-			irs[0] = new IRConfig();			
-			player.setIrconfig(irs);
-		}
-		IRConfig pir = player.getIrconfig()[0];
-		pir.setIrname(irname.getValue());
-		pir.setUserid(iruserid.getText());
-		pir.setPassword(irpassword.getText());
-		pir.setIrsend(irsend.getValue());
+		irController.commit();
 
 		updateInputConfig();
 		updatePlayConfig();
@@ -829,7 +800,7 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void updateInputConfig() {
-    	// TODO 各デバイス毎の最小入力感覚設定
+    	// TODO 各デバイス毎の最小入力間隔設定
 		if (ic != null) {
 			PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
 			conf.getKeyboardConfig().setDuration(getValue(inputduration));
@@ -918,22 +889,6 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void loadDiffBMS() {
 		loadBMS(null, false);
-	}
-
-	@FXML
-	public void updateIRConnection() {
-    	String homeurl = IRConnectionManager.getHomeURL(irname.getValue());
-		irhome.setText(homeurl);
-		irhome.setOnAction((event) -> {
-            Desktop desktop = Desktop.getDesktop();
-            URI uri;
-            try {
-                uri = new URI(homeurl);
-                desktop.browse(uri);
-            } catch (Exception e) {
-                Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
-            }
-        });
 	}
 
 	public void loadBMSPath(String updatepath){
@@ -1093,7 +1048,7 @@ public class PlayConfigurationView implements Initializable {
 		System.exit(0);
 	}
 
-	class OptionListCell extends ListCell<Integer> {
+	static class OptionListCell extends ListCell<Integer> {
 
 		private final String[] strings;
 
