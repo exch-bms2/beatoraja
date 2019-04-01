@@ -36,7 +36,18 @@ public class SkinBar extends SkinObject {
      * 3以降で定義されてなければ0か1を用いる
      */
     private SkinText[] text = new SkinText[BARTEXT_COUNT];
-    
+
+    public static final int BARTEXT_NORMAL = 0;
+    public static final int BARTEXT_NEW = 1;
+    public static final int BARTEXT_SONG_NORMAL = 2;
+    public static final int BARTEXT_SONG_NEW = 3;
+    public static final int BARTEXT_FOLDER_NORMAL = 4;
+    public static final int BARTEXT_FOLDER_NEW = 5;
+    public static final int BARTEXT_TABLE = 6;
+    public static final int BARTEXT_GRADE = 7;
+    public static final int BARTEXT_NO_SONGS = 8;
+    public static final int BARTEXT_COMMAND = 9;
+    public static final int BARTEXT_SEARCH = 10;
     public static final int BARTEXT_COUNT = 11;
     /**
      * レベルのSkinNumber。描画位置はBarの相対座標
@@ -239,14 +250,13 @@ public class SkinBar extends SkinObject {
     	if(graph != null) {
     		graph.prepare(time, state);
     	}
+
+        selector.getBarRender().prepare((MusicSelectSkin) selector.getSkin(), this, time);
+
     }
 
     public void draw(SkinObjectRenderer sprite) {
         selector.getBarRender().render(sprite, (MusicSelectSkin) selector.getSkin(), this, time);
-    }
-
-    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-    	draw(sprite);
     }
 
     @Override

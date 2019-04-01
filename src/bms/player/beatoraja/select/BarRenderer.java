@@ -86,6 +86,7 @@ public class BarRenderer {
 		public float x;
 		public float y;
 		public int value = -1;
+		public int text;
 	}
 
 	public BarRenderer(MusicSelector select) {
@@ -339,6 +340,89 @@ public class BarRenderer {
 		return false;
 	}
 
+	public void prepare(MusicSelectSkin skin, SkinBar baro, long time) {
+		for (int i = 0; i < barlength; i++) {
+			// calcurate song bar position
+			final BarArea ba = bararea[i];
+			boolean on = (i == skin.getCenterBar());
+			if (baro.getBarImages(on, i) == null) {
+				continue;
+			}
+			float dx = 0;
+			float dy = 0;
+			final SkinImage si1 = baro.getBarImages(on, i);
+			if (si1.draw) {
+				if (duration != 0) {
+					int nextindex = i + (angle >= 0 ? 1 : -1);
+					SkinImage si2 = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
+							: null;
+					if (si2 != null && si2.draw) {
+						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
+								: ((float) (duration - System.currentTimeMillis())) / angle;
+						dx = (si2.region.x - si1.region.x) * a;
+						dy = (si2.region.y - si1.region.y) * a;
+					}
+				}
+				ba.x = (int) (si1.region.x + dx);
+				ba.y = (int) (si1.region.y + dy + (baro.getPosition() == 1 ? si1.region.height : 0));
+
+				// set song bar type
+				int index = (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar())
+						% currentsongs.length;
+				Bar sd = currentsongs[index];
+				ba.sd = sd;
+
+				if (sd instanceof TableBar) {
+					ba.value = 2;
+				} else if (sd instanceof HashBar) {
+					ba.value = 2;
+				} else if (sd instanceof GradeBar) {
+					ba.value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
+				} else if (sd instanceof FolderBar) {
+					ba.value = 1;
+				} else if (sd instanceof SongBar) {
+					ba.value = ((SongBar) sd).existsSong() ? 0 : 4;
+				} else if (sd instanceof SearchWordBar) {
+					ba.value = 6;
+				} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
+					ba.value = 5;
+				} else {
+					ba.value = -1;
+				}
+			} else {
+				ba.value = -1;
+			}
+
+			if(ba.value != -1) {
+				// Barの種類によってテキストを変える
+				// SongBarかFolderBarの場合は新規かどうかでさらに変える
+				// songstatus最終値 =
+				// 0:通常 1:新規 2:SongBar(通常) 3:SongBar(新規) 4:FolderBar(通常) 5:FolderBar(新規) 6:TableBar or HashBar
+				// 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
+				// 3以降で定義されてなければ0か1を用いる
+				int songstatus = ba.value;
+				if(songstatus >= 2) {
+					songstatus += 4;
+					//定義されてなければ0:通常を用いる
+					if(baro.getText(songstatus) == null) songstatus = 0;
+				} else {
+					if (songstatus == 0) {
+						SongData song = ((SongBar) ba.sd).getSongData();
+						songstatus = song == null || System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 2 : 3;
+						//定義されてなければ0:通常か1:新規を用いる
+						if(baro.getText(songstatus) == null) songstatus = songstatus == 3 ? 1 : 0;
+					} else {
+						FolderData data = ((FolderBar) ba.sd).getFolderData();
+						songstatus = data == null || System.currentTimeMillis() / 1000 > data.getAdddate() + 3600 * 24 ? 4 : 5;
+						//定義されてなければ0:通常か1:新規を用いる
+						if(baro.getText(songstatus) == null) songstatus = songstatus == 5 ? 1 : 0;
+					}
+				}
+				ba.text = songstatus;
+			}
+		}
+	}
+
 	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, long time) {
 		if (skin == null) {
 			return;
@@ -369,67 +453,17 @@ public class BarRenderer {
 			loader = null;
 		}
 
-		// calcurate song bar position
-		for (int i = 0; i < barlength; i++) {
-			final BarArea ba = bararea[i];
-			boolean on = (i == skin.getCenterBar());
-			if (baro.getBarImages(on, i) == null) {
-				continue;
-			}
-			float dx = 0;
-			float dy = 0;
-			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
-			if (r != null) {
-				if (duration != 0) {
-					int nextindex = i + (angle >= 0 ? 1 : -1);
-					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
-							: null;
-					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
-					if (r2 != null) {
-						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
-								: ((float) (duration - System.currentTimeMillis())) / angle;
-						dx = (r2.x - r.x) * a;
-						dy = (r2.y - r.y) * a;
-					}
-				}
-				ba.x = (int) (r.x + dx);
-				ba.y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
-			}
-		}
-
 		// draw song bar
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			boolean on = (i == skin.getCenterBar());
-			if (baro.getBarImages(on, i) == null) {
+			final SkinImage si = baro.getBarImages(on, i);
+			if (si == null) {
 				continue;
 			}
-			int index = (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar())
-					% currentsongs.length;
-			Bar sd = currentsongs[index];
-			ba.sd = sd;
 
-			if (sd instanceof TableBar) {
-				ba.value = 2;
-			} else if (sd instanceof HashBar) {
-				ba.value = 2;
-			} else if (sd instanceof GradeBar) {
-				ba.value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
-			} else if (sd instanceof FolderBar) {
-				ba.value = 1;
-			} else if (sd instanceof SongBar) {
-				ba.value = ((SongBar) sd).existsSong() ? 0 : 4;
-			} else if (sd instanceof SearchWordBar) {
-				ba.value = 6;
-			} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
-				ba.value = 5;
-			} else {
-				ba.value = -1;
-			}
-
-			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
-			if (r != null) {
-				baro.getBarImages(on, i).draw(sprite, time, select, ba.value, ba.x - r.x, ba.y - r.y - (baro.getPosition() == 1 ? r.height : 0));
+			if (si.draw) {
+				si.draw(sprite, time, select, ba.value, ba.x - si.region.x, ba.y - si.region.y - (baro.getPosition() == 1 ? si.region.height : 0));
 			} else {
 				ba.value = -1;
 			}
@@ -442,8 +476,9 @@ public class BarRenderer {
 			}
 			// folder graph
 			if (ba.sd instanceof DirectoryBar) {
-				if (baro.getGraph() != null) {
-					baro.getGraph().draw(sprite, time, select, (DirectoryBar)ba.sd, ba.x, ba.y);
+				final SkinDistributionGraph graph = baro.getGraph();
+				if (graph != null && graph.draw) {
+					graph.draw(sprite, time, select, (DirectoryBar)ba.sd, ba.x, ba.y);
 				}
 			}
 		}
@@ -453,32 +488,8 @@ public class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
-			// Barの種類によってテキストを変える
-			// SongBarかFolderBarの場合は新規かどうかでさらに変える
-			// songstatus最終値 =
-			// 0:通常 1:新規 2:SongBar(通常) 3:SongBar(新規) 4:FolderBar(通常) 5:FolderBar(新規) 6:TableBar or HashBar
-			// 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
-			// 3以降で定義されてなければ0か1を用いる
-			int songstatus = ba.value;
-			if(songstatus >= 2) {
-				songstatus += 4;
-				//定義されてなければ0:通常を用いる
-				if(baro.getText(songstatus) == null) songstatus = 0;
-			} else {
-				if (songstatus == 0) {
-					SongData song = ((SongBar) ba.sd).getSongData();
-					songstatus = song == null || System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 2 : 3;
-					//定義されてなければ0:通常か1:新規を用いる
-					if(baro.getText(songstatus) == null) songstatus = songstatus == 3 ? 1 : 0;
-				} else {
-					FolderData data = ((FolderBar) ba.sd).getFolderData();
-					songstatus = data == null || System.currentTimeMillis() / 1000 > data.getAdddate() + 3600 * 24 ? 4 : 5;
-					//定義されてなければ0:通常か1:新規を用いる
-					if(baro.getText(songstatus) == null) songstatus = songstatus == 5 ? 1 : 0;
-				}
-			}
-			baro.getText(songstatus).setText(ba.sd.getTitle());
-			baro.getText(songstatus).draw(sprite, ba.x, ba.y);
+			baro.getText(ba.text).setText(ba.sd.getTitle());
+			baro.getText(ba.text).draw(sprite, ba.x, ba.y);
 		}
 
 		for (int i = 0; i < barlength; i++) {
@@ -492,7 +503,7 @@ public class BarRenderer {
 				if (trophy != null) {
 					for (int j = 0; j < TROPHY.length; j++) {
 						if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy(j) != null) {
-							baro.getTrophy(j).draw(sprite, time, select, ba.x, ba.y);
+							baro.getTrophy(j).draw(sprite, ba.x, ba.y);
 							break;
 						}
 					}
@@ -508,14 +519,14 @@ public class BarRenderer {
 			// lamp
 			if(select.getRival() != null) {
 				if (baro.getPlayerLamp(ba.sd.getLamp(true)) != null) {
-					baro.getPlayerLamp(ba.sd.getLamp(true)).draw(sprite, time, select, ba.x, ba.y);
+					baro.getPlayerLamp(ba.sd.getLamp(true)).draw(sprite, ba.x, ba.y);
 				}
 				if (baro.getRivalLamp(ba.sd.getLamp(false)) != null) {
-					baro.getRivalLamp(ba.sd.getLamp(false)).draw(sprite, time, select, ba.x, ba.y);
+					baro.getRivalLamp(ba.sd.getLamp(false)).draw(sprite, ba.x, ba.y);
 				}
 			} else {
 				if (baro.getLamp(ba.sd.getLamp(true)) != null) {
-					baro.getLamp(ba.sd.getLamp(true)).draw(sprite, time, select, ba.x, ba.y);
+					baro.getLamp(ba.sd.getLamp(true)).draw(sprite, ba.x, ba.y);
 				}
 			}
 		}
@@ -577,19 +588,19 @@ public class BarRenderer {
 				// LNラベル描画分岐
 				final int[] lnindex = {0,3,4};
 				if (baro.getLabel(lnindex[ln]) != null) {
-					baro.getLabel(lnindex[ln]).draw(sprite, time, select, ba.x, ba.y);
+					baro.getLabel(lnindex[ln]).draw(sprite, ba.x, ba.y);
 				} else if (baro.getLabel(0) != null) {
-					baro.getLabel(0).draw(sprite, time, select, ba.x, ba.y);
+					baro.getLabel(0).draw(sprite, ba.x, ba.y);
 				}
 
 			}
 			// MINE
 			if ((flag & SongData.FEATURE_MINENOTE) != 0 && baro.getLabel(2) != null) {
-				baro.getLabel(2).draw(sprite, time, select, ba.x, ba.y);
+				baro.getLabel(2).draw(sprite, ba.x, ba.y);
 			}
 			// RANDOM
 			if ((flag & SongData.FEATURE_RANDOM) != 0 && baro.getLabel(1) != null) {
-				baro.getLabel(1).draw(sprite, time, select, ba.x, ba.y);
+				baro.getLabel(1).draw(sprite, ba.x, ba.y);
 			}
 		}
 	}
