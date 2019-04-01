@@ -118,7 +118,9 @@ public class IRConfigurationView implements Initializable {
         });
 		
 		if(!irmap.containsKey(irname.getValue())) {
-			irmap.put(irname.getValue(), new IRConfig());
+			IRConfig ir = new IRConfig();
+			ir.setIrname(irname.getValue());
+			irmap.put(irname.getValue(), ir);
 		}
 		currentir = irmap.get(irname.getValue());
 		iruserid.setText(currentir.getUserid());
