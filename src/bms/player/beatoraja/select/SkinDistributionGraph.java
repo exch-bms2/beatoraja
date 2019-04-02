@@ -103,24 +103,24 @@ public class SkinDistributionGraph extends SkinObject {
     		draw = false;
     		return;
     	}
-        prepare(time, state, (DirectoryBar)bar, 0, 0);
+        if (!state.main.getPlayerResource().getConfig().isFolderlamp()) {
+            draw = false;
+            return;
+        }
+        super.prepare(time, state);
+        for(int i = 0;i < currentImage.length;i++) {
+            currentImage[i] = lampimage[i].getImage(time,state);
+        }
+        this.currentBar = (DirectoryBar)bar;
 	}
 	
-	public void prepare(long time, MainState state, DirectoryBar current, float offsetX, float offsetY) {
-        if (!state.main.getPlayerResource().getConfig().isFolderlamp()) {
-    		draw = false;
-    		return;        	
-        }
-		super.prepare(time, state, offsetX, offsetY);
-		for(int i = 0;i < currentImage.length;i++) {
-	        currentImage[i] = lampimage[i].getImage(time,state);
-		}
-		this.currentBar = current;
-	}
-
     public void draw(SkinObjectRenderer sprite) {
-        int[] lamps = currentBar.getLamps();
-        int[] ranks = currentBar.getRanks();
+        draw(sprite, currentBar, 0, 0);
+    }
+
+    public void draw(SkinObjectRenderer sprite, DirectoryBar current, float offsetx, float offsety) {
+        int[] lamps = current.getLamps();
+        int[] ranks = current.getRanks();
         int count = 0;
         for (int lamp : lamps) {
             count += lamp;
@@ -129,23 +129,16 @@ public class SkinDistributionGraph extends SkinObject {
         if (count != 0) {
             if(type == 0) {
                 for (int i = 10, x = 0; i >= 0; i--) {
-                    sprite.draw(currentImage[i], region.x + x * region.width / count, region.y, lamps[i] * region.width / count, region.height);                    		
+                    sprite.draw(currentImage[i], region.x + x * region.width / count + offsetx, region.y + offsety, lamps[i] * region.width / count, region.height);
                     x += lamps[i];
                 }
             } else {
                 for (int i = 27, x = 0; i >= 0; i--) {
-                    sprite.draw(currentImage[i], region.x + x * region.width / count, region.y, ranks[i] * region.width / count, region.height);                    		
+                    sprite.draw(currentImage[i], region.x + x * region.width / count + offsetx, region.y + offsety, ranks[i] * region.width / count, region.height);
                     x += ranks[i];
                 }
             }
         }
-    }
-
-    public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, float offsetx, float offsety) {
-    	prepare(time, state, current, offsetx, offsety);
-    	if(draw) {
-    		draw(sprite);
-    	}
     }
 
     @Override

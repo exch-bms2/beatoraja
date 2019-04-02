@@ -478,7 +478,7 @@ public class BarRenderer {
 			if (ba.sd instanceof DirectoryBar) {
 				final SkinDistributionGraph graph = baro.getGraph();
 				if (graph != null && graph.draw) {
-					graph.draw(sprite, time, select, (DirectoryBar)ba.sd, ba.x, ba.y);
+					graph.draw(sprite, (DirectoryBar)ba.sd, ba.x, ba.y);
 				}
 			}
 		}
