@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin.property;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 import com.badlogic.gdx.Gdx;
@@ -85,7 +86,10 @@ public class IntegerPropertyFactory {
 				}
 				return state.main.getPlayerResource().getSongdata() != null
 						? state.main.getPlayerResource().getSongdata().getNotes()
-						: Integer.MIN_VALUE;
+						: state.main.getPlayerResource().getCourseData() != null
+							? Arrays.asList(state.main.getPlayerResource().getCourseData().getSong()).stream()
+								.mapToInt(sd -> sd.getNotes()).sum()
+							: Integer.MIN_VALUE;
 			};
 		}
 		if (optionid == NUMBER_SONGLENGTH_MINUTE) {
@@ -875,9 +879,9 @@ public class IntegerPropertyFactory {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;
 				} else if (state instanceof AbstractResult) {
-					final PlayerResource resource = state.main.getPlayerResource();
-					if (resource.getScoreData() != null) {
-						return resource.getScoreData().getClear();
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					if (score != null) {
+						return score.getClear();
 					}
 					return Integer.MIN_VALUE;
 				}

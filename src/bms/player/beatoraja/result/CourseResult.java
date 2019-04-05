@@ -3,6 +3,7 @@ package bms.player.beatoraja.result;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.KeyCommand;
@@ -278,7 +279,8 @@ public class CourseResult extends AbstractResult {
 			oldscore = new IRScoreData();
 		}
 
-		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(),
+				Arrays.asList(resource.getCourseBMSModels()).stream().mapToInt(model -> model.getTotalNotes()).sum());
 		getScoreDataProperty().update(newscore);
 
 		main.getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
