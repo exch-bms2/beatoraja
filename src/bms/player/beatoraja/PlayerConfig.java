@@ -681,10 +681,10 @@ public class PlayerConfig {
 			irconfig = new IRConfig[0];
 		}
 		
-		if(irconfig.length == 0 && (irname != null && irname.length() > 0) || (userid != null && userid.length() > 0)) {
+		if(irconfig.length == 0) {
 			irconfig = new IRConfig[1];
 			IRConfig ir = new IRConfig();
-			ir.setIrname(irname);
+			ir.setIrname(irname != null && irname.length() > 0 ? irname : "mocha");
 			ir.setPassword(password);
 			ir.setUserid(userid);
 			ir.setIrsend(irsend);
@@ -827,6 +827,9 @@ public class PlayerConfig {
 
 		public void setUserid(String userid) {
 			this.userid = userid;
+			if(userid.length() == 0) {
+				cuserid = "";
+			}
 			validate();
 		}
 
@@ -843,6 +846,9 @@ public class PlayerConfig {
 
 		public void setPassword(String password) {
 			this.password = password;
+			if(password.length() == 0) {
+				cpassword = "";
+			}
 			validate();
 		}
 

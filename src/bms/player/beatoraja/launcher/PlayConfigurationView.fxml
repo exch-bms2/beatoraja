@@ -532,7 +532,14 @@
                             <Insets top="10.0" />
                         </VBox.margin>
                     </Button>
-               <VBox prefHeight="150.0" prefWidth="100.0">
+                    <CheckBox fx:id="enableIpfs" mnemonicParsing="false" prefHeight="18.0" text="%ENABLE_IPFS" />
+                    <HBox prefHeight="100.0" prefWidth="300.0">
+                        <children>
+                           <Label prefHeight="25.0" prefWidth="60.0" text="IPFS URL" />
+                           <TextField fx:id="ipfsurl" prefHeight="25.0" prefWidth="200.0" />
+                        </children>
+                     </HBox>
+               <VBox prefHeight="150.0" prefWidth="100.0" visible="false">
                   <children>
                      <HBox prefHeight="31.0" prefWidth="780.0">
                         <children>
@@ -562,61 +569,12 @@
                      </HBox>
                   </children>
                </VBox>
-                    <CheckBox fx:id="enableIpfs" mnemonicParsing="false" prefHeight="18.0" text="%ENABLE_IPFS" />
-                    <HBox prefHeight="100.0" prefWidth="300.0">
-                        <children>
-                           <Label prefHeight="25.0" prefWidth="60.0" text="IPFS URL" />
-                           <TextField fx:id="ipfsurl" prefHeight="25.0" prefWidth="200.0" />
-                        </children>
-                     </HBox>
                 </VBox>
             </AnchorPane>
         </Tab>
         <Tab fx:id="irTab" closable="false" text="IR">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <VBox layoutX="71.0" layoutY="6.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <HBox prefHeight="0.0" prefWidth="730.0">
-                        <VBox.margin>
-                            <Insets bottom="10.0" left="10.0" top="10.0" />
-                        </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="100.0" text="IR" />
-                        <ComboBox fx:id="irname" prefWidth="150.0" onAction="#updateIRConnection" />
-                        <Hyperlink fx:id="irhome" text="" />
-                    </HBox>
-                    <HBox prefHeight="12.0" prefWidth="730.0">
-                        <VBox.margin>
-                            <Insets left="10.0" top="10.0" />
-                        </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="100.0" text="User ID" />
-                        <TextField fx:id="iruserid" prefHeight="24.0" prefWidth="287.0" />
-                    </HBox>
-                    <HBox prefHeight="7.0" prefWidth="740.0">
-                        <VBox.margin>
-                            <Insets top="10.0" />
-                        </VBox.margin>
-                        <Label prefHeight="35.0" prefWidth="100.0" text="Password">
-                            <HBox.margin>
-                                <Insets left="10.0" />
-                            </HBox.margin>
-                        </Label>
-                        <PasswordField fx:id="irpassword" prefHeight="24.0" prefWidth="205.0">
-                            <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
-                        </PasswordField>
-                    </HBox>
-                    <HBox prefHeight="15.0" prefWidth="740.0">
-                        <VBox.margin>
-                            <Insets top="30.0" />
-                        </VBox.margin>
-                        <Label prefHeight="35.0" prefWidth="100.0" text="%IR_SEND">
-                            <HBox.margin>
-                                <Insets left="10.0" />
-                            </HBox.margin>
-                        </Label>
-                        <ComboBox fx:id="irsend" prefHeight="24.0" prefWidth="200.0" />
-                    </HBox>
-                </VBox>
+                <fx:include fx:id="ir" source="IRConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="courseTab" closable="false" text="Course">

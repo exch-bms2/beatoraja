@@ -125,6 +125,16 @@ public class SkinImage extends SkinObject {
     	}                    				
 	}
 
+	public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
+		if(image[0] instanceof SkinSourceMovie) {
+			setImageType(3);
+			draw(sprite, currentImage, region.x + offsetX, region.y + offsetY, region.width, region.height);
+			setImageType(0);
+		} else {
+			draw(sprite, currentImage, region.x + offsetX, region.y + offsetY, region.width, region.height);
+		}
+	}
+
 	public void draw(SkinObjectRenderer sprite, long time, MainState state, float offsetX, float offsetY) {
 		prepare(time, state, offsetX, offsetY);
 		if(draw) {
