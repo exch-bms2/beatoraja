@@ -280,7 +280,7 @@ public class CourseResult extends AbstractResult {
 		}
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(),
-				Arrays.asList(resource.getCourseBMSModels()).stream().mapToInt(model -> model.getTotalNotes()).sum());
+				Arrays.asList(resource.getCourseData().getSong()).stream().mapToInt(sd -> sd.getNotes()).sum());
 		getScoreDataProperty().update(newscore);
 
 		main.getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
