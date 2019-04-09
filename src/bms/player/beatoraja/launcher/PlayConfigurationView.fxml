@@ -169,12 +169,12 @@
                         <VBox.margin>
                             <Insets left="10.0" top="10.0" />
                         </VBox.margin>
-                        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="%JKOC_HACK">
+                        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="130.0" text="%JKOC_HACK">
                             <HBox.margin>
                                 <Insets right="20.0" />
                             </HBox.margin>
                         </CheckBox>
-                        <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="250.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
+                        <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="170.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
                             <tooltip>
                                 <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
                             </tooltip>
@@ -182,12 +182,23 @@
                                 <Insets />
                             </HBox.margin>
                         </CheckBox>
-                        <Label prefHeight="24.0" prefWidth="200.0" text="%ANALOG_SCRATCH_THRESHOLD" />
+                        <Label prefHeight="24.0" prefWidth="180.0" text="%ANALOG_SCRATCH_THRESHOLD" />
                         <NumericSpinner fx:id="analogScratchThreshold" editable="true" prefWidth="80.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="100" min="1" />
                             </valueFactory>
+                            <HBox.margin>
+                                <Insets right="20.0" />
+                            </HBox.margin>
                         </NumericSpinner>
+                        <CheckBox fx:id="analogScratchMode2" contentDisplay="CENTER" prefHeight="18.0" prefWidth="170.0" text="%ANALOG_SCRATCH_MODE_2" textAlignment="CENTER">
+                            <tooltip>
+                                <Tooltip text="Alternative Analog Scratch Algorithm." textAlignment="CENTER" />
+                            </tooltip>
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </CheckBox>
                     </HBox>
                 </VBox>
             </AnchorPane>
