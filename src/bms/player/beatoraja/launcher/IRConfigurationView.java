@@ -62,7 +62,11 @@ public class IRConfigurationView implements Initializable {
     	    	
 		primary = player.getIrconfig().length > 0 ? player.getIrconfig()[0].getIrname() : null;
 		if(!irname.getItems().contains(primary)) {
-			primary = irname.getItems().get(0);
+			if (irname.getItems().size() == 0) {
+				primary = null;
+			} else {
+				primary = irname.getItems().get(0);
+			}
 		}
 		irname.setValue(primary);
 		updateIRConnection();
@@ -126,7 +130,7 @@ public class IRConfigurationView implements Initializable {
 		iruserid.setText(currentir.getUserid());
 		irpassword.setText(currentir.getPassword());
 		irsend.setValue(currentir.getIrsend());
-		
-		primarybutton.setVisible(!irname.getValue().equals(primary));
+
+		primarybutton.setVisible(!(primary != null && irname.getValue().equals(primary)));
 	}
 }
