@@ -285,7 +285,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 			} else if (!activeAnalogScratch) {
 				// 移動無し→回転の場合
 				if (analogScratchTickCounter == 0 || counter <= this.analogScratchThreshold) {
-					analogScratchTickCounter++;
+					analogScratchTickCounter += Math.floor(Math.abs(analogScratchX-oldAnalogScratchX)/0.0075f);
 				}
 				if (analogScratchTickCounter >= 2) {
 					activeAnalogScratch = true;
