@@ -48,19 +48,31 @@ public class TableDataAccessor {
 	 * @param td 難易度表データ
 	 */
 	public void write(TableData td) {
+		write(td, getFileName(td.getUrl()) + ".bmt");
+	}
+
+	public void write(TableData td, String filename) {
 		try {
 			td.shrink();
-			Json json = new Json();
-			json.setElementType(TableData.class, "folder", ArrayList.class);
-			json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
-			json.setElementType(TableData.class, "course", ArrayList.class);
-			json.setElementType(CourseData.class, "trophy", ArrayList.class);
-			json.setOutputType(OutputType.json);
-			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
-					new GZIPOutputStream(new FileOutputStream(tabledir + "/" + getFileName(td.getUrl()) + ".bmt"))), "UTF-8");
-			fw.write(json.prettyPrint(td));
-			fw.flush();
-			fw.close();
+			OutputStream os = null;
+			if(filename.endsWith(".bmt")) {
+				os = new GZIPOutputStream(new FileOutputStream(tabledir + "/" + filename));
+			} else if(filename.endsWith(".json")) {
+				os = new FileOutputStream(tabledir + "/" + filename);
+			}
+			
+			if(os != null) {
+				Json json = new Json();
+				json.setElementType(TableData.class, "folder", ArrayList.class);
+				json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
+				json.setElementType(TableData.class, "course", ArrayList.class);
+				json.setElementType(CourseData.class, "trophy", ArrayList.class);
+				json.setOutputType(OutputType.json);
+				OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(os), "UTF-8");
+				fw.write(json.prettyPrint(td));
+				fw.flush();
+				fw.close();				
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -75,18 +87,9 @@ public class TableDataAccessor {
 		List<TableData> result = new ArrayList<TableData>();
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
-				if (p.toString().endsWith(".bmt")) {
-					try {
-						Json json = new Json();
-						json.setIgnoreUnknownFields(true);
-						TableData td = json.fromJson(TableData.class,
-								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-						if(td != null && td.validate()) {
-							result.add(td);
-						}
-					} catch(Throwable e) {
-						e.printStackTrace();
-					}
+				TableData td = read(p);
+				if(td != null) {
+					result.add(td);						
 				}
 			}
 		} catch (IOException e) {
@@ -106,24 +109,38 @@ public class TableDataAccessor {
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
 				if (p.getFileName().toString().equals(getFileName(url) + ".bmt")) {
-					try {
-						Json json = new Json();
-						json.setIgnoreUnknownFields(true);
-						td = json.fromJson(TableData.class,
-								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-						if(td == null || !td.validate()) {
-							td = null;
-						}
-						break;
-					} catch(Throwable e) {
-
-					}
+					td = read(p);
+					break;
 				}
 			}
 		} catch (IOException e) {
 
 		}
 		return td;
+	}
+	
+	private TableData read(Path p) {
+		try {
+			InputStream is = null;
+			if (p.toString().endsWith(".bmt")) {
+				is = new GZIPInputStream(Files.newInputStream(p));
+			} else if(p.toString().endsWith(".json")) {
+				is = Files.newInputStream(p);			
+			}
+
+			if(is != null) {
+				Json json = new Json();
+				json.setIgnoreUnknownFields(true);
+				TableData td = json.fromJson(TableData.class, new BufferedInputStream(is));
+				if(td == null || !td.validate()) {
+					td = null;
+				}
+				return td;				
+			}
+		} catch(Throwable e) {
+
+		}
+		return null;
 	}
 	
 	private String getFileName(String name) {

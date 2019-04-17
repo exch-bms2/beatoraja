@@ -34,7 +34,7 @@ public class BGAProcessor {
 	private PlayerConfig player;
 	private float progress = 0;
 
-	private IntMap<MovieProcessor> mpgmap = new IntMap<MovieProcessor>();
+	private MovieProcessor[] movies; 
 	
 	private final ResourcePool<String, MovieProcessor> mpgresource;
 
@@ -101,7 +101,6 @@ public class BGAProcessor {
 		this.model = model;
 		progress = 0;
 
-		mpgmap.clear();
 		cache.clear();
 
 		int id = 0;
@@ -118,6 +117,7 @@ public class BGAProcessor {
 			// BMS格納ディレクトリ
 			Path dpath = Paths.get(model.getPath()).getParent();
 
+			movies = new MovieProcessor[model.getBgaList().length];
 			for (String name : model.getBgaList()) {
 				if (progress == 1) {
 					break;
@@ -169,7 +169,7 @@ public class BGAProcessor {
 						if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
 							try {
 								MovieProcessor mm = mpgresource.get(f.toString());
-								mpgmap.put(id, mm);
+								movies[id] = mm;
 								isMovie = true;
 								break;
 							} catch (Throwable e) {
@@ -212,8 +212,10 @@ public class BGAProcessor {
 		if(cache != null) {
 			cache.prepare(timelines);			
 		}
-		for (MovieProcessor mp : mpgmap.values()) {
-			mp.stop();				
+		for (MovieProcessor mp : movies) {
+			if(mp != null) {
+				mp.stop();				
+			}
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
@@ -227,12 +229,11 @@ public class BGAProcessor {
 			return null;
 		}
 
-		MovieProcessor mp = getMovieProcessor(id);
-		if(mp != null) {
+		if(movies[id] != null) {
 			if (!cont) {
-				mp.play(time, false);
+				movies[id].play(time, false);
 			}
-			return mp.getFrame(time);
+			return movies[id].getFrame(time);
 		}
 		return cache != null ? cache.getTexture(id) : null;
 	}
@@ -299,8 +300,7 @@ public class BGAProcessor {
 			// draw BGA
 			final Texture playingbgatex = getBGAData(time, playingbgaid, rbga);
 			if (playingbgatex != null) {
-				final MovieProcessor mp = getMovieProcessor(playingbgaid);
-				if (mp != null) {
+				if (movies[playingbgaid] != null) {
 					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
 					drawBGAFixRatio(dst, sprite, r, playingbgatex);
 				} else {
@@ -313,8 +313,7 @@ public class BGAProcessor {
 			// draw layer
 			final Texture playinglayertex = getBGAData(time, playinglayerid, rlayer);
 			if (playinglayertex != null) {
-				final MovieProcessor mp = getMovieProcessor(playinglayerid);
-				if (mp != null) {
+				if (movies[playinglayerid] != null) {
 					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
 					drawBGAFixRatio(dst, sprite, r, playinglayertex);
 				} else {
@@ -327,10 +326,6 @@ public class BGAProcessor {
 		prevrendertime = time;
 	}
 	
-	private MovieProcessor getMovieProcessor(int id) {
-		return mpgmap.get(id);
-	}
-
 	/**
 	 * Modify the aspect ratio and draw BGA
 	 */
@@ -354,7 +349,7 @@ public class BGAProcessor {
 	}
 
 	public void stop() {
-		for (MovieProcessor mpg : mpgmap.values()) {
+		for (MovieProcessor mpg : movies) {
 			if (mpg != null) {
 				mpg.stop();
 			}

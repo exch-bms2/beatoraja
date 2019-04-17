@@ -243,7 +243,7 @@ public class PlayModeConfig {
         }
 
         public void setDuration(int inputduration) {
-            this.duration = duration;
+            this.duration = inputduration;
         }
     }
 
@@ -401,7 +401,7 @@ public class PlayModeConfig {
         }
 
         public void setDuration(int inputduration) {
-            this.duration = duration;
+            this.duration = inputduration;
         }
 
         public boolean getJKOC()  {

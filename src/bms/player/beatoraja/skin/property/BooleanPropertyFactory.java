@@ -665,22 +665,22 @@ public class BooleanPropertyFactory {
 					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getGauge().getGauge().isQualified() : false));
 		case OPTION_UPDATE_SCORE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() > ((AbstractResult) state).getOldScore().getExscore() : false));
+					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getExscore() > ((AbstractResult) state).getOldScore().getExscore() : false));
 		case OPTION_DRAW_SCORE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() == ((AbstractResult) state).getOldScore().getExscore() : false));
+					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getExscore() == ((AbstractResult) state).getOldScore().getExscore() : false));
 		case OPTION_UPDATE_MAXCOMBO:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getCombo() > ((AbstractResult) state).getOldScore().getCombo() : false));
+					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getCombo() > ((AbstractResult) state).getOldScore().getCombo() : false));
 		case OPTION_DRAW_MAXCOMBO:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getCombo() == ((AbstractResult) state).getOldScore().getCombo() : false));
+					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getCombo() == ((AbstractResult) state).getOldScore().getCombo() : false));
 		case OPTION_UPDATE_MISSCOUNT:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getMinbp() < ((AbstractResult) state).getOldScore().getMinbp() : false));
+					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getMinbp() < ((AbstractResult) state).getOldScore().getMinbp() : false));
 		case OPTION_DRAW_MISSCOUNT:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getMinbp() == ((AbstractResult) state).getOldScore().getMinbp() : false));
+					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getMinbp() == ((AbstractResult) state).getOldScore().getMinbp() : false));
 		case OPTION_UPDATE_SCORERANK:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> (state.getScoreDataProperty().getNowRate() > state.getScoreDataProperty().getBestScoreRate()));
