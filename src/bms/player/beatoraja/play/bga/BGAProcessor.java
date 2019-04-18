@@ -59,7 +59,7 @@ public class BGAProcessor {
 	 */
 	private Layer misslayer = null;
 
-	private long prevrendertime;
+	private long time;
 
 	private BGImageProcessor cache;
 
@@ -69,6 +69,9 @@ public class BGAProcessor {
 	private int pos;
 	private TextureRegion image;
 	private Rectangle tmpRect = new Rectangle();
+	
+	private boolean rbga;
+	private boolean rlayer;
 
 	public BGAProcessor(Config config, PlayerConfig player) {
 		this.config = config;
@@ -221,7 +224,7 @@ public class BGAProcessor {
 		playinglayerid = -1;
 		misslayertime = 0;
 		misslayer = null;
-		prevrendertime = 0;		
+		time = 0;		
 	}
 
 	private Texture getBGAData(long time, int id, boolean cont) {
@@ -237,24 +240,21 @@ public class BGAProcessor {
 		}
 		return cache != null ? cache.getTexture(id) : null;
 	}
-
-	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, long time) {
-		sprite.setColor(dst.getColor());
-		sprite.setBlend(dst.getBlend());
+	
+	public void prepareBGA(long time) {
 		if (time < 0 || timelines == null) {
-			prevrendertime = -1;
-			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
+			this.time = -1;
 			return;
 		}
-		boolean rbga = true;
-		boolean rlayer = true;
+		rbga = true;
+		rlayer = true;
 		for (int i = pos; i < timelines.length; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() > time) {
 				break;
 			}
 
-			if (tl.getTime() > prevrendertime) {
+			if (tl.getTime() > this.time) {
 				final int bga = tl.getBGA();
 				if (bga == -2) {
 					playingbgaid = -1;
@@ -283,6 +283,18 @@ public class BGAProcessor {
 			} else {
 				pos++;
 			}
+		}
+		
+		this.time = time;
+	}
+
+
+	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r) {
+		sprite.setColor(dst.getColor());
+		sprite.setBlend(dst.getBlend());
+		if (time < 0 || timelines == null) {
+			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
+			return;
 		}
 
 		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + getMisslayerduration) {
@@ -322,8 +334,6 @@ public class BGAProcessor {
 				}
 			}
 		}
-
-		prevrendertime = time;
 	}
 	
 	/**
