@@ -166,7 +166,7 @@ public enum JudgeProperty {
     		// judgeWindowRateによる補正
     		for (int i = 0; i < Math.min(org.length, 2); i++) {
     			for(int j = 0;j < 2;j++) {
-					judge[i][j] *= judgeWindowRate / 100;
+					judge[i][j] = judge[i][j]*judgeWindowRate / 100;
 					if(Math.abs(judge[i][j]) > Math.abs(judge[2][j])) {
 						judge[i][j] = judge[2][j];
 					}

@@ -41,6 +41,12 @@ public class SkinBGA extends SkinObject {
 		}
 		this.time = time;
 		super.prepare(time, state);
+		if(draw) {
+			final int s = player.getState();
+			player.main.getPlayerResource().getBGAManager().prepareBGA(
+					s == BMSPlayer.STATE_PRELOAD || s == BMSPlayer.STATE_PRACTICE || s == BMSPlayer.STATE_READY ? -1
+							: player.main.getNowTime(TIMER_PLAY));
+		}
 	}
 
 	public void draw(SkinObjectRenderer sprite) {
@@ -48,13 +54,7 @@ public class SkinBGA extends SkinObject {
 		if (resource.getPlayMode() == PlayMode.PRACTICE) {
 			player.getPracticeConfiguration().draw(region, sprite, time, player);
 		} else if (resource.getBGAManager() != null) {
-			final int s = player.getState();
-			resource.getBGAManager().drawBGA(
-					this,
-					sprite,
-					region,
-					s == BMSPlayer.STATE_PRELOAD || s == BMSPlayer.STATE_PRACTICE || s == BMSPlayer.STATE_READY ? -1
-							: player.main.getNowTime(TIMER_PLAY));
+			resource.getBGAManager().drawBGA(this,sprite,region);
 		}		
 	}
 
