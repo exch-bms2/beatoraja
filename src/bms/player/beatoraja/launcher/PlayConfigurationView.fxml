@@ -193,11 +193,8 @@
                         </NumericSpinner>
                         <ComboBox fx:id="analogScratchMode" onAction="#updateInputConfig" prefHeight="18.0" prefWidth="170.0">
                             <tooltip>
-                                <Tooltip text="Alternative Analog Scratch Algorithm." textAlignment="CENTER" />
+                                <Tooltip text="Choose Analog Scratch Algorithm." textAlignment="CENTER" />
                             </tooltip>
-                            <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
                         </ComboBox>
                     </HBox>
                 </VBox>
