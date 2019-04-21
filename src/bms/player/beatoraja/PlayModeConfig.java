@@ -254,6 +254,10 @@ public class PlayModeConfig {
      */
     public static class ControllerConfig {
 
+        public static final int ANALOG_SCRATCH_MODE_1 = 0;
+        
+        public static final int ANALOG_SCRATCH_MODE_2 = 1;
+
         private String name = "";
 
         private int[] keys;
@@ -272,9 +276,9 @@ public class PlayModeConfig {
          */
         private boolean analogScratch = false;
         /**
-         * TEST ANALOG SCRATCH MODE 2
+         * アナログスクラッチモード
          */
-        private boolean analogScratchMode2 = false;
+        private int analogScratchMode = 0;
         /**
          * アナログスクラッチ停止閾値
          */
@@ -420,12 +424,12 @@ public class PlayModeConfig {
             this.analogScratch = analogScratch;
         }
         
-        public boolean isAnalogScratchMode2() {
-            return analogScratchMode2;
+        public int getAnalogScratchMode() {
+            return analogScratchMode;
         }
 
-        public void setAnalogScratchMode2(boolean analogScratchMode2) {
-            this.analogScratchMode2 = analogScratchMode2;
+        public void setAnalogScratchMode(int analogScratchMode) {
+            this.analogScratchMode = analogScratchMode;
         }
         
         public int getAnalogScratchThreshold() {

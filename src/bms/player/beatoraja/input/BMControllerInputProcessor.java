@@ -70,7 +70,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	/**
 	 * アナログ皿モード２かどうか
 	 */
-	private boolean analogScratchMode2;
+	private int analogScratchMode;
 	/**
 	 * アナログ皿の閾値
 	 */
@@ -80,7 +80,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 */
 	private long counter = 1;
 	/**
-	 * （モード２）皿の閾値以内皿移動の数(２回->スクラッチ)
+	 * （モード２）閾値以内の皿の移動数(２回->スクラッチ)
 	 */
 	private int analogScratchTickCounter = 0;
 	/**
@@ -111,7 +111,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.duration = controllerConfig.getDuration();
 		this.jkoc = controllerConfig.getJKOC();
 		this.analogScratch = controllerConfig.isAnalogScratch();
-		this.analogScratchMode2 = controllerConfig.isAnalogScratchMode2();
+		this.analogScratchMode = controllerConfig.getAnalogScratchMode();
 		this.analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
 	}
 
@@ -178,9 +178,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	}
 
 	private boolean analogScratchInput(int button) {
-		// Linux : axis[0]
-		// Windows : axis[1]
-		//float analogScratchX = File.separatorChar == '\\' ? axis[1] :  axis[0];
+		// Pick correct axis (axis[i] != 0)
 		float analogScratchX = 0f;
 		for (int i = 0; i < 4; i++) {
 			if (axis[i] != 0f) {
@@ -245,9 +243,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	}
 
 	private boolean analogScratchInputMode2(int button) {
-		// Linux : axis[0]
-		// Windows : axis[1]
-		//float analogScratchX = File.separatorChar == '\\' ? axis[1] :  axis[0];
+		// Pick correct axis (axis[i] != 0)
 		float analogScratchX = 0f;
 		for (int i = 0; i < 4; i++) {
 			if (axis[i] != 0f) {
@@ -264,18 +260,19 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 		if (oldAnalogScratchX != analogScratchX) {
 			// アナログスクラッチ位置の移動が発生した場合
-			boolean nowRight = false;
-			if (oldAnalogScratchX < analogScratchX) {
-				nowRight = true;
-				if ((analogScratchX - oldAnalogScratchX) > (1 - analogScratchX + oldAnalogScratchX)) {
-					nowRight = false;
-				}
-			} else if (oldAnalogScratchX > analogScratchX) {
-				nowRight = false;
-				if ((oldAnalogScratchX - analogScratchX) > ((analogScratchX + 1) - oldAnalogScratchX)) {
-					nowRight = true;
-				}
+
+			// tick: 皿の最小の動き
+			// INFINITAS, DAO, YuanCon -> 0.00787
+			// arcin board -> 0.00784
+			final float TICK_MAX_SIZE = 0.009f;
+			float scratchDifferenceX = analogScratchX - oldAnalogScratchX;
+			if (scratchDifferenceX > 1.0f) {
+				scratchDifferenceX -= (2 + TICK_MAX_SIZE/2);
+			} else if (scratchDifferenceX < -1.0f) {
+				scratchDifferenceX += (2 + TICK_MAX_SIZE/2);
 			}
+			boolean nowRight = (scratchDifferenceX > 0);
+			int ticks = (int)Math.ceil(Math.abs(scratchDifferenceX)/TICK_MAX_SIZE);
 
 			if (activeAnalogScratch && !(rightMoveScratching == nowRight)) {
 				// 左回転→右回転の場合(右回転→左回転は値の変更がない)
@@ -285,8 +282,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 			} else if (!activeAnalogScratch) {
 				// 移動無し→回転の場合
 				if (analogScratchTickCounter == 0 || counter <= this.analogScratchThreshold) {
-					analogScratchTickCounter += Math.floor(Math.abs(analogScratchX-oldAnalogScratchX)/0.0075f);
+					analogScratchTickCounter += ticks;
 				}
+				// 閾値以内tick２回→activeAnalogScratch=true
 				if (analogScratchTickCounter >= 2) {
 					activeAnalogScratch = true;
 					rightMoveScratching = nowRight;
@@ -316,10 +314,12 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	}
 
 	private boolean scratchInput(int button) {
-		if (analogScratchMode2) {
-			return analogScratchInputMode2(button);
-		} else if (analogScratch) {
-			return analogScratchInput(button);
+		if (analogScratch) {
+			if (analogScratchMode == ControllerConfig.ANALOG_SCRATCH_MODE_1) {
+				return analogScratchInput(button);
+			} else {
+				return analogScratchInputMode2(button);
+			}
 		} else {
 			if(button == BMKeys.UP) {
 				return (axis[1] < -0.9) || (axis[2] < -0.9);

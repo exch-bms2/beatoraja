@@ -191,14 +191,14 @@
                                 <Insets right="20.0" />
                             </HBox.margin>
                         </NumericSpinner>
-                        <CheckBox fx:id="analogScratchMode2" contentDisplay="CENTER" prefHeight="18.0" prefWidth="170.0" text="%ANALOG_SCRATCH_MODE_2" textAlignment="CENTER">
+                        <ComboBox fx:id="analogScratchMode" onAction="#updateInputConfig" prefHeight="18.0" prefWidth="170.0">
                             <tooltip>
                                 <Tooltip text="Alternative Analog Scratch Algorithm." textAlignment="CENTER" />
                             </tooltip>
                             <HBox.margin>
                                 <Insets />
                             </HBox.margin>
-                        </CheckBox>
+                        </ComboBox>
                     </HBox>
                 </VBox>
             </AnchorPane>

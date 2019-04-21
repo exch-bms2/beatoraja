@@ -235,7 +235,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox analogScratch;
 	@FXML
-	private CheckBox analogScratchMode2;
+	private ComboBox<Integer> analogScratchMode;
 	@FXML
 	private NumericSpinner<Integer> analogScratchThreshold;
     @FXML
@@ -298,6 +298,8 @@ public class PlayConfigurationView implements Initializable {
 		lr2configuration.setVgap(4);
 		lr2configurationassist.setHgap(25);
 		lr2configurationassist.setVgap(4);
+
+		initComboBox(analogScratchMode, new String[] { "MODE 1 ANALOG SCRATCH", "MODE 2 ANALOG SCRATCH" });
 
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
@@ -811,7 +813,7 @@ public class PlayConfigurationView implements Initializable {
 				controller.setJKOC(jkoc_hack.isSelected());
 		        controller.setAnalogScratch(analogScratch.isSelected());
 		        controller.setAnalogScratchThreshold(analogScratchThreshold.getValue());
-		        controller.setAnalogScratchMode2(analogScratchMode2.isSelected());
+		        controller.setAnalogScratchMode(analogScratchMode.getValue());
 			}
 		}
 		ic = inputconfig.getValue();
@@ -821,7 +823,7 @@ public class PlayConfigurationView implements Initializable {
 			inputduration.getValueFactory().setValue(controller.getDuration());
 	        jkoc_hack.setSelected(controller.getJKOC());
 	        analogScratch.setSelected(controller.isAnalogScratch());
-	        analogScratchMode2.setSelected(controller.isAnalogScratchMode2());
+	        analogScratchMode.getSelectionModel().select(controller.getAnalogScratchMode());
 	        analogScratchThreshold.getValueFactory().setValue(controller.getAnalogScratchThreshold());
 		}
 	}
