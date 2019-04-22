@@ -126,16 +126,31 @@ public class BGAProcessor {
 					break;
 				}
 				Path f = null;
-				if (Files.exists(dpath.resolve(name))) {
-					final int index = name.lastIndexOf('.');
-					String fex = null;
-					if (index != -1) {
-						fex = name.substring(index + 1).toLowerCase();
+				try {
+					if (Files.exists(dpath.resolve(name))) {
+						final int index = name.lastIndexOf('.');
+						String fex = null;
+						if (index != -1) {
+							fex = name.substring(index + 1).toLowerCase();
+						}
+						if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
+							f = dpath.resolve(name);
+						}else if(fex != null){
+							name = name.substring(0, index);
+							for (String mov : mov_extension) {
+								final Path mpgfile = dpath.resolve(name + "." + mov);
+								if (Files.exists(mpgfile)) {
+									f = mpgfile;
+									break;
+								}
+							}
+						}
 					}
-					if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
-						f = dpath.resolve(name);
-					}else if(fex != null){
-						name = name.substring(0, index);
+					if (f == null) {
+						final int index = name.lastIndexOf('.');
+						if (index != -1) {
+							name = name.substring(0, index);
+						}
 						for (String mov : mov_extension) {
 							final Path mpgfile = dpath.resolve(name + "." + mov);
 							if (Files.exists(mpgfile)) {
@@ -143,28 +158,17 @@ public class BGAProcessor {
 								break;
 							}
 						}
-					}
-				}
-				if (f == null) {
-					final int index = name.lastIndexOf('.');
-					if (index != -1) {
-						name = name.substring(0, index);
-					}
-					for (String mov : mov_extension) {
-						final Path mpgfile = dpath.resolve(name + "." + mov);
-						if (Files.exists(mpgfile)) {
-							f = mpgfile;
-							break;
+						for (String mov : BGImageProcessor.pic_extension) {
+							final Path picfile = dpath.resolve(name + "." + mov);
+							if (Files.exists(picfile)) {
+								f = picfile;
+								break;
+							}
 						}
 					}
-					for (String mov : BGImageProcessor.pic_extension) {
-						final Path picfile = dpath.resolve(name + "." + mov);
-						if (Files.exists(picfile)) {
-							f = picfile;
-							break;
-						}
-					}
-				}
+				} catch (InvalidPathException e) {
+	                Logger.getGlobal().warning(e.getMessage());
+	            }
 
 				if (f != null) {
 					boolean isMovie = false;
