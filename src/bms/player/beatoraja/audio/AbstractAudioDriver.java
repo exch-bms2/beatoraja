@@ -283,8 +283,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					}
 				}
 			} catch (InvalidPathException e) {
-                Logger.getGlobal().warning(e.getMessage());
-            }
+				Logger.getGlobal().warning(e.getMessage());
+			}
 			progress.incrementAndGet();
 		});
 

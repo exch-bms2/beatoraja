@@ -167,8 +167,8 @@ public class BGAProcessor {
 						}
 					}
 				} catch (InvalidPathException e) {
-	                Logger.getGlobal().warning(e.getMessage());
-	            }
+					Logger.getGlobal().warning(e.getMessage());
+				}
 
 				if (f != null) {
 					boolean isMovie = false;
