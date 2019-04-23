@@ -254,9 +254,9 @@ public class PlayModeConfig {
      */
     public static class ControllerConfig {
 
-        public static final int ANALOG_SCRATCH_MODE_1 = 0;
+        public static final int ANALOG_SCRATCH_VER_2 = 0;
         
-        public static final int ANALOG_SCRATCH_MODE_2 = 1;
+        public static final int ANALOG_SCRATCH_VER_1 = 1;
 
         private String name = "";
 

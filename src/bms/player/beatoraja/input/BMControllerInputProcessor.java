@@ -64,37 +64,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
  	 */
 	private boolean jkoc;
 	/**
-	 * アナログ皿かどうか
+	 * アナログ皿のアルゴリズム (null=アナログ皿を通用しない)
 	 */
-	private boolean analogScratch;
-	/**
-	 * アナログ皿モード２かどうか
-	 */
-	private int analogScratchMode;
-	/**
-	 * アナログ皿の閾値
-	 */
-	private int analogScratchThreshold;
-	/**
-	 * スクラッチ停止カウンタ
-	 */
-	private long counter = 1;
-	/**
-	 * （モード２）閾値以内の皿の移動数(２回->スクラッチ)
-	 */
-	private int analogScratchTickCounter = 0;
-	/**
-	 * アナログスクラッチ位置(-1<->0<->1)
-	 */
-	private float oldAnalogScratchX = 10;
-	/**
-	 * アナログスクラッチ 入力フラグ
-	 */
-	private boolean activeAnalogScratch = false;
-	/**
-	 * アナログスクラッチ 右回転フラグ
-	 */
-	private boolean rightMoveScratching = false;
+	AnalogScratchAlgorithm analogScratchAlgorithm = null;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, String name, Controller controller,
 									  ControllerConfig controllerConfig) {
@@ -110,9 +82,18 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.select = controllerConfig.getSelect();
 		this.duration = controllerConfig.getDuration();
 		this.jkoc = controllerConfig.getJKOC();
-		this.analogScratch = controllerConfig.isAnalogScratch();
-		this.analogScratchMode = controllerConfig.getAnalogScratchMode();
-		this.analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
+		analogScratchAlgorithm = null;
+		if (controllerConfig.isAnalogScratch()) {
+			int analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
+			switch (controllerConfig.getAnalogScratchMode()) {
+				case ControllerConfig.ANALOG_SCRATCH_VER_1:
+					analogScratchAlgorithm = new AnalogScratchAlgorithmVersion1(analogScratchThreshold);
+					break;
+				case ControllerConfig.ANALOG_SCRATCH_VER_2:
+					analogScratchAlgorithm = new AnalogScratchAlgorithmVersion2(analogScratchThreshold);
+					break;
+			}
+		}
 	}
 
 	public String getName() {
@@ -177,150 +158,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		}
 	}
 
-	private boolean analogScratchInput(int button) {
-		// Pick correct axis (axis[i] != 0)
-		float analogScratchX = 0f;
-		for (int i = 0; i < 4; i++) {
-			if (axis[i] != 0f) {
-				analogScratchX = axis[i];
-				break;
-			}
-		}
-
-		if (oldAnalogScratchX > 1) {
-			oldAnalogScratchX = analogScratchX;
-			activeAnalogScratch = false;
-			return false;
-		}
-
-		if (oldAnalogScratchX != analogScratchX) {
-			// アナログスクラッチ位置の移動が発生した場合
-			boolean nowRight = false;
-			if (oldAnalogScratchX < analogScratchX) {
-				nowRight = true;
-				if ((analogScratchX - oldAnalogScratchX) > (1 - analogScratchX + oldAnalogScratchX)) {
-					nowRight = false;
-				}
-			} else if (oldAnalogScratchX > analogScratchX) {
-				nowRight = false;
-				if ((oldAnalogScratchX - analogScratchX) > ((analogScratchX + 1) - oldAnalogScratchX)) {
-					nowRight = true;
-				}
-			}
-
-			if (activeAnalogScratch && !(rightMoveScratching == nowRight)) {
-				// 左回転→右回転の場合(右回転→左回転は値の変更がない)
-				rightMoveScratching = nowRight;
-			} else if (!activeAnalogScratch) {
-				// 移動無し→回転の場合
-				activeAnalogScratch = true;
-				rightMoveScratching = nowRight;
-			}
-
-			counter = 0;
-			oldAnalogScratchX = analogScratchX;
-		}
-
-		// counter > Threshold ... Stop Scratching.
-		if (counter > this.analogScratchThreshold && activeAnalogScratch) {
-			activeAnalogScratch = false;
-			counter = 0;
-		}
-
-		if (counter == Long.MAX_VALUE) {
-			counter = 0;
-		}
-
-		counter++;
-
-		if(button == BMKeys.UP) {
-			return activeAnalogScratch && rightMoveScratching;
-		} else if(button == BMKeys.DOWN){
-			return activeAnalogScratch && !rightMoveScratching;
-		} else {
-			return false;
-		}
-	}
-
-	private boolean analogScratchInputMode2(int button) {
-		// Pick correct axis (axis[i] != 0)
-		float analogScratchX = 0f;
-		for (int i = 0; i < 4; i++) {
-			if (axis[i] != 0f) {
-				analogScratchX = axis[i];
-				break;
-			}
-		}
-
-		if (oldAnalogScratchX > 1) {
-			oldAnalogScratchX = analogScratchX;
-			activeAnalogScratch = false;
-			return false;
-		}
-
-		if (oldAnalogScratchX != analogScratchX) {
-			// アナログスクラッチ位置の移動が発生した場合
-
-			// tick: 皿の最小の動き
-			// INFINITAS, DAO, YuanCon -> 0.00787
-			// arcin board -> 0.00784
-			final float TICK_MAX_SIZE = 0.009f;
-			float scratchDifferenceX = analogScratchX - oldAnalogScratchX;
-			if (scratchDifferenceX > 1.0f) {
-				scratchDifferenceX -= (2 + TICK_MAX_SIZE/2);
-			} else if (scratchDifferenceX < -1.0f) {
-				scratchDifferenceX += (2 + TICK_MAX_SIZE/2);
-			}
-			boolean nowRight = (scratchDifferenceX > 0);
-			int ticks = (int)Math.ceil(Math.abs(scratchDifferenceX)/TICK_MAX_SIZE);
-
-			if (activeAnalogScratch && !(rightMoveScratching == nowRight)) {
-				// 左回転→右回転の場合(右回転→左回転は値の変更がない)
-				rightMoveScratching = nowRight;
-				activeAnalogScratch = false;
-				analogScratchTickCounter = 0;
-			} else if (!activeAnalogScratch) {
-				// 移動無し→回転の場合
-				if (analogScratchTickCounter == 0 || counter <= this.analogScratchThreshold) {
-					analogScratchTickCounter += ticks;
-				}
-				// 閾値以内tick２回→activeAnalogScratch=true
-				if (analogScratchTickCounter >= 2) {
-					activeAnalogScratch = true;
-					rightMoveScratching = nowRight;
-				}
-			}
-
-			counter = 0;
-			oldAnalogScratchX = analogScratchX;
-		}
-
-		// counter > 2*Threshold ... Stop Scratching.
-		if (counter > this.analogScratchThreshold*2) {
-			activeAnalogScratch = false;
-			analogScratchTickCounter = 0;
-			counter = 0;
-		}
-
-		counter++;
-
-		if(button == BMKeys.UP) {
-			return activeAnalogScratch && rightMoveScratching;
-		} else if(button == BMKeys.DOWN){
-			return activeAnalogScratch && !rightMoveScratching;
-		} else {
-			return false;
-		}
-	}
-
 	private boolean scratchInput(int button) {
-		if (analogScratch) {
-			if (analogScratchMode == ControllerConfig.ANALOG_SCRATCH_MODE_1) {
-				return analogScratchInput(button);
-			} else {
-				return analogScratchInputMode2(button);
-			}
-		} else {
+		if (analogScratchAlgorithm == null) {
+			// アナログ皿を使わない
 			if(button == BMKeys.UP) {
 				return (axis[1] < -0.9) || (axis[2] < -0.9);
 			} else if(button == BMKeys.DOWN){
@@ -328,6 +168,17 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 			} else {
 				return false;
 			}
+		} else {
+			// アナログ皿
+			// Pick correct axis (axis[i] != 0)
+			float analogScratchX = 0f;
+			for (int i = 0; i < 4; i++) {
+				if (axis[i] != 0f) {
+					analogScratchX = axis[i];
+					break;
+				}
+			}
+			return analogScratchAlgorithm.analogScratchInput(button, analogScratchX);
 		}
 	}
 
@@ -379,4 +230,184 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		}
 	}
 
+
+    private static interface AnalogScratchAlgorithm {
+        public boolean analogScratchInput(int button, float currentScratchX);
+    }
+
+    private static class AnalogScratchAlgorithmVersion1 implements AnalogScratchAlgorithm {
+        /**
+         * アナログ皿の閾値
+         */
+        private int analogScratchThreshold;
+        /**
+         * スクラッチ停止カウンタ
+         */
+        private long counter = 1;
+        /**
+         * アナログスクラッチ位置(-1<->0<->1)
+         */
+        private float oldScratchX = 10;
+        /**
+         * アナログスクラッチ 入力フラグ
+         */
+        private boolean scratchActive = false;
+        /**
+         * アナログスクラッチ 右回転フラグ
+         */
+        private boolean rightMoveScratching = false;
+
+        public AnalogScratchAlgorithmVersion1(int analogScratchThreshold) {
+            this.analogScratchThreshold = analogScratchThreshold;
+        }
+
+        public boolean analogScratchInput(int button, float currentScratchX) {
+            if (oldScratchX > 1) {
+                oldScratchX = currentScratchX;
+                scratchActive = false;
+                return false;
+            }
+
+            if (oldScratchX != currentScratchX) {
+                // アナログスクラッチ位置の移動が発生した場合
+                boolean nowRight = false;
+                if (oldScratchX < currentScratchX) {
+                    nowRight = true;
+                    if ((currentScratchX - oldScratchX) > (1 - currentScratchX + oldScratchX)) {
+                        nowRight = false;
+                    }
+                } else if (oldScratchX > currentScratchX) {
+                    nowRight = false;
+                    if ((oldScratchX - currentScratchX) > ((currentScratchX + 1) - oldScratchX)) {
+                        nowRight = true;
+                    }
+                }
+
+                if (scratchActive && !(rightMoveScratching == nowRight)) {
+                    // 左回転→右回転の場合(右回転→左回転は値の変更がない)
+                    rightMoveScratching = nowRight;
+                } else if (!scratchActive) {
+                    // 移動無し→回転の場合
+                    scratchActive = true;
+                    rightMoveScratching = nowRight;
+                }
+
+                counter = 0;
+                oldScratchX = currentScratchX;
+            }
+
+            // counter > Threshold ... Stop Scratching.
+            if (counter > this.analogScratchThreshold && scratchActive) {
+                scratchActive = false;
+                counter = 0;
+            }
+
+            if (counter == Long.MAX_VALUE) {
+                counter = 0;
+            }
+
+            counter++;
+
+            if(button == BMKeys.UP) {
+                return scratchActive && rightMoveScratching;
+            } else if(button == BMKeys.DOWN){
+                return scratchActive && !rightMoveScratching;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private static class AnalogScratchAlgorithmVersion2 implements AnalogScratchAlgorithm {
+        /**
+         * アナログ皿の閾値
+         */
+        private int analogScratchThreshold;
+        /**
+         * スクラッチ停止カウンタ
+         */
+        private long counter = 1;
+        /**
+         * （モード２）閾値以内の皿の移動数(２回->スクラッチ)
+         */
+        private int analogScratchTickCounter = 0;
+        /**
+         * アナログスクラッチ位置(-1<->0<->1)
+         */
+        private float oldScratchX = 10;
+        /**
+         * アナログスクラッチ 入力フラグ
+         */
+        private boolean scratchActive = false;
+        /**
+         * アナログスクラッチ 右回転フラグ
+         */
+        private boolean rightMoveScratching = false;
+
+        public AnalogScratchAlgorithmVersion2(int analogScratchThreshold) {
+            this.analogScratchThreshold = analogScratchThreshold;
+        }
+
+        public boolean analogScratchInput(int button, float currentScratchX) {
+            if (oldScratchX > 1) {
+                oldScratchX = currentScratchX;
+                scratchActive = false;
+                return false;
+            }
+
+            if (oldScratchX != currentScratchX) {
+                // アナログスクラッチ位置の移動が発生した場合
+
+                // tick: 皿の最小の動き
+                // INFINITAS, DAO, YuanCon -> 0.00787
+                // arcin board -> 0.00784
+                final float TICK_MAX_SIZE = 0.009f;
+                float scratchDifferenceX = currentScratchX - oldScratchX;
+                if (scratchDifferenceX > 1.0f) {
+                    scratchDifferenceX -= (2 + TICK_MAX_SIZE/2);
+                } else if (scratchDifferenceX < -1.0f) {
+                    scratchDifferenceX += (2 + TICK_MAX_SIZE/2);
+                }
+                boolean nowRight = (scratchDifferenceX > 0);
+                int ticks = (int)Math.ceil(Math.abs(scratchDifferenceX)/TICK_MAX_SIZE);
+
+                if (scratchActive && !(rightMoveScratching == nowRight)) {
+                    // 左回転→右回転の場合(右回転→左回転は値の変更がない)
+                    rightMoveScratching = nowRight;
+                    scratchActive = false;
+                    analogScratchTickCounter = 0;
+                } else if (!scratchActive) {
+                    // 移動無し→回転の場合
+                    if (analogScratchTickCounter == 0 || counter <= this.analogScratchThreshold) {
+                        analogScratchTickCounter += ticks;
+                    }
+                    // scratchActive=true
+                    if (analogScratchTickCounter >= 2) {
+                        scratchActive = true;
+                        rightMoveScratching = nowRight;
+                    }
+                }
+
+                counter = 0;
+                oldScratchX = currentScratchX;
+            }
+
+            // counter > 2*Threshold ... Stop Scratching.
+            if (counter > this.analogScratchThreshold*2) {
+                scratchActive = false;
+                analogScratchTickCounter = 0;
+                counter = 0;
+            }
+
+            counter++;
+
+            if(button == BMKeys.UP) {
+                return scratchActive && rightMoveScratching;
+            } else if(button == BMKeys.DOWN){
+                return scratchActive && !rightMoveScratching;
+            } else {
+                return false;
+            }
+        }
+    }
 }

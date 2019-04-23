@@ -299,7 +299,7 @@ public class PlayConfigurationView implements Initializable {
 		lr2configurationassist.setHgap(25);
 		lr2configurationassist.setVgap(4);
 
-		initComboBox(analogScratchMode, new String[] { "MODE 1 ANALOG SCRATCH", "MODE 2 ANALOG SCRATCH" });
+		initComboBox(analogScratchMode, new String[] { "Ver. 2 (Newest)", "Ver. 1 (~0.6.9)" });
 
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
