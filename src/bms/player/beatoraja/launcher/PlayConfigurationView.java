@@ -927,11 +927,15 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(config.getTablepath()))) {
-			for (Path p : paths) {
-				Files.deleteIfExists(p);
-			}
+			paths.forEach((p) -> {
+				if(p.toString().toLowerCase().endsWith(".bmt")) {
+					try {
+						Files.deleteIfExists(p);
+					} catch (IOException e) {
+					}					
+				}
+			});
 		} catch (IOException e) {
-
 		}
 
 		TableDataAccessor tda = new TableDataAccessor(config.getTablepath());
