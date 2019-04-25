@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
 
 /**
  * BGAのリソース管理、描画用クラス
@@ -29,12 +28,10 @@ public class BGAProcessor {
 	
 	// TODO イベントレイヤー対応(現状はミスレイヤーのみ)
 
-	private BMSModel model;
-	private Config config;
 	private PlayerConfig player;
 	private float progress = 0;
 
-	private MovieProcessor[] movies; 
+	private MovieProcessor[] movies = new MovieProcessor[0]; 
 	
 	private final ResourcePool<String, MovieProcessor> mpgresource;
 
@@ -74,7 +71,6 @@ public class BGAProcessor {
 	private boolean rlayer;
 
 	public BGAProcessor(Config config, PlayerConfig player) {
-		this.config = config;
 		this.player = player;
 
 		Pixmap blank = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -101,7 +97,6 @@ public class BGAProcessor {
 	}
 
 	public synchronized void setModel(BMSModel model) {
-		this.model = model;
 		progress = 0;
 
 		cache.clear();
