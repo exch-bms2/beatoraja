@@ -10,11 +10,14 @@ import bms.player.beatoraja.input.BMSPlayerInputDevice;
  * @author ununique
  */
 public class IRScoreData implements Validatable {
+
+	// TODO 各OPでのクリア、各DPオプションでのクリア、増加型/減少型プレイゲージでの最大クリア
+
 	/**
 	 * 譜面のハッシュ値
 	 */
 	private String sha256 = "";
-	
+
 	private int mode = 0;
 	
 	private int clear = 0;

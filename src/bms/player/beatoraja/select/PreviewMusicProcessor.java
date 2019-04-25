@@ -1,8 +1,10 @@
 package bms.player.beatoraja.select;
 
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.audio.AudioDriver;
@@ -44,8 +46,16 @@ public class PreviewMusicProcessor {
             preview.start();
         }
         current = song;
-        commands.add(song != null && song.getPreview() != null && song.getPreview().length() > 0 ?
-                Paths.get(song.getPath()).getParent().resolve(song.getPreview()).toString() : "");
+
+        String previewPath = "";
+        if (song != null && song.getPreview() != null && song.getPreview().length() > 0) {
+            try {
+                previewPath = Paths.get(song.getPath()).getParent().resolve(song.getPreview()).toString();
+            } catch (InvalidPathException e) {
+                Logger.getGlobal().warning(e.getMessage());
+            }
+        }
+        commands.add(previewPath);
     }
 
     public SongData getSongData() {

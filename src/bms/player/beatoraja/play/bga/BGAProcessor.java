@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
 
 /**
  * BGAのリソース管理、描画用クラス
@@ -29,12 +28,10 @@ public class BGAProcessor {
 	
 	// TODO イベントレイヤー対応(現状はミスレイヤーのみ)
 
-	private BMSModel model;
-	private Config config;
 	private PlayerConfig player;
 	private float progress = 0;
 
-	private MovieProcessor[] movies; 
+	private MovieProcessor[] movies = new MovieProcessor[0]; 
 	
 	private final ResourcePool<String, MovieProcessor> mpgresource;
 
@@ -74,7 +71,6 @@ public class BGAProcessor {
 	private boolean rlayer;
 
 	public BGAProcessor(Config config, PlayerConfig player) {
-		this.config = config;
 		this.player = player;
 
 		Pixmap blank = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -101,7 +97,6 @@ public class BGAProcessor {
 	}
 
 	public synchronized void setModel(BMSModel model) {
-		this.model = model;
 		progress = 0;
 
 		cache.clear();
@@ -126,16 +121,31 @@ public class BGAProcessor {
 					break;
 				}
 				Path f = null;
-				if (Files.exists(dpath.resolve(name))) {
-					final int index = name.lastIndexOf('.');
-					String fex = null;
-					if (index != -1) {
-						fex = name.substring(index + 1).toLowerCase();
+				try {
+					if (Files.exists(dpath.resolve(name))) {
+						final int index = name.lastIndexOf('.');
+						String fex = null;
+						if (index != -1) {
+							fex = name.substring(index + 1).toLowerCase();
+						}
+						if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
+							f = dpath.resolve(name);
+						}else if(fex != null){
+							name = name.substring(0, index);
+							for (String mov : mov_extension) {
+								final Path mpgfile = dpath.resolve(name + "." + mov);
+								if (Files.exists(mpgfile)) {
+									f = mpgfile;
+									break;
+								}
+							}
+						}
 					}
-					if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
-						f = dpath.resolve(name);
-					}else if(fex != null){
-						name = name.substring(0, index);
+					if (f == null) {
+						final int index = name.lastIndexOf('.');
+						if (index != -1) {
+							name = name.substring(0, index);
+						}
 						for (String mov : mov_extension) {
 							final Path mpgfile = dpath.resolve(name + "." + mov);
 							if (Files.exists(mpgfile)) {
@@ -143,27 +153,16 @@ public class BGAProcessor {
 								break;
 							}
 						}
-					}
-				}
-				if (f == null) {
-					final int index = name.lastIndexOf('.');
-					if (index != -1) {
-						name = name.substring(0, index);
-					}
-					for (String mov : mov_extension) {
-						final Path mpgfile = dpath.resolve(name + "." + mov);
-						if (Files.exists(mpgfile)) {
-							f = mpgfile;
-							break;
+						for (String mov : BGImageProcessor.pic_extension) {
+							final Path picfile = dpath.resolve(name + "." + mov);
+							if (Files.exists(picfile)) {
+								f = picfile;
+								break;
+							}
 						}
 					}
-					for (String mov : BGImageProcessor.pic_extension) {
-						final Path picfile = dpath.resolve(name + "." + mov);
-						if (Files.exists(picfile)) {
-							f = picfile;
-							break;
-						}
-					}
+				} catch (InvalidPathException e) {
+					Logger.getGlobal().warning(e.getMessage());
 				}
 
 				if (f != null) {

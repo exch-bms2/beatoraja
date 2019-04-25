@@ -3,6 +3,7 @@ package bms.player.beatoraja.audio;
 import bms.model.*;
 import bms.player.beatoraja.ResourcePool;
 
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -249,37 +250,40 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				return;
 			}
 			String name = model.getWavList()[wavid];
-			for (Note note : waventry.getValue()) {
-				// 音切りあり・なし両方のデータが必要になるケースがある
-				if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
-					// 音切りなしのケース
-					Path p = dpath.resolve(name);
-					wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
-					if (wavmap[wavid] == null) {
-						break;
-					}
-				} else {
-					// 音切りありのケース
-					boolean b = true;
-					if (slicesound[note.getWav()] == null) {
-						slicesound[note.getWav()] = new Array<SliceWav<T>>();
-					}
-					for (SliceWav<T> slice : slicesound[note.getWav()]) {
-						if (slice.starttime == note.getMicroStarttime() && slice.duration == note.getMicroDuration()) {
-							b = false;
+			try {
+				Path p = dpath.resolve(name);
+				for (Note note : waventry.getValue()) {
+					// 音切りあり・なし両方のデータが必要になるケースがある
+					if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
+						// 音切りなしのケース
+						wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
+						if (wavmap[wavid] == null) {
 							break;
 						}
-					}
-					if (b) {
-						Path p = dpath.resolve(name);
-						T sliceaudio = cache.get(new AudioKey(p.toString(), note));
-						if (sliceaudio != null) {
-							slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
-						} else {
-							return;
+					} else {
+						// 音切りありのケース
+						boolean b = true;
+						if (slicesound[note.getWav()] == null) {
+							slicesound[note.getWav()] = new Array<SliceWav<T>>();
+						}
+						for (SliceWav<T> slice : slicesound[note.getWav()]) {
+							if (slice.starttime == note.getMicroStarttime() && slice.duration == note.getMicroDuration()) {
+								b = false;
+								break;
+							}
+						}
+						if (b) {
+							T sliceaudio = cache.get(new AudioKey(p.toString(), note));
+							if (sliceaudio != null) {
+								slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
+							} else {
+								return;
+							}
 						}
 					}
 				}
+			} catch (InvalidPathException e) {
+				Logger.getGlobal().warning(e.getMessage());
 			}
 			progress.incrementAndGet();
 		});
