@@ -17,7 +17,7 @@ import bms.tool.mdprocessor.IpfsInformation;
  * @author exch
  */
 public class SongData implements Validatable, IpfsInformation {
-	
+
 	public static final SongData[] EMPTY = new SongData[0];
 	
 	public static final int FEATURE_UNDEFINEDLN = 1;
@@ -30,9 +30,11 @@ public class SongData implements Validatable, IpfsInformation {
 
 	public static final int CONTENT_TEXT = 1;
 	public static final int CONTENT_BGA = 2;
+	public static final int CONTENT_PREVIEW = 4;
 
 	public static final int FAVORITE_SONG = 1;
 	public static final int FAVORITE_CHART = 2;
+	public static final int INVISIBLE_CHART = 4;
 
 	/**
 	 * 楽曲タイトル
@@ -365,13 +367,17 @@ public class SongData implements Validatable, IpfsInformation {
 	}
 	
 	public boolean hasDocument() {
-		return (content & 1) != 0;
+		return (content & CONTENT_TEXT) != 0;
 	}
 	
 	public boolean hasBGA() {
-		return (content & 2) != 0;
+		return (content & CONTENT_BGA) != 0;
 	}
-	
+
+	public boolean hasPreview() {
+		return (content & CONTENT_PREVIEW) != 0;
+	}
+
 	public boolean hasRandomSequence() {
 		return (feature & FEATURE_RANDOM) != 0;
 	}
