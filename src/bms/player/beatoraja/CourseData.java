@@ -119,7 +119,7 @@ public class CourseData implements Validatable {
         if(constraint == null) {
         	constraint = CourseDataConstraint.EMPTY;
         }
-        CourseDataConstraint[] cdc = new CourseDataConstraint[4];
+        CourseDataConstraint[] cdc = new CourseDataConstraint[5];
         for(int i = 0;i < constraint.length;i++) {
         	if(cdc[constraint[i].type] == null) {
         		cdc[constraint[i].type] = constraint[i];
@@ -144,19 +144,61 @@ public class CourseData implements Validatable {
      * @author exch
      */
     public enum CourseDataConstraint {
+    	/**
+    	 * 段位
+    	 */
         CLASS("grade", 0),
+    	/**
+    	 * 段位(ミラーOK)
+    	 */
         MIRROR("grade_mirror", 0),
+    	/**
+    	 * 段位(ランダムOK)
+    	 */
         RANDOM("grade_random", 0),
+    	/**
+    	 * ハイスピード機能禁止
+    	 */
         NO_SPEED("no_speed", 1),
+    	/**
+    	 * GOOD判定なし
+    	 */
         NO_GOOD("no_good", 2),
+    	/**
+    	 * GREAT判定なし
+    	 */
         NO_GREAT("no_great", 2),
+    	/**
+    	 * LR2ゲージ
+    	 */
     	GAUGE_LR2("gauge_lr2", 3),
+    	/**
+    	 * 5KEYゲージ
+    	 */
     	GAUGE_5KEYS("gauge_5k", 3),
+    	/**
+    	 * 7KEYゲージ
+    	 */
     	GAUGE_7KEYS("gauge_7k", 3),
+    	/**
+    	 * PMSゲージ
+    	 */
     	GAUGE_9KEYS("gauge_9k", 3),
+    	/**
+    	 * 24KEYゲージ
+    	 */
     	GAUGE_24KEYS("gauge_24k", 3),
+    	/**
+    	 * LNモード
+    	 */
         LN("ln", 4),
+    	/**
+    	 * CNモード
+    	 */
         CN("cn", 4),
+    	/**
+    	 * HCNモード
+    	 */
         HCN("hcn", 4);
 
     	public static final CourseDataConstraint[] EMPTY = new CourseDataConstraint[0];
