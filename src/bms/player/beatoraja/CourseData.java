@@ -19,7 +19,7 @@ public class CourseData implements Validatable {
     /**
      * 楽曲のハッシュ
      */
-    private SongData[] hash = new SongData[0];
+    private SongData[] hash = SongData.EMPTY;
     /**
      * コースの制限
      */
@@ -54,6 +54,10 @@ public class CourseData implements Validatable {
     }
     
     public void setSong(BMSModel[] models) {
+        if(models == null || models.length == 0) {
+            this.hash = SongData.EMPTY;
+            return;
+        }
     	SongData[] hash = new SongData[models.length];
     	for(int i = 0;i < models.length;i++) {
     		hash[i] = new SongData(models[i], false);
@@ -164,7 +168,7 @@ public class CourseData implements Validatable {
             this.name = name;
             this.type = type;
         }
-        
+
         public static CourseDataConstraint getValue(String name) {
         	for(CourseDataConstraint constraint : CourseDataConstraint.values()) {
         		if(constraint.name.equals(name)) {
