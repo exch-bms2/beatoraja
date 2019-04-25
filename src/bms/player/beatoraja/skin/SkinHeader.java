@@ -16,8 +16,13 @@ public class SkinHeader {
 	 * スキンの種類
 	 */
 	private int type;
-
+	/**
+	 * スキン:LR2
+	 */
 	public static final int TYPE_LR2SKIN = 0;
+	/**
+	 * スキン:beatoraja
+	 */
 	public static final int TYPE_BEATORJASKIN = 1;
 	/**
 	 * スキンファイルのパス
@@ -32,9 +37,9 @@ public class SkinHeader {
 	 */
 	private String name;
 	
-	private CustomOption[] options = new CustomOption[0];
-	private CustomFile[] files = new CustomFile[0];
-	private CustomOffset[] offsets = new CustomOffset[0];
+	private CustomOption[] options = CustomOption.EMPTY_ARRAY;
+	private CustomFile[] files = CustomFile.EMPTY_ARRAY;
+	private CustomOffset[] offsets = CustomOffset.EMPTY_ARRAY;
 	/**
 	 * スキン解像度
 	 */
@@ -109,6 +114,9 @@ public class SkinHeader {
 	}
 
 	public static class CustomOption {
+
+		public static final CustomOption[] EMPTY_ARRAY = new CustomOption[0];
+
 		public final String name;
 		public final int[] option;
 		public final String[] contents;
@@ -138,6 +146,9 @@ public class SkinHeader {
 	}
 
 	public static class CustomFile {
+
+		public static final CustomFile[] EMPTY_ARRAY = new CustomFile[0];
+
 		public final String name;
 		public final String path;
 		public final String def;
@@ -150,6 +161,9 @@ public class SkinHeader {
 	}
 	
 	public static class CustomOffset {
+
+		public static final CustomOffset[] EMPTY_ARRAY = new CustomOffset[0];
+
 		public final String name;
 		public final int id;
 		public final boolean x;
