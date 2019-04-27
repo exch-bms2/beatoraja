@@ -270,6 +270,8 @@ public class PlayConfigurationView implements Initializable {
 	private IRConfigurationView irController;
 	@FXML
 	private CourseEditorView courseController;
+	@FXML
+	private FolderEditorView tableController;
 
 	private Config config;
 	private PlayerConfig player;
@@ -448,6 +450,8 @@ public class PlayConfigurationView implements Initializable {
 					config.getBmsroot());
 			courseController.setSongDatabaseAccessor(songdb);
 			courseController.update("default");
+			tableController.init(config, songdb);
+			tableController.update("default.json");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -579,6 +583,7 @@ public class PlayConfigurationView implements Initializable {
 			e.printStackTrace();
 		}
 		courseController.commit();
+		tableController.commit();
 	}
 
 	public void commitPlayer() {

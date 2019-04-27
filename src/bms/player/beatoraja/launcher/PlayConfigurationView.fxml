@@ -585,6 +585,14 @@
             </padding>
             </AnchorPane>
         </Tab>
+        <Tab fx:id="tableTab" closable="false" text="Table">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <fx:include fx:id="table" source="FolderEditorView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <padding>
+               <Insets left="10.0" top="10.0" />
+            </padding>
+            </AnchorPane>
+        </Tab>
     </TabPane>
     <HBox fx:id="controlPanel" prefWidth="552.0">
         <VBox.margin>
