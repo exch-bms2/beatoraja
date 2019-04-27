@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.CheckBox?>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.FolderEditorView">
+   <children>
+      <HBox VBox.vgrow="ALWAYS">
+         <children>
+            <VBox spacing="10.0">
+               <children>
+                  <HBox prefHeight="31.0" prefWidth="240.0">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <children>
+                        <TextField fx:id="tableName" prefWidth="400" />
+                        <Button mnemonicParsing="false" onAction="#addTableFolder" text="＋" />
+                     </children>
+                  </HBox>
+                  <ListView fx:id="folders" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#commit" text="Save" />
+               </children>
+            </VBox>
+            <GridPane prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="101.0" minWidth="10.0" prefWidth="99.0" />
+                  <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="500.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+                  <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+                  <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <HBox GridPane.columnIndex="2">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                     <children>
+                        <TextField fx:id="folderName" prefWidth="400">
+                        </TextField>
+                     </children>
+                  </HBox>
+                  <HBox minHeight="60.0" spacing="5.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                  <children>
+                        <AnchorPane minHeight="10.0" prefHeight="300.0" HBox.hgrow="ALWAYS">
+                           <children>
+      	      <fx:include fx:id="folderSongs" prefHeight="130.0" prefWidth="450.0" source="SongDataView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                        <VBox prefHeight="208.0" prefWidth="60.0" spacing="5.0" HBox.hgrow="NEVER">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#removeSongData" prefWidth="60.0" text="ー">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#moveSongDataUp" prefWidth="60.0" text="↑">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#moveSongDataDown" prefWidth="60.0" text="↓">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                  </children>
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin>
+                     <padding>
+                        <Insets bottom="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </HBox>
+                  <Label text="NAME" GridPane.columnIndex="1" />
+                  <Label text="SONGS" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <VBox minHeight="60.0" spacing="5.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <children>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#addSongData" text="＋">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </Button>
+                              <TextField fx:id="search" prefHeight="24.0" prefWidth="342.0" HBox.hgrow="ALWAYS" />
+                              <Button mnemonicParsing="false" onAction="#searchSongs" text="Search">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin></Button>
+                           </children>
+                        </HBox>
+                        <AnchorPane minHeight="10.0" prefHeight="300.0" VBox.vgrow="ALWAYS">
+                           <children>
+                              <fx:include fx:id="searchSongs" prefHeight="130.0" prefWidth="450.0" source="SongDataView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                     </children>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                  </VBox>
+                  <Label text="SEARCH" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+         </children>
+      </HBox>
+   </children>
+</VBox>
