@@ -104,7 +104,7 @@ public class TableDataAccessor {
 	 * @param name 難易度表URL
 	 * @return キャッシュされた難易度表データ。存在しない場合はnull
 	 */
-	public TableData read(String url) {
+	public TableData readCache(String url) {
 		TableData td = null;
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
@@ -119,7 +119,11 @@ public class TableDataAccessor {
 		return td;
 	}
 	
-	private TableData read(Path p) {
+	public TableData read(String filename) {
+		return read(Paths.get(tabledir + "/" + filename));
+	}
+
+	public TableData read(Path p) {
 		try {
 			InputStream is = null;
 			if (p.toString().endsWith(".bmt")) {
