@@ -7,7 +7,10 @@
     <columns>
         <TableColumn fx:id="title" minWidth="200.0" prefWidth="278.0" text="TITLE" />
         <TableColumn fx:id="artist" minWidth="100.0" prefWidth="147.0" text="ARTIST" />
+        <TableColumn fx:id="genre" minWidth="100.0" prefWidth="147.0" text="GENRE" />
         <TableColumn fx:id="mode" minWidth="20.0" prefWidth="82.0" text="MODE" />
         <TableColumn fx:id="notes" minWidth="40.0" prefWidth="70.0" text="NOTES" />
+        <TableColumn fx:id="level" minWidth="40.0" prefWidth="70.0" text="LEVEL" />
+        <TableColumn fx:id="sha256" minWidth="40.0" prefWidth="200.0" text="SHA256" />
     </columns>
 </TableView>
