@@ -25,6 +25,8 @@ public class FolderEditorView implements Initializable {
 	private TextField search;
 	@FXML
 	private TableView<SongData> searchSongs;
+	@FXML
+	private SongDataView searchSongsController;
 
 	@FXML
 	private TextField tableName;
@@ -34,6 +36,8 @@ public class FolderEditorView implements Initializable {
 	private TextField folderName;
 	@FXML
 	private TableView<SongData> folderSongs;
+	@FXML
+	private SongDataView folderSongsController;
 
 	private String filename;
 	
@@ -59,6 +63,8 @@ public class FolderEditorView implements Initializable {
 				}
 			};
 		});
+		folderSongsController.setVisible("fullTitle", "sha256");
+		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
 	}
 	
 	protected void init(Config config, SongDatabaseAccessor songdb) {
