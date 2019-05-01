@@ -299,11 +299,6 @@ public class PracticeConfiguration {
 			sprite.draw(titlefont, String.format("%s %d %d %d",judge[i], state.getJudgeCount(i, true) + state.getJudgeCount(i, false), state.getJudgeCount(i, true), state.getJudgeCount(i, false)), x + 250, y - (i * 22), Color.WHITE);
 		}
 
-		for(int i = 0; i < graph.length; i++) {
-			graph[i].draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
-					property.endtime, property.freq / 100f);
-		}
-
 		graph[property.graphtype].draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
 				property.endtime, property.freq / 100f);
 	}
