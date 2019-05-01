@@ -37,6 +37,10 @@ public class FFmpegProcessor implements MovieProcessor {
 	private MovieSeekThread movieseek;
 
 	private long time;
+	/**
+	 * dispose()を呼び出した後にprocessorDisposedはtrueになる
+	 */
+	private boolean processorDisposed = false;
 
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;
@@ -64,6 +68,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public void dispose() {
+		processorDisposed = true;
 		if (movieseek != null) {
 			movieseek.exec(Command.HALT);
 			movieseek = null;
@@ -171,7 +176,8 @@ public class FFmpegProcessor implements MovieProcessor {
 								}
 								Gdx.app.postRunnable(() -> {
 									final Pixmap p = pixmap;
-									if (p == null) {
+									// dispose()を呼び出した後にshowingtexを使えばEXCEPTION_ACCESS_VIOLATIONが発生
+									if (p == null || processorDisposed) {
 										return;
 									}
 									if (showingtex != null) {
