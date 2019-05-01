@@ -3,12 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.song.SongData;
-import com.badlogic.gdx.utils.ObjectMap;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.badlogic.gdx.utils.*;
 
 /**
  * スコアデータのキャッシュ
@@ -31,6 +26,12 @@ public abstract class ScoreDataCache {
         }
     }
 
+    /**
+     * 指定した楽曲データ、LN MODEに対するスコアデータを返す
+     * @param song 楽曲データ
+     * @param lnmode LN MODE
+     * @return スコアデータ。存在しない場合はnull
+     */
     public IRScoreData readScoreData(SongData song, int lnmode) {
         final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
         if (scorecache[cacheindex].containsKey(song.getSha256())) {
@@ -41,9 +42,15 @@ public abstract class ScoreDataCache {
         return score;
     }
 
+    /**
+     *
+     * @param collector
+     * @param songs
+     * @param lnmode
+     */
     public void readScoreDatas(ScoreDataCollector collector, SongData[] songs, int lnmode) {
         // キャッシュからの抽出
-        List<SongData> noscore = null;
+        Array<SongData> noscore = null;
         for (SongData song : songs) {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
 
@@ -51,7 +58,7 @@ public abstract class ScoreDataCache {
                 collector.collect(song, scorecache[cacheindex].get(song.getSha256()));
             } else {
             	if(noscore == null) {
-            		noscore = new ArrayList<SongData>();
+            		noscore = new Array<SongData>();
             	}
                 noscore.add(song);
             }
@@ -60,15 +67,14 @@ public abstract class ScoreDataCache {
         if(noscore == null) {
             return;
         }
-        
-        final SongData[] noscores = noscore.toArray(new SongData[noscore.size()]);
+        // キャッシュに存在しなかったスコアデータをキャッシュに登録
+        final SongData[] noscores = noscore.toArray(SongData.class);
 
         final ScoreDataCollector cachecollector = (song, score) -> {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
             scorecache[cacheindex].put(song.getSha256(), score);
         	collector.collect(song, score);
         };
-        // データベースから抽出し、キャッシュに登録
         readScoreDatasFromSource(cachecollector, noscores, lnmode);
     }
 

@@ -772,11 +772,8 @@ public class BarRenderer {
 				dir.addLast((DirectoryBar) bar);
 			}
 
-			// 変更前と同じバーがあればカーソル位置を保持する
-			currentsongs = l.toArray(Bar.class);
-			bartextupdate = true;
-
-			for (Bar b : currentsongs) {
+			Bar[] newcurrentsongs = l.toArray(Bar.class);
+			for (Bar b : newcurrentsongs) {
 				if (b instanceof SongBar) {
 					SongData sd = ((SongBar) b).getSongData();
 					if (sd != null && select.getScoreDataCache().existsScoreDataCache(sd, config.getLnmode())) {
@@ -784,11 +781,14 @@ public class BarRenderer {
 					}
 				}
 			}
+			Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
 
-			Sort.instance().sort(currentsongs, BarSorter.values()[select.getSort()]);
+			currentsongs = newcurrentsongs;
+			bartextupdate = true;
 
 			selectedindex = 0;
 
+			// 変更前と同じバーがあればカーソル位置を保持する
 			if (prevbar != null) {
 				if (prevbar instanceof SongBar && ((SongBar) prevbar).existsSong()) {
 					final SongBar prevsong = (SongBar) prevbar;

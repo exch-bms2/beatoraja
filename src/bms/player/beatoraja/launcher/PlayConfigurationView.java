@@ -235,6 +235,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox analogScratch;
 	@FXML
+	private ComboBox<Integer> analogScratchMode;
+	@FXML
 	private NumericSpinner<Integer> analogScratchThreshold;
     @FXML
     private CheckBox usecim;
@@ -270,6 +272,8 @@ public class PlayConfigurationView implements Initializable {
 	private IRConfigurationView irController;
 	@FXML
 	private CourseEditorView courseController;
+	@FXML
+	private FolderEditorView tableController;
 
 	private Config config;
 	private PlayerConfig player;
@@ -296,6 +300,8 @@ public class PlayConfigurationView implements Initializable {
 		lr2configuration.setVgap(4);
 		lr2configurationassist.setHgap(25);
 		lr2configurationassist.setVgap(4);
+
+		initComboBox(analogScratchMode, new String[] { "Ver. 2 (Newest)", "Ver. 1 (~0.6.9)" });
 
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
@@ -448,6 +454,8 @@ public class PlayConfigurationView implements Initializable {
 					config.getBmsroot());
 			courseController.setSongDatabaseAccessor(songdb);
 			courseController.update("default");
+			tableController.init(config, songdb);
+			tableController.update("default.json");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -579,6 +587,7 @@ public class PlayConfigurationView implements Initializable {
 			e.printStackTrace();
 		}
 		courseController.commit();
+		tableController.commit();
 	}
 
 	public void commitPlayer() {
@@ -809,6 +818,7 @@ public class PlayConfigurationView implements Initializable {
 				controller.setJKOC(jkoc_hack.isSelected());
 		        controller.setAnalogScratch(analogScratch.isSelected());
 		        controller.setAnalogScratchThreshold(analogScratchThreshold.getValue());
+		        controller.setAnalogScratchMode(analogScratchMode.getValue());
 			}
 		}
 		ic = inputconfig.getValue();
@@ -818,6 +828,7 @@ public class PlayConfigurationView implements Initializable {
 			inputduration.getValueFactory().setValue(controller.getDuration());
 	        jkoc_hack.setSelected(controller.getJKOC());
 	        analogScratch.setSelected(controller.isAnalogScratch());
+	        analogScratchMode.getSelectionModel().select(controller.getAnalogScratchMode());
 	        analogScratchThreshold.getValueFactory().setValue(controller.getAnalogScratchThreshold());
 		}
 	}

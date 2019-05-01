@@ -454,9 +454,14 @@ public class JudgeManager {
 									}
 									j = (j >= 4 ? j + 1 : j);
 								}
-								if (j < 6 && (j < 4 || tnote == null
-										|| Math.abs(tnote.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime))) {
-									tnote = judgenote;
+								
+								if(j < 6) {
+									if (j < 6 && (j < 4 || tnote == null
+											|| Math.abs(tnote.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime))) {
+										tnote = judgenote;
+									}									
+								} else {
+									tnote = null;
 								}
 							}
 						}

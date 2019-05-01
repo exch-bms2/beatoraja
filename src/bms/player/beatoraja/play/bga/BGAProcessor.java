@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
 
 /**
  * BGAのリソース管理、描画用クラス
@@ -29,12 +28,10 @@ public class BGAProcessor {
 	
 	// TODO イベントレイヤー対応(現状はミスレイヤーのみ)
 
-	private BMSModel model;
-	private Config config;
 	private PlayerConfig player;
 	private float progress = 0;
 
-	private MovieProcessor[] movies; 
+	private MovieProcessor[] movies = new MovieProcessor[0]; 
 	
 	private final ResourcePool<String, MovieProcessor> mpgresource;
 
@@ -59,7 +56,7 @@ public class BGAProcessor {
 	 */
 	private Layer misslayer = null;
 
-	private long prevrendertime;
+	private long time;
 
 	private BGImageProcessor cache;
 
@@ -69,9 +66,11 @@ public class BGAProcessor {
 	private int pos;
 	private TextureRegion image;
 	private Rectangle tmpRect = new Rectangle();
+	
+	private boolean rbga;
+	private boolean rlayer;
 
 	public BGAProcessor(Config config, PlayerConfig player) {
-		this.config = config;
 		this.player = player;
 
 		Pixmap blank = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -98,7 +97,6 @@ public class BGAProcessor {
 	}
 
 	public synchronized void setModel(BMSModel model) {
-		this.model = model;
 		progress = 0;
 
 		cache.clear();
@@ -123,16 +121,31 @@ public class BGAProcessor {
 					break;
 				}
 				Path f = null;
-				if (Files.exists(dpath.resolve(name))) {
-					final int index = name.lastIndexOf('.');
-					String fex = null;
-					if (index != -1) {
-						fex = name.substring(index + 1).toLowerCase();
+				try {
+					if (Files.exists(dpath.resolve(name))) {
+						final int index = name.lastIndexOf('.');
+						String fex = null;
+						if (index != -1) {
+							fex = name.substring(index + 1).toLowerCase();
+						}
+						if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
+							f = dpath.resolve(name);
+						}else if(fex != null){
+							name = name.substring(0, index);
+							for (String mov : mov_extension) {
+								final Path mpgfile = dpath.resolve(name + "." + mov);
+								if (Files.exists(mpgfile)) {
+									f = mpgfile;
+									break;
+								}
+							}
+						}
 					}
-					if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
-						f = dpath.resolve(name);
-					}else if(fex != null){
-						name = name.substring(0, index);
+					if (f == null) {
+						final int index = name.lastIndexOf('.');
+						if (index != -1) {
+							name = name.substring(0, index);
+						}
 						for (String mov : mov_extension) {
 							final Path mpgfile = dpath.resolve(name + "." + mov);
 							if (Files.exists(mpgfile)) {
@@ -140,27 +153,16 @@ public class BGAProcessor {
 								break;
 							}
 						}
-					}
-				}
-				if (f == null) {
-					final int index = name.lastIndexOf('.');
-					if (index != -1) {
-						name = name.substring(0, index);
-					}
-					for (String mov : mov_extension) {
-						final Path mpgfile = dpath.resolve(name + "." + mov);
-						if (Files.exists(mpgfile)) {
-							f = mpgfile;
-							break;
+						for (String mov : BGImageProcessor.pic_extension) {
+							final Path picfile = dpath.resolve(name + "." + mov);
+							if (Files.exists(picfile)) {
+								f = picfile;
+								break;
+							}
 						}
 					}
-					for (String mov : BGImageProcessor.pic_extension) {
-						final Path picfile = dpath.resolve(name + "." + mov);
-						if (Files.exists(picfile)) {
-							f = picfile;
-							break;
-						}
-					}
+				} catch (InvalidPathException e) {
+					Logger.getGlobal().warning(e.getMessage());
 				}
 
 				if (f != null) {
@@ -221,7 +223,7 @@ public class BGAProcessor {
 		playinglayerid = -1;
 		misslayertime = 0;
 		misslayer = null;
-		prevrendertime = 0;		
+		time = 0;		
 	}
 
 	private Texture getBGAData(long time, int id, boolean cont) {
@@ -237,24 +239,21 @@ public class BGAProcessor {
 		}
 		return cache != null ? cache.getTexture(id) : null;
 	}
-
-	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, long time) {
-		sprite.setColor(dst.getColor());
-		sprite.setBlend(dst.getBlend());
+	
+	public void prepareBGA(long time) {
 		if (time < 0 || timelines == null) {
-			prevrendertime = -1;
-			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
+			this.time = -1;
 			return;
 		}
-		boolean rbga = true;
-		boolean rlayer = true;
+		rbga = true;
+		rlayer = true;
 		for (int i = pos; i < timelines.length; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() > time) {
 				break;
 			}
 
-			if (tl.getTime() > prevrendertime) {
+			if (tl.getTime() > this.time) {
 				final int bga = tl.getBGA();
 				if (bga == -2) {
 					playingbgaid = -1;
@@ -283,6 +282,18 @@ public class BGAProcessor {
 			} else {
 				pos++;
 			}
+		}
+		
+		this.time = time;
+	}
+
+
+	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r) {
+		sprite.setColor(dst.getColor());
+		sprite.setBlend(dst.getBlend());
+		if (time < 0 || timelines == null) {
+			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
+			return;
 		}
 
 		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + getMisslayerduration) {
@@ -322,8 +333,6 @@ public class BGAProcessor {
 				}
 			}
 		}
-
-		prevrendertime = time;
 	}
 	
 	/**
