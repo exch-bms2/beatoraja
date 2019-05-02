@@ -109,22 +109,28 @@ public class SkinGauge extends SkinObject {
 			return;
 		}
 
-		if (atime < time) {
-			switch(animationType) {
-			case ANIMATION_RANDOM:
+		switch(animationType) {
+		case ANIMATION_RANDOM:
+			if (atime < time) {
 				animation = (int) (Math.random() * (animationRange + 1));
-				break;
-			case ANIMATION_INCLEASE:
-				animation = (animation + animationRange) % (animationRange + 1);
-				break;
-			case ANIMATION_DECLEASE:
-				animation = (animation + 1) % (animationRange + 1);
-				break;
-			case ANIMATION_FLICKERING:
-				animation = (int) (time % duration);
-				break;
+				atime = time + duration;
 			}
-			atime = time + duration;
+			break;
+		case ANIMATION_INCLEASE:
+			if (atime < time) {
+				animation = (animation + animationRange) % (animationRange + 1);
+				atime = time + duration;
+			}
+			break;
+		case ANIMATION_DECLEASE:
+			if (atime < time) {
+				animation = (animation + 1) % (animationRange + 1);
+				atime = time + duration;
+			}
+			break;
+		case ANIMATION_FLICKERING:
+			animation = (int) (time % duration);
+			break;
 		}
 
 		// TODO 9key固有実装の汎用化
@@ -184,23 +190,40 @@ public class SkinGauge extends SkinObject {
 		sprite.setColor(color);
 		sprite.setBlend(getBlend());
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
-		for (int i = 1; i <= parts; i++) {
-			final float border = i * max / parts;
-			sprite.draw(
-					images[exgauge + (notes == i || notes - animation > i ? 0 : 2)
-							+ (border < this.border ? 1 : 0)],
-					region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
-
-			if(animationType == ANIMATION_FLICKERING && images.length == 12 && i == notes) {
-				final Color orgColor = sprite.getColor();
-				flickerColor.set(orgColor.r, orgColor.g, orgColor.b, orgColor.a * (animation < duration / 2 ? animation / ((float) duration / 2 - 1) : ((duration - 1) - animation) / ((float) duration / 2 - 1)));
-				sprite.setColor(flickerColor);
+		switch(animationType) {
+		case ANIMATION_RANDOM:
+		case ANIMATION_INCLEASE:
+		case ANIMATION_DECLEASE:
+			for (int i = 1; i <= parts; i++) {
+				final float border = i * max / parts;
 				sprite.draw(
-						images[8 + exgauge / 2 + (border < this.border ? 1 : 0)],
+						images[exgauge + (notes == i || notes - animation > i ? 0 : 2)
+								+ (border < this.border ? 1 : 0)],
 						region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
-				sprite.setColor(orgColor);
-			}
-		}		
+
+			}		
+			break;
+		case ANIMATION_FLICKERING:
+			for (int i = 1; i <= parts; i++) {
+				final float border = i * max / parts;
+				sprite.draw(
+						images[exgauge + (notes >= i ? 0 : 2)
+								+ (border < this.border ? 1 : 0)],
+						region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
+
+				if(images.length == 12 && i == notes) {
+					final Color orgColor = sprite.getColor();
+					flickerColor.set(orgColor.r, orgColor.g, orgColor.b, orgColor.a * (animation < duration / 2 ? animation / ((float) duration / 2 - 1) : ((duration - 1) - animation) / ((float) duration / 2 - 1)));
+					sprite.setColor(flickerColor);
+					System.out.println(animation + "  " + duration + "  " + flickerColor.toString());
+					sprite.draw(
+							images[8 + exgauge / 2 + (border < this.border ? 1 : 0)],
+							region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
+					sprite.setColor(orgColor);
+				}
+			}		
+			break;
+		}
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
