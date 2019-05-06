@@ -74,6 +74,10 @@ public class IRScoreData implements Validatable {
 	 */
 	private String trophy = "";
 	/**
+	 * ベストスコアのゴースト
+	 */
+	private String ghost = "";
+	/**
 	 * 更新時のRANDOM配列
 	 */
 	private int random;
@@ -368,6 +372,18 @@ public class IRScoreData implements Validatable {
 
 	public Mode getPlaymode() {
 		return playmode;
+	}
+
+	public int[] getGhost() {
+		if (ghost == null) {
+			return null;
+		}
+		// TODO
+		return null;
+	}
+
+	public void setGhost(int[] value){
+		// TODO
 	}
 
 	@Override
