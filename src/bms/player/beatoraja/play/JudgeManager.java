@@ -68,6 +68,10 @@ public class JudgeManager {
 	private int[] judgenow;
 	private int[] judgecombo;
 	/**
+	 * ゴースト記録用の判定ログ
+	 */
+	private int[] ghost;
+	/**
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
 	private long[] judgefast;
@@ -168,6 +172,10 @@ public class JudgeManager {
 		score = new IRScoreData(orgmode);
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
+		ghost = new int[model.getTotalNotes()];
+		for (int i=0; i<ghost.length; i++) {
+			ghost[i] = 4;
+		}
 
 		this.lntype = model.getLntype();
 		lanes = model.getLanes();
@@ -666,6 +674,9 @@ public class JudgeManager {
 
 	private void update(int lane, Note n, long time, int judge, long fast) {
 		if (judgeVanish[judge]) {
+			if (pastNotes < ghost.length) {
+				ghost[pastNotes] = judge;
+			}
 			n.setState(judge + 1);
 			pastNotes++;
 		}
@@ -836,5 +847,9 @@ public class JudgeManager {
 
 	public int getPMcharaJudge() {
 		return PMcharaJudge;
+	}
+
+	public int[] getGhost() {
+		return ghost;
 	}
 }

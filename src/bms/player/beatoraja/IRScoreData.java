@@ -3,6 +3,11 @@ package bms.player.beatoraja;
 import bms.model.Mode;
 import bms.player.beatoraja.input.BMSPlayerInputDevice;
 
+import java.io.*;
+import java.util.Base64;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
 /**
  * スコアデータ
  * LR2のスコアデータを元に拡張している
@@ -374,16 +379,54 @@ public class IRScoreData implements Validatable {
 		return playmode;
 	}
 
-	public int[] getGhost() {
-		if (ghost == null) {
-			return null;
-		}
-		// TODO
-		return null;
+	public String getGhost() {
+		return ghost;
 	}
 
-	public void setGhost(int[] value){
-		// TODO
+	public void setGhost(String value){
+		ghost = value;
+	}
+
+	public int[] decodeGhost() {
+		try {
+			if (ghost == null) {
+				return null;
+			}
+			InputStream input = new ByteArrayInputStream(ghost.getBytes());
+			InputStream base64 = Base64.getUrlDecoder().wrap(input);
+			GZIPInputStream gzip = new GZIPInputStream(base64);
+			if (gzip.available() == 0) {
+				return null;
+			}
+			int[] value = new int[notes];
+			for (int i=0; i<value.length; i++) {
+				int judge = gzip.read();
+				value[i] = judge >= 0 ? judge : 4;
+			}
+			gzip.close();
+			return value;
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public void encodeGhost(int[] value) {
+		try {
+			if (value == null || value.length == 0) {
+				ghost = null;
+				return;
+			}
+			ByteArrayOutputStream output = new ByteArrayOutputStream();
+			OutputStream base64 = Base64.getUrlEncoder().wrap(output);
+			OutputStream gzip = new GZIPOutputStream(base64);
+			for (int judge : value) {
+				gzip.write(judge);
+			}
+			gzip.close();
+			ghost = output.toString();
+ 		} catch (IOException e) {
+			ghost = null;
+		}
 	}
 
 	@Override

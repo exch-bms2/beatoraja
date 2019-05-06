@@ -190,14 +190,14 @@ public class ScoreDatabaseAccessor {
 			con.setAutoCommit(false);
 			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
-					+ "minbp, playcount, clearcount, trophy, scorehash, option, random, date, state)"
-					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+					+ "minbp, playcount, clearcount, trophy, ghost, scorehash, option, random, date, state)"
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 			for (IRScoreData score : scores) {
 				qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(),
 						score.getLpg(), score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(),
 						score.getLbd(), score.getEpr(), score.getLpr(), score.getEms(), score.getLms(),
 						score.getNotes(), score.getCombo(), score.getMinbp(), score.getPlaycount(),
-						score.getClearcount(), score.getTrophy(), score.getScorehash(), score.getOption(),
+						score.getClearcount(), score.getTrophy(), score.getGhost(), score.getScorehash(), score.getOption(),
 						score.getRandom(), score.getDate(), score.getState());
 			}
 			con.commit();
