@@ -68,12 +68,17 @@ public class ScoreDatabaseAccessor {
 						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
 						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
 						+ "[ems] INTEGER," + "[lms] INTEGER," + "[notes] INTEGER," + "[combo] INTEGER,"
-						+ "[minbp] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[trophy] TEXT,"
+						+ "[minbp] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[trophy] TEXT," + "[ghost] TEXT,"
 						+ "[scorehash] TEXT," + "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
 						+ "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
-			}			
+			}
+
+			// 過去のバージョンで作成したテーブルにカラムが存在しない場合に作成
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'score' AND sql LIKE '%trophy%'", new MapListHandler()).size() == 0) {
 				qr.update("ALTER TABLE score ADD COLUMN trophy [TEXT]");
+			}
+			if (qr.query("SELECT * FROM sqlite_master WHERE name = 'score' AND sql LIKE '%ghost%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE score ADD COLUMN ghost [TEXT]");
 			}
 
 		} catch (SQLException e) {
