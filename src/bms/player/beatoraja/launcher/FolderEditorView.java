@@ -166,6 +166,11 @@ public class FolderEditorView implements Initializable {
 	}
 	
 	public TableFolder[] getTableFolder() {
+		commitFolder();
 		return folders.getItems().toArray(new TableFolder[folders.getItems().size()]);
+	}
+	
+	public void setTableFolder(TableFolder[] folder) {
+		folders.getItems().setAll(folder);
 	}
 }

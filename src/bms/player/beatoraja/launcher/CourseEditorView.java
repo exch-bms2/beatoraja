@@ -110,7 +110,15 @@ public class CourseEditorView implements Initializable {
 	
 	public void commit() {
 		commitCourse();
-		courseAccessor.write(filename, courses.getItems().toArray(new CourseData[courses.getItems().size()]));
+		courseAccessor.write(filename, getCourseData());
+	}
+	
+	public CourseData[] getCourseData() {
+		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
+	}
+	
+	public void setCourseData(CourseData[] course) {
+		courses.getItems().setAll(course);
 	}
 	
 	public void updateCourseData() {
