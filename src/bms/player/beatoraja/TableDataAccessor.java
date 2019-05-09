@@ -6,11 +6,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 import bms.model.BMSDecoder;
 import bms.model.Mode;
@@ -48,34 +43,11 @@ public class TableDataAccessor {
 	 * @param td 難易度表データ
 	 */
 	public void write(TableData td) {
-		write(td, getFileName(td.getUrl()) + ".bmt");
+		TableData.write(Paths.get(tabledir + "/" + getFileName(td.getUrl()) + ".bmt"), td);
 	}
 
 	public void write(TableData td, String filename) {
-		try {
-			td.shrink();
-			OutputStream os = null;
-			if(filename.endsWith(".bmt")) {
-				os = new GZIPOutputStream(new FileOutputStream(tabledir + "/" + filename));
-			} else if(filename.endsWith(".json")) {
-				os = new FileOutputStream(tabledir + "/" + filename);
-			}
-			
-			if(os != null) {
-				Json json = new Json();
-				json.setElementType(TableData.class, "folder", ArrayList.class);
-				json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
-				json.setElementType(TableData.class, "course", ArrayList.class);
-				json.setElementType(CourseData.class, "trophy", ArrayList.class);
-				json.setOutputType(OutputType.json);
-				OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(os), "UTF-8");
-				fw.write(json.prettyPrint(td));
-				fw.flush();
-				fw.close();				
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		TableData.write(Paths.get(tabledir + "/" + filename), td);
 	}
 
 	/**
@@ -87,7 +59,7 @@ public class TableDataAccessor {
 		List<TableData> result = new ArrayList<TableData>();
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
-				TableData td = read(p);
+				TableData td = TableData.read(p);
 				if(td != null) {
 					result.add(td);						
 				}
@@ -109,7 +81,7 @@ public class TableDataAccessor {
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
 				if (p.getFileName().toString().equals(getFileName(url) + ".bmt")) {
-					td = read(p);
+					td = TableData.read(p);
 					break;
 				}
 			}
@@ -120,33 +92,9 @@ public class TableDataAccessor {
 	}
 	
 	public TableData read(String filename) {
-		return read(Paths.get(tabledir + "/" + filename));
+		return TableData.read(Paths.get(tabledir + "/" + filename));
 	}
 
-	public TableData read(Path p) {
-		try {
-			InputStream is = null;
-			if (p.toString().endsWith(".bmt")) {
-				is = new GZIPInputStream(Files.newInputStream(p));
-			} else if(p.toString().endsWith(".json")) {
-				is = Files.newInputStream(p);			
-			}
-
-			if(is != null) {
-				Json json = new Json();
-				json.setIgnoreUnknownFields(true);
-				TableData td = json.fromJson(TableData.class, new BufferedInputStream(is));
-				if(td == null || !td.validate()) {
-					td = null;
-				}
-				return td;				
-			}
-		} catch(Throwable e) {
-
-		}
-		return null;
-	}
-	
 	private String getFileName(String name) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
