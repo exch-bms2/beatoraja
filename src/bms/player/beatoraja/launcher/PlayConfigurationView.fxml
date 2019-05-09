@@ -24,7 +24,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="root" prefHeight="630.0" prefWidth="835.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.PlayConfigurationView">
+<VBox fx:id="root" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.PlayConfigurationView">
    <Hyperlink fx:id="newversion" text="" />
     <HBox fx:id="playerPanel" alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
         <VBox.margin>
@@ -588,17 +588,9 @@
                 <fx:include fx:id="ir" source="IRConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             </AnchorPane>
         </Tab>
-        <Tab fx:id="courseTab" closable="false" text="Course">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <fx:include fx:id="course" source="CourseEditorView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <padding>
-               <Insets left="10.0" top="10.0" />
-            </padding>
-            </AnchorPane>
-        </Tab>
         <Tab fx:id="tableTab" closable="false" text="Table">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <fx:include fx:id="table" source="FolderEditorView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                <fx:include fx:id="table" source="TableEditorView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <padding>
                <Insets left="10.0" top="10.0" />
             </padding>

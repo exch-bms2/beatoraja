@@ -40,7 +40,6 @@
                      </children>
                   </HBox>
                   <ListView fx:id="courses" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
-                  <Button mnemonicParsing="false" onAction="#commit" text="Save" />
                </children>
             </VBox>
             <GridPane prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">

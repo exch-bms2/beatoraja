@@ -63,8 +63,6 @@ public class CourseEditorView implements Initializable {
 	
 	private SongDatabaseAccessor songdb;
 	
-	private CourseDataAccessor courseAccessor = new CourseDataAccessor("course");
-	
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		gradeType.getItems().setAll(null, CLASS, MIRROR, RANDOM);
 		hispeedType.getItems().setAll(null, NO_SPEED);
@@ -103,16 +101,6 @@ public class CourseEditorView implements Initializable {
 		}
 	}
 
-	public void update(String name) {
-		courses.getItems().setAll(courseAccessor.read(name));
-		filename = name;
-	}
-	
-	public void commit() {
-		commitCourse();
-		courseAccessor.write(filename, getCourseData());
-	}
-	
 	public CourseData[] getCourseData() {
 		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
 	}

@@ -1,18 +1,11 @@
 package bms.player.beatoraja.launcher;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import bms.player.beatoraja.Config;
 import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.CourseDataAccessor;
-import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.TableData.TableFolder;
-import bms.player.beatoraja.TableDataAccessor;
-
-import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import bms.player.beatoraja.song.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -29,8 +22,6 @@ public class FolderEditorView implements Initializable {
 	private SongDataView searchSongsController;
 
 	@FXML
-	private TextField tableName;
-	@FXML
 	private ListView<TableFolder> folders;
 	@FXML
 	private TextField folderName;
@@ -39,13 +30,12 @@ public class FolderEditorView implements Initializable {
 	@FXML
 	private SongDataView folderSongsController;
 
-	private String filename;
+	private Path filepath;
 	
 	private TableFolder selectedFolder;
 	
 	private SongDatabaseAccessor songdb;
 	
-	private TableDataAccessor tableAccessor;
 	private CourseData[] courses;
 	
 	public void initialize(URL arg0, ResourceBundle arg1) {		
@@ -67,9 +57,8 @@ public class FolderEditorView implements Initializable {
 		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
 	}
 	
-	protected void init(Config config, SongDatabaseAccessor songdb) {
+	protected void init(SongDatabaseAccessor songdb) {
 		this.songdb = songdb;
-		tableAccessor = new TableDataAccessor(config.getTablepath());
 	}
 
 	public void searchSongs() {
@@ -81,27 +70,6 @@ public class FolderEditorView implements Initializable {
 		}
 	}
 
-	public void update(String name) {
-		TableData td = tableAccessor.read(name);
-		if(td == null) {
-			td = new TableData();
-			td.setName("New Table");
-		}
-		courses = td.getCourse();
-		folders.getItems().setAll(td.getFolder());
-		tableName.setText(td.getName());
-		filename = name;
-	}
-	
-	public void commit() {
-		commitFolder();
-		TableData td = new TableData();
-		td.setName(tableName.getText());
-		td.setCourse(courses);
-		td.setFolder(folders.getItems().toArray(new TableFolder[folders.getItems().size()]));
-		tableAccessor.write(td, filename);
-	}
-	
 	public void updateCourseData() {
 		commitFolder();
 		updateFolder(folders.getSelectionModel().getSelectedItem());

@@ -28,12 +28,18 @@
                         <Insets />
                      </VBox.margin>
                      <children>
-                        <TextField fx:id="tableName" prefWidth="400" />
+                        <Label text="FOLDER">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets right="30.0" />
+                           </HBox.margin>
+                        </Label>
                         <Button mnemonicParsing="false" onAction="#addTableFolder" text="＋" />
                      </children>
                   </HBox>
                   <ListView fx:id="folders" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
-                  <Button mnemonicParsing="false" onAction="#commit" text="Save" />
                </children>
             </VBox>
             <GridPane prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
