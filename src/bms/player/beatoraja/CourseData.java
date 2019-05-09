@@ -97,7 +97,7 @@ public class CourseData implements Validatable {
     }
     
     public boolean validate() {
-        if(hash == null) {
+        if(hash == null || hash.length == 0) {
             return false;
         }
         if(name == null || name.length() == 0) {
