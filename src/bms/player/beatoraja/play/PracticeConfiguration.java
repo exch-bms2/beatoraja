@@ -44,11 +44,12 @@ public class PracticeConfiguration {
 	private PracticeProperty property = new PracticeProperty();
 
 	private SkinNoteDistributionGraph[] graph = { 
+			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_NORMAL, 500, 0, 0, 0),
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_JUDGE, 500, 0, 0, 0),
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_EARLYLATE, 500, 0, 0, 0),
 	};
 	
-	private static final String[] GRAPHTYPE = {"JUDGE", "EARLYLATE"};
+	private static final String[] GRAPHTYPE = {"NOTETYPE", "JUDGE", "EARLYLATE"};
 
 	public void create(BMSModel model) {
 		property.judgerank = model.getJudgerank();
@@ -180,7 +181,7 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 8:
-				property.graphtype = (property.graphtype + 1) % 2;
+				property.graphtype = (property.graphtype + 2) % 3;
 				break;
 			case 9:
 				property.random = (property.random + (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 6 : 9))
@@ -251,7 +252,7 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 8:
-				property.graphtype = (property.graphtype + 1) % 2;
+				property.graphtype = (property.graphtype + 1) % 3;
 				break;
 			case 9:
 				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
@@ -296,11 +297,6 @@ public class PracticeConfiguration {
 		String[] judge = {"PGREAT :","GREAT  :","GOOD   :", "BAD    :", "POOR   :", "KPOOR  :"};
 		for(int i = 0; i < 6; i++) {
 			sprite.draw(titlefont, String.format("%s %d %d %d",judge[i], state.getJudgeCount(i, true) + state.getJudgeCount(i, false), state.getJudgeCount(i, true), state.getJudgeCount(i, false)), x + 250, y - (i * 22), Color.WHITE);
-		}
-
-		for(int i = 0; i < graph.length; i++) {
-			graph[i].draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
-					property.endtime, property.freq / 100f);
 		}
 
 		graph[property.graphtype].draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
