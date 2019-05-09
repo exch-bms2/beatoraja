@@ -145,7 +145,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		
 		// TODO スキン定義側で分岐できないか？
 		if(chips == null) {
-			Color[] graphcolor = type > 0 && model != null && model.getMode() == Mode.POPN_9K  ? 
+			Color[] graphcolor = type != TYPE_NORMAL && model != null && model.getMode() == Mode.POPN_9K  ? 
 					pmsGraphColor[type] : JGRAPH[type];
 			chips = new Pixmap[graphcolor.length];
 			for(int i = 0;i < graphcolor.length;i++) {
@@ -157,7 +157,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if(song != current || (this.model == null && model != null)) {
 			current = song;
 			this.model = model;
-			if(type == 0 && song != null && song.getInformation() != null) {
+			if(type == TYPE_NORMAL && song != null && song.getInformation() != null) {
 				updateGraph(song.getInformation().getDistributionValues());				
 			} else {
 				updateGraph(model);
@@ -168,7 +168,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 
 		//プレイ時、判定をリアルタイムで更新する
-		if(model != null && state instanceof BMSPlayer && type > 0 && pastNotes != ((BMSPlayer)state).getPastNotes()) {
+		if(model != null && state instanceof BMSPlayer && type != TYPE_NORMAL && pastNotes != ((BMSPlayer)state).getPastNotes()) {
 			pastNotes = ((BMSPlayer)state).getPastNotes();
 			// TODO さらなる高速化のアイデア-BMSPlayerから更新したノーツの時間だけを渡し。指定時間のデータ/イメージのみ更新する
 			updateData(model);

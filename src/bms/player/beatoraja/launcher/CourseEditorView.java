@@ -21,6 +21,8 @@ public class CourseEditorView implements Initializable {
 	private TextField search;
 	@FXML
 	private TableView<SongData> searchSongs;
+	@FXML
+	private SongDataView searchSongsController;
 
 	@FXML
 	private ListView<CourseData> courses;
@@ -52,14 +54,14 @@ public class CourseEditorView implements Initializable {
 	private Spinner<Double> goldscore;
 	@FXML
 	private TableView<SongData> courseSongs;
+	@FXML
+	private SongDataView courseSongsController;
 
 	private String filename;
 	
 	private CourseData selectedCourse;
 	
 	private SongDatabaseAccessor songdb;
-	
-	private CourseDataAccessor courseAccessor = new CourseDataAccessor("course");
 	
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		gradeType.getItems().setAll(null, CLASS, MIRROR, RANDOM);
@@ -82,6 +84,8 @@ public class CourseEditorView implements Initializable {
 				}
 			};
 		});
+		courseSongsController.setVisible("fullTitle", "sha256");
+		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
 	}
 	
 	protected void setSongDatabaseAccessor(SongDatabaseAccessor songdb) {
@@ -97,14 +101,12 @@ public class CourseEditorView implements Initializable {
 		}
 	}
 
-	public void update(String name) {
-		courses.getItems().setAll(courseAccessor.read(name));
-		filename = name;
+	public CourseData[] getCourseData() {
+		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
 	}
 	
-	public void commit() {
-		commitCourse();
-		courseAccessor.write(filename, courses.getItems().toArray(new CourseData[courses.getItems().size()]));
+	public void setCourseData(CourseData[] course) {
+		courses.getItems().setAll(course);
 	}
 	
 	public void updateCourseData() {

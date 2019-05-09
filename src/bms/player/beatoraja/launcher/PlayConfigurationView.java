@@ -24,9 +24,7 @@ import com.portaudio.DeviceInfo;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
-import bms.player.beatoraja.PlayerConfig.IRConfig;
 import bms.player.beatoraja.audio.PortAudioDriver;
-import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.song.*;
@@ -271,9 +269,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private IRConfigurationView irController;
 	@FXML
-	private CourseEditorView courseController;
-	@FXML
-	private FolderEditorView tableController;
+	private TableEditorView tableController;
 
 	private Config config;
 	private PlayerConfig player;
@@ -452,10 +448,8 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
 					config.getBmsroot());
-			courseController.setSongDatabaseAccessor(songdb);
-			courseController.update("default");
-			tableController.init(config, songdb);
-			tableController.update("default.json");
+			tableController.init(songdb);
+			tableController.update(Paths.get(config.getTablepath() + "/" + "default.json"));
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -586,7 +580,6 @@ public class PlayConfigurationView implements Initializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		courseController.commit();
 		tableController.commit();
 	}
 
