@@ -102,6 +102,7 @@ public class CourseEditorView implements Initializable {
 	}
 
 	public CourseData[] getCourseData() {
+		commitCourse();
 		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
 	}
 	
