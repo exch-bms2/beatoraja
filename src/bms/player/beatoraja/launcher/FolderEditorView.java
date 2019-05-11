@@ -101,6 +101,31 @@ public class FolderEditorView implements Initializable {
 		folders.getItems().add(course);
 	}
 
+	public void removeTableFolder() {
+		TableFolder song = folders.getSelectionModel().getSelectedItem();
+		if(song != null) {
+			folders.getItems().remove(song);
+		}
+	}
+ 
+	public void moveTableFolderUp() {
+		final int index = folders.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			TableFolder song = folders.getSelectionModel().getSelectedItem();
+			folders.getItems().remove(index);
+			folders.getItems().add(index - 1, song);
+		}
+	}
+
+	public void moveTableFolderDown() {
+		final int index = folders.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < folders.getItems().size() - 1) {
+			TableFolder song = folders.getSelectionModel().getSelectedItem();
+			folders.getItems().remove(index);
+			folders.getItems().add(index + 1, song);
+		}
+	}
+	
 	public void addSongData() {
 		SongData song = searchSongs.getSelectionModel().getSelectedItem();
 		if(song != null) {

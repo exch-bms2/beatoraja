@@ -37,6 +37,9 @@
                            </HBox.margin>
                         </Label>
                         <Button mnemonicParsing="false" onAction="#addTableFolder" text="＋" />
+                        <Button mnemonicParsing="false" onAction="#removeTableFolder" text="ー" />
+                        <Button mnemonicParsing="false" onAction="#moveTableFolderUp" text="↑" />
+                        <Button mnemonicParsing="false" onAction="#moveTableFolderDown" text="↓" />
                      </children>
                   </HBox>
                   <ListView fx:id="folders" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
