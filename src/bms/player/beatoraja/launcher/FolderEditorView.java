@@ -41,7 +41,7 @@ public class FolderEditorView implements Initializable {
 	public void initialize(URL arg0, ResourceBundle arg1) {		
 		folders.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
 			if(oldVal != newVal) {
-				updateCourseData();				
+				updateTableFolder();
 			}
 		});
 		folders.setCellFactory((ListView) -> {
@@ -70,7 +70,7 @@ public class FolderEditorView implements Initializable {
 		}
 	}
 
-	public void updateCourseData() {
+	public void updateTableFolder() {
 		commitFolder();
 		updateFolder(folders.getSelectionModel().getSelectedItem());
 	}
@@ -88,16 +88,16 @@ public class FolderEditorView implements Initializable {
 		folders.getItems().set(index, selectedFolder);
 	}
 
-	private void updateFolder(TableFolder course) {
-		selectedFolder = course;
-		
+	private void updateFolder(TableFolder folder) {
+		selectedFolder = folder;
+
 		folderName.setText(selectedFolder.getName());
-		folderSongs.getItems().setAll(course.getSong());
+		folderSongs.getItems().setAll(folder.getSong());
 	}
 	
 	public void addTableFolder() {
 		TableFolder course = new TableFolder();
-		course.setName("New Course");
+		course.setName("New Folder");
 		folders.getItems().add(course);
 	}
 
