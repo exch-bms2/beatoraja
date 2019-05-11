@@ -245,6 +245,10 @@ public class CourseEditorView implements Initializable {
 			SongData song = courseSongs.getSelectionModel().getSelectedItem();
 			courseSongs.getItems().remove(index);
 			courseSongs.getItems().add(index - 1, song);
+
+			TableView.TableViewSelectionModel m = courseSongs.getSelectionModel();
+			m.select(index - 1);
+			courseSongs.setSelectionModel(m);
 		}
 	}
 
@@ -254,6 +258,10 @@ public class CourseEditorView implements Initializable {
 			SongData song = courseSongs.getSelectionModel().getSelectedItem();
 			courseSongs.getItems().remove(index);
 			courseSongs.getItems().add(index + 1, song);
+
+			TableView.TableViewSelectionModel m = courseSongs.getSelectionModel();
+			m.select(index + 1);
+			courseSongs.setSelectionModel(m);
 		}
 	}
 }

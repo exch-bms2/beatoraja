@@ -121,6 +121,10 @@ public class FolderEditorView implements Initializable {
 			SongData song = folderSongs.getSelectionModel().getSelectedItem();
 			folderSongs.getItems().remove(index);
 			folderSongs.getItems().add(index - 1, song);
+
+			TableView.TableViewSelectionModel m = folderSongs.getSelectionModel();
+			m.select(index - 1);
+			folderSongs.setSelectionModel(m);
 		}
 	}
 
@@ -130,6 +134,10 @@ public class FolderEditorView implements Initializable {
 			SongData song = folderSongs.getSelectionModel().getSelectedItem();
 			folderSongs.getItems().remove(index);
 			folderSongs.getItems().add(index + 1, song);
+
+			TableView.TableViewSelectionModel m = folderSongs.getSelectionModel();
+			m.select(index + 1);
+			folderSongs.setSelectionModel(m);
 		}
 	}
 	
