@@ -37,6 +37,9 @@
                            </HBox.margin>
                         </Label>
                         <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
+                        <Button mnemonicParsing="false" onAction="#removeCourseData" text="ー" />
+                        <Button mnemonicParsing="false" onAction="#moveCourseDataUp" text="↑" />
+                        <Button mnemonicParsing="false" onAction="#moveCourseDataDown" text="↓" />
                      </children>
                   </HBox>
                   <ListView fx:id="courses" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />

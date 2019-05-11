@@ -225,6 +225,30 @@ public class CourseEditorView implements Initializable {
 		courses.getItems().add(course);
 	}
 
+	public void removeCourseData() {
+		CourseData song = courses.getSelectionModel().getSelectedItem();
+		if(song != null) {
+			courses.getItems().remove(song);
+		}
+	}
+ 
+	public void moveCourseDataUp() {
+		final int index = courses.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			CourseData song = courses.getSelectionModel().getSelectedItem();
+			courses.getItems().remove(index);
+			courses.getItems().add(index - 1, song);
+		}
+	}
+
+	public void moveCourseDataDown() {
+		final int index = courses.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < courses.getItems().size() - 1) {
+			CourseData song = courses.getSelectionModel().getSelectedItem();
+			courses.getItems().remove(index);
+			courses.getItems().add(index + 1, song);
+		}
+	}
 	public void addSongData() {
 		SongData song = searchSongs.getSelectionModel().getSelectedItem();
 		if(song != null) {
