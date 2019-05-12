@@ -120,15 +120,6 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Integer> scrolldurationhigh;
 
 	@FXML
-	private ListView<String> bmsroot;
-	@FXML
-	private TextField url;
-	@FXML
-	private ListView<String> tableurl;
-	@FXML
-	private CheckBox updatesong;
-
-	@FXML
 	private ComboBox<Integer> scoreop;
 	@FXML
 	private ComboBox<Integer> scoreop2;
@@ -265,6 +256,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private VideoConfigurationView videoController;
 	@FXML
+	private ResourceConfigurationView resourceController;
+	@FXML
 	private SkinConfigurationView skinController;
 	@FXML
 	private IRConfigurationView irController;
@@ -335,6 +328,8 @@ public class PlayConfigurationView implements Initializable {
 		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
 		initComboBox(audioFreqOption, audioPlaySpeedControls);
 		initComboBox(audioFastForward, audioPlaySpeedControls);
+		
+		resourceController.init(this);
 
 		newVersionCheck();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
@@ -403,9 +398,7 @@ public class PlayConfigurationView implements Initializable {
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
 
-		bmsroot.getItems().setAll(config.getBmsroot());
-		updatesong.setSelected(config.isUpdatesong());
-		tableurl.getItems().setAll(config.getTableURL());
+		resourceController.update(config);
 
 		audio.setValue(config.getAudioDriver());
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
@@ -541,9 +534,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setKeyvolume((float) keyvolume.getValue());
 		config.setBgvolume((float) bgvolume.getValue());
 
-		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
-		config.setUpdatesong(updatesong.isSelected());
-		config.setTableURL(tableurl.getItems().toArray(new String[0]));
+		resourceController.commit(config);
 
 		config.setShowhiddennote(showhiddennote.isSelected());
 
@@ -627,67 +618,6 @@ public class PlayConfigurationView implements Initializable {
 	}
 
     @FXML
-	public void addSongPath() {
-		DirectoryChooser chooser = new DirectoryChooser();
-		chooser.setTitle("楽曲のルートフォルダを選択してください");
-		File f = chooser.showDialog(null);
-		if (f != null) {
-			final String defaultPath = new File(".").getAbsoluteFile().getParent() + File.separatorChar;;
-			String targetPath = f.getAbsolutePath();
-			if(targetPath.startsWith(defaultPath)) {
-				targetPath = f.getAbsolutePath().substring(defaultPath.length());
-			}
-			boolean unique = true;
-			for (String path : bmsroot.getItems()) {
-				if (path.equals(targetPath) || targetPath.startsWith(path + File.separatorChar)) {
-					unique = false;
-					break;
-				}
-			}
-			if (unique) {
-				bmsroot.getItems().add(targetPath);
-				loadBMSPath(targetPath);
-			}
-		}
-	}
-
-    @FXML
-	public void onSongPathDragOver(DragEvent ev) {
-		Dragboard db = ev.getDragboard();
-		if (db.hasFiles()) {
-			ev.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-		}
-		ev.consume();
-	}
-
-    @FXML
-	public void songPathDragDropped(final DragEvent ev) {
-		Dragboard db = ev.getDragboard();
-		if (db.hasFiles()) {
-			for (File f : db.getFiles()) {
-				if (f.isDirectory()) {
-					final String defaultPath = new File(".").getAbsoluteFile().getParent() + File.separatorChar;;
-					String targetPath = f.getAbsolutePath();
-					if(targetPath.startsWith(defaultPath)) {
-						targetPath = f.getAbsolutePath().substring(defaultPath.length());
-					}
-					boolean unique = true;
-					for (String path : bmsroot.getItems()) {
-						if (path.equals(targetPath) || targetPath.startsWith(path + File.separatorChar)) {
-							unique = false;
-							break;
-						}
-					}
-					if (unique) {
-						bmsroot.getItems().add(targetPath);
-						loadBMSPath(targetPath);
-					}
-				}
-			}
-		}
-	}
-
-    @FXML
 	public void addBGMPath() {
     	String s = showDirectoryChooser("BGMのルートフォルダを選択してください");
     	if(s != null) {
@@ -716,50 +646,6 @@ public class PlayConfigurationView implements Initializable {
 		File f = chooser.showDialog(null);
 		return f != null ? f.getPath() : null;
     }
-
-    @FXML
-	public void removeSongPath() {
-		bmsroot.getItems().removeAll(bmsroot.getSelectionModel().getSelectedItems());
-	}
-
-    @FXML
-	public void addTableURL() {
-		String s = url.getText();
-		if (s.startsWith("http") && !tableurl.getItems().contains(s)) {
-			tableurl.getItems().add(url.getText());
-		}
-	}
-
-    @FXML
-	public void removeTableURL() {
-		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
-	}
-
-	public void moveTableURLUp() {
-		final int index = tableurl.getSelectionModel().getSelectedIndex();
-		if(index > 0) {
-			String table = tableurl.getSelectionModel().getSelectedItem();
-			tableurl.getItems().remove(index);
-			tableurl.getItems().add(index - 1, table);
-
-			SelectionModel m = tableurl.getSelectionModel();
-			m.select(index - 1);
-			tableurl.setSelectionModel((MultipleSelectionModel)m);
-		}
-	}
-
-	public void moveTableURLDown() {
-		final int index = tableurl.getSelectionModel().getSelectedIndex();
-		if(index >= 0 && index < tableurl.getItems().size() - 1) {
-			String table = tableurl.getSelectionModel().getSelectedItem();
-			tableurl.getItems().remove(index);
-			tableurl.getItems().add(index + 1, table);
-
-			SelectionModel m = tableurl.getSelectionModel();
-			m.select(index + 1);
-			tableurl.setSelectionModel((MultipleSelectionModel)m);
-		}
-	}
 
 	private PlayMode pc = null;
 
