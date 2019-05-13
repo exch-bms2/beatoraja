@@ -78,16 +78,14 @@ public class IRConfigurationView implements Initializable {
 		
 		List<IRConfig> irlist = new ArrayList<IRConfig>();
 		
-		IRConfig ir = irmap.get(primary);
-		if(ir != null && ir.getUserid().length() > 0) {
-			irlist.add(ir);
-			irmap.remove(primary);
-		}
-		
 		for(String s : irname.getItems()) {
-			ir = irmap.get(s);
+			IRConfig ir = irmap.get(s);
 			if(ir != null && ir.getUserid().length() > 0) {
-				irlist.add(ir);
+				if(s.equals(primary) ) {
+					irlist.add(0, ir);
+				} else {
+					irlist.add(ir);
+				}
 			}
 		}
 		
