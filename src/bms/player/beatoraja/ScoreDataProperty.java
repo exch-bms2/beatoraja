@@ -35,6 +35,12 @@ public class ScoreDataProperty {
     private boolean[] nowrank = new boolean[27];
     private boolean[] bestrank = new boolean[27];
 
+    private int previousNotes = 0;
+    private int[] bestGhost;
+    private int[] rivalGhost;
+    private boolean useBestGhost = false;
+    private boolean useRivalGhost = false;
+
     public void update(IRScoreData score) {
         this.update(score, score != null ? score.getNotes() : 0);
     }
@@ -100,15 +106,45 @@ public class ScoreDataProperty {
             nowrank[i] = totalnotes != 0 && nowrate >= 1f * i / nowrank.length;
         }
 
-        nowbestscore = totalnotes == 0 ? 0 : bestscore * notes / totalnotes;
-        nowbestscorerate= totalnotes == 0 ? 0 : (float) (bestscore) * notes / (totalnotes * totalnotes * 2);
-        nowrivalscore = totalnotes == 0 ? 0 : rivalscore * notes / totalnotes;
-        nowrivalscorerate= totalnotes == 0 ? 0 : (float) (rivalscore) * notes / (totalnotes * totalnotes * 2);
+        if (useBestGhost) {
+            for (int i=previousNotes; i<notes; i++) {
+                nowbestscore += getExScore(bestGhost[i]);
+            }
+            nowbestscorerate = totalnotes == 0 ? 0 : (float) nowbestscore / (totalnotes * 2);
+        } else {
+            nowbestscore = totalnotes == 0 ? 0 : bestscore * notes / totalnotes;
+            nowbestscorerate= totalnotes == 0 ? 0 : (float) (bestscore) * notes / (totalnotes * totalnotes * 2);
+        }
+        if (useRivalGhost) {
+            for (int i=previousNotes; i<notes; i++) {
+                nowrivalscore += getExScore(rivalGhost[i]);
+            }
+            nowrivalscorerate = totalnotes == 0 ? 0 : (float) nowrivalscore / (totalnotes * 2);
+        } else {
+            nowrivalscore = totalnotes == 0 ? 0 : rivalscore * notes / totalnotes;
+            nowrivalscorerate= totalnotes == 0 ? 0 : (float) (rivalscore) * notes / (totalnotes * totalnotes * 2);
+        }
+        previousNotes = notes;
+    }
+
+    private int getExScore(int judge) {
+        if (judge == 0) {
+            return 2;
+        } else if (judge == 1) {
+            return 1;
+        }
+        return 0;
     }
 
     public void setTargetScore(int bestscore, int rivalscore, int totalnotes) {
+        setTargetScore(bestscore, null, rivalscore, null, totalnotes);
+    }
+
+    public void setTargetScore(int bestscore, int[] bestGhost, int rivalscore, int[] rivalGhost, int totalnotes) {
         this.bestscore = bestscore;
+        this.bestGhost = bestGhost;
         this.rivalscore = rivalscore;
+        this.rivalGhost = rivalGhost;
         bestscorerate= ((float)bestscore)  / (totalnotes * 2);
         bestrateInt = (int)(bestscorerate * 100);
         bestrateAfterDot = ((int)(bestscorerate * 10000)) % 100;
@@ -118,6 +154,10 @@ public class ScoreDataProperty {
         }
         rivalrateInt = (int)(rivalscorerate * 100);
         rivalrateAfterDot = ((int)(rivalscorerate * 10000)) % 100;
+
+        // ゴーストとノーツ数が異なる場合（ランダム分岐でノーツ数が変わった場合）はゴーストを再生しない
+        useBestGhost = bestGhost != null && bestGhost.length == totalnotes;
+        useRivalGhost = rivalGhost != null && rivalGhost.length == totalnotes;
     }
 
     public int getNowScore() {

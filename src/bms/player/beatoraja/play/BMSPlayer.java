@@ -374,11 +374,11 @@ public class BMSPlayer extends MainState {
 		resource.setRivalScoreData(rivalscore);
 
 		if (autoplay == PlayMode.PRACTICE) {
-			getScoreDataProperty().setTargetScore(0, 0, model.getTotalNotes());
+			getScoreDataProperty().setTargetScore(0, null, 0, null, model.getTotalNotes());
 			practice.create(model);
 			state = STATE_PRACTICE;
 		} else {
-			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
+			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), rivalscore, null, model.getTotalNotes());
 		}
 	}
 
@@ -789,6 +789,7 @@ public class BMSPlayer extends MainState {
 		score.setGauge(gauge.isTypeChanged() ? -1 : gauge.getType());
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
+		score.encodeGhost(judge.getGhost());
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
 		final ReplayData replay = resource.getReplayData();
 		replay.player = main.getPlayerConfig().getName();
