@@ -53,16 +53,19 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public Texture getFrame(long time) {
+		if (processorDisposed) return null;
 		this.time = time;
 		return showingtex;
 	}
 	
 	public void play(long time, boolean loop) {
+		if (processorDisposed) return;
 		this.time = time;
 		movieseek.exec(loop ? Command.LOOP : Command.PLAY);
 	}
 
 	public void stop() {
+		if (processorDisposed) return;
 		movieseek.exec(Command.STOP);
 	}
 
