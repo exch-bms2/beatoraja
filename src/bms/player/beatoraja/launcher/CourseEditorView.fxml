@@ -37,12 +37,15 @@
                            </HBox.margin>
                         </Label>
                         <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
+                        <Button mnemonicParsing="false" onAction="#removeCourseData" text="ー" />
+                        <Button mnemonicParsing="false" onAction="#moveCourseDataUp" text="↑" />
+                        <Button mnemonicParsing="false" onAction="#moveCourseDataDown" text="↓" />
                      </children>
                   </HBox>
                   <ListView fx:id="courses" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
-            <GridPane prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
+            <GridPane fx:id="coursePane" prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
                <columnConstraints>
                   <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="101.0" minWidth="10.0" prefWidth="99.0" />

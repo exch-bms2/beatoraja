@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.layout.GridPane;
 
 public class FolderEditorView implements Initializable {
 
@@ -23,6 +24,8 @@ public class FolderEditorView implements Initializable {
 
 	@FXML
 	private ListView<TableFolder> folders;
+	@FXML
+	private GridPane folderPane;	
 	@FXML
 	private TextField folderName;
 	@FXML
@@ -41,7 +44,7 @@ public class FolderEditorView implements Initializable {
 	public void initialize(URL arg0, ResourceBundle arg1) {		
 		folders.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
 			if(oldVal != newVal) {
-				updateCourseData();				
+				updateTableFolder();				
 			}
 		});
 		folders.setCellFactory((ListView) -> {
@@ -55,6 +58,8 @@ public class FolderEditorView implements Initializable {
 		});
 		folderSongsController.setVisible("fullTitle", "sha256");
 		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
+		
+		updateFolder(null);
 	}
 	
 	protected void init(SongDatabaseAccessor songdb) {
@@ -70,7 +75,7 @@ public class FolderEditorView implements Initializable {
 		}
 	}
 
-	public void updateCourseData() {
+	public void updateTableFolder() {
 		commitFolder();
 		updateFolder(folders.getSelectionModel().getSelectedItem());
 	}
@@ -79,17 +84,17 @@ public class FolderEditorView implements Initializable {
 		if(selectedFolder == null) {
 			return;
 		}
-		final int index = folders.getItems().indexOf(selectedFolder);
-		
-		selectedFolder = new TableFolder();
-		selectedFolder.setName(folderName.getText());
-		
+		selectedFolder.setName(folderName.getText());		
 		selectedFolder.setSong(folderSongs.getItems().toArray(new SongData[folderSongs.getItems().size()]));		
-		folders.getItems().set(index, selectedFolder);
 	}
 
 	private void updateFolder(TableFolder course) {
 		selectedFolder = course;
+		if(selectedFolder == null) {
+			folderPane.setVisible(false);
+			return;
+		}
+		folderPane.setVisible(true);
 		
 		folderName.setText(selectedFolder.getName());
 		folderSongs.getItems().setAll(course.getSong());
@@ -97,10 +102,37 @@ public class FolderEditorView implements Initializable {
 	
 	public void addTableFolder() {
 		TableFolder course = new TableFolder();
-		course.setName("New Course");
+		course.setName("New Folder");
 		folders.getItems().add(course);
 	}
 
+	public void removeTableFolder() {
+		TableFolder song = folders.getSelectionModel().getSelectedItem();
+		if(song != null) {
+			folders.getItems().remove(song);
+		}
+	}
+ 
+	public void moveTableFolderUp() {
+		final int index = folders.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			TableFolder song = folders.getSelectionModel().getSelectedItem();
+			folders.getItems().remove(index);
+			folders.getItems().add(index - 1, song);
+			folders.getSelectionModel().select(index - 1);
+		}
+	}
+
+	public void moveTableFolderDown() {
+		final int index = folders.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < folders.getItems().size() - 1) {
+			TableFolder song = folders.getSelectionModel().getSelectedItem();
+			folders.getItems().remove(index);
+			folders.getItems().add(index + 1, song);
+			folders.getSelectionModel().select(index + 1);
+		}
+	}
+	
 	public void addSongData() {
 		SongData song = searchSongs.getSelectionModel().getSelectedItem();
 		if(song != null) {
@@ -121,6 +153,7 @@ public class FolderEditorView implements Initializable {
 			SongData song = folderSongs.getSelectionModel().getSelectedItem();
 			folderSongs.getItems().remove(index);
 			folderSongs.getItems().add(index - 1, song);
+			folderSongs.getSelectionModel().select(index - 1);
 		}
 	}
 
@@ -130,6 +163,7 @@ public class FolderEditorView implements Initializable {
 			SongData song = folderSongs.getSelectionModel().getSelectedItem();
 			folderSongs.getItems().remove(index);
 			folderSongs.getItems().add(index + 1, song);
+			folderSongs.getSelectionModel().select(index + 1);
 		}
 	}
 	

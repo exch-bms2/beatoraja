@@ -16,12 +16,15 @@ Music Select :
 4 ... Select replay log
 5 ... Show Detail Option
 6 ... Open Key Config
+7 ... Cycle through rival lamps
 8 ... Show songs which are in the same folder
+9 ... Display song text file
 
 F3 ... Open folder which contains selected song with system file viewer 
 F8 ... Set song as favorite song
 F9 ... Set chart as favorite chart
 F10 ... Autoplay all songs in folder
+F11 ... Open chart page in the primary IR
 F12 ... Open skin settings
 
 1 KEY ... play
@@ -50,6 +53,7 @@ Autoplay / Replay :
 
 Music Result :
 1,2,3,4 ... Save Replay log
+F7 ... post current score to twitter
 
 1,3 KEY ... Back to Music select
 5 KEY (hold) ... Retry same song with same pattern option

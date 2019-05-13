@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.CourseDataAccessor;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import bms.player.beatoraja.song.*;
@@ -14,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.layout.GridPane;
 
 public class CourseEditorView implements Initializable {
 
@@ -26,6 +26,8 @@ public class CourseEditorView implements Initializable {
 
 	@FXML
 	private ListView<CourseData> courses;
+	@FXML
+	private GridPane coursePane;
 	@FXML
 	private TextField courseName;
 	@FXML
@@ -86,6 +88,7 @@ public class CourseEditorView implements Initializable {
 		});
 		courseSongsController.setVisible("fullTitle", "sha256");
 		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
+		updateCourse(null);
 	}
 	
 	protected void setSongDatabaseAccessor(SongDatabaseAccessor songdb) {
@@ -102,6 +105,7 @@ public class CourseEditorView implements Initializable {
 	}
 
 	public CourseData[] getCourseData() {
+		commitCourse();
 		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
 	}
 	
@@ -118,9 +122,6 @@ public class CourseEditorView implements Initializable {
 		if(selectedCourse == null) {
 			return;
 		}
-		final int index = courses.getItems().indexOf(selectedCourse);
-		
-		selectedCourse = new CourseData();
 		selectedCourse.setName(courseName.getText());
 		selectedCourse.setRelease(release.isSelected());
 		
@@ -148,11 +149,15 @@ public class CourseEditorView implements Initializable {
 		selectedCourse.setTrophy(trophy);
 		
 		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));		
-		courses.getItems().set(index, selectedCourse);
 	}
 
 	private void updateCourse(CourseData course) {
 		selectedCourse = course;
+		if(selectedCourse == null) {
+			coursePane.setVisible(false);
+			return;
+		} 
+		coursePane.setVisible(true);
 		
 		courseName.setText(selectedCourse.getName());
 		release.setSelected(selectedCourse.isRelease());
@@ -225,6 +230,32 @@ public class CourseEditorView implements Initializable {
 		courses.getItems().add(course);
 	}
 
+	public void removeCourseData() {
+		CourseData song = courses.getSelectionModel().getSelectedItem();
+		if(song != null) {
+			courses.getItems().remove(song);
+		}
+	}
+ 
+	public void moveCourseDataUp() {
+		final int index = courses.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			CourseData song = courses.getSelectionModel().getSelectedItem();
+			courses.getItems().remove(index);
+			courses.getItems().add(index - 1, song);
+			courses.getSelectionModel().select(index - 1);
+		}
+	}
+
+	public void moveCourseDataDown() {
+		final int index = courses.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < courses.getItems().size() - 1) {
+			CourseData song = courses.getSelectionModel().getSelectedItem();
+			courses.getItems().remove(index);
+			courses.getItems().add(index + 1, song);
+			courses.getSelectionModel().select(index + 1);
+		}
+	}
 	public void addSongData() {
 		SongData song = searchSongs.getSelectionModel().getSelectedItem();
 		if(song != null) {
@@ -245,6 +276,7 @@ public class CourseEditorView implements Initializable {
 			SongData song = courseSongs.getSelectionModel().getSelectedItem();
 			courseSongs.getItems().remove(index);
 			courseSongs.getItems().add(index - 1, song);
+			courseSongs.getSelectionModel().select(index - 1);
 		}
 	}
 
@@ -254,6 +286,7 @@ public class CourseEditorView implements Initializable {
 			SongData song = courseSongs.getSelectionModel().getSelectedItem();
 			courseSongs.getItems().remove(index);
 			courseSongs.getItems().add(index + 1, song);
+			courseSongs.getSelectionModel().select(index + 1);
 		}
 	}
 }

@@ -37,12 +37,15 @@
                            </HBox.margin>
                         </Label>
                         <Button mnemonicParsing="false" onAction="#addTableFolder" text="＋" />
+                        <Button mnemonicParsing="false" onAction="#removeTableFolder" text="ー" />
+                        <Button mnemonicParsing="false" onAction="#moveTableFolderUp" text="↑" />
+                        <Button mnemonicParsing="false" onAction="#moveTableFolderDown" text="↓" />
                      </children>
                   </HBox>
                   <ListView fx:id="folders" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
-            <GridPane prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
+            <GridPane fx:id="folderPane" prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
                <columnConstraints>
                   <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="101.0" minWidth="10.0" prefWidth="99.0" />
