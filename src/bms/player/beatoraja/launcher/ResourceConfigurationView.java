@@ -8,9 +8,6 @@ import bms.player.beatoraja.Config;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MultipleSelectionModel;
-import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -20,11 +17,11 @@ import javafx.stage.DirectoryChooser;
 public class ResourceConfigurationView implements Initializable {
 
 	@FXML
-	private ListView<String> bmsroot;
+	private EditableListView<String> bmsroot;
 	@FXML
 	private TextField url;
 	@FXML
-	private ListView<String> tableurl;
+	private EditableListView<String> tableurl;
 	@FXML
 	private CheckBox updatesong;
 	
@@ -114,46 +111,28 @@ public class ResourceConfigurationView implements Initializable {
 
     @FXML
 	public void removeSongPath() {
-		bmsroot.getItems().removeAll(bmsroot.getSelectionModel().getSelectedItems());
+    	bmsroot.removeSelectedItems();
 	}
 
     @FXML
 	public void addTableURL() {
 		String s = url.getText();
 		if (s.startsWith("http") && !tableurl.getItems().contains(s)) {
-			tableurl.getItems().add(url.getText());
+			tableurl.addItem(url.getText());
 		}
 	}
 
     @FXML
 	public void removeTableURL() {
-		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
+		tableurl.removeSelectedItems();
 	}
 
 	public void moveTableURLUp() {
-		final int index = tableurl.getSelectionModel().getSelectedIndex();
-		if(index > 0) {
-			String table = tableurl.getSelectionModel().getSelectedItem();
-			tableurl.getItems().remove(index);
-			tableurl.getItems().add(index - 1, table);
-
-			SelectionModel m = tableurl.getSelectionModel();
-			m.select(index - 1);
-			tableurl.setSelectionModel((MultipleSelectionModel)m);
-		}
+		tableurl.moveSelectedItemUp();
 	}
 
 	public void moveTableURLDown() {
-		final int index = tableurl.getSelectionModel().getSelectedIndex();
-		if(index >= 0 && index < tableurl.getItems().size() - 1) {
-			String table = tableurl.getSelectionModel().getSelectedItem();
-			tableurl.getItems().remove(index);
-			tableurl.getItems().add(index + 1, table);
-
-			SelectionModel m = tableurl.getSelectionModel();
-			m.select(index + 1);
-			tableurl.setSelectionModel((MultipleSelectionModel)m);
-		}
+		tableurl.moveSelectedItemDown();
 	}
 
 }
