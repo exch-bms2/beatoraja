@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.AudioConfigurationView">
+	<padding>
+		<Insets left="10.0" top="10.0" />
+	</padding>
+	<HBox prefHeight="13.0" prefWidth="730.0">
+		<VBox.margin>
+			<Insets bottom="10.0" />
+		</VBox.margin>
+		<Label prefHeight="25.0" prefWidth="150.0" text="%Audio_Output" />
+		<ComboBox fx:id="audio" onAction="#updateAudioDriver"
+			prefHeight="24.0" prefWidth="261.0" />
+	</HBox>
+	<HBox prefHeight="13.0" prefWidth="730.0">
+		<VBox.margin>
+			<Insets bottom="10.0" top="10.0" />
+		</VBox.margin>
+		<Label prefHeight="31.0" prefWidth="150.0"
+			text="Audio Driver Name" />
+		<ComboBox fx:id="audioname" prefHeight="24.0"
+			prefWidth="261.0" />
+	</HBox>
+	<HBox prefHeight="40.0" prefWidth="730.0">
+		<Label prefHeight="25.0" prefWidth="150.0"
+			text="%AUDIO_BUF_SIZE" />
+		<NumericSpinner fx:id="audiobuffer" editable="true"
+			prefWidth="150.0">
+			<valueFactory>
+				<SpinnerValueFactory.IntegerSpinnerValueFactory
+					amountToStepBy="1" initialValue="384" max="1024" min="16" />
+			</valueFactory>
+		</NumericSpinner>
+		<Label prefHeight="23.0" prefWidth="150.0"
+			text="%AUDIO_SIM_SOURCES">
+			<HBox.margin>
+				<Insets left="10.0" />
+			</HBox.margin>
+		</Label>
+		<NumericSpinner fx:id="audiosim" editable="true"
+			prefWidth="150.0">
+			<valueFactory>
+				<SpinnerValueFactory.IntegerSpinnerValueFactory
+					amountToStepBy="1" initialValue="64" max="1024" min="8" />
+			</valueFactory>
+		</NumericSpinner>
+	</HBox>
+	<HBox prefHeight="30.0" prefWidth="730.0">
+		<Label prefHeight="25.0" prefWidth="150.0" text="%SYSTEM_VOLUME" />
+		<Slider fx:id="systemvolume" blockIncrement="0.1"
+			majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0"
+			prefWidth="200.0" value="1.0" />
+	</HBox>
+	<HBox prefHeight="30.0" prefWidth="730.0">
+		<Label prefHeight="25.0" prefWidth="150.0" text="%KEY_VOLUME" />
+		<Slider fx:id="keyvolume" blockIncrement="0.1"
+			majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0"
+			prefWidth="200.0" value="1.0" />
+	</HBox>
+	<HBox prefHeight="30.0" prefWidth="730.0">
+		<Label prefHeight="30.0" prefWidth="150.0" text="%BG_VOLUME" />
+		<Slider fx:id="bgvolume" blockIncrement="0.1"
+			majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0"
+			prefWidth="200.0" value="1.0" />
+	</HBox>
+	<HBox prefHeight="30.0" prefWidth="200.0">
+		<Label prefHeight="30.0" prefWidth="150.0"
+			text="%AUDIO_FREQ_OPTION">
+			<HBox.margin>
+				<Insets right="5.0" />
+			</HBox.margin>
+		</Label>
+		<ComboBox fx:id="audioFreqOption" prefWidth="150.0" />
+	</HBox>
+	<HBox prefHeight="30.0" prefWidth="200.0">
+		<Label prefHeight="30.0" prefWidth="150.0"
+			text="%AUDIO_FAST_FORWARD">
+			<HBox.margin>
+				<Insets right="5.0" />
+			</HBox.margin>
+		</Label>
+		<ComboBox fx:id="audioFastForward" prefWidth="150.0" />
+	</HBox>
+</VBox>
+
