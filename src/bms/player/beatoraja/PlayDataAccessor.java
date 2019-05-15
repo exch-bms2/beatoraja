@@ -443,6 +443,7 @@ public class PlayDataAccessor {
 			score.setEms(newscore.getEms());
 			score.setLms(newscore.getLms());
 			score.setOption(newscore.getOption());
+			score.setGhost(newscore.getGhost());
 			log.setSha256(hash);
 			log.setScore(newscore.getExscore());
 		}
