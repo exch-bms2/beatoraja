@@ -176,12 +176,17 @@ public class Skin {
 		objects.removeAll(removes, true);
 		objectarray = objects.toArray(SkinObject.class);
 		option.clear();
+		
+		prepareduration = 1000000 / state.main.getConfig().getPrepareFramePerSecond();
+		nextpreparetime = -1;
 	}
 	
 	private SkinObjectRenderer renderer;
+	
+	private long nextpreparetime;
+	private long prepareduration;
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
-		final long time = state.main.getNowTime();
 		if(renderer == null) {
 			SkinOffset offsetAll = getOffsetAll(state);
 			Matrix4 transform = new Matrix4();
@@ -193,8 +198,18 @@ public class Skin {
 			sprite.setTransformMatrix(transform);
 			renderer = new SkinObjectRenderer(sprite);
 		}
+		
+		final long microtime = state.main.getNowMicroTime();
+		if(nextpreparetime <= microtime) {
+			final long time = state.main.getNowTime();
+			for (SkinObject obj : objectarray) {
+				obj.prepare(time, state);
+			}
+			
+			nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
+		}
+		
 		for (SkinObject obj : objectarray) {
-			obj.prepare(time, state);
 			if (obj.draw) {
 				obj.draw(renderer);
 			}

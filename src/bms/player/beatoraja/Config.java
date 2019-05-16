@@ -106,6 +106,8 @@ public class Config implements Validatable {
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
 	private int maxFramePerSecond = 240;
+	
+	private int prepareFramePerSecond = 120;
 	/**
 	 * 選曲バー移動速度の最初
 	 */
@@ -263,6 +265,14 @@ public class Config implements Validatable {
 
 	public void setMaxFramePerSecond(int maxFramePerSecond) {
 		this.maxFramePerSecond = maxFramePerSecond;
+	}
+
+	public int getPrepareFramePerSecond() {
+		return prepareFramePerSecond;
+	}
+
+	public void setPrepareFramePerSecond(int prepareFramePerSecond) {
+		this.prepareFramePerSecond = prepareFramePerSecond;
 	}
 
 	public String[] getBmsroot() {
@@ -592,6 +602,7 @@ public class Config implements Validatable {
 		keyvolume = MathUtils.clamp(keyvolume, 0f, 1f);
 		bgvolume = MathUtils.clamp(bgvolume, 0f, 1f);
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
+		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
 
