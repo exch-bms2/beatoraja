@@ -19,12 +19,10 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
-import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.song.*;
@@ -34,9 +32,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -190,24 +185,6 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> target;
 
 	@FXML
-	private ComboBox<Integer> audio;
-	@FXML
-	private ComboBox<String> audioname;
-	@FXML
-	private Spinner<Integer> audiobuffer;
-	@FXML
-	private Spinner<Integer> audiosim;
-	@FXML
-	private Slider systemvolume;
-	@FXML
-	private Slider keyvolume;
-	@FXML
-	private Slider bgvolume;
-	@FXML
-	private ComboBox<Integer> audioFreqOption;
-	@FXML
-	private ComboBox<Integer> audioFastForward;
-	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
     @FXML
@@ -255,6 +232,8 @@ public class PlayConfigurationView implements Initializable {
 	private VBox skin;
 	@FXML
 	private VideoConfigurationView videoController;
+	@FXML
+	private AudioConfigurationView audioController;
 	@FXML
 	private ResourceConfigurationView resourceController;
 	@FXML
@@ -322,12 +301,6 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay2, autosaves);
 		initComboBox(autosavereplay3, autosaves);
 		initComboBox(autosavereplay4, autosaves);
-		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio"});
-		audio.getItems().setAll(0, 2);
-
-		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
-		initComboBox(audioFreqOption, audioPlaySpeedControls);
-		initComboBox(audioFastForward, audioPlaySpeedControls);
 		
 		resourceController.init(this);
 
@@ -390,21 +363,13 @@ public class PlayConfigurationView implements Initializable {
 
 		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 		videoController.update(config);
-
-		systemvolume.setValue((double)config.getSystemvolume());
-		keyvolume.setValue((double)config.getKeyvolume());
-		bgvolume.setValue((double)config.getBgvolume());
+		audioController.update(config);
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
 
 		resourceController.update(config);
 
-		audio.setValue(config.getAudioDriver());
-		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
-		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
-		audioFreqOption.setValue(config.getAudioFreqOption());
-		audioFastForward.setValue(config.getAudioFastForward());
 		showhiddennote.setSelected(config.isShowhiddennote());
 
 		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgeType()));
@@ -427,8 +392,6 @@ public class PlayConfigurationView implements Initializable {
 
 		enableIpfs.setSelected(config.isEnableIpfs());
 		ipfsurl.setText(config.getIpfsUrl());
-
-		updateAudioDriver();
 
 		if(players.getItems().contains(config.getPlayername())) {
 			players.setValue(config.getPlayername());
@@ -525,25 +488,16 @@ public class PlayConfigurationView implements Initializable {
 	 */
 	public void commit() {
 	    videoController.commit(config);
+		audioController.commit();
 
 		config.setPlayername(players.getValue());
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
-		config.setSystemvolume((float) systemvolume.getValue());
-		config.setKeyvolume((float) keyvolume.getValue());
-		config.setBgvolume((float) bgvolume.getValue());
 
 		resourceController.commit(config);
 
 		config.setShowhiddennote(showhiddennote.isSelected());
-
-		config.setAudioDriver(audio.getValue());
-		config.setAudioDriverName(audioname.getValue());
-		config.setAudioDeviceBufferSize(getValue(audiobuffer));
-		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
-		config.setAudioFreqOption(audioFreqOption.getValue());
-		config.setAudioFastForward(audioFastForward.getValue());
 
 		config.setJudgeType(JudgeAlgorithm.values()[judgealgorithm.getValue()].name());
 		config.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
@@ -716,43 +670,6 @@ public class PlayConfigurationView implements Initializable {
 		spinner.getValueFactory()
 				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
 		return spinner.getValue();
-	}
-
-    @FXML
-	public void updateAudioDriver() {
-		switch(audio.getValue()) {
-		case Config.AUDIODRIVER_SOUND:
-			audioname.setDisable(true);
-			audioname.getItems().clear();
-			audiobuffer.setDisable(false);
-			audiosim.setDisable(false);
-			break;
-		case Config.AUDIODRIVER_PORTAUDIO:
-			try {
-				DeviceInfo[] devices = PortAudioDriver.getDevices();
-				List<String> drivers = new ArrayList<String>(devices.length);
-				for(int i = 0;i < devices.length;i++) {
-					drivers.add(devices[i].name);
-				}
-				if(drivers.size() == 0) {
-					throw new RuntimeException("ドライバが見つかりません");
-				}
-				audioname.getItems().setAll(drivers);
-				if(drivers.contains(config.getAudioDriverName())) {
-					audioname.setValue(config.getAudioDriverName());
-				} else {
-					audioname.setValue(drivers.get(0));
-				}
-				audioname.setDisable(false);
-				audiobuffer.setDisable(false);
-				audiosim.setDisable(false);
-//				PortAudio.terminate();
-			} catch(Throwable e) {
-				Logger.getGlobal().severe("PortAudioは選択できません : " + e.getMessage());
-				audio.setValue(Config.AUDIODRIVER_SOUND);
-			}
-			break;
-		}
 	}
 
     @FXML
