@@ -12,6 +12,7 @@ import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
@@ -685,7 +686,9 @@ public class BarRenderer {
 					for(SongData song : songs) {
 						song.setFavorite(enable ? song.getFavorite() | SongData.FAVORITE_SONG : song.getFavorite() & (0xffffffff ^ SongData.FAVORITE_SONG));
 					}
+					sd.setFavorite(enable ? sd.getFavorite() | SongData.FAVORITE_SONG : sd.getFavorite() & (0xffffffff ^ SongData.FAVORITE_SONG));
 					select.getSongDatabase().setSongDatas(songs);
+					select.main.getMessageRenderer().addMessage(enable ? "Added to Favorite Song" : "Removed from Favorite Song", 1200, Color.GREEN, 1);
 				}
 			}
 		}
@@ -694,8 +697,10 @@ public class BarRenderer {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
 				if(sd != null) {
+					boolean enable = ((sd.getFavorite() & SongData.FAVORITE_CHART) == 0);
 					sd.setFavorite(sd.getFavorite() ^ SongData.FAVORITE_CHART);
 					select.getSongDatabase().setSongDatas(new SongData[]{sd});
+					select.main.getMessageRenderer().addMessage(enable ? "Added to Favorite Chart" : "Removed from Favorite Chart", 1200, Color.GREEN, 1);
 //					boolean exist = false;
 //					for(TableData.TableSongData element : favorites[0].getElements()) {
 //						if(element.getHash().equals(sd.getSha256())) {
