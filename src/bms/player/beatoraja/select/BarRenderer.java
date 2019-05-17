@@ -446,8 +446,12 @@ public class BarRenderer {
 			for (char c : charset) {
 				chars[i++] = c;
 			}
-			baro.getText(0).prepareFont(String.valueOf(chars));
-			baro.getText(1).prepareFont(String.valueOf(chars));
+			if(baro.getText(0) != null) {
+				baro.getText(0).prepareFont(String.valueOf(chars));				
+			}
+			if(baro.getText(1) != null) {
+				baro.getText(1).prepareFont(String.valueOf(chars));				
+			}
 		}
 
 		// check terminated loader thread and load song images
@@ -495,8 +499,11 @@ public class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
-			baro.getText(ba.text).setText(ba.sd.getTitle());
-			baro.getText(ba.text).draw(sprite, ba.x, ba.y);
+			SkinText text = baro.getText(ba.text);
+			if(text != null) {
+				text.setText(ba.sd.getTitle());
+				text.draw(sprite, ba.x, ba.y);				
+			}
 		}
 
 		for (int i = 0; i < barlength; i++) {

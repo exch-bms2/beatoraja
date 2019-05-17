@@ -189,6 +189,15 @@ public class SkinBar extends SkinObject {
         }
     }
 
+    public boolean validate() {
+    	for(int i = 0;i < text.length;i++) {
+    		if(text[i] != null && !text[i].validate()) {
+    			text[i] = null;
+    		}
+    	}
+    	return super.validate();
+    }
+    
     @Override
     public void prepare(long time, MainState state) {
     	if(selector == null) {
