@@ -100,6 +100,7 @@ public class BGAProcessor {
 		progress = 0;
 
 		cache.clear();
+		resetCurrentlyPlayingBGA();
 
 		int id = 0;
 
@@ -219,11 +220,15 @@ public class BGAProcessor {
 				mp.stop();				
 			}
 		}
+		resetCurrentlyPlayingBGA();
+		time = 0;		
+	}
+
+	private void resetCurrentlyPlayingBGA() {
 		playingbgaid = -1;
 		playinglayerid = -1;
 		misslayertime = 0;
 		misslayer = null;
-		time = 0;		
 	}
 
 	private Texture getBGAData(long time, int id, boolean cont) {
