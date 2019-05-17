@@ -51,7 +51,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.7.0";
+	public static final String VERSION = "beatoraja 0.7.1";
 
 	public static final boolean debug = false;
 
@@ -296,10 +296,14 @@ public class MainController extends ApplicationAdapter {
 		sprite = new SpriteBatch();
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
-		systemfont = generator.generateFont(parameter);
+		try {
+			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+			parameter.size = 24;
+			systemfont = generator.generateFont(parameter);			
+		} catch (GdxRuntimeException e) {
+			Logger.getGlobal().severe("System Font１読み込み失敗");
+		}
 		messageRenderer = new MessageRenderer();
 
 		input = new BMSPlayerInputProcessor(config, player);
@@ -407,7 +411,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		// show fps
-		if (showfps) {
+		if (showfps && systemfont != null) {
 			sprite.begin();
 			systemfont.setColor(Color.PURPLE);
 			message.setLength(0);
@@ -866,7 +870,11 @@ public class MainController extends ApplicationAdapter {
 		private final Array<Message> messages = new Array<Message>();
 
 		public MessageRenderer() {
-			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+			try {
+				generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));				
+			} catch (GdxRuntimeException e) {
+				Logger.getGlobal().severe("Message Font読み込み失敗");
+			}
 		}
 
 		public void render(MainState state, SpriteBatch sprite, int x, int y) {
@@ -889,10 +897,12 @@ public class MainController extends ApplicationAdapter {
 
 		public Message addMessage(String text, int time, Color color, int type) {
 			Message message = new Message(text, time, color, type);
-			Gdx.app.postRunnable(() -> {
-				message.init(generator);
-				messages.add(message);
-			});
+			if(generator != null) {
+				Gdx.app.postRunnable(() -> {
+					message.init(generator);
+					messages.add(message);
+				});
+			}
 			return message;
 		}
 
