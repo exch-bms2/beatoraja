@@ -340,7 +340,10 @@ public class BarRenderer {
 		return false;
 	}
 
+	private long time;
+	
 	public void prepare(MusicSelectSkin skin, SkinBar baro, long time) {
+		this.time = time;		
 		for (int i = 0; i < barlength; i++) {
 			// calcurate song bar position
 			final BarArea ba = bararea[i];
@@ -423,7 +426,7 @@ public class BarRenderer {
 		}
 	}
 
-	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, long time) {
+	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro) {
 		if (skin == null) {
 			return;
 		}
@@ -463,7 +466,11 @@ public class BarRenderer {
 			}
 
 			if (si.draw) {
+				float orgx = si.region.x;
+				float orgy = si.region.y;
 				si.draw(sprite, time, select, ba.value, ba.x - si.region.x, ba.y - si.region.y - (baro.getPosition() == 1 ? si.region.height : 0));
+				si.region.x = orgx;
+				si.region.y = orgy;
 			} else {
 				ba.value = -1;
 			}
