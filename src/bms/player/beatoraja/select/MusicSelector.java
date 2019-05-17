@@ -578,6 +578,18 @@ public class MusicSelector extends MainState {
 		case BUTTON_GAUGEAUTOSHIFT:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;
+		case BUTTON_AUTOSAVEREPLAY_1:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_1 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_1);
+			break;
+		case BUTTON_AUTOSAVEREPLAY_2:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_2 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_2);
+			break;
+		case BUTTON_AUTOSAVEREPLAY_3:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_3 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_3);
+			break;
+		case BUTTON_AUTOSAVEREPLAY_4:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_4 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_4);
+			break;
 		default:
 			super.executeEvent(id, arg1, arg2);
 		}

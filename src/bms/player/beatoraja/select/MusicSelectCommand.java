@@ -19,6 +19,7 @@ import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.bar.*;
+import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
@@ -536,6 +537,78 @@ public enum MusicSelectCommand {
         @Override
         public void execute(MusicSelector selector) {
             selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() - 1 + 5) % 5);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    NEXT_AUTOSAVEREPLAY_1 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[0] = (asr[0] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    PREV_AUTOSAVEREPLAY_1 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[0] = (asr[0] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    NEXT_AUTOSAVEREPLAY_2 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[1] = (asr[1] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    PREV_AUTOSAVEREPLAY_2 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[1] = (asr[1] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    NEXT_AUTOSAVEREPLAY_3 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[2] = (asr[2] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    PREV_AUTOSAVEREPLAY_3 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[2] = (asr[2] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    NEXT_AUTOSAVEREPLAY_4 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[3] = (asr[3] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
+            selector.play(SOUND_OPTIONCHANGE);
+        }
+    },
+    PREV_AUTOSAVEREPLAY_4 {
+        @Override
+        public void execute(MusicSelector selector) {
+            int[] asr = selector.main.getConfig().getAutoSaveReplay();
+            asr[3] = (asr[3] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
+            selector.main.getConfig().setAutoSaveReplay(asr);
             selector.play(SOUND_OPTIONCHANGE);
         }
     },

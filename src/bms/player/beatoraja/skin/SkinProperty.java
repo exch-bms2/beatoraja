@@ -829,6 +829,10 @@ public class SkinProperty {
 	public static final int BUTTON_ASSIST_BPMGUIDE = 306;
 	public static final int BUTTON_ASSIST_NOMINE = 307;
 	public static final int BUTTON_LNMODE = 308;
+	public static final int BUTTON_AUTOSAVEREPLAY_1 = 321;
+	public static final int BUTTON_AUTOSAVEREPLAY_2 = 322;
+	public static final int BUTTON_AUTOSAVEREPLAY_3 = 323;
+	public static final int BUTTON_AUTOSAVEREPLAY_4 = 324;
 
 	public static final int BUTTON_SKINSELECT_24KEY = 386;
 	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;

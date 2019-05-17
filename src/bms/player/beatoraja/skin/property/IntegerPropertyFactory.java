@@ -800,6 +800,18 @@ public class IntegerPropertyFactory {
 		if (optionid == BUTTON_BGA) {
 			result = (state) -> (state.main.getPlayerResource().getConfig().getBga());
 		}
+		if (optionid == BUTTON_AUTOSAVEREPLAY_1) {
+			result = (state) -> (state.main.getConfig().getAutoSaveReplay()[0]);
+		}
+		if (optionid == BUTTON_AUTOSAVEREPLAY_2) {
+			result = (state) -> (state.main.getConfig().getAutoSaveReplay()[1]);
+		}
+		if (optionid == BUTTON_AUTOSAVEREPLAY_3) {
+			result = (state) -> (state.main.getConfig().getAutoSaveReplay()[2]);
+		}
+		if (optionid == BUTTON_AUTOSAVEREPLAY_4) {
+			result = (state) -> (state.main.getConfig().getAutoSaveReplay()[3]);
+		}
 
 		if ((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
 				|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
