@@ -2,6 +2,9 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
+
+import java.util.logging.Logger;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /**
  * フォントデータをソースとして持つスキン用テキスト
@@ -36,12 +40,23 @@ public class SkinTextFont extends SkinText {
 
     public SkinTextFont(String fontpath, int cycle, int size, int shadow, StringProperty property) {
     	super(property);
-        generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
-        parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.characters = "";
-//        this.setCycle(cycle);
-        parameter.size = size;
-        setShadowOffset(new Vector2(shadow, shadow));
+    	try {
+            generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
+            parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+            parameter.characters = "";
+//            this.setCycle(cycle);
+            parameter.size = size;
+            setShadowOffset(new Vector2(shadow, shadow));    		
+    	} catch (GdxRuntimeException e) {
+    		Logger.getGlobal().warning("Skin Font読み込み失敗");
+    	}
+    }
+    
+    public boolean validate() {
+    	if(generator == null) {
+    		return false;
+    	}
+    	return super.validate();
     }
 
     public void prepareFont(String text) {
@@ -68,9 +83,6 @@ public class SkinTextFont extends SkinText {
 	
 	@Override
     public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
-        if(generator == null) {
-            return;
-        }
         if(font != null) {
             font.getData().setScale(region.height / parameter.size);
             
