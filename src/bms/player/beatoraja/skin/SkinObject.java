@@ -484,6 +484,10 @@ public abstract class SkinObject implements Disposable {
 		this.index = 0;
 	}
 	
+	public boolean validate() {
+		return getAllDestination().length > 0;
+	}
+	
 	public void prepare(long time, MainState state) {
 		prepare(time, state, 0, 0);
 	}

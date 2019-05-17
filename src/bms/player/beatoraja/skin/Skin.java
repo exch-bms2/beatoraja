@@ -139,7 +139,7 @@ public class Skin {
 	
 	public void prepare(MainState state) {
 		for(SkinObject obj : objects) {
-			if(obj.getAllDestination().length == 0) {
+			if(!obj.validate()) {
 				removes.add(obj);
 			} else {
 				Array<BooleanProperty> bp = new Array();
