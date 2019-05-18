@@ -271,7 +271,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								}
 							}
 
-							num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, str[14].length() > 0 ? values[14] : 2, values[11]);
+							num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, str[14].length() > 0 ? values[14] : 2, values[15], values[11]);
 							num.setAlign(values[12]);
 						} else {
 							int d = images.length % 10 == 0 ? 10 : 11;
@@ -283,7 +283,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								}
 							}
 
-							num = new SkinNumber(nimages, values[10], values[9], values[13], d > 10 ? 2 : 0,
+							num = new SkinNumber(nimages, values[10], values[9], values[13], d > 10 ? 2 : 0, values[15],
 									values[11]);
 							num.setAlign(values[12]);
 						}
@@ -361,7 +361,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							values[13]);
 					slider.setChangable(values[14] == 0);
 					skin.add(slider);
-					
+
 					// TODO 固有実装の汎用化
 					if((skin instanceof PlaySkin) && values[13] == SLIDER_LANECOVER) {
 						((PlaySkin)skin).laneCover = slider;
