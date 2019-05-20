@@ -99,10 +99,7 @@ public class SkinDistributionGraph extends SkinObject {
 
 	public void prepare(long time, MainState state) {
     	final Bar bar = ((MusicSelector)state).getSelectedBar();
-    	if(!(bar instanceof DirectoryBar)) {
-    		draw = false;
-    		return;
-    	}
+        this.currentBar = (bar instanceof DirectoryBar) ? (DirectoryBar)bar : null;
         if (!state.main.getPlayerResource().getConfig().isFolderlamp()) {
             draw = false;
             return;
@@ -111,7 +108,6 @@ public class SkinDistributionGraph extends SkinObject {
         for(int i = 0;i < currentImage.length;i++) {
             currentImage[i] = lampimage[i].getImage(time,state);
         }
-        this.currentBar = (DirectoryBar)bar;
 	}
 	
     public void draw(SkinObjectRenderer sprite) {
@@ -119,6 +115,9 @@ public class SkinDistributionGraph extends SkinObject {
     }
 
     public void draw(SkinObjectRenderer sprite, DirectoryBar current, float offsetx, float offsety) {
+    	if(current == null) {
+    		return;
+    	}
         int[] lamps = current.getLamps();
         int[] ranks = current.getRanks();
         int count = 0;
