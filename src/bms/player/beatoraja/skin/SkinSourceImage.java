@@ -1,6 +1,5 @@
 package bms.player.beatoraja.skin;
 
-import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.skin.property.TimerProperty;
 import bms.player.beatoraja.skin.property.TimerPropertyFactory;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -42,6 +41,28 @@ public class SkinSourceImage implements SkinSource {
 		this.cycle = cycle;
 	}
 
+	public boolean validate() {
+		if(image == null || image.length == 0) {
+			return false;
+		}
+		
+		boolean exist = false;
+		for(TextureRegion[] trs : image) {
+			if(trs != null) {
+				for(TextureRegion tr : trs) {
+					if(tr != null) {
+						exist = true;
+					}
+				}				
+			}
+		}
+
+		if(!exist) {
+			return false;
+		}
+		return true;
+	}
+	
 	public TextureRegion getImage(long time, MainState state) {
 		if (image != null && image.length > 0 & image[0] != null && image[0].length > 0) {
 			return image[0][getImageIndex(image[0].length, time, state)];

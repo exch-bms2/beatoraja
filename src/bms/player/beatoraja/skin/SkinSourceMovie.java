@@ -29,6 +29,10 @@ public class SkinSourceMovie implements SkinSource {
 		this.timer = timer;
 	}
 
+	public boolean validate() {
+		return true;
+	}
+	
 	public TextureRegion getImage(long time, MainState state) {
 		if(!playing) {
 			image.play(time, true);
