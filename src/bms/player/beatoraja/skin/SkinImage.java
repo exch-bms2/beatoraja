@@ -7,6 +7,7 @@ import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * スキンイメージ
@@ -23,6 +24,8 @@ public class SkinImage extends SkinObject {
 	private IntegerProperty ref;
 
 	private TextureRegion currentImage;
+	
+	private Array<SkinSource> removedSources = new Array<SkinSource>();
 	
 	public SkinImage() {
 		
@@ -53,18 +56,19 @@ public class SkinImage extends SkinObject {
 		setImage(image, timer, cycle);
 	}
 
-	public TextureRegion getImage(long time, MainState state) {
-		return getImage(0 ,time, state);
-	}
-
 	public SkinImage(SkinSourceMovie image) {
 		this.image = new SkinSource[1];
 		this.image[0] = image;
 		this.setImageType(SkinObjectRenderer.TYPE_FFMPEG);
 	}
 
+	public TextureRegion getImage(long time, MainState state) {
+		return getImage(0 ,time, state);
+	}
+
 	public TextureRegion getImage(int value, long time, MainState state) {
-		return image[value].getImage(time, state);
+		final SkinSource source = image[value];
+		return source != null ? source.getImage(time, state) : null;
 	}
 
 	public void setImage(TextureRegion[] image, int timer, int cycle) {
@@ -89,6 +93,30 @@ public class SkinImage extends SkinObject {
 		for(int i = 0;i < image.length;i++) {
 			this.image[i] = new SkinSourceImage(image[i], timer, cycle);
 		}
+	}
+	
+	public boolean validate() {
+		if(image == null) {
+			return false;
+		}
+		
+		boolean exist = false;
+    	for(int i = 0;i < image.length;i++) {
+    		if(image[i] != null) {
+    			if(image[i].validate()) {
+    				exist = true;
+    			} else {
+        			removedSources.add(image[i]);
+        			image[i] = null;
+    			}
+    		}
+    	}
+    	
+    	if(!exist) {
+    		return false;
+    	}
+
+		return super.validate();
 	}
 
 	public void prepare(long time, MainState state) {
@@ -150,9 +178,12 @@ public class SkinImage extends SkinObject {
     }
 
     public void dispose() {
+    	disposeAll(removedSources.toArray(SkinSource.class));
 		if(image != null) {
 			for(SkinSource tr : image) {
-				tr.dispose();
+				if(tr != null) {
+					tr.dispose();					
+				}
 			}
 			image = null;
 		}
