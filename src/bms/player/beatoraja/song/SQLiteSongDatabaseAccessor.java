@@ -431,11 +431,15 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				final String s = (path.startsWith(root) ? root.relativize(path).toString() : path.toString())
 						+ File.separatorChar;
 				// System.out.println("folder更新 : " + s);
+				Path parentpath = path.getParent();
+				if(parentpath == null) {
+					parentpath = path.toAbsolutePath().getParent();
+				}				
 				qr.update(property.conn,
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);",
 								path.getFileName().toString(), "", "", s, 1, "",
-						SongUtils.crc32(path.toAbsolutePath().getParent().toString(), bmsroot, root.toString()),
+						SongUtils.crc32(parentpath.toString() , bmsroot, root.toString()),
 						Files.getLastModifiedTime(path).toMillis() / 1000, null,
 						Calendar.getInstance().getTimeInMillis() / 1000);
 			}
