@@ -77,12 +77,15 @@ public class SkinGraph extends SkinObject {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = new RateProperty(id, min, max);
 	}
+
+	public boolean validate() {
+		if(source == null || !source.validate()) {
+			return false;
+		}
+		return super.validate();
+	}
 	
 	public void prepare(long time, MainState state) {
-		if (source == null) {
-			draw = false;
-			return;
-		}		
 		super.prepare(time, state);
 		if(!draw) {
 			return;
