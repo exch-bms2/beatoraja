@@ -411,10 +411,10 @@ public class JSONSkinLoader extends SkinLoader {
 
 								SkinNumber num = null;
 								if(value.value != null) {
-									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding,
+									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding, value.space,
 											value.value);
 								} else {
-									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding,
+									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding, value.space,
 											value.ref);
 								}
 
@@ -444,10 +444,10 @@ public class JSONSkinLoader extends SkinLoader {
 								SkinNumber num = null;
 								if(value.value != null) {
 									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-											d > 10 ? 2 : value.padding, value.value);
+											d > 10 ? 2 : value.padding, value.space, value.value);
 								} else {
 									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-											d > 10 ? 2 : value.padding, value.ref);
+											d > 10 ? 2 : value.padding, value.space, value.ref);
 								}
 								num.setAlign(value.align);
 								if(value.offset != null) {
@@ -803,7 +803,7 @@ public class JSONSkinLoader extends SkinLoader {
 											}
 										}
 										numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-												d > 10 ? 2 : 0, value.ref);
+												d > 10 ? 2 : 0, value.space, value.ref);
 										numbers[i].setAlign(2);
 										if(value.offset != null) {
 											SkinOffset[] offsets = new SkinOffset[value.offset.length];
@@ -974,7 +974,7 @@ public class JSONSkinLoader extends SkinLoader {
 										}
 									}
 									SkinNumber numbers = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-											d > 10 ? 2 : 0, value.ref);
+											d > 10 ? 2 : 0, value.space, value.ref);
 									numbers.setAlign(value.align);
 									setDestination(skin, numbers, sk.songlist.level[i]);
 									barobj.setBarlevel(i, numbers);

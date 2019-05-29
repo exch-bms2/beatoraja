@@ -130,6 +130,7 @@ public class JsonSkin {
 		public int digit;
 		public int padding;
 		public int zeropadding;
+		public int space;
 		public int ref;
 		public IntegerProperty value;
 		public Value[] offset;

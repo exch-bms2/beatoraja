@@ -168,7 +168,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							}
 
 							skinbar.setBarlevel(values[1], new SkinNumber(pn, mn, values[10], values[9],
-									values[13] + 1, 0, values[11]));
+									values[13] + 1, 0, values[15], values[11]));
 							skinbar.getBarlevel(values[1]).setAlign(values[12]);
 						} else {
 							int d = images.length % 10 == 0 ? 10 : 11;
@@ -181,7 +181,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							}
 
 							skinbar.setBarlevel(values[1], new SkinNumber(nimages, values[10], values[9],
-									values[13], d > 10 ? 2 : 0, values[11]));
+									values[13], d > 10 ? 2 : 0, values[15], values[11]));
 							skinbar.getBarlevel(values[1]).setAlign(values[12]);
 						}
 						// System.out.println("Number Added - " +
@@ -420,7 +420,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					for(int j = 0 ;j < len;j++) {
 						for(int i = 0 ;i < imgs[j].length;i++) {
 							imgs[j][i] = images[i * len + j];
-						}						
+						}
 					}
 					skinbar.setGraph(new SkinDistributionGraph(values[1], imgs, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
