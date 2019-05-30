@@ -88,8 +88,10 @@ local function value_judge(index)
 end
 
 local filepath = {
+	{name = "Background", path = "play/background/*.png"},
 	{name = "Theme", path = "keyboard/*.png"},
-	{name = "Laser", path = "laser/*.png"}
+	{name = "Laser", path = "play/laser/*.png"},
+	{name = "Lanecover", path = "play/lanecover/*.png"},
 }
 
 local header = {
@@ -219,18 +221,18 @@ local function main()
 
 	skin.source = {
 		{id = 0, path = "system.png"},
-		{id = 1, path = "play.png"},
+		{id = 1, path = "play/background/*.png"},
 		{id = 2, path = "playbg.png"},
 		{id = 3, path = "gauge.png"},
 		{id = 4, path = "judge.png"},
 		{id = 5, path = "number.png"},
-		{id = 6, path = "laser/*.png"},
+		{id = 6, path = "play/laser/*.png"},
 		{id = 7, path = "keyboard/*.png"},
 		{id = 8, path = "close.png"},
 		{id = 9, path = "scoregraph.png"},
 		{id = 10, path = "bomb.png"},
 		{id = 11, path = "ready.png"},
-		{id = 12, path = "lanecover.png"},
+		{id = 12, path = "play/lanecover/*.png"},
 		{id = 13, path = "judgedetail.png"}
 	}
 	skin.font = {
