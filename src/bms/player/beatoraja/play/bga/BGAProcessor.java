@@ -250,8 +250,6 @@ public class BGAProcessor {
 			this.time = -1;
 			return;
 		}
-		rbga = true;
-		rlayer = true;
 		for (int i = pos; i < timelines.length; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() > time) {
@@ -315,6 +313,7 @@ public class BGAProcessor {
 		} else {
 			// draw BGA
 			final Texture playingbgatex = getBGAData(time, playingbgaid, rbga);
+			rbga = true;
 			if (playingbgatex != null) {
 				if (movies[playingbgaid] != null) {
 					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
@@ -328,6 +327,7 @@ public class BGAProcessor {
 			}
 			// draw layer
 			final Texture playinglayertex = getBGAData(time, playinglayerid, rlayer);
+			rlayer = true;
 			if (playinglayertex != null) {
 				if (movies[playinglayerid] != null) {
 					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
