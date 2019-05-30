@@ -29,23 +29,25 @@
 		]},
 	],
 	"filepath":[
-		{"name":"Note", "path":"notes/*.png"},
-		{"name":"Laser", "path":"laser/*.png"}
+		{"name":"Background", "path":"play/background/*.png"},
+		{"name":"Note", "path":"play/notes/*.png"},
+		{"name":"Laser", "path":"play/laser/*.png"},
+		{"name":"Lanecover", "path":"play/lanecover/*.png"},
 	],
 	"source": [
 		{"id":0, "path":"system.png"},
-		{"id":1, "path":"play.png"},
+		{"id":1, "path":"play/background/*.png"},
 		{"id":2, "path":"playbg.png"},
 		{"id":3, "path":"gauge.png"},
 		{"id":4, "path":"judge.png"},
 		{"id":5, "path":"number.png"},
-		{"id":6, "path":"laser/*.png"},
-		{"id":7, "path":"notes/*.png"},
+		{"id":6, "path":"play/laser/*.png"},
+		{"id":7, "path":"play/notes/*.png"},
 		{"id":8, "path":"close.png"},
 		{"id":9, "path":"scoregraph.png"},
 		{"id":10, "path":"bomb.png"},
 		{"id":11, "path":"ready.png"},
-		{"id":12, "path":"lanecover.png"},
+		{"id":12, "path":"play/lanecover/*.png"},
 		{"id":13, "path":"judgedetail.png"}
 	],
 	"font": [
@@ -299,25 +301,25 @@
 			]}
 		],
 		"group":[
-			{"id":"section-line", "offset":50, "dst":[
+			{"id":"section-line", "offset":3, "dst":[
 				{"if": [920], "value": {"x":20, "y":140, "w":390, "h":1, "r":128, "g":128, "b":128}},
 				{"if": [921], "value": {"x":870, "y":140, "w":390, "h":1, "r":128, "g":128, "b":128}}
 			]}
 		],
 		"time":[
-			{"id":"section-line", "offset":50, "dst":[
+			{"id":"section-line", "offset":3, "dst":[
 				{"if": [920], "value": {"x":20, "y":140, "w":390, "h":1, "r":64, "g":192, "b":192}},
 				{"if": [921], "value": {"x":870, "y":140, "w":390, "h":1, "r":64, "g":192, "b":192}}
 			]}
 		],
 		"bpm":[
-			{"id":"section-line", "offset":50, "dst":[
+			{"id":"section-line", "offset":3, "dst":[
 				{"if": [920], "value": {"x":20, "y":140, "w":390, "h":2, "r":0, "g":192, "b":0}},
 				{"if": [921], "value": {"x":870, "y":140, "w":390, "h":2, "r":0, "g":192, "b":0}}
 			]}
 		],
 		"stop":[
-			{"id":"section-line", "offset":50, "dst":[
+			{"id":"section-line", "offset":3, "dst":[
 				{"if": [920], "value": {"x":20, "y":140, "w":390, "h":2, "r":192, "g":192, "b":0}},
 				{"if": [921], "value": {"x":870, "y":140, "w":390, "h":2, "r":192, "g":192, "b":0}}
 			]}
@@ -332,32 +334,32 @@
 		"id":2010,
 		"index":0,
 		"images":[
-			{"id":"judgef-pg", "loop":-1, "timer":46 ,"offset":50, "dst":[
+			{"id":"judgef-pg", "loop":-1, "timer":46 ,"offset":3, "dst":[
 				{"if": [920], "value": {"time":0, "x":115, "y":240, "w":180, "h":40}},
 				{"if": [921], "value": {"time":0, "x":965, "y":240, "w":180, "h":40}},
 				{"time":500}
 			]},
-			{"id":"judgef-gr", "loop":-1, "timer":46 ,"offset":50, "dst":[
+			{"id":"judgef-gr", "loop":-1, "timer":46 ,"offset":3, "dst":[
 				{"if": [920], "value": {"time":0, "x":115, "y":240, "w":180, "h":40}},
 				{"if": [921], "value": {"time":0, "x":965, "y":240, "w":180, "h":40}},
 				{"time":500}
 			]},
-			{"id":"judgef-gd", "loop":-1, "timer":46 ,"offset":50, "dst":[
+			{"id":"judgef-gd", "loop":-1, "timer":46 ,"offset":3, "dst":[
 				{"if": [920], "value": {"time":0, "x":115, "y":240, "w":180, "h":40}},
 				{"if": [921], "value": {"time":0, "x":965, "y":240, "w":180, "h":40}},
 				{"time":500}
 			]},
-			{"id":"judgef-bd", "loop":-1, "timer":46 ,"offset":50, "dst":[
+			{"id":"judgef-bd", "loop":-1, "timer":46 ,"offset":3, "dst":[
 				{"if": [920], "value": {"time":0, "x":115, "y":240, "w":180, "h":40}},
 				{"if": [921], "value": {"time":0, "x":965, "y":240, "w":180, "h":40}},
 				{"time":500}
 			]},
-			{"id":"judgef-pr", "loop":-1, "timer":46 ,"offset":50, "dst":[
+			{"id":"judgef-pr", "loop":-1, "timer":46 ,"offset":3, "dst":[
 				{"if": [920], "value": {"time":0, "x":115, "y":240, "w":180, "h":40}},
 				{"if": [921], "value": {"time":0, "x":965, "y":240, "w":180, "h":40}},
 				{"time":500}
 			]},
-			{"id":"judgef-ms", "loop":-1, "timer":46 ,"offset":50, "dst":[
+			{"id":"judgef-ms", "loop":-1, "timer":46 ,"offset":3, "dst":[
 				{"if": [920], "value": {"time":0, "x":115, "y":240, "w":180, "h":40}},
 				{"if": [921], "value": {"time":0, "x":965, "y":240, "w":180, "h":40}},
 				{"time":500}
@@ -479,40 +481,40 @@
 				{"x":420, "y":140, "w":12, "h":18}
 			]},
 
-			{"id":"keybeam1", "timer":101, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam1", "timer":101, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":102, "y":140, "w":25, "h":580},
 				{"time":100, "x":90, "w":50}
 			]},
-			{"id":"keybeam2", "timer":102, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam2", "timer":102, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":150, "y":140, "w":20, "h":580},
 				{"time":100, "x":140, "w":40}
 			]},
-			{"id":"keybeam3", "timer":103, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam3", "timer":103, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":192, "y":140, "w":25, "h":580},
 				{"time":100, "x":180, "w":50}
 			]},
-			{"id":"keybeam4", "timer":104, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam4", "timer":104, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":240, "y":140, "w":20, "h":580},
 				{"time":100, "x":230, "w":40}
 			]},
-			{"id":"keybeam5", "timer":105, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam5", "timer":105, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":282, "y":140, "w":25, "h":580},
 				{"time":100, "x":270, "w":50}
 			]},
-			{"id":"keybeam6", "timer":106, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam6", "timer":106, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":330, "y":140, "w":20, "h":580},
 				{"time":100, "x":320, "w":40}
 			]},
-			{"id":"keybeam7", "timer":107, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam7", "timer":107, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":372, "y":140, "w":25, "h":580},
 				{"time":100, "x":360, "w":50}
 			]},
-			{"id":"keybeams", "timer":100, "loop":100, "offset":50, "dst":[
+			{"id":"keybeams", "timer":100, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":37, "y":140, "w":35, "h":580},
 				{"time":100, "x":20, "w":70}
 			]},
 
-			{"id":15, "offset":50, "dst":[
+			{"id":15, "offset":3, "dst":[
 				{"x":20, "y":137, "w":390, "h":6}
 			]},
 
@@ -525,78 +527,78 @@
 				{"x":20, "y":720, "w":390, "h":580}
 			]},
 
-			{"id":110, "timer":51, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":110, "timer":51, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":-26, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":111, "timer":52, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":111, "timer":52, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":19, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":112, "timer":53, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":112, "timer":53, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":64, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":113, "timer":54, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":113, "timer":54, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":109, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":114, "timer":55, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":114, "timer":55, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":154, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":115, "timer":56, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":115, "timer":56, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":199, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":116, "timer":57, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":116, "timer":57, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":244, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":117, "timer":50, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":117, "timer":50, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":-86, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":140, "timer":71, "blend":2, "offset":50, "dst":[
+			{"id":140, "timer":71, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":-26, "y":-62, "w":322, "h":344}
 			]},
-			{"id":141, "timer":72, "blend":2, "offset":50, "dst":[
+			{"id":141, "timer":72, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":19, "y":-62, "w":322, "h":344}
 			]},
-			{"id":142, "timer":73, "blend":2, "offset":50, "dst":[
+			{"id":142, "timer":73, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":64, "y":-62, "w":322, "h":344}
 			]},
-			{"id":143, "timer":74, "blend":2, "offset":50, "dst":[
+			{"id":143, "timer":74, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":109, "y":-62, "w":322, "h":344}
 			]},
-			{"id":144, "timer":75, "blend":2, "offset":50, "dst":[
+			{"id":144, "timer":75, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":154, "y":-62, "w":322, "h":344}
 			]},
-			{"id":145, "timer":76, "blend":2, "offset":50, "dst":[
+			{"id":145, "timer":76, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":199, "y":-62, "w":322, "h":344}
 			]},
-			{"id":146, "timer":77, "blend":2, "offset":50, "dst":[
+			{"id":146, "timer":77, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":244, "y":-62, "w":322, "h":344}
 			]},
-			{"id":147, "timer":70, "blend":2, "offset":50, "dst":[
+			{"id":147, "timer":70, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":-86, "y":-62, "w":322, "h":344}
 			]},
 
 			{"id":2010},
 
-			{"id":"judge-early", "loop":-1, "timer":46 ,"op":[911,1242],"offset":50, "dst":[
+			{"id":"judge-early", "loop":-1, "timer":46 ,"op":[911,1242],"offset":3, "dst":[
 				{"time":0, "x":200, "y":290, "w":50, "h":20},
 				{"time":500}
 			]},
-			{"id":"judge-late", "loop":-1, "timer":46 ,"op":[911,1243],"offset":50, "dst":[
+			{"id":"judge-late", "loop":-1, "timer":46 ,"op":[911,1243],"offset":3, "dst":[
 				{"time":0, "x":200, "y":290, "w":50, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgems-1pp", "loop":-1, "timer":46 ,"op":[912,241],"offset":50, "dst":[
+			{"id":"judgems-1pp", "loop":-1, "timer":46 ,"op":[912,241],"offset":3, "dst":[
 				{"time":0, "x":200, "y":290, "w":10, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgems-1pg", "loop":-1, "timer":46 ,"op":[912,-241],"offset":50, "dst":[
+			{"id":"judgems-1pg", "loop":-1, "timer":46 ,"op":[912,-241],"offset":3, "dst":[
 				{"time":0, "x":200, "y":290, "w":10, "h":20},
 				{"time":500}
 			]},
@@ -707,10 +709,10 @@
 				{"x":536, "y":50, "w":12, "h":18}
 			]},
 
-			{"id":450, "offset":51, "op":[270],"dst":[
+			{"id":450, "offset":4, "op":[270],"dst":[
 				{"time":0, "x":120, "y":720, "w":10, "h":15}
 			]},
-			{"id":451, "offset":51, "op":[270],"dst":[
+			{"id":451, "offset":4, "op":[270],"dst":[
 				{"time":0, "x":310, "y":720, "w":10, "h":15}
 			]},
 
@@ -787,40 +789,40 @@
 				{"x":790, "y":140, "w":12, "h":18}
 			]},
 
-			{"id":"keybeam1", "timer":101, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam1", "timer":101, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":882, "y":140, "w":25, "h":580},
 				{"time":100, "x":870, "w":50}
 			]},
-			{"id":"keybeam2", "timer":102, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam2", "timer":102, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":930, "y":140, "w":20, "h":580},
 				{"time":100, "x":920, "w":40}
 			]},
-			{"id":"keybeam3", "timer":103, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam3", "timer":103, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":972, "y":140, "w":25, "h":580},
 				{"time":100, "x":960, "w":50}
 			]},
-			{"id":"keybeam4", "timer":104, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam4", "timer":104, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":1020, "y":140, "w":20, "h":580},
 				{"time":100, "x":1010, "w":40}
 			]},
-			{"id":"keybeam5", "timer":105, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam5", "timer":105, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":1062, "y":140, "w":25, "h":580},
 				{"time":100, "x":1050, "w":50}
 			]},
-			{"id":"keybeam6", "timer":106, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam6", "timer":106, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":1110, "y":140, "w":20, "h":580},
 				{"time":100, "x":1100, "w":40}
 			]},
-			{"id":"keybeam7", "timer":107, "loop":100, "offset":50, "dst":[
+			{"id":"keybeam7", "timer":107, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":1152, "y":140, "w":25, "h":580},
 				{"time":100, "x":1140, "w":50}
 			]},
-			{"id":"keybeams", "timer":100, "loop":100, "offset":50, "dst":[
+			{"id":"keybeams", "timer":100, "loop":100, "offset":3, "dst":[
 				{"time":0, "x":1207, "y":140, "w":35, "h":580},
 				{"time":100, "x":1190, "w":70}
 			]},
 
-			{"id":15, "offset":50, "dst":[
+			{"id":15, "offset":3, "dst":[
 				{"x":870, "y":137, "w":390, "h":6}
 			]},
 
@@ -833,78 +835,78 @@
 				{"x":870, "y":720, "w":390, "h":580}
 			]},
 
-			{"id":110, "timer":51, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":110, "timer":51, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":754, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":111, "timer":52, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":111, "timer":52, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":799, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":112, "timer":53, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":112, "timer":53, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":844, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":113, "timer":54, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":113, "timer":54, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":889, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":114, "timer":55, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":114, "timer":55, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":934, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":115, "timer":56, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":115, "timer":56, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":979, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":116, "timer":57, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":116, "timer":57, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":1024, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":117, "timer":50, "loop":-1, "blend":2, "offset":50, "dst":[
+			{"id":117, "timer":50, "loop":-1, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":1084, "y":-62, "w":322, "h":344},
 				{"time":160}
 			]},
-			{"id":140, "timer":71, "blend":2, "offset":50, "dst":[
+			{"id":140, "timer":71, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":754, "y":-62, "w":322, "h":344}
 			]},
-			{"id":141, "timer":72, "blend":2, "offset":50, "dst":[
+			{"id":141, "timer":72, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":799, "y":-62, "w":322, "h":344}
 			]},
-			{"id":142, "timer":73, "blend":2, "offset":50, "dst":[
+			{"id":142, "timer":73, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":844, "y":-62, "w":322, "h":344}
 			]},
-			{"id":143, "timer":74, "blend":2, "offset":50, "dst":[
+			{"id":143, "timer":74, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":889, "y":-62, "w":322, "h":344}
 			]},
-			{"id":144, "timer":75, "blend":2, "offset":50, "dst":[
+			{"id":144, "timer":75, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":934, "y":-62, "w":322, "h":344}
 			]},
-			{"id":145, "timer":76, "blend":2, "offset":50, "dst":[
+			{"id":145, "timer":76, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":979, "y":-62, "w":322, "h":344}
 			]},
-			{"id":146, "timer":77, "blend":2, "offset":50, "dst":[
+			{"id":146, "timer":77, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":1024, "y":-62, "w":322, "h":344}
 			]},
-			{"id":147, "timer":70, "blend":2, "offset":50, "dst":[
+			{"id":147, "timer":70, "blend":2, "offset":3, "dst":[
 				{"time":0, "x":1084, "y":-62, "w":322, "h":344}
 			]},
 
 			{"id":2010},
 
-			{"id":"judge-early", "loop":-1, "timer":46 ,"op":[911,1242],"offset":50, "dst":[
+			{"id":"judge-early", "loop":-1, "timer":46 ,"op":[911,1242],"offset":3, "dst":[
 				{"time":0, "x":1050, "y":290, "w":50, "h":20},
 				{"time":500}
 			]},
-			{"id":"judge-late", "loop":-1, "timer":46 ,"op":[911,1243],"offset":50, "dst":[
+			{"id":"judge-late", "loop":-1, "timer":46 ,"op":[911,1243],"offset":3, "dst":[
 				{"time":0, "x":1050, "y":290, "w":50, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgems-1pp", "loop":-1, "timer":46 ,"op":[912,241],"offset":50, "dst":[
+			{"id":"judgems-1pp", "loop":-1, "timer":46 ,"op":[912,241],"offset":3, "dst":[
 				{"time":0, "x":1050, "y":290, "w":10, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgems-1pg", "loop":-1, "timer":46 ,"op":[912,-241],"offset":50, "dst":[
+			{"id":"judgems-1pg", "loop":-1, "timer":46 ,"op":[912,-241],"offset":3, "dst":[
 				{"time":0, "x":1050, "y":290, "w":10, "h":20},
 				{"time":500}
 			]},
@@ -1017,10 +1019,10 @@
 				{"x":780, "y":50, "w":12, "h":18}
 			]},
 
-			{"id":450, "offset":51, "op":[270],"dst":[
+			{"id":450, "offset":4, "op":[270],"dst":[
 				{"time":0, "x":970, "y":720, "w":10, "h":15}
 			]},
-			{"id":451, "offset":51, "op":[270],"dst":[
+			{"id":451, "offset":4, "op":[270],"dst":[
 				{"time":0, "x":1160, "y":720, "w":10, "h":15}
 			]},
 
