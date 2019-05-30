@@ -6,9 +6,12 @@
 	"fadeout":500,
 	"scene":3000,
 	"input":500,
+	"filepath":[
+		{"name":"Background", "path":"select/background/*.png"}
+	],
 	"source": [
 		{"id":0, "path":"system.png"},
-		{"id":1, "path":"select.png"},
+		{"id":1, "path":"select/background/*.png"},
 		{"id":2, "path":"songbar.png"},
 		{"id":3, "path":"lamp.png"},
 		{"id":4, "path":"trophy.png"},
