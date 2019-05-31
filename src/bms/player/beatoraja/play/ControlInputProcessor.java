@@ -58,6 +58,11 @@ public class ControlInputProcessor {
 			processStart = () -> processStart24key();
 			processSelect = () -> processSelect24key();
 			break;
+		case BEAT_5K:
+		case BEAT_10K:
+			processStart = () -> processStart5key();
+			processSelect = () -> processSelect5key();
+			break;
 		default:
 			processStart = () -> processStart7key();
 			processSelect = () -> processSelect7key();
@@ -250,6 +255,68 @@ public class ControlInputProcessor {
 					hschanged[i] = true;
 				}
 			} else if ((i == 0 || i == 2 || i == 4 || i == 6 || i == 9 || i == 11 || i == 13 || i == 15) && key[i])  {
+				if(!hschanged[i]) {
+					lanerender.setGreenValue(lanerender.getGreenValue() +1);
+					hschanged[i] = true;
+				}
+			} else {
+				hschanged[i] = false;
+			}
+		}
+	}
+
+	void processStart5key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change hi speed by START + Keys
+		for(int i = 0; i <= 11; i++) {
+			if ((i == 0 || i == 2 || i == 4 || i == 7 || i == 9 || i == 11) && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.changeHispeed(false);
+					hschanged[i] = true;
+				}
+			} else if ((i == 1 || i == 3 || i == 8 || i == 10) && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.changeHispeed(true);
+					hschanged[i] = true;
+				}
+			} else {
+				hschanged[i] = false;
+			}
+		}
+
+		// move lane cover by START + Scratch
+		if (key[5] || key[6] || key[12] || key[13]) {
+			coverValueChange(key[5] || key[12]);
+		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
+			laneCoverStartTiming = Long.MIN_VALUE;
+		}
+	}
+
+	void processSelect5key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change duration by SELECT + Scratch
+		if (key[5] || key[6] || key[12] || key[13]) {
+			long l = System.currentTimeMillis();
+			if (l - lanecovertiming > 50) {
+				lanerender.setGreenValue(lanerender.getGreenValue() + (key[5] || key[12] ? 1 : -1));
+				lanecovertiming = l;
+			}
+		}
+
+		// change duration by SELECT + Keys
+		for(int i = 0; i <= 11; i++) {
+			if ((i == 1 || i == 3 || i == 8 || i == 10) && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.setGreenValue(lanerender.getGreenValue() -1);
+					hschanged[i] = true;
+				}
+			} else if ((i == 0 || i == 2 || i == 4 || i == 7 || i == 9 || i == 11) && key[i])  {
 				if(!hschanged[i]) {
 					lanerender.setGreenValue(lanerender.getGreenValue() +1);
 					hschanged[i] = true;
