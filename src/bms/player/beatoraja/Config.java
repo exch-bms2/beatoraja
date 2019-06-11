@@ -107,7 +107,7 @@ public class Config implements Validatable {
 	 */
 	private int maxFramePerSecond = 240;
 	
-	private int prepareFramePerSecond = 120;
+	private int prepareFramePerSecond = 10000;
 	/**
 	 * 選曲バー移動速度の最初
 	 */
