@@ -552,8 +552,8 @@ public class JSONSkinLoader extends SkinLoader {
 					for (JsonSkin.GaugeGraph ggraph : sk.gaugegraph) {
 						if (dst.id.equals(ggraph.id)) {
 							SkinGaugeGraphObject st = new SkinGaugeGraphObject(ggraph.assistClearBGColor, ggraph.assistAndEasyFailBGColor, ggraph.grooveFailBGColor, ggraph.grooveClearAndHardBGColor, ggraph.exHardBGColor, ggraph.hazardBGColor,
-									ggraph.assistClearLineColor, ggraph.assistAndEasyFailLineColor, ggraph.grooveFailLineColor, ggraph.grooveClearAndHardLineColor, ggraph.exHardLineColor, ggraph.hazardLineColor,
-									ggraph.borderlineColor, ggraph.borderColor);
+							ggraph.assistClearLineColor, ggraph.assistAndEasyFailLineColor, ggraph.grooveFailLineColor, ggraph.grooveClearAndHardLineColor, ggraph.exHardLineColor, ggraph.hazardLineColor,
+							ggraph.borderlineColor, ggraph.borderColor);
 							obj = st;
 							break;
 						}

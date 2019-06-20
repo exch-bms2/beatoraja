@@ -52,9 +52,15 @@ public class SkinGaugeGraphObject extends SkinObject {
 		this.lineWidth = lineWidth;
 	}
 
+	private final Color[] graphcolor = new Color[6];
+	private final Color[] graphline = new Color[6];
+	private final Color borderline;
+	private final Color bordercolor;
+	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
+
 	public SkinGaugeGraphObject(String assistClearBGColor, String assistAndEasyFailBGColor, String grooveFailBGColor, String grooveClearAndHardBGColor, String exHardBGColor, String hazardBGColor,
-			String assistClearLineColor, String assistAndEasyFailLineColor, String grooveFailLineColor, String grooveClearAndHardLineColor, String exHardLineColor, String hazardLineColor,
-			String borderlineColor, String borderColor) {
+	String assistClearLineColor, String assistAndEasyFailLineColor, String grooveFailLineColor, String grooveClearAndHardLineColor, String exHardLineColor, String hazardLineColor,
+	String borderlineColor, String borderColor) {
 		graphcolor[0] = Color.valueOf(assistClearBGColor);
 		graphcolor[1] = Color.valueOf(assistAndEasyFailBGColor);
 		graphcolor[2] = Color.valueOf(grooveFailBGColor);
@@ -87,12 +93,6 @@ public class SkinGaugeGraphObject extends SkinObject {
 		borderline = Color.valueOf("ff0000");
 		bordercolor = Color.valueOf("440000");
 	}
-
-	private final Color[] graphcolor = new Color[6];
-	private final Color[] graphline = new Color[6];
-	private final Color borderline;
-	private final Color bordercolor;
-	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
 
 	private int color;
 	private FloatArray gaugehistory;
