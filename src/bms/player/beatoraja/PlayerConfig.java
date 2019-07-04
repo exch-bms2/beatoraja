@@ -59,6 +59,9 @@ public class PlayerConfig {
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
+	
+	public static final int JUDGETIMING_MAX = 500;
+	public static final int JUDGETIMING_MIN = -500;
 
     /**
      * 選曲時のモードフィルター
@@ -668,7 +671,7 @@ public class PlayerConfig {
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
 		target = MathUtils.clamp(target, 0, TargetProperty.getAllTargetProperties().length);
-		judgetiming = MathUtils.clamp(judgetiming, -100, 100);
+		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		judgewindowrate = MathUtils.clamp(judgewindowrate, 10, 400);

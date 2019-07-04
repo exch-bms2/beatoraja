@@ -32,6 +32,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -149,7 +150,7 @@ public class PlayConfigurationView implements Initializable {
 	private TextField soundpath;
 
 	@FXML
-	private Spinner<Integer> judgetiming;
+	private NumericSpinner<Integer> judgetiming;
 	@FXML
 	private CheckBox constant;
 	@FXML
@@ -301,7 +302,8 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay2, autosaves);
 		initComboBox(autosavereplay3, autosaves);
 		initComboBox(autosavereplay4, autosaves);
-		
+
+		judgetiming.setValueFactoryValues(PlayerConfig.JUDGETIMING_MIN, PlayerConfig.JUDGETIMING_MAX, 0, 1);
 		resourceController.init(this);
 
 		newVersionCheck();

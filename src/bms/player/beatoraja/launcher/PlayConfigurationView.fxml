@@ -233,7 +233,7 @@
                                          <Label text="%JUDGETIMING" GridPane.rowIndex="4" />
                                          <NumericSpinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory />
                                              </valueFactory>
                                          </NumericSpinner>
                                          <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="4" />
