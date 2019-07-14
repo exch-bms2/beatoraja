@@ -2,9 +2,7 @@ package bms.player.beatoraja;
 
 import static bms.player.beatoraja.Resolution.*;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -640,9 +638,9 @@ public class Config implements Validatable {
 		Config config = null;
 		if (Files.exists(MainController.configpath)) {
 			Json json = new Json();
-			try {
-				json.setIgnoreUnknownFields(true);
-				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
+			json.setIgnoreUnknownFields(true);
+			try (BufferedReader reader = Files.newBufferedReader(MainController.configpath)) {
+				config = json.fromJson(Config.class, reader);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -659,10 +657,11 @@ public class Config implements Validatable {
 
 	public static void write(Config config) {
 		Json json = new Json();
+		json.setUsePrototypes(false);
 		json.setOutputType(OutputType.json);
-		try (FileWriter fw = new FileWriter(MainController.configpath.toFile())) {
-			fw.write(json.prettyPrint(config));
-			fw.flush();
+		try (BufferedWriter writer = Files.newBufferedWriter(MainController.configpath)) {
+			writer.write(json.prettyPrint(config));
+			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
