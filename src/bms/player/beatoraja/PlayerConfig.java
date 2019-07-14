@@ -1,8 +1,6 @@
 package bms.player.beatoraja;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -773,11 +771,10 @@ public class PlayerConfig {
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
 		PlayerConfig player = new PlayerConfig();
-		Path p = Paths.get(playerpath + "/" + playerid + "/config.json");
 		Json json = new Json();
-		try {
+		try (BufferedReader reader = Files.newBufferedReader(Paths.get(playerpath + "/" + playerid + "/config.json"))) {
 			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+			player = json.fromJson(PlayerConfig.class, reader);
 			player.setId(playerid);
 			player.validate();
 		} catch(Throwable e) {
@@ -789,10 +786,10 @@ public class PlayerConfig {
 	public static void write(String playerpath, PlayerConfig player) {
 		Json json = new Json();
 		json.setOutputType(JsonWriter.OutputType.json);
-		Path p = Paths.get(playerpath + "/" + player.getId() + "/config.json");
-		try (FileWriter fw = new FileWriter(p.toFile())) {
-			fw.write(json.prettyPrint(player));
-			fw.flush();
+		json.setUsePrototypes(false);
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(playerpath + "/" + player.getId() + "/config.json"))) {
+			writer.write(json.prettyPrint(player));
+			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
