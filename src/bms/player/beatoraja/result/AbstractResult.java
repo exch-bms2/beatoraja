@@ -56,8 +56,6 @@ public abstract class AbstractResult extends MainState {
 	protected ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
 	protected static final int REPLAY_SIZE = 4;
 	
-	protected static final int IR_SEND_RETRY = 5;
-
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
 	public static final int SOUND_CLOSE = 2;

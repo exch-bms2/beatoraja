@@ -196,7 +196,7 @@ public class Config implements Validatable {
 	private boolean enableIpfs = true;
 	private String ipfsurl = "https://gateway.ipfs.io/";
 
-
+	private int irSendCount = 5;
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
@@ -603,6 +603,12 @@ public class Config implements Validatable {
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
+		irSendCount = MathUtils.clamp(irSendCount, 1, 100);
+
+		skinPixmapGen = MathUtils.clamp(skinPixmapGen, 0, 100);
+		stagefilePixmapGen = MathUtils.clamp(stagefilePixmapGen, 0, 100);
+		bannerPixmapGen = MathUtils.clamp(bannerPixmapGen, 0, 100);
+		songResourceGen = MathUtils.clamp(songResourceGen, 0, 100);
 
 		if(JudgeAlgorithm.getIndex(judgeType) == -1) {
 			judgeType = JudgeAlgorithm.Combo.name();
@@ -665,6 +671,14 @@ public class Config implements Validatable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public int getIrSendCount() {
+		return irSendCount;
+	}
+
+	public void setIrSendCount(int irSendCount) {
+		this.irSendCount = irSendCount;
 	}
 
 	public enum DisplayMode {

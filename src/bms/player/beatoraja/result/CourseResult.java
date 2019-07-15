@@ -131,7 +131,7 @@ public class CourseResult extends AbstractResult {
         				}
         				irsend++;
                         succeed &= irc.send();
-                        if(irc.retry < 0 || irc.retry > IR_SEND_RETRY) {
+                        if(irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
                         	removeIrSendStatus.add(irc);
                         }
                 	}
