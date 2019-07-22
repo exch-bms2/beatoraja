@@ -645,7 +645,7 @@ public class Config implements Validatable {
 		if (Files.exists(MainController.configpath)) {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
-			try (BufferedReader reader = Files.newBufferedReader(MainController.configpath)) {
+			try (FileReader reader = new FileReader(MainController.configpath.toFile())) {
 				config = json.fromJson(Config.class, reader);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -665,7 +665,7 @@ public class Config implements Validatable {
 		Json json = new Json();
 		json.setUsePrototypes(false);
 		json.setOutputType(OutputType.json);
-		try (BufferedWriter writer = Files.newBufferedWriter(MainController.configpath)) {
+		try (FileWriter writer = new FileWriter(MainController.configpath.toFile())) {
 			writer.write(json.prettyPrint(config));
 			writer.flush();
 		} catch (IOException e) {

@@ -771,8 +771,8 @@ public class PlayerConfig {
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
 		PlayerConfig player = new PlayerConfig();
-		Json json = new Json();
-		try (BufferedReader reader = Files.newBufferedReader(Paths.get(playerpath + "/" + playerid + "/config.json"))) {
+		try (FileReader reader = new FileReader(Paths.get(playerpath + "/" + playerid + "/config.json").toFile())) {
+			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 			player = json.fromJson(PlayerConfig.class, reader);
 			player.setId(playerid);
@@ -784,10 +784,10 @@ public class PlayerConfig {
 	}
 
 	public static void write(String playerpath, PlayerConfig player) {
-		Json json = new Json();
-		json.setOutputType(JsonWriter.OutputType.json);
-		json.setUsePrototypes(false);
-		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(playerpath + "/" + player.getId() + "/config.json"))) {
+		try (FileWriter writer = new FileWriter(Paths.get(playerpath + "/" + player.getId() + "/config.json").toFile())) {
+			Json json = new Json();
+			json.setOutputType(JsonWriter.OutputType.json);
+			json.setUsePrototypes(false);
 			writer.write(json.prettyPrint(player));
 			writer.flush();
 		} catch (IOException e) {
