@@ -148,12 +148,21 @@ local function main()
 		geometry.note_s_width = 70
 		geometry.title_align = 0
 		geometry.judge_x = 115
+		geometry.judgecount_x = 476
+		geometry.judgecount_y = 50
 		geometry.ready_x = 40
 		geometry.title_x = 450
+		geometry.gauge_x = 20
+		geometry.gauge_w = 390
+		geometry.gaugevalue_x = 314
 		geometry.bga_x = 440
 		geometry.bga_y = 50
 		geometry.bga_w = 800
 		geometry.bga_h = 650
+		geometry.progress_x = 2
+		geometry.progress_y = 140
+		geometry.progress_w = 16
+		geometry.progress_h = 540
 	end
 	if is_right_side() then
 		geometry.lanes_x = 870
@@ -164,14 +173,45 @@ local function main()
 		geometry.note_w_width = 50
 		geometry.note_b_width = 40
 		geometry.note_s_width = 70
-		geometry.title_align = 1
+		geometry.title_align = 2
 		geometry.judge_x = 965
+		geometry.judgecount_x = 720
+		geometry.judgecount_y = 50
 		geometry.ready_x = 890
-		geometry.title_x = 50
+		geometry.title_x = 840
+		geometry.gauge_x = 1260
+		geometry.gauge_w = -390
+		geometry.gaugevalue_x = 870
 		geometry.bga_x = 40
 		geometry.bga_y = 50
 		geometry.bga_w = 800
 		geometry.bga_h = 650
+		geometry.progress_x = 1262
+		geometry.progress_y = 140
+		geometry.progress_w = 16
+		geometry.progress_h = 540
+	end
+	if is_score_graph_enabled() then
+    	if is_left_side() then
+    		geometry.graph_x = geometry.lanes_x + geometry.lanes_w
+    		geometry.title_x = geometry.title_x + 90
+    		geometry.bga_x = geometry.bga_x + 90
+    		geometry.bga_w = geometry.bga_w - 90
+    		geometry.judgecount_x = geometry.judgecount_x + 90
+    	else
+    		geometry.graph_x = geometry.lanes_x - 90
+    		geometry.title_x = geometry.title_x - 90
+    		geometry.bga_w = geometry.bga_w - 90
+    		geometry.judgecount_x = geometry.judgecount_x - 90
+    	end
+		geometry.graph_y = 220
+		geometry.graph_w = 90
+		geometry.graph_h = 480
+	else
+		geometry.graph_x = 0
+		geometry.graph_y = 0
+		geometry.graph_w = 0
+		geometry.graph_h = 0
 	end
 	do
 		geometry.notes_x = {}
@@ -403,8 +443,8 @@ local function main()
 		{id = 1000, font = 0, size = 24, align = geometry.title_align, ref = 12}
 	}
 	skin.slider = {
-		{id = 1050, src = 0, x = 0, y = 289, w = 14, h = 20, angle = 2, range = 520,type = 6},
-		{id = 1051, src = 0, x = 15, y = 289, w = 14, h = 20, angle = 2, range = 520,type = 6},
+		{id = "musicprogress", src = 0, x = 0, y = 289, w = 14, h = 20, angle = 2, range = geometry.progress_h - 20,type = 6},
+		{id = "musicprogress-fin", src = 0, x = 15, y = 289, w = 14, h = 20, angle = 2, range = geometry.progress_h - 20,type = 6},
 		{id = 1060, src = 12, x = 0, y = 0, w = 390, h = 580, angle = 2, range = 580,type = 4}
 	}
 	skin.hiddenCover = {
@@ -463,7 +503,7 @@ local function main()
 		}
 	end
 	skin.gauge = {
-		id = 2001,
+		id = "gauge",
 		nodes = {"gauge-n1","gauge-n2","gauge-n3","gauge-n4","gauge-e1","gauge-e2","gauge-e3","gauge-e4"}
 	}
 	skin.judge = {
@@ -562,7 +602,7 @@ local function main()
 		}},
 
 		{id = 13, dst = {
-			{x = 4, y = 140, w = 12, h = 540}
+			{x = geometry.progress_x + 2, y = geometry.progress_y, w = geometry.progress_w - 4, h = geometry.progress_h}
 		}},
 
 		{id = "lane-bg", loop = 1000, dst = {
@@ -647,14 +687,14 @@ local function main()
 		{id = 1060, dst = {
 			{x = geometry.lanes_x, y = 720, w = geometry.lanes_w, h = 580}
 		}},
-		{id = 2001, dst = {
-			{time = 0, x = 20, y = 30, w = 390, h = 30}
+		{id = "gauge", dst = {
+			{time = 0, x = geometry.gauge_x, y = 30, w = geometry.gauge_w, h = 30}
 		}},
 		{id = 410, dst = {
-			{time = 0, x = 314, y = 60, w = 24, h = 24}
+			{time = 0, x = geometry.gaugevalue_x, y = 60, w = 24, h = 24}
 		}},
 		{id = 411, dst = {
-			{time = 0, x = 386, y = 60, w = 18, h = 18}
+			{time = 0, x = geometry.gaugevalue_x + 72, y = 60, w = 18, h = 18}
 		}}
 	})
 	append_all(skin.destination, {
@@ -667,43 +707,43 @@ local function main()
 			{time = 2000, a = 255}
 		}},
 		{id = 11, op = {901},dst = {
-			{x = 1132, y = 50, w = 120, h = 360}
+			{x = geometry.graph_x, y = geometry.graph_y, w = geometry.graph_w, h = geometry.graph_h}
 		}},
 		{id = "graph-now", op = {901},dst = {
-			{x = 1133, y = 50, w = 38, h = 360}
+			{x = geometry.graph_x + 1, y = geometry.graph_y, w = geometry.graph_w / 3 - 2, h = geometry.graph_h}
 		}},
 		{id = "graph-best", op = {901},dst = {
-			{x = 1173, y = 50, w = 38, h = 360}
+			{x = geometry.graph_x + geometry.graph_w / 3 + 1, y = geometry.graph_y, w = geometry.graph_w / 3 - 2, h = geometry.graph_h}
 		}},
 		{id = "graph-target", op = {901},dst = {
-			{x = 1213, y = 50, w = 38, h = 360}
+			{x = geometry.graph_x + geometry.graph_w * 2 / 3 + 1, y = geometry.graph_y, w = geometry.graph_w / 3 - 2, h = geometry.graph_h}
 		}},
 		{id = 12, op = {901},dst = {
-			{x = 1132, y = 50, w = 120, h = 360}
+			{x = geometry.graph_x, y = geometry.graph_y, w = geometry.graph_w, h = geometry.graph_h}
 		}},
 		{id = 420, op = {901},dst = {
-			{x = 1020, y = 230, w = 12, h = 18}
+			{x = geometry.graph_x + 10, y = 200, w = 12, h = 18}
 		}},
 		{id = 421, op = {901},dst = {
-			{x = 1068, y = 230, w = 8, h = 12}
+			{x = geometry.graph_x + 58, y = 200, w = 8, h = 12}
 		}},
 		{id = 422, op = {901},dst = {
-			{x = 1020, y = 210, w = 12, h = 18}
+			{x = geometry.graph_x + 10, y = 180, w = 12, h = 18}
 		}},
 		{id = 423, op = {901},dst = {
-			{x = 1020, y = 190, w = 12, h = 18}
+			{x = geometry.graph_x + 10, y = 160, w = 12, h = 18}
 		}},
 		{id = 424, op = {901},dst = {
-			{x = 1020, y = 170, w = 12, h = 18}
+			{x = geometry.graph_x + 10, y = 140, w = 12, h = 18}
 		}},
-		{id = 1050, blend = 2, dst = {
-			{x = 2, y = 660, w = 16, h = 20}
+		{id = "musicprogress", blend = 2, dst = {
+			{x = geometry.progress_x, y = geometry.progress_y + geometry.progress_h - 20, w = geometry.progress_w, h = 20}
 		}},
-		{id = 1051, blend = 2, timer = 143,dst = {
-			{x = 2, y = 660, w = 16, h = 20}
+		{id = "musicprogress-fin", blend = 2, timer = 143,dst = {
+			{x = geometry.progress_x, y = geometry.progress_y + geometry.progress_h - 20, w = geometry.progress_w, h = 20}
 		}},
 	})
-	append_all(skin.destination, play_parts.judge_count_destinations("judge-count-", 1000, 50, {906}, -1))
+	append_all(skin.destination, play_parts.judge_count_destinations("judge-count-", geometry.judgecount_x, geometry.judgecount_y, {906}, -1))
 	append_all(skin.destination, {
 		{id = 450, offset = 51, op = {270},dst = {
 			{time = 0, x = 120, y = 720, w = 10, h = 15}

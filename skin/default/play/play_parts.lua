@@ -43,7 +43,7 @@ return {
 					id = prefix..j..t,
 					op = ops,
 					dst = {
-						{x = pos_x + (x - 1) * 60, y = pos_y + (y - 1) * 18, w = 12, h = 18}
+						{x = pos_x + (x - 1) * 60, y = pos_y + 90 - (y - 1) * 18, w = 12, h = 18}
 					}
 				})
 			end
