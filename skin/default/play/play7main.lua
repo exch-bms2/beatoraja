@@ -148,6 +148,8 @@ local function main()
 		geometry.note_s_width = 70
 		geometry.title_align = 0
 		geometry.judge_x = 115
+		geometry.judgedetail_x = 200
+		geometry.judgedetail_y = 290
 		geometry.judgecount_x = 476
 		geometry.judgecount_y = 50
 		geometry.ready_x = 40
@@ -175,6 +177,8 @@ local function main()
 		geometry.note_s_width = 70
 		geometry.title_align = 2
 		geometry.judge_x = 965
+		geometry.judgedetail_x = 1050
+		geometry.judgedetail_y = 290
 		geometry.judgecount_x = 720
 		geometry.judgecount_y = 50
 		geometry.ready_x = 890
@@ -251,7 +255,7 @@ local function main()
 
 	skin.source = {
 		{id = 0, path = "../system.png"},
-		{id = 1, path = "background/*.png"},
+		{id = "bg", path = "background/*.png"},
 		{id = 2, path = "../playbg.png"},
 		{id = 3, path = "gauge/*.png"},
 		{id = 4, path = "judge/*.png"},
@@ -270,9 +274,9 @@ local function main()
 	}
 
 	skin.image = {
-		{id = "background", src = 1, x = 0, y = 0, w = 1280, h = 720},
+		{id = "background", src = "bg", x = 0, y = 0, w = 1280, h = 720},
 		{id = 1, src = 2, x = 0, y = 0, w = 1280, h = 720},
-		{id = 6, src = 11, x = 0, y = 0, w = 216, h = 40},
+		{id = "ready", src = 11, x = 0, y = 0, w = 216, h = 40},
 		{id = 7, src = 0, x = 0, y = 0, w = 8, h = 8},
 		{id = "close1", src = 8, x = 0, y = 500, w = 640, h = 240},
 		{id = "close2", src = 8, x = 0, y = 740, w = 640, h = 240},
@@ -409,24 +413,24 @@ local function main()
 		})
 	end
 	skin.value = {
-		{id = 400, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 91},
-		{id = 401, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 160},
-		{id = 402, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 90},
-		{id = 403, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, ref = 163},
-		{id = 404, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, padding = 1, ref = 164},
-		{id = 405, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, ref = 310},
-		{id = 406, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, padding = 1, ref = 311},
-		{id = 407, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 312},
-		{id = 410, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 3, ref = 107},
-		{id = 411, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 1, ref = 407},
-		{id = 420, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 102},
-		{id = 421, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 1, ref = 103},
+		{id = "minbpm", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 91},
+		{id = "nowbpm", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 160},
+		{id = "maxbpm", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 90},
+		{id = "timeleft-m", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, ref = 163},
+		{id = "timeleft-s", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, padding = 1, ref = 164},
+		{id = "hispeed", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, ref = 310},
+		{id = "hispeed-d", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 2, padding = 1, ref = 311},
+		{id = "duration", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 312},
+		{id = "gaugevalue", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 3, ref = 107},
+		{id = "gaugevalue-d", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 1, ref = 407},
+		{id = "graphvalue-rate", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 102},
+		{id = "graphvalue-rate-d", src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 1, ref = 103},
 		{id = 422, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 5, ref = 71},
 		{id = 423, src = 5, x = 0, y = 24, w = 240, h = 24, divx = 10, digit = 5, ref = 150},
 		{id = 424, src = 5, x = 0, y = 48, w = 240, h = 24, divx = 10, digit = 5, ref = 121},
 
-		{id = 450, src = 0, x = 0, y = 550, w = 100, h = 15, divx = 10, digit = 3, ref = 14},
-		{id = 451, src = 0, x = 0, y = 565, w = 100, h = 15, divx = 10, digit = 4, ref = 312},
+		{id = "lanecover-value", src = 0, x = 0, y = 550, w = 100, h = 15, divx = 10, digit = 3, ref = 14},
+		{id = "lanecover-duration", src = 0, x = 0, y = 565, w = 100, h = 15, divx = 10, digit = 4, ref = 312},
 		
 		{id = "judgen-pg", src = 4, x = 200, y = 0, w = 300, h = 100, divx = 10, divy = 2, digit = 6, ref = 75, cycle = 100},
 		{id = "judgen-gr", src = 4, x = 200, y = 150, w = 300, h = 50, divx = 10, digit = 6, ref = 75},
@@ -440,12 +444,12 @@ local function main()
 	}
 	append_all(skin.value, play_parts.judge_count_sources("judge-count-", 5))
 	skin.text = {
-		{id = 1000, font = 0, size = 24, align = geometry.title_align, ref = 12}
+		{id = "song-title", font = 0, size = 24, align = geometry.title_align, ref = 12}
 	}
 	skin.slider = {
 		{id = "musicprogress", src = 0, x = 0, y = 289, w = 14, h = 20, angle = 2, range = geometry.progress_h - 20,type = 6},
 		{id = "musicprogress-fin", src = 0, x = 15, y = 289, w = 14, h = 20, angle = 2, range = geometry.progress_h - 20,type = 6},
-		{id = 1060, src = 12, x = 0, y = 0, w = 390, h = 580, angle = 2, range = 580,type = 4}
+		{id = "lanecover", src = 12, x = 0, y = 0, w = 390, h = 580, angle = 2, range = 580,type = 4}
 	}
 	skin.hiddenCover = {
 		{id = "hidden-cover", src = 12, x = 0, y = 0, w = 390, h = 580, disapearLine = 140, isDisapearLineLinkLift = true}
@@ -508,7 +512,7 @@ local function main()
 	}
 	skin.judge = {
 		{
-			id = 2010,
+			id = "judge",
 			index = 0,
 			images = {
 				{id = "judgef-pg", loop = -1, timer = 46 ,offset = 50, dst = {
@@ -566,7 +570,7 @@ local function main()
 		}
 	}
 	skin.bga = {
-		id = 2002
+		id = "bga"
 	}
 	skin.destination = {
 		{id = "background", dst = {
@@ -576,28 +580,28 @@ local function main()
 			{x = 0, y = 0, w = 1280, h = 720}
 		}},
 
-		{id = 400, dst = {
+		{id = "minbpm", dst = {
 			{x = 520, y = 2, w = 18, h = 18}
 		}},
-		{id = 401, dst = {
+		{id = "nowbpm", dst = {
 			{x = 592, y = 2, w = 24, h = 24}
 		}},
-		{id = 402, dst = {
+		{id = "maxbpm", dst = {
 			{x = 688, y = 2, w = 18, h = 18}
 		}},
-		{id = 403, dst = {
+		{id = "timeleft-m", dst = {
 			{x = 1148, y = 2, w = 24, h = 24}
 		}},
-		{id = 404, dst = {
+		{id = "timeleft-s", dst = {
 			{x = 1220, y = 2, w = 24, h = 24}
 		}},
-		{id = 405, dst = {
+		{id = "hispeed", dst = {
 			{x = 116, y = 2, w = 12, h = 24}
 		}},
-		{id = 406, dst = {
+		{id = "hispeed-d", dst = {
 			{x = 154, y = 2, w = 10, h = 20}
 		}},
-		{id = 407, dst = {
+		{id = "duration", dst = {
 			{x = 318, y = 2, w = 12, h = 24}
 		}},
 
@@ -664,44 +668,44 @@ local function main()
 		})
 	end
 	append_all(skin.destination, {
-		{id = 2010},
-		{id = "judge-early", loop = -1, timer = 46 ,op = {911,1242},offset = 50, dst = {
-			{time = 0, x = 320, y = 290, w = 50, h = 20},
+		{id = "judge"},
+		{id = "judge-early", loop = -1, timer = 46 ,op = {911,1242},offset = 3, dst = {
+			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 50, h = 20},
 			{time = 500}
 		}},
-		{id = "judge-late", loop = -1, timer = 46 ,op = {911,1243},offset = 50, dst = {
-			{time = 0, x = 320, y = 290, w = 50, h = 20},
+		{id = "judge-late", loop = -1, timer = 46 ,op = {911,1243},offset = 3, dst = {
+			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 50, h = 20},
 			{time = 500}
 		}},
-		{id = "judgems-1pp", loop = -1, timer = 46 ,op = {912,241},offset = 50, dst = {
-			{time = 0, x = 320, y = 290, w = 10, h = 20},
+		{id = "judgems-1pp", loop = -1, timer = 46 ,op = {912,241},offset = 3, dst = {
+			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 10, h = 20},
 			{time = 500}
 		}},
-		{id = "judgems-1pg", loop = -1, timer = 46 ,op = {912,-241},offset = 50, dst = {
-			{time = 0, x = 320, y = 290, w = 10, h = 20},
+		{id = "judgems-1pg", loop = -1, timer = 46 ,op = {912,-241},offset = 3, dst = {
+			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 10, h = 20},
 			{time = 500}
 		}},
 		{id = "hidden-cover", dst = {
 			{x = geometry.lanes_x, y = -440, w = geometry.lanes_w, h = 580}
 		}},
-		{id = 1060, dst = {
+		{id = "lanecover", dst = {
 			{x = geometry.lanes_x, y = 720, w = geometry.lanes_w, h = 580}
 		}},
 		{id = "gauge", dst = {
 			{time = 0, x = geometry.gauge_x, y = 30, w = geometry.gauge_w, h = 30}
 		}},
-		{id = 410, dst = {
+		{id = "gaugevalue", dst = {
 			{time = 0, x = geometry.gaugevalue_x, y = 60, w = 24, h = 24}
 		}},
-		{id = 411, dst = {
+		{id = "gaugevalue-d", dst = {
 			{time = 0, x = geometry.gaugevalue_x + 72, y = 60, w = 18, h = 18}
 		}}
 	})
 	append_all(skin.destination, {
-		{id = 2002, dst = {
+		{id = "bga", dst = {
 			{time = 0, x = geometry.bga_x, y = geometry.bga_y, w = geometry.bga_w, h = geometry.bga_h}
 		}},
-		{id = 1000, dst = {
+		{id = "song-title", dst = {
 			{time = 0, x = geometry.title_x, y = 674, w = 24, h = 24},
 			{time = 1000, a = 0},
 			{time = 2000, a = 255}
@@ -721,10 +725,10 @@ local function main()
 		{id = 12, op = {901},dst = {
 			{x = geometry.graph_x, y = geometry.graph_y, w = geometry.graph_w, h = geometry.graph_h}
 		}},
-		{id = 420, op = {901},dst = {
+		{id = "graphvalue-rate", op = {901},dst = {
 			{x = geometry.graph_x + 10, y = 200, w = 12, h = 18}
 		}},
-		{id = 421, op = {901},dst = {
+		{id = "graphvalue-rate-d", op = {901},dst = {
 			{x = geometry.graph_x + 58, y = 200, w = 8, h = 12}
 		}},
 		{id = 422, op = {901},dst = {
@@ -745,11 +749,11 @@ local function main()
 	})
 	append_all(skin.destination, play_parts.judge_count_destinations("judge-count-", geometry.judgecount_x, geometry.judgecount_y, {906}, -1))
 	append_all(skin.destination, {
-		{id = 450, offset = 51, op = {270},dst = {
-			{time = 0, x = 120, y = 720, w = 10, h = 15}
+		{id = "lanecover-value", offset = 4, op = {270},dst = {
+			{time = 0, x = geometry.lanes_x + geometry.lanes_w / 3 - 24, y = 720, w = 12, h = 18}
 		}},
-		{id = 451, offset = 51, op = {270},dst = {
-			{time = 0, x = 310, y = 720, w = 10, h = 15}
+		{id = "lanecover-duration", offset = 4, op = {270},dst = {
+			{time = 0, x = geometry.lanes_x + geometry.lanes_w * 2 / 3 - 24, y = 720, w = 12, h = 18}
 		}},
 
 		{id = "load-progress", loop = 0, op = {80}, dst = {
@@ -760,7 +764,7 @@ local function main()
 			{time = 2000, a = 255, b = 255}
 		}},
 
-		{id = 6, loop = -1, timer = 40, dst = {
+		{id = "ready", loop = -1, timer = 40, dst = {
 			{time = 0, x = geometry.ready_x, y = 250, w = 350, h = 60, a = 0},
 			{time = 750, y = 300, a = 255},
 			{time = 1000}
