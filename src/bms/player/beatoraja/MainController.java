@@ -49,7 +49,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.7.2";
+	public static final String VERSION = "beatoraja 0.7.3";
 
 	public static final boolean debug = false;
 
@@ -270,7 +270,9 @@ public class MainController extends ApplicationAdapter {
 				current.setSkin(null);
 			}
 			newState.create();
-			newState.getSkin().prepare(newState);
+			if(newState.getSkin() != null) {
+				newState.getSkin().prepare(newState);				
+			}
 			current = newState;
 			starttime = System.nanoTime();
 			nowmicrotime = ((System.nanoTime() - starttime) / 1000);
