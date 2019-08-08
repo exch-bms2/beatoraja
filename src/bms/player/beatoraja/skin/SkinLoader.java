@@ -65,7 +65,7 @@ public abstract class SkinLoader {
             e.printStackTrace();
         }
         JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
-        Skin skin =  sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new SkinConfig.Property());
+        Skin skin =  sl.loadSkin(Paths.get(SkinConfig.Default.get(skinType).path), skinType, new SkinConfig.Property());
         SkinLoader.resource.disposeOld();
         return skin;
     }
