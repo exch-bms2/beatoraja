@@ -1,5 +1,6 @@
 package bms.player.beatoraja.config;
 
+import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
@@ -118,7 +119,11 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void create() {
-		this.setSkin(new MusicDecideSkin(Resolution.HD, main.getConfig().getResolution()));
+		loadSkin(SkinType.KEY_CONFIG);
+		if(getSkin() == null) {
+			this.setSkin(new KeyConfigurationSkin(Resolution.HD, main.getConfig().getResolution()));
+		}
+
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
