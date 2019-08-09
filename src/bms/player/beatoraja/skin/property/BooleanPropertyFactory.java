@@ -629,16 +629,16 @@ public class BooleanPropertyFactory {
 					});
 		case OPTION_AUTOPLAYON:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() == PlayMode.AUTOPLAY : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == PlayMode.AUTOPLAY : false));
 		case OPTION_AUTOPLAYOFF:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() != PlayMode.AUTOPLAY : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() != PlayMode.AUTOPLAY : false));
 		case OPTION_REPLAY_OFF:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() == PlayMode.PLAY || ((BMSPlayer) state).getPlayMode() == PlayMode.PRACTICE : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == PlayMode.PLAY || ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == PlayMode.PRACTICE : false));
 		case OPTION_REPLAY_PLAYING:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode().isReplayMode() : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().isReplayMode() : false));
 		case OPTION_STATE_PRACTICE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRACTICE : false));
