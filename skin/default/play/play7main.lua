@@ -103,6 +103,14 @@ local filepath = {
 	{name = "Lanecover", path = "lanecover/*.png"},
 }
 
+local offset = {
+	{name = "Laser Offset", id = 40, x = false, y = false, w = false, h = true, r = false, a = true},
+	{name = "Bomb Offset", id = 41, x = true, y = true, w = true, h = true, r = false, a = true},
+	{name = "Judge Count Offset", id = 42, x = true, y = true, w = false, h = false, r = false, a = true},
+	{name = "BGA Offset", id = 43, x = true, y = true, w = true, h = true, r = false, a = true},
+	{name = "Lane Background Offset", id = 44, x = false, y = false, w = false, h = false, r = false, a = true},
+}
+
 local header = {
 	type = 0,
 	name = "beatoraja default (lua)",
@@ -114,7 +122,8 @@ local header = {
 	close = 1500,
 	fadeout = 1000,
 	property = property,
-	filepath = filepath
+	filepath = filepath,
+	offset = offset
 }
 
 local key_wbs = { 0, 1, 0, 1, 0, 1, 0, 2 }
@@ -515,27 +524,27 @@ local function main()
 			id = "judge",
 			index = 0,
 			images = {
-				{id = "judgef-pg", loop = -1, timer = 46 ,offset = 50, dst = {
+				{id = "judgef-pg", loop = -1, timer = 46 ,offset = 3, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-gr", loop = -1, timer = 46 ,offset = 50, dst = {
+				{id = "judgef-gr", loop = -1, timer = 46 ,offset = 3, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-gd", loop = -1, timer = 46 ,offset = 50, dst = {
+				{id = "judgef-gd", loop = -1, timer = 46 ,offset = 3, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-bd", loop = -1, timer = 46 ,offset = 50, dst = {
+				{id = "judgef-bd", loop = -1, timer = 46 ,offset = 3, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-pr", loop = -1, timer = 46 ,offset = 50, dst = {
+				{id = "judgef-pr", loop = -1, timer = 46 ,offset = 3, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-ms", loop = -1, timer = 46 ,offset = 50, dst = {
+				{id = "judgef-ms", loop = -1, timer = 46 ,offset = 3, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}}
@@ -609,7 +618,7 @@ local function main()
 			{x = geometry.progress_x + 2, y = geometry.progress_y, w = geometry.progress_w - 4, h = geometry.progress_h}
 		}},
 
-		{id = "lane-bg", loop = 1000, dst = {
+		{id = "lane-bg", loop = 1000, offset = 44, dst = {
 			{time = 0, x = geometry.lanebg_x, y = 140, w = geometry.lanebg_w, h = 0, a = 0},
 			{time = 1000, h = 580, a = 255}
 		}},
@@ -628,7 +637,7 @@ local function main()
 			id = "keybeam"..name,
 			timer = timer_key_on(i),
 			loop = 100,
-			offset = 50,
+			offsets = {3, 40},
 			dst = {
 				{ time = 0, x = geometry.notes_x[i] + geometry.notes_w[i] / 4, y = 140, w = geometry.notes_w[i] / 2, h = 580 },
 				{ time = 100, x = geometry.notes_x[i], w = geometry.notes_w[i] }
@@ -643,7 +652,7 @@ local function main()
 			timer = timer_key_bomb(i),
 			blend = 2,
 			loop = -1,
-			offset = 50,
+			offsets = {3, 41},
 			dst = {
 				{ time = 0, x = geometry.lanes_center_x[i] - 80, y = 28, w = 180, h = 192 },
 				{ time = 160 }
@@ -661,7 +670,7 @@ local function main()
 			id = "hold-"..name,
 			timer = timer_key_hold(i),
 			blend = 2,
-			offset = 50,
+			offset = 3,
 			dst = {
 				{ time = 0, x = geometry.lanes_center_x[i] - 80, y = 28, w = 180, h = 192 }
 			}
@@ -702,7 +711,7 @@ local function main()
 		}}
 	})
 	append_all(skin.destination, {
-		{id = "bga", dst = {
+		{id = "bga", offset = 43, dst = {
 			{time = 0, x = geometry.bga_x, y = geometry.bga_y, w = geometry.bga_w, h = geometry.bga_h}
 		}},
 		{id = "song-title", dst = {
@@ -747,7 +756,7 @@ local function main()
 			{x = geometry.progress_x, y = geometry.progress_y + geometry.progress_h - 20, w = geometry.progress_w, h = 20}
 		}},
 	})
-	append_all(skin.destination, play_parts.judge_count_destinations("judge-count-", geometry.judgecount_x, geometry.judgecount_y, {906}, -1))
+	append_all(skin.destination, play_parts.judge_count_destinations("judge-count-", geometry.judgecount_x, geometry.judgecount_y, {906}, 42))
 	append_all(skin.destination, {
 		{id = "lanecover-value", offset = 4, op = {270},dst = {
 			{time = 0, x = geometry.lanes_x + geometry.lanes_w / 3 - 24, y = 720, w = 12, h = 18}
