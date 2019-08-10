@@ -9,10 +9,19 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 
+/**
+ * IRConnectionの管理用クラス
+ * 
+ * @author exch
+ */
 public class IRConnectionManager {
-
-	private static Class[] irconnections;
+	
+	/**
+	 * 検出されたIRConnection
+	 */
+	private static Class<IRConnection>[] irconnections;
 
 
 	/**
@@ -21,7 +30,7 @@ public class IRConnectionManager {
 	 * @return IRConnectionの名称
 	 */
 	public static String[] getAllAvailableIRConnectionName() {
-		Class[] irclass = getAllAvailableIRConnection();
+		Class<IRConnection>[] irclass = getAllAvailableIRConnection();
 		String[] names = new String[irclass.length];
 		for (int i = 0; i < names.length; i++) {
 			try {
@@ -41,10 +50,10 @@ public class IRConnectionManager {
 	 * @return 対応するIRConnectionインスタンス。存在しない場合はnull
 	 */
 	public static IRConnection getIRConnection(String name) {
-		Class irclass = getIRConnectionClass(name);
+		Class<IRConnection> irclass = getIRConnectionClass(name);
 		if(irclass != null) {
 			try {
-				return (IRConnection) irclass.newInstance();
+				return (IRConnection) irclass.getDeclaredConstructor().newInstance();
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
@@ -52,11 +61,11 @@ public class IRConnectionManager {
 		return null;
 	}
 
-	public static Class getIRConnectionClass(String name) {
+	public static Class<IRConnection> getIRConnectionClass(String name) {
 		if (name == null || name.length() == 0) {
 			return null;
 		}
-		Class[] irclass = getAllAvailableIRConnection();
+		Class<IRConnection>[] irclass = getAllAvailableIRConnection();
 		for (int i = 0; i < irclass.length; i++) {
 			try {
 				if (name.equals(irclass[i].getField("NAME").get(null).toString())) {
@@ -69,11 +78,11 @@ public class IRConnectionManager {
 		return null;
 	}
 
-	private static Class[] getAllAvailableIRConnection() {
+	private static Class<IRConnection>[] getAllAvailableIRConnection() {
 		if(irconnections != null) {
 			return irconnections;
 		}
-		List<Class> classes = new ArrayList();
+		List<Class<IRConnection>> classes = new ArrayList<Class<IRConnection>>();
 
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		try {
@@ -82,9 +91,7 @@ public class IRConnectionManager {
 				URL url = urls.nextElement();
 				if (url.getProtocol().equals("jar")) {
 					JarURLConnection jarUrlConnection = (JarURLConnection) url.openConnection();
-					JarFile jarFile = null;
-					try {
-						jarFile = jarUrlConnection.getJarFile();
+					try (JarFile jarFile = jarUrlConnection.getJarFile()){
 						Enumeration<JarEntry> jarEnum = jarFile.entries();
 
 						while (jarEnum.hasMoreElements()) {
@@ -97,7 +104,6 @@ public class IRConnectionManager {
 									if (inf == IRConnection.class) {
 										for (Field f : c.getFields()) {
 											if (f.getName().equals("NAME")) {
-												Object irname = c.getField("NAME").get(null);
 												classes.add(c);
 											}
 										}
@@ -106,10 +112,8 @@ public class IRConnectionManager {
 								}
 							}
 						}
-					} finally {
-						if (jarFile != null) {
-							jarFile.close();
-						}
+					} catch(Throwable e) {
+						Logger.getGlobal().warning("Jarファイル読み込み失敗 - " + url.toString() + " : " + e.getMessage());
 					}
 				}
 				if (url.getProtocol().equals("file")) {
@@ -121,7 +125,6 @@ public class IRConnectionManager {
 								if (inf == IRConnection.class) {
 									for (Field f : c.getFields()) {
 										if (f.getName().equals("NAME")) {
-											Object irname = c.getField("NAME").get(null);
 											classes.add(c);
 										}
 									}
@@ -140,7 +143,7 @@ public class IRConnectionManager {
 	}
 
 	/**
-	 * IRのオームURLを取得する
+	 * IRのホームURLを取得する
 	 * @param name IR名
 	 * @return IRのホームURL。存在しない場合はnull
 	 */
@@ -153,7 +156,6 @@ public class IRConnectionManager {
 					return result.toString();
 				}
 			} catch (Throwable e) {
-				e.printStackTrace();
 			}
 		}
 		return null;
