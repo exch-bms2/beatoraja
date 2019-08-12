@@ -170,6 +170,14 @@ local function main()
 		geometry.bga_y = 50
 		geometry.bga_w = 800
 		geometry.bga_h = 650
+		geometry.judgegraph_x = 840
+		geometry.judgegraph_y = 100
+		geometry.judgegraph_w = 400
+		geometry.judgegraph_h = 100
+		geometry.timing_x = 840
+		geometry.timing_y = 50
+		geometry.timing_w = 400
+		geometry.timing_h = 50
 		geometry.progress_x = 2
 		geometry.progress_y = 140
 		geometry.progress_w = 16
@@ -199,6 +207,14 @@ local function main()
 		geometry.bga_y = 50
 		geometry.bga_w = 800
 		geometry.bga_h = 650
+		geometry.judgegraph_x = 40
+		geometry.judgegraph_y = 100
+		geometry.judgegraph_w = 400
+		geometry.judgegraph_h = 100
+		geometry.timing_x = 40
+		geometry.timing_y = 50
+		geometry.timing_w = 400
+		geometry.timing_h = 50
 		geometry.progress_x = 1262
 		geometry.progress_y = 140
 		geometry.progress_w = 16
@@ -486,22 +502,22 @@ local function main()
 		hidden = {},
 		processed = {},
 		group = {
-			{id = "section-line", offset = 50, dst = {
+			{id = "section-line", offset = 3, dst = {
 				{x = geometry.lanes_x, y = 140, w = geometry.lanes_w, h = 1, r = 128, g = 128, b = 128}
 			}}
 		},
 		time = {
-			{id = "section-line", offset = 50, dst = {
+			{id = "section-line", offset = 3, dst = {
 				{x = geometry.lanes_x, y = 140, w = geometry.lanes_w, h = 1, r = 64, g = 192, b = 192}
 			}}
 		},
 		bpm = {
-			{id = "section-line", offset = 50, dst = {
+			{id = "section-line", offset = 3, dst = {
 				{x = geometry.lanes_x, y = 140, w = geometry.lanes_w, h = 2, r = 0, g = 192, b = 0}
 			}}
 		},
 		stop = {
-			{id = "section-line", offset = 50, dst = {
+			{id = "section-line", offset = 3, dst = {
 				{x = geometry.lanes_x, y = 140, w = geometry.lanes_w, h = 2, r = 192, g = 192, b = 0}
 			}}
 		}
@@ -524,53 +540,53 @@ local function main()
 			id = "judge",
 			index = 0,
 			images = {
-				{id = "judgef-pg", loop = -1, timer = 46 ,offset = 3, dst = {
+				{id = "judgef-pg", loop = -1, timer = 46 ,offsets = {3, 32}, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-gr", loop = -1, timer = 46 ,offset = 3, dst = {
+				{id = "judgef-gr", loop = -1, timer = 46 ,offsets = {3, 32}, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-gd", loop = -1, timer = 46 ,offset = 3, dst = {
+				{id = "judgef-gd", loop = -1, timer = 46 ,offsets = {3, 32}, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-bd", loop = -1, timer = 46 ,offset = 3, dst = {
+				{id = "judgef-bd", loop = -1, timer = 46 ,offsets = {3, 32}, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-pr", loop = -1, timer = 46 ,offset = 3, dst = {
+				{id = "judgef-pr", loop = -1, timer = 46 ,offsets = {3, 32}, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}},
-				{id = "judgef-ms", loop = -1, timer = 46 ,offset = 3, dst = {
+				{id = "judgef-ms", loop = -1, timer = 46 ,offsets = {3, 32}, dst = {
 					{time = 0, x = geometry.judge_x, y = 240, w = 180, h = 40},
 					{time = 500}
 				}}
 			},
 			numbers = {
-				{id = "judgen-pg", loop = -1, timer = 46, dst = {
+				{id = "judgen-pg", loop = -1, timer = 46,offsets = {3, 32},  dst = {
 					{time = 0, x = 200, y = 0, w = 40, h = 40},
 					{time = 500}
 				}},
-				{id = "judgen-gr", loop = -1, timer = 46, dst = {
+				{id = "judgen-gr", loop = -1, timer = 46,offsets = {3, 32},  dst = {
 					{time = 0, x = 200, y = 0, w = 40, h = 40},
 					{time = 500}
 				}},
-				{id = "judgen-gd", loop = -1, timer = 46, dst = {
+				{id = "judgen-gd", loop = -1, timer = 46,offsets = {3, 32},  dst = {
 					{time = 0, x = 200, y = 0, w = 40, h = 40},
 					{time = 500}
 				}},
-				{id = "judgen-bd", loop = -1, timer = 46, dst = {
+				{id = "judgen-bd", loop = -1, timer = 46,offsets = {3, 32},  dst = {
 					{time = 0, x = 200, y = 0, w = 40, h = 40},
 					{time = 500}
 				}},
-				{id = "judgen-pr", loop = -1, timer = 46, dst = {
+				{id = "judgen-pr", loop = -1, timer = 46,offsets = {3, 32},  dst = {
 					{time = 0, x = 200, y = 0, w = 40, h = 40},
 					{time = 500}
 				}},
-				{id = "judgen-ms", loop = -1, timer = 46, dst = {
+				{id = "judgen-ms", loop = -1, timer = 46,offsets = {3, 32},  dst = {
 					{time = 0, x = 200, y = 0, w = 40, h = 40},
 					{time = 500}
 				}}
@@ -580,6 +596,15 @@ local function main()
 	}
 	skin.bga = {
 		id = "bga"
+	}
+	skin.judgegraph = {
+		{id = "judgegraph", type = 1, backTexOff = 1}
+	}
+	skin.bpmgraph = {
+		{id = "bpmgraph"}
+	}
+	skin.timingvisualizer = {
+		{id = "timing"}
 	}
 	skin.destination = {
 		{id = "background", dst = {
@@ -645,7 +670,7 @@ local function main()
 		})
 	end
 	table.insert(skin.destination, {id = 15, offset = 50, dst = { {x = geometry.lanes_x, y = 137, w = geometry.lanes_w, h = 6} }})
-	table.insert(skin.destination, {id = "notes"})
+	table.insert(skin.destination, {id = "notes", offset = 30})
 	for i = 1, 8 do
 		table.insert(skin.destination, {
 			id = 109 + i,
@@ -678,19 +703,19 @@ local function main()
 	end
 	append_all(skin.destination, {
 		{id = "judge"},
-		{id = "judge-early", loop = -1, timer = 46 ,op = {911,1242},offset = 3, dst = {
+		{id = "judge-early", loop = -1, timer = 46 ,op = {911,1242},offsets = {3, 33}, dst = {
 			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 50, h = 20},
 			{time = 500}
 		}},
-		{id = "judge-late", loop = -1, timer = 46 ,op = {911,1243},offset = 3, dst = {
+		{id = "judge-late", loop = -1, timer = 46 ,op = {911,1243},offsets = {3, 33}, dst = {
 			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 50, h = 20},
 			{time = 500}
 		}},
-		{id = "judgems-1pp", loop = -1, timer = 46 ,op = {912,241},offset = 3, dst = {
+		{id = "judgems-1pp", loop = -1, timer = 46 ,op = {912,241},offsets = {3, 33}, dst = {
 			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 10, h = 20},
 			{time = 500}
 		}},
-		{id = "judgems-1pg", loop = -1, timer = 46 ,op = {912,-241},offset = 3, dst = {
+		{id = "judgems-1pg", loop = -1, timer = 46 ,op = {912,-241},offsets = {3, 33}, dst = {
 			{time = 0, x = geometry.judgedetail_x, y = geometry.judgedetail_y, w = 10, h = 20},
 			{time = 500}
 		}},
@@ -713,6 +738,15 @@ local function main()
 	append_all(skin.destination, {
 		{id = "bga", offset = 43, dst = {
 			{time = 0, x = geometry.bga_x, y = geometry.bga_y, w = geometry.bga_w, h = geometry.bga_h}
+		}},
+		{id = "judgegraph", dst = {
+			{time = 0, x = geometry.judgegraph_x, y = geometry.judgegraph_y, w = geometry.judgegraph_w, h = geometry.judgegraph_h}
+		}},
+		{id = "bpmgraph", dst = {
+			{time = 0, x = geometry.judgegraph_x, y = geometry.judgegraph_y, w = geometry.judgegraph_w, h = geometry.judgegraph_h}
+		}},
+		{id = "timing", dst = {
+			{time = 0, x = geometry.timing_x, y = geometry.timing_y, w = geometry.timing_w, h = geometry.timing_h}
 		}},
 		{id = "song-title", dst = {
 			{time = 0, x = geometry.title_x, y = 674, w = 24, h = 24},
