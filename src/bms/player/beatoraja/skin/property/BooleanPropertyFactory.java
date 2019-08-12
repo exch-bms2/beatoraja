@@ -505,6 +505,9 @@ public class BooleanPropertyFactory {
 		case OPTION_SELECT_REPLAYDATA4:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 3 : false));
+		case OPTION_GRADEBAR_CLASS:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.CLASS) : false));
 		case OPTION_GRADEBAR_MIRROR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.MIRROR) : false));
@@ -520,6 +523,30 @@ public class BooleanPropertyFactory {
 		case OPTION_GRADEBAR_NOGREAT:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_GREAT) : false));
+		case OPTION_GRADEBAR_GAUGE_LR2:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_LR2) : false));
+		case OPTION_GRADEBAR_GAUGE_5KEYS:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_5KEYS) : false));
+		case OPTION_GRADEBAR_GAUGE_7KEYS:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_7KEYS) : false));
+		case OPTION_GRADEBAR_GAUGE_9KEYS:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_9KEYS) : false));
+		case OPTION_GRADEBAR_GAUGE_24KEYS:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_24KEYS) : false));
+		case OPTION_GRADEBAR_LN:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.LN) : false));
+		case OPTION_GRADEBAR_CN:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.CN) : false));
+		case OPTION_GRADEBAR_HCN:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.HCN) : false));
 		case OPTION_NOT_COMPARE_RIVAL:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() == null : false));
