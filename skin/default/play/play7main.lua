@@ -170,13 +170,13 @@ local function main()
 		geometry.bga_y = 50
 		geometry.bga_w = 800
 		geometry.bga_h = 650
-		geometry.judgegraph_x = 840
+		geometry.judgegraph_x = 740
 		geometry.judgegraph_y = 100
-		geometry.judgegraph_w = 400
+		geometry.judgegraph_w = 450
 		geometry.judgegraph_h = 100
-		geometry.timing_x = 840
+		geometry.timing_x = 740
 		geometry.timing_y = 50
-		geometry.timing_w = 400
+		geometry.timing_w = 450
 		geometry.timing_h = 50
 		geometry.progress_x = 2
 		geometry.progress_y = 140
@@ -207,13 +207,13 @@ local function main()
 		geometry.bga_y = 50
 		geometry.bga_w = 800
 		geometry.bga_h = 650
-		geometry.judgegraph_x = 40
+		geometry.judgegraph_x = 90
 		geometry.judgegraph_y = 100
-		geometry.judgegraph_w = 400
+		geometry.judgegraph_w = 450
 		geometry.judgegraph_h = 100
-		geometry.timing_x = 40
+		geometry.timing_x = 90
 		geometry.timing_y = 50
-		geometry.timing_w = 400
+		geometry.timing_w = 450
 		geometry.timing_h = 50
 		geometry.progress_x = 1262
 		geometry.progress_y = 140
@@ -371,15 +371,19 @@ local function main()
 
 		{id = "section-line", src = 0, x = 0, y = 0, w = 1, h = 1},
 		
-		{id = "gauge-n1", src = 3, x = 0, y = 0, w = 5, h = 17},
-		{id = "gauge-n2", src = 3, x = 5, y = 0, w = 5, h = 17},
-		{id = "gauge-n3", src = 3, x = 10, y = 0, w = 5, h = 17},
-		{id = "gauge-n4", src = 3, x = 15, y = 0, w = 5, h = 17},
-		{id = "gauge-e1", src = 3, x = 0, y = 17, w = 5, h = 17},
-		{id = "gauge-e2", src = 3, x = 5, y = 17, w = 5, h = 17},
-		{id = "gauge-e3", src = 3, x = 10, y = 17, w = 5, h = 17},
-		{id = "gauge-e4", src = 3, x = 15, y = 17, w = 5, h = 17},
-		
+		{id = "gauge-r1", src = 3, x = 0, y = 0, w = 5, h = 17},
+		{id = "gauge-b1", src = 3, x = 5, y = 0, w = 5, h = 17},
+		{id = "gauge-r2", src = 3, x = 10, y = 0, w = 5, h = 17},
+		{id = "gauge-b2", src = 3, x = 15, y = 0, w = 5, h = 17},
+		{id = "gauge-r3", src = 3, x = 0, y = 34, w = 5, h = 17},
+		{id = "gauge-b3", src = 3, x = 5, y = 34, w = 5, h = 17},
+		{id = "gauge-y1", src = 3, x = 0, y = 17, w = 5, h = 17},
+		{id = "gauge-p1", src = 3, x = 5, y = 17, w = 5, h = 17},
+		{id = "gauge-y2", src = 3, x = 10, y = 17, w = 5, h = 17},
+		{id = "gauge-p2", src = 3, x = 15, y = 17, w = 5, h = 17},
+		{id = "gauge-y3", src = 3, x = 10, y = 34, w = 5, h = 17},
+		{id = "gauge-p3", src = 3, x = 15, y = 34, w = 5, h = 17},
+
 		{id = "judgef-pg", src = 4, x = 0, y = 0, w = 180, h = 100, divy = 2, cycle = 100},
 		{id = "judgef-gr", src = 4, x = 0, y = 150, w = 180, h = 50},
 		{id = "judgef-gd", src = 4, x = 0, y = 200, w = 180, h = 50},
@@ -533,7 +537,12 @@ local function main()
 	end
 	skin.gauge = {
 		id = "gauge",
-		nodes = {"gauge-n1","gauge-n2","gauge-n3","gauge-n4","gauge-e1","gauge-e2","gauge-e3","gauge-e4"}
+		nodes = {"gauge-r1","gauge-p1","gauge-r2","gauge-p2","gauge-r3","gauge-p3"
+			,"gauge-r1","gauge-p1","gauge-r2","gauge-p2","gauge-r3","gauge-p3"
+			,"gauge-r1","gauge-b1","gauge-r2","gauge-b2","gauge-r3","gauge-b3"
+			,"gauge-r1","gauge-p1","gauge-r2","gauge-p2","gauge-r3","gauge-p3"
+			,"gauge-y1","gauge-p1","gauge-y2","gauge-p2","gauge-y3","gauge-p3"
+			,"gauge-p1","gauge-p1","gauge-p2","gauge-p2","gauge-p3","gauge-p3"}
 	}
 	skin.judge = {
 		{

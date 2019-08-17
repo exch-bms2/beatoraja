@@ -6,13 +6,17 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Logger;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
@@ -88,7 +92,7 @@ public class JSONSkinLoader extends SkinLoader {
 			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
 			header = loadJsonSkinHeader(sk, p);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getGlobal().severe("JSONスキンファイルが見つかりません : " + p.toString());
 		}
 		return header;
 	}
@@ -167,6 +171,10 @@ public class JSONSkinLoader extends SkinLoader {
 		serializer = new JsonSkinSerializer(lua, path -> getPath(path, filemap));
 		Skin skin = null;
 		SkinHeader header = loadHeader(p);
+		if(header == null) {
+			return null;
+		}
+
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
@@ -180,6 +188,9 @@ public class JSONSkinLoader extends SkinLoader {
 			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
 			skin = loadJsonSkin(header, sk, type, property, p);
 		} catch (FileNotFoundException e) {
+			Logger.getGlobal().severe("JSONスキンファイルが見つかりません : " + p.toString());
+		} catch (Throwable e) {
+			Logger.getGlobal().severe("何らかの原因でJSONスキンファイルの読み込みに失敗しました");
 			e.printStackTrace();
 		}
 		return skin;
@@ -724,15 +735,38 @@ public class JSONSkinLoader extends SkinLoader {
 					}
 					// gauge (playskin or resultskin only)
 					if (sk.gauge != null && dst.id.equals(sk.gauge.id)) {
-						TextureRegion[][] pgaugetex = new TextureRegion[sk.gauge.nodes.length][];
-						
+						int[][] indexmap = null;
+						switch(sk.gauge.nodes.length) {
+							case 4:
+								indexmap = new int[][]{{0,4,6,10,12,16,18,22,24,28,30,34},{1,5,7,11,13,17,19,23,25,29,31,35},{2,8,14,20,26,32},{3,9,15,21,27,33}};
+								break;
+							case 8:
+								indexmap = new int[][]{{12,16,18,22},{13,17,19,23},{14,20},{15,21},
+										{0,4,6,10,24,28,30,34},{1,5,7,11,25,29,31,35},{2,8,26,32},{3,9,27,33}};
+								break;
+							case 12:
+								indexmap = new int[][]{{12,18},{13,19},{14,20},{15,21},
+										{0,6,24,30},{1,7,25,31},{2,8,26,32},{3,9,27,33},
+										{16,22}, {17,23}, {4, 10, 28, 34}, {5,11,29,35}};
+								break;
+							case 36:
+								break;
+						}
+						TextureRegion[][] pgaugetex = new TextureRegion[36][];
+
 						int gaugelength = 0;
 						for (int i = 0; i < sk.gauge.nodes.length; i++) {
 							for (JsonSkin.Image img : sk.image) {
 								if (sk.gauge.nodes[i].equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									if(tex != null) {
-										pgaugetex[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
+										if(indexmap != null) {
+											for(int index : indexmap[i]) {
+												pgaugetex[index] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
+											}
+										} else {
+											pgaugetex[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
+										}
 										gaugelength = pgaugetex[i].length;
 									}
 									break;
@@ -741,8 +775,8 @@ public class JSONSkinLoader extends SkinLoader {
 
 						}
 
-						TextureRegion[][] gaugetex = new TextureRegion[gaugelength][sk.gauge.nodes.length];
-						for (int i = 0; i < sk.gauge.nodes.length; i++) {
+						TextureRegion[][] gaugetex = new TextureRegion[gaugelength][36];
+						for (int i = 0; i < 36; i++) {
 							for (int j = 0; j < gaugetex.length; j++) {
 								gaugetex[j][i] = pgaugetex[i][j];
 							}
