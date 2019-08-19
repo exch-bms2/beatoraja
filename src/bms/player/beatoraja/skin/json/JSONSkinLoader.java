@@ -518,6 +518,7 @@ public class JSONSkinLoader extends SkinLoader {
 													? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
 											img.type);
 								}								
+								((SkinSlider)obj).setChangeable(img.changeable);
 							}
 							break;
 						}

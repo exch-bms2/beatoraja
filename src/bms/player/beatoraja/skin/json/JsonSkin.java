@@ -167,6 +167,7 @@ public class JsonSkin {
 		public int angle;
 		public int range;
 		public int type;
+		public boolean changeable = true;
 		public FloatProperty value;
 		public FloatWriter event;
 		public boolean isRefNum = false;
