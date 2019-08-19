@@ -128,12 +128,12 @@ public class SkinConfig {
 		PLAY9(SkinType.PLAY_9KEYS, "skin/default/play9.json"),
 		SELECT(SkinType.MUSIC_SELECT, "skin/default/select.json"),
 		DECIDE(SkinType.DECIDE, "skin/default/decide/decide.luaskin"),
-		RESULT(SkinType.RESULT, "skin/default/result.json"),
+		RESULT(SkinType.RESULT, "skin/default/result/result.luaskin"),
 		COURSERESULT(SkinType.COURSE_RESULT, "skin/default/graderesult.json"),
 		PLAY24(SkinType.PLAY_24KEYS, "skin/default/play24.json"),
 		PLAY24DOUBLE(SkinType.PLAY_24KEYS_DOUBLE, "skin/default/play24double.json"),
 		KEYCONFIG(SkinType.KEY_CONFIG, "skin/default/keyconfig/keyconfig.luaskin"),
-		SKINSELECT(SkinType.SKIN_SELECT, "skin/default/skinselect.json"),
+		SKINSELECT(SkinType.SKIN_SELECT, "skin/default/skinselect/skinselect.luaskin"),
 		;
 
 		public final SkinType type;
