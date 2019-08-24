@@ -39,6 +39,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 	private final QueryRunner qr;
 	
+	private List<SongDatabaseAccessorPlugin> plugins = new ArrayList();
+	
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
@@ -51,6 +53,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		root = Paths.get(".");
 		this.bmsroot = bmsroot;
 		createTable();
+	}
+	
+	public void addPlugin(SongDatabaseAccessorPlugin plugin) {
+		plugins.add(plugin);
 	}
 
 	/**
@@ -526,6 +532,11 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					}
 					final String tag = property.tags.get(sd.getMd5());
 					final Integer favorite = property.favorites.get(sd.getMd5());
+					
+					for(SongDatabaseAccessorPlugin plugin : plugins) {
+						plugin.update(model, sd);
+					}
+					
 					try {
 						qr.update(property.conn,
 								"INSERT OR REPLACE INTO song "
@@ -589,5 +600,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			this.info = info;
 		}
 
+	}
+	
+	public static interface SongDatabaseAccessorPlugin {
+		
+		public void update(BMSModel model, SongData song);
 	}
 }

@@ -359,7 +359,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					slider = new SkinSlider(images, values[10], values[9], values[11],
 							(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw) : (dsth / srch))),
 							values[13]);
-					slider.setChangable(values[14] == 0);
+					slider.setChangeable(values[14] == 0);
 					skin.add(slider);
 
 					// TODO 固有実装の汎用化
@@ -384,7 +384,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					slider = new SkinSlider(images, values[10], values[9], values[11],
 							(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw) : (dsth / srch))),
 							values[13], values[15], values[16]);
-					slider.setChangable(values[14] == 0);
+					slider.setChangeable(values[14] == 0);
 					skin.add(slider);
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
@@ -590,43 +590,41 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					TextureRegion[][] gauge;
 					if(values[14] == 3 && divx * divy % 6 == 0) {
 						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、発光表赤、発光表緑の順にsrc分割
-						gauge = new TextureRegion[(divx * divy) / 6][12];
+						gauge = new TextureRegion[(divx * divy) / 6][36];
 						final int w = values[5];
 						final int h = values[6];
 						for (int x = 0; x < divx; x++) {
 							for (int y = 0; y < divy; y++) {
 								if ((y * divx + x) / 6 < gauge.length) {
-									if((y * divx + x) % 6 < 4) {
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-									} else {
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 6] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-									}
+									TextureRegion tr = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+									final int dx = (y * divx + x) / 6;
+									final int dy = (y * divx + x) % 6;
+									gauge[dx][dy] = gauge[dx][dy + 6] = gauge[dx][dy + 12] = gauge[dx][dy + 18]
+											= gauge[dx][dy + 24] = gauge[dx][dy + 30] = tr;
+
 								}
 							}
 						}
 					} else {
-						gauge = new TextureRegion[(divx * divy) / 4][8];
+						gauge = new TextureRegion[(divx * divy) / 4][36];
 						final int w = values[5];
 						final int h = values[6];
 						for (int x = 0; x < divx; x++) {
 							for (int y = 0; y < divy; y++) {
 								if ((y * divx + x) / 4 < gauge.length) {
-									gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
+									TextureRegion tr = new TextureRegion(
 											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
 											values[4] + h * y / divy, w / divx, h / divy);
-									gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
-											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-											values[4] + h * y / divy, w / divx, h / divy);
+									final int dx = (y * divx + x) / 4;
+									final int dy = (y * divx + x) % 4;
+									gauge[dx][dy] = gauge[dx][dy + 6] = gauge[dx][dy + 12] = gauge[dx][dy + 18]
+											= gauge[dx][dy + 24] = gauge[dx][dy + 30] = tr;
+									if(dy < 2) {
+										gauge[dx][dy + 4] = gauge[dx][dy + 10] = gauge[dx][dy + 16] = gauge[dx][dy + 22]
+												= gauge[dx][dy + 28] = gauge[dx][dy + 34] = tr;
+									}
 								}
 							}
 						}

@@ -3,7 +3,9 @@ package bms.player.beatoraja.result;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.KeyCommand;
@@ -14,6 +16,7 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -25,7 +28,7 @@ import bms.player.beatoraja.skin.SkinType;
  */
 public class CourseResult extends AbstractResult {
 
-	private IRScoreData newscore;
+	private List<IRSendStatus> irSendStatus = new ArrayList<IRSendStatus>();
 
 	private ResultKeyProperty property;
 
@@ -68,7 +71,7 @@ public class CourseResult extends AbstractResult {
 		// リプレイの自動保存
 		if(resource.getPlayMode() == PlayMode.PLAY){
 			for(int i=0;i<REPLAY_SIZE;i++){
-				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,newscore)) {
+				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,getNewScore())) {
 					saveReplayData(i);
 				}
 			}
@@ -81,53 +84,58 @@ public class CourseResult extends AbstractResult {
 		state = STATE_OFFLINE;
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
+		final IRScoreData newscore = getNewScore();
 
 		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
 			state = STATE_IR_PROCESSING;
+			
+			boolean uln = false;
+			for(BMSModel model : resource.getCourseBMSModels()) {
+				if(model.containsUndefinedLongNote()) {
+					uln = true;
+					break;
+				}
+			}
+			final int lnmode = uln ? config.getLnmode() : 0;
+			
+        	for(IRStatus irc : ir) {
+    			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
+    			switch(irc.send) {
+    			case PlayerConfig.IR_SEND_ALWAYS:
+    				break;
+    			case PlayerConfig.IR_SEND_COMPLETE_SONG:
+//    				FloatArray gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
+//    				send &= gauge.get(gauge.size - 1) > 0.0;
+    				break;
+    			case PlayerConfig.IR_SEND_UPDATE_SCORE:
+//    				send &= (newscore.getExscore() > oldscore.getExscore() || newscore.getClear() > oldscore.getClear()
+//    						|| newscore.getCombo() > oldscore.getCombo() || newscore.getMinbp() < oldscore.getMinbp());
+    				break;
+    			}
+    			
+    			if(send) {
+    				irSendStatus.add(new IRSendStatus(irc.connection, resource.getCourseData(), lnmode, newscore));
+    			}
+        	}
+
 			Thread irprocess = new Thread(() -> {
 				try {
-					int lnmode = 0;
-					for(BMSModel model : resource.getCourseBMSModels()) {
-						if(model.containsUndefinedLongNote()) {
-							lnmode = config.getLnmode();
-							break;
-						}
-					}
-					
                 	int irsend = 0;
                 	boolean succeed = true;
-                	for(IRStatus irc : ir) {
-            			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
-            			switch(irc.send) {
-            			case PlayerConfig.IR_SEND_ALWAYS:
-            				break;
-            			case PlayerConfig.IR_SEND_COMPLETE_SONG:
-//            				FloatArray gauge = resource.getG.getGauge()[resource.getGrooveGauge().getType()];
-//            				send &= gauge.get(gauge.size - 1) > 0.0;
-            				break;
-            			case PlayerConfig.IR_SEND_UPDATE_SCORE:
-//            				IRScoreData current = resource.getScoreData();
-//            				send &= (current.getExscore() > oldexscore || current.getClear() > oldclear
-//            						|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
-            				break;
-            			}
-            			
-            			if(send) {
-            				if(irsend == 0) {
-            					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);                					
-            				}
-            				irsend++;
-            				Logger.getGlobal().info("IRへスコア送信中");
-							IRResponse<Object> send1 = irc.connection.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
-                            if(send1.isSucceeded()) {
-                                Logger.getGlobal().info("IRスコア送信完了");
-                            } else {
-                                Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
-                            }
-                            succeed &= send1.isSucceeded();	                				
-            			}
+                	List<IRSendStatus> removeIrSendStatus = new ArrayList<IRSendStatus>();
+                	
+                	for(IRSendStatus irc : irSendStatus) {
+        				if(irsend == 0) {
+        					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);                					
+        				}
+        				irsend++;
+                        succeed &= irc.send();
+                        if(irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
+                        	removeIrSendStatus.add(irc);
+                        }
                 	}
+                	irSendStatus.removeAll(removeIrSendStatus);
                 	
                 	if(irsend > 0) {
                         main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
@@ -253,7 +261,7 @@ public class CourseResult extends AbstractResult {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
-		newscore = resource.getCourseScoreData();
+		final IRScoreData newscore = getNewScore();
 		if (newscore == null) {
 			return;
 		}
@@ -271,13 +279,9 @@ public class CourseResult extends AbstractResult {
 				&& (!dp || (config.getRandom2() == 1 && config.getDoubleoption() == 1))) {
 			random = 1;
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(models,
+		final IRScoreData score = main.getPlayDataAccessor().readScoreData(models,
 				config.getLnmode(), random, resource.getConstraint());
-		if (score != null) {
-			oldscore = score;
-		}else{
-			oldscore = new IRScoreData();
-		}
+		oldscore = score != null ? score : new IRScoreData();
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(),
 				Arrays.asList(resource.getCourseData().getSong()).stream().mapToInt(sd -> sd.getNotes()).sum());
@@ -358,5 +362,35 @@ public class CourseResult extends AbstractResult {
 
 	public void execute(CourseResultCommand command) {
 		command.execute(this);
+	}
+	
+	static class IRSendStatus {
+		public final IRConnection ir;
+		public final CourseData course;
+		public final int lnmode;
+		public final IRScoreData score;
+		public int retry = 0;
+		
+		public IRSendStatus(IRConnection ir, CourseData course, int lnmode, IRScoreData score) {
+			this.ir = ir;
+			this.course = course;
+			this.lnmode = lnmode;
+			this.score = score;
+		}
+		
+		public boolean send() {
+			Logger.getGlobal().info("IRへスコア送信中 : " + course.getName());
+            IRResponse<Object> send1 = ir.sendCoursePlayData(course, lnmode, score);
+            if(send1.isSucceeded()) {
+                Logger.getGlobal().info("IRスコア送信完了 : " + course.getName());
+                retry = -255;
+                return true;
+            } else {
+                Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
+                retry++;
+                return false;
+            }
+
+		}
 	}
 }

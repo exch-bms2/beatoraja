@@ -37,7 +37,7 @@ public class SkinSlider extends SkinObject {
 	/**
 	 * ユーザーによる値変更を受け付けるかどうか
 	 */
-	private boolean changable;
+	private boolean changeable;
 
 	private TextureRegion currentImage;
 	private float currentValue;
@@ -121,7 +121,7 @@ public class SkinSlider extends SkinObject {
 	}
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
-		if (isChangable()) {
+		if (isChangeable()) {
 			switch (direction) {
 			case 0:
 				if (region.x <= x && region.x + region.width >= x && region.y <= y && region.y + range >= y) {
@@ -167,12 +167,12 @@ public class SkinSlider extends SkinObject {
 		}
 	}
 
-	public boolean isChangable() {
-		return changable;
+	public boolean isChangeable() {
+		return changeable;
 	}
 
-	public void setChangable(boolean changable) {
-		this.changable = changable;
+	public void setChangeable(boolean changeable) {
+		this.changeable = changeable;
 	}
 	
 	public int getRange() {

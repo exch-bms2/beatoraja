@@ -447,11 +447,11 @@ public class BarRenderer {
 			for (char c : charset) {
 				chars[i++] = c;
 			}
-			if(baro.getText(0) != null) {
-				baro.getText(0).prepareFont(String.valueOf(chars));				
-			}
-			if(baro.getText(1) != null) {
-				baro.getText(1).prepareFont(String.valueOf(chars));				
+			
+			for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
+				if(baro.getText(index) != null) {
+					baro.getText(index).prepareFont(String.valueOf(chars));				
+				}				
 			}
 		}
 

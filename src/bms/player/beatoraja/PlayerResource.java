@@ -209,6 +209,10 @@ public class PlayerResource {
 		return mode;
 	}
 
+	public void setPlayMode(PlayMode mode) {
+		this.mode = mode;
+	}
+
 	public Config getConfig() {
 		return config;
 	}

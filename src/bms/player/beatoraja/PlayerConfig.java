@@ -1,8 +1,6 @@
 package bms.player.beatoraja;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -59,6 +57,9 @@ public class PlayerConfig {
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
+	
+	public static final int JUDGETIMING_MAX = 500;
+	public static final int JUDGETIMING_MIN = -500;
 
     /**
      * 選曲時のモードフィルター
@@ -668,7 +669,7 @@ public class PlayerConfig {
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
 		target = MathUtils.clamp(target, 0, TargetProperty.getAllTargetProperties().length);
-		judgetiming = MathUtils.clamp(judgetiming, -100, 100);
+		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		judgewindowrate = MathUtils.clamp(judgewindowrate, 10, 400);
@@ -770,11 +771,10 @@ public class PlayerConfig {
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
 		PlayerConfig player = new PlayerConfig();
-		Path p = Paths.get(playerpath + "/" + playerid + "/config.json");
-		Json json = new Json();
-		try {
+		try (FileReader reader = new FileReader(Paths.get(playerpath + "/" + playerid + "/config.json").toFile())) {
+			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+			player = json.fromJson(PlayerConfig.class, reader);
 			player.setId(playerid);
 			player.validate();
 		} catch(Throwable e) {
@@ -784,12 +784,12 @@ public class PlayerConfig {
 	}
 
 	public static void write(String playerpath, PlayerConfig player) {
-		Json json = new Json();
-		json.setOutputType(JsonWriter.OutputType.json);
-		Path p = Paths.get(playerpath + "/" + player.getId() + "/config.json");
-		try (FileWriter fw = new FileWriter(p.toFile())) {
-			fw.write(json.prettyPrint(player));
-			fw.flush();
+		try (FileWriter writer = new FileWriter(Paths.get(playerpath + "/" + player.getId() + "/config.json").toFile())) {
+			Json json = new Json();
+			json.setOutputType(JsonWriter.OutputType.json);
+			json.setUsePrototypes(false);
+			writer.write(json.prettyPrint(player));
+			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

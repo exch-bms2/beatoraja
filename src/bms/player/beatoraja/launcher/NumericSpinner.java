@@ -2,8 +2,17 @@ package bms.player.beatoraja.launcher;
 
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.util.StringConverter;
 
+/**
+ * JavaFX Spinnerの拡張クラス．
+ * 
+ * @author sack_magiclight
+ *
+ * @param <T>
+ */
 public class NumericSpinner<T> extends Spinner<T> {
 	public NumericSpinner() {
 		focusedProperty().addListener((s, ov, nv) -> {
@@ -12,6 +21,31 @@ public class NumericSpinner<T> extends Spinner<T> {
 			}
 			commitEditorText(this);
 		});
+	}
+	
+	/**
+	 * Spinnerの各種値を設定する
+	 * 
+	 * @param min Spinnerの最小値
+	 * @param max Spinnerの最大値
+	 * @param initialValue Spinnerの初期値
+	 * @param amountToStepBy Spinnerの増減単位
+	 */
+	public void setValueFactoryValues(T min, T max, T initialValue, T amountToStepBy) {
+		if(min instanceof Integer) {
+			IntegerSpinnerValueFactory vf = (IntegerSpinnerValueFactory) this.getValueFactory();
+			vf.setMin((Integer) min);
+			vf.setMax((Integer) max);
+			vf.setValue((Integer) initialValue);
+			vf.setAmountToStepBy((Integer) amountToStepBy);
+		}
+		if(min instanceof Double) {
+			DoubleSpinnerValueFactory vf = (DoubleSpinnerValueFactory) this.getValueFactory();
+			vf.setMin((Double) min);
+			vf.setMax((Double) max);
+			vf.setValue((Double) initialValue);
+			vf.setAmountToStepBy((Double) amountToStepBy);			
+		}
 	}
 
 	private void commitEditorText(Spinner<T> spinner) {

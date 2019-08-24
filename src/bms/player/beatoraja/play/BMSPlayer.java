@@ -39,7 +39,6 @@ public class BMSPlayer extends MainState {
 
 	private int playtime;
 
-	private PlayMode autoplay = PlayMode.PLAY;
 	/**
 	 * キー入力用スレッド
 	 */
@@ -82,7 +81,7 @@ public class BMSPlayer extends MainState {
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
 		this.model = resource.getBMSModel();
-		this.autoplay = resource.getPlayMode();
+		PlayMode autoplay = resource.getPlayMode();
 		PlayerConfig config = resource.getPlayerConfig();
 
 		if (autoplay.isReplayMode()) {
@@ -97,6 +96,7 @@ public class BMSPlayer extends MainState {
 						replay = replays[0];
 					} else {
 						autoplay = PlayMode.PLAY;
+						resource.setPlayMode(autoplay);
 					}
 				} else {
 					for (int i = 0; i < resource.getCourseBMSModels().length; i++) {
@@ -109,6 +109,7 @@ public class BMSPlayer extends MainState {
 				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay.getReplayIndex());
 				if (replay == null) {
 					autoplay = PlayMode.PLAY;
+					resource.setPlayMode(autoplay);
 				}
 			}
 		}
@@ -134,6 +135,7 @@ public class BMSPlayer extends MainState {
 		if(isReplayPatternPlay) {
 			replay = null;
 			autoplay = PlayMode.PLAY;
+			resource.setPlayMode(autoplay);
 		}
 
 		if (model.getRandom() != null && model.getRandom().length > 0) {
@@ -325,6 +327,7 @@ public class BMSPlayer extends MainState {
 
 	public void create() {
 		final PlayerResource resource = main.getPlayerResource();
+		final PlayMode autoplay = resource.getPlayMode();
 		laneProperty = new LaneProperty(model.getMode());
 		keysound = new KeySoundProcessor(this);
 		judge = new JudgeManager(this);
@@ -357,9 +360,8 @@ public class BMSPlayer extends MainState {
 
 		judge.init(model, resource);
 
-		final PlaySkin skin = (PlaySkin) getSkin();
-
-		rhythm = new RhythmTimerProcessor(model, skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100);
+		rhythm = new RhythmTimerProcessor(model, 
+				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
 
 		bga = resource.getBGAManager();
 
@@ -403,7 +405,12 @@ public class BMSPlayer extends MainState {
 	@Override
 	public void render() {
 		final PlaySkin skin = (PlaySkin) getSkin();
+		if(skin == null) {
+			main.changeState(MainStateType.MUSICSELECT);
+			return;
+		}
 		final PlayerResource resource = main.getPlayerResource();
+		final PlayMode autoplay = resource.getPlayMode();
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final PlayerConfig config = resource.getPlayerConfig();
 
@@ -747,7 +754,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		PlayConfig pc = resource.getPlayerConfig().getPlayConfig(model.getMode()).getPlayconfig();
-		if (lanerender.getFixHispeed() != PlayConfig.FIX_HISPEED_OFF) {
+		if (pc.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
 			pc.setDuration(lanerender.getGreenValue());
 		} else {
 			pc.setHispeed(lanerender.getHispeed());
@@ -889,10 +896,6 @@ public class BMSPlayer extends MainState {
 
 	public GrooveGauge getGauge() {
 		return gauge;
-	}
-
-	public PlayMode getPlayMode() {
-		return autoplay;
 	}
 
 	public boolean isNoteEnd() {

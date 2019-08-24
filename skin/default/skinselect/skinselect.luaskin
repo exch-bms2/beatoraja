@@ -1,0 +1,6 @@
+local t = require("skinselectmain")
+if skin_config then
+	return t.main()
+else
+	return t.header
+end

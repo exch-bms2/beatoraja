@@ -740,6 +740,10 @@ public abstract class SkinObject implements Disposable {
 			this.off = new SkinOffset[this.offset.length];
 		}
 	}
+	
+	public SkinOffset[] getOffsets() {
+		return off;
+	}
 
 	public TimerProperty getDestinationTimer() {
 		return dsttimer;

@@ -1,8 +1,5 @@
 package bms.player.beatoraja;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import bms.player.beatoraja.skin.SkinType;
 
 /**
@@ -11,39 +8,13 @@ import bms.player.beatoraja.skin.SkinType;
  * @author exch
  */
 public class SkinConfig {
-
-	public static final String DEFAULT_PLAY7 = "skin/default/play7.json";
-	public static final String DEFAULT_PLAY5 = "skin/default/play5.json";
-	public static final String DEFAULT_PLAY14 = "skin/default/play14.json";
-	public static final String DEFAULT_PLAY10 = "skin/default/play10.json";
-	public static final String DEFAULT_PLAY9 = "skin/default/play9.json";
-	public static final String DEFAULT_SELECT = "skin/default/select.json";
-	public static final String DEFAULT_DECIDE = "skin/default/decide.json";
-	public static final String DEFAULT_RESULT = "skin/default/result.json";
-	public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
-	public static final String DEFAULT_PLAY24 = "skin/default/play24.json";
-	public static final String DEFAULT_PLAY24DOUBLE = "skin/default/play24double.json";
-	public static final String DEFAULT_SKINSELECT = "skin/default/skinselect.json";
-
-	public static final Map<SkinType, String> defaultSkinPathMap = new HashMap<SkinType, String>() {
-		{
-			put(SkinType.PLAY_7KEYS, DEFAULT_PLAY7);
-			put(SkinType.PLAY_5KEYS, DEFAULT_PLAY5);
-			put(SkinType.PLAY_14KEYS, DEFAULT_PLAY14);
-			put(SkinType.PLAY_10KEYS, DEFAULT_PLAY10);
-			put(SkinType.PLAY_9KEYS, DEFAULT_PLAY9);
-			put(SkinType.MUSIC_SELECT, DEFAULT_SELECT);
-			put(SkinType.DECIDE, DEFAULT_DECIDE);
-			put(SkinType.RESULT, DEFAULT_RESULT);
-			put(SkinType.COURSE_RESULT, DEFAULT_GRADERESULT);
-			put(SkinType.PLAY_24KEYS, DEFAULT_PLAY24);
-			put(SkinType.PLAY_24KEYS_DOUBLE, DEFAULT_PLAY24DOUBLE);
-			put(SkinType.SKIN_SELECT, DEFAULT_SKINSELECT);
-		}
-	};
-
+	/**
+	 * ファイルパス
+	 */
 	private String path;
-
+	/**
+	 * 設定項目
+	 */
 	private Property properties;
 
 	public SkinConfig() {
@@ -79,8 +50,11 @@ public class SkinConfig {
 	
 	public static SkinConfig getDefault(int id) {
 		SkinConfig skin = new SkinConfig();
-		skin.setPath(defaultSkinPathMap.get(SkinType.getSkinTypeById(id)));
-		skin.validate();
+		Default dskin = Default.get(SkinType.getSkinTypeById(id));
+		if(dskin != null) {
+			skin.setPath(dskin.path);
+			skin.validate();
+		}
 		return skin;
 	}
 
@@ -146,4 +120,37 @@ public class SkinConfig {
 		public int a;
 	}
 
+	public enum Default {
+		PLAY7(SkinType.PLAY_7KEYS, "skin/default/play/play7.luaskin"),
+		PLAY5(SkinType.PLAY_5KEYS, "skin/default/play5.json"),
+		PLAY14(SkinType.PLAY_14KEYS, "skin/default/play14.json"),
+		PLAY10(SkinType.PLAY_10KEYS, "skin/default/play10.json"),
+		PLAY9(SkinType.PLAY_9KEYS, "skin/default/play9.json"),
+		SELECT(SkinType.MUSIC_SELECT, "skin/default/select.json"),
+		DECIDE(SkinType.DECIDE, "skin/default/decide/decide.luaskin"),
+		RESULT(SkinType.RESULT, "skin/default/result/result.luaskin"),
+		COURSERESULT(SkinType.COURSE_RESULT, "skin/default/graderesult.json"),
+		PLAY24(SkinType.PLAY_24KEYS, "skin/default/play24.json"),
+		PLAY24DOUBLE(SkinType.PLAY_24KEYS_DOUBLE, "skin/default/play24double.json"),
+		KEYCONFIG(SkinType.KEY_CONFIG, "skin/default/keyconfig/keyconfig.luaskin"),
+		SKINSELECT(SkinType.SKIN_SELECT, "skin/default/skinselect/skinselect.luaskin"),
+		;
+
+		public final SkinType type;
+		public final String path;
+
+		private Default(SkinType type, String path) {
+			this.type = type;
+			this.path = path;
+		}
+
+		public static Default get(SkinType type) {
+			for(Default skin : values()) {
+				if(skin.type == type) {
+					return skin;
+				}
+			}
+			return null;
+		}
+	}
 }

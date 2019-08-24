@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.IntArray;
 
 /**
  * ゲージ遷移描画オブジェクト
- * 
+ *
  * @author exch
  */
 public class SkinGaugeGraphObject extends SkinObject {
@@ -33,7 +33,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	 * グラフ線の太さ
 	 */
 	private int lineWidth = 2;
-	
+
 	private int currentType = -1;
 
 	public int getDelay() {
@@ -52,34 +52,68 @@ public class SkinGaugeGraphObject extends SkinObject {
 		this.lineWidth = lineWidth;
 	}
 
-	private final Color[] graphcolor = { Color.valueOf("440044"), Color.valueOf("004444"), Color.valueOf("004400"),
-			Color.valueOf("440000"), Color.valueOf("444400"), Color.valueOf("444444") };
-	private final Color[] graphline = { Color.valueOf("ff00ff"), Color.valueOf("00ffff"), Color.valueOf("00ff00"),
-			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
-	private final Color borderline = Color.valueOf("ff0000");
-	private final Color bordercolor = Color.valueOf("440000");
+	private final Color[] graphcolor = new Color[6];
+	private final Color[] graphline = new Color[6];
+	private final Color borderline;
+	private final Color bordercolor;
 	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
+
+	public SkinGaugeGraphObject(String assistClearBGColor, String assistAndEasyFailBGColor, String grooveFailBGColor, String grooveClearAndHardBGColor, String exHardBGColor, String hazardBGColor,
+	String assistClearLineColor, String assistAndEasyFailLineColor, String grooveFailLineColor, String grooveClearAndHardLineColor, String exHardLineColor, String hazardLineColor,
+	String borderlineColor, String borderColor) {
+		graphcolor[0] = Color.valueOf(assistClearBGColor);
+		graphcolor[1] = Color.valueOf(assistAndEasyFailBGColor);
+		graphcolor[2] = Color.valueOf(grooveFailBGColor);
+		graphcolor[3] = Color.valueOf(grooveClearAndHardBGColor);
+		graphcolor[4] = Color.valueOf(exHardBGColor);
+		graphcolor[5] = Color.valueOf(hazardBGColor);
+		graphline[0] = Color.valueOf(assistClearLineColor);
+		graphline[1] = Color.valueOf(assistAndEasyFailLineColor);
+		graphline[2] = Color.valueOf(grooveFailLineColor);
+		graphline[3] = Color.valueOf(grooveClearAndHardLineColor);
+		graphline[4] = Color.valueOf(exHardLineColor);
+		graphline[5] = Color.valueOf(hazardLineColor);
+		borderline = Color.valueOf(borderlineColor);
+		bordercolor = Color.valueOf(borderColor);
+	}
+
+	public SkinGaugeGraphObject() {
+		graphcolor[0] = Color.valueOf("440044");
+		graphcolor[1] = Color.valueOf("004444");
+		graphcolor[2] = Color.valueOf("004400");
+		graphcolor[3] = Color.valueOf("440000");
+		graphcolor[4] = Color.valueOf("444400");
+		graphcolor[5] = Color.valueOf("444444");
+		graphline[0] = Color.valueOf("ff00ff");
+		graphline[1] = Color.valueOf("0000ff");
+		graphline[2] = Color.valueOf("00ff00");
+		graphline[3] = Color.valueOf("ff0000");
+		graphline[4] = Color.valueOf("ffff00");
+		graphline[5] = Color.valueOf("cccccc");
+		borderline = Color.valueOf("ff0000");
+		bordercolor = Color.valueOf("440000");
+	}
 
 	private int color;
 	private FloatArray gaugehistory;
 	private IntArray section;
 	private Gauge gg;
-	
+
 	private float render;
 	private boolean redraw;
-	
+
 	public void prepare(long time, MainState state) {
 		render = time >= delay ? 1.0f : (float) time / delay;
-		
+
 		final PlayerResource resource = state.main.getPlayerResource();
 		int type = resource.getGrooveGauge().getType();
 		if(state instanceof AbstractResult) {
 			type = ((AbstractResult) state).gaugeType;
 		}
-		
+
 		if(currentType != type) {
 			redraw = true;
-			currentType = type;			
+			currentType = type;
 			gaugehistory = resource.getGauge()[currentType];
 			section = new IntArray();
 			if (state instanceof CourseResult) {

@@ -454,7 +454,7 @@ public enum MusicSelectCommand {
 		@Override
 		public void execute(MusicSelector selector) {
 	        final PlayerConfig config = selector.main.getPlayerConfig();
-            if (config.getJudgetiming() < 99) {
+            if (config.getJudgetiming() < PlayerConfig.JUDGETIMING_MAX) {
                 config.setJudgetiming(config.getJudgetiming() + 1);
                 selector.play(SOUND_OPTIONCHANGE);
             }
@@ -464,7 +464,7 @@ public enum MusicSelectCommand {
 		@Override
 		public void execute(MusicSelector selector) {
 	        final PlayerConfig config = selector.main.getPlayerConfig();
-            if (config.getJudgetiming() > -99) {
+            if (config.getJudgetiming() > PlayerConfig.JUDGETIMING_MIN) {
                 config.setJudgetiming(config.getJudgetiming() - 1);
                 selector.play(SOUND_OPTIONCHANGE);
             }

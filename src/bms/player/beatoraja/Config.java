@@ -2,9 +2,7 @@ package bms.player.beatoraja;
 
 import static bms.player.beatoraja.Resolution.*;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -107,7 +105,7 @@ public class Config implements Validatable {
 	 */
 	private int maxFramePerSecond = 240;
 	
-	private int prepareFramePerSecond = 120;
+	private int prepareFramePerSecond = 10000;
 	/**
 	 * 選曲バー移動速度の最初
 	 */
@@ -198,7 +196,7 @@ public class Config implements Validatable {
 	private boolean enableIpfs = true;
 	private String ipfsurl = "https://gateway.ipfs.io/";
 
-
+	private int irSendCount = 5;
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
@@ -605,6 +603,12 @@ public class Config implements Validatable {
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
+		irSendCount = MathUtils.clamp(irSendCount, 1, 100);
+
+		skinPixmapGen = MathUtils.clamp(skinPixmapGen, 0, 100);
+		stagefilePixmapGen = MathUtils.clamp(stagefilePixmapGen, 0, 100);
+		bannerPixmapGen = MathUtils.clamp(bannerPixmapGen, 0, 100);
+		songResourceGen = MathUtils.clamp(songResourceGen, 0, 100);
 
 		if(JudgeAlgorithm.getIndex(judgeType) == -1) {
 			judgeType = JudgeAlgorithm.Combo.name();
@@ -640,9 +644,9 @@ public class Config implements Validatable {
 		Config config = null;
 		if (Files.exists(MainController.configpath)) {
 			Json json = new Json();
-			try {
-				json.setIgnoreUnknownFields(true);
-				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
+			json.setIgnoreUnknownFields(true);
+			try (FileReader reader = new FileReader(MainController.configpath.toFile())) {
+				config = json.fromJson(Config.class, reader);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -659,13 +663,22 @@ public class Config implements Validatable {
 
 	public static void write(Config config) {
 		Json json = new Json();
+		json.setUsePrototypes(false);
 		json.setOutputType(OutputType.json);
-		try (FileWriter fw = new FileWriter(MainController.configpath.toFile())) {
-			fw.write(json.prettyPrint(config));
-			fw.flush();
+		try (FileWriter writer = new FileWriter(MainController.configpath.toFile())) {
+			writer.write(json.prettyPrint(config));
+			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public int getIrSendCount() {
+		return irSendCount;
+	}
+
+	public void setIrSendCount(int irSendCount) {
+		this.irSendCount = irSendCount;
 	}
 
 	public enum DisplayMode {

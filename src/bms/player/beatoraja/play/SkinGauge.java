@@ -179,14 +179,8 @@ public class SkinGauge extends SkinObject {
 
 	public void draw(SkinObjectRenderer sprite) {
 
-		int exgauge = 0;
-		if (type == ASSISTEASY || type == EASY || type == EXHARD || type == HAZARD || type == EXCLASS || type == EXHARDCLASS) {
-			exgauge = 4;
-		}
-		
-		final int notes = (type == HARD || type == EXHARD || type == HAZARD || type ==GrooveGauge.CLASS || type == EXCLASS || type == EXHARDCLASS)
-						&& value > 0 && ((int) (value * parts / max)) < 1
-						? 1 : (int) (value * parts / max);
+		final int exgauge = (type >= CLASS ? type - 3 : type) * 6;
+		final int notes = value > 0 ? Math.max(1 , (int) (value * parts / max)) : 0;
 		sprite.setColor(color);
 		sprite.setBlend(getBlend());
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
@@ -197,7 +191,7 @@ public class SkinGauge extends SkinObject {
 			for (int i = 1; i <= parts; i++) {
 				final float border = i * max / parts;
 				sprite.draw(
-						images[exgauge + (notes == i || notes - animation > i ? 0 : 2)
+						images[exgauge + (notes == i ? 4 : (notes - animation > i ? 0 : 2))
 								+ (border < this.border ? 1 : 0)],
 						region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
 
@@ -211,13 +205,13 @@ public class SkinGauge extends SkinObject {
 								+ (border < this.border ? 1 : 0)],
 						region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
 
-				if(images.length == 12 && i == notes) {
+				if(i == notes) {
 					final Color orgColor = sprite.getColor();
 					flickerColor.set(orgColor.r, orgColor.g, orgColor.b, orgColor.a * (animation < duration / 2 ? animation / ((float) duration / 2 - 1) : ((duration - 1) - animation) / ((float) duration / 2 - 1)));
 					sprite.setColor(flickerColor);
 					System.out.println(animation + "  " + duration + "  " + flickerColor.toString());
 					sprite.draw(
-							images[8 + exgauge / 2 + (border < this.border ? 1 : 0)],
+							images[exgauge + 4 + (border < this.border ? 1 : 0)],
 							region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
 					sprite.setColor(orgColor);
 				}

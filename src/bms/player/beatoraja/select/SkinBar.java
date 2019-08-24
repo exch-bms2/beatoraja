@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * 楽曲バー描画用スキンオブジェクト
@@ -86,6 +87,8 @@ public class SkinBar extends SkinObject {
     public static final int BARLAMP_COUNT = 11;
     
     private MusicSelector selector;
+    
+    private Array<SkinObject> removes = new Array();
 
     public SkinBar(int position) {
         this.position = position;
@@ -190,8 +193,51 @@ public class SkinBar extends SkinObject {
     }
 
     public boolean validate() {
+    	for(int i = 0;i < barimageon.length;i++) {
+    		if(barimageon[i] != null && !barimageon[i].validate()) {
+    			removes.add(barimageon[i]);
+    			barimageon[i] = null;
+    		}
+    	}
+    	for(int i = 0;i < barimageoff.length;i++) {
+    		if(barimageoff[i] != null && !barimageoff[i].validate()) {
+    			removes.add(barimageoff[i]);
+    			barimageoff[i] = null;
+    		}
+    	}
+    	for(int i = 0;i < trophy.length;i++) {
+    		if(trophy[i] != null && !trophy[i].validate()) {
+    			removes.add(trophy[i]);
+    			trophy[i] = null;
+    		}
+    	}
+    	for(int i = 0;i < label.length;i++) {
+    		if(label[i] != null && !label[i].validate()) {
+    			removes.add(label[i]);
+    			label[i] = null;
+    		}
+    	}
+    	for(int i = 0;i < lamp.length;i++) {
+    		if(lamp[i] != null && !lamp[i].validate()) {
+    			removes.add(lamp[i]);
+    			lamp[i] = null;
+    		}
+    	}
+    	for(int i = 0;i < mylamp.length;i++) {
+    		if(mylamp[i] != null && !mylamp[i].validate()) {
+    			removes.add(mylamp[i]);
+    			mylamp[i] = null;
+    		}
+    	}
+    	for(int i = 0;i < rivallamp.length;i++) {
+    		if(rivallamp[i] != null && !rivallamp[i].validate()) {
+    			removes.add(rivallamp[i]);
+    			rivallamp[i] = null;
+    		}
+    	}
     	for(int i = 0;i < text.length;i++) {
     		if(text[i] != null && !text[i].validate()) {
+    			removes.add(text[i]);
     			text[i] = null;
     		}
     	}
@@ -268,6 +314,7 @@ public class SkinBar extends SkinObject {
 
     @Override
     public void dispose() {
+    	disposeAll(removes.toArray(SkinObject.class));
     	disposeAll(barimageon);
     	disposeAll(barimageoff);
     	disposeAll(trophy);

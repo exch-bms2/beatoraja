@@ -156,10 +156,6 @@ public class LaneRenderer {
 		this.hispeedmargin = playconfig.getHispeedMargin();
 	}
 
-	public int getFixHispeed() {
-		return playconfig.getFixhispeed();
-	}
-
 	public float getHispeed() {
 		return playconfig.getHispeed();
 	}
@@ -244,7 +240,18 @@ public class LaneRenderer {
 		return playconfig;
 	}
 
-	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes) {
+	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, SkinOffset[] offsets) {
+		float offsetX = 0;
+		float offsetY = 0;
+		float offsetW = 0;
+		float offsetH= 0;
+		for(SkinOffset offset : offsets) {
+			offsetX += offset.x;
+			offsetY += offset.y;
+			offsetW += offset.w;
+			offsetH += offset.h;
+		}
+		
 		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
@@ -419,10 +426,10 @@ public class LaneRenderer {
 				final Note note = tl.getNote(lane);
 				if (note != null) {
 					//4分のタイミングでノートを拡大する
-					float dstx = lanes[lane].region.x;
-					float dsty = (float) y;
-					float dstw = lanes[lane].region.width;
-					float dsth = scale;
+					float dstx = lanes[lane].region.x + offsetX;
+					float dsty = (float) y + offsetY;
+					float dstw = lanes[lane].region.width + offsetW;
+					float dsth = scale + offsetH;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
 						if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
 							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;

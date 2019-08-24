@@ -458,11 +458,20 @@ public class SkinProperty {
 	public static final int OPTION_FOLDERBAR = 1;
 	public static final int OPTION_SONGBAR = 2;
 	public static final int OPTION_GRADEBAR = 3;
+	public static final int OPTION_GRADEBAR_CLASS = 1002;
 	public static final int OPTION_GRADEBAR_MIRROR = 1003;
 	public static final int OPTION_GRADEBAR_RANDOM = 1004;
 	public static final int OPTION_GRADEBAR_NOSPEED = 1005;
 	public static final int OPTION_GRADEBAR_NOGOOD = 1006;
 	public static final int OPTION_GRADEBAR_NOGREAT = 1007;
+	public static final int OPTION_GRADEBAR_GAUGE_LR2 = 1010;
+	public static final int OPTION_GRADEBAR_GAUGE_5KEYS = 1011;
+	public static final int OPTION_GRADEBAR_GAUGE_7KEYS = 1012;
+	public static final int OPTION_GRADEBAR_GAUGE_9KEYS = 1013;
+	public static final int OPTION_GRADEBAR_GAUGE_24KEYS = 1014;
+	public static final int OPTION_GRADEBAR_LN = 1015;
+	public static final int OPTION_GRADEBAR_CN = 1016;
+	public static final int OPTION_GRADEBAR_HCN = 1017;
 
 	public static final int OPTION_PLAYABLEBAR = 5;
 
