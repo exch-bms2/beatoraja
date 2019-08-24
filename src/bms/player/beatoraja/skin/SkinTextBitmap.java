@@ -27,6 +27,11 @@ public class SkinTextBitmap extends SkinText {
 	private GlyphLayout layout;
 	private float size;
 
+	@Override
+	public void load() {
+		font = source.getFont();
+	}
+
 	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
 		this(source, size, StringPropertyFactory.getStringProperty(-1));
 	}
@@ -40,12 +45,10 @@ public class SkinTextBitmap extends SkinText {
 
 	@Override
 	public void prepareFont(String text) {
-		font = source.getFont();
 	}
 
 	@Override
 	protected void prepareText(String text) {
-		font = source.getFont();
 	}
 
 	public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {

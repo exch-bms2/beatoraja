@@ -176,6 +176,10 @@ public class Skin {
 		objects.removeAll(removes, true);
 		objectarray = objects.toArray(SkinObject.class);
 		option.clear();
+
+		for(SkinObject obj : objects) {
+			obj.load();
+		}
 		
 		prepareduration = 1000000 / state.main.getConfig().getPrepareFramePerSecond();
 		nextpreparetime = -1;
