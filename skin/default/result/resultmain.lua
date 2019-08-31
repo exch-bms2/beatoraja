@@ -101,7 +101,12 @@ local function main()
 		{id = "title", font = 0, size = 24, align = 1, ref = 12},
 	}
 	skin.gaugegraph = {
-		{id = "gaugegraph"}
+		{id = "gaugegraph", color = {"ff8888","442222","ff00ff","440044",
+			"ff0088","440022","00ffff","004444",
+			"ff0000","440000","00ff00","004400",
+			"ff0000","440000","ff0000","440000",
+			"ffff00","444400","ffff00","444400",
+			"cccccc","444444","cccccc","444444",}}
 	}
 	skin.judgegraph = {
 		{id = "judgegraph_j", type = 1},
