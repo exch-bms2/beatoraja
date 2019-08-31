@@ -574,9 +574,18 @@ public class JSONSkinLoader extends SkinLoader {
 
 					for (JsonSkin.GaugeGraph ggraph : sk.gaugegraph) {
 						if (dst.id.equals(ggraph.id)) {
-							SkinGaugeGraphObject st = new SkinGaugeGraphObject(ggraph.assistClearBGColor, ggraph.assistAndEasyFailBGColor, ggraph.grooveFailBGColor, ggraph.grooveClearAndHardBGColor, ggraph.exHardBGColor, ggraph.hazardBGColor,
-							ggraph.assistClearLineColor, ggraph.assistAndEasyFailLineColor, ggraph.grooveFailLineColor, ggraph.grooveClearAndHardLineColor, ggraph.exHardLineColor, ggraph.hazardLineColor,
-							ggraph.borderlineColor, ggraph.borderColor);
+							SkinGaugeGraphObject st = null;
+							if(ggraph.color != null) {
+								Color[][] colors = new Color[6][4];
+								for(int i = 0;i < 24 && i < ggraph.color.length;i++) {
+									colors[i / 4][i % 4] = Color.valueOf(ggraph.color[i]);
+								}
+								st = new SkinGaugeGraphObject(colors);
+							} else {
+								st = new SkinGaugeGraphObject(ggraph.assistClearBGColor, ggraph.assistAndEasyFailBGColor, ggraph.grooveFailBGColor, ggraph.grooveClearAndHardBGColor, ggraph.exHardBGColor, ggraph.hazardBGColor,
+										ggraph.assistClearLineColor, ggraph.assistAndEasyFailLineColor, ggraph.grooveFailLineColor, ggraph.grooveClearAndHardLineColor, ggraph.exHardLineColor, ggraph.hazardLineColor,
+										ggraph.borderlineColor, ggraph.borderColor);								
+							}
 							obj = st;
 							break;
 						}

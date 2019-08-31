@@ -34,66 +34,26 @@ public class SkinGaugeGraphObject extends SkinObject {
 	 */
 	private int lineWidth = 2;
 
-	private int currentType = -1;
-
-	public int getDelay() {
-		return delay;
-	}
-
-	public void setDelay(int delay) {
-		this.delay = delay;
-	}
-
-	public int getLineWidth() {
-		return lineWidth;
-	}
-
-	public void setLineWidth(int lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
+	/**
+	 * ボーダー下背景色
+	 */
 	private final Color[] graphcolor = new Color[6];
+	/**
+	 * ボーダー下グラフ色
+	 */
 	private final Color[] graphline = new Color[6];
-	private final Color borderline;
-	private final Color bordercolor;
+	/**
+	 * ボーダー上背景色
+	 */
+	private final Color[] borderline = new Color[6];
+	/**
+	 * ボーダー上グラフ色
+	 */
+	private final Color[] bordercolor = new Color[6];
+	
 	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
 
-	public SkinGaugeGraphObject(String assistClearBGColor, String assistAndEasyFailBGColor, String grooveFailBGColor, String grooveClearAndHardBGColor, String exHardBGColor, String hazardBGColor,
-	String assistClearLineColor, String assistAndEasyFailLineColor, String grooveFailLineColor, String grooveClearAndHardLineColor, String exHardLineColor, String hazardLineColor,
-	String borderlineColor, String borderColor) {
-		graphcolor[0] = Color.valueOf(assistClearBGColor);
-		graphcolor[1] = Color.valueOf(assistAndEasyFailBGColor);
-		graphcolor[2] = Color.valueOf(grooveFailBGColor);
-		graphcolor[3] = Color.valueOf(grooveClearAndHardBGColor);
-		graphcolor[4] = Color.valueOf(exHardBGColor);
-		graphcolor[5] = Color.valueOf(hazardBGColor);
-		graphline[0] = Color.valueOf(assistClearLineColor);
-		graphline[1] = Color.valueOf(assistAndEasyFailLineColor);
-		graphline[2] = Color.valueOf(grooveFailLineColor);
-		graphline[3] = Color.valueOf(grooveClearAndHardLineColor);
-		graphline[4] = Color.valueOf(exHardLineColor);
-		graphline[5] = Color.valueOf(hazardLineColor);
-		borderline = Color.valueOf(borderlineColor);
-		bordercolor = Color.valueOf(borderColor);
-	}
-
-	public SkinGaugeGraphObject() {
-		graphcolor[0] = Color.valueOf("440044");
-		graphcolor[1] = Color.valueOf("004444");
-		graphcolor[2] = Color.valueOf("004400");
-		graphcolor[3] = Color.valueOf("440000");
-		graphcolor[4] = Color.valueOf("444400");
-		graphcolor[5] = Color.valueOf("444444");
-		graphline[0] = Color.valueOf("ff00ff");
-		graphline[1] = Color.valueOf("0000ff");
-		graphline[2] = Color.valueOf("00ff00");
-		graphline[3] = Color.valueOf("ff0000");
-		graphline[4] = Color.valueOf("ffff00");
-		graphline[5] = Color.valueOf("cccccc");
-		borderline = Color.valueOf("ff0000");
-		bordercolor = Color.valueOf("440000");
-	}
-
+	private int currentType = -1;
 	private int color;
 	private FloatArray gaugehistory;
 	private IntArray section;
@@ -101,6 +61,55 @@ public class SkinGaugeGraphObject extends SkinObject {
 
 	private float render;
 	private boolean redraw;
+
+	public SkinGaugeGraphObject() {
+		this(new Color[][]{{Color.valueOf("ff0000"),Color.valueOf("440000"),Color.valueOf("ff00ff"),Color.valueOf("440044")},
+			{Color.valueOf("ff0000"),Color.valueOf("440000"),Color.valueOf("00ffff"),Color.valueOf("004444")},
+			{Color.valueOf("ff0000"),Color.valueOf("440000"),Color.valueOf("00ff00"),Color.valueOf("004400")},
+			{Color.valueOf("ff0000"),Color.valueOf("440000")},
+			{Color.valueOf("ffff00"),Color.valueOf("444400")},
+			{Color.valueOf("cccccc"),Color.valueOf("444444")}
+			});
+	}
+	
+	public SkinGaugeGraphObject(Color[][] colors) {
+		for(int i = 0;i < 6;i++) {
+			if(colors.length > i) {
+				borderline[i] = colors[i].length > 0 && colors[i][0] != null ? colors[i][0] : Color.valueOf("000000");
+				bordercolor[i] = colors[i].length > 1 && colors[i][1] != null ? colors[i][1] : Color.valueOf("000000");
+				graphline[i] = colors[i].length > 2 && colors[i][2] != null ? colors[i][2] : Color.valueOf("000000");
+				graphcolor[i] = colors[i].length > 3 && colors[i][3] != null ? colors[i][3] : Color.valueOf("000000");
+			} else {
+				graphline[i] = graphcolor[i] = borderline[i] = bordercolor[i] = Color.valueOf("000000");
+			}
+		}		
+	}
+
+	public SkinGaugeGraphObject(String assistClearBGColor, String assistAndEasyFailBGColor, String grooveFailBGColor, String grooveClearAndHardBGColor, String exHardBGColor, String hazardBGColor,
+	String assistClearLineColor, String assistAndEasyFailLineColor, String grooveFailLineColor, String grooveClearAndHardLineColor, String exHardLineColor, String hazardLineColor,
+	String borderlineColor, String borderColor) {
+		graphcolor[0] = Color.valueOf(assistClearBGColor);
+		graphcolor[1] = Color.valueOf(assistAndEasyFailBGColor);
+		graphcolor[2] = Color.valueOf(grooveFailBGColor);
+		bordercolor[3] = Color.valueOf(grooveClearAndHardBGColor);
+		bordercolor[4] = Color.valueOf(exHardBGColor);
+		bordercolor[5] = Color.valueOf(hazardBGColor);
+		graphline[0] = Color.valueOf(assistClearLineColor);
+		graphline[1] = Color.valueOf(assistAndEasyFailLineColor);
+		graphline[2] = Color.valueOf(grooveFailLineColor);
+		borderline[3] = Color.valueOf(grooveClearAndHardLineColor);
+		borderline[4] = Color.valueOf(exHardLineColor);
+		borderline[5] = Color.valueOf(hazardLineColor);
+		
+		for(int i = 0;i < 3;i++) {
+			borderline[i] = Color.valueOf(borderlineColor);
+			bordercolor[i] = Color.valueOf(borderColor);			
+		}
+		for(int i = 3;i < 6;i++) {
+			graphline[i] = borderline[i];
+			graphcolor[i] = bordercolor[i];			
+		}
+	}
 
 	public void prepare(long time, MainState state) {
 		render = time >= delay ? 1.0f : (float) time / delay;
@@ -151,14 +160,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shape.fill();
 			final float border = gg.getProperty().border;
 			final float max = gg.getProperty().max;
-			Color borderline = this.borderline;
-			if (border > 0) {
-				shape.setColor(bordercolor);
-				shape.fillRectangle(0, (int) (region.height * border / max), (int) (region.width),
-						(int) (region.height * (max - border) / max));
-			} else {
-				borderline = graphline[color];
-			}
+			shape.setColor(bordercolor[color]);
+			shape.fillRectangle(0, (int) (region.height * border / max), (int) (region.width),
+					(int) (region.height * (max - border) / max));
+			
 			backtex = new Texture(shape);
 			shape.dispose();
 
@@ -186,17 +191,17 @@ public class SkinGaugeGraphObject extends SkinObject {
 						} else {
 							shape.setColor(graphline[color]);
 							shape.fillRectangle(x1, y1, lineWidth, yb - y1);
-							shape.setColor(borderline);
+							shape.setColor(borderline[color]);
 							shape.fillRectangle(x1, yb, lineWidth, y2 - yb + lineWidth);
 							shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
 						}
 					} else {
 						if (f2 >= border) {
-							shape.setColor(borderline);
+							shape.setColor(borderline[color]);
 							shape.fillRectangle(x1, Math.min(y1, y2), lineWidth, Math.abs(y2 - y1) + lineWidth);
 							shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
 						} else {
-							shape.setColor(borderline);
+							shape.setColor(borderline[color]);
 							shape.fillRectangle(x1, yb, lineWidth, y1 - yb + lineWidth);
 							shape.setColor(graphline[color]);
 							shape.fillRectangle(x1, y2, lineWidth, yb - y2);
@@ -216,6 +221,22 @@ public class SkinGaugeGraphObject extends SkinObject {
 		sprite.draw(shapetex, region.x, region.y + region.height, (int)(region.width * render), -region.height);
 	}
 
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
+	}
+
+	public int getLineWidth() {
+		return lineWidth;
+	}
+
+	public void setLineWidth(int lineWidth) {
+		this.lineWidth = lineWidth;
+	}
+
 	@Override
 	public void dispose() {
 		if (shapetex != null) {
@@ -226,5 +247,5 @@ public class SkinGaugeGraphObject extends SkinObject {
 			backtex.dispose();
 			backtex = null;
 		}
-	}
+	}	
 }
