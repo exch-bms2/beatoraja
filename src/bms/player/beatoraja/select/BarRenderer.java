@@ -65,8 +65,6 @@ public class BarRenderer {
 
 	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
 
-	private final int SEARCHBAR_MAXCOUNT = 10;
-
 	private int durationlow = 300;
 	private int durationhigh = 50;
 	/**
@@ -310,7 +308,7 @@ public class BarRenderer {
 				break;
 			}
 		}
-		if (search.size >= SEARCHBAR_MAXCOUNT) {
+		if (search.size >= select.main.getConfig().getMaxSearchBarCount()) {
 			search.removeIndex(0);
 		}
 		search.add(bar);
@@ -746,7 +744,10 @@ public class BarRenderer {
 	public boolean updateBar(Bar bar) {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		Array<Bar> l = new Array<Bar>();
-		if (bar == null) {
+
+		if (MainLoader.getIllegalSongCount() > 0) {
+			l.addAll(SongBar.toSongBarArray(select.getSongDatabase().getSongDatas(MainLoader.getIllegalSongs())));
+		} else if (bar == null) {
 			if (dir.size > 0) {
 				prevbar = dir.first();
 			}

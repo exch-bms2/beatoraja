@@ -36,6 +36,10 @@ public class Config implements Validatable {
 	 */
 	private Resolution resolution = HD;
 
+	private boolean useResolution = true;
+	private int windowWidth = 1280;
+	private int windowHeight = 720;
+
 	/**
 	 * フォルダランプの有効/無効
 	 */
@@ -106,6 +110,8 @@ public class Config implements Validatable {
 	private int maxFramePerSecond = 240;
 	
 	private int prepareFramePerSecond = 10000;
+
+	private int maxSearchBarCount = 10;
 	/**
 	 * 選曲バー移動速度の最初
 	 */
@@ -319,6 +325,22 @@ public class Config implements Validatable {
 		this.resolution = resolution;
 	}
 
+	public int getWindowWidth() {
+		return windowWidth;
+	}
+
+	public void setWindowWidth(int width) {
+		this.windowWidth = width;
+	}
+
+	public int getWindowHeight() {
+		return windowHeight;
+	}
+
+	public void setWindowHeight(int height) {
+		this.windowHeight = height;
+	}
+
 	public boolean isShowhiddennote() {
 		return showhiddennote;
 	}
@@ -350,6 +372,14 @@ public class Config implements Validatable {
 	public void setSoundpath(String soundpath) {
 		this.soundpath = soundpath;
 	}
+
+	public int getMaxSearchBarCount() {
+	    return maxSearchBarCount;
+    }
+
+    public void setMaxSearchBarCount(int maxSearchBarCount) {
+	    this.maxSearchBarCount = maxSearchBarCount;
+    }
 
 	public int getScrollDurationLow(){
 		return scrolldurationlow;
@@ -591,6 +621,8 @@ public class Config implements Validatable {
 		if(resolution == null) {
 			resolution = Resolution.HD;
 		}
+		windowWidth = MathUtils.clamp(windowWidth, Resolution.SD.width, Resolution.ULTRAHD.width);
+		windowHeight = MathUtils.clamp(windowHeight, Resolution.SD.height, Resolution.ULTRAHD.height);
 		audioDriver = MathUtils.clamp(audioDriver, 0, 2);
 		audioDeviceBufferSize = MathUtils.clamp(audioDeviceBufferSize, 4, 4096);
 		audioDeviceSimultaneousSources = MathUtils.clamp(audioDeviceSimultaneousSources, 16, 1024);
@@ -601,6 +633,7 @@ public class Config implements Validatable {
 		bgvolume = MathUtils.clamp(bgvolume, 0f, 1f);
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
+        maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
 		irSendCount = MathUtils.clamp(irSendCount, 1, 100);
@@ -679,6 +712,14 @@ public class Config implements Validatable {
 
 	public void setIrSendCount(int irSendCount) {
 		this.irSendCount = irSendCount;
+	}
+
+	public boolean isUseResolution() {
+		return useResolution;
+	}
+
+	public void setUseResolution(boolean useResolution) {
+		this.useResolution = useResolution;
 	}
 
 	public enum DisplayMode {
