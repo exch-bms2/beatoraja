@@ -72,7 +72,12 @@ public class SongBar extends SelectableBar {
         return 0;
     }
 
-    protected static SongBar[] toSongBarArray(SongData[] songs) {
+    /**
+     * SongData配列をSongBar配列に変換する
+     * @param songs SongData配列
+     * @return SongBar配列
+     */
+    public static SongBar[] toSongBarArray(SongData[] songs) {
         // 重複除外
         int count = songs.length;
         for(int i = 0;i < songs.length;i++) {
