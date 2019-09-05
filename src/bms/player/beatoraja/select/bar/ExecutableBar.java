@@ -7,7 +7,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
-public class RandomSongBar extends SelectableBar {
+public class ExecutableBar extends SelectableBar {
 
 	private final static int QueueLength = 1000;
 	private SongData[] songs = null;
@@ -15,7 +15,7 @@ public class RandomSongBar extends SelectableBar {
 	private Queue<Integer> queue;
 	private SongData currentSong = null;
 
-	public RandomSongBar(SongData[] songs, MainState state) {
+	public ExecutableBar(SongData[] songs, MainState state) {
 		super();
 		this.songs = songs;
 		this.state = state;

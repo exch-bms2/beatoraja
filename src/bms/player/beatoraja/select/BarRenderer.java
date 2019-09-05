@@ -392,7 +392,7 @@ public class BarRenderer {
 					ba.value = 6;
 				} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
 					ba.value = 5;
-				} else if (sd instanceof RandomSongBar) {
+				} else if (sd instanceof ExecutableBar) {
 					ba.value = 2;
 				} else {
 					ba.value = -1;
@@ -815,7 +815,7 @@ public class BarRenderer {
 					.map(songBar -> ((SongBar)songBar).getSongData())
 					.toArray(SongData[]::new);
 	    	if(randomTargets.length > 0) {
-	    		Bar randomBar = new RandomSongBar(randomTargets, select.main.getCurrentState());
+	    		Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState());
 	        	bars.add(randomBar);
 	    	}
 	    	bars.addAll(Arrays.asList(newcurrentsongs));

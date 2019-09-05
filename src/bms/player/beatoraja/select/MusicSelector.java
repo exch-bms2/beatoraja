@@ -329,8 +329,8 @@ public class MusicSelector extends MainState {
 				} else {
 	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
 				}
-			} else if (current instanceof RandomSongBar) {
-				SongData song = ((RandomSongBar) current).getSongData();
+			} else if (current instanceof ExecutableBar) {
+				SongData song = ((ExecutableBar) current).getSongData();
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
