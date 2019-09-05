@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.config.KeyConfigurationSkin;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.play.*;
@@ -30,6 +31,11 @@ import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 import bms.player.beatoraja.skin.property.*;
 
+/**
+ * JSONスキンローダー
+ * 
+ * @author exch
+ */
 public class JSONSkinLoader extends SkinLoader {
 
 	private Resolution dstr;
@@ -137,6 +143,7 @@ public class JSONSkinLoader extends SkinLoader {
 					case PLAY_14KEYS:
 					case PLAY_24KEYS:
 					case PLAY_24KEYS_DOUBLE:
+					default:
 						offsetLengthAddition = 4;
 				}
 				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length + offsetLengthAddition];
@@ -152,6 +159,7 @@ public class JSONSkinLoader extends SkinLoader {
 					case PLAY_14KEYS:
 					case PLAY_24KEYS:
 					case PLAY_24KEYS_DOUBLE:
+					default:
 						offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false);
 
 						offsets[sk.offset.length + 1] = new SkinHeader.CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false);
@@ -275,23 +283,28 @@ public class JSONSkinLoader extends SkinLoader {
 				((PlaySkin) skin).setPlaystart(sk.playstart);
 				((PlaySkin) skin).setJudgetimer(sk.judgetimer);
 				((PlaySkin) skin).setFinishMargin(sk.finishmargin);
-			}
-			if (type == SkinType.MUSIC_SELECT) {
+			} else switch(type) {
+			case MUSIC_SELECT:
 				skin = new MusicSelectSkin(src, dstr);
-			}
-			if (type == SkinType.DECIDE) {
+				break;
+			case DECIDE:
 				skin = new MusicDecideSkin(src, dstr);
-			}
-			if (type == SkinType.RESULT) {
+				break;
+			case RESULT:
 				skin = new MusicResultSkin(src, dstr);
-			}
-			if (type == SkinType.COURSE_RESULT) {
+				break;
+			case COURSE_RESULT:
 				skin = new CourseResultSkin(src, dstr);
-			}
-			if (type == SkinType.SKIN_SELECT) {
+				break;
+			case SKIN_SELECT:
 				skin = new SkinConfigurationSkin(src, dstr);
+				break;
+			case KEY_CONFIG:
+			default:
+				skin = new KeyConfigurationSkin(src, dstr);
+				break;				
 			}
-
+			
 			IntIntMap op = new IntIntMap();
 			for (JsonSkin.Property pr : sk.property) {
 				int pop = 0;
@@ -773,11 +786,12 @@ public class JSONSkinLoader extends SkinLoader {
 										if(indexmap != null) {
 											for(int index : indexmap[i]) {
 												pgaugetex[index] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
+												gaugelength = pgaugetex[index].length;
 											}
 										} else {
 											pgaugetex[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
+											gaugelength = pgaugetex[i].length;
 										}
-										gaugelength = pgaugetex[i].length;
 									}
 									break;
 								}
