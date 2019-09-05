@@ -6,12 +6,7 @@ import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.*;
 
-import bms.model.Mode;
-import bms.model.BMSDecoder;
-import bms.model.BMSGenerator;
-import bms.model.BMSModel;
-import bms.model.BMSModelUtils;
-import bms.model.BMSONDecoder;
+import bms.model.*;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.audio.AudioDriver;
@@ -33,10 +28,6 @@ public class PlayerResource {
 	private BMSModel model;
 	
 	private long marginTime;
-	/**
-	 * 選曲中のBMSの生成器
-	 */
-	private BMSGenerator generator;
 	/**
 	 * 選択中のBMSの情報
 	 */
@@ -174,22 +165,26 @@ public class PlayerResource {
 	}
 
 	public BMSModel loadBMSModel(Path f, int lnmode) {
-		BMSModel model;
-		boolean bmson = false;
-		if (f.toString().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder(lnmode);
-			model = decoder.decode(f.toFile());
-			if (model == null) {
-				return null;
-			}
-			bmson = true;
-		} else {
-			BMSDecoder decoder = new BMSDecoder(lnmode);
-			model = decoder.decode(f.toFile());
-			if (model == null) {
-				return null;
-			}
-			generator = decoder.getBMSGenerator();
+		return loadBMSModel(new ChartInformation(f, lnmode, null));
+	}
+
+	public BMSModel loadBMSModel(int[] selectedRandom) {
+		if(model != null) {
+			ChartInformation info = model.getChartInformation();
+			return loadBMSModel(new ChartInformation(info.path, info.lntype, selectedRandom));			
+		}
+		return null;
+	}
+
+	public BMSModel loadBMSModel(ChartInformation info) {
+		ChartDecoder decoder = ChartDecoder.getDecoder(info.path);
+		if(decoder == null) {
+			return null;
+		}
+		boolean bmson = decoder instanceof BMSONDecoder;		
+		BMSModel model = decoder.decode(info);
+		if (model == null) {
+			return null;
 		}
 
 		marginTime = BMSModelUtils.setStartNoteTime(model, 1000);
@@ -415,10 +410,6 @@ public class PlayerResource {
 
 	public void setSongdata(SongData songdata) {
 		this.songdata = songdata;
-	}
-
-	public BMSGenerator getGenerator() {
-		return generator;
 	}
 
 	public BMSResource getBMSResource() {

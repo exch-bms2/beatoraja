@@ -140,12 +140,12 @@ public class BMSPlayer extends MainState {
 
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
-				model = resource.getGenerator().generate(replay.rand);
+				model = resource.loadBMSModel(replay.rand);
 				// 暫定処置
 				BMSModelUtils.setStartNoteTime(model, 1000);
 				BMSPlayerRule.validate(model, false);
 			} else if (resource.getReplayData().pattern != null) {
-				model = resource.getGenerator().generate(resource.getReplayData().rand);
+				model = resource.loadBMSModel(resource.getReplayData().rand);
 				// 暫定処置
 				BMSModelUtils.setStartNoteTime(model, 1000);
 				BMSPlayerRule.validate(model, false);
