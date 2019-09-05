@@ -7,14 +7,42 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
+/**
+ * Bar to resolve when selecting a song.
+ * TODO: ExecutableBar extends to make things happen
+ */
 public class ExecutableBar extends SelectableBar {
 
+	/**
+	 * index table size 
+	 */
 	private final static int QueueLength = 1000;
+	
+	/**
+	 * source songs
+	 */
 	private SongData[] songs = null;
+	
+	/**
+	 * current state pointer
+	 */
 	private MainState state;
+	
+	/**
+	 * Queue for get index to SongData array.
+	 */
 	private Queue<Integer> queue;
+	
+	/**
+	 * currentSong
+	 */
 	private SongData currentSong = null;
 
+	/**
+	 * Constructor
+	 * @param songs SongData array that is the source of SongData returned according to the conditions.
+	 * @param state MainState pointer.
+	 */
 	public ExecutableBar(SongData[] songs, MainState state) {
 		super();
 		this.songs = songs;
@@ -22,10 +50,17 @@ public class ExecutableBar extends SelectableBar {
 		createIndexQueue();
 	}
 
+	/**
+	 * @return SongData
+	 */
 	public SongData getSongData() {
 		return _getSongData();
 	}
 
+	/**
+	 * Return random SongData
+	 * @return SongData extracted from this.songs
+	 */
 	private synchronized SongData _getSongData() {
 		if (queue.size() == 0) {
 			createIndexQueue();
@@ -39,6 +74,9 @@ public class ExecutableBar extends SelectableBar {
 		return currentSong;
 	}
 
+	/**
+	 * Create random index Queue
+	 */
 	private void createIndexQueue() {
 		queue = new ArrayDeque<>();
 		for (int i = 0; i < QueueLength - 1; i++) {
