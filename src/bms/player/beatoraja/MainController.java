@@ -284,6 +284,10 @@ public class MainController extends ApplicationAdapter {
 			Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());
 		}
 	}
+	
+	public MainState getCurrentState() {
+		return current;
+	}
 
 	public void setPlayMode(PlayMode auto) {
 		this.auto = auto;
