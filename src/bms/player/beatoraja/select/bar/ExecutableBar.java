@@ -8,31 +8,31 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
 /**
- * Bar to resolve when selecting a song.
+ * Bar to resolve when selecting a song. 
  * TODO: ExecutableBar extends to make things happen
  */
 public class ExecutableBar extends SelectableBar {
 
 	/**
-	 * index table size 
+	 * index table size
 	 */
 	private final static int QueueLength = 1000;
-	
+
 	/**
 	 * source songs
 	 */
 	private SongData[] songs = null;
-	
+
 	/**
 	 * current state pointer
 	 */
 	private MainState state;
-	
+
 	/**
 	 * Queue for get index to SongData array.
 	 */
 	private Queue<Integer> queue;
-	
+
 	/**
 	 * currentSong
 	 */
@@ -40,6 +40,7 @@ public class ExecutableBar extends SelectableBar {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param songs SongData array that is the source of SongData returned according to the conditions.
 	 * @param state MainState pointer.
 	 */
@@ -59,6 +60,7 @@ public class ExecutableBar extends SelectableBar {
 
 	/**
 	 * Return random SongData
+	 * 
 	 * @return SongData extracted from this.songs
 	 */
 	private synchronized SongData _getSongData() {

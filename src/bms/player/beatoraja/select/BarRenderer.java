@@ -820,7 +820,7 @@ public class BarRenderer {
 				}
 			}
 
-	    	bars.addAll(Arrays.asList(newcurrentsongs));
+			bars.addAll(Arrays.asList(newcurrentsongs));
 
 			currentsongs = bars.toArray(new Bar[] {});
 			bartextupdate = true;
