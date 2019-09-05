@@ -39,27 +39,35 @@ public enum BMSPlayerRule {
         return Default;
     }
     
-    public static void validate(BMSModel model, boolean bmson) {
+    public static void validate(BMSModel model) {
     	BMSPlayerRule rule = getBMSPlayerRule(model.getMode());
-    	int judgerank = model.getJudgerank();
-		if (judgerank >= 0 && model.getJudgerank() < 5) {
-			model.setJudgerank(rule.judge.windowrule.judgerank[judgerank]);
-		} else if (model.getJudgerank() < 0) {
-			model.setJudgerank(100);
-		}
+    	final int judgerank = model.getJudgerank();
+    	switch(model.getJudgerankType()) {
+    	case BMS_RANK:
+			model.setJudgerank(judgerank >= 0 && model.getJudgerank() < 5 ? rule.judge.windowrule.judgerank[judgerank] : rule.judge.windowrule.judgerank[2]);
+    		break;
+    	case BMS_DEFEXRANK:
+			model.setJudgerank(judgerank > 0 ? judgerank * rule.judge.windowrule.judgerank[2] / 100 : rule.judge.windowrule.judgerank[2]);
+    		break;
+    	case BMSON_JUDGERANK:
+			model.setJudgerank(judgerank > 0 ? judgerank : 100);
+    		break;
+    	}
+    	model.setJudgerankType(BMSModel.JudgeRankType.BMSON_JUDGERANK);
 		
-		if(bmson) {
-			// TOTAL未定義の場合
-			if (model.getTotal() <= 0.0) {
-				model.setTotal(100.0);
-			}			
-			model.setTotal(model.getTotal() / 100.0 * calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
-		} else {
+    	switch(model.getTotalType()) {
+    	case BMS:
 			// TOTAL未定義の場合
 			if (model.getTotal() <= 0.0) {
 				model.setTotal(calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
 			}			
-		}
+    		break;
+    	case BMSON:
+    		final double total = calculateDefaultTotal(model.getMode(), model.getTotalNotes());
+			model.setTotal(model.getTotal() > 0 ? model.getTotal() / 100.0 * total : total);
+    		break;
+    	}
+    	model.setTotalType(BMSModel.TotalType.BMS);
     }
     
 	private static double calculateDefaultTotal(Mode mode, int totalnotes) {

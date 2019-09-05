@@ -181,14 +181,13 @@ public class PlayerResource {
 		if(decoder == null) {
 			return null;
 		}
-		boolean bmson = decoder instanceof BMSONDecoder;		
 		BMSModel model = decoder.decode(info);
 		if (model == null) {
 			return null;
 		}
 
 		marginTime = BMSModelUtils.setStartNoteTime(model, 1000);
-		BMSPlayerRule.validate(model, bmson);
+		BMSPlayerRule.validate(model);
 		return model;
 	}
 

@@ -143,12 +143,12 @@ public class BMSPlayer extends MainState {
 				model = resource.loadBMSModel(replay.rand);
 				// 暫定処置
 				BMSModelUtils.setStartNoteTime(model, 1000);
-				BMSPlayerRule.validate(model, false);
+				BMSPlayerRule.validate(model);
 			} else if (resource.getReplayData().pattern != null) {
 				model = resource.loadBMSModel(resource.getReplayData().rand);
 				// 暫定処置
 				BMSModelUtils.setStartNoteTime(model, 1000);
-				BMSPlayerRule.validate(model, false);
+				BMSPlayerRule.validate(model);
 			}
 			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
 		}
