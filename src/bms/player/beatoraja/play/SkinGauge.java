@@ -12,7 +12,6 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.graphics.Color;
 
@@ -184,6 +183,7 @@ public class SkinGauge extends SkinObject {
 		sprite.setColor(color);
 		sprite.setBlend(getBlend());
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
+		
 		switch(animationType) {
 		case ANIMATION_RANDOM:
 		case ANIMATION_INCLEASE:
@@ -209,7 +209,7 @@ public class SkinGauge extends SkinObject {
 					final Color orgColor = sprite.getColor();
 					flickerColor.set(orgColor.r, orgColor.g, orgColor.b, orgColor.a * (animation < duration / 2 ? animation / ((float) duration / 2 - 1) : ((duration - 1) - animation) / ((float) duration / 2 - 1)));
 					sprite.setColor(flickerColor);
-					System.out.println(animation + "  " + duration + "  " + flickerColor.toString());
+//					System.out.println(animation + "  " + duration + "  " + flickerColor.toString());
 					sprite.draw(
 							images[exgauge + 4 + (border < this.border ? 1 : 0)],
 							region.x + region.width * (i - 1) / parts, region.y, region.width / parts, region.height);
