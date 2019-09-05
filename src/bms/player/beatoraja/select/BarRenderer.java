@@ -810,14 +810,16 @@ public class BarRenderer {
 			Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
 			
 			List<Bar> bars = new ArrayList<Bar>();
-			SongData[] randomTargets = Stream.of(newcurrentsongs)
-					.filter(songBar -> songBar instanceof SongBar && ((SongBar)songBar).getSongData().getPath() != null)
-					.map(songBar -> ((SongBar)songBar).getSongData())
-					.toArray(SongData[]::new);
-	    	if(randomTargets.length > 0) {
-	    		Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState());
-	        	bars.add(randomBar);
-	    	}
+			if (select.main.getPlayerConfig().isRandomSelect()) {
+				SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
+						songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
+						.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
+				if (randomTargets.length > 0) {
+					Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState());
+					bars.add(randomBar);
+				}
+			}
+
 	    	bars.addAll(Arrays.asList(newcurrentsongs));
 
 			currentsongs = bars.toArray(new Bar[] {});
