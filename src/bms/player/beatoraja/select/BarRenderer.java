@@ -814,7 +814,7 @@ public class BarRenderer {
 				SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
 						songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
 						.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
-				if (randomTargets.length > 0) {
+				if (randomTargets.length >= 2) {
 					Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState());
 					bars.add(randomBar);
 				}

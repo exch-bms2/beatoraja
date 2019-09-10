@@ -27,11 +27,7 @@ import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.select.bar.Bar;
-import bms.player.beatoraja.select.bar.DirectoryBar;
-import bms.player.beatoraja.select.bar.GradeBar;
-import bms.player.beatoraja.select.bar.SelectableBar;
-import bms.player.beatoraja.select.bar.SongBar;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.song.SongData;
 
@@ -483,13 +479,17 @@ public class BooleanPropertyFactory {
 		case OPTION_GRADEBAR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof GradeBar : false));
+		case OPTION_RANDOMSELECTBAR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof ExecutableBar : false));
 		case OPTION_PLAYABLEBAR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> {
 						if(state instanceof MusicSelector) {
 							Bar selected = ((MusicSelector) state).getSelectedBar();
 							return ((selected instanceof SongBar) && ((SongBar)selected).getSongData().getPath() != null) ||
-									((selected instanceof GradeBar) && ((GradeBar)selected).existsAllSongs()); 
+									((selected instanceof GradeBar) && ((GradeBar)selected).existsAllSongs()) ||
+									(selected instanceof ExecutableBar);
 						}
 						return false;
 					});

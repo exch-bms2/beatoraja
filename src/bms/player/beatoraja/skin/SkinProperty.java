@@ -472,6 +472,7 @@ public class SkinProperty {
 	public static final int OPTION_GRADEBAR_LN = 1015;
 	public static final int OPTION_GRADEBAR_CN = 1016;
 	public static final int OPTION_GRADEBAR_HCN = 1017;
+	public static final int OPTION_RANDOMSELECTBAR = 1030;
 
 	public static final int OPTION_PLAYABLEBAR = 5;
 
