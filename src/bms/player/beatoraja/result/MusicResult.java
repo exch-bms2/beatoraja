@@ -392,6 +392,7 @@ public class MusicResult extends AbstractResult {
 				cscore.setOption(newscore.getOption());
 				resource.setCourseScoreData(cscore);
 			}
+			cscore.setPassnotes(cscore.getPassnotes() + newscore.getPassnotes());
 			cscore.setEpg(cscore.getEpg() + newscore.getEpg());
 			cscore.setLpg(cscore.getLpg() + newscore.getLpg());
 			cscore.setEgr(cscore.getEgr() + newscore.getEgr());
@@ -450,6 +451,8 @@ public class MusicResult extends AbstractResult {
 		if (resource.getPlayMode() == PlayMode.PLAY) {
 			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
+		} else {
+			Logger.getGlobal().info("プレイモードが" + resource.getPlayMode().name() + "のため、スコア登録はされません");
 		}
 
 	}

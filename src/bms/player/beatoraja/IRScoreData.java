@@ -73,6 +73,8 @@ public class IRScoreData implements Validatable {
 	
 	private int notes = 0;
 	
+	private int passnotes = 0;
+	
 	private int minbp = Integer.MAX_VALUE;
 	/**
 	 * 各譜面オプションのクリア履歴
@@ -434,8 +436,16 @@ public class IRScoreData implements Validatable {
 		return mode >= 0 && clear >= 0 && clear <= ClearType.Max.id &&
 				epg >= 0 && lpg >= 0 && egr >= 0 && lgr >= 0 && egd >= 0 && lgd >= 0 &&
 				ebd >= 0 && lbd >= 0 && epr >= 0 && lpr >= 0 && ems >= 0 && lms >= 0 &&
-				clearcount >= 0 && playcount >= clearcount && maxcombo >= 0 && notes > 0 && minbp >= 0 &&
+				clearcount >= 0 && playcount >= clearcount && maxcombo >= 0 && notes > 0 && passnotes >= 0 && passnotes <= notes &&minbp >= 0 &&
 				random >= 0 && option >= 0 && assist >= 0 && gauge >= 0;
+	}
+
+	public int getPassnotes() {
+		return passnotes;
+	}
+
+	public void setPassnotes(int passnotes) {
+		this.passnotes = passnotes;
 	}
 
 	public enum SongTrophy {

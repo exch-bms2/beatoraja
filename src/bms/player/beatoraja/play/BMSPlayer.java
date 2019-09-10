@@ -816,6 +816,7 @@ public class BMSPlayer extends MainState {
 		replay.doubleoption = config.getDoubleoption();
 		replay.config = replayConfig;
 
+		score.setPassnotes(notes);
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		return score;
