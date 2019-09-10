@@ -9,6 +9,7 @@ import java.util.Map;
 
 import bms.model.*;
 import bms.player.beatoraja.Validatable;
+import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.tool.mdprocessor.IpfsInformation;
 
 /**
@@ -63,7 +64,6 @@ public class SongData implements Validatable, IpfsInformation {
 	private String tag = "";
 	private String md5 = "";
 	private String sha256 = "";
-	private String banner = "";
 	private String url;
 	private String appendurl;
 	private String ipfs;
@@ -75,7 +75,13 @@ public class SongData implements Validatable, IpfsInformation {
 	private int feature;
 	private int difficulty;
 	private int judge;
+	/**
+	 * 最小BPM
+	 */
 	private int minbpm;
+	/**
+	 * 最大BPM
+	 */
 	private int maxbpm;
 	private int mainbpm;
 	/**
@@ -84,6 +90,7 @@ public class SongData implements Validatable, IpfsInformation {
 	private int length;
 	private int content;
 	private int notes;
+	
 	/**
 	 * STAGEFILE path
 	 */
@@ -92,6 +99,11 @@ public class SongData implements Validatable, IpfsInformation {
 	 * BACKBMP path
 	 */
 	private String backbmp = "";
+	/**
+	 * BANNER path
+	 */
+	private String banner = "";
+
 	/**
 	 * PREVIEW path
 	 */
@@ -121,6 +133,7 @@ public class SongData implements Validatable, IpfsInformation {
 			return;
 		}
 		this.model = model;
+		BMSPlayerRule.validate(model);
 		setTitle(model.getTitle());
 		setSubtitle(model.getSubTitle());
 		genre = model.getGenre();
