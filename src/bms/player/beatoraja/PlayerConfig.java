@@ -137,6 +137,11 @@ public class PlayerConfig {
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
+	
+	/**
+	 * Enable folder random select bar
+	 */
+	private boolean isRandomSelect = false;
 
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 	private SkinConfig[] skinHistory;
@@ -573,6 +578,14 @@ public class PlayerConfig {
 
 	public void setWindowHold(boolean isWindowHold) {
 		this.isWindowHold = isWindowHold;
+	}
+	
+	public boolean isRandomSelect() {
+		return isRandomSelect;
+	}
+	
+	public void setRandomSelect(boolean isRandomSelect) {
+		this.isRandomSelect = isRandomSelect;
 	}
 
 	public String getId() {

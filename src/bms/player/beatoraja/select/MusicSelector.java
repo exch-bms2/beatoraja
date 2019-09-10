@@ -329,7 +329,37 @@ public class MusicSelector extends MainState {
 				} else {
 	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
 				}
-			} else if (current instanceof GradeBar) {
+			} else if (current instanceof ExecutableBar) {
+				SongData song = ((ExecutableBar) current).getSongData();
+				resource.clear();
+				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
+					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
+					if(!(dir.last() instanceof SameFolderBar)) {
+						Array<String> urls = new Array(main.getConfig().getTableURL());
+
+						boolean isdtable = false;
+						for (DirectoryBar bar : dir) {
+							if (bar instanceof TableBar) {
+								String currenturl = ((TableBar) bar).getUrl();
+								if (currenturl != null && urls.contains(currenturl, false)) {
+									isdtable = true;
+									resource.setTablename(bar.getTitle());
+								}
+							}
+							if (bar instanceof HashBar && isdtable) {
+								resource.setTablelevel(bar.getTitle());
+								break;
+							}
+						}
+					}
+					preview.stop();
+					main.changeState(MainStateType.DECIDE);
+					banners.disposeOld();
+					stagefiles.disposeOld();
+				} else {
+					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
+				}
+			}else if (current instanceof GradeBar) {
 				if (play == PlayMode.PRACTICE) {
 					play = PlayMode.PLAY;
 				}

@@ -2,7 +2,11 @@ package bms.player.beatoraja.select;
 
 import java.io.BufferedInputStream;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
@@ -388,6 +392,8 @@ public class BarRenderer {
 					ba.value = 6;
 				} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
 					ba.value = 5;
+				} else if (sd instanceof ExecutableBar) {
+					ba.value = 2;
 				} else {
 					ba.value = -1;
 				}
@@ -802,8 +808,21 @@ public class BarRenderer {
 				}
 			}
 			Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
+			
+			List<Bar> bars = new ArrayList<Bar>();
+			if (select.main.getPlayerConfig().isRandomSelect()) {
+				SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
+						songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
+						.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
+				if (randomTargets.length > 0) {
+					Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState());
+					bars.add(randomBar);
+				}
+			}
 
-			currentsongs = newcurrentsongs;
+			bars.addAll(Arrays.asList(newcurrentsongs));
+
+			currentsongs = bars.toArray(new Bar[] {});
 			bartextupdate = true;
 
 			selectedindex = 0;
