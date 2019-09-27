@@ -63,25 +63,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		final float srch = src.height;
 		final float dstw = dst.width;
 		final float dsth = dst.height;
-
-		addCommandWord(new CommandWord("STARTINPUT") {
-			@Override
-			public void execute(String[] str) {
-				skin.setInput(Integer.parseInt(str[1]));
-			}
-		});
-		addCommandWord(new CommandWord("SCENETIME") {
-			@Override
-			public void execute(String[] str) {
-				skin.setScene(Integer.parseInt(str[1]));
-			}
-		});
-		addCommandWord(new CommandWord("FADEOUT") {
-			@Override
-			public void execute(String[] str) {
-				skin.setFadeout(Integer.parseInt(str[1]));
-			}
-		});
+		
+		addCommandWord(CSVCommand.values());
 
 		addCommandWord(new CommandWord("INCLUDE") {
 			@Override
@@ -245,14 +228,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				num = null;
 				int[] values = parseInt(str);
-				int divx = values[7];
-				if (divx <= 0) {
-					divx = 1;
-				}
-				int divy = values[8];
-				if (divy <= 0) {
-					divy = 1;
-				}
+				final int divx = values[7] > 0 ? values[7] : 1;
+				final int divy = values[8] > 0 ? values[8] : 1;
 
 				if (divx * divy >= 10) {
 					TextureRegion[] images = getSourceImage(values);
@@ -486,14 +463,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					if (h == -1) {
 						h = ((Texture) imagelist.get(gr)).getHeight();
 					}
-					int divx = values[7];
-					if (divx <= 0) {
-						divx = 1;
-					}
-					int divy = values[8];
-					if (divy <= 0) {
-						divy = 1;
-					}
+					final int divx = values[7] > 0 ? values[7] : 1;
+					final int divy = values[8] > 0 ? values[8] : 1;
 					TextureRegion[][] tr;
 					int length = values[15];
 					if (length <= 0) {
@@ -579,14 +550,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
 					int playside = values[1];
-					int divx = values[7];
-					if (divx <= 0) {
-						divx = 1;
-					}
-					int divy = values[8];
-					if (divy <= 0) {
-						divy = 1;
-					}
+					final int divx = values[7] > 0 ? values[7] : 1;
+					final int divy = values[8] > 0 ? values[8] : 1;
 					TextureRegion[][] gauge;
 					if(values[14] == 3 && divx * divy % 6 == 0) {
 						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、発光表赤、発光表緑の順にsrc分割
@@ -658,39 +623,59 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
 					int playside = values[1];
-					int divx = values[7];
-					if (divx <= 0) {
-						divx = 1;
-					}
-					int divy = values[8];
-					if (divy <= 0) {
-						divy = 1;
-					}
+					final int divx = values[7] > 0 ? values[7] : 1;
+					final int divy = values[8] > 0 ? values[8] : 1;
 					TextureRegion[][] gauge;
 					if(values[14] == 3 && divx * divy % 12 == 0) {
 						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑、発光表赤、発光表緑、発光EX表赤、発光EX表緑の順にsrc分割
-						gauge = new TextureRegion[(divx * divy) / 12][12];
+						gauge = new TextureRegion[(divx * divy) / 12][36];
 						final int w = values[5];
 						final int h = values[6];
 						for (int x = 0; x < divx; x++) {
 							for (int y = 0; y < divy; y++) {
 								if ((y * divx + x) / 12 < gauge.length) {
-										gauge[(y * divx + x) / 12][(y * divx + x) % 12] = new TextureRegion(
+										TextureRegion tr = new TextureRegion(
 												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
 												values[4] + h * y / divy, w / divx, h / divy);
+										
+										final int dx = (y * divx + x) / 12;
+										final int dy = (y * divx + x) % 12;
+										if(dy < 4) {
+											gauge[dx][dy] = gauge[dx][dy + 6] = gauge[dx][dy + 12] = gauge[dx][dy + 18] = tr;											
+										} else if(dy >= 4 && dy < 8){
+											gauge[dx][dy + 20] = gauge[dx][dy + 26] = tr;
+										} else if(dy == 8 || dy == 9) {
+											gauge[dx][dy - 4] = gauge[dx][dy + 2] = gauge[dx][dy + 8] = gauge[dx][dy + 14] = tr;
+										} else {
+											gauge[dx][dy + 18] = gauge[dx][dy + 24] = tr;											
+										}
 								}
 							}
 						}
 					} else {
-						gauge = new TextureRegion[(divx * divy) / 8][8];
+						gauge = new TextureRegion[(divx * divy) / 8][36];
 						final int w = values[5];
 						final int h = values[6];
 						for (int x = 0; x < divx; x++) {
 							for (int y = 0; y < divy; y++) {
 								if ((y * divx + x) / 8 < gauge.length) {
-									gauge[(y * divx + x) / 8][(y * divx + x) % 8] = new TextureRegion(
+									TextureRegion tr = new TextureRegion(
 											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
 											values[4] + h * y / divy, w / divx, h / divy);
+									
+									final int dx = (y * divx + x) / 8;
+									final int dy = (y * divx + x) % 8;
+									if(dy < 4) {
+										gauge[dx][dy] = gauge[dx][dy + 6] = gauge[dx][dy + 12] = gauge[dx][dy + 18] = tr;											
+										if(dy < 2) {
+											gauge[dx][dy + 4] = gauge[dx][dy + 10] = gauge[dx][dy + 16] = gauge[dx][dy + 22] = tr;
+										}
+									} else {
+										gauge[dx][dy + 20] = gauge[dx][dy + 26] = tr;
+										if(dy < 6) {
+											gauge[dx][dy + 24] = gauge[dx][dy + 30] = tr;											
+										}
+									}
 								}
 							}
 						}
@@ -987,7 +972,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return images;
 	}
 
-	public S loadSkin(Path f, MainState decide, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
+	public S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
 		ObjectMap m = new ObjectMap();
 		for(SkinConfig.Option op : property.getOption()) {
 			if(op.value != OPTION_RANDOM_VALUE) {
@@ -1038,11 +1023,18 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 		mode = header.getSkinType().getMode();
 
-		return loadSkin(f, decide, header, option, m);
+		return loadSkin(f, state, header, option, m);
 	}
 
-	public abstract S loadSkin(Path f, MainState decide, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
+	public abstract S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
 
+	/**
+	 * SkinTypeに対応したLR2SkinCSVLoaderを返す
+	 * @param type SkinType
+	 * @param src Skinの元解像度
+	 * @param c コンフィグ
+	 * @return 対応するLR2SkinCSVLoader。存在しない場合はnull
+	 */
 	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {
 		switch(type) {
 		case MUSIC_SELECT:
@@ -1066,8 +1058,26 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		}
 		return null;
 	}
+}
 
-
-
-
+enum CSVCommand implements LR2SkinLoader.Command<LR2SkinCSVLoader> {
+	STARTINPUT {
+		@Override
+		public void execute(LR2SkinCSVLoader loader, String[] str) {
+			loader.skin.setInput(Integer.parseInt(str[1]));
+		}
+	},
+	SCENETIME {
+		@Override
+		public void execute(LR2SkinCSVLoader loader, String[] str) {
+			loader.skin.setScene(Integer.parseInt(str[1]));
+		}
+	},
+	FADEOUT {
+		@Override
+		public void execute(LR2SkinCSVLoader loader, String[] str) {
+			loader.skin.setFadeout(Integer.parseInt(str[1]));
+		}
+	}
+	;
 }
