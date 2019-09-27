@@ -1,14 +1,13 @@
 package bms.player.beatoraja.result;
 
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.*;
+
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.IntArray;
 
 /**
  * ゲージ遷移描画オブジェクト
@@ -20,7 +19,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	/**
 	 * 背景テクスチャ
 	 */
-	private Texture backtex;
+	private TextureRegion backtex;
 	/**
 	 * グラフテクスチャ
 	 */
@@ -50,7 +49,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	 * ボーダー上グラフ色
 	 */
 	private final Color[] bordercolor = new Color[6];
-	
+
 	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
 
 	private int currentType = -1;
@@ -71,7 +70,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 			{Color.valueOf("cccccc"),Color.valueOf("444444")}
 			});
 	}
-	
+
 	public SkinGaugeGraphObject(Color[][] colors) {
 		for(int i = 0;i < 6;i++) {
 			if(colors.length > i) {
@@ -82,7 +81,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 			} else {
 				graphline[i] = graphcolor[i] = borderline[i] = bordercolor[i] = Color.valueOf("000000");
 			}
-		}		
+		}
 	}
 
 	public SkinGaugeGraphObject(String assistClearBGColor, String assistAndEasyFailBGColor, String grooveFailBGColor, String grooveClearAndHardBGColor, String exHardBGColor, String hazardBGColor,
@@ -100,14 +99,14 @@ public class SkinGaugeGraphObject extends SkinObject {
 		borderline[3] = Color.valueOf(grooveClearAndHardLineColor);
 		borderline[4] = Color.valueOf(exHardLineColor);
 		borderline[5] = Color.valueOf(hazardLineColor);
-		
+
 		for(int i = 0;i < 3;i++) {
 			borderline[i] = Color.valueOf(borderlineColor);
-			bordercolor[i] = Color.valueOf(borderColor);			
+			bordercolor[i] = Color.valueOf(borderColor);
 		}
 		for(int i = 3;i < 6;i++) {
 			graphline[i] = borderline[i];
-			graphcolor[i] = bordercolor[i];			
+			graphcolor[i] = bordercolor[i];
 		}
 	}
 
@@ -145,7 +144,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 				// shape.setColor(Color.BLACK);
 				// shape.fill();
 			} else {
-				backtex.dispose();
+				backtex.getTexture().dispose();
 				backtex = null;
 				shapetex.getTexture().dispose();
 				shapetex = null;
@@ -163,8 +162,8 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shape.setColor(bordercolor[color]);
 			shape.fillRectangle(0, (int) (region.height * border / max), (int) (region.width),
 					(int) (region.height * (max - border) / max));
-			
-			backtex = new Texture(shape);
+
+			backtex = new TextureRegion(new Texture(shape));
 			shape.dispose();
 
 			shape = new Pixmap((int) region.width, (int) region.height, Pixmap.Format.RGBA8888);
@@ -215,10 +214,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shape.dispose();
 		}
 
-		sprite.draw(backtex, region.x, region.y + region.height, region.width, -region.height);
+		draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
 		// setRegionにfloatを渡すと表示がおかしくなる
 		shapetex.setRegion(0, 0, (int)(region.width * render), (int)region.height);
-		sprite.draw(shapetex, region.x, region.y + region.height, (int)(region.width * render), -region.height);
+		draw(sprite, shapetex, region.x, region.y + region.height, (int)(region.width * render), -region.height);
 	}
 
 	public int getDelay() {
@@ -244,8 +243,8 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shapetex = null;
 		}
 		if (backtex != null) {
-			backtex.dispose();
+			backtex.getTexture().dispose();
 			backtex = null;
 		}
-	}	
+	}
 }
