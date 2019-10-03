@@ -45,36 +45,39 @@ public class ScoreDataImporter {
                     sd.setEpr((int) score.get("poor"));
                     sd.setMinbp((int) score.get("minbp"));
                     sd.setClear(clears[(int) score.get("clear")]);
-                    IRScoreData oldsd = scoredb.getScoreData(sd.getSha256(), 0);
-                    if(oldsd == null) {
-                        oldsd = new IRScoreData();
-                        oldsd.setPlaycount((int) score.get("playcount"));
-                        oldsd.setClearcount((int) score.get("clearcount"));
-                    }
-                    oldsd.setSha256(song[0].getSha256());
-                    oldsd.setNotes(song[0].getNotes());
-                    oldsd.setScorehash("LR2");
-                    if (oldsd.update(sd)) {
-                        result.add(oldsd);
-                    }
+                    sd.setPlaycount((int) score.get("playcount"));
+                    sd.setClearcount((int) score.get("clearcount"));
+                    sd.setSha256(song[0].getSha256());
+                    sd.setNotes(song[0].getNotes());
+                    result.add(sd);
                 }
             }
-            scoredb.setScoreData(result.toArray(new IRScoreData[result.size()]));
+            
+            this.importScores(result.toArray(new IRScoreData[result.size()]), "LR2");
         } catch (Exception e) {
             Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
         }
     }
 
-    private void update(IRScoreData[] scores) {
+    public void importScores(IRScoreData[] scores, String scorehash) {
         List<IRScoreData> result = new ArrayList<IRScoreData>();
 
-        for(IRScoreData sd : scores) {
-            IRScoreData oldsd = scoredb.getScoreData(sd.getSha256(), 0);
-            sd.setScorehash("LR2");
-            if (oldsd == null || oldsd.getClear() <= sd.getClear()) {
-                result.add(sd);
+        for(IRScoreData score : scores) {
+            IRScoreData oldsd = scoredb.getScoreData(score.getSha256(), 0);
+            if(oldsd == null) {
+                oldsd = new IRScoreData();
+                oldsd.setPlaycount(score.getPlaycount());
+                oldsd.setClearcount(score.getClearcount());
+                oldsd.setSha256(score.getSha256());
+                oldsd.setNotes(score.getNotes());
+            }
+            oldsd.setScorehash(scorehash);
+            if (oldsd.update(score)) {
+                result.add(oldsd);
             }
         }
-
+        
+        scoredb.setScoreData(result.toArray(new IRScoreData[result.size()]));
+		Logger.getGlobal().info("スコアインポート完了 - インポート数 : " + result.size());
     }
 }

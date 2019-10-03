@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.nio.file.DirectoryStream;
+import java.io.File;
 import java.nio.file.*;
 import java.util.logging.Logger;
 
@@ -13,8 +14,8 @@ import com.badlogic.gdx.utils.ObjectMap.Keys;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.ScoreDatabaseAccessor;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
+import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.IRResponse;
@@ -114,9 +115,27 @@ public class MusicSelector extends MainState {
 		};
 
 		if(main.getIRStatus().length > 0) {
+			if(main.getIRStatus()[0].config.isImportscore()) {
+				main.getIRStatus()[0].config.setImportscore(false);
+				try {
+					IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(null, null);
+					if(scores.isSucceeded()) {
+						ScoreDataImporter scoreimport = new ScoreDataImporter(new ScoreDatabaseAccessor(main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + File.separatorChar + "score.db"));
+						scoreimport.importScores(scores.getData(), main.getIRStatus()[0].config.getIrname());
+
+						Logger.getGlobal().info("IRからのスコアインポート完了");
+					} else {
+						Logger.getGlobal().warning("IRからのスコアインポート失敗 : " + scores.getMessage());
+					}					
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+			
 			IRResponse<PlayerInformation[]> response = main.getIRStatus()[0].connection.getRivals();
 			if(response.isSucceeded()) {
 				try {
+					
 					// ライバルスコアデータベース作成
 					// TODO 別のクラスに移動
 					if(!Files.exists(Paths.get("rival"))) {
