@@ -431,6 +431,48 @@ public class IRScoreData implements Validatable {
 		}
 	}
 
+	/**
+	 * 指定したスコアデータを元に更新する
+	 * @param newscore スコアデータ
+	 * @return スコアデータが更新された場合はtrue
+	 */
+	public boolean update(IRScoreData newscore) {
+		boolean update = false;
+		if (clear < newscore.getClear()) {
+			setClear(newscore.getClear());
+			setOption(newscore.getOption());
+			update = true;
+		}
+		if (getExscore() < newscore.getExscore()) {
+			setEpg(newscore.getEpg());
+			setLpg(newscore.getLpg());
+			setEgr(newscore.getEgr());
+			setLgr(newscore.getLgr());
+			setEgd(newscore.getEgd());
+			setLgd(newscore.getLgd());
+			setEbd(newscore.getEbd());
+			setLbd(newscore.getLbd());
+			setEpr(newscore.getEpr());
+			setLpr(newscore.getLpr());
+			setEms(newscore.getEms());
+			setLms(newscore.getLms());
+			setOption(newscore.getOption());
+			setGhost(newscore.getGhost());
+			update = true;
+		}
+		if (getMinbp() > newscore.getMinbp()) {
+			setMinbp(newscore.getMinbp());
+			setOption(newscore.getOption());
+			update = true;
+		}
+		if (getCombo() < newscore.getCombo()) {
+			setCombo(newscore.getCombo());
+			setOption(newscore.getOption());
+			update = true;
+		}
+		return update;
+	}
+
 	@Override
 	public boolean validate() {
 		return mode >= 0 && clear >= 0 && clear <= ClearType.Max.id &&
