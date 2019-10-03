@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.external.ScoreDataImporter;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -765,7 +766,6 @@ public class PlayConfigurationView implements Initializable {
 			return;
 		}
 
-		final int[] clears = { 0, 1, 4, 5, 6, 8, 9 };
 		try {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
@@ -774,39 +774,9 @@ public class PlayConfigurationView implements Initializable {
 			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + "/" + player + "/score.db");
 			scoredb.createTable();
 
-			try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + dir.getPath())) {
-				QueryRunner qr = new QueryRunner();
-				MapListHandler rh = new MapListHandler();
-				List<Map<String, Object>> scores = qr.query(con, "SELECT * FROM score", rh);
+			ScoreDataImporter scoreimporter = new ScoreDataImporter(scoredb);
+			scoreimporter.importFromLR2ScoreDatabase(dir.getPath(), songdb);
 
-				List<IRScoreData> result = new ArrayList<IRScoreData>();
-				for (Map<String, Object> score : scores) {
-					final String md5 = (String) score.get("hash");
-					SongData[] song = songdb.getSongDatas(new String[] { md5 });
-					if (song.length > 0) {
-						IRScoreData sd = new IRScoreData();
-						sd.setEpg((int) score.get("perfect"));
-						sd.setEgr((int) score.get("great"));
-						sd.setEgd((int) score.get("good"));
-						sd.setEbd((int) score.get("bad"));
-						sd.setEpr((int) score.get("poor"));
-						sd.setMinbp((int) score.get("minbp"));
-						sd.setClear(clears[(int) score.get("clear")]);
-						sd.setPlaycount((int) score.get("playcount"));
-						sd.setClearcount((int) score.get("clearcount"));
-						sd.setNotes(song[0].getNotes());
-						sd.setSha256(song[0].getSha256());
-						IRScoreData oldsd = scoredb.getScoreData(sd.getSha256(), 0);
-						sd.setScorehash("LR2");
-						if (oldsd == null || oldsd.getClear() <= sd.getClear()) {
-							result.add(sd);
-						}
-					}
-				}
-				scoredb.setScoreData(result.toArray(new IRScoreData[result.size()]));
-			} catch (Exception e) {
-				Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
-			}
 		} catch (ClassNotFoundException e1) {
 		}
 
