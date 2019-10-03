@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.StringBuilder;
 
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.MessageRenderer.Message;
+import bms.player.beatoraja.PlayerConfig.IRConfig;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -179,7 +180,7 @@ public class MainController extends ApplicationAdapter {
 			}
 			
 			if(ir != null) {
-				irarray.add(new IRStatus(irconfig.getIrname(), irconfig.getIrsend(), ir));
+				irarray.add(new IRStatus(irconfig, ir));
 			}
 		}
 		ir = irarray.toArray(IRStatus.class);
@@ -865,13 +866,11 @@ public class MainController extends ApplicationAdapter {
 
 	public static class IRStatus {
 		
-		public final String name;
-		public final int send;
+		public final IRConfig config;
 		public final IRConnection connection;
 		
-		public IRStatus(String name, int send, IRConnection connection) {
-			this.name = name;
-			this.send = send;
+		public IRStatus(IRConfig config, IRConnection connection) {
+			this.config = config;
 			this.connection = connection;
 		}
 	}

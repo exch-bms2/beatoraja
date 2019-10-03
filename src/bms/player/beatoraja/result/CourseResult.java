@@ -101,7 +101,7 @@ public class CourseResult extends AbstractResult {
 			
         	for(IRStatus irc : ir) {
     			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
-    			switch(irc.send) {
+    			switch(irc.config.getIrsend()) {
     			case PlayerConfig.IR_SEND_ALWAYS:
     				break;
     			case PlayerConfig.IR_SEND_COMPLETE_SONG:

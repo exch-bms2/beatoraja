@@ -92,7 +92,7 @@ public class MusicResult extends AbstractResult {
 			
         	for(IRStatus irc : ir) {
     			boolean send = resource.isUpdateScore();
-    			switch(irc.send) {
+    			switch(irc.config.getIrsend()) {
     			case PlayerConfig.IR_SEND_ALWAYS:
     				break;
     			case PlayerConfig.IR_SEND_COMPLETE_SONG:
