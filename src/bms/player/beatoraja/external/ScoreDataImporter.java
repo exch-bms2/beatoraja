@@ -63,12 +63,13 @@ public class ScoreDataImporter {
         List<IRScoreData> result = new ArrayList<IRScoreData>();
 
         for(IRScoreData score : scores) {
-            IRScoreData oldsd = scoredb.getScoreData(score.getSha256(), 0);
+            IRScoreData oldsd = scoredb.getScoreData(score.getSha256(), score.getMode());
             if(oldsd == null) {
                 oldsd = new IRScoreData();
                 oldsd.setPlaycount(score.getPlaycount());
                 oldsd.setClearcount(score.getClearcount());
                 oldsd.setSha256(score.getSha256());
+                oldsd.setMode(score.getMode());
                 oldsd.setNotes(score.getNotes());
             }
             oldsd.setScorehash(scorehash);
