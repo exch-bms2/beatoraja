@@ -57,4 +57,16 @@
 		</Label>
 		<ComboBox fx:id="irsend" prefHeight="24.0" prefWidth="200.0" />
 	</HBox>
+	<HBox prefHeight="15.0" prefWidth="740.0">
+		<VBox.margin>
+			<Insets top="30.0" />
+		</VBox.margin>
+		<CheckBox fx:id="importrival" prefHeight="24.0" prefWidth="200.0" text="%IR_IMPORT_RIVAL"/>
+	</HBox>
+	<HBox prefHeight="15.0" prefWidth="740.0">
+		<VBox.margin>
+			<Insets top="30.0" />
+		</VBox.margin>
+		<CheckBox fx:id="importscore" prefHeight="24.0" prefWidth="200.0" text="%IR_IMPORT_SCORE"/>
+	</HBox>
 </VBox>

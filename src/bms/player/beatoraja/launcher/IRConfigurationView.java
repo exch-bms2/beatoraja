@@ -13,6 +13,7 @@ import bms.player.beatoraja.launcher.PlayConfigurationView.OptionListCell;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
@@ -32,6 +33,10 @@ public class IRConfigurationView implements Initializable {
 	private PasswordField irpassword;
 	@FXML
 	private ComboBox<Integer> irsend;
+	@FXML
+	private CheckBox importrival;
+	@FXML
+	private CheckBox importscore;
 	
 	private Map<String, IRConfig> irmap = new HashMap<String, IRConfig>();
 	
@@ -104,6 +109,8 @@ public class IRConfigurationView implements Initializable {
 			currentir.setUserid(iruserid.getText());
 			currentir.setPassword(irpassword.getText());
 			currentir.setIrsend(irsend.getValue());
+			currentir.setImportscore(importscore.isSelected());
+			currentir.setImportrival(importrival.isSelected());
 		}
 		
     	String homeurl = IRConnectionManager.getHomeURL(irname.getValue());
@@ -128,6 +135,8 @@ public class IRConfigurationView implements Initializable {
 		iruserid.setText(currentir.getUserid());
 		irpassword.setText(currentir.getPassword());
 		irsend.setValue(currentir.getIrsend());
+		importscore.setSelected(currentir.isImportscore());
+		importrival.setSelected(currentir.isImportrival());
 
 		primarybutton.setVisible(!(primary != null && irname.getValue().equals(primary)));
 	}
