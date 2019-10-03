@@ -143,8 +143,47 @@ public class MusicSelector extends MainState {
 					}
 
 					// ライバルキャッシュ作成
+					if(main.getIRStatus()[0].config.isImportrival()) {
+						for(PlayerInformation rival : response.getData()) {
+							final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + main.getIRStatus()[0].config.getIrname() + rival.getId() + ".db");
+							rivalcaches.put(rival,  new ScoreDataCache() {
+
+								@Override
+								protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
+									return scoredb.getScoreData(song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
+								}
+
+								protected void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode) {
+									scoredb.getScoreDatas(collector,songs, lnmode);
+								}
+							});
+							new Thread(() -> {
+								scoredb.createTable();
+								scoredb.setInformation(rival);
+								IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
+								if(scores.isSucceeded()) {
+									scoredb.setScoreData(scores.getData());
+									Logger.getGlobal().info("IRからのライバルスコア取得完了 : " + rival.getName());
+								} else {
+									Logger.getGlobal().warning("IRからのライバルスコア取得失敗 : " + scores.getMessage());
+								}
+							}).start();
+						}						
+					}
+					
 					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
 						for (Path p : paths) {
+							boolean exists = false;
+							for(PlayerInformation info : rivalcaches.keys()) {
+								if(p.getFileName().toString().equals(main.getIRStatus()[0].config.getIrname() + info.getId() + ".db")) {
+									exists = true;
+									break;
+								}
+							}
+							if(exists) {
+								continue;
+							}
+							
 							if(p.toString().endsWith(".db")) {
 								final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(p.toString());
 								PlayerInformation info = scoredb.getInformation();
@@ -160,37 +199,12 @@ public class MusicSelector extends MainState {
 											scoredb.getScoreDatas(collector,songs, lnmode);
 										}
 									});
+									Logger.getGlobal().info("ローカルに保存されているライバルスコア取得完了 : " + info.getName());
 								}
 							}
 						}
 					} catch (Throwable e) {
 						e.printStackTrace();
-					}
-
-					for(PlayerInformation rival : response.getData()) {
-						final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + config.getIrname() + rival.getId() + ".db");
-						rivalcaches.put(rival,  new ScoreDataCache() {
-
-							@Override
-							protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
-								return scoredb.getScoreData(song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
-							}
-
-							protected void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode) {
-								scoredb.getScoreDatas(collector,songs, lnmode);
-							}
-						});
-						new Thread(() -> {
-							scoredb.createTable();
-							scoredb.setInformation(rival);
-							IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
-							if(scores.isSucceeded()) {
-								scoredb.setScoreData(scores.getData());
-								Logger.getGlobal().info("IRからのスコア取得完了 : " + rival.getName());
-							} else {
-								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());
-							}
-						}).start();
 					}
 
 				} catch (Throwable e) {

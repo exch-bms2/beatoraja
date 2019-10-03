@@ -823,6 +823,8 @@ public class PlayerConfig {
 		
 		private boolean importscore = false;
 		
+		private boolean importrival = true;
+		
 		private static final String KEY = "0123456789abcdef";
 
 		public static final int IR_SEND_ALWAYS = 0;
@@ -889,6 +891,14 @@ public class PlayerConfig {
 
 		public void setImportscore(boolean importscore) {
 			this.importscore = importscore;
+		}
+
+		public boolean isImportrival() {
+			return importrival;
+		}
+
+		public void setImportrival(boolean importrival) {
+			this.importrival = importrival;
 		}
 
 		public boolean validate() {
