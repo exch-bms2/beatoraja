@@ -251,7 +251,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 			String name = model.getWavList()[wavid];
 			try {
-				Path p = dpath.resolve(name);
+				Path p = dpath.resolve(name).toAbsolutePath();
 				for (Note note : waventry.getValue()) {
 					// 音切りあり・なし両方のデータが必要になるケースがある
 					if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
