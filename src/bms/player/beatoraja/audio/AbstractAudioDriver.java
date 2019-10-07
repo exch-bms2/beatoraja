@@ -34,6 +34,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * キー音マップ(音切りあり)
 	 */
 	private SliceWav<T>[][] slicesound = new SliceWav[0][0];
+	
+	private T[][] additionalKeySounds = (T[][]) new Object[6][2];
 	/**
 	 * キー音読み込み進捗状況
 	 */
@@ -141,8 +143,15 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	protected abstract void stop(T id, int channel);
 
 	public void play(String p, float volume, boolean loop) {
+		final AudioElement<T> sound = getSound(p);
+		if (sound != null) {
+			play(sound, volume, loop);
+		}
+	}
+	
+	private AudioElement<T> getSound(String p) {
 		if (p == null || p.length() == 0) {
-			return;
+			return null;
 		}
 		AudioElement<T> sound = soundmap.get(p);
 		if (!soundmap.containsKey(p)) {
@@ -153,11 +162,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			} catch (Exception e) {
 				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
 			}
-		}
-
-		if (sound != null) {
-			play(sound, volume, loop);
-		}
+		}		
+		return sound;
 	}
 
 	public void setVolume(String p, float volume) {
@@ -303,6 +309,15 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		progress.set(noteMapSize);
 	}
+	
+	public void setAdditionalKeySound(int judge, boolean fast, String p) {
+		if(judge < 0 || judge >= additionalKeySounds.length) {
+			return;
+		}
+		
+		final AudioElement<T> sound = getSound(p);
+		additionalKeySounds[judge][fast ? 0 : 1] = sound != null ? sound.audio : null;		
+	}
 
 	private void addNoteList(IntMap<List<Note>> notemap, Note n) {
 		if (n.getWav() < 0) {
@@ -333,6 +348,20 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 	}
 
+	public void play(int judge, boolean fast) {
+		if(judge < 0 || judge >= additionalKeySounds.length) {
+			return;
+		}
+
+		final T sound = additionalKeySounds[judge][fast ? 0 : 1];
+		if (sound != null) {
+			final int channel = (65536 + judge) * 256;
+			stop(sound, channel);
+			play(sound, channel, volume, 1.0f);
+		}
+
+	}
+	
 	private int channel(int id, int pitch) {
 		return id * 256 + pitch + 128;
 	}

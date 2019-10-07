@@ -55,6 +55,8 @@ public interface AudioDriver extends Disposable {
 	 *            BMSモデル
 	 */
 	public void setModel(BMSModel model);
+	
+	public void setAdditionalKeySound(int judge, boolean fast, String path);
 
 	/**
 	 * BMSの音源データ読み込みを中止する
@@ -80,6 +82,7 @@ public interface AudioDriver extends Disposable {
 	 */
 	public void play(Note n, float volume, int pitch);
 
+	public void play(int judge, boolean fast);
 	/**
 	 * 指定したNoteの音を止める。nullの場合は再生されている音を全て止める
 	 * 
