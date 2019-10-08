@@ -340,9 +340,13 @@ public class BMSPlayer extends MainState {
 
 		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
 		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
-		setSound(SOUND_GUIDE_SE_PG, "guide-pg.wav", SoundType.SOUND, false);
-		setSound(SOUND_GUIDE_SE_GR, "guide-gr.wav", SoundType.SOUND, false);
-		setSound(SOUND_GUIDE_SE_GD, "guide-gd.wav", SoundType.SOUND, false);
+
+		main.getAudioProcessor().setAdditionalKeySound(0, true, config.isGuideSE() ? "defaultsound/guide-pg.wav" : null);
+		main.getAudioProcessor().setAdditionalKeySound(0, false, config.isGuideSE() ? "defaultsound/guide-pg.wav" : null);
+		main.getAudioProcessor().setAdditionalKeySound(1, true, config.isGuideSE() ? "defaultsound/guide-gr.wav" : null);
+		main.getAudioProcessor().setAdditionalKeySound(1, false, config.isGuideSE() ? "defaultsound/guide-gr.wav" : null);
+		main.getAudioProcessor().setAdditionalKeySound(2, true, config.isGuideSE() ? "defaultsound/guide-gd.wav" : null);
+		main.getAudioProcessor().setAdditionalKeySound(2, false, config.isGuideSE() ? "defaultsound/guide-gd.wav" : null);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
