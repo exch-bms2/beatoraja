@@ -41,25 +41,18 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		}
 	}
 
-	static final String[] exts = { ".wav", ".ogg", ".mp3", ".flac" };
-
 	@Override
 	protected Sound getKeySound(Path p) {
-		String path = p.toString();
-		final int index = path.lastIndexOf('.');
-		final String name = path.substring(0, index < 0 ? path.length() : index);
-		final String ext = index < 0 ? "" : path.substring(index, path.length());
-		if (p.toFile().exists()) {
-			return getKeySound(name, ext);
-		}
-
-		for (String _ext : exts) {
-			if (!_ext.equals(ext) && p.resolve(name + _ext).toFile().exists()) {
-				return getKeySound(name, _ext);
+		for(Path path : AudioDriver.getPaths(p.toString())) {
+			final String filename = path.toString();
+			final String name = filename.substring(0, filename.lastIndexOf('.'));
+			final String ext = filename.substring(filename.lastIndexOf('.'));
+			final Sound sound = getKeySound(name, ext);
+			if(sound != null) {
+				return sound;
 			}
 		}
-
-		return null;
+		return null;		
 	}
 
 	private Sound getKeySound(String name, String ext) {

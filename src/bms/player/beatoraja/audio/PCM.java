@@ -97,37 +97,11 @@ public abstract class PCM<T> {
 	}
 	
 	public static PCM load(String name, AudioDriver driver) {
-		int index = name.lastIndexOf('.');
-		if(index >= 0) {
-			name = name.substring(0, index);			
-		}
-		final Path wavfile = Paths.get(name + ".wav");
-		if (Files.exists(wavfile)) {
-			PCM pcm = PCM.load(wavfile,driver);
+		for(Path path : AudioDriver.getPaths(name)) {
+			PCM pcm = PCM.load(path,driver);
 			if(pcm != null) {
 				return pcm;
-			}
-		}
-		final Path flacfile = Paths.get(name + ".flac");
-		if (Files.exists(flacfile)) {
-			PCM pcm = PCM.load(flacfile,driver);
-			if(pcm != null) {
-				return pcm;
-			}
-		}
-		final Path oggfile = Paths.get(name + ".ogg");
-		if (Files.exists(oggfile)) {
-			PCM pcm = PCM.load(oggfile,driver);
-			if(pcm != null) {
-				return pcm;
-			}
-		}
-		final Path mp3file = Paths.get(name + ".mp3");
-		if (Files.exists(mp3file)) {
-			PCM pcm = PCM.load(mp3file,driver);
-			if(pcm != null) {
-				return pcm;
-			}
+			}			
 		}
 		return null;
 	}
