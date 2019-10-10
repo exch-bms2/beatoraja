@@ -3,6 +3,7 @@ package bms.player.beatoraja.play;
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -74,9 +75,6 @@ public class BMSPlayer extends MainState {
 
 	public static final int SOUND_READY = 0;
 	public static final int SOUND_PLAYSTOP = 1;
-	public static final int SOUND_GUIDE_SE_PG = 10;
-	public static final int SOUND_GUIDE_SE_GR = 11;
-	public static final int SOUND_GUIDE_SE_GD = 12;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -341,12 +339,19 @@ public class BMSPlayer extends MainState {
 		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
 		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
 
-		main.getAudioProcessor().setAdditionalKeySound(0, true, config.isGuideSE() ? "defaultsound/guide-pg.wav" : null);
-		main.getAudioProcessor().setAdditionalKeySound(0, false, config.isGuideSE() ? "defaultsound/guide-pg.wav" : null);
-		main.getAudioProcessor().setAdditionalKeySound(1, true, config.isGuideSE() ? "defaultsound/guide-gr.wav" : null);
-		main.getAudioProcessor().setAdditionalKeySound(1, false, config.isGuideSE() ? "defaultsound/guide-gr.wav" : null);
-		main.getAudioProcessor().setAdditionalKeySound(2, true, config.isGuideSE() ? "defaultsound/guide-gd.wav" : null);
-		main.getAudioProcessor().setAdditionalKeySound(2, false, config.isGuideSE() ? "defaultsound/guide-gd.wav" : null);
+		final String[] guideses = {"guide-pg.wav","guide-gr.wav","guide-gd.wav","guide-bd.wav","guide-pr.wav","guide-ms.wav"};
+		for(int i = 0;i < 6;i++) {
+			if(config.isGuideSE()) {
+				Path[] paths = getSoundPaths(guideses[i], SoundType.SOUND);
+				if(paths.length > 0) {
+					main.getAudioProcessor().setAdditionalKeySound(i, true, paths[0].toString());
+					main.getAudioProcessor().setAdditionalKeySound(i, false, paths[0].toString());
+				}				
+			} else {
+				main.getAudioProcessor().setAdditionalKeySound(i, true, null);
+				main.getAudioProcessor().setAdditionalKeySound(i, false, null);								
+			}
+		}
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
