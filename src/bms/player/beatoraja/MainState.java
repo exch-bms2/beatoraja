@@ -1,16 +1,15 @@
 package bms.player.beatoraja;
 
-import java.io.File;
 import java.nio.file.Path;
 
 import bms.player.beatoraja.SkinConfig.Offset;
-import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
-import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -31,10 +30,10 @@ public abstract class MainState {
 
 	private Stage stage;
 
-	private IntMap<String> soundmap = new IntMap<String>();
-	private IntMap<Boolean> soundloop = new IntMap<Boolean>();
+	private final IntMap<String> soundmap = new IntMap<String>();
+	private final IntMap<Boolean> soundloop = new IntMap<Boolean>();
 
-	private ScoreDataProperty score = new ScoreDataProperty();
+	private final ScoreDataProperty score = new ScoreDataProperty();
 
 	public MainState(MainController main) {
 		this.main = main;
@@ -157,6 +156,40 @@ public abstract class MainState {
 	}
 
 	public void setSound(int id, String path, SoundType type, boolean loop) {
+		for(Path p :getSoundPaths(path, type)) {
+			String newpath = p.toString();
+			String oldpath = soundmap.get(id);
+			if (newpath.equals(oldpath)) {
+				return;
+			}
+			if (oldpath != null) {
+				main.getAudioProcessor().dispose(oldpath);
+			}
+			soundmap.put(id, newpath);
+			soundloop.put(id, loop);
+			return;
+		}
+	}
+	
+	public boolean setSoundFile(int id, String path, SoundType type, boolean loop) {		
+		for(Path p : AudioDriver.getPaths(path)) {
+			String newpath = p.toString();
+			String oldpath = soundmap.get(id);
+			if (newpath.equals(oldpath)) {
+				return true;
+			}
+			if (oldpath != null) {
+				main.getAudioProcessor().dispose(oldpath);
+			}
+			soundmap.put(id, newpath);
+			soundloop.put(id, loop);
+			return true;
+			
+		}
+		return false;
+	}
+	
+	public Path[] getSoundPaths(String filename, SoundType type) {
 		Path p = null;
 		switch (type) {
 		case BGM:
@@ -166,37 +199,13 @@ public abstract class MainState {
 			p = main.getSoundManager().getSoundPath();
 			break;
 		}
-		if (p != null) {
-			path = p.resolve(path).toString();
-			path = path.substring(0, path.lastIndexOf('.'));
-		} else {
-			path = "defaultsound/" + path.substring(path.contains("/") || path.contains("\\") ? Math.max(path.lastIndexOf('/'),path.lastIndexOf('\\')) + 1 : 0, path.contains(".") ? path.lastIndexOf('.') : path.length());
+		
+		Array<Path> paths = new Array();
+		if(p != null) {
+			paths.addAll(AudioDriver.getPaths(p.resolve(filename).toString()));			
 		}
-
-		if(!setSoundFile(id, path, type, loop)) {
-			path = "defaultsound/" + path.substring(path.contains("/") || path.contains("\\") ? Math.max(path.lastIndexOf('/'),path.lastIndexOf('\\')) + 1 : 0, path.length());
-			setSoundFile(id, path, type, loop);
-		}
-	}
-
-	public boolean setSoundFile(int id, String path, SoundType type, boolean loop) {
-		for (File f : new File[] { new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3"),
-				new File(path + ".flac") }) {
-			if (f.exists()) {
-				String newpath = f.getPath();
-				String oldpath = soundmap.get(id);
-				if (newpath.equals(oldpath)) {
-					return true;
-				}
-				if (oldpath != null) {
-					main.getAudioProcessor().dispose(oldpath);
-				}
-				soundmap.put(id, newpath);
-				soundloop.put(id, loop);
-				return true;
-			}
-		}
-		return false;
+		paths.addAll(AudioDriver.getPaths("defaultsound/" + filename.substring(filename.contains("/") || filename.contains("\\") ? Math.max(filename.lastIndexOf('/'),filename.lastIndexOf('\\')) + 1 : 0)));
+		return paths.toArray(Path.class);
 	}
 
 	public String getSound(int id) {
