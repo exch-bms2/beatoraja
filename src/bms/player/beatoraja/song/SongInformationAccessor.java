@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.Validatable;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -62,6 +61,12 @@ public class SongInformationAccessor {
 			}
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'information' AND sql LIKE '%enddensity%'", new MapListHandler()).size() == 0) {
 				qr.update("ALTER TABLE information ADD COLUMN enddensity [REAL]");
+			}
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'information' AND sql LIKE '%mainbpm%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE information ADD COLUMN mainbpm [REAL]");
+			}
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'information' AND sql LIKE '%speedchange%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE information ADD COLUMN speedchange [TEXT]");
 			}
 
 		} catch (SQLException e) {
@@ -138,9 +143,9 @@ public class SongInformationAccessor {
 		SongInformation info = new SongInformation(model);
 		try {
 			qr.update(conn,
-					"INSERT OR REPLACE INTO information (sha256, n, ln, s, ls, total, density, peakdensity, enddensity, distribution)"
-							+ "VALUES(?,?,?,?,?,?,?,?,?,?);",
-					model.getSHA256(), info.getN(), info.getLn(), info.getS(), info.getLs(), info.getTotal(), info.getDensity(), info.getPeakdensity(), info.getEnddensity(), info.getDistribution());
+					"INSERT OR REPLACE INTO information (sha256, n, ln, s, ls, total, density, peakdensity, enddensity, mainbpm, distribution, speedchange)"
+							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?);",
+					model.getSHA256(), info.getN(), info.getLn(), info.getS(), info.getLs(), info.getTotal(), info.getDensity(), info.getPeakdensity(), info.getEnddensity(), info.getMainbpm(), info.getDistribution(), info.getSpeedchange());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

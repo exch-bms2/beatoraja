@@ -3,7 +3,14 @@ package bms.player.beatoraja.song;
 import bms.model.*;
 import bms.player.beatoraja.Validatable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * 楽曲詳細情報
@@ -11,6 +18,9 @@ import java.util.logging.Logger;
  * @author exch
  */
 public class SongInformation implements Validatable {
+	
+	// TODO BPM遷移の追加
+	
 	/**
 	 * 譜面のハッシュ値
 	 */
@@ -32,22 +42,38 @@ public class SongInformation implements Validatable {
 	 */
 	private int ls;
 	/**
-	 * 
+	 * 平均密度
 	 */
 	private double density;
+	/**
+	 * 最大密度
+	 */
 	private double peakdensity;
+	/**
+	 * 終盤最大密度
+	 */
 	private double enddensity;
 
 	/**
 	 * TOTAL
 	 */
 	private double total;
+	
+	private double mainbpm;
+
 	/**
 	 * 分布
 	 */
-	private String distribution;
+	private String distribution = "";
 	
 	private int[][] distributionValues = new int[0][7];
+
+	/**
+	 * 分布
+	 */
+	private String speedchange = "";
+	
+	private double[][] speedchangeValues = new double[0][2];
 
 	public SongInformation() {
 		
@@ -123,6 +149,39 @@ public class SongInformation implements Validatable {
 			enddensity = Math.max(enddensity, ((double)notes) / d);
 		}
 		setDistributionValues(data);
+		
+		List<double[]> speedList = new ArrayList<double[]>();
+		Map<Double, Integer> bpmNoteCountMap = new HashMap<Double, Integer>();
+		double nowSpeed = model.getBpm();
+		speedList.add(new double[] {nowSpeed, 0.0});
+		final TimeLine[] tls = model.getAllTimeLines();
+		for (TimeLine tl : tls) {
+			int notecount = bpmNoteCountMap.containsKey(tl.getBPM()) ? bpmNoteCountMap.get(tl.getBPM()) : 0;
+			bpmNoteCountMap.put(tl.getBPM(), notecount + tl.getTotalNotes());
+
+			if(tl.getStop() > 0) {
+				if(nowSpeed != 0) {
+					nowSpeed = 0;					
+					speedList.add(new double[] {nowSpeed, tl.getTime()});
+				}
+			} else if(nowSpeed != tl.getBPM() * tl.getScroll()) {
+				nowSpeed = tl.getBPM() * tl.getScroll();
+				speedList.add(new double[] {nowSpeed, tl.getTime()});
+			}
+		}
+		
+		int maxcount = 0;
+		for (double bpm : bpmNoteCountMap.keySet()) {
+			if (bpmNoteCountMap.get(bpm) > maxcount) {
+				maxcount = bpmNoteCountMap.get(bpm);
+				mainbpm = bpm;
+			}
+		}
+		if(speedList.get(speedList.size() - 1)[1] != tls[tls.length - 1].getTime()) {
+			speedList.add(new double[] {nowSpeed, tls[tls.length - 1].getTime()});			
+		}
+
+		setSpeedchangeValues(speedList.toArray(new double[speedList.size()][]));
 	}
 	
 	public String getDistribution() {
@@ -200,6 +259,46 @@ public class SongInformation implements Validatable {
 		return result;
 	}
 
+	public String getSpeedchange() {
+		return speedchange;
+	}
+
+	public void setSpeedchange(String speedchange) {
+		this.speedchange = speedchange;
+		ArrayList<double[]> result = new ArrayList();
+		int index = 0;
+		double[] values = new double[2];
+		try {
+			for(String s : speedchange.split(",", -1)) {
+				values[index++] = Double.parseDouble(s);
+				if(index == values.length) {
+					index = 0;
+					result.add(values);
+					values = new double[2];
+				}
+			}
+		} catch(Throwable e) {
+			result.clear();
+		}
+		speedchangeValues = result.toArray(new double[result.size()][]);
+	}
+
+	public double[][] getSpeedchangeValues() {
+		return speedchangeValues;
+	}
+
+	public void setSpeedchangeValues(double[][] values) {
+		speedchangeValues = values;
+		StringBuilder sb = new StringBuilder(values.length * 14 + 1);
+		for(int i = 0;i < values.length;i++) {
+			sb.append(values[i][0]).append(',').append(values[i][1]);
+			if(i < values.length - 1) {
+				sb.append(',');
+			}
+		}
+		speedchange = sb.toString();
+	}
+
 	public int getN() {
 		return n;
 	}
@@ -272,6 +371,14 @@ public class SongInformation implements Validatable {
 		this.enddensity = enddensity;
 	}
 
+	public double getMainbpm() {
+		return mainbpm;
+	}
+
+	public void setMainbpm(double mainbpm) {
+		this.mainbpm = mainbpm;
+	}
+
 	@Override
 	public boolean validate() {
 		if(sha256 == null || sha256.length() != 64) {
@@ -285,4 +392,5 @@ public class SongInformation implements Validatable {
 		}
 		return true;
 	}
+
 }
