@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -36,6 +37,8 @@ public class MainLoader extends Application {
 	private static SongDatabaseAccessor songdb;
 	
 	private static final Set<String> illegalSongs = new HashSet<String>();
+
+	private static Path bmsPath;
 	
 	public static void main(String[] args) {
 		
@@ -51,7 +54,6 @@ public class MainLoader extends Application {
 			e.printStackTrace();
 		}
 
-		Path f = null;
 		PlayMode auto = null;
 		for (String s : args) {
 			if (s.startsWith("-")) {
@@ -77,16 +79,16 @@ public class MainLoader extends Application {
 					auto = PlayMode.PLAY;
 				}
 			} else {
-				f = Paths.get(s);
+				bmsPath = Paths.get(s);
 				if(auto == null) {
 					auto = PlayMode.PLAY;
 				}
 			}
 		}
 		
-		if(Files.exists(MainController.configpath) && (f != null || auto != null)) {
+		if(Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();
-			play(f, auto, true, null, null, f != null);			
+			play(bmsPath, auto, true, null, null, bmsPath != null);
 		} else {
 			launch(args);			
 		}
@@ -194,6 +196,10 @@ public class MainLoader extends Application {
 			}
 		}
 		return songdb;
+	}
+
+	public static Path getBMSPath() {
+		return bmsPath;
 	}
 
 	public static void putIllegalSong(String hash) {
