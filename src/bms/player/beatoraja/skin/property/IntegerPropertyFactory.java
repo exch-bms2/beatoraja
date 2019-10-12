@@ -42,9 +42,13 @@ public class IntegerPropertyFactory {
 					: Integer.MIN_VALUE);
 		}
 		if (optionid == NUMBER_MAINBPM) {
-			result = (state) -> (state.main.getPlayerResource().getSongdata() != null
-					? state.main.getPlayerResource().getSongdata().getMainbpm()
-					: Integer.MIN_VALUE);
+			result = (state) -> {
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return (int) (song.getInformation().getMainbpm());
+				}
+				return Integer.MIN_VALUE;
+			};
 		}
 		if (optionid >= NUMBER_DURATION_LANECOVER_ON && optionid <= NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_OFF) {
 			final boolean green = (optionid - NUMBER_DURATION_LANECOVER_ON) % 2 == 1;

@@ -83,7 +83,6 @@ public class SongData implements Validatable, IpfsInformation {
 	 * 最大BPM
 	 */
 	private int maxbpm;
-	private int mainbpm;
 	/**
 	 * 曲の長さ(ms)
 	 */
@@ -162,14 +161,8 @@ public class SongData implements Validatable, IpfsInformation {
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
 		feature = 0;
-		Map<Double, Integer> bpmMap = new HashMap<Double, Integer>();
 		final int keys = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			Integer count = bpmMap.get(tl.getBPM());
-			if (count == null) {
-				count = 0;
-			}
-			bpmMap.put(tl.getBPM(), count + tl.getTotalNotes());
 			if(tl.getStop() > 0) feature |= FEATURE_STOPSEQUENCE;
 
 			for(int i = 0;i < keys;i++) {
@@ -192,13 +185,6 @@ public class SongData implements Validatable, IpfsInformation {
 				if(tl.getNote(i) instanceof MineNote) {
 					feature |= FEATURE_MINENOTE;
 				}
-			}
-		}
-		int maxcount = 0;
-		for (double bpm : bpmMap.keySet()) {
-			if (bpmMap.get(bpm) > maxcount) {
-				maxcount = bpmMap.get(bpm);
-				mainbpm = (int) bpm;
 			}
 		}
 		length = model.getLastTime();
@@ -357,14 +343,6 @@ public class SongData implements Validatable, IpfsInformation {
 
 	public void setMaxbpm(int maxbpm) {
 		this.maxbpm = maxbpm;
-	}
-
-	public int getMainbpm() {
-		return mainbpm;
-	}
-
-	public void setMainbpm(int mainbpm) {
-		this.mainbpm = mainbpm;
 	}
 
 	public boolean isBpmstop() {
@@ -578,7 +556,7 @@ public class SongData implements Validatable, IpfsInformation {
 	public void shrink() {
 		fulltitle = fullartist = null;
 		path.clear();
-		date = adddate = level = mode = feature = difficulty = judge = minbpm = maxbpm = mainbpm = notes = length = 0;
+		date = adddate = level = mode = feature = difficulty = judge = minbpm = maxbpm = notes = length = 0;
 		folder = parent = preview = "";
 	}
 
