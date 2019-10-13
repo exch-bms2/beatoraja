@@ -50,7 +50,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.7.3";
+	public static final String VERSION = "beatoraja 0.7.4";
 
 	public static final boolean debug = false;
 
@@ -814,18 +814,35 @@ public class MainController extends ApplicationAdapter {
 		}
 	}
 
+	/**
+	 * BGM、効果音セット管理用クラス
+	 * 
+	 * @author exch
+	 */
 	public static class SystemSoundManager {
+		/**
+		 * 検出されたBGMセットのディレクトリパス
+		 */
 		private Array<Path> bgms = new Array<Path>();
+		/**
+		 * 現在のBGMセットのディレクトリパス
+		 */
 		private Path currentBGMPath;
+		/**
+		 * 検出された効果音セットのディレクトリパス
+		 */
 		private Array<Path> sounds = new Array<Path>();
+		/**
+		 * 現在の効果音セットのディレクトリパス
+		 */
 		private Path currentSoundPath;
 
 		public SystemSoundManager(Config config) {
 			if(config.getBgmpath() != null && config.getBgmpath().length() > 0) {
-				scan(Paths.get(config.getBgmpath()), bgms, "select.");				
+				scan(Paths.get(config.getBgmpath()), bgms, "select.wav");				
 			}
 			if(config.getSoundpath() != null && config.getSoundpath().length() > 0) {
-				scan(Paths.get(config.getSoundpath()), sounds, "clear.");				
+				scan(Paths.get(config.getSoundpath()), sounds, "clear.wav");				
 			}
 			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
@@ -854,13 +871,12 @@ public class MainController extends ApplicationAdapter {
 					sub.forEach((t) -> {
 						scan(t, paths, name);
 					});
+					if (AudioDriver.getPaths(p.resolve(name).toString()).length > 0) {
+						paths.add(p);
+					}
 				} catch (IOException e) {
 				}
-			} else if (p.getFileName().toString().toLowerCase().equals(name + "wav") ||
-					p.getFileName().toString().toLowerCase().equals(name + "ogg")) {
-				paths.add(p.getParent());
-			}
-
+			} 
 		}
 	}
 
