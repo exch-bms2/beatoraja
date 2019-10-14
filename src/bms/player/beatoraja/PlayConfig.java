@@ -1,5 +1,6 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.play.JudgeAlgorithm;
 import com.badlogic.gdx.math.MathUtils;
 
 /**
@@ -61,15 +62,19 @@ public class PlayConfig implements Cloneable {
 	/**
 	 * レーンカバー変化間隔(低速)
 	 */
-	public float lanecovermarginlow = 0.001f;
+	private float lanecovermarginlow = 0.001f;
 	/**
 	 * レーンカバー変化間隔(高速)
 	 */
-	public float lanecovermarginhigh = 0.01f;
+	private float lanecovermarginhigh = 0.01f;
 	/**
 	 * レーンカバー変化速度切り替え時間
 	 */
-	public int lanecoverswitchduration = 500;
+	private int lanecoverswitchduration = 500;
+	/**
+	 * 判定アルゴリズム
+	 */
+	private String judgetype = JudgeAlgorithm.Combo.name();
 
 	public PlayConfig() {
 	}
@@ -178,6 +183,20 @@ public class PlayConfig implements Cloneable {
 		this.lanecoverswitchduration = lanecoverswitchduration;
 	}
 
+	public String getJudgetype() {
+		for(JudgeAlgorithm type : JudgeAlgorithm.values()) {
+			if(type.name().equals(judgetype)) {
+				return judgetype;
+			}
+		}
+		judgetype = JudgeAlgorithm.Combo.name();
+		return judgetype;
+	}
+
+	public void setJudgetype(String judgetype) {
+		this.judgetype = judgetype;
+	}
+
 	public void validate() {
 		hispeed = MathUtils.clamp(hispeed, 0.01f, 20);
 		duration = MathUtils.clamp(duration, 1, 10000);
@@ -189,6 +208,9 @@ public class PlayConfig implements Cloneable {
 		lanecovermarginlow = MathUtils.clamp(lanecovermarginlow, 0f, 1f);
 		lanecovermarginhigh = MathUtils.clamp(lanecovermarginhigh, 0f, 1f);
 		lanecoverswitchduration = MathUtils.clamp(lanecoverswitchduration, 0, 1000000);
+		if(JudgeAlgorithm.getIndex(judgetype) == -1) {
+			judgetype = JudgeAlgorithm.Combo.name();
+		}
 	}
 
 	public PlayConfig clone() {
