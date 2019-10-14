@@ -136,7 +136,7 @@ public class JudgeManager {
 	 */
 	private final int auto_minduration = 80;
 
-	private final JudgeAlgorithm algorithm;
+	private JudgeAlgorithm algorithm;
 
 	/**
 	 * 処理済ノート数
@@ -160,7 +160,6 @@ public class JudgeManager {
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
 		this.keysound = main.main.getAudioProcessor();
-		algorithm = JudgeAlgorithm.valueOf(main.main.getPlayerResource().getConfig().getJudgeType());
 	}
 
 	public void init(BMSModel model, PlayerResource resource) {
@@ -181,6 +180,7 @@ public class JudgeManager {
 		this.lntype = model.getLntype();
 		lanes = model.getLanes();
 
+		algorithm = JudgeAlgorithm.valueOf(resource.getPlayerConfig().getPlayConfig(orgmode).getPlayconfig().getJudgetype());
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
 		combocond = rule.combo;
 		miss = rule.miss;

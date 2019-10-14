@@ -134,10 +134,6 @@ public class Config implements Validatable {
     private boolean useSongInfo = true;
 
 	/**
-	 * 判定アルゴリズム
-	 */
-	private String judgeType = JudgeAlgorithm.Combo.name();
-	/**
 	 * HIDDENノートを表示するかどうか
 	 */
 	private boolean showhiddennote = false;
@@ -293,20 +289,6 @@ public class Config implements Validatable {
 
 	public void setTableURL(String[] tableURL) {
 		this.tableURL = tableURL;
-	}
-
-	public String getJudgeType() {
-		for(JudgeAlgorithm type : JudgeAlgorithm.values()) {
-			if(type.name().equals(judgeType)) {
-				return judgeType;
-			}
-		}
-		judgeType = JudgeAlgorithm.Combo.name();
-		return judgeType;
-	}
-
-	public void setJudgeType(String judgeType) {
-		this.judgeType = judgeType;
 	}
 
 	public boolean isFolderlamp() {
@@ -643,9 +625,6 @@ public class Config implements Validatable {
 		bannerPixmapGen = MathUtils.clamp(bannerPixmapGen, 0, 100);
 		songResourceGen = MathUtils.clamp(songResourceGen, 0, 100);
 
-		if(JudgeAlgorithm.getIndex(judgeType) == -1) {
-			judgeType = JudgeAlgorithm.Combo.name();
-		}
 		bmsroot = Validatable.removeInvalidElements(bmsroot);
 
 		if(tableURL == null) {

@@ -308,6 +308,8 @@
                                          </rowConstraints>
                                          <Label text="%TARGET_SCORE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                                          <ComboBox fx:id="target" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                         <Label prefHeight="18.0" prefWidth="127.0" text="%JUDGE_ALGORITHM" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                         <ComboBox fx:id="judgealgorithm" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
                                          <Label text="Gauge Auto Shift" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                                          <ComboBox fx:id="gaugeautoshift" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                          <Label text="%BOTTOM_SHIFTABLE_GAUGE" GridPane.columnIndex="2" GridPane.rowIndex="1" />
@@ -394,10 +396,6 @@
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </padding>
                 <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <HBox prefHeight="37.0" prefWidth="723.0">
-                        <Label prefHeight="18.0" prefWidth="127.0" text="%JUDGE_ALGORITHM" />
-                        <ComboBox fx:id="judgealgorithm" prefWidth="150.0" />
-                    </HBox>
                     <CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" text="%USE_SONGINFO" />
                     <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" text="%FOLDER_LAMP" />
                     <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" text="%CACHE_SKIN_IMAGE" />

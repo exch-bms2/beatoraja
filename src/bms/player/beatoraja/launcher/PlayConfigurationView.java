@@ -377,8 +377,6 @@ public class PlayConfigurationView implements Initializable {
 
 		showhiddennote.setSelected(config.isShowhiddennote());
 
-		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgeType()));
-
 		autosavereplay1.getSelectionModel().select(config.getAutoSaveReplay()[0]);
 		autosavereplay2.getSelectionModel().select(config.getAutoSaveReplay()[1]);
 		autosavereplay3.getSelectionModel().select(config.getAutoSaveReplay()[2]);
@@ -505,7 +503,6 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setShowhiddennote(showhiddennote.isSelected());
 
-		config.setJudgeType(JudgeAlgorithm.values()[judgealgorithm.getValue()].name());
 		config.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
 				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
@@ -627,6 +624,8 @@ public class PlayConfigurationView implements Initializable {
 			conf.setEnablehidden(enableHidden.isSelected());
 			conf.setLift(getValue(lift) / 1000f);
 			conf.setHidden(getValue(hidden) / 1000f);
+			conf.setJudgetype(JudgeAlgorithm.values()[judgealgorithm.getValue()].name());
+
 		}
 		pc = playconfig.getValue();
 		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
@@ -643,6 +642,7 @@ public class PlayConfigurationView implements Initializable {
 		enableHidden.setSelected(conf.isEnablehidden());
 		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));
 		hidden.getValueFactory().setValue((int) (conf.getHidden() * 1000));
+		judgealgorithm.setValue(JudgeAlgorithm.getIndex(conf.getJudgetype()));
 	}
 
 	private PlayMode ic = null;
