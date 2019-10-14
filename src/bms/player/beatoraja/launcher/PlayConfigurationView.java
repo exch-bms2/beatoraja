@@ -74,6 +74,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Tab skinTab;
 	@FXML
+	private Tab musicselectTab;
+	@FXML
 	private Tab optionTab;
 	@FXML
 	private Tab otherTab;
@@ -111,10 +113,6 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Double> hispeedmargin;
 	@FXML
 	private Spinner<Integer> inputduration;
-	@FXML
-	private Spinner<Integer> scrolldurationlow;
-	@FXML
-	private Spinner<Integer> scrolldurationhigh;
 
 	@FXML
 	private ComboBox<Integer> scoreop;
@@ -176,8 +174,6 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox guidese;
 	@FXML
 	private CheckBox windowhold;
-	@FXML
-	private CheckBox randomselect;
 
 	@FXML
 	private CheckBox judgeregion;
@@ -210,8 +206,6 @@ public class PlayConfigurationView implements Initializable {
 	private NumericSpinner<Integer> analogScratchThreshold;
     @FXML
     private CheckBox usecim;
-    @FXML
-    private CheckBox useSongInfo;
 
     @FXML
 	private TextField txtTwitterConsumerKey;
@@ -241,6 +235,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ResourceConfigurationView resourceController;
 	@FXML
+	private MusicSelectConfigurationView musicselectController;
+	@FXML
 	private SkinConfigurationView skinController;
 	@FXML
 	private IRConfigurationView irController;
@@ -249,8 +245,6 @@ public class PlayConfigurationView implements Initializable {
 
 	private Config config;
 	private PlayerConfig player;
-	@FXML
-	private CheckBox folderlamp;
 
 	private MainLoader loader;
 
@@ -369,6 +363,7 @@ public class PlayConfigurationView implements Initializable {
 		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 		videoController.update(config);
 		audioController.update(config);
+		musicselectController.update(config);
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
@@ -386,12 +381,6 @@ public class PlayConfigurationView implements Initializable {
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
         usecim.setSelected(config.isCacheSkinImage());
-        useSongInfo.setSelected(config.isUseSongInfo());
-
-		folderlamp.setSelected(config.isFolderlamp());
-
-		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
-		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
 
 		enableIpfs.setSelected(config.isEnableIpfs());
 		ipfsurl.setText(config.getIpfsUrl());
@@ -443,6 +432,7 @@ public class PlayConfigurationView implements Initializable {
 		playername.setText(player.getName());
 
 		videoController.updatePlayer(player);
+		musicselectController.updatePlayer(player);
 
 		scoreop.getSelectionModel().select(player.getRandom());
 		scoreop2.getSelectionModel().select(player.getRandom2());
@@ -451,7 +441,6 @@ public class PlayConfigurationView implements Initializable {
 		seventoninetype.getSelectionModel().select(player.getSevenToNineType());
 		guidese.setSelected(player.isGuideSE());
 		windowhold.setSelected(player.isWindowHold());
-		randomselect.setSelected(player.isRandomSelect());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
 
@@ -493,6 +482,7 @@ public class PlayConfigurationView implements Initializable {
 	public void commit() {
 	    videoController.commit(config);
 		audioController.commit();
+		musicselectController.commit();
 
 		config.setPlayername(players.getValue());
 
@@ -509,11 +499,6 @@ public class PlayConfigurationView implements Initializable {
         // jkoc_hack is integer but *.setJKOC needs boolean type
 
         config.setCacheSkinImage(usecim.isSelected());
-        config.setUseSongInfo(useSongInfo.isSelected());
-        config.setFolderlamp(folderlamp.isSelected());
-
-		config.setScrollDutationLow(getValue(scrolldurationlow));
-		config.setScrollDutationHigh(getValue(scrolldurationhigh));
 
 		config.setEnableIpfs(enableIpfs.isSelected());
 		config.setIpfsUrl(ipfsurl.getText());
@@ -540,6 +525,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		videoController.commitPlayer(player);
+		musicselectController.commitPlayer();
 
 		player.setRandom(scoreop.getValue());
 		player.setRandom2(scoreop2.getValue());
@@ -548,7 +534,6 @@ public class PlayConfigurationView implements Initializable {
 		player.setSevenToNineType(seventoninetype.getValue());
 		player.setGuideSE(guidese.isSelected());
 		player.setWindowHold(windowhold.isSelected());
-		player.setRandomSelect(randomselect.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setJudgetiming(getValue(judgetiming));
@@ -721,7 +706,7 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
 					config.getBmsroot());
-			SongInformationAccessor infodb = useSongInfo.isSelected() ?
+			SongInformationAccessor infodb = config.isUseSongInfo() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(updatepath, updateAll, infodb);

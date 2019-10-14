@@ -59,30 +59,6 @@
         <Tab fx:id="inputTab" closable="false" text="%TAB_INPUT">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
-                    <HBox prefHeight="37.0" prefWidth="723.0">
-                        <opaqueInsets>
-                            <Insets />
-                        </opaqueInsets>
-                        <VBox.margin>
-                            <Insets left="10.0" />
-                        </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
-                        <NumericSpinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
-                            </valueFactory>
-                        </NumericSpinner>
-                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" >
-                            <HBox.margin>
-                                <Insets left="10.0" />
-                            </HBox.margin>
-                        </Label>
-                        <NumericSpinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
-                            </valueFactory>
-                        </NumericSpinner>
-                    </HBox>
                     <HBox prefHeight="22.0" prefWidth="740.0">
                         <VBox.margin>
                             <Insets left="10.0" />
@@ -142,6 +118,11 @@
         <Tab fx:id="resourceTab" closable="false" text="%Resource">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <fx:include fx:id="resource" source="ResourceConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            </AnchorPane>
+        </Tab>
+        <Tab fx:id="musicselectTab" closable="false" text="%TAB_MUSICSELECT">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <fx:include fx:id="musicselect" source="MusicSelectConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="optionTab" closable="false" text="%Play_Option">
@@ -291,7 +272,6 @@
                                          <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                          <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                         <CheckBox fx:id="randomselect" mnemonicParsing="false" text="%RANDOM_SELECT" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                      </GridPane>
                                      <GridPane hgap="10.0" vgap="4.0">
                                          <columnConstraints>
@@ -396,8 +376,6 @@
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </padding>
                 <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" text="%USE_SONGINFO" />
-                    <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" text="%FOLDER_LAMP" />
                     <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" text="%CACHE_SKIN_IMAGE" />
                     <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%IMPORT_LR2_SCORE">
                         <VBox.margin>
