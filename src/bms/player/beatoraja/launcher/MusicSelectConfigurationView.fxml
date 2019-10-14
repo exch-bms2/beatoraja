@@ -44,5 +44,17 @@
 	<CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" text="%USE_SONGINFO" />
 	<CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" text="%FOLDER_LAMP" />
 	<CheckBox fx:id="randomselect" mnemonicParsing="false" text="%RANDOM_SELECT" />
+	<HBox prefHeight="40.0" prefWidth="730.0">
+		<Label prefHeight="25.0" prefWidth="150.0"
+			text="%MAX_SEARCH_BAR_COUNT" />
+		<NumericSpinner fx:id="maxsearchbar" editable="true"
+			prefWidth="150.0">
+			<valueFactory>
+				<SpinnerValueFactory.IntegerSpinnerValueFactory
+					amountToStepBy="1" initialValue="10" max="100" min="1" />
+			</valueFactory>
+		</NumericSpinner>
+	</HBox>
+	
 </VBox>
 
