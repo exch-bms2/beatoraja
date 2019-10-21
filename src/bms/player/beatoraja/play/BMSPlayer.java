@@ -156,7 +156,7 @@ public class BMSPlayer extends MainState {
 		boolean score = true;
 
 		Logger.getGlobal().info("アシストオプション設定");
-		if (resource.getCourseBMSModels() == null && autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {
+		if (autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
 				assist = 1;
@@ -309,6 +309,7 @@ public class BMSPlayer extends MainState {
 		}
 
 		resource.setUpdateScore(score);
+		resource.setUpdateCourseScore(resource.isUpdateCourseScore() && score);
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.getSongdata().setBMSModel(model);
 		resource.getSongdata().setDifficulty(difficulty);

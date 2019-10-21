@@ -100,7 +100,7 @@ public class CourseResult extends AbstractResult {
 			final int lnmode = uln ? config.getLnmode() : 0;
 			
         	for(IRStatus irc : ir) {
-    			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
+    			boolean send = resource.isUpdateCourseScore() && resource.getCourseData().isRelease();
     			switch(irc.config.getIrsend()) {
     			case PlayerConfig.IR_SEND_ALWAYS:
     				break;
@@ -288,7 +288,7 @@ public class CourseResult extends AbstractResult {
 		getScoreDataProperty().update(newscore);
 
 		main.getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
-				random, resource.getConstraint(), resource.isUpdateScore());
+				random, resource.getConstraint(), resource.isUpdateCourseScore());
 
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
@@ -324,7 +324,7 @@ public class CourseResult extends AbstractResult {
 	private void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseScoreData() != null) {
-			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
+			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateCourseScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
 				for(int i = 0; i < rd.length; i++) {

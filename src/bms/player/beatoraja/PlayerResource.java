@@ -60,6 +60,7 @@ public class PlayerResource {
 	 * スコア更新するかどうか
 	 */
 	private boolean updateScore = true;
+	private boolean updateCourseScore = true;
 	private GrooveGauge grooveGauge;
 	/**
 	 * ゲージの遷移ログ
@@ -249,6 +250,7 @@ public class PlayerResource {
 			models.add(model);
 		}
 		course = models.toArray(BMSModel.class);
+		updateCourseScore = true;
 		return true;
 	}
 
@@ -346,6 +348,14 @@ public class PlayerResource {
 
 	public void setUpdateScore(boolean b) {
 		this.updateScore = b;
+	}
+
+	public boolean isUpdateCourseScore() {
+		return updateCourseScore;
+	}
+
+	public void setUpdateCourseScore(boolean updateCourseScore) {
+		this.updateCourseScore = updateCourseScore;
 	}
 
 	public CourseData getCourseData() {
