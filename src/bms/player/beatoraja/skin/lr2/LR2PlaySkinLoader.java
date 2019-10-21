@@ -77,31 +77,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		srch = src.height;
 		dstw = dst.width;
 		dsth = dst.height;
+		
+		addCommandWord(PlayCommand.values());
 
-		addCommandWord(new CommandWord("CLOSE") {
-			@Override
-			public void execute(String[] str) {
-				skin.setClose(Integer.parseInt(str[1]));
-			}
-		});
-		addCommandWord(new CommandWord("PLAYSTART") {
-			@Override
-			public void execute(String[] str) {
-				skin.setPlaystart(Integer.parseInt(str[1]));
-			}
-		});
-		addCommandWord(new CommandWord("LOADSTART") {
-			@Override
-			public void execute(String[] str) {
-				skin.setLoadstart(Integer.parseInt(str[1]));
-			}
-		});
-		addCommandWord(new CommandWord("LOADEND") {
-			@Override
-			public void execute(String[] str) {
-				skin.setLoadend(Integer.parseInt(str[1]));
-			}
-		});
 		addCommandWord(new CommandWord("FINISHMARGIN") {
 			@Override
 			//STATE_FINISHEDからフェードアウトを開始するまでのマージン(ms)
@@ -493,30 +471,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("SRC_NOWCOMBO_1P") {
 			@Override
 			public void execute(String[] str) {
-				int[] values = parseInt(str);
-				int divx = values[7];
-				if (divx <= 0) {
-					divx = 1;
-				}
-				int divy = values[8];
-				if (divy <= 0) {
-					divy = 1;
-				}
-				TextureRegion[] simages = getSourceImage(values);
-				if (simages != null) {
-					TextureRegion[][] images = new TextureRegion[divy][divx];
-					for (int i = 0; i < divx; i++) {
-						for (int j = 0; j < divy; j++) {
-							images[j][i] = simages[j * divx + i];
-						}
-					}
-
-					judge[0].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinNumber(images, values[10], values[9], values[13],
-							images.length > 10 ? 2 : 0, values[15], values[11]);
-					judge[0].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
-					// System.out.println("Number Added - " +
-					// (num.getId()));
-				}
+				setSrcNowCombo(0, str);
 			}
 		});
 
@@ -530,30 +485,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("SRC_NOWCOMBO_2P") {
 			@Override
 			public void execute(String[] str) {
-				int[] values = parseInt(str);
-				int divx = values[7];
-				if (divx <= 0) {
-					divx = 1;
-				}
-				int divy = values[8];
-				if (divy <= 0) {
-					divy = 1;
-				}
-				TextureRegion[] simages = getSourceImage(values);
-				if (simages != null) {
-					TextureRegion[][] images = new TextureRegion[divy][divx];
-					for (int i = 0; i < divx; i++) {
-						for (int j = 0; j < divy; j++) {
-							images[j][i] = simages[j * divx + i];
-						}
-					}
-
-					judge[1].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinNumber(images, values[10], values[9], values[13],
-							images.length > 10 ? 2 : 0, values[15], values[11]);
-					judge[1].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
-					// System.out.println("Number Added - " +
-					// (num.getId()));
-				}
+				setSrcNowCombo(1, str);
 			}
 		});
 
@@ -567,30 +499,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("SRC_NOWCOMBO_3P") {
 			@Override
 			public void execute(String[] str) {
-				int[] values = parseInt(str);
-				int divx = values[7];
-				if (divx <= 0) {
-					divx = 1;
-				}
-				int divy = values[8];
-				if (divy <= 0) {
-					divy = 1;
-				}
-				TextureRegion[] simages = getSourceImage(values);
-				if (simages != null) {
-					TextureRegion[][] images = new TextureRegion[divy][divx];
-					for (int i = 0; i < divx; i++) {
-						for (int j = 0; j < divy; j++) {
-							images[j][i] = simages[j * divx + i];
-						}
-					}
-
-					judge[2].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinNumber(images, values[10], values[9], values[13],
-							images.length > 10 ? 2 : 0, values[15], values[11]);
-					judge[2].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
-					// System.out.println("Number Added - " +
-					// (num.getId()));
-				}
+				setSrcNowCombo(2, str);
 			}
 		});
 
@@ -734,6 +643,27 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				}
 			}
 		});
+	}
+	
+	private void setSrcNowCombo(int index, String[] str) {
+		int[] values = parseInt(str);
+		final int divx = values[7] > 0 ? values[7] : 1;
+		final int divy = values[8] > 0 ? values[8] : 1;
+		TextureRegion[] simages = getSourceImage(values);
+		if (simages != null) {
+			TextureRegion[][] images = new TextureRegion[divy][divx];
+			for (int i = 0; i < divx; i++) {
+				for (int j = 0; j < divy; j++) {
+					images[j][i] = simages[j * divx + i];
+				}
+			}
+
+			judge[index].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinNumber(images, values[10], values[9], values[13],
+					images.length > 10 ? 2 : 0, values[15], values[11]);
+			judge[index].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
+			// System.out.println("Number Added - " +
+			// (num.getId()));
+		}
 	}
 
 	private void setDstNowCombo(int index, String[] str, int[] offset) {
@@ -964,4 +894,33 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		}
 		return -1;
 	}
+}
+
+enum PlayCommand implements LR2SkinLoader.Command<LR2PlaySkinLoader> {
+	CLOSE {
+		@Override
+		public void execute(LR2PlaySkinLoader loader, String[] str) {
+			loader.skin.setClose(Integer.parseInt(str[1]));
+		}
+	},
+	PLAYSTART {
+		@Override
+		public void execute(LR2PlaySkinLoader loader, String[] str) {
+			loader.skin.setPlaystart(Integer.parseInt(str[1]));
+		}
+	},
+	LOADSTART {
+		@Override
+		public void execute(LR2PlaySkinLoader loader, String[] str) {
+			loader.skin.setLoadstart(Integer.parseInt(str[1]));
+		}
+	},
+	LOADEND {
+		@Override
+		public void execute(LR2PlaySkinLoader loader, String[] str) {
+			loader.skin.setLoadend(Integer.parseInt(str[1]));
+		}
+	}
+	;
+
 }
