@@ -100,14 +100,17 @@ public class BMSResource {
 		while(!bgaloaders.isEmpty() && !bgaloaders.getFirst().isAlive()) {
 			bgaloaders.removeFirst();
 		}
-		// Audio, BGAともキャッシュがあるため、何があっても全リロードする
-		BGALoaderThread bgaloader = new BGALoaderThread(
-				config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == PlayMode.AUTOPLAY || mode.isReplayMode())) ? model : null);
-		bgaloaders.addLast(bgaloader);
-		bgaloader.start();
-		AudioLoaderThread audioloader = new AudioLoaderThread(model);
-		audioloaders.addLast(audioloader);
-		audioloader.start();
+		
+		if(MainLoader.getIllegalSongCount() == 0) {
+			// Audio, BGAともキャッシュがあるため、何があっても全リロードする
+			BGALoaderThread bgaloader = new BGALoaderThread(
+					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == PlayMode.AUTOPLAY || mode.isReplayMode())) ? model : null);
+			bgaloaders.addLast(bgaloader);
+			bgaloader.start();
+			AudioLoaderThread audioloader = new AudioLoaderThread(model);
+			audioloaders.addLast(audioloader);
+			audioloader.start();			
+		}
 		return true;
 	}
 
