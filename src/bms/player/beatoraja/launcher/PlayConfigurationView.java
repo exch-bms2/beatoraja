@@ -394,9 +394,7 @@ public class PlayConfigurationView implements Initializable {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
-					config.getBmsroot());
-			tableController.init(songdb);
+			tableController.init(MainLoader.getScoreDatabaseAccessor());
 			tableController.update(Paths.get(config.getTablepath() + "/" + "default.json"));
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -703,9 +701,7 @@ public class PlayConfigurationView implements Initializable {
 	public void loadBMS(String updatepath, boolean updateAll) {
 		commit();
 		try {
-			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
-					config.getBmsroot());
+			SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
 			SongInformationAccessor infodb = config.isUseSongInfo() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
@@ -753,8 +749,7 @@ public class PlayConfigurationView implements Initializable {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
-					config.getBmsroot());
+			SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
 			String player = "player1";
 			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + "/" + player + "/score.db");
 			scoredb.createTable();

@@ -89,7 +89,6 @@ public class MainController extends ApplicationAdapter {
 	private PlayMode auto;
 	private boolean songUpdated;
 
-	private SongDatabaseAccessor songdb;
 	private SongInformationAccessor infodb;
 
 	private IRStatus[] ir;
@@ -154,7 +153,6 @@ public class MainController extends ApplicationAdapter {
 		}
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(), config.getBmsroot());
 			if(config.isUseSongInfo()) {
 				infodb = new SongInformationAccessor(config.getSonginfopath());
 			}
@@ -204,7 +202,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {
-		return songdb;
+		return MainLoader.getScoreDatabaseAccessor();
 	}
 
 	public SongInformationAccessor getInfoDatabase() {
