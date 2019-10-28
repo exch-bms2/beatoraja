@@ -104,6 +104,9 @@ public abstract class MainState {
 		if (skin != null) {
 			for (IntMap.Entry<Offset> e : skin.getOffset().entries()) {
 				SkinOffset offset = main.getOffset(e.key);
+				if(offset == null || e.value == null) {
+					continue;
+				}
 				offset.x = e.value.x;
 				offset.y = e.value.y;
 				offset.w = e.value.w;
