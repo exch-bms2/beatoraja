@@ -503,14 +503,8 @@ public class PlayConfigurationView implements Initializable {
 
 		commitPlayer();
 
-		Json json = new Json();
-		json.setOutputType(OutputType.json);
-		try (FileWriter fw = new FileWriter("config.json")) {
-			fw.write(json.prettyPrint(config));
-			fw.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Config.write(config);
+
 		tableController.commit();
 	}
 
