@@ -110,8 +110,14 @@ public class Config implements Validatable {
 	private int maxFramePerSecond = 240;
 	
 	private int prepareFramePerSecond = 10000;
-
+	/**
+	 * 検索バー同時表示上限数
+	 */
 	private int maxSearchBarCount = 10;
+	/**
+	 * 所持していない楽曲バーを表示するかどうか
+	 */
+	private boolean showNoSongExistingBar = true;
 	/**
 	 * 選曲バー移動速度の最初
 	 */
@@ -362,6 +368,14 @@ public class Config implements Validatable {
     public void setMaxSearchBarCount(int maxSearchBarCount) {
 	    this.maxSearchBarCount = maxSearchBarCount;
     }
+
+	public boolean isShowNoSongExistingBar() {
+		return showNoSongExistingBar;
+	}
+
+	public void setShowNoSongExistingBar(boolean showNoExistingSongBar) {
+		this.showNoSongExistingBar = showNoExistingSongBar;
+	}
 
 	public int getScrollDurationLow(){
 		return scrolldurationlow;

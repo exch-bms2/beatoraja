@@ -774,15 +774,26 @@ public class BarRenderer {
 			l.addAll(((DirectoryBar) bar).getChildren());
 		}
 
+		if(!select.main.getConfig().isShowNoSongExistingBar()) {
+			Array<Bar> remove = new Array<Bar>();
+			for (Bar b : l) {
+				if ((b instanceof SongBar && !((SongBar) b).existsSong())
+					|| b instanceof GradeBar && !((GradeBar) b).existsAllSongs()) {
+					remove.add(b);
+				}
+			}
+			l.removeAll(remove, true);
+		}
+
 		if (l.size > 0) {
 			final PlayerConfig config = select.main.getPlayerResource().getPlayerConfig();
 			int modeIndex = 0;
 			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getMode();modeIndex++);
 			for(int trialCount = 0; trialCount < MusicSelector.MODE.length; trialCount++, modeIndex++) {
-				config.setMode(MusicSelector.MODE[modeIndex % MusicSelector.MODE.length]);
+				final Mode mode = MusicSelector.MODE[modeIndex % MusicSelector.MODE.length];
+				config.setMode(mode);
 				Array<Bar> remove = new Array<Bar>();
 				for (Bar b : l) {
-					final Mode mode = select.main.getPlayerResource().getPlayerConfig().getMode();
 					if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 &&
 							((SongBar) b).getSongData().getMode() != mode.id) {
 						remove.add(b);
