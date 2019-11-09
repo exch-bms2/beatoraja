@@ -26,6 +26,8 @@ public class MusicSelectConfigurationView implements Initializable {
     @FXML
     private CheckBox useSongInfo;
 	@FXML
+	private CheckBox shownoexistingbar;
+	@FXML
 	private CheckBox randomselect;
 	@FXML
 	private NumericSpinner<Integer> maxsearchbar;
@@ -44,6 +46,7 @@ public class MusicSelectConfigurationView implements Initializable {
 
         useSongInfo.setSelected(config.isUseSongInfo());
 		folderlamp.setSelected(config.isFolderlamp());
+		shownoexistingbar.setSelected(config.isShowNoSongExistingBar());
 		
 		maxsearchbar.getValueFactory().setValue(config.getMaxSearchBarCount());
 	}
@@ -54,6 +57,7 @@ public class MusicSelectConfigurationView implements Initializable {
 
         config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());
+        config.setShowNoSongExistingBar(shownoexistingbar.isSelected());
         
         config.setMaxSearchBarCount(maxsearchbar.getValue());
 	}
