@@ -272,6 +272,12 @@
                                          <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                          <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                         <Label text="Extra Note" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                         <NumericSpinner fx:id="extranotedepth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="3" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
                                      </GridPane>
                                      <GridPane hgap="10.0" vgap="4.0">
                                          <columnConstraints>

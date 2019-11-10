@@ -174,6 +174,8 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox guidese;
 	@FXML
 	private CheckBox windowhold;
+	@FXML
+	private Spinner<Integer> extranotedepth;
 
 	@FXML
 	private CheckBox judgeregion;
@@ -455,6 +457,8 @@ public class PlayConfigurationView implements Initializable {
 		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
+		extranotedepth.getValueFactory().setValue(player.getExtranoteDepth());
+
 		target.setValue(player.getTarget());
 
 		irController.update(player);
@@ -539,6 +543,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setNomine(nomine.isSelected());
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));
 		player.setMarkprocessednote(markprocessednote.isSelected());
+		player.setExtranoteDepth(extranotedepth.getValue());
 
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTarget(target.getValue());
