@@ -21,7 +21,10 @@ import bms.player.beatoraja.PlayerConfig;
  */
 public abstract class PatternModifier {
 
-	private int assist;
+	/**
+	 * 譜面変更のアシストレベル
+	 */
+	private AssistLevel assist = AssistLevel.NONE;
 
 	/**
 	 * 1P側、2P側どちらの譜面を変更するか
@@ -38,8 +41,12 @@ public abstract class PatternModifier {
 		playerConfig = config;
 	}
 
+	public PatternModifier() {
+
+	}
+
 	public PatternModifier(int assist) {
-		this.assist = assist;
+		this.assist = AssistLevel.values()[assist];
 	}
 
 	public abstract List<PatternModifyLog> modify(BMSModel model);
@@ -128,8 +135,12 @@ public abstract class PatternModifier {
 		return result;
 	}
 
-	public int getAssistLevel() {
+	public AssistLevel getAssistLevel() {
 		return assist;
+	}
+
+	protected void setAssistLevel(AssistLevel assist) {
+		this.assist = (assist != null ? assist : AssistLevel.NONE);
 	}
 
 	public int getModifyTarget() {
@@ -279,5 +290,9 @@ public abstract class PatternModifier {
 			return Collections.emptyList();
 		}
 
+	}
+
+	public enum AssistLevel {
+		NONE, LIGHT_ASSIST, ASSIST;
 	}
 }
