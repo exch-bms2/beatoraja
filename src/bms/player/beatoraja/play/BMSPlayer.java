@@ -192,6 +192,15 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 			}
+			if(config.getExtranoteDepth() > 0) {
+				ExtraNoteModifier mod = new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch());
+				mod.modify(model);
+				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
+					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
+					score = false;
+				}
+			}
+
 			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
 				// SPでなければBATTLEは未適用
 				switch (model.getMode()) {

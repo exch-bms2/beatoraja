@@ -95,6 +95,10 @@ public class PlayerConfig {
 	 */
 	private boolean bpmguide = false;
 
+	private int extranoteType = 0;
+	private int extranoteDepth = 0;
+	private boolean extranoteScratch = false;
+
 	private boolean showjudgearea = false;
 
 	private boolean markprocessednote = false;
@@ -298,6 +302,30 @@ public class PlayerConfig {
 
 	public void setLegacynote(boolean legacynote) {
 		this.legacynote = legacynote;
+	}
+
+	public int getExtranoteDepth() {
+		return extranoteDepth;
+	}
+
+	public void setExtranoteDepth(int extranoteDepth) {
+		this.extranoteDepth = extranoteDepth;
+	}
+
+	public int getExtranoteType() {
+		return extranoteType;
+	}
+
+	public void setExtranoteType(int extranoteType) {
+		this.extranoteType = extranoteType;
+	}
+
+	public boolean isExtranoteScratch() {
+		return extranoteScratch;
+	}
+
+	public void setExtranoteScratch(boolean extranoteScratch) {
+		this.extranoteScratch = extranoteScratch;
 	}
 
 	public boolean isShowjudgearea() {
@@ -807,7 +835,7 @@ public class PlayerConfig {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static class IRConfig implements Validatable{
 		private String irname = "";
 
