@@ -174,14 +174,6 @@ public class PlayerConfig {
 	 */
 	private int musicselectinput = 0;
 
-	private String irname = "";
-
-	private String userid = "";
-
-	private String password = "";
-
-	private int irsend = 0;
-
 	public static final int IR_SEND_ALWAYS = 0;
 	public static final int IR_SEND_COMPLETE_SONG = 1;
 	public static final int IR_SEND_UPDATE_SCORE = 2;
@@ -498,38 +490,6 @@ public class PlayerConfig {
 		this.skinHistory = skinHistory;
 	}
 
-	public String getUserid() {
-		return userid;
-	}
-
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getIrname() {
-		return irname;
-	}
-
-	public void setIrname(String irname) {
-		this.irname = irname;
-	}
-
-	public int getIrsend() {
-		return irsend;
-	}
-
-	public void setIrsend(int irsend) {
-		this.irsend = irsend;
-	}
-
 	public IRConfig[] getIrconfig() {
 		return irconfig;
 	}
@@ -718,21 +678,10 @@ public class PlayerConfig {
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
 
-		irsend = MathUtils.clamp(irsend, 0, 2);
+		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
+
 		if(irconfig == null) {
 			irconfig = new IRConfig[0];
-		}
-		
-		if(irconfig.length == 0) {
-			irconfig = new IRConfig[1];
-			IRConfig ir = new IRConfig();
-			ir.setIrname(irname != null && irname.length() > 0 ? irname : "mocha");
-			ir.setPassword(password);
-			ir.setUserid(userid);
-			ir.setIrsend(irsend);
-			irconfig[0] = ir;
-			irname = password = userid = "";
-			irsend = 0;
 		}
 		
 		for(int i = 0;i < irconfig.length;i++) {
