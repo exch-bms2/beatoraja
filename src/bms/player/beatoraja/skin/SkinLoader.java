@@ -39,9 +39,19 @@ public abstract class SkinLoader {
      * @return
      */
     public static Skin load(MainState state, SkinType skinType) {
+        Skin skin = load(state, skinType, state.main.getPlayerResource().getPlayerConfig().getSkin()[skinType.getId()]);
+        if(skin == null) {
+            SkinConfig skinConfig = new SkinConfig();
+            skinConfig.setPath(SkinConfig.Default.get(skinType).path);
+            skinConfig.validate();
+            skin = load(state, skinType, skinConfig);
+        }
+        return skin;
+    }
+
+    public static Skin load(MainState state, SkinType skinType, SkinConfig sc) {
         final PlayerResource resource = state.main.getPlayerResource();
         try {
-            SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
             if (sc.getPath().endsWith(".json")) {
                 JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
                 Skin skin = sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
@@ -64,10 +74,7 @@ public abstract class SkinLoader {
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
-        Skin skin =  sl.loadSkin(Paths.get(SkinConfig.Default.get(skinType).path), skinType, new SkinConfig.Property());
-        SkinLoader.resource.disposeOld();
-        return skin;
+        return null;
     }
 
     public static PixmapResourcePool getResource() {
