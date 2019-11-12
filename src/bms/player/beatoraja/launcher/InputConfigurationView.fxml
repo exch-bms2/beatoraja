@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.InputConfigurationView">
+    <HBox prefHeight="23.0" prefWidth="740.0">
+        <VBox.margin>
+            <Insets left="10.0" top="30.0" />
+        </VBox.margin>
+        <Label prefHeight="24.0" prefWidth="68.0" text="%MODE" />
+        <ComboBox fx:id="inputconfig" onAction="#changeMode" prefWidth="150.0" />
+    </HBox>
+    <HBox prefHeight="22.0" prefWidth="740.0">
+        <VBox.margin>
+            <Insets left="10.0" top="10.0"  />
+        </VBox.margin>
+        <Label prefHeight="24.0" prefWidth="200.0" text="%MINIMUM_INPUT_DURATION" />
+        <NumericSpinner fx:id="inputduration" editable="true" prefWidth="80.0">
+            <valueFactory>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
+            </valueFactory>
+        </NumericSpinner>
+    </HBox>
+    <HBox prefHeight="37.0" prefWidth="723.0">
+        <VBox.margin>
+            <Insets left="10.0" top="10.0" />
+        </VBox.margin>
+        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="130.0" text="%JKOC_HACK">
+            <HBox.margin>
+                <Insets right="20.0" />
+            </HBox.margin>
+        </CheckBox>
+    </HBox>
+    <HBox prefHeight="37.0" prefWidth="723.0">
+        <VBox.margin>
+            <Insets left="10.0" top="10.0" />
+        </VBox.margin>
+        <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="160.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
+            <tooltip>
+                <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
+            </tooltip>
+        </CheckBox>
+        <Label prefHeight="24.0" prefWidth="185.0" text="%ANALOG_SCRATCH_THRESHOLD" />
+        <NumericSpinner fx:id="analogScratchThreshold" editable="true" prefWidth="80.0">
+            <valueFactory>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="100" min="1" />
+            </valueFactory>
+            <HBox.margin>
+                <Insets right="20.0" />
+            </HBox.margin>
+        </NumericSpinner>
+        <Label prefHeight="24.0" prefWidth="185.0" text="%ANALOG_SCRATCH_ALGORITHM" />
+        <ComboBox fx:id="analogScratchMode" prefHeight="18.0" prefWidth="140.0">
+            <tooltip>
+                <Tooltip text="Choose Analog Scratch Algorithm." textAlignment="CENTER" />
+            </tooltip>
+        </ComboBox>
+    </HBox>
+</VBox>
