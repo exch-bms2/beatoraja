@@ -7,7 +7,7 @@ import bms.player.beatoraja.skin.SkinType;
  * 
  * @author exch
  */
-public class SkinConfig {
+public class SkinConfig implements Validatable {
 	/**
 	 * ファイルパス
 	 */
@@ -41,11 +41,15 @@ public class SkinConfig {
 		this.properties = property;
 	}
 	
-	public void validate() {
+	public boolean validate() {
+		if(path == null || path.length() == 0) {
+			return false;
+		}
 		if(properties == null) {
 			properties = new Property();
 		}
 		properties.validate();
+		return true;
 	}
 	
 	public static SkinConfig getDefault(int id) {
@@ -58,9 +62,23 @@ public class SkinConfig {
 		return skin;
 	}
 
-	public static class Property {
+	/**
+	 * スキンの各種設定項目
+	 * 
+	 * @author exch
+	 */
+	public static class Property implements Validatable {
+		/**
+		 * 設定項目名-数値のセット
+		 */
 		private Option[] option = new Option[0];
+		/**
+		 * 設定項目名-ファイルパスのセット
+		 */
 		private FilePath[] file = new FilePath[0];
+		/**
+		 * 設定項目名-オフセットのセット
+		 */
 		private Offset[] offset = new Offset[0];
 
 		public Option[] getOption() {
@@ -87,30 +105,47 @@ public class SkinConfig {
 			this.offset = offset;
 		}
 		
-		public void validate() {
+		public boolean validate() {
 			if(option == null) {
 				option = new Option[0];
 			}
+			option = Validatable.removeInvalidElements(option);
+			
 			if(file == null) {
 				file = new FilePath[0];
 			}
+			file = Validatable.removeInvalidElements(file);
+			
 			if(offset == null) {
 				offset = new Offset[0];
-			}			
+			}
+			offset = Validatable.removeInvalidElements(offset);
+			
+			return true;
 		}
 	}
 
-	public static class Option {
+	public static class Option implements Validatable {
 		public String name;
 		public int value;
+
+		@Override
+		public boolean validate() {
+			return name != null && name.length() > 0;
+		}
 	}
 
-	public static class FilePath {
+	public static class FilePath implements Validatable {
 		public String name;
 		public String path;
+		
+		@Override
+		public boolean validate() {
+			return name != null && name.length() > 0 && path != null && path.length() > 0;
+		}
 	}
 
-	public static class Offset {
+	public static class Offset implements Validatable {
 		public String name;
 		public int x;
 		public int y;
@@ -118,8 +153,18 @@ public class SkinConfig {
 		public int h;
 		public int r;
 		public int a;
+		
+		@Override
+		public boolean validate() {
+			return name != null && name.length() > 0;
+		}
 	}
 
+	/**
+	 * デフォルトスキンのパス
+	 * 
+	 * @author exch
+	 */
 	public enum Default {
 		PLAY7(SkinType.PLAY_7KEYS, "skin/default/play/play7.luaskin"),
 		PLAY5(SkinType.PLAY_5KEYS, "skin/default/play5.json"),
