@@ -15,14 +15,14 @@
             <Insets bottom="10.0" left="10.0" top="10.0"/>
         </VBox.margin>
         <Label prefHeight="24.0" prefWidth="100.0" text="%Category"/>
-        <ComboBox fx:id="skincategory" onAction="#updateSkinCategory" prefWidth="150.0"/>
+        <ComboBox fx:id="skintypeSelector" onAction="#changeSkinType" prefWidth="150.0"/>
         <Label prefHeight="24.0" prefWidth="60.0" text="%Skin">
             <HBox.margin>
                 <Insets left="20.0"/>
             </HBox.margin>
         </Label>
-        <ComboBox fx:id="skinheader" onAction="#updateSkin" prefHeight="24.0" prefWidth="294.0"/>
-        <Button mnemonicParsing="false" onAction="#updateSkinCategory" text="%Update">
+        <ComboBox fx:id="skinheaderSelector" onAction="#changeSkinHeader" prefHeight="24.0" prefWidth="294.0"/>
+        <Button mnemonicParsing="false" onAction="#commitSkinType" text="%Update">
             <HBox.margin>
                 <Insets left="20.0"/>
             </HBox.margin>

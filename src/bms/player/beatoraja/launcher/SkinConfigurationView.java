@@ -30,209 +30,33 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 public class SkinConfigurationView implements Initializable {
 
 	@FXML
-	private ComboBox<SkinType> skincategory;
+	private ComboBox<SkinType> skintypeSelector;
 	@FXML
-	private ComboBox<SkinHeader> skinheader;
+	private ComboBox<SkinHeader> skinheaderSelector;
 	@FXML
 	private ScrollPane skinconfig;
 
 	private PlayerConfig player;
 	private SkinType mode = null;
 
-	private List<SkinHeader> lr2skinheader = new ArrayList<SkinHeader>();
+	/**
+	 * 検出されたスキン定義ファイル
+	 */
+	private List<SkinHeader> skinheader = new ArrayList<SkinHeader>();
 
 	private SkinHeader selected = null;
 	private Map<CustomOption, ComboBox<String>> optionbox = new HashMap<CustomOption, ComboBox<String>>();
 	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
 	private Map<CustomOffset, Spinner<Integer>[]> offsetbox = new HashMap<CustomOffset, Spinner<Integer>[]>();
 
-	static class SkinTypeCell extends ListCell<SkinType> {
-
-		@Override
-		protected void updateItem(SkinType arg0, boolean arg1) {
-			super.updateItem(arg0, arg1);
-			setText(arg0 != null ? arg0.getName() : "");
-		}
-	}
-
-	static class SkinListCell extends ListCell<SkinHeader> {
-
-		@Override
-		protected void updateItem(SkinHeader arg0, boolean arg1) {
-			super.updateItem(arg0, arg1);
-			setText(arg0 != null ? arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)") : "");
-		}
-	}
-
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		skincategory.setCellFactory((param) -> new SkinTypeCell());
-		skincategory.setButtonCell(new SkinTypeCell());
-		skincategory.getItems().addAll(SkinType.values());
+		skintypeSelector.setCellFactory((param) -> new SkinTypeCell());
+		skintypeSelector.setButtonCell(new SkinTypeCell());
+		skintypeSelector.getItems().addAll(SkinType.values());
 
-		skinheader.setCellFactory((param) -> new SkinListCell());
-		skinheader.setButtonCell(new SkinListCell());
-	}
-
-	public VBox create(SkinHeader header, SkinConfig.Property property) {
-		selected = header;
-		if (header == null) {
-			return null;
-		}
-		if(property == null) {
-			property = new SkinConfig.Property();
-		}
-		VBox main = new VBox();
-		optionbox.clear();
-		for (CustomOption option : header.getCustomOptions()) {
-			HBox hbox = new HBox();
-			ComboBox<String> combo = new ComboBox<String>();
-			combo.getItems().setAll(option.contents);
-			combo.getItems().add("Random");
-			combo.getSelectionModel().select(0);
-			int selection = -1;
-			for(SkinConfig.Option o : property.getOption()) {
-				if (o.name.equals(option.name)) {
-					int i = o.value;
-					if(i != OPTION_RANDOM_VALUE) {
-						for(int index = 0;index < option.option.length;index++) {
-							if(option.option[index] == i) {
-								selection = index;
-								break;
-							}
-						}
-					} else {
-						selection = combo.getItems().size() - 1;
-					}
-					break;
-				}
-			}
-			if (selection < 0 && option.def != null) {
-				for (int index = 0; index < option.option.length; index++) {
-					if (option.contents[index].equals(option.def)) {
-						selection = index;
-					}
-				}
-			}
-			if (selection >= 0) {
-				combo.getSelectionModel().select(selection);
-			}
-
-			Label label = new Label(option.name);
-			label.setMinWidth(250.0);
-			hbox.getChildren().addAll(label, combo);
-			optionbox.put(option, combo);
-			main.getChildren().add(hbox);
-		}
-		filebox.clear();
-		for (CustomFile file : header.getCustomFiles()) {
-			String name = file.path.substring(file.path.lastIndexOf('/') + 1);
-			if(file.path.contains("|")) {
-				if(file.path.length() > file.path.lastIndexOf('|') + 1) {
-					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|')) + file.path.substring(file.path.lastIndexOf('|') + 1);
-				} else {
-					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
-				}
-			}
-			
-			final int slashindex = file.path.lastIndexOf('/');
-			final Path dirpath = slashindex != -1 ? Paths.get(file.path.substring(0, slashindex)) : Paths.get(file.path);
-			if (!Files.exists(dirpath)) {
-				continue;
-			}
-			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dirpath,
-					"{" + name.toLowerCase() + "," + name.toUpperCase() + "}")) {
-				HBox hbox = new HBox();
-				ComboBox<String> combo = new ComboBox<String>();
-				for (Path p : paths) {
-					combo.getItems().add(p.getFileName().toString());
-				}
-				combo.getItems().add("Random");
-
-				String selection = null;
-				for(SkinConfig.FilePath f : property.getFile()) {
-					if(f.name.equals(file.name)) {
-						selection = f.path;
-						break;
-					}
-				}
-				if (selection == null && file.def != null) {
-					// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
-					for (String item : combo.getItems()) {
-						if (item.equalsIgnoreCase(file.def)) {
-							selection = item;
-							break;
-						}
-						int point = item.lastIndexOf('.');
-						if (point != -1 && item.substring(0, point).equalsIgnoreCase(file.def)) {
-							selection = item;
-							break;
-						}
-					}
-				}
-				if (selection != null) {
-					combo.setValue(selection);
-				} else {
-					combo.getSelectionModel().select(0);
-				}
-
-				Label label = new Label(file.name);
-				label.setMinWidth(250.0);
-				hbox.getChildren().addAll(label, combo);
-				filebox.put(file, combo);
-				main.getChildren().add(hbox);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		offsetbox.clear();
-		for (CustomOffset option : header.getCustomOffsets()) {
-			final String[] values = {"x","y","w","h","r","a"};
-			HBox hbox = new HBox();
-			Label label = new Label(option.name);
-			label.setMinWidth(250.0);
-			hbox.getChildren().add(label);
-
-			final boolean[] b = {option.x, option.y, option.w, option.h, option.r, option.a};
-			SkinConfig.Offset offset = null;
-			for(SkinConfig.Offset o : property.getOffset()) {
-				if(o.name.equals(option.name)) {
-					offset = o;
-					break;
-				}
-			}
-			final int[] v = offset != null ? new int[]{offset.x, offset.y, offset.w, offset.h, offset.r, offset.a} : new int[values.length];
-
-			Spinner<Integer>[] spinner = new Spinner[values.length];
-			for(int i = 0;i < spinner.length;i++) {
-				spinner[i] = new NumericSpinner();
-				spinner[i].setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-9999,9999,v[i],1));
-				spinner[i].setPrefWidth(80);
-				spinner[i].setEditable(true);
-				if(b[i]) {
-					hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
-				}
-			}
-			offsetbox.put(option, spinner);
-			main.getChildren().add(hbox);
-		}
-
-		return main;
-	}
-
-	private void scan(Path p, final List<Path> paths) {
-		if (Files.isDirectory(p)) {
-			try (Stream<Path> sub = Files.list(p)) {
-				sub.forEach((t) -> {
-						scan(t, paths);
-				});
-			} catch (IOException e) {
-			}
-		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
-				|| p.getFileName().toString().toLowerCase().endsWith(".luaskin")
-				|| p.getFileName().toString().toLowerCase().endsWith(".json")) {
-			paths.add(p);
-		}
+		skinheaderSelector.setCellFactory((param) -> new SkinListCell());
+		skinheaderSelector.setButtonCell(new SkinListCell());
 	}
 
 	public SkinHeader getSelectedHeader() {
@@ -297,7 +121,7 @@ public class SkinConfigurationView implements Initializable {
 
 	public SkinHeader[] getSkinHeader(SkinType mode) {
 		List<SkinHeader> result = new ArrayList<SkinHeader>();
-		for (SkinHeader header : lr2skinheader) {
+		for (SkinHeader header : skinheader) {
 			if (header.getSkinType() == mode) {
 				result.add(header);
 			}
@@ -306,52 +130,64 @@ public class SkinConfigurationView implements Initializable {
 	}
 	
     @FXML
-	public void updateSkinCategory() {
-		if (getSelectedHeader() != null) {
-			SkinHeader header = getSelectedHeader();
-			SkinConfig skin = new SkinConfig(header.getPath().toString());
-			skin.setProperties(getProperty());
-			player.getSkin()[header.getSkinType().getId()] = skin;
-		} else if (mode != null) {
-			player.getSkin()[mode.getId()] = null;
-		}
+	public void changeSkinType() {
+    	commitSkinType();
+    	updateSkinType(skintypeSelector.getValue());    	
+	}
+    
+	public void updateSkinType(SkinType type) {
+		mode = type;
 
-		skinheader.getItems().clear();
-		SkinHeader[] headers = getSkinHeader(skincategory.getValue());
-		skinheader.getItems().addAll(headers);
-		mode = skincategory.getValue();
-		if (player.getSkin()[skincategory.getValue().getId()] != null) {
-			SkinConfig skinconf = player.getSkin()[skincategory.getValue().getId()];
+		skinheaderSelector.getItems().clear();
+		SkinHeader[] headers = getSkinHeader(type);
+		skinheaderSelector.getItems().addAll(headers);
+		if (player.getSkin()[type.getId()] != null) {
+			SkinConfig skinconf = player.getSkin()[type.getId()];
 			if (skinconf != null) {
-				for (SkinHeader header : skinheader.getItems()) {
+				for (SkinHeader header : skinheaderSelector.getItems()) {
 					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
-						skinheader.setValue(header);
-						skinconfig.setContent(create(skinheader.getValue(), skinconf.getProperties()));
+						skinheaderSelector.setValue(header);
+						skinconfig.setContent(create(skinheaderSelector.getValue(), skinconf.getProperties()));
 						break;
 					}
 				}
 			} else {
-				skinheader.getSelectionModel().select(0);
+				skinheaderSelector.getSelectionModel().select(0);
 			}
 		}
 	}
     
+    @FXML
+	public void commitSkinType() {
+		if(player == null) {
+			return;
+		}
+		
+		if (selected != null) {
+			SkinConfig skin = new SkinConfig(selected.getPath().toString());
+			skin.setProperties(getProperty());
+			player.getSkin()[selected.getSkinType().getId()] = skin;
+		} else if (mode != null) {
+			player.getSkin()[mode.getId()] = null;
+		}
+	}
+    
     public void update(Config config) {
-		List<Path> lr2skinpaths = new ArrayList<Path>();
-		scan(Paths.get(config.getSkinpath()), lr2skinpaths);
-		for (Path path : lr2skinpaths) {
+		List<Path> skinpaths = new ArrayList<Path>();
+		scan(Paths.get(config.getSkinpath()), skinpaths);
+		for (Path path : skinpaths) {
 			String pathString = path.toString().toLowerCase();
 			if (pathString.endsWith(".json")) {
 				JSONSkinLoader loader = new JSONSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
-					lr2skinheader.add(header);
+					skinheader.add(header);
 				}
 			} else if (pathString.endsWith(".luaskin")) {
 				LuaSkinLoader loader = new LuaSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
-					lr2skinheader.add(header);
+					skinheader.add(header);
 				}
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(config);
@@ -360,7 +196,7 @@ public class SkinConfigurationView implements Initializable {
 					// System.out.println(path.toString() + " : " +
 					// header.getName()
 					// + " - " + header.getMode());
-					lr2skinheader.add(header);
+					skinheader.add(header);
 					// 7/14key skinは5/10keyにも加える
 					if(header.getType() == SkinHeader.TYPE_LR2SKIN &&
 							(header.getSkinType() == SkinType.PLAY_7KEYS || header.getSkinType() == SkinType.PLAY_14KEYS)) {
@@ -372,7 +208,7 @@ public class SkinConfigurationView implements Initializable {
 							header.setName(header.getName() + " (14KEYS) ");
 						}
 						header.setSkinType(header.getSkinType() == SkinType.PLAY_7KEYS ? SkinType.PLAY_5KEYS : SkinType.PLAY_10KEYS);
-						lr2skinheader.add(header);
+						skinheader.add(header);
 					}
 
 				} catch (IOException e) {
@@ -382,14 +218,53 @@ public class SkinConfigurationView implements Initializable {
 		}
     }
     
+	private void scan(Path p, final List<Path> paths) {
+		if (Files.isDirectory(p)) {
+			try (Stream<Path> sub = Files.list(p)) {
+				sub.forEach((t) -> {
+						scan(t, paths);
+				});
+			} catch (IOException e) {
+			}
+		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
+				|| p.getFileName().toString().toLowerCase().endsWith(".luaskin")
+				|| p.getFileName().toString().toLowerCase().endsWith(".json")) {
+			paths.add(p);
+		}
+	}
+
     public void update(PlayerConfig player) {
     	this.player = player;
-		skincategory.setValue(SkinType.PLAY_7KEYS);
-    	updateSkinCategory();
+    	skintypeSelector.setValue(SkinType.PLAY_7KEYS);
+		updateSkinType(SkinType.PLAY_7KEYS);
     }
 
+    public void commit() {
+    	commitSkinType();
+    }
+    
     @FXML
-	public void updateSkin() {
+	public void changeSkinHeader() {
+    	commitSkinHeader();
+		updateSkinHeader(skinheaderSelector.getValue());
+	}
+    
+    public void updateSkinHeader(SkinHeader header) {
+		// historyからconfig抽出
+		SkinConfig.Property property = null;
+		if(header != null) {
+			for(SkinConfig skinc : player.getSkinHistory()) {
+				if(skinc.getPath().equals(header.getPath().toString())) {
+					property = skinc.getProperties();
+					break;
+				}
+			}
+		}
+		skinconfig.setContent(create(header, property));
+    	
+    }
+    
+    public void commitSkinHeader() {
 		// history保存
 		if(selected != null) {
 			SkinConfig.Property property = getProperty();
@@ -412,17 +287,175 @@ public class SkinConfigurationView implements Initializable {
 				player.setSkinHistory(history);
 			}
 		}
+    }
 
-		// historyからconfig抽出
-		SkinConfig.Property property = null;
-		if(skinheader.getValue() != null) {
-			for(SkinConfig skinc : player.getSkinHistory()) {
-				if(skinc.getPath().equals(skinheader.getValue().getPath().toString())) {
-					property = skinc.getProperties();
+	private VBox create(SkinHeader header, SkinConfig.Property property) {
+		selected = header;
+		if (header == null) {
+			return null;
+		}
+		if(property == null) {
+			property = new SkinConfig.Property();
+		}
+		VBox main = new VBox();
+		
+		// Option項目生成
+		optionbox.clear();
+		for (CustomOption option : header.getCustomOptions()) {
+			HBox hbox = new HBox();
+			ComboBox<String> combo = new ComboBox<String>();
+			combo.getItems().setAll(option.contents);
+			combo.getItems().add("Random");
+			combo.getSelectionModel().select(0);
+			int selection = -1;
+			for(SkinConfig.Option o : property.getOption()) {
+				if (o.name.equals(option.name)) {
+					int i = o.value;
+					if(i != OPTION_RANDOM_VALUE) {
+						for(int index = 0;index < option.option.length;index++) {
+							if(option.option[index] == i) {
+								selection = index;
+								break;
+							}
+						}
+					} else {
+						selection = combo.getItems().size() - 1;
+					}
 					break;
 				}
 			}
+			if (selection < 0 && option.def != null) {
+				for (int index = 0; index < option.option.length; index++) {
+					if (option.contents[index].equals(option.def)) {
+						selection = index;
+					}
+				}
+			}
+			if (selection >= 0) {
+				combo.getSelectionModel().select(selection);
+			}
+
+			Label label = new Label(option.name);
+			label.setMinWidth(250.0);
+			hbox.getChildren().addAll(label, combo);
+			optionbox.put(option, combo);
+			main.getChildren().add(hbox);
 		}
-		skinconfig.setContent(create(skinheader.getValue(), property));
+		
+		// File項目生成
+		filebox.clear();
+		for (CustomFile file : header.getCustomFiles()) {
+			String name = file.path.substring(file.path.lastIndexOf('/') + 1);
+			if(file.path.contains("|")) {
+				if(file.path.length() > file.path.lastIndexOf('|') + 1) {
+					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|')) + file.path.substring(file.path.lastIndexOf('|') + 1);
+				} else {
+					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
+				}
+			}
+			
+			final int slashindex = file.path.lastIndexOf('/');
+			final Path dirpath = slashindex != -1 ? Paths.get(file.path.substring(0, slashindex)) : Paths.get(file.path);
+			if (!Files.exists(dirpath)) {
+				continue;
+			}
+			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dirpath,
+					"{" + name.toLowerCase() + "," + name.toUpperCase() + "}")) {
+				HBox hbox = new HBox();
+				ComboBox<String> combo = new ComboBox<String>();
+				for (Path p : paths) {
+					combo.getItems().add(p.getFileName().toString());
+				}
+				combo.getItems().add("Random");
+
+				String selection = null;
+				for(SkinConfig.FilePath f : property.getFile()) {
+					if(f.name.equals(file.name)) {
+						selection = f.path;
+						break;
+					}
+				}
+				if (selection == null && file.def != null) {
+					// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
+					for (String item : combo.getItems()) {
+						if (item.equalsIgnoreCase(file.def)) {
+							selection = item;
+							break;
+						}
+						int point = item.lastIndexOf('.');
+						if (point != -1 && item.substring(0, point).equalsIgnoreCase(file.def)) {
+							selection = item;
+							break;
+						}
+					}
+				}
+				if (selection != null) {
+					combo.setValue(selection);
+				} else {
+					combo.getSelectionModel().select(0);
+				}
+
+				Label label = new Label(file.name);
+				label.setMinWidth(250.0);
+				hbox.getChildren().addAll(label, combo);
+				filebox.put(file, combo);
+				main.getChildren().add(hbox);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		// Offset項目生成
+		offsetbox.clear();
+		for (CustomOffset option : header.getCustomOffsets()) {
+			final String[] values = {"x","y","w","h","r","a"};
+			HBox hbox = new HBox();
+			Label label = new Label(option.name);
+			label.setMinWidth(250.0);
+			hbox.getChildren().add(label);
+
+			final boolean[] b = {option.x, option.y, option.w, option.h, option.r, option.a};
+			SkinConfig.Offset offset = null;
+			for(SkinConfig.Offset o : property.getOffset()) {
+				if(o.name.equals(option.name)) {
+					offset = o;
+					break;
+				}
+			}
+			final int[] v = offset != null ? new int[]{offset.x, offset.y, offset.w, offset.h, offset.r, offset.a} : new int[values.length];
+
+			Spinner<Integer>[] spinner = new Spinner[values.length];
+			for(int i = 0;i < spinner.length;i++) {
+				spinner[i] = new NumericSpinner();
+				spinner[i].setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-9999,9999,v[i],1));
+				spinner[i].setPrefWidth(80);
+				spinner[i].setEditable(true);
+				if(b[i]) {
+					hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
+				}
+			}
+			offsetbox.put(option, spinner);
+			main.getChildren().add(hbox);
+		}
+
+		return main;
+	}
+	
+	static class SkinTypeCell extends ListCell<SkinType> {
+
+		@Override
+		protected void updateItem(SkinType arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			setText(arg0 != null ? arg0.getName() : "");
+		}
+	}
+
+	static class SkinListCell extends ListCell<SkinHeader> {
+
+		@Override
+		protected void updateItem(SkinHeader arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			setText(arg0 != null ? arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)") : "");
+		}
 	}
 }
