@@ -11,6 +11,7 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 
 import bms.player.beatoraja.ir.IRConnectionManager;
+import bms.player.beatoraja.pattern.MineNoteModifier;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.BarSorter;
@@ -90,6 +91,8 @@ public class PlayerConfig {
 	 * アシストオプション:地雷除去
 	 */
 	private boolean nomine = false;
+
+	private int mineMode = 0;
 	/**
 	 * アシストオプション:BPMガイド
 	 */
@@ -678,6 +681,7 @@ public class PlayerConfig {
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
 
+		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
 		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
 
 		if(irconfig == null) {
@@ -783,6 +787,14 @@ public class PlayerConfig {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public int getMineMode() {
+		return mineMode;
+	}
+
+	public void setMineMode(int mineMode) {
+		this.mineMode = mineMode;
 	}
 
 	public static class IRConfig implements Validatable{
