@@ -29,7 +29,6 @@ public class SkinTextBitmap extends SkinText {
 
 	@Override
 	public void load() {
-		font = source.getFont();
 	}
 
 	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
@@ -41,6 +40,7 @@ public class SkinTextBitmap extends SkinText {
 		this.source = source;
 		this.size = size;
 		this.layout =new GlyphLayout();
+		this.font = source.getFont();
 	}
 
 	@Override
