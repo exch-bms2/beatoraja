@@ -684,8 +684,13 @@ public class PlayerConfig {
 		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
 		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
 
-		if(irconfig == null) {
-			irconfig = new IRConfig[0];
+		if(irconfig == null || irconfig.length == 0) {
+			String[] irnames = IRConnectionManager.getAllAvailableIRConnectionName();
+			irconfig = new IRConfig[irnames.length];
+			for(int i = 0;i < irnames.length;i++) {
+				irconfig[i] = new IRConfig();
+				irconfig[i].setIrname(irnames[i]);
+			}
 		}
 		
 		for(int i = 0;i < irconfig.length;i++) {
