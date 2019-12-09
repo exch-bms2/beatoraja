@@ -23,6 +23,7 @@ import bms.player.beatoraja.config.KeyConfigurationSkin;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.play.*;
+import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
@@ -44,7 +45,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 	protected JsonSkin.Skin sk;
 
-	Map<String, Texture> texmap;
+	Map<String, SourceData> sourceMap;
 	Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
 
 	protected final SkinLuaAccessor lua;
@@ -52,6 +53,16 @@ public class JSONSkinLoader extends SkinLoader {
 	protected ObjectMap<String, String> filemap = new ObjectMap();
 
 	protected JsonSkinSerializer serializer;
+	
+	private static class SourceData {
+		public final String path;
+		public boolean loaded = false;
+		public Object data;
+		
+		public SourceData(String path) {
+			this.path = path;
+		}
+	}
 
 	/**
 	 * ヘッダの読み込みに使われるコンストラクタ
@@ -273,7 +284,7 @@ public class JSONSkinLoader extends SkinLoader {
 				}
 			}
 
-			texmap = new HashMap<>();
+			sourceMap = new HashMap<>();
 			bitmapSourceMap = new HashMap<>();
 
 			if (type.isPlay()) {
@@ -338,6 +349,10 @@ public class JSONSkinLoader extends SkinLoader {
 			skin.setFadeout(sk.fadeout);
 			skin.setInput(sk.input);
 			skin.setScene(sk.scene);
+			
+			for(JsonSkin.Source source : sk.source) {
+				sourceMap.put(source.id, new SourceData(source.path));
+			}
 
 			for (JsonSkin.Destination dst : sk.destination) {
 				SkinObject obj = null;
@@ -352,9 +367,12 @@ public class JSONSkinLoader extends SkinLoader {
 				if (obj == null) {
 					for (JsonSkin.Image img : sk.image) {
 						if (dst.id.equals(img.id)) {
-							Texture tex = getTexture(img.src, p);
+							Object data = getSource(img.src, p);
 							
-							if(tex != null) {
+							if(data instanceof SkinSourceMovie) {
+								obj = new SkinImage((SkinSourceMovie)data);
+							} else if(data instanceof Texture) {
+								Texture tex = (Texture) data;
 								if (img.len > 1) {
 									TextureRegion[] srcimg = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx,
 											img.divy);
@@ -372,12 +390,12 @@ public class JSONSkinLoader extends SkinLoader {
 									obj = new SkinImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle);
 								}
-								if (img.act != null) {
-									obj.setClickevent(img.act);
-									obj.setClickeventType(img.click);
-								}								
-							}
-
+							} 
+							
+							if (obj != null && img.act != null) {
+								obj.setClickevent(img.act);
+								obj.setClickeventType(img.click);
+							}								
 							break;
 						}
 					}
@@ -1258,45 +1276,66 @@ public class JSONSkinLoader extends SkinLoader {
 			obj.setStretch(dst.stretch);
 		}
 	}
+	
+	private Object getSource(String srcid, Path p) {
+		if(srcid == null) {
+			return null;
+		}
+		
+		final SourceData data = sourceMap.get(srcid);
+		if(data == null) {
+			return null;
+		}
+		
+		if(data.loaded) {
+			return data.data;
+		}
+		final File imagefile = getPath(p.getParent().toString() + "/" + data.path, filemap);
+		if (imagefile.exists()) {
+			boolean isMovie = false;
+			 for (String mov : BGAProcessor.mov_extension) {
+				 if (imagefile.getName().toLowerCase().endsWith(mov)) {
+					 try {
+					 	SkinSourceMovie mm = new SkinSourceMovie(imagefile.getAbsolutePath());
+					 	data.data = mm;
+					 	isMovie = true;
+					 	break;
+					 } catch (Throwable e) {
+						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+					 	e.printStackTrace();
+					 }
+				 }
+			 }
+
+			if (!isMovie) {
+				data.data = getTexture(imagefile.getPath());
+			}
+		}
+		data.loaded = true;
+		
+		return data.data;
+	}
 
 	private Texture getTexture(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
 		}
-		for (JsonSkin.Source src : sk.source) {
-			if (srcid.equals(src.id)) {
-				if (!texmap.containsKey(src.id)) {
-					final File imagefile = getPath(p.getParent().toString() + "/" + src.path, filemap);
-					if (imagefile.exists()) {
-						boolean isMovie = false;
-						// for (String mov : BGAProcessor.mov_extension) {
-						// if (imagefile.getName().toLowerCase().endsWith(mov))
-						// {
-						// try {
-						// SkinSourceMovie mm = new
-						// SkinSourceMovie(imagefile.getPath());
-						// imagelist.add(mm);
-						// isMovie = true;
-						// break;
-						// } catch (Throwable e) {
-						// Logger.getGlobal().warning("BGAファイル読み込み失敗。" +
-						// e.getMessage());
-						// e.printStackTrace();
-						// }
-						// }
-						// }
-
-						if (!isMovie) {
-							texmap.put(src.id, getTexture(imagefile.getPath()));
-						}
-					} else {
-						texmap.put(src.id, null);
-					}
-				}
-				return texmap.get(src.id);
-			}
+		
+		final SourceData data = sourceMap.get(srcid);
+		if(data == null) {
+			return null;
 		}
-		return null;
+
+		if(data.loaded) {
+			return (data.data instanceof Texture) ? (Texture)data.data : null;
+		}
+		final File imagefile = getPath(p.getParent().toString() + "/" + data.path, filemap);
+		if (imagefile.exists()) {
+			data.data = getTexture(imagefile.getPath());
+		}
+		data.loaded = true;
+		
+		return (Texture) data.data;
 	}
 
 	private SkinSource[] getNoteTexture(String[] images, Path p) {
@@ -1387,13 +1426,12 @@ public class JSONSkinLoader extends SkinLoader {
 		if(srcid == null) {
 			return null;
 		}
-		for (JsonSkin.Source src : sk.source) {
-			if (srcid.equals(src.id)) {
-				if (!texmap.containsKey(src.id)) {
-					return getPath(p.getParent().toString() + "/" + src.path, filemap);
-				}
-			}
+		
+		final SourceData data = sourceMap.get(srcid);
+		if(data == null) {
+			return null;
 		}
-		return null;
+		
+		return getPath(p.getParent().toString() + "/" + data.path, filemap);
 	}
 }
