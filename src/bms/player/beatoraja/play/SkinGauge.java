@@ -25,7 +25,7 @@ public class SkinGauge extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private SkinSource image;
+	private SkinSourceSet image;
 	/**
 	 * アニメーションの種類
 	 */

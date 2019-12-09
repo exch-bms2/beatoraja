@@ -24,10 +24,4 @@ public class SkinSourceReference implements SkinSource {
 	public TextureRegion getImage(long time, MainState state) {
 		return state.getImage(id);
 	}
-
-	@Override
-	public TextureRegion[] getImages(long time, MainState state) {
-		return null;
-	}
-
 }

@@ -15,6 +15,4 @@ public interface SkinSource extends Disposable {
 	public boolean validate();
 	
 	public TextureRegion getImage(long time, MainState state);
-
-	public TextureRegion[] getImages(long time, MainState state);
 }

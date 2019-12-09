@@ -18,11 +18,11 @@ public class SkinNumber extends SkinObject {
 	/**
 	 * プラス値用イメージ
 	 */
-	private SkinSource image;
+	private SkinSourceSet image;
 	/**
 	 * マイナス値用イメージ
 	 */
-	private SkinSource mimage;
+	private SkinSourceSet mimage;
 	/**
 	 * 数値参照先
 	 */
@@ -131,7 +131,7 @@ public class SkinNumber extends SkinObject {
 			draw = false;
 			return;
 		}
-		final SkinSource images = (value >= 0 || mimage == null) ? this.image : mimage;
+		final SkinSourceSet images = (value >= 0 || mimage == null) ? this.image : mimage;
 		if (images == null) {
 			length = 0;
 			draw = false;
