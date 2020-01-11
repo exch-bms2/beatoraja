@@ -88,10 +88,8 @@ public class PlayerConfig {
 	 */
 	private int judgewindowrate = 100;
 	/**
-	 * アシストオプション:地雷除去
+	 * 地雷モード
 	 */
-	private boolean nomine = false;
-
 	private int mineMode = 0;
 	/**
 	 * アシストオプション:BPMガイド
@@ -281,14 +279,6 @@ public class PlayerConfig {
 
 	public void setDoubleoption(int doubleoption) {
 		this.doubleoption = doubleoption;
-	}
-
-	public boolean isNomine() {
-		return nomine;
-	}
-
-	public void setNomine(boolean nomine) {
-		this.nomine = nomine;
 	}
 
 	public boolean isLegacynote() {

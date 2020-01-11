@@ -241,7 +241,7 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, NOMINE, true)) {
-                config.setNomine(!config.isNomine());
+                config.setMineMode(config.getMineMode() == 1 ? 0 : 1);
                 select.play(SOUND_OPTIONCHANGE);
             }
         } else if (input.getNumberState()[5] || (input.startPressed() && input.isSelectPressed())) {

@@ -790,7 +790,7 @@ public class IntegerPropertyFactory {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0);
 		}
 		if (optionid == BUTTON_ASSIST_NOMINE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0);
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getMineMode() == 1 ? 1 : 0);
 		}
 		if (optionid == BUTTON_LNMODE) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode());

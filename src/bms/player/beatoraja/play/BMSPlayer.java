@@ -183,16 +183,8 @@ public class BMSPlayer extends MainState {
 				assist = 2;
 				score = false;
 			}
-			if (config.isNomine()) {
-				// 地雷ノートがなければアシストなし
-				MineNoteModifier mod = new MineNoteModifier();
-				mod.modify(model);
-				if (mod.mineNoteExists()) {
-					assist = 2;
-					score = false;
-				}
-			}
 
+			// 地雷ノートがなければアシストなし
 			if(config.getMineMode() > 0) {
 				MineNoteModifier mod = new MineNoteModifier(config.getMineMode() - 1);
 				mod.modify(model);
