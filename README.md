@@ -8,7 +8,7 @@ It works on Windows, Mac OS, and Linux.
 - 8 types of groove gauge (ex. assist-easy, ex-hard, ex-grade)
 - 11 types of clear lamp (ex. assist, light-assist, ex-hard, perfect, and max)
 - real-time play speed controller (x0.25 - x4.0. auto play mode, replay mode only)
-- Various assist options : legacy note, expand judge, bpm guide, and no mine
+- various assist options : legacy note, expand judge, bpm guide, and no mine
 - pms judge (max 1 miss / 1 notes, combo is reset when miss)
 - support bmson 0.2.1, 1.0.0
 - practice mode
