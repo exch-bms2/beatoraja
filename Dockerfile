@@ -1,4 +1,4 @@
-FROM airdock/oracle-jdk:1.8
+FROM airdock/oraclejdk:1.8
 
 # Installs Ant
 ENV ANT_VERSION 1.9.7
