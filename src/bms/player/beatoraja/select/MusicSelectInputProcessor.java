@@ -329,7 +329,7 @@ public class MusicSelectInputProcessor {
                 if (current instanceof SongBar && ((SongBar) current).existsSong() &&
                         (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
-                    bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
+                    bar.updateBar(new SameFolderBar(select, sd.getFullTitle(), sd.getFolder()));
                     select.play(SOUND_FOLDEROPEN);
                 } else if (current instanceof GradeBar) {
                     List<Bar> songbars = Arrays.asList(((GradeBar) current).getSongDatas()).stream()
