@@ -159,4 +159,8 @@ public class SearchTextField extends Stage {
 			searchfont = null;
 		}
 	}
+
+	public Rectangle getSearchBounds() {
+		return new Rectangle(search.getX(), search.getY(), search.getWidth(), search.getHeight());
+	}
 }

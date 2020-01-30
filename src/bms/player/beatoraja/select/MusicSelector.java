@@ -8,6 +8,7 @@ import java.nio.file.*;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.ObjectMap.Keys;
 
@@ -281,7 +282,9 @@ public class MusicSelector extends MainState {
 		loadSkin(SkinType.MUSIC_SELECT);
 
 		// search text field
-		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
+		Rectangle searchRegion = ((MusicSelectSkin) getSkin()).getSearchTextRegion();
+		if (searchRegion != null && (getStage() == null ||
+				(search != null && !searchRegion.equals(search.getSearchBounds())))) {
 			if(search != null) {
 				search.dispose();
 			}
