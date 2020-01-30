@@ -351,6 +351,7 @@ public class MusicSelector extends MainState {
 						}
 						preview.stop();
 						main.changeState(MainStateType.DECIDE);
+						search.unfocus(this);
 						banners.disposeOld();
 						stagefiles.disposeOld();
 					} else {
@@ -387,6 +388,7 @@ public class MusicSelector extends MainState {
 					}
 					preview.stop();
 					main.changeState(MainStateType.DECIDE);
+					search.unfocus(this);
 					banners.disposeOld();
 					stagefiles.disposeOld();
 				} else {
@@ -411,6 +413,7 @@ public class MusicSelector extends MainState {
 						if(resource.nextSong()) {
 							preview.stop();
 							main.changeState(MainStateType.DECIDE);
+							search.unfocus(this);
 							banners.disposeOld();
 							stagefiles.disposeOld();
 						}
@@ -427,9 +430,11 @@ public class MusicSelector extends MainState {
 		if (input.getNumberState()[6]) {
 			preview.stop();
 			main.changeState(MainStateType.CONFIG);
+			search.unfocus(this);
 		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
 			preview.stop();
 			main.changeState(MainStateType.SKINCONFIG);
+			search.unfocus(this);
 		}
 
 		musicinput.input();
@@ -519,6 +524,7 @@ public class MusicSelector extends MainState {
 			resource.setCourseData(course.getCourseData());
 			resource.setBMSFile(files[0], mode);
 			main.changeState(MainStateType.DECIDE);
+			search.unfocus(this);
 			banners.disposeOld();
 			stagefiles.disposeOld();
 		} else {
