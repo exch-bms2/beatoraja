@@ -61,6 +61,7 @@ public class SearchTextField extends Stage {
 
 				public void keyTyped(TextField textField, char key) {
 					if (key == '\n' || key == 13) {
+						boolean searched = false;
 						if (textField.getText().length() > 0) {
 							SearchWordBar swb = new SearchWordBar(selector, textField.getText());
 							int count = swb.getChildren().length;
@@ -71,12 +72,16 @@ public class SearchTextField extends Stage {
 								textField.setText("");
 								textField.setMessageText(count + " song(s) found");
 								textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
+								searched = true;
 							} else {
-								selector.main.getInputProcessor().setEnterPressed(false);
 								textField.setText("");
 								textField.setMessageText("no song found");
 								textFieldStyle.messageFontColor = Color.DARK_GRAY;
 							}
+						}
+						if (!searched) {
+							// Enter入力がTextFieldとInputProcessorで2回発生するので、後者のEnter入力を一時的にロックする
+							selector.main.getInputProcessor().lockEnterPress();
 						}
 						textField.getOnscreenKeyboard().show(false);
 						setKeyboardFocus(null);
