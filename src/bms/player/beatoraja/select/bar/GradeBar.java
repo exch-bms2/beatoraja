@@ -61,15 +61,14 @@ public class GradeBar extends SelectableBar {
     }
 
     public CourseData.TrophyData getTrophy() {
-        for (CourseData.TrophyData trophy : course.getTrophy()) {
-            if (qualified(this.getScore(), trophy)) {
-                return trophy;
-            }
-            if (qualified(mscore, trophy)) {
-                return trophy;
-            }
-            if (qualified(rscore, trophy)) {
-                return trophy;
+        IRScoreData[] scores = {this.getScore(), mscore, rscore};
+
+        CourseData.TrophyData[] trophies = course.getTrophy();
+        for (int i = trophies.length - 1; i >= 0; i--) {
+            for (IRScoreData score : scores) {
+                if (qualified(score, trophies[i])) {
+                    return trophies[i];
+                }
             }
         }
         return null;
