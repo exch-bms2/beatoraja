@@ -64,22 +64,22 @@ public class ScoreDataProperty {
             switch (score.getPlaymode()) {
                 case BEAT_5K:
                 case BEAT_10K:
-                    nowpoint = (int)((long)100000 * score.getJudgeCount(0) + 100000 * score.getJudgeCount(1) + 50000 * score.getJudgeCount(2))
-                            / totalnotes;
+                    nowpoint = (int)(((long)100000 * score.getJudgeCount(0) + 100000 * score.getJudgeCount(1) + 50000 * score.getJudgeCount(2))
+                            / totalnotes);
                     break;
                 case BEAT_7K:
                 case BEAT_14K:
-                    nowpoint = (int)((long)150000 * score.getJudgeCount(0) + 100000 * score.getJudgeCount(1) + 20000 * score.getJudgeCount(2))
-                            / totalnotes + (int)((long)50000 * score.getCombo() / totalnotes);
+                    nowpoint = (int)(((long)150000 * score.getJudgeCount(0) + 100000 * score.getJudgeCount(1) + 20000 * score.getJudgeCount(2))
+                            / totalnotes) + (int)((long)50000 * score.getCombo() / totalnotes);
                     break;
                 case POPN_5K:
                 case POPN_9K:
-                    nowpoint = (int)((long)100000 * score.getJudgeCount(0) + 70000 * score.getJudgeCount(1) + 40000 * score.getJudgeCount(2))
-                            / totalnotes;
+                    nowpoint = (int)(((long)100000 * score.getJudgeCount(0) + 70000 * score.getJudgeCount(1) + 40000 * score.getJudgeCount(2))
+                            / totalnotes);
                     break;
                 default:
-                    nowpoint = (int)((long)1000000 * score.getJudgeCount(0) + 700000 * score.getJudgeCount(1) + 400000 * score.getJudgeCount(2))
-                            / totalnotes;
+                    nowpoint = (int)(((long)1000000 * score.getJudgeCount(0) + 700000 * score.getJudgeCount(1) + 400000 * score.getJudgeCount(2))
+                            / totalnotes);
                     break;
             }
         } else {
