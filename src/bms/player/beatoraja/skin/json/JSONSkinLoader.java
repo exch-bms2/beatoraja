@@ -1400,6 +1400,7 @@ public class JSONSkinLoader extends SkinLoader {
 				} else {
 					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
 				}
+				skinText.setConstantText(text.constantText);
 				skinText.setAlign(text.align);
 				skinText.setWrapping(text.wrapping);
 				skinText.setOverflow(text.overflow);
