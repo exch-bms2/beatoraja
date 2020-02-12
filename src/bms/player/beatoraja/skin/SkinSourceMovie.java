@@ -47,10 +47,6 @@ public class SkinSourceMovie implements SkinSource {
 		return null;
 	}
 
-	public TextureRegion[] getImages(long time, MainState state) {
-		return null;
-	}
-	
 	public void dispose() {
 		if (image != null) {
 			image.dispose();

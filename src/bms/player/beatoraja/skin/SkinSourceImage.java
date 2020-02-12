@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
 
-public class SkinSourceImage implements SkinSource {
+public class SkinSourceImage implements SkinSource, SkinSourceSet {
 
 	/**
 	 * イメージ

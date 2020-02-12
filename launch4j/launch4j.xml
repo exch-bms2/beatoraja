@@ -1,12 +1,21 @@
 <launch4jConfig>
   <headerType>gui</headerType>
   <jar>build/beatoraja.jar</jar>
+  <dontWrapJar>true</dontWrapJar>
   <outfile>build/beatoraja.exe</outfile>
   <errTitle>beatoraja</errTitle>
   <chdir>.</chdir>
-  <!-- <icon>beatoraja.ico</icon> -->
+  <icon>beatoraja.ico</icon>
+  <classPath>
+    <mainClass>bms.player.beatoraja.MainLoader</mainClass>
+    <cp>beatoraja.jar;ir/*</cp>
+  </classPath>
   <jre>
+  	<path>./jre-13.0.1</path>
+  	<bundledJre64Bit>true</bundledJre64Bit>
     <minVersion>1.8.0</minVersion>
-    <runtimeBits>64/32</runtimeBits>
+    <runtimeBits>64</runtimeBits>
+    <initialHeapSize>1024</initialHeapSize>
+    <maxHeapSize>4096</maxHeapSize>
   </jre>
 </launch4jConfig>
