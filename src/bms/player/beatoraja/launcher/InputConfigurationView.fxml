@@ -37,12 +37,13 @@
             </HBox.margin>
         </CheckBox>
     </HBox>
-    <HBox prefHeight="150.0" prefWidth="723.0">
+    <HBox prefHeight="74.0" prefWidth="723.0">
         <VBox.margin>
             <Insets left="10.0" top="10.0" />
         </VBox.margin>
 	    <TableView fx:id="controller_tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<columns>
+				<TableColumn fx:id="playsideCol" prefWidth="40.0" text="" />
 				<TableColumn fx:id="nameCol" prefWidth="185.0" text="" />
 				<TableColumn fx:id="isAnalogCol" prefWidth="185.0" text="%ANALOG_SCRATCH" />
 				<TableColumn fx:id="analogThresholdCol" prefWidth="185.0" text="%ANALOG_SCRATCH_THRESHOLD" />
