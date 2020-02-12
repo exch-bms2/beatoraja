@@ -2,6 +2,7 @@ package bms.player.beatoraja.launcher;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import bms.player.beatoraja.CourseData;
@@ -58,6 +59,8 @@ public class FolderEditorView implements Initializable {
 		});
 		folderSongsController.setVisible("fullTitle", "sha256");
 		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
+
+		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
 		updateFolder(null);
 	}
@@ -134,9 +137,11 @@ public class FolderEditorView implements Initializable {
 	}
 	
 	public void addSongData() {
-		SongData song = searchSongs.getSelectionModel().getSelectedItem();
-		if(song != null) {
-			folderSongs.getItems().add(song);
+		List<SongData> songs = searchSongs.getSelectionModel().getSelectedItems();
+		for (SongData song : songs) {
+			if (song != null) {
+				folderSongs.getItems().add(song);
+			}
 		}
 	}
 

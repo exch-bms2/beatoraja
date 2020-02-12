@@ -88,6 +88,9 @@ public class CourseEditorView implements Initializable {
 		});
 		courseSongsController.setVisible("fullTitle", "sha256");
 		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
+
+		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
 		updateCourse(null);
 	}
 	
@@ -256,10 +259,13 @@ public class CourseEditorView implements Initializable {
 			courses.getSelectionModel().select(index + 1);
 		}
 	}
+
 	public void addSongData() {
-		SongData song = searchSongs.getSelectionModel().getSelectedItem();
-		if(song != null) {
-			courseSongs.getItems().add(song);
+		List<SongData> songs = searchSongs.getSelectionModel().getSelectedItems();
+		for (SongData song : songs) {
+			if (song != null) {
+				courseSongs.getItems().add(song);
+			}
 		}
 	}
 
