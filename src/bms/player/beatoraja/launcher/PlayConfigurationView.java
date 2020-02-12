@@ -152,6 +152,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> minemode;
 	@FXML
+	private ComboBox<Integer> scrollmode;
+	@FXML
 	private Spinner<Integer> hranthresholdbpm;
 	@FXML
 	private ComboBox<Integer> seventoninepattern;
@@ -266,6 +268,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(gaugeautoshift, new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE","BEST CLEAR","SELECT TO UNDER" });
 		initComboBox(bottomshiftablegauge, new String[] { "ASSIST EASY", "EASY", "NORMAL" });
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
+		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 
 		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
 		String[] targetString = new String[targets.length];
@@ -434,6 +437,7 @@ public class PlayConfigurationView implements Initializable {
 
 		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		minemode.getSelectionModel().select(player.getMineMode());
+		scrollmode.getSelectionModel().select(player.getScrollMode());
 		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
@@ -522,6 +526,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setBottomShiftableGauge(bottomshiftablegauge.getValue());
 		player.setJudgewindowrate(getValue(exjudge));
 		player.setMineMode(minemode.getValue());
+		player.setScrollMode(scrollmode.getValue());
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));
 		player.setMarkprocessednote(markprocessednote.isSelected());
 		player.setExtranoteDepth(extranotedepth.getValue());

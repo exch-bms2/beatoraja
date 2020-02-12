@@ -225,6 +225,8 @@
                                          </NumericSpinner>
                                          <Label text="Mine Mode" GridPane.rowIndex="3" />
                                          <ComboBox fx:id="minemode" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                         <Label text="Scroll Mode" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="scrollmode" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                      </GridPane>
                                      <GridPane hgap="10.0" vgap="4.0">
                                          <columnConstraints>
