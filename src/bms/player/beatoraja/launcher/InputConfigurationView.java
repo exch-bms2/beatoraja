@@ -29,6 +29,10 @@ public class InputConfigurationView implements Initializable {
     private ComboBox<Integer> analogScratchMode;
     @FXML
     private NumericSpinner<Integer> analogScratchThreshold;
+    @FXML
+    private CheckBox mouseScratch;
+    @FXML
+    private NumericSpinner<Integer> mouseScratchDuration;
 
     private PlayerConfig player;
 
@@ -67,6 +71,8 @@ public class InputConfigurationView implements Initializable {
             analogScratch.setSelected(controller.isAnalogScratch());
             analogScratchMode.getSelectionModel().select(controller.getAnalogScratchMode());
             analogScratchThreshold.getValueFactory().setValue(controller.getAnalogScratchThreshold());
+            mouseScratch.setSelected(controller.isMouseScratch());
+            mouseScratchDuration.getValueFactory().setValue(controller.getMouseScratchDuration());
         }
 
     }
@@ -81,6 +87,8 @@ public class InputConfigurationView implements Initializable {
                 controller.setAnalogScratch(analogScratch.isSelected());
                 controller.setAnalogScratchThreshold(analogScratchThreshold.getValue());
                 controller.setAnalogScratchMode(analogScratchMode.getValue());
+                controller.setMouseScratch(mouseScratch.isSelected());
+                controller.setMouseScratchDuration(mouseScratchDuration.getValue());
             }
         }
     }
