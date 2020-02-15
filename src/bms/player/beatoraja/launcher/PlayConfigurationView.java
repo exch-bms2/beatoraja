@@ -288,52 +288,37 @@ public class PlayConfigurationView implements Initializable {
 		judgetiming.setValueFactoryValues(PlayerConfig.JUDGETIMING_MIN, PlayerConfig.JUDGETIMING_MAX, 0, 1);
 		resourceController.init(this);
 
-		newVersionCheck();
+		checkNewVersion();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 	}
 
-	@JsonIgnoreProperties(ignoreUnknown=true)
-	static class GithubLastestRelease{
-		public String name;
-	}
+	private void checkNewVersion() {
+		Runnable newVersionCheckRunnable = () -> {
+			final String message = MainLoader.getVersionChecker().getMessage();
+			final String downloadURL = MainLoader.getVersionChecker().getDownloadURL();
+			Platform.runLater(() -> {
+				newversion.setText(message);
+				if(downloadURL != null) {
+					newversion.setOnAction(new EventHandler<ActionEvent>() {
 
-        private void newVersionCheck() {
-        	Runnable newVersionCheckRunnable = () -> {
-        	    try {
-        		URL url = new URL("https://api.github.com/repos/exch-bms2/beatoraja/releases/latest");
-        		ObjectMapper mapper = new ObjectMapper();
-        		GithubLastestRelease lastestData = mapper.readValue(url, GithubLastestRelease.class);
-        		final String name = lastestData.name;
-        		final String downloadURL = "https://mocha-repository.info/download/beatoraja" + name + ".zip";
-        		Platform.runLater(() -> {
-        
-        		    if (MainController.VERSION.contains(name)) {
-        			newversion.setText("最新版を利用中です");
-        		    } else {
-        			newversion.setText(String.format("最新版[%s]を利用可能です。", name));
-        			newversion.setOnAction(new EventHandler<ActionEvent>() {
-        
-        			    @Override
-        			    public void handle(ActionEvent event) {
-        				Desktop desktop = Desktop.getDesktop();
-        				URI uri;
-        				try {
-        				    uri = new URI(downloadURL);
-        				    desktop.browse(uri);
-        				} catch (Exception e) {
-        				    Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
-        				}
-        			    }
-        			});
-        		    }
-        		});
-        	    } catch (Exception e) {
-        		Logger.getGlobal().warning("最新版URL取得時例外:" + e.getMessage());
-        	    }
-        	};
-        
-        	new Thread(newVersionCheckRunnable).start();
-        }
+						@Override
+						public void handle(ActionEvent event) {
+							Desktop desktop = Desktop.getDesktop();
+							URI uri;
+							try {
+								uri = new URI(downloadURL);
+								desktop.browse(uri);
+							} catch (Exception e) {
+								Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
+							}
+						}
+					});
+				}
+			});
+		};
+
+		new Thread(newVersionCheckRunnable).start();
+	}
 
 	public void setBMSInformationLoader(MainLoader loader) {
 		this.loader = loader;

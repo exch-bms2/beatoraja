@@ -1,6 +1,9 @@
 package bms.player.beatoraja;
 
+import java.awt.*;
 import java.io.*;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.FileHandler;
@@ -10,7 +13,12 @@ import javax.swing.JOptionPane;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
@@ -39,6 +47,8 @@ public class MainLoader extends Application {
 	private static final Set<String> illegalSongs = new HashSet<String>();
 
 	private static Path bmsPath;
+
+	private static VersionChecker version;
 	
 	public static void main(String[] args) {
 		
@@ -198,6 +208,19 @@ public class MainLoader extends Application {
 		return songdb;
 	}
 
+	public static VersionChecker getVersionChecker() {
+		if(version == null) {
+			version = new GithubVersionChecker();
+		}
+		return version;
+	}
+
+	public static void setVersionChecker(VersionChecker version) {
+		if(version != null) {
+			MainLoader.version = version;
+		}
+	}
+
 	public static Path getBMSPath() {
 		return bmsPath;
 	}
@@ -241,4 +264,53 @@ public class MainLoader extends Application {
 			e.printStackTrace();
 		}
 	}
+
+	public interface VersionChecker {
+		public String getMessage();
+		public String getDownloadURL();
+	}
+
+	private static class GithubVersionChecker implements VersionChecker {
+
+		private String dlurl;
+		private String message;
+
+		public String getMessage() {
+			if(message == null) {
+				getInformation();
+			}
+			return message;
+		}
+
+		public String getDownloadURL() {
+			if(message == null) {
+				getInformation();
+			}
+			return dlurl;
+		}
+
+		private void getInformation() {
+			try {
+				URL url = new URL("https://api.github.com/repos/exch-bms2/beatoraja/releases/latest");
+				ObjectMapper mapper = new ObjectMapper();
+				GithubLastestRelease lastestData = mapper.readValue(url, GithubLastestRelease.class);
+				final String name = lastestData.name;
+				if (MainController.VERSION.contains(name)) {
+					message = "最新版を利用中です";
+				} else {
+					message = String.format("最新版[%s]を利用可能です。", name);
+					dlurl = "https://mocha-repository.info/download/beatoraja" + name + ".zip";
+				}
+			} catch (Exception e) {
+				Logger.getGlobal().warning("最新版URL取得時例外:" + e.getMessage());
+				message = "バージョン情報を取得できませんでした";
+			}
+		}
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown=true)
+	static class GithubLastestRelease{
+		public String name;
+	}
+
 }
