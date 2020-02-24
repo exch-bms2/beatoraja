@@ -692,8 +692,8 @@ public class PlayConfigurationView implements Initializable {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
-			String player = "player1";
-			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + "/" + player + "/score.db");
+			String player = players.getValue();
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + File.separatorChar + player + File.separatorChar + "score.db");
 			scoredb.createTable();
 
 			ScoreDataImporter scoreimporter = new ScoreDataImporter(scoredb);
