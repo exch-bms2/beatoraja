@@ -86,6 +86,7 @@ public class PlayerConfig {
 	 * アシストオプション:LNアシスト
 	 */
 	private boolean legacynote = false;
+    private int longnoteMode = 0;
 	/**
 	 * アシストオプション:判定拡大
 	 */
@@ -675,6 +676,7 @@ public class PlayerConfig {
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
 
 		scrollMode = MathUtils.clamp(scrollMode, 0, ScrollSpeedModifier.Mode.values().length);
+		longnoteMode = MathUtils.clamp(longnoteMode, 0, LongNoteModifier.Mode.values().length);
 		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
 		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
 
@@ -802,6 +804,14 @@ public class PlayerConfig {
 
     public void setScrollMode(int scrollMode) {
         this.scrollMode = scrollMode;
+    }
+
+    public int getLongnoteMode() {
+        return longnoteMode;
+    }
+
+    public void setLongnoteMode(int longnoteMode) {
+        this.longnoteMode = longnoteMode;
     }
 
     public static class IRConfig implements Validatable{

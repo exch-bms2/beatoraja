@@ -188,6 +188,15 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 			}
+			if(config.getLongnoteMode() > 0) {
+				LongNoteModifier mod = new LongNoteModifier(config.getLongnoteMode() - 1);
+				mod.modify(model);
+				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
+					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
+					score = false;
+				}
+			}
+
 			if (config.getJudgewindowrate() > 100) {
 				assist = 2;
 				score = false;
