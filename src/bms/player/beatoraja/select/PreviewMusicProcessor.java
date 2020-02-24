@@ -71,9 +71,11 @@ public class PreviewMusicProcessor {
 
         private boolean stop;
         private String playing;
+        private float currentVolume;
 
         public void run() {
             audio.play(defaultMusic, config.getSystemvolume(), true);
+            currentVolume = config.getSystemvolume();
             while(!stop) {
                 if(!commands.isEmpty()) {
                     String path = commands.removeFirst();
@@ -94,6 +96,9 @@ public class PreviewMusicProcessor {
                     stopPreview(true);
                     audio.setVolume(defaultMusic, config.getSystemvolume());
                     playing = defaultMusic;
+                } else if(currentVolume != config.getSystemvolume()){
+                    audio.setVolume(playing, config.getSystemvolume());
+                    currentVolume = config.getSystemvolume();
                 } else {
                     try {
                         sleep(50);
