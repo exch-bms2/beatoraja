@@ -78,14 +78,12 @@ public class PlayerConfig {
 	 */
 	private int lnmode = 0;
 	/**
-	 * アシストオプション:コンスタント
+	 * スクロール追加/削除モード
 	 */
-	private boolean constant = false;
     private int scrollMode = 0;
 	/**
-	 * アシストオプション:LNアシスト
+	 * ロングノート追加/削除モード
 	 */
-	private boolean legacynote = false;
     private int longnoteMode = 0;
 	/**
 	 * アシストオプション:判定拡大
@@ -229,14 +227,6 @@ public class PlayerConfig {
 		this.judgetiming = judgetiming;
 	}
 
-	public boolean isConstant() {
-		return constant;
-	}
-
-	public void setConstant(boolean constant) {
-		this.constant = constant;
-	}
-
 	public boolean isBpmguide() {
 		return bpmguide;
 	}
@@ -283,14 +273,6 @@ public class PlayerConfig {
 
 	public void setDoubleoption(int doubleoption) {
 		this.doubleoption = doubleoption;
-	}
-
-	public boolean isLegacynote() {
-		return legacynote;
-	}
-
-	public void setLegacynote(boolean legacynote) {
-		this.legacynote = legacynote;
 	}
 
 	public int getExtranoteDepth() {

@@ -775,13 +775,13 @@ public class IntegerPropertyFactory {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0);
 		}
 		if (optionid == BUTTON_ASSIST_CONSTANT) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0);
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getScrollMode() == 1 ? 1 : 0);
 		}
 		if (optionid == BUTTON_ASSIST_JUDGEAREA) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0);
 		}
 		if (optionid == BUTTON_ASSIST_LEGACY) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0);
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLongnoteMode() == 1 ? 1 : 0);
 		}
 		if (optionid == BUTTON_ASSIST_MARKNOTE) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0);

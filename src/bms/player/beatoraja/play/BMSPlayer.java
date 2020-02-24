@@ -163,13 +163,6 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 
-			if (config.isConstant() && (model.getMinBPM() < model.getMaxBPM())) {
-				// BPM変化がなければコンスタントなし
-				new ConstantBPMModifier().modify(model);
-				assist = 1;
-				score = false;
-			}
-
 			if(config.getScrollMode() > 0) {
 				ScrollSpeedModifier mod = new ScrollSpeedModifier(config.getScrollMode() - 1);
 				mod.modify(model);
@@ -179,15 +172,6 @@ public class BMSPlayer extends MainState {
 				}
 			}
 
-			if (config.isLegacynote()) {
-				// LNがなければアシストなし
-				LongNoteModifier mod = new LongNoteModifier();
-				mod.modify(model);
-				if (mod.longNoteExists()) {
-					assist = 2;
-					score = false;
-				}
-			}
 			if(config.getLongnoteMode() > 0) {
 				LongNoteModifier mod = new LongNoteModifier(config.getLongnoteMode() - 1);
 				mod.modify(model);

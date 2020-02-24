@@ -221,7 +221,7 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, CONSTANT, true)) {
-                config.setConstant(!config.isConstant());
+                config.setScrollMode(config.getScrollMode() == 1 ? 0 : 1);
                 select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, JUDGEAREA, true)) {
@@ -229,7 +229,7 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, LEGACYNOTE, true)) {
-                config.setLegacynote(!config.isLegacynote());
+                config.setLongnoteMode(config.getLongnoteMode() == 1 ? 0 : 1);
                 select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, MARKNOTE, true)) {

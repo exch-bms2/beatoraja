@@ -208,9 +208,7 @@
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                                          </rowConstraints>
                                          <Label text="%ASSIST_OPTION" GridPane.rowIndex="0" />
-                                         <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                         <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                                         <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                         <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                                          <Label text="%OPTIONS_MISC" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -223,10 +221,12 @@
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="3" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="Mine Mode" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="minemode" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                         <Label text="Scroll Mode" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="scrollmode" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                         <Label text="Mine Mode" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="minemode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                         <Label text="Scroll Mode" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="scrollmode" prefWidth="150.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                                         <Label text="Long Note Mode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                         <ComboBox fx:id="longnotemode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                      </GridPane>
                                      <GridPane hgap="10.0" vgap="4.0">
                                          <columnConstraints>

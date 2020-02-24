@@ -138,11 +138,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private NumericSpinner<Integer> judgetiming;
 	@FXML
-	private CheckBox constant;
-	@FXML
 	private CheckBox bpmguide;
-	@FXML
-	private CheckBox legacy;
 	@FXML
 	private ComboBox<Integer> gaugeautoshift;
 	@FXML
@@ -153,6 +149,8 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> minemode;
 	@FXML
 	private ComboBox<Integer> scrollmode;
+	@FXML
+	private ComboBox<Integer> longnotemode;
 	@FXML
 	private Spinner<Integer> hranthresholdbpm;
 	@FXML
@@ -269,6 +267,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(bottomshiftablegauge, new String[] { "ASSIST EASY", "EASY", "NORMAL" });
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
+		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
 
 		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
 		String[] targetString = new String[targets.length];
@@ -414,15 +413,14 @@ public class PlayConfigurationView implements Initializable {
 
 		judgetiming.getValueFactory().setValue(player.getJudgetiming());
 
-		constant.setSelected(player.isConstant());
 		bpmguide.setSelected(player.isBpmguide());
-		legacy.setSelected(player.isLegacynote());
 		gaugeautoshift.setValue(player.getGaugeAutoShift());
 		bottomshiftablegauge.setValue(player.getBottomShiftableGauge());
 
 		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		minemode.getSelectionModel().select(player.getMineMode());
 		scrollmode.getSelectionModel().select(player.getScrollMode());
+		longnotemode.getSelectionModel().select(player.getLongnoteMode());
 		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
@@ -504,14 +502,13 @@ public class PlayConfigurationView implements Initializable {
 		player.setLnmode(lntype.getValue());
 		player.setJudgetiming(getValue(judgetiming));
 
-		player.setConstant(constant.isSelected());
 		player.setBpmguide(bpmguide.isSelected());
-		player.setLegacynote(legacy.isSelected());
 		player.setGaugeAutoShift(gaugeautoshift.getValue());
 		player.setBottomShiftableGauge(bottomshiftablegauge.getValue());
 		player.setJudgewindowrate(getValue(exjudge));
 		player.setMineMode(minemode.getValue());
 		player.setScrollMode(scrollmode.getValue());
+		player.setLongnoteMode(longnotemode.getValue());
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));
 		player.setMarkprocessednote(markprocessednote.isSelected());
 		player.setExtranoteDepth(extranotedepth.getValue());
