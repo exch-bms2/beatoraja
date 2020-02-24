@@ -71,6 +71,7 @@ public class LongNoteModifier extends PatternModifier {
 					}
 
 					LongNote lnstart = new LongNote(tls[i].getNote(lane).getWav());
+					lnstart.setType(lntype);
 					LongNote lnend = new LongNote(-2);
 
 					tls[i].setNote(lane, lnstart);
