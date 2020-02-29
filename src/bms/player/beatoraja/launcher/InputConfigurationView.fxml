@@ -37,29 +37,18 @@
             </HBox.margin>
         </CheckBox>
     </HBox>
-    <HBox prefHeight="37.0" prefWidth="723.0">
+    <HBox prefHeight="74.0" prefWidth="723.0">
         <VBox.margin>
             <Insets left="10.0" top="10.0" />
         </VBox.margin>
-        <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="160.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
-            <tooltip>
-                <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
-            </tooltip>
-        </CheckBox>
-        <Label prefHeight="24.0" prefWidth="185.0" text="%ANALOG_SCRATCH_THRESHOLD" />
-        <NumericSpinner fx:id="analogScratchThreshold" editable="true" prefWidth="80.0">
-            <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="100" min="1" />
-            </valueFactory>
-            <HBox.margin>
-                <Insets right="20.0" />
-            </HBox.margin>
-        </NumericSpinner>
-        <Label prefHeight="24.0" prefWidth="185.0" text="%ANALOG_SCRATCH_ALGORITHM" />
-        <ComboBox fx:id="analogScratchMode" prefHeight="18.0" prefWidth="140.0">
-            <tooltip>
-                <Tooltip text="Choose Analog Scratch Algorithm." textAlignment="CENTER" />
-            </tooltip>
-        </ComboBox>
+	    <TableView fx:id="controller_tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<columns>
+				<TableColumn fx:id="playsideCol" prefWidth="40.0" text="" />
+				<TableColumn fx:id="nameCol" prefWidth="185.0" text="" />
+				<TableColumn fx:id="isAnalogCol" prefWidth="185.0" text="%ANALOG_SCRATCH" />
+				<TableColumn fx:id="analogThresholdCol" prefWidth="185.0" text="%ANALOG_SCRATCH_THRESHOLD" />
+				<TableColumn fx:id="analogModeCol" prefWidth="185.0" text="%ANALOG_SCRATCH_ALGORITHM" />
+			</columns>
+		</TableView>
     </HBox>
 </VBox>
