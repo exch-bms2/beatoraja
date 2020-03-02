@@ -143,6 +143,7 @@ public class JsonSkin {
 		public int align;
 		public int ref;
 		public StringProperty value;
+		public String constantText;
 		public boolean wrapping = false;
 		public int overflow = SkinText.OVERFLOW_OVERFLOW;
 		public String outlineColor = "ffffff00";
