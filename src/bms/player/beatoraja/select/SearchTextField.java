@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -35,6 +36,10 @@ public class SearchTextField extends Stage {
 	private BitmapFont searchfont;
 
 	private TextField search;
+	/**
+	 * 画面クリック感知用Actor
+	 */
+	private Group screen;
 
 	public SearchTextField(MusicSelector selector, Resolution resolution) {
 		super(new FitViewport(resolution.width, resolution.height));
@@ -61,6 +66,7 @@ public class SearchTextField extends Stage {
 
 				public void keyTyped(TextField textField, char key) {
 					if (key == '\n' || key == 13) {
+						boolean searched = false;
 						if (textField.getText().length() > 0) {
 							SearchWordBar swb = new SearchWordBar(selector, textField.getText());
 							int count = swb.getChildren().length;
@@ -71,12 +77,16 @@ public class SearchTextField extends Stage {
 								textField.setText("");
 								textField.setMessageText(count + " song(s) found");
 								textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
+								searched = true;
 							} else {
-								selector.main.getInputProcessor().setEnterPressed(false);
 								textField.setText("");
 								textField.setMessageText("no song found");
 								textFieldStyle.messageFontColor = Color.DARK_GRAY;
 							}
+						}
+						if (!searched) {
+							// Enter入力がTextFieldとInputProcessorで2回発生するので、後者のEnter入力を一時的にロックする
+							selector.main.getInputProcessor().lockEnterPress();
 						}
 						textField.getOnscreenKeyboard().show(false);
 						setKeyboardFocus(null);
@@ -99,7 +109,6 @@ public class SearchTextField extends Stage {
 			search.setBounds(r.x, r.y, r.width, r.height);
 			search.setMaxLength(50);
 			search.setFocusTraversal(false);
-			addActor(search);
 
 			search.setVisible(true);
 			search.addListener(new EventListener() {
@@ -112,9 +121,31 @@ public class SearchTextField extends Stage {
 					return false;
 				}
 			});			
+
+			screen = new Group();
+			screen.setBounds(0, 0, resolution.width, resolution.height);
+			screen.addListener(new ClickListener() {
+				public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+					if (getKeyboardFocus() != null && !r.contains(x, y)) {
+						unfocus(selector);
+					}
+					return false;
+				}
+			});
+			screen.addActor(search);
+			addActor(screen);
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().warning("Search Text読み込み失敗");
 		}
+	}
+
+	public void unfocus(MusicSelector selector) {
+		search.setText("");
+		search.setMessageText("search song");
+		search.getStyle().messageFontColor = Color.GRAY;
+		search.getOnscreenKeyboard().show(false);
+		setKeyboardFocus(null);
+		selector.main.getInputProcessor().getKeyBoardInputProcesseor().setEnable(true);
 	}
 
 	public void dispose() {
@@ -127,5 +158,9 @@ public class SearchTextField extends Stage {
 			searchfont.dispose();
 			searchfont = null;
 		}
+	}
+
+	public Rectangle getSearchBounds() {
+		return new Rectangle(search.getX(), search.getY(), search.getWidth(), search.getHeight());
 	}
 }
