@@ -67,7 +67,7 @@ public class BarRenderer {
 	 */
 	private Array<SearchWordBar> search = new Array<SearchWordBar>();
 
-	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
+	private final String[] TROPHY = { "bronzemedal", "silvermedal", "goldmedal" };
 
 	private int durationlow = 300;
 	private int durationhigh = 50;
