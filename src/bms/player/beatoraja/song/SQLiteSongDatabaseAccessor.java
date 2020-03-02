@@ -191,7 +191,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		try {
 			List<SongData> m = qr.query(
 					"SELECT * FROM song WHERE rtrim(title||' '||subtitle||' '||artist||' '||subartist||' '||genre) LIKE ?"
-							+ " GROUP BY sha256",songhandler, "%" + text.replaceAll("'", "''") + "%");
+							+ " GROUP BY sha256",songhandler, "%" + text + "%");
 			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
