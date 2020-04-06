@@ -647,6 +647,9 @@ public class MusicSelector extends MainState {
 		case BUTTON_BGA:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
 			break;
+		case BUTTON_JUDGE_TIMING:
+			execute(arg1 >= 0 ? MusicSelectCommand.JUDGETIMING_UP : MusicSelectCommand.JUDGETIMING_DOWN);
+			break;			
 		case BUTTON_GAUGEAUTOSHIFT:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;

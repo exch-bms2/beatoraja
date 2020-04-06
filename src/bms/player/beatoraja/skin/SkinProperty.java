@@ -808,6 +808,7 @@ public class SkinProperty {
 	public static final int BUTTON_DPOPTION = 54;
 	public static final int BUTTON_HSFIX = 55;
 	public static final int BUTTON_BGA = 72;
+	public static final int BUTTON_JUDGE_TIMING = 74;
 	public static final int BUTTON_TARGET = 77;
 	public static final int BUTTON_GAUGEAUTOSHIFT = 78;
 	public static final int BUTTON_FAVORITTE = 90;
