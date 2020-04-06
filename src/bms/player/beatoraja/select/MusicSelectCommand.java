@@ -10,9 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerConfig;
@@ -21,12 +23,14 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.utils.Queue;
 
 public enum MusicSelectCommand {
 
+	/**
+	 * 次のMODEフィルター(5KEY, 7KEY, ...)へ移動
+	 */
     NEXT_MODE {
         @Override
         public void execute(MusicSelector selector) {
@@ -38,6 +42,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+	/**
+	 * 前のMODEフィルター(5KEY, 7KEY, ...)へ移動
+	 */
     PREV_MODE {
         @Override
         public void execute(MusicSelector selector) {
@@ -49,6 +56,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次の選曲バーソート(曲名,  クリアランプ, ...)へ移動
+     */
     NEXT_SORT {
         @Override
         public void execute(MusicSelector selector) {
@@ -57,6 +67,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 前の選曲バーソート(曲名,  クリアランプ, ...)へ移動
+     */
     PREV_SORT {
         @Override
         public void execute(MusicSelector selector) {
@@ -65,6 +78,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次のLNモードへ移動
+     */
     NEXT_LNMODE {
         @Override
         public void execute(MusicSelector selector) {
@@ -74,6 +90,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 前のLNモードへ移動
+     */
     PREV_LNMODE {
         @Override
         public void execute(MusicSelector selector) {
@@ -200,6 +219,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次の1P側譜面オプションへ移動
+     */
     NEXT_OPTION_1P {
         @Override
         public void execute(MusicSelector selector) {
@@ -208,6 +230,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 前の1P側譜面オプションへ移動
+     */
     PREV_OPTION_1P {
         @Override
         public void execute(MusicSelector selector) {
@@ -216,6 +241,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次の2P側譜面オプションへ移動
+     */
     NEXT_OPTION_2P {
         @Override
         public void execute(MusicSelector selector) {
@@ -224,6 +252,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 前の2P側譜面オプションへ移動
+     */
     PREV_OPTION_2P {
         @Override
         public void execute(MusicSelector selector) {
@@ -232,6 +263,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次のDP譜面オプションへ移動
+     */
     NEXT_OPTION_DP {
         @Override
         public void execute(MusicSelector selector) {
@@ -240,6 +274,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 前のDP譜面オプションへ移動
+     */
     PREV_OPTION_DP {
         @Override
         public void execute(MusicSelector selector) {
@@ -248,6 +285,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次のゲージオプションへ移動
+     */
     NEXT_GAUGE_1P {
         @Override
         public void execute(MusicSelector selector) {
@@ -256,6 +296,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 前のゲージオプションへ移動
+     */
     PREV_GAUGE_1P {
         @Override
         public void execute(MusicSelector selector) {
@@ -264,6 +307,9 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 次のハイスピード固定オプションへ移動
+     */
     NEXT_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
@@ -274,6 +320,9 @@ public enum MusicSelectCommand {
             }
         }
     },
+    /**
+     * 前のハイスピード固定オプションへ移動
+     */
     PREV_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
@@ -284,6 +333,9 @@ public enum MusicSelectCommand {
             }
         }
     },
+    /**
+     * 楽曲ファイルの場所をOS既定のファイルブラウザーで開く
+     */
     OPEN_WITH_EXPLORER {
         @Override
         public void execute(MusicSelector selector) {
@@ -325,6 +377,9 @@ public enum MusicSelectCommand {
             }
         }
     },
+    /**
+     * 楽曲ファイルのDLサイトをOS既定のブラウザーで開く
+     */
     OPEN_DOWNLOAD_SITE {
         @Override
         public void execute(MusicSelector selector) {
@@ -352,6 +407,9 @@ public enum MusicSelectCommand {
             }
         }
     },
+    /**
+     * 楽曲ファイルのIRサイトをOS既定のブラウザーで開く
+     */
     OPEN_RANKING_ON_IR {
         @Override
         public void execute(MusicSelector selector) {
@@ -414,6 +472,9 @@ public enum MusicSelectCommand {
 
         }
     },
+    /**
+     * 楽曲ファイルのドキュメントをOS既定のドキュメントビューアーで開く
+     */
     OPEN_DOCUMENT {
         @Override
         public void execute(MusicSelector selector) {
@@ -438,6 +499,9 @@ public enum MusicSelectCommand {
             }
         }
     },
+    /**
+     * 楽曲フォルダ/難易度表を更新する
+     */
     UPDATE_FOLDER {
 
 		@Override
@@ -612,6 +676,29 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
+    /**
+     * 同一フォルダにある譜面を全て表示する．コースの場合は構成譜面を全て表示する
+     */
+    SHOW_SONGS_ON_SAME_FOLDER {
+        @Override
+        public void execute(MusicSelector selector) {
+        	final BarRenderer bar = selector.getBarRender();
+            Bar current = selector.getBarRender().getSelected();
+            if (current instanceof SongBar && ((SongBar) current).existsSong() &&
+                    (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
+                SongData sd = ((SongBar) current).getSongData();
+                bar.updateBar(new SameFolderBar(selector, sd.getFullTitle(), sd.getFolder()));
+                selector.play(SOUND_FOLDEROPEN);
+            } else if (current instanceof GradeBar) {
+                List<Bar> songbars = Arrays.asList(((GradeBar) current).getSongDatas()).stream()
+                        .distinct()
+                        .map(SongBar::new)
+                        .collect(Collectors.toList());
+                bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
+                selector.play(SOUND_FOLDEROPEN);
+            }
+        }    	
+    }
     ;
 
     public abstract void execute(MusicSelector selector);

@@ -326,19 +326,7 @@ public class MusicSelectInputProcessor {
             }
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
-                if (current instanceof SongBar && ((SongBar) current).existsSong() &&
-                        (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
-                    SongData sd = ((SongBar) current).getSongData();
-                    bar.updateBar(new SameFolderBar(select, sd.getFullTitle(), sd.getFolder()));
-                    select.play(SOUND_FOLDEROPEN);
-                } else if (current instanceof GradeBar) {
-                    List<Bar> songbars = Arrays.asList(((GradeBar) current).getSongDatas()).stream()
-                            .distinct()
-                            .map(SongBar::new)
-                            .collect(Collectors.toList());
-                    bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
-                    select.play(SOUND_FOLDEROPEN);
-                }
+                select.execute(MusicSelectCommand.SHOW_SONGS_ON_SAME_FOLDER);
             }
             if (numberstate[9] && numtime[9] != 0) {
                 numtime[9] = 0;
