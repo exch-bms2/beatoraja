@@ -177,10 +177,6 @@ public class PlayerConfig {
 	 */
 	private int musicselectinput = 0;
 
-	public static final int IR_SEND_ALWAYS = 0;
-	public static final int IR_SEND_COMPLETE_SONG = 1;
-	public static final int IR_SEND_UPDATE_SCORE = 2;
-
 	private IRConfig[] irconfig;
 	
 	private String twitterConsumerKey;

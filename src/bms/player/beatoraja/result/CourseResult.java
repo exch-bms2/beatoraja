@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.FloatArray;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
+import bms.player.beatoraja.PlayerConfig.IRConfig;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
@@ -102,13 +103,13 @@ public class CourseResult extends AbstractResult {
         	for(IRStatus irc : ir) {
     			boolean send = resource.isUpdateCourseScore() && resource.getCourseData().isRelease();
     			switch(irc.config.getIrsend()) {
-    			case PlayerConfig.IR_SEND_ALWAYS:
+    			case IRConfig.IR_SEND_ALWAYS:
     				break;
-    			case PlayerConfig.IR_SEND_COMPLETE_SONG:
+    			case IRConfig.IR_SEND_COMPLETE_SONG:
 //    				FloatArray gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
 //    				send &= gauge.get(gauge.size - 1) > 0.0;
     				break;
-    			case PlayerConfig.IR_SEND_UPDATE_SCORE:
+    			case IRConfig.IR_SEND_UPDATE_SCORE:
 //    				send &= (newscore.getExscore() > oldscore.getExscore() || newscore.getClear() > oldscore.getClear()
 //    						|| newscore.getCombo() > oldscore.getCombo() || newscore.getMinbp() < oldscore.getMinbp());
     				break;
