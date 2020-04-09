@@ -91,6 +91,9 @@ public class MusicSelector extends MainState {
 
 	private PlayMode play = null;
 
+	private SongData playedsong = null;
+	private CourseData playedcourse = null;
+
 	private PixmapResourcePool banners;
 
 	private PixmapResourcePool stagefiles;
@@ -263,8 +266,14 @@ public class MusicSelector extends MainState {
 		play = null;
 		showNoteGraph = false;
 		main.getPlayerResource().setPlayerData(main.getPlayDataAccessor().readPlayerData());
-		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
-			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
+		if (playedsong != null) {
+			scorecache.update(playedsong, config.getLnmode());
+			playedsong = null;
+		} else if (playedcourse != null) {
+			for (SongData sd : playedcourse.getSong()) {
+				scorecache.update(sd, config.getLnmode());
+			}
+			playedcourse = null;
 		}
 
 		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
@@ -352,6 +361,7 @@ public class MusicSelector extends MainState {
 								}
 							}
 						}
+						playedsong = song;
 						preview.stop();
 						main.changeState(MainStateType.DECIDE);
 						search.unfocus(this);
@@ -389,6 +399,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 					}
+					playedsong = song;
 					preview.stop();
 					main.changeState(MainStateType.DECIDE);
 					search.unfocus(this);
@@ -522,6 +533,7 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
+			playedcourse = course.getCourseData();
 			preview.stop();
 			course.getCourseData().setSong(resource.getCourseBMSModels());
 			resource.setCourseData(course.getCourseData());
