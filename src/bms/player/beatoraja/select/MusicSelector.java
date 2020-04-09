@@ -389,11 +389,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 					}
-					preview.stop();
-					main.changeState(MainStateType.DECIDE);
-					search.unfocus(this);
-					banners.disposeOld();
-					stagefiles.disposeOld();
+					changeState(MainStateType.DECIDE);
 				} else {
 					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 				}
@@ -414,11 +410,7 @@ public class MusicSelector extends MainState {
 						resource.clear();
 						resource.setAutoPlaySongs(paths.toArray(Path.class), false);
 						if(resource.nextSong()) {
-							preview.stop();
-							main.changeState(MainStateType.DECIDE);
-							search.unfocus(this);
-							banners.disposeOld();
-							stagefiles.disposeOld();
+							changeState(MainStateType.DECIDE);
 						}
 					}
 				}
@@ -431,16 +423,18 @@ public class MusicSelector extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		if (input.getNumberState()[6]) {
-			preview.stop();
-			main.changeState(MainStateType.CONFIG);
-			search.unfocus(this);
+			changeState(MainStateType.CONFIG);
 		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
-			preview.stop();
-			main.changeState(MainStateType.SKINCONFIG);
-			search.unfocus(this);
+			changeState(MainStateType.SKINCONFIG);
 		}
 
 		musicinput.input();
+	}
+	
+	void changeState(MainStateType type) {
+		preview.stop();
+		main.changeState(MainStateType.CONFIG);
+		search.unfocus(this);		
 	}
 
 	public void select(Bar current) {
@@ -593,6 +587,12 @@ public class MusicSelector extends MainState {
 
 	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
+		case BUTTON_KEYCONFIG:
+			changeState(MainStateType.CONFIG);
+			break;
+		case BUTTON_SKINSELECT:
+			changeState(MainStateType.SKINCONFIG);
+			break;
 		case BUTTON_PLAY:
 			play = PlayMode.PLAY;
 			break;
