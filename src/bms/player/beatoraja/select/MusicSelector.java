@@ -352,11 +352,7 @@ public class MusicSelector extends MainState {
 								}
 							}
 						}
-						preview.stop();
-						main.changeState(MainStateType.DECIDE);
-						search.unfocus(this);
-						banners.disposeOld();
-						stagefiles.disposeOld();
+						changeState(MainStateType.DECIDE);
 					} else {
 						main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 					}
@@ -433,8 +429,10 @@ public class MusicSelector extends MainState {
 	
 	void changeState(MainStateType type) {
 		preview.stop();
-		main.changeState(MainStateType.CONFIG);
-		search.unfocus(this);		
+		main.changeState(type);
+		search.unfocus(this);
+		banners.disposeOld();
+		stagefiles.disposeOld();
 	}
 
 	public void select(Bar current) {
@@ -516,14 +514,10 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
-			preview.stop();
 			course.getCourseData().setSong(resource.getCourseBMSModels());
 			resource.setCourseData(course.getCourseData());
 			resource.setBMSFile(files[0], mode);
-			main.changeState(MainStateType.DECIDE);
-			search.unfocus(this);
-			banners.disposeOld();
-			stagefiles.disposeOld();
+			changeState(MainStateType.DECIDE);
 		} else {
 			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
