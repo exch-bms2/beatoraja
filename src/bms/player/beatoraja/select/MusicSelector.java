@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ObjectMap.Keys;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
@@ -71,10 +72,16 @@ public class MusicSelector extends MainState {
 	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
 	 */
 	private final int previewDuration = 400;
+	
+	private final int rankingDuration = 5000;
+
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
+	
+	private IRAccessStatus currentir;
+	private ObjectMap<String, IRAccessStatus> ircache = new ObjectMap<String, IRAccessStatus>();
 
 	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
@@ -269,7 +276,8 @@ public class MusicSelector extends MainState {
 		if (playedsong != null) {
 			scorecache.update(playedsong, config.getLnmode());
 			playedsong = null;
-		} else if (playedcourse != null) {
+		}
+		if (playedcourse != null) {
 			for (SongData sd : playedcourse.getSong()) {
 				scorecache.update(sd, config.getLnmode());
 			}
@@ -335,6 +343,17 @@ public class MusicSelector extends MainState {
 			}
 			showNoteGraph = true;
 		}
+		// get ir ranking
+		if (current instanceof SongBar && ((SongBar) current).existsSong()) {
+			if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + rankingDuration && currentir == null && play == null) {
+				SongData song = ((SongBar) current).getSongData();
+				IRAccessStatus irc = new IRAccessStatus();
+				irc.load(this, song);
+	            ircache.put(song.getSha256(), irc);
+	            currentir = irc;
+			}
+		}				
+
 
 		if (play != null) {
 			if (current instanceof SongBar) {
@@ -362,11 +381,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 						playedsong = song;
-						preview.stop();
-						main.changeState(MainStateType.DECIDE);
-						search.unfocus(this);
-						banners.disposeOld();
-						stagefiles.disposeOld();
+						changeState(MainStateType.DECIDE);
 					} else {
 						main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 					}
@@ -400,11 +415,7 @@ public class MusicSelector extends MainState {
 						}
 					}
 					playedsong = song;
-					preview.stop();
-					main.changeState(MainStateType.DECIDE);
-					search.unfocus(this);
-					banners.disposeOld();
-					stagefiles.disposeOld();
+					changeState(MainStateType.DECIDE);
 				} else {
 					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 				}
@@ -425,11 +436,7 @@ public class MusicSelector extends MainState {
 						resource.clear();
 						resource.setAutoPlaySongs(paths.toArray(Path.class), false);
 						if(resource.nextSong()) {
-							preview.stop();
-							main.changeState(MainStateType.DECIDE);
-							search.unfocus(this);
-							banners.disposeOld();
-							stagefiles.disposeOld();
+							changeState(MainStateType.DECIDE);
 						}
 					}
 				}
@@ -442,16 +449,20 @@ public class MusicSelector extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		if (input.getNumberState()[6]) {
-			preview.stop();
-			main.changeState(MainStateType.CONFIG);
-			search.unfocus(this);
+			changeState(MainStateType.CONFIG);
 		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
-			preview.stop();
-			main.changeState(MainStateType.SKINCONFIG);
-			search.unfocus(this);
+			changeState(MainStateType.SKINCONFIG);
 		}
 
 		musicinput.input();
+	}
+	
+	void changeState(MainStateType type) {
+		preview.stop();
+		main.changeState(type);
+		search.unfocus(this);
+		banners.disposeOld();
+		stagefiles.disposeOld();
 	}
 
 	public void select(Bar current) {
@@ -533,15 +544,11 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
-			playedcourse = course.getCourseData();
-			preview.stop();
 			course.getCourseData().setSong(resource.getCourseBMSModels());
 			resource.setCourseData(course.getCourseData());
 			resource.setBMSFile(files[0], mode);
-			main.changeState(MainStateType.DECIDE);
-			search.unfocus(this);
-			banners.disposeOld();
-			stagefiles.disposeOld();
+			playedcourse = course.getCourseData();
+			changeState(MainStateType.DECIDE);
 		} else {
 			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
@@ -605,6 +612,12 @@ public class MusicSelector extends MainState {
 
 	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
+		case BUTTON_KEYCONFIG:
+			changeState(MainStateType.CONFIG);
+			break;
+		case BUTTON_SKINSELECT:
+			changeState(MainStateType.SKINCONFIG);
+			break;
 		case BUTTON_PLAY:
 			play = PlayMode.PLAY;
 			break;
@@ -665,6 +678,12 @@ public class MusicSelector extends MainState {
 		case BUTTON_GAUGEAUTOSHIFT:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;
+		case BUTTON_RIVAL:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_RIVAL : MusicSelectCommand.PREV_RIVAL);
+			break;
+		case BUTTON_OPEN_IR_WEBSITE:
+			execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
+			break;
 		case BUTTON_AUTOSAVEREPLAY_1:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_1 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_1);
 			break;
@@ -706,6 +725,9 @@ public class MusicSelector extends MainState {
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);
 		showNoteGraph = false;
+
+		final Bar current = bar.getSelected();
+		currentir = (current instanceof SongBar && ((SongBar) current).existsSong()) ? ircache.get(((SongBar) current).getSongData().getSha256()) : null;
 	}
 
 	public void loadSelectedSongImages() {
@@ -746,5 +768,73 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return pc;
+	}
+	
+	public IRAccessStatus getCurrentIRStatus () {
+		return currentir;
+	}
+	
+	public static class IRAccessStatus {
+		/**
+		 * 選択されている楽曲の現在のIR順位
+		 */
+		private int irrank;
+		/**
+		 * IR総プレイ数
+		 */
+		private int irtotal;
+
+		private IRScoreData[] scores;
+		
+		private int state;
+		public static final int ACCESS = 1;
+		public static final int FINISH = 2;
+		public static final int FAIL = 3;
+		
+		public void load(MusicSelector selector, SongData song) {
+			final IRAccessStatus irc = this;
+			Thread irprocess = new Thread(() -> {
+				state = ACCESS;
+				final IRStatus[] ir = selector.main.getIRStatus();
+		        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, song);
+		        if(response.isSucceeded()) {
+		        	irc.scores = response.getData();
+		            irc.irtotal = irc.scores.length;
+
+		            IRScoreData score = selector.getScoreDataProperty().getScoreData();
+		            if(score != null) {
+			            for(int i = 0;i < irc.scores.length;i++) {
+			                if(irc.irrank == 0 && irc.scores[i].getExscore() <=  score.getExscore()) {
+			                	irc.irrank = i + 1;
+			                }
+			            }	            	
+		            }
+		            
+		            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+					state = FINISH;
+		        } else {
+		            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+					state = FAIL;
+		        }				
+			});
+			irprocess.start();
+
+		}
+		
+		public int getRank() {
+			return irrank;
+		}
+		
+		public int getTotalPlayer() {
+			return irtotal;
+		}
+
+		public IRScoreData[] getScores() {
+			return scores;
+		}
+		
+		public int getState() {
+			return state;
+		}
 	}
 }

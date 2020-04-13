@@ -721,8 +721,13 @@ public class BooleanPropertyFactory {
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() == state.getScoreDataProperty().getRivalScore() : false));
 		case OPTION_DISABLE_SAVE_SCORE:
+			// TODO select, decide時の実装
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (!state.main.getPlayerResource().isUpdateScore()));
 		case OPTION_ENABLE_SAVE_SCORE:
+			// TODO select, decide時の実装
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.main.getPlayerResource().isUpdateScore()));
+		case OPTION_NO_SAVE_CLEAR:
+			// TODO 未実装
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.main.getPlayerResource().isUpdateScore()));
 		case OPTION_RESULT_CLEAR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
@@ -736,6 +741,27 @@ public class BooleanPropertyFactory {
 				final IRScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
 				return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
 			});
+		case OPTION_IR_NOPLAYER:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+				if(state instanceof MusicSelector) {
+					final MusicSelector.IRAccessStatus irc = ((MusicSelector)state).getCurrentIRStatus();
+					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() == 0;
+				}
+				return false;
+			});
+		case OPTION_IR_FAILED:
+		case OPTION_IR_BUSY:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+				if(state instanceof MusicSelector) {
+					final MusicSelector.IRAccessStatus irc = ((MusicSelector)state).getCurrentIRStatus();
+					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FAIL;
+				}
+				return false;
+			});
+		case OPTION_IR_WAITING:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,	
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector)state).getCurrentIRStatus() == null : false));
+
 		}
 		
 		return null;

@@ -761,6 +761,14 @@ public class SkinProperty {
 	public static final int OPTION_2PWIN = 353;
 	public static final int OPTION_DRAW = 354;
 
+	public static final int OPTION_IR_LOADING = 601;
+	public static final int OPTION_IR_LOADED = 602;
+	public static final int OPTION_IR_NOPLAYER = 603;
+	public static final int OPTION_IR_FAILED = 604;
+	public static final int OPTION_IR_BANNED = 605;
+	public static final int OPTION_IR_WAITING = 606;
+	public static final int OPTION_IR_ACCESSING = 607;
+	public static final int OPTION_IR_BUSY = 608;
 	public static final int OPTION_NOT_COMPARE_RIVAL = 624;
 	public static final int OPTION_COMPARE_RIVAL = 625;
 
@@ -793,6 +801,8 @@ public class SkinProperty {
 
 	public static final int BUTTON_MODE = 11;
 	public static final int BUTTON_SORT = 12;
+	public static final int BUTTON_KEYCONFIG = 13;
+	public static final int BUTTON_SKINSELECT = 14;
 	public static final int BUTTON_PLAY = 15;
 	public static final int BUTTON_AUTOPLAY = 16;
 	public static final int BUTTON_PRACTICE = 315;
@@ -811,6 +821,7 @@ public class SkinProperty {
 	public static final int BUTTON_JUDGE_TIMING = 74;
 	public static final int BUTTON_TARGET = 77;
 	public static final int BUTTON_GAUGEAUTOSHIFT = 78;
+	public static final int BUTTON_RIVAL = 79;
 	public static final int BUTTON_FAVORITTE = 90;
 	public static final int BUTTON_SKINSELECT_7KEY = 170;
 	public static final int BUTTON_SKINSELECT_5KEY = 171;

@@ -1,8 +1,6 @@
 package bms.player.beatoraja.play.bga;
 
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
 
@@ -108,13 +106,6 @@ public class FFmpegProcessor implements MovieProcessor {
 
 		public MovieSeekThread(String filepath) {
 			this.filepath = filepath;
-			try {
-				RandomAccessFile file = new RandomAccessFile(filepath, "r");
-				file.getChannel().map(MapMode.READ_ONLY, 0, file.length()).load();
-				file.close();
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
 		}
 
 		public void run() {
@@ -169,13 +160,12 @@ public class FFmpegProcessor implements MovieProcessor {
 						if (frame == null) {
 							eof = true;
 							if (loop) {
-								commands.offerLast(Command.PLAY);
+								commands.offerLast(Command.LOOP);
 							}
 						} else if (frame.image != null && frame.image[0] != null) {
 							try {
-								Gdx2DPixmap pixmapData = new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData);
 								if (pixmap == null) {
-									pixmap = new Pixmap(pixmapData);
+									pixmap = new Pixmap(new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData));
 								}
 								Gdx.app.postRunnable(() -> {
 									final Pixmap p = pixmap;
@@ -228,7 +218,7 @@ public class FFmpegProcessor implements MovieProcessor {
 			} finally {
 				try {
 					grabber.stop();
-					grabber.release();
+					grabber.close();
 					Logger.getGlobal().info("動画リソースの開放 : " + filepath);
 				} catch (Throwable e) {
 					e.printStackTrace();
