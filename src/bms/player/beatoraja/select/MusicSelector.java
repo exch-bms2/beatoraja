@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ObjectMap.Keys;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
@@ -71,10 +72,16 @@ public class MusicSelector extends MainState {
 	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
 	 */
 	private final int previewDuration = 400;
+	
+	private final int rankingDuration = 5000;
+
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
+	
+	private IRAccessStatus currentir;
+	private ObjectMap<String, IRAccessStatus> ircache = new ObjectMap<String, IRAccessStatus>();
 
 	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
@@ -326,6 +333,17 @@ public class MusicSelector extends MainState {
 			}
 			showNoteGraph = true;
 		}
+		// get ir ranking
+		if (current instanceof SongBar && ((SongBar) current).existsSong()) {
+			if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + rankingDuration && currentir == null && play == null) {
+				SongData song = ((SongBar) current).getSongData();
+				IRAccessStatus irc = new IRAccessStatus();
+				irc.load(this, song);
+	            ircache.put(song.getSha256(), irc);
+	            currentir = irc;
+			}
+		}				
+
 
 		if (play != null) {
 			if (current instanceof SongBar) {
@@ -700,6 +718,9 @@ public class MusicSelector extends MainState {
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);
 		showNoteGraph = false;
+
+		final Bar current = bar.getSelected();
+		currentir = (current instanceof SongBar && ((SongBar) current).existsSong()) ? ircache.get(((SongBar) current).getSongData().getSha256()) : null;
 	}
 
 	public void loadSelectedSongImages() {
@@ -740,5 +761,73 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return pc;
+	}
+	
+	public IRAccessStatus getCurrentIRStatus () {
+		return currentir;
+	}
+	
+	public static class IRAccessStatus {
+		/**
+		 * 選択されている楽曲の現在のIR順位
+		 */
+		private int irrank;
+		/**
+		 * IR総プレイ数
+		 */
+		private int irtotal;
+
+		private IRScoreData[] scores;
+		
+		private int state;
+		public static final int ACCESS = 1;
+		public static final int FINISH = 2;
+		public static final int FAIL = 3;
+		
+		public void load(MusicSelector selector, SongData song) {
+			final IRAccessStatus irc = this;
+			Thread irprocess = new Thread(() -> {
+				state = ACCESS;
+				final IRStatus[] ir = selector.main.getIRStatus();
+		        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, song);
+		        if(response.isSucceeded()) {
+		        	irc.scores = response.getData();
+		            irc.irtotal = irc.scores.length;
+
+		            IRScoreData score = selector.getScoreDataProperty().getScoreData();
+		            if(score != null) {
+			            for(int i = 0;i < irc.scores.length;i++) {
+			                if(irc.irrank == 0 && irc.scores[i].getExscore() <=  score.getExscore()) {
+			                	irc.irrank = i + 1;
+			                }
+			            }	            	
+		            }
+		            
+		            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+					state = FINISH;
+		        } else {
+		            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+					state = FAIL;
+		        }				
+			});
+			irprocess.start();
+
+		}
+		
+		public int getRank() {
+			return irrank;
+		}
+		
+		public int getTotalPlayer() {
+			return irtotal;
+		}
+
+		public IRScoreData[] getScores() {
+			return scores;
+		}
+		
+		public int getState() {
+			return state;
+		}
 	}
 }
