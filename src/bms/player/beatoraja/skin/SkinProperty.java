@@ -761,6 +761,14 @@ public class SkinProperty {
 	public static final int OPTION_2PWIN = 353;
 	public static final int OPTION_DRAW = 354;
 
+	public static final int OPTION_IR_LOADING = 601;
+	public static final int OPTION_IR_LOADED = 602;
+	public static final int OPTION_IR_NOPLAYER = 603;
+	public static final int OPTION_IR_FAILED = 604;
+	public static final int OPTION_IR_BANNED = 605;
+	public static final int OPTION_IR_WAITING = 606;
+	public static final int OPTION_IR_ACCESSING = 607;
+	public static final int OPTION_IR_BUSY = 608;
 	public static final int OPTION_NOT_COMPARE_RIVAL = 624;
 	public static final int OPTION_COMPARE_RIVAL = 625;
 
