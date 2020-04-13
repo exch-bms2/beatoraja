@@ -653,6 +653,12 @@ public class MusicSelector extends MainState {
 		case BUTTON_GAUGEAUTOSHIFT:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;
+		case BUTTON_RIVAL:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_RIVAL : MusicSelectCommand.PREV_RIVAL);
+			break;
+		case BUTTON_OPEN_IR_WEBSITE:
+			execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
+			break;
 		case BUTTON_AUTOSAVEREPLAY_1:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_1 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_1);
 			break;

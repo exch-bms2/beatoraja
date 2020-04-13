@@ -502,6 +502,9 @@ public class MusicResult extends AbstractResult {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
+		case BUTTON_OPEN_IR_WEBSITE:
+			execute(MusicResultCommand.OPEN_RANKING_ON_IR);
+			break;
 		default:
 			super.executeEvent(id, arg1, arg2);
 		}
