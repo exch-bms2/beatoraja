@@ -676,6 +676,10 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_IR_RANK:
 			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
+					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH ? irc.getRank() : Integer.MIN_VALUE;
+				}
 				if (state instanceof AbstractResult) {
 					final IRScoreData score = ((AbstractResult) state).getNewScore();
 					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
@@ -696,6 +700,10 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_IR_TOTALPLAYER:
 			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
+					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH ? irc.getTotalPlayer() : Integer.MIN_VALUE;
+				}
 				if (state instanceof AbstractResult) {
 					final IRScoreData score = ((AbstractResult) state).getNewScore();
 					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
