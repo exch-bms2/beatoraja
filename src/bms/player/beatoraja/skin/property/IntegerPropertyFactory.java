@@ -8,15 +8,9 @@ import java.util.Calendar;
 import com.badlogic.gdx.Gdx;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.BMSResource;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfiguration;
-import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.play.JudgeManager;
-import bms.player.beatoraja.play.LaneRenderer;
+import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
 import bms.player.beatoraja.result.CourseResult;
@@ -699,6 +693,7 @@ public class IntegerPropertyFactory {
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_IR_TOTALPLAYER:
+		case NUMBER_IR_TOTALPLAYER2:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
 					final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
@@ -712,6 +707,50 @@ public class IntegerPropertyFactory {
 				}
 				return Integer.MIN_VALUE;
 			};
+		case NUMBER_IR_PLAYER_NOPLAY:
+			return new IRClearCountProperty(0);
+		case NUMBER_IR_PLAYER_NOPLAY_RATE:
+			return new IRClearRateProperty(0);
+		case NUMBER_IR_PLAYER_FAILED:
+			return new IRClearCountProperty(1);
+		case NUMBER_IR_PLAYER_FAILED_RATE:
+			return new IRClearRateProperty(1);
+		case NUMBER_IR_PLAYER_ASSIST:
+			return new IRClearCountProperty(2);
+		case NUMBER_IR_PLAYER_ASSIST_RATE:
+			return new IRClearRateProperty(2);
+		case NUMBER_IR_PLAYER_LIGHTASSIST:
+			return new IRClearCountProperty(3);
+		case NUMBER_IR_PLAYER_LIGHTASSIST_RATE:
+			return new IRClearRateProperty(3);
+		case NUMBER_IR_PLAYER_EASY:
+			return new IRClearCountProperty(4);
+		case NUMBER_IR_PLAYER_EASY_RATE:
+			return new IRClearRateProperty(4);
+		case NUMBER_IR_PLAYER_NORMAL:
+			return new IRClearCountProperty(5);
+		case NUMBER_IR_PLAYER_NORMAL_RATE:
+			return new IRClearRateProperty(5);
+		case NUMBER_IR_PLAYER_HARD:
+			return new IRClearCountProperty(6);
+		case NUMBER_IR_PLAYER_HARD_RATE:
+			return new IRClearRateProperty(6);
+		case NUMBER_IR_PLAYER_EXHARD:
+			return new IRClearCountProperty(7);
+		case NUMBER_IR_PLAYER_EXHARD_RATE:
+			return new IRClearRateProperty(7);
+		case NUMBER_IR_PLAYER_FULLCOMBO:
+			return new IRClearCountProperty(8);
+		case NUMBER_IR_PLAYER_FULLCOMBO_RATE:
+			return new IRClearRateProperty(8);
+		case NUMBER_IR_PLAYER_PERFECT:
+			return new IRClearCountProperty(9);
+		case NUMBER_IR_PLAYER_PERFECT_RATE:
+			return new IRClearRateProperty(9);
+		case NUMBER_IR_PLAYER_MAX:
+			return new IRClearCountProperty(10);
+		case NUMBER_IR_PLAYER_MAX_RATE:
+			return new IRClearRateProperty(10);
 		case NUMBER_AVERAGE_DURATION:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
@@ -923,5 +962,39 @@ public class IntegerPropertyFactory {
 			};
 		}
 		return null;
+	}
+	
+	private static class IRClearCountProperty implements IntegerProperty {
+
+		private final int clearType;
+		
+		public IRClearCountProperty(int clearType) {
+			this.clearType = clearType;
+		}
+		@Override
+		public int get(MainState state) {
+			if (state instanceof MusicSelector) {
+				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
+				return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH ? irc.getClearCount(clearType) : Integer.MIN_VALUE;
+			}
+			return Integer.MIN_VALUE;
+		}		
+	}
+	
+	private static class IRClearRateProperty implements IntegerProperty {
+
+		private final int clearType;
+		
+		public IRClearRateProperty(int clearType) {
+			this.clearType = clearType;
+		}
+		@Override
+		public int get(MainState state) {
+			if (state instanceof MusicSelector) {
+				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
+				return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() > 0 ? irc.getClearCount(clearType) * 100 / irc.getTotalPlayer() : Integer.MIN_VALUE;
+			}
+			return Integer.MIN_VALUE;
+		}		
 	}
 }

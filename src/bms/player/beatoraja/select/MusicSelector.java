@@ -73,7 +73,7 @@ public class MusicSelector extends MainState {
 	 */
 	private final int previewDuration = 400;
 	
-	private final int rankingDuration = 5000;
+	private final int rankingDuration = 1500;
 
 	private boolean showNoteGraph = false;
 
@@ -784,6 +784,8 @@ public class MusicSelector extends MainState {
 		 */
 		private int irtotal;
 
+		private int[] lamps = new int[11];
+		
 		private IRScoreData[] scores;
 		
 		private int state;
@@ -792,23 +794,21 @@ public class MusicSelector extends MainState {
 		public static final int FAIL = 3;
 		
 		public void load(MusicSelector selector, SongData song) {
-			final IRAccessStatus irc = this;
 			Thread irprocess = new Thread(() -> {
 				state = ACCESS;
 				final IRStatus[] ir = selector.main.getIRStatus();
 		        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, song);
 		        if(response.isSucceeded()) {
-		        	irc.scores = response.getData();
-		            irc.irtotal = irc.scores.length;
+		        	scores = response.getData();
+		            irtotal = scores.length;
 
 		            IRScoreData score = selector.getScoreDataProperty().getScoreData();
-		            if(score != null) {
-			            for(int i = 0;i < irc.scores.length;i++) {
-			                if(irc.irrank == 0 && irc.scores[i].getExscore() <=  score.getExscore()) {
-			                	irc.irrank = i + 1;
-			                }
-			            }	            	
-		            }
+		            for(int i = 0;i < scores.length;i++) {
+		                if(score != null && irrank == 0 && scores[i].getExscore() <=  score.getExscore()) {
+		                	irrank = i + 1;
+		                }
+		                lamps[scores[i].getClear()]++;
+		            }	            	
 		            
 		            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
 					state = FINISH;
@@ -831,6 +831,10 @@ public class MusicSelector extends MainState {
 
 		public IRScoreData[] getScores() {
 			return scores;
+		}
+		
+		public int getClearCount(int clearType) {
+			return lamps[clearType];
 		}
 		
 		public int getState() {
