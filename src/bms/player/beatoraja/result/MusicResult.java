@@ -238,7 +238,12 @@ public class MusicResult extends AbstractResult {
 					} else if (resource.getPlayMode() == PlayMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
-						Logger.getGlobal().info("同じ譜面でリプレイ");
+						if(resource.isUpdateScore()) {
+							Logger.getGlobal().info("同じ譜面でリプレイ");							
+						} else {
+							Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
+							resource.getReplayData().pattern = null;
+						}
 						resource.reloadBMSFile();
 						main.changeState(MainStateType.PLAY);
 					} else {
