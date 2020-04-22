@@ -741,6 +741,12 @@ public class BooleanPropertyFactory {
 				final IRScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
 				return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
 			});
+		case OPTION_1PWIN:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore()));
+		case OPTION_2PWIN:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore()));
+		case OPTION_DRAW:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore()));
 		case OPTION_IR_NOPLAYER:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
 				if(state instanceof MusicSelector) {
