@@ -352,8 +352,11 @@ public class MusicSelector extends MainState {
 	            ircache.put(song.getSha256(), irc);
 	            currentir = irc;
 			}
-		}				
-
+		}
+		final int irstate = currentir != null ? currentir.getState() : -1;
+		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == IRAccessStatus.ACCESS);
+		main.switchTimer(TIMER_IR_CONNECT_SUCCESS, irstate == IRAccessStatus.FINISH);
+		main.switchTimer(TIMER_IR_CONNECT_FAIL, irstate == IRAccessStatus.FAIL);
 
 		if (play != null) {
 			if (current instanceof SongBar) {
