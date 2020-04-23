@@ -81,7 +81,7 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache rivalcache;
 	
 	private IRAccessStatus currentir;
-	private ObjectMap<String, IRAccessStatus> ircache = new ObjectMap<String, IRAccessStatus>();
+	private IRAccessStatusCache ircache = new IRAccessStatusCache();
 
 	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
@@ -349,7 +349,7 @@ public class MusicSelector extends MainState {
 				SongData song = ((SongBar) current).getSongData();
 				IRAccessStatus irc = new IRAccessStatus();
 				irc.load(this, song);
-	            ircache.put(song.getSha256(), irc);
+	            ircache.put(song, config.getLnmode(), irc);
 	            currentir = irc;
 			}
 		}
@@ -730,7 +730,7 @@ public class MusicSelector extends MainState {
 		showNoteGraph = false;
 
 		final Bar current = bar.getSelected();
-		currentir = (current instanceof SongBar && ((SongBar) current).existsSong()) ? ircache.get(((SongBar) current).getSongData().getSha256()) : null;
+		currentir = (current instanceof SongBar && ((SongBar) current).existsSong()) ? ircache.get(((SongBar) current).getSongData(), config.getLnmode()) : null;
 	}
 
 	public void loadSelectedSongImages() {
@@ -777,6 +777,50 @@ public class MusicSelector extends MainState {
 		return currentir;
 	}
 	
+	/**
+	 * IRアクセスデータのキャッシュ
+	 *
+	 * @author exch
+	 */
+	public static class IRAccessStatusCache {
+
+	    /**
+	     * スコアデータのキャッシュ
+	     */
+	    private ObjectMap<String, IRAccessStatus>[] scorecache;
+
+	    public IRAccessStatusCache() {
+	        scorecache = new ObjectMap[4];
+	        for (int i = 0; i < scorecache.length; i++) {
+	            scorecache[i] = new ObjectMap(2000);
+	        }
+	    }
+
+	    /**
+	     * 指定した楽曲データ、LN MODEに対するスコアデータを返す
+	     * @param song 楽曲データ
+	     * @param lnmode LN MODE
+	     * @return スコアデータ。存在しない場合はnull
+	     */
+	    public IRAccessStatus get(SongData song, int lnmode) {
+	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
+	        if (scorecache[cacheindex].containsKey(song.getSha256())) {
+	            return scorecache[cacheindex].get(song.getSha256());
+	        }
+	        return null;
+	    }
+
+	    public void put(SongData song, int lnmode, IRAccessStatus iras) {
+	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
+	        scorecache[cacheindex].put(song.getSha256(), iras);
+	    }
+	}
+	
+	/**
+	 * IRアクセスデータ
+	 *
+	 * @author exch
+	 */
 	public static class IRAccessStatus {
 		/**
 		 * 選択されている楽曲の現在のIR順位
@@ -796,32 +840,38 @@ public class MusicSelector extends MainState {
 		public static final int FINISH = 2;
 		public static final int FAIL = 3;
 		
-		public void load(MusicSelector selector, SongData song) {
+		public void load(MainState selector, SongData song) {
 			Thread irprocess = new Thread(() -> {
 				state = ACCESS;
 				final IRStatus[] ir = selector.main.getIRStatus();
 		        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, song);
 		        if(response.isSucceeded()) {
-		        	scores = response.getData();
-		            irtotal = scores.length;
-
-		            IRScoreData score = selector.getScoreDataProperty().getScoreData();
-		            for(int i = 0;i < scores.length;i++) {
-		                if(score != null && irrank == 0 && scores[i].getExscore() <=  score.getExscore()) {
-		                	irrank = i + 1;
-		                }
-		                lamps[scores[i].getClear()]++;
-		            }	            	
-		            
+		        	updateScore(response.getData(), selector.getScoreDataProperty().getScoreData());
+		        	
 		            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
 					state = FINISH;
 		        } else {
 		            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 					state = FAIL;
-		        }				
+		        }
 			});
 			irprocess.start();
 
+		}
+		
+		public void updateScore(IRScoreData[] scores, IRScoreData myscore) {
+			if(scores == null) {
+				return;
+			}
+			this.scores = scores;
+            irtotal = scores.length;
+
+            for(int i = 0;i < scores.length;i++) {
+                if(myscore != null && irrank == 0 && scores[i].getExscore() <=  myscore.getExscore()) {
+                	irrank = i + 1;
+                }
+                lamps[scores[i].getClear()]++;
+            }	            	
 		}
 		
 		public int getRank() {
@@ -842,6 +892,6 @@ public class MusicSelector extends MainState {
 		
 		public int getState() {
 			return state;
-		}
+		}		
 	}
 }
