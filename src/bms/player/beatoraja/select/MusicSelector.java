@@ -73,7 +73,10 @@ public class MusicSelector extends MainState {
 	 */
 	private final int previewDuration = 400;
 	
-	private final int rankingDuration = 1500;
+	private final int rankingDuration = 5000;
+	private final int rankingReloadDuration = 10 * 60 * 1000;
+	
+	private long currentRankingDuration = -1;
 
 	private boolean showNoteGraph = false;
 
@@ -344,14 +347,18 @@ public class MusicSelector extends MainState {
 			showNoteGraph = true;
 		}
 		// get ir ranking
-		if (current instanceof SongBar && ((SongBar) current).existsSong()) {
-			if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + rankingDuration && currentir == null && play == null) {
+		if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
+			if (currentRankingDuration != -1 && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
+				currentRankingDuration = -1;
 				SongData song = ((SongBar) current).getSongData();
-				IRAccessStatus irc = new IRAccessStatus();
+				IRAccessStatus irc = ircache.get(song, config.getLnmode());
+				if(irc == null) {
+					irc = new IRAccessStatus();
+		            ircache.put(song, config.getLnmode(), irc);
+				}
 				irc.load(this, song);
-	            ircache.put(song, config.getLnmode(), irc);
 	            currentir = irc;
-			}
+			}				
 		}
 		final int irstate = currentir != null ? currentir.getState() : -1;
 		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == IRAccessStatus.ACCESS);
@@ -730,7 +737,13 @@ public class MusicSelector extends MainState {
 		showNoteGraph = false;
 
 		final Bar current = bar.getSelected();
-		currentir = (current instanceof SongBar && ((SongBar) current).existsSong()) ? ircache.get(((SongBar) current).getSongData(), config.getLnmode()) : null;
+		if(current instanceof SongBar && ((SongBar) current).existsSong()) {
+			currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
+			currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.lastUpdateTime) ,0) : 0) + rankingDuration;
+		} else {
+			currentir = null;
+			currentRankingDuration = -1;			
+		}
 	}
 
 	public void loadSelectedSongImages() {
@@ -773,10 +786,13 @@ public class MusicSelector extends MainState {
 		return pc;
 	}
 	
-	public IRAccessStatus getCurrentIRStatus () {
+	public IRAccessStatus getCurrentIRStatus() {
 		return currentir;
 	}
 	
+	public long getCurrentRankingDuration() {
+		return currentRankingDuration;
+	}
 	/**
 	 * IRアクセスデータのキャッシュ
 	 *
@@ -785,7 +801,7 @@ public class MusicSelector extends MainState {
 	public static class IRAccessStatusCache {
 
 	    /**
-	     * スコアデータのキャッシュ
+	     * IRアクセスデータのキャッシュ
 	     */
 	    private ObjectMap<String, IRAccessStatus>[] scorecache;
 
@@ -797,10 +813,10 @@ public class MusicSelector extends MainState {
 	    }
 
 	    /**
-	     * 指定した楽曲データ、LN MODEに対するスコアデータを返す
+	     * 指定した楽曲データ、LN MODEに対するIRアクセスデータを返す
 	     * @param song 楽曲データ
 	     * @param lnmode LN MODE
-	     * @return スコアデータ。存在しない場合はnull
+	     * @return IRアクセスデータ。存在しない場合はnull
 	     */
 	    public IRAccessStatus get(SongData song, int lnmode) {
 	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
@@ -840,6 +856,8 @@ public class MusicSelector extends MainState {
 		public static final int FINISH = 2;
 		public static final int FAIL = 3;
 		
+		private long lastUpdateTime;
+		
 		public void load(MainState selector, SongData song) {
 			Thread irprocess = new Thread(() -> {
 				state = ACCESS;
@@ -854,6 +872,7 @@ public class MusicSelector extends MainState {
 		            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 					state = FAIL;
 		        }
+		        lastUpdateTime = System.currentTimeMillis();
 			});
 			irprocess.start();
 
@@ -892,6 +911,10 @@ public class MusicSelector extends MainState {
 		
 		public int getState() {
 			return state;
-		}		
+		}
+		
+		public long getLastUpdateTime() {
+			return lastUpdateTime;
+		}
 	}
 }
