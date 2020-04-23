@@ -421,6 +421,7 @@ public class SkinProperty {
 	public static final int NUMBER_IR_PLAYER_HARD_RATE = 217;
 	public static final int NUMBER_IR_PLAYER_FULLCOMBO = 218;
 	public static final int NUMBER_IR_PLAYER_FULLCOMBO_RATE = 219;
+	public static final int NUMBER_IR_UPDATE_WAITING_TIME = 220;
 	public static final int NUMBER_IR_PLAYER_PERFECT = 222;
 	public static final int NUMBER_IR_PLAYER_PERFECT_RATE = 223;
 	public static final int NUMBER_IR_PLAYER_MAX = 224;

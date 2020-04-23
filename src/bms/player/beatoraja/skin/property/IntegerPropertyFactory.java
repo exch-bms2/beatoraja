@@ -751,6 +751,18 @@ public class IntegerPropertyFactory {
 			return new IRClearCountProperty(10);
 		case NUMBER_IR_PLAYER_MAX_RATE:
 			return new IRClearRateProperty(10);
+		case NUMBER_IR_UPDATE_WAITING_TIME:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final long dtime = ((MusicSelector) state).getCurrentRankingDuration();
+					if(dtime == -1) {
+						return Integer.MIN_VALUE;						
+					}
+					final long time = state.main.getTimer(TIMER_SONGBAR_CHANGE) + dtime  - state.main.getNowTime();
+					return (int) (time > 0 ? time / 1000 + 1 : Integer.MIN_VALUE);
+				}
+				return Integer.MIN_VALUE;
+			};
 		case NUMBER_AVERAGE_DURATION:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
