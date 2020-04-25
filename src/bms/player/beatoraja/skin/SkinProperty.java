@@ -426,6 +426,23 @@ public class SkinProperty {
 	public static final int NUMBER_IR_PLAYER_PERFECT_RATE = 223;
 	public static final int NUMBER_IR_PLAYER_MAX = 224;
 	public static final int NUMBER_IR_PLAYER_MAX_RATE = 225;
+	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR = 226;
+	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE = 227;
+	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO = 228;
+	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE = 229;
+	public static final int NUMBER_IR_PLAYER_NOPLAY_RATE_AFTERDOT = 230;
+	public static final int NUMBER_IR_PLAYER_ASSIST_RATE_AFTERDOT = 231;
+	public static final int NUMBER_IR_PLAYER_LIGHTASSIST_RATE_AFTERDOT = 232;
+	public static final int NUMBER_IR_PLAYER_EXHARD_RATE_AFTERDOT = 233;
+	public static final int NUMBER_IR_PLAYER_FAILED_RATE_AFTERDOT = 234;
+	public static final int NUMBER_IR_PLAYER_EASY_RATE_AFTERDOT = 235;
+	public static final int NUMBER_IR_PLAYER_NORMAL_RATE_AFTERDOT = 236;
+	public static final int NUMBER_IR_PLAYER_HARD_RATE_AFTERDOT = 237;
+	public static final int NUMBER_IR_PLAYER_FULLCOMBO_RATE_AFTERDOT = 238;
+	public static final int NUMBER_IR_PLAYER_PERFECT_RATE_AFTERDOT = 239;
+	public static final int NUMBER_IR_PLAYER_MAX_RATE_AFTERDOT = 240;
+	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE_AFTERDOT = 241;
+	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE_AFTERDOT = 242;
 
 	public static final int NUMBER_RIVAL_SCORE = 271;
 	public static final int NUMBER_RIVAL_MAXSCORE = 272;

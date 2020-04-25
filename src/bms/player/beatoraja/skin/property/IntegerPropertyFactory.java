@@ -710,47 +710,81 @@ public class IntegerPropertyFactory {
 		case NUMBER_IR_PLAYER_NOPLAY:
 			return new IRClearCountProperty(0);
 		case NUMBER_IR_PLAYER_NOPLAY_RATE:
-			return new IRClearRateProperty(0);
+			return new IRClearRateProperty(0, false);
+		case NUMBER_IR_PLAYER_NOPLAY_RATE_AFTERDOT:
+			return new IRClearRateProperty(0, true);
 		case NUMBER_IR_PLAYER_FAILED:
 			return new IRClearCountProperty(1);
 		case NUMBER_IR_PLAYER_FAILED_RATE:
-			return new IRClearRateProperty(1);
+			return new IRClearRateProperty(1, false);
+		case NUMBER_IR_PLAYER_FAILED_RATE_AFTERDOT:
+			return new IRClearRateProperty(1, true);
 		case NUMBER_IR_PLAYER_ASSIST:
 			return new IRClearCountProperty(2);
 		case NUMBER_IR_PLAYER_ASSIST_RATE:
-			return new IRClearRateProperty(2);
+			return new IRClearRateProperty(2, false);
+		case NUMBER_IR_PLAYER_ASSIST_RATE_AFTERDOT:
+			return new IRClearRateProperty(2, true);
 		case NUMBER_IR_PLAYER_LIGHTASSIST:
 			return new IRClearCountProperty(3);
 		case NUMBER_IR_PLAYER_LIGHTASSIST_RATE:
-			return new IRClearRateProperty(3);
+			return new IRClearRateProperty(3, false);
+		case NUMBER_IR_PLAYER_LIGHTASSIST_RATE_AFTERDOT:
+			return new IRClearRateProperty(3, true);
 		case NUMBER_IR_PLAYER_EASY:
 			return new IRClearCountProperty(4);
 		case NUMBER_IR_PLAYER_EASY_RATE:
-			return new IRClearRateProperty(4);
+			return new IRClearRateProperty(4, false);
+		case NUMBER_IR_PLAYER_EASY_RATE_AFTERDOT:
+			return new IRClearRateProperty(4, true);
 		case NUMBER_IR_PLAYER_NORMAL:
 			return new IRClearCountProperty(5);
 		case NUMBER_IR_PLAYER_NORMAL_RATE:
-			return new IRClearRateProperty(5);
+			return new IRClearRateProperty(5, false);
+		case NUMBER_IR_PLAYER_NORMAL_RATE_AFTERDOT:
+			return new IRClearRateProperty(5, true);
 		case NUMBER_IR_PLAYER_HARD:
 			return new IRClearCountProperty(6);
 		case NUMBER_IR_PLAYER_HARD_RATE:
-			return new IRClearRateProperty(6);
+			return new IRClearRateProperty(6, false);
+		case NUMBER_IR_PLAYER_HARD_RATE_AFTERDOT:
+			return new IRClearRateProperty(6, true);
 		case NUMBER_IR_PLAYER_EXHARD:
 			return new IRClearCountProperty(7);
 		case NUMBER_IR_PLAYER_EXHARD_RATE:
-			return new IRClearRateProperty(7);
+			return new IRClearRateProperty(7, false);
+		case NUMBER_IR_PLAYER_EXHARD_RATE_AFTERDOT:
+			return new IRClearRateProperty(7, true);
 		case NUMBER_IR_PLAYER_FULLCOMBO:
 			return new IRClearCountProperty(8);
 		case NUMBER_IR_PLAYER_FULLCOMBO_RATE:
-			return new IRClearRateProperty(8);
+			return new IRClearRateProperty(8, false);
+		case NUMBER_IR_PLAYER_FULLCOMBO_RATE_AFTERDOT:
+			return new IRClearRateProperty(8, true);
 		case NUMBER_IR_PLAYER_PERFECT:
 			return new IRClearCountProperty(9);
 		case NUMBER_IR_PLAYER_PERFECT_RATE:
-			return new IRClearRateProperty(9);
+			return new IRClearRateProperty(9, false);
+		case NUMBER_IR_PLAYER_PERFECT_RATE_AFTERDOT:
+			return new IRClearRateProperty(9, true);
 		case NUMBER_IR_PLAYER_MAX:
 			return new IRClearCountProperty(10);
 		case NUMBER_IR_PLAYER_MAX_RATE:
-			return new IRClearRateProperty(10);
+			return new IRClearRateProperty(10, false);
+		case NUMBER_IR_PLAYER_MAX_RATE_AFTERDOT:
+			return new IRClearRateProperty(10, true);
+		case NUMBER_IR_PLAYER_TOTAL_CLEAR:
+			return new IRTotalClearCountProperty(new int[]{2,3,4,5,6,7,8,9,10});
+		case NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE:
+			return new IRTotalClearRateProperty(new int[]{2,3,4,5,6,7,8,9,10}, false);
+		case NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE_AFTERDOT:
+			return new IRTotalClearRateProperty(new int[]{2,3,4,5,6,7,8,9,10}, true);
+		case NUMBER_IR_PLAYER_TOTAL_FULLCOMBO:
+			return new IRTotalClearCountProperty(new int[]{8,9,10});
+		case NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE:
+			return new IRTotalClearRateProperty(new int[]{8,9,10}, false);
+		case NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE_AFTERDOT:
+			return new IRTotalClearRateProperty(new int[]{8,9,10}, true);
 		case NUMBER_IR_UPDATE_WAITING_TIME:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
@@ -993,18 +1027,69 @@ public class IntegerPropertyFactory {
 		}		
 	}
 	
-	private static class IRClearRateProperty implements IntegerProperty {
+	private static class IRTotalClearCountProperty implements IntegerProperty {
 
-		private final int clearType;
+		private final int[] clearType;
 		
-		public IRClearRateProperty(int clearType) {
+		public IRTotalClearCountProperty(int[] clearType) {
 			this.clearType = clearType;
 		}
 		@Override
 		public int get(MainState state) {
 			if (state instanceof MusicSelector) {
 				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-				return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() > 0 ? irc.getClearCount(clearType) * 100 / irc.getTotalPlayer() : Integer.MIN_VALUE;
+				if(irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH) {
+					int count = 0;
+					for(int c : clearType) {
+						count += irc.getClearCount(c);
+					}
+					return count;
+				}
+			}
+			return Integer.MIN_VALUE;
+		}		
+	}
+	
+	private static class IRClearRateProperty implements IntegerProperty {
+
+		private final int clearType;
+		private final boolean afterdot;
+		
+		public IRClearRateProperty(int clearType, boolean afterdot) {
+			this.clearType = clearType;
+			this.afterdot = afterdot;
+		}
+		@Override
+		public int get(MainState state) {
+			if (state instanceof MusicSelector) {
+				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
+				return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() > 0 ? 
+						(afterdot ? (irc.getClearCount(clearType) * 1000 / irc.getTotalPlayer()) % 10 : irc.getClearCount(clearType) * 100 / irc.getTotalPlayer()) : Integer.MIN_VALUE;
+			}
+			return Integer.MIN_VALUE;
+		}		
+	}
+	
+	private static class IRTotalClearRateProperty implements IntegerProperty {
+
+		private final int[] clearType;
+		private final boolean afterdot;
+		
+		public IRTotalClearRateProperty(int[] clearType, boolean afterdot) {
+			this.clearType = clearType;
+			this.afterdot = afterdot;
+		}
+		@Override
+		public int get(MainState state) {
+			if (state instanceof MusicSelector) {
+				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
+				if(irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() > 0) {
+					int count = 0;
+					for(int c : clearType) {
+						count += irc.getClearCount(c);
+					}
+					return (afterdot ? (count * 1000 / irc.getTotalPlayer()) % 10 : count * 100 / irc.getTotalPlayer());
+				}
 			}
 			return Integer.MIN_VALUE;
 		}		
