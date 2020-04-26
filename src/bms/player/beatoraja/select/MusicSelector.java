@@ -737,7 +737,7 @@ public class MusicSelector extends MainState {
 		showNoteGraph = false;
 
 		final Bar current = bar.getSelected();
-		if(current instanceof SongBar && ((SongBar) current).existsSong()) {
+		if(main.getIRStatus().length > 0 && current instanceof SongBar && ((SongBar) current).existsSong()) {
 			currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
 			currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.lastUpdateTime) ,0) : 0) + rankingDuration;
 		} else {
