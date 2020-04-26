@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
@@ -123,7 +124,7 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("リプレイ再現モード : 譜面 (アシストモード)");
 			resource.setReplayData(replay);
 			isReplayPatternPlay = true;
-			assist = 2;
+			assist = 1;
 			score = false;
 		} else if(replay != null && main.getInputProcessor().getKeystate()[2]) {
 			//保存された譜面オプションログから譜面オプション再現
@@ -169,47 +170,33 @@ public class BMSPlayer extends MainState {
 				assist = Math.max(assist, 1);
 				score = false;
 			}
-
-			if(config.getScrollMode() > 0) {
-				ScrollSpeedModifier mod = new ScrollSpeedModifier(config.getScrollMode() - 1);
-				mod.modify(model);
-				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
-					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
-					score = false;
-				}
-			}
-
-			if(config.getLongnoteMode() > 0) {
-				LongNoteModifier mod = new LongNoteModifier(config.getLongnoteMode() - 1);
-				mod.modify(model);
-				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
-					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
-					score = false;
-				}
-			}
-
+			
 			if (config.getJudgewindowrate() > 100) {
 				assist = Math.max(assist, 2);
 				score = false;
 			}
 
-			// 地雷ノートがなければアシストなし
-			if(config.getMineMode() > 0) {
-				MineNoteModifier mod = new MineNoteModifier(config.getMineMode() - 1);
-				mod.modify(model);
-				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
-					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
-					score = false;
-				}
-			}
+			Array<PatternModifier> mods = new Array<PatternModifier>();
 
+			if(config.getScrollMode() > 0) {
+				mods.add(new ScrollSpeedModifier(config.getScrollMode() - 1));
+			}
+			if(config.getLongnoteMode() > 0) {
+				mods.add(new LongNoteModifier(config.getLongnoteMode() - 1));
+			}
+			if(config.getMineMode() > 0) {
+				mods.add(new MineNoteModifier(config.getMineMode() - 1));
+			}
 			if(config.getExtranoteDepth() > 0) {
-				ExtraNoteModifier mod = new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch());
+				mods.add(new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch()));
+			}
+			
+			for(PatternModifier mod : mods) {
 				mod.modify(model);
 				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
 					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
 					score = false;
-				}
+				}				
 			}
 
 			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
