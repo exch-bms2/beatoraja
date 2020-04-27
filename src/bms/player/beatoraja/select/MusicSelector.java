@@ -14,13 +14,13 @@ import com.badlogic.gdx.utils.ObjectMap.Keys;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
@@ -83,8 +83,8 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
 	
-	private IRAccessStatus currentir;
-	private IRAccessStatusCache ircache = new IRAccessStatusCache();
+	private RankingData currentir;
+	private RankingDataCache ircache = new RankingDataCache();
 
 	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
@@ -351,9 +351,9 @@ public class MusicSelector extends MainState {
 			if (currentRankingDuration != -1 && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
 				currentRankingDuration = -1;
 				SongData song = ((SongBar) current).getSongData();
-				IRAccessStatus irc = ircache.get(song, config.getLnmode());
+				RankingData irc = ircache.get(song, config.getLnmode());
 				if(irc == null) {
-					irc = new IRAccessStatus();
+					irc = new RankingData();
 		            ircache.put(song, config.getLnmode(), irc);
 				}
 				irc.load(this, song);
@@ -361,9 +361,9 @@ public class MusicSelector extends MainState {
 			}				
 		}
 		final int irstate = currentir != null ? currentir.getState() : -1;
-		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == IRAccessStatus.ACCESS);
-		main.switchTimer(TIMER_IR_CONNECT_SUCCESS, irstate == IRAccessStatus.FINISH);
-		main.switchTimer(TIMER_IR_CONNECT_FAIL, irstate == IRAccessStatus.FAIL);
+		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == RankingData.ACCESS);
+		main.switchTimer(TIMER_IR_CONNECT_SUCCESS, irstate == RankingData.FINISH);
+		main.switchTimer(TIMER_IR_CONNECT_FAIL, irstate == RankingData.FAIL);
 
 		if (play != null) {
 			if (current instanceof SongBar) {
@@ -739,7 +739,7 @@ public class MusicSelector extends MainState {
 		final Bar current = bar.getSelected();
 		if(main.getIRStatus().length > 0 && current instanceof SongBar && ((SongBar) current).existsSong()) {
 			currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
-			currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.lastUpdateTime) ,0) : 0) + rankingDuration;
+			currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
 		} else {
 			currentir = null;
 			currentRankingDuration = -1;			
@@ -786,7 +786,7 @@ public class MusicSelector extends MainState {
 		return pc;
 	}
 	
-	public IRAccessStatus getCurrentIRStatus() {
+	public RankingData getCurrentRankingData() {
 		return currentir;
 	}
 	
@@ -798,14 +798,14 @@ public class MusicSelector extends MainState {
 	 *
 	 * @author exch
 	 */
-	public static class IRAccessStatusCache {
+	public static class RankingDataCache {
 
 	    /**
 	     * IRアクセスデータのキャッシュ
 	     */
-	    private ObjectMap<String, IRAccessStatus>[] scorecache;
+	    private ObjectMap<String, RankingData>[] scorecache;
 
-	    public IRAccessStatusCache() {
+	    public RankingDataCache() {
 	        scorecache = new ObjectMap[4];
 	        for (int i = 0; i < scorecache.length; i++) {
 	            scorecache[i] = new ObjectMap(2000);
@@ -818,7 +818,7 @@ public class MusicSelector extends MainState {
 	     * @param lnmode LN MODE
 	     * @return IRアクセスデータ。存在しない場合はnull
 	     */
-	    public IRAccessStatus get(SongData song, int lnmode) {
+	    public RankingData get(SongData song, int lnmode) {
 	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
 	        if (scorecache[cacheindex].containsKey(song.getSha256())) {
 	            return scorecache[cacheindex].get(song.getSha256());
@@ -826,95 +826,9 @@ public class MusicSelector extends MainState {
 	        return null;
 	    }
 
-	    public void put(SongData song, int lnmode, IRAccessStatus iras) {
+	    public void put(SongData song, int lnmode, RankingData iras) {
 	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
 	        scorecache[cacheindex].put(song.getSha256(), iras);
 	    }
-	}
-	
-	/**
-	 * IRアクセスデータ
-	 *
-	 * @author exch
-	 */
-	public static class IRAccessStatus {
-		/**
-		 * 選択されている楽曲の現在のIR順位
-		 */
-		private int irrank;
-		/**
-		 * IR総プレイ数
-		 */
-		private int irtotal;
-
-		private int[] lamps = new int[11];
-		
-		private IRScoreData[] scores;
-		
-		private int state;
-		public static final int ACCESS = 1;
-		public static final int FINISH = 2;
-		public static final int FAIL = 3;
-		
-		private long lastUpdateTime;
-		
-		public void load(MainState selector, SongData song) {
-			Thread irprocess = new Thread(() -> {
-				state = ACCESS;
-				final IRStatus[] ir = selector.main.getIRStatus();
-		        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, song);
-		        if(response.isSucceeded()) {
-		        	updateScore(response.getData(), selector.getScoreDataProperty().getScoreData());
-		        	
-		            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
-					state = FINISH;
-		        } else {
-		            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-					state = FAIL;
-		        }
-		        lastUpdateTime = System.currentTimeMillis();
-			});
-			irprocess.start();
-
-		}
-		
-		public void updateScore(IRScoreData[] scores, IRScoreData myscore) {
-			if(scores == null) {
-				return;
-			}
-			this.scores = scores;
-            irtotal = scores.length;
-
-            for(int i = 0;i < scores.length;i++) {
-                if(myscore != null && irrank == 0 && scores[i].getExscore() <=  myscore.getExscore()) {
-                	irrank = i + 1;
-                }
-                lamps[scores[i].getClear()]++;
-            }	            	
-		}
-		
-		public int getRank() {
-			return irrank;
-		}
-		
-		public int getTotalPlayer() {
-			return irtotal;
-		}
-
-		public IRScoreData[] getScores() {
-			return scores;
-		}
-		
-		public int getClearCount(int clearType) {
-			return lamps[clearType];
-		}
-		
-		public int getState() {
-			return state;
-		}
-		
-		public long getLastUpdateTime() {
-			return lastUpdateTime;
-		}
 	}
 }

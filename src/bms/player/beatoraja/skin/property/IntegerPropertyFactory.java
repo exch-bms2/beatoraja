@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfiguration;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
@@ -671,8 +672,8 @@ public class IntegerPropertyFactory {
 		case NUMBER_IR_RANK:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH ? irc.getRank() : Integer.MIN_VALUE;
+					final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
+					return irc != null && irc.getState() == RankingData.FINISH ? irc.getRank() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
 					final IRScoreData score = ((AbstractResult) state).getNewScore();
@@ -696,8 +697,8 @@ public class IntegerPropertyFactory {
 		case NUMBER_IR_TOTALPLAYER2:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH ? irc.getTotalPlayer() : Integer.MIN_VALUE;
+					final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
+					return irc != null && irc.getState() == RankingData.FINISH ? irc.getTotalPlayer() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
 					final IRScoreData score = ((AbstractResult) state).getNewScore();
@@ -1020,8 +1021,8 @@ public class IntegerPropertyFactory {
 		@Override
 		public int get(MainState state) {
 			if (state instanceof MusicSelector) {
-				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-				return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH ? irc.getClearCount(clearType) : Integer.MIN_VALUE;
+				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
+				return irc != null && irc.getState() == RankingData.FINISH ? irc.getClearCount(clearType) : Integer.MIN_VALUE;
 			}
 			return Integer.MIN_VALUE;
 		}		
@@ -1037,8 +1038,8 @@ public class IntegerPropertyFactory {
 		@Override
 		public int get(MainState state) {
 			if (state instanceof MusicSelector) {
-				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-				if(irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH) {
+				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
+				if(irc != null && irc.getState() == RankingData.FINISH) {
 					int count = 0;
 					for(int c : clearType) {
 						count += irc.getClearCount(c);
@@ -1062,8 +1063,8 @@ public class IntegerPropertyFactory {
 		@Override
 		public int get(MainState state) {
 			if (state instanceof MusicSelector) {
-				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-				return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() > 0 ? 
+				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
+				return irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0 ? 
 						(afterdot ? (irc.getClearCount(clearType) * 1000 / irc.getTotalPlayer()) % 10 : irc.getClearCount(clearType) * 100 / irc.getTotalPlayer()) : Integer.MIN_VALUE;
 			}
 			return Integer.MIN_VALUE;
@@ -1082,8 +1083,8 @@ public class IntegerPropertyFactory {
 		@Override
 		public int get(MainState state) {
 			if (state instanceof MusicSelector) {
-				final MusicSelector.IRAccessStatus irc = ((MusicSelector) state).getCurrentIRStatus();
-				if(irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() > 0) {
+				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
+				if(irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
 					int count = 0;
 					for(int c : clearType) {
 						count += irc.getClearCount(c);

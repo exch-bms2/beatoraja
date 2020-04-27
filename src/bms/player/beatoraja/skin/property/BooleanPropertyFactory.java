@@ -20,6 +20,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
@@ -750,8 +751,8 @@ public class BooleanPropertyFactory {
 		case OPTION_IR_NOPLAYER:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
 				if(state instanceof MusicSelector) {
-					final MusicSelector.IRAccessStatus irc = ((MusicSelector)state).getCurrentIRStatus();
-					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FINISH && irc.getTotalPlayer() == 0;
+					final RankingData irc = ((MusicSelector)state).getCurrentRankingData();
+					return irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() == 0;
 				}
 				return false;
 			});
@@ -759,14 +760,14 @@ public class BooleanPropertyFactory {
 		case OPTION_IR_BUSY:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
 				if(state instanceof MusicSelector) {
-					final MusicSelector.IRAccessStatus irc = ((MusicSelector)state).getCurrentIRStatus();
-					return irc != null && irc.getState() == MusicSelector.IRAccessStatus.FAIL;
+					final RankingData irc = ((MusicSelector)state).getCurrentRankingData();
+					return irc != null && irc.getState() == RankingData.FAIL;
 				}
 				return false;
 			});
 		case OPTION_IR_WAITING:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,	
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector)state).getCurrentIRStatus() == null : false));
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector)state).getCurrentRankingData() == null : false));
 
 		}
 		
