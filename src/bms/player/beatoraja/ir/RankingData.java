@@ -1,5 +1,6 @@
 package bms.player.beatoraja.ir;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.IRScoreData;
@@ -8,7 +9,7 @@ import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.song.SongData;
 
 /**
- * IRアクセスデータ
+ * IRのランキングデータ
  *
  * @author exch
  */
@@ -33,7 +34,8 @@ public class RankingData {
 	/**
 	 * IRアクセス状態
 	 */
-	private int state;
+	private int state = NONE;
+	public static final int NONE = 0;
 	public static final int ACCESS = 1;
 	public static final int FINISH = 2;
 	public static final int FAIL = 3;
@@ -44,6 +46,7 @@ public class RankingData {
 	private long lastUpdateTime;
 	
 	public void load(MainState mainstate, SongData song) {
+		state = NONE;
 		Thread irprocess = new Thread(() -> {
 			state = ACCESS;
 			final IRStatus[] ir = mainstate.main.getIRStatus();
@@ -69,7 +72,8 @@ public class RankingData {
 		}
 		this.scores = scores;
         irtotal = scores.length;
-
+        Arrays.fill(lamps, 0);
+        irrank = 0;
         for(int i = 0;i < scores.length;i++) {
             if(myscore != null && irrank == 0 && scores[i].getExscore() <=  myscore.getExscore()) {
             	irrank = i + 1;
