@@ -102,6 +102,18 @@ public class IntegerPropertyFactory {
 					: Integer.MIN_VALUE);
 		}
 
+		if (optionid >= NUMBER_PERFECT2 && optionid <= NUMBER_POOR2) {
+			final int index = optionid - NUMBER_PERFECT2;
+			result = (state) -> (state.getScoreDataProperty().getScoreData() != null ? 
+					state.getScoreDataProperty().getScoreData().getJudgeCount(index) : Integer.MIN_VALUE);
+		}
+		if (optionid >= NUMBER_PERFECT_RATE && optionid <= NUMBER_POOR_RATE) {
+			final int index = optionid - NUMBER_PERFECT_RATE;
+			result = (state) -> {
+				final IRScoreData score = state.getScoreDataProperty().getScoreData();
+				return score != null && score.getNotes() > 0 ? score.getJudgeCount(index) * 100 / score.getNotes() : Integer.MIN_VALUE;
+						};
+		}
 		if (optionid >= NUMBER_PERFECT && optionid <= NUMBER_POOR) {
 			final int index = optionid - NUMBER_PERFECT;
 			result = (state) -> (state.getJudgeCount(index, true) + state.getJudgeCount(index, false));
@@ -110,6 +122,18 @@ public class IntegerPropertyFactory {
 			final int index = (optionid - NUMBER_EARLY_PERFECT) / 2;
 			final boolean early = (optionid - NUMBER_EARLY_PERFECT) % 2 == 0;
 			result = (state) -> (state.getJudgeCount(index, early));
+		}
+		if (optionid >= NUMBER_RIVAL_PERFECT && optionid <= NUMBER_RIVAL_POOR) {
+			final int index = optionid - NUMBER_RIVAL_PERFECT;
+			result = (state) -> (state.getScoreDataProperty().getRivalScoreData() != null ? 
+					state.getScoreDataProperty().getRivalScoreData().getJudgeCount(index) : Integer.MIN_VALUE);
+		}
+		if (optionid >= NUMBER_RIVAL_PERFECT_RATE && optionid <= NUMBER_RIVAL_POOR_RATE) {
+			final int index = optionid - NUMBER_RIVAL_PERFECT_RATE;
+			result = (state) -> {
+				final IRScoreData rival = state.getScoreDataProperty().getRivalScoreData();
+				return rival != null && rival.getNotes() > 0 ? rival.getJudgeCount(index) * 100 / rival.getNotes() : Integer.MIN_VALUE;
+						};
 		}
 
 		if (optionid == NUMBER_LOADING_PROGRESS) {
