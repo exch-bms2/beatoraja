@@ -10,6 +10,7 @@ import bms.model.*;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.audio.AudioDriver;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -56,6 +57,8 @@ public class PlayerResource {
 	 * ライバルスコア
 	 */
 	private int rscore;
+	
+	private RankingData ranking;
 	/**
 	 * スコア更新するかどうか
 	 */
@@ -238,6 +241,14 @@ public class PlayerResource {
 
 	public void setRivalScoreData(int rscore) {
 		this.rscore = rscore;
+	}
+	
+	public RankingData getRankingData() {
+		return ranking;
+	}
+	
+	public void setRankingData(RankingData ranking) {
+		this.ranking = ranking;
 	}
 	
 	public boolean setCourseBMSFiles(Path[] files) {

@@ -22,6 +22,7 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -130,8 +131,13 @@ public class MusicResult extends AbstractResult {
                 	                	
                 	if(irsend > 0) {
                         main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
+                        
                         IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, resource.getSongdata());
                         if(response.isSucceeded()) {
+                        	if(resource.getRankingData() != null) {
+                        		resource.getRankingData().updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
+                        	}
+                        	// TODO このあたりの算出もRankingDataに集約すべきか
                             IRScoreData[] scores = response.getData();
                             irtotal = scores.length;
 

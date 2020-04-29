@@ -390,6 +390,12 @@ public class MusicSelector extends MainState {
 								}
 							}
 						}
+						if(main.getIRStatus().length > 0 && currentir == null) {
+							currentir = new RankingData();
+				            ircache.put(song, config.getLnmode(), currentir);
+						}
+						resource.setRankingData(currentir);
+						
 						playedsong = song;
 						changeState(MainStateType.DECIDE);
 					} else {
