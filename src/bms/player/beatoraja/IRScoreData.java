@@ -22,6 +22,10 @@ public class IRScoreData implements Validatable {
 	 * 譜面のハッシュ値
 	 */
 	private String sha256 = "";
+	/**
+	 * プレイヤー名。自身のスコアの場合は空白
+	 */
+	private String player = "";
 
 	private int mode = 0;
 	
@@ -336,11 +340,21 @@ public class IRScoreData implements Validatable {
 	public void setState(int state) {
 		this.state = state;
 	}
+	
 	public String getSha256() {
 		return sha256;
 	}
+
 	public void setSha256(String sha256) {
 		this.sha256 = sha256;
+	}
+	
+	public String getPlayer() {
+		return player;
+	}
+	
+	public void setPlayer(String player) {
+		this.player = player != null ? player : "";
 	}
 
 	public int getExscore() {
