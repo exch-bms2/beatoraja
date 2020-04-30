@@ -82,10 +82,10 @@ public class MusicResult extends AbstractResult {
 	
 	public void prepare() {
 		state = STATE_OFFLINE;
-		irrank = irprevrank = irtotal = 0;
 		final PlayerResource resource = main.getPlayerResource();
 		final IRScoreData newscore = getNewScore();
 
+		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
@@ -134,24 +134,7 @@ public class MusicResult extends AbstractResult {
                         
                         IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, resource.getSongdata());
                         if(response.isSucceeded()) {
-                        	if(resource.getRankingData() != null) {
-                        		resource.getRankingData().updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
-                        	}
-                        	// TODO このあたりの算出もRankingDataに集約すべきか
-                            IRScoreData[] scores = response.getData();
-                            irtotal = scores.length;
-
-                            for(int i = 0;i < scores.length;i++) {
-                                if(irrank == 0 && scores[i].getExscore() <= newscore.getExscore() ) {
-                                    irrank = i + 1;
-                                }
-                                if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-                                    irprevrank = i + 1;
-                                    if(irrank == 0) {
-                                        irrank = irprevrank;
-                                    }
-                                }
-                            }
+                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
                             Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
                         } else {
                             Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.ir.RankingData;
 
 public abstract class AbstractResult extends MainState {
 
@@ -26,17 +27,9 @@ public abstract class AbstractResult extends MainState {
 	public static final int STATE_IR_FINISHED = 2;
 
 	/**
-	 * 今回のスコアのIR順位
+	 * ランキングデータ
 	 */
-	protected int irrank;
-	/**
-	 * 前回のスコアのIR順位
-	 */
-	protected int irprevrank;
-	/**
-	 * IRそうプレイ数
-	 */
-	protected int irtotal;
+	protected RankingData ranking;
 	/**
 	 * 全ノーツの平均ズレ
 	 */
@@ -219,15 +212,15 @@ public abstract class AbstractResult extends MainState {
 	}
 	
 	public int getIRRank() {
-		return irrank;
+		return ranking != null ? ranking.getRank() : 0;
 	}
 	
 	public int getOldIRRank() {
-		return irprevrank;
+		return ranking != null ? ranking.getPreviousRank() : 0;
 	}
 	
 	public int getIRTotalPlayer() {
-		return irtotal;
+		return ranking != null ? ranking.getTotalPlayer() : 0;
 	}
 	
 	public float getAverageDuration() {
