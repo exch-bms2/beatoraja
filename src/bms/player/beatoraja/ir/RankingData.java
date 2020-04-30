@@ -19,6 +19,15 @@ public class RankingData {
 	 */
 	private int irrank;
 	/**
+	 * 選択されている楽曲の以前のIR順位
+	 */
+	private int prevrank;
+	/**
+	 * 選択されている楽曲のローカルスコアでの想定IR順位
+	 */	
+	private int localrank;
+
+	/**
 	 * IR総プレイ数
 	 */
 	private int irtotal;
@@ -55,35 +64,58 @@ public class RankingData {
 	        	updateScore(response.getData(), mainstate.getScoreDataProperty().getScoreData());
 	        	
 	            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
-				state = FINISH;
 	        } else {
 	            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 				state = FAIL;
+		        lastUpdateTime = System.currentTimeMillis();
 	        }
-	        lastUpdateTime = System.currentTimeMillis();
 		});
 		irprocess.start();
 
 	}
 	
-	public void updateScore(IRScoreData[] scores, IRScoreData myscore) {
+	public void updateScore(IRScoreData[] scores, IRScoreData localscore) {
 		if(scores == null) {
 			return;
+		}
+		boolean firstUpdate = this.scores == null;
+		
+		if(!firstUpdate) {
+			prevrank = irrank;	
 		}
 		this.scores = scores;
         irtotal = scores.length;
         Arrays.fill(lamps, 0);
         irrank = 0;
+        localrank = 0;
         for(int i = 0;i < scores.length;i++) {
-            if(myscore != null && irrank == 0 && scores[i].getExscore() <=  myscore.getExscore()) {
+            if(irrank == 0 && scores[i].getPlayer().length() == 0) {
             	irrank = i + 1;
             }
+            if(localscore != null && localrank == 0 && scores[i].getExscore() <=  localscore.getExscore()) {
+            	localrank = i + 1;
+            }
             lamps[scores[i].getClear()]++;
-        }	            	
+        }
+        
+        if(firstUpdate && localrank != 0) {
+        	prevrank = Math.max(irrank, localrank);
+        }
+        
+		state = FINISH;
+        lastUpdateTime = System.currentTimeMillis();
 	}
 	
 	public int getRank() {
 		return irrank;
+	}
+	
+	public int getPreviousRank() {
+		return prevrank;
+	}
+	
+	public int getLocalRank() {
+		return localrank;
 	}
 	
 	public int getTotalPlayer() {
