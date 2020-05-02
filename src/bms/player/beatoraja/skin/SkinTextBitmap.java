@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
+import bms.player.beatoraja.skin.BitmapFontCache.CacheableBitmapFont;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -136,40 +137,70 @@ public class SkinTextBitmap extends SkinText {
 			this.fontPath = fontPath;
 		}
 
-		public void load() {
-			try {
-				fontData = new BitmapFont.BitmapFontData(new FileHandle(fontPath.toFile()), false);
+		public CacheableBitmapFont createCacheableFont(Path _fontPath, int _type) {
+			BitmapFont.BitmapFontData _fontData = null;
+			Array<TextureRegion> _regions = null;
+			BitmapFont _font = null;
+			float _originalSize = 0;
+			float _pageWidth = 0;
+			float _pageHeight = 0;
 
-				regions = new Array<>(fontData.imagePaths.length);
-				for (int i = 0; i < fontData.imagePaths.length; ++i) {
-					this.regions.add(new TextureRegion(SkinLoader.getTexture(fontData.imagePaths[i], usecim, useMipMaps)));
+			try {
+				_fontData = new BitmapFont.BitmapFontData(new FileHandle(_fontPath.toFile()), false);
+
+				_regions = new Array<>(_fontData.imagePaths.length);
+				for (int i = 0; i < _fontData.imagePaths.length; ++i) {
+					_regions.add(new TextureRegion(SkinLoader.getTexture(_fontData.imagePaths[i], usecim, useMipMaps)));
 				}
 
-				font = new BitmapFont(fontData, regions, true);
+				_font = new BitmapFont(_fontData, _regions, true);
 
 				// size が BitmapFont から取得できないので、独自に取得する
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileHandle(fontPath.toFile()).read()), 512)) {
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileHandle(_fontPath.toFile()).read()), 512)) {
 					String line = reader.readLine();
-					originalSize = (float) Integer.parseInt(line.substring(line.indexOf("size=") + 5).split(" ")[0]);
+					_originalSize = (float) Integer.parseInt(line.substring(line.indexOf("size=") + 5).split(" ")[0]);
 					line = reader.readLine();
-					pageWidth = (float) Integer.parseInt(line.substring(line.indexOf("scaleW=") + 7).split(" ")[0]);
-					pageHeight = (float) Integer.parseInt(line.substring(line.indexOf("scaleH=") + 7).split(" ")[0]);
+					_pageWidth = (float) Integer.parseInt(line.substring(line.indexOf("scaleW=") + 7).split(" ")[0]);
+					_pageHeight = (float) Integer.parseInt(line.substring(line.indexOf("scaleH=") + 7).split(" ")[0]);
 				} catch (Exception e) {
-					originalSize = fontData.lineHeight;
-					if (regions.size > 0) {
-						pageWidth = (float) regions.get(0).getRegionWidth();
-						pageHeight = (float) regions.get(0).getRegionHeight();
+					_originalSize = _fontData.lineHeight;
+					if (_regions.size > 0) {
+						_pageWidth = (float) _regions.get(0).getRegionWidth();
+						_pageHeight = (float) _regions.get(0).getRegionHeight();
 					}
 				}
 			} catch (Exception e) {
-				font = null;
+				_font = null;
 			}
+
+			CacheableBitmapFont result = new CacheableBitmapFont();
+			result.fontData = _fontData;
+			result.regions = _regions;
+			result.font = _font;
+			result.originalSize = _originalSize;
+			result.type = _type;
+			result.pageWidth = _pageWidth;
+			result.pageHeight = _pageHeight;
+
+			return result;
 		}
 
 		public BitmapFont getFont() {
-			if (font == null) {
-				load();
+			if (!BitmapFontCache.Has(fontPath)) {
+				CacheableBitmapFont _newFont = createCacheableFont(fontPath, type);
+				BitmapFontCache.Set(fontPath, _newFont);
 			}
+
+			CacheableBitmapFont cached = BitmapFontCache.Get(fontPath);
+
+			fontData = cached.fontData;
+			regions = cached.regions;
+			font = cached.font;
+			originalSize = cached.originalSize;
+			type = cached.type;
+			pageWidth = cached.pageWidth;
+			pageHeight = cached.pageHeight;
+
 			return font;
 		}
 
