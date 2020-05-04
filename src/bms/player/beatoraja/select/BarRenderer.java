@@ -219,7 +219,7 @@ public class BarRenderer {
 			}
 			return new ContainerBar(folder.getName(), l.toArray(Bar.class));
 		} else {
-			return new CommandBar(select, folder.getName(), folder.getSql());
+			return new CommandBar(select, folder.getName(), folder.getSql(), folder.isShowall());
 		}
 	}
 
@@ -228,6 +228,7 @@ public class BarRenderer {
 		private String name;
 		private CommandFolder[] folder = new CommandFolder[0];
 		private String sql;
+		private boolean showall = false;
 
 		public String getName() {
 			return name;
@@ -251,6 +252,14 @@ public class BarRenderer {
 
 		public void setSql(String sql) {
 			this.sql = sql;
+		}
+
+		public boolean isShowall() {
+			return showall;
+		}
+
+		public void setShowall(boolean showall) {
+			this.showall = showall;
 		}
 	}
 
@@ -750,6 +759,7 @@ public class BarRenderer {
 	public boolean updateBar(Bar bar) {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		Array<Bar> l = new Array<Bar>();
+		boolean showInvisibleCharts = false;
 
 		if (MainLoader.getIllegalSongCount() > 0) {
 			l.addAll(SongBar.toSongBarArray(select.getSongDatabase().getSongDatas(MainLoader.getIllegalSongs())));
@@ -765,6 +775,7 @@ public class BarRenderer {
 			l.addAll(commands);
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
+			showInvisibleCharts = ((DirectoryBar)bar).isShowInvisibleChart();
 			if(dir.indexOf((DirectoryBar) bar, true) != -1) {
 				while(dir.last() != bar) {
 					prevbar = dir.removeLast();
@@ -796,7 +807,7 @@ public class BarRenderer {
 				for (Bar b : l) {
 					if(b instanceof SongBar && ((SongBar) b).getSongData() != null) {
 						final SongData song = ((SongBar) b).getSongData();
-						if((song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0
+						if((!showInvisibleCharts && (song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
 								|| (mode != null && song.getMode() != 0 && song.getMode() != mode.id)) {
 							remove.add(b);
 						}
