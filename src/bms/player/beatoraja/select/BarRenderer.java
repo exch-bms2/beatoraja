@@ -794,9 +794,12 @@ public class BarRenderer {
 				config.setMode(mode);
 				Array<Bar> remove = new Array<Bar>();
 				for (Bar b : l) {
-					if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 &&
-							((SongBar) b).getSongData().getMode() != mode.id) {
-						remove.add(b);
+					if(b instanceof SongBar && ((SongBar) b).getSongData() != null) {
+						final SongData song = ((SongBar) b).getSongData();
+						if((song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0
+								|| (mode != null && song.getMode() != 0 && song.getMode() != mode.id)) {
+							remove.add(b);
+						}
 					}
 				}
 				if(l.size != remove.size) {
