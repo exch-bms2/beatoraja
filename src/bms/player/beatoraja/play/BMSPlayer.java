@@ -715,6 +715,7 @@ public class BMSPlayer extends MainState {
 				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
+					Logger.getGlobal().info("\"score\": " + resource.getScoreData());
 					main.changeState(MainStateType.RESULT);
 				} else {
 					if (resource.mediaLoadFinished()) {
