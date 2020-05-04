@@ -12,6 +12,16 @@
 	"name":"FAVORITE CHART",
 	"sql":"favorite & 2 != 0"
 },
+{
+	"name":"INVISIBLE SONG",
+	"sql":"favorite & 4 != 0",
+	"showall" : true
+},
+{
+	"name":"INVISIBLE CHART",
+	"sql":"favorite & 8 != 0",
+	"showall" : true
+},
 
 {
 	"name":"CLEAR TYPE",
