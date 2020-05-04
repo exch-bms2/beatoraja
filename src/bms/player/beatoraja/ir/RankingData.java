@@ -3,6 +3,7 @@ package bms.player.beatoraja.ir;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.MainController.IRStatus;
@@ -54,12 +55,20 @@ public class RankingData {
 	 */
 	private long lastUpdateTime;
 	
-	public void load(MainState mainstate, SongData song) {
+	public void load(MainState mainstate, Object song) {
+		if(!(song instanceof SongData || song instanceof CourseData)) {
+			return;
+		}		
 		state = NONE;
 		Thread irprocess = new Thread(() -> {
 			state = ACCESS;
 			final IRStatus[] ir = mainstate.main.getIRStatus();
-	        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, song);
+	        IRResponse<IRScoreData[]> response = null;
+	        if(song instanceof SongData) {
+	        	 response = ir[0].connection.getPlayData(null, (SongData) song);
+	        } else if(song instanceof CourseData) {
+		        response = ir[0].connection.getCoursePlayData(null, (CourseData) song, mainstate.main.getPlayerConfig().getLnmode());
+	        }
 	        if(response.isSucceeded()) {
 	        	updateScore(response.getData(), mainstate.getScoreDataProperty().getScoreData());
 	        	

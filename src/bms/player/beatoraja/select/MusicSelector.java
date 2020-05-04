@@ -3,7 +3,10 @@ package bms.player.beatoraja.select;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.nio.file.DirectoryStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.io.File;
+import java.lang.StringBuilder;
 import java.nio.file.*;
 import java.util.logging.Logger;
 
@@ -12,8 +15,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.ObjectMap.Keys;
 
+import bms.model.BMSDecoder;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
@@ -347,9 +352,9 @@ public class MusicSelector extends MainState {
 			showNoteGraph = true;
 		}
 		// get ir ranking
-		if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
-			if (currentRankingDuration != -1 && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
-				currentRankingDuration = -1;
+		if (currentRankingDuration != -1 && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
+			currentRankingDuration = -1;
+			if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
 				SongData song = ((SongBar) current).getSongData();
 				RankingData irc = ircache.get(song, config.getLnmode());
 				if(irc == null) {
@@ -357,6 +362,16 @@ public class MusicSelector extends MainState {
 		            ircache.put(song, config.getLnmode(), irc);
 				}
 				irc.load(this, song);
+	            currentir = irc;
+			}				
+			if (current instanceof GradeBar && ((GradeBar) current).existsAllSongs() && play == null) {
+				CourseData course = ((GradeBar) current).getCourseData();
+				RankingData irc = ircache.get(course, config.getLnmode());
+				if(irc == null) {
+					irc = new RankingData();
+		            ircache.put(course, config.getLnmode(), irc);
+				}
+				irc.load(this, course);
 	            currentir = irc;
 			}				
 		}
@@ -564,6 +579,13 @@ public class MusicSelector extends MainState {
 			resource.setCourseData(course.getCourseData());
 			resource.setBMSFile(files[0], mode);
 			playedcourse = course.getCourseData();
+			
+			if(main.getIRStatus().length > 0 && currentir == null) {
+				currentir = new RankingData();
+	            ircache.put(course.getCourseData(), config.getLnmode(), currentir);
+			}
+			resource.setRankingData(currentir);
+
 			changeState(MainStateType.DECIDE);
 		} else {
 			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
@@ -743,9 +765,17 @@ public class MusicSelector extends MainState {
 		showNoteGraph = false;
 
 		final Bar current = bar.getSelected();
-		if(main.getIRStatus().length > 0 && current instanceof SongBar && ((SongBar) current).existsSong()) {
-			currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
-			currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
+		if(main.getIRStatus().length > 0) {
+			if(current instanceof SongBar && ((SongBar) current).existsSong()) {
+				currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
+				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
+			} else if(current instanceof GradeBar && ((GradeBar) current).existsAllSongs()) {
+				currentir = ircache.get(((GradeBar) current).getCourseData(), config.getLnmode());
+				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
+			} else {
+				currentir = null;
+				currentRankingDuration = -1;			
+			}
 		} else {
 			currentir = null;
 			currentRankingDuration = -1;			
@@ -810,11 +840,14 @@ public class MusicSelector extends MainState {
 	     * IRアクセスデータのキャッシュ
 	     */
 	    private ObjectMap<String, RankingData>[] scorecache;
+	    private ObjectMap<String, RankingData>[] cscorecache;
 
 	    public RankingDataCache() {
 	        scorecache = new ObjectMap[4];
+	        cscorecache = new ObjectMap[4];
 	        for (int i = 0; i < scorecache.length; i++) {
 	            scorecache[i] = new ObjectMap(2000);
+	            cscorecache[i] = new ObjectMap(100);
 	        }
 	    }
 
@@ -832,9 +865,56 @@ public class MusicSelector extends MainState {
 	        return null;
 	    }
 
+	    public RankingData get(CourseData course, int lnmode) {
+	        int cacheindex = 3;
+	        for(SongData song : course.getSong()) {
+	        	if(song.hasUndefinedLongNote()) {
+	        		cacheindex = lnmode;
+	        	}
+	        }
+	        String hash = createCourseHash(course);
+	        if (cscorecache[cacheindex].containsKey(hash)) {
+	            return cscorecache[cacheindex].get(hash);
+	        }
+	        return null;
+	    }
+
 	    public void put(SongData song, int lnmode, RankingData iras) {
 	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
 	        scorecache[cacheindex].put(song.getSha256(), iras);
 	    }
+	    
+	    public void put(CourseData course, int lnmode, RankingData iras) {
+	        int cacheindex = 3;
+	        for(SongData song : course.getSong()) {
+	        	if(song.hasUndefinedLongNote()) {
+	        		cacheindex = lnmode;
+	        	}
+	        }
+	        cscorecache[cacheindex].put(createCourseHash(course), iras);
+	    }
+	    
+		private String createCourseHash(CourseData course) {
+			StringBuilder sb = new StringBuilder();
+			for(SongData song : course.getSong()) {
+				if(song.getSha256() != null && song.getSha256().length() == 64) {
+					sb.append(song.getSha256());
+				} else {
+					return null;
+				}
+			}
+			for(CourseDataConstraint constraint : course.getConstraint()) {
+				sb.append(constraint.name);
+			}
+			try {
+				MessageDigest md = MessageDigest.getInstance("sha-256");
+				md.update(sb.toString().getBytes());
+				return BMSDecoder.convertHexString(md.digest());
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 }
