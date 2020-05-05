@@ -1,19 +1,9 @@
 package bms.player.beatoraja.ir;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-
-import bms.model.BMSModel;
 import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.TableData;
-import bms.player.beatoraja.song.SongData;
 
 /**
  * IR接続用インターフェイス
@@ -68,7 +58,7 @@ public interface IRConnection {
 	 *            スコアデータを取得する譜面。ユーザーIDのスコアデータを全取得する場合はnullを入れる
 	 * @return
 	 */
-	public IRResponse<IRScoreData[]> getPlayData(String id, SongData model);
+	public IRResponse<IRScoreData[]> getPlayData(String id, IRChartData model);
 
 	public IRResponse<IRScoreData[]> getCoursePlayData(String id, CourseData course, int lnmode);
 
@@ -81,7 +71,7 @@ public interface IRConnection {
 	 *            スコア
 	 * @return 送信結果
 	 */
-	public IRResponse<Object> sendPlayData(SongData model, IRScoreData score);
+	public IRResponse<Object> sendPlayData(IRChartData model, IRScoreData score);
 
 	/**
 	 * コーススコアデータを送信する
@@ -103,7 +93,7 @@ public interface IRConnection {
 	 *            譜面データ
 	 * @return 楽曲URL。存在しない場合はnull
 	 */
-	public String getSongURL(SongData song);
+	public String getSongURL(IRChartData chart);
 
 	/**
 	 * コースのURLを取得する

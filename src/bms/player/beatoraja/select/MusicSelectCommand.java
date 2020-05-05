@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.result.AbstractResult;
@@ -421,7 +422,7 @@ public enum MusicSelectCommand {
             Bar current = selector.getBarRender().getSelected();
             String url = null;
             if(current instanceof SongBar) {
-                url = ir.getSongURL(((SongBar) current).getSongData());
+                url = ir.getSongURL(new IRChartData(((SongBar) current).getSongData()));
             }
             if(current instanceof GradeBar) {
                 url = ir.getCourseURL(((GradeBar) current).getCourseData());

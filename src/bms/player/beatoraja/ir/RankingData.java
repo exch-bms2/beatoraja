@@ -65,7 +65,7 @@ public class RankingData {
 			final IRStatus[] ir = mainstate.main.getIRStatus();
 	        IRResponse<IRScoreData[]> response = null;
 	        if(song instanceof SongData) {
-	        	 response = ir[0].connection.getPlayData(null, (SongData) song);
+	        	 response = ir[0].connection.getPlayData(null, new IRChartData((SongData) song));
 	        } else if(song instanceof CourseData) {
 		        response = ir[0].connection.getCoursePlayData(null, (CourseData) song, mainstate.main.getPlayerConfig().getLnmode());
 	        }
