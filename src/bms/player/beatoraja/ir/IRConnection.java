@@ -60,7 +60,7 @@ public interface IRConnection {
 	 */
 	public IRResponse<IRScoreData[]> getPlayData(String id, IRChartData model);
 
-	public IRResponse<IRScoreData[]> getCoursePlayData(String id, CourseData course, int lnmode);
+	public IRResponse<IRScoreData[]> getCoursePlayData(String id, IRCourseData course);
 
 	/**
 	 * スコアデータを送信する
@@ -84,7 +84,7 @@ public interface IRConnection {
 	 *            スコア
 	 * @return 送信結果
 	 */
-	public IRResponse<Object> sendCoursePlayData(CourseData course, int lnmode, IRScoreData score);
+	public IRResponse<Object> sendCoursePlayData(IRCourseData course, IRScoreData score);
 
 	/**
 	 * 楽曲のURLを取得する
@@ -102,7 +102,7 @@ public interface IRConnection {
 	 *            コースデータ
 	 * @return コースURL。存在しない場合はnull
 	 */
-	public String getCourseURL(CourseData course);
+	public String getCourseURL(IRCourseData course);
 
 	/**
 	 * プレイヤーURLを取得する

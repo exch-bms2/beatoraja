@@ -21,6 +21,7 @@ import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRCourseData;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.song.SongData;
@@ -425,7 +426,7 @@ public enum MusicSelectCommand {
                 url = ir.getSongURL(new IRChartData(((SongBar) current).getSongData()));
             }
             if(current instanceof GradeBar) {
-                url = ir.getCourseURL(((GradeBar) current).getCourseData());
+                url = ir.getCourseURL(new IRCourseData(((GradeBar) current).getCourseData()));
             }
             if (url != null) {
                 try {

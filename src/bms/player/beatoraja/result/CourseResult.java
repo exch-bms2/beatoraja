@@ -17,6 +17,7 @@ import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRCourseData;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.select.MusicSelector;
@@ -143,7 +144,7 @@ public class CourseResult extends AbstractResult {
                 	if(irsend > 0) {
                         main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 
-						IRResponse<IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, resource.getCourseData(), lnmode);
+						IRResponse<IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
 						if(response.isSucceeded()) {
                     		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
 							Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
@@ -373,7 +374,7 @@ public class CourseResult extends AbstractResult {
 		
 		public boolean send() {
 			Logger.getGlobal().info("IRへスコア送信中 : " + course.getName());
-            IRResponse<Object> send1 = ir.sendCoursePlayData(course, lnmode, score);
+            IRResponse<Object> send1 = ir.sendCoursePlayData(new IRCourseData(course, lnmode), score);
             if(send1.isSucceeded()) {
                 Logger.getGlobal().info("IRスコア送信完了 : " + course.getName());
                 retry = -255;
