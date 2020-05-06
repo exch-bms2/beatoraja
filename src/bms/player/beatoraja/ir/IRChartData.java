@@ -63,7 +63,7 @@ public class IRChartData {
 	 */
 	public final Mode mode;
 	/**
-	 * LN TYPE(-1: 未定義LNなし譜面, 0: LN, 1: CN, 2: HCN)
+	 * LN TYPE(-1: 未指定, 0: LN, 1: CN, 2: HCN)
 	 */
 	public final int lntype;
 	/**
@@ -82,10 +82,18 @@ public class IRChartData {
 	 * 総ノーツ数
 	 */
 	public final int notes;
+	/**
+	 * LN TYPE未定義ロングノーツが存在するかどうか
+	 */
+	public final boolean hasUndefinedLN;
 	
 	public final Map<String, String> values = new HashMap<String, String>();
 	
 	public IRChartData(SongData song) {
+		this(song, song.getBMSModel() != null ? song.getBMSModel().getLntype() : 0);
+	}
+	
+	public IRChartData(SongData song, int lntype) {
 		this.title = song.getTitle();
 		this.subtitle = song.getSubtitle();
 		this.genre = song.getGenre();
@@ -104,7 +112,8 @@ public class IRChartData {
 		this.minbpm = song.getMinbpm();
 		this.maxbpm = song.getMaxbpm();
 		this.notes = song.getNotes();
-		this.lntype = song.hasUndefinedLongNote() && model != null ? model.getLntype() : -1;
+		this.hasUndefinedLN = song.hasUndefinedLongNote();
+		this.lntype = lntype;
 
 		values.putAll(model.getValues());
 	}

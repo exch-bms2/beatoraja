@@ -22,8 +22,16 @@ public class IRCourseData {
      * コースの制限
      */
     public final CourseDataConstraint[] constraint;
-	
+	/**
+	 * LN TYPE(-1 : 未指定, 0: LN, 1: CN, 2: HCN)
+	 */
+	public final int lntype;
+
     public IRCourseData(CourseData course) {
+    	this(course, -1);
+    }
+
+    public IRCourseData(CourseData course, int lntype) {
     	this.name = course.getName();
     	this.charts = new IRChartData[course.getSong().length];
     	for(int i = 0;i < this.charts.length;i++) {
@@ -32,6 +40,7 @@ public class IRCourseData {
     	this.constraint = new CourseDataConstraint[course.getConstraint().length];
     	for(int i = 0;i < this.constraint.length;i++) {
     		constraint[i] =course.getConstraint()[i];
-    	}    	
+    	}
+    	this.lntype = lntype;
     }
 }
