@@ -10,6 +10,7 @@ import java.lang.StringBuilder;
 import java.nio.file.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.ir.IRPlayerData;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
@@ -151,7 +152,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			
-			IRResponse<PlayerInformation[]> response = main.getIRStatus()[0].connection.getRivals();
+			IRResponse<IRPlayerData[]> response = main.getIRStatus()[0].connection.getRivals();
 			if(response.isSucceeded()) {
 				try {
 					
@@ -163,7 +164,11 @@ public class MusicSelector extends MainState {
 
 					// ライバルキャッシュ作成
 					if(main.getIRStatus()[0].config.isImportrival()) {
-						for(PlayerInformation rival : response.getData()) {
+						for(IRPlayerData irplayer : response.getData()) {
+							final PlayerInformation rival = new PlayerInformation();
+							rival.setId(irplayer.id);
+							rival.setName(irplayer.name);
+							rival.setRank(irplayer.rank);
 							final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + main.getIRStatus()[0].config.getIrname() + rival.getId() + ".db");
 							rivalcaches.put(rival,  new ScoreDataCache() {
 

@@ -38,7 +38,7 @@ public interface IRConnection {
 	 * 
 	 * @return ライバルデータ
 	 */
-	public IRResponse<PlayerInformation[]> getRivals();
+	public IRResponse<IRPlayerData[]> getRivals();
 
 	/**
 	 * IRに設定されている表データを収録する
