@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.song.SongData;
@@ -83,7 +82,7 @@ public class RankingData {
 
 	}
 	
-	public void updateScore(IRScoreData[] scores, IRScoreData localscore) {
+	public void updateScore(IRScoreData[] scores, bms.player.beatoraja.IRScoreData localscore) {
 		if(scores == null) {
 			return;
 		}
@@ -98,13 +97,13 @@ public class RankingData {
         irrank = 0;
         localrank = 0;
         for(int i = 0;i < scores.length;i++) {
-            if(irrank == 0 && scores[i].getPlayer().length() == 0) {
+            if(irrank == 0 && scores[i].player.length() == 0) {
             	irrank = i + 1;
             }
-            if(localscore != null && localrank == 0 && scores[i].getExscore() <=  localscore.getExscore()) {
+            if(localscore != null && localrank == 0 && scores[i].pg * 2 + scores[i].gr <=  localscore.getExscore()) {
             	localrank = i + 1;
             }
-            lamps[scores[i].getClear()]++;
+            lamps[scores[i].clear.id]++;
         }
         
         if(firstUpdate && localrank != 0) {

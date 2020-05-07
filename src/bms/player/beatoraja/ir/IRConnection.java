@@ -1,7 +1,5 @@
 package bms.player.beatoraja.ir;
 
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.TableData;
 

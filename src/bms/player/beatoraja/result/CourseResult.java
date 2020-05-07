@@ -144,7 +144,7 @@ public class CourseResult extends AbstractResult {
                 	if(irsend > 0) {
                         main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 
-						IRResponse<IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
+                        IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
 						if(response.isSucceeded()) {
                     		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
 							Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
@@ -374,7 +374,7 @@ public class CourseResult extends AbstractResult {
 		
 		public boolean send() {
 			Logger.getGlobal().info("IRへスコア送信中 : " + course.getName());
-            IRResponse<Object> send1 = ir.sendCoursePlayData(new IRCourseData(course, lnmode), score);
+            IRResponse<Object> send1 = ir.sendCoursePlayData(new IRCourseData(course, lnmode), new bms.player.beatoraja.ir.IRScoreData(score));
             if(send1.isSucceeded()) {
                 Logger.getGlobal().info("IRスコア送信完了 : " + course.getName());
                 retry = -255;

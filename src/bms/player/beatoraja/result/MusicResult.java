@@ -133,7 +133,7 @@ public class MusicResult extends AbstractResult {
                 	if(irsend > 0) {
                         main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
                         
-                        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
+                        IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
                         if(response.isSucceeded()) {
                     		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
                             Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
@@ -527,7 +527,7 @@ public class MusicResult extends AbstractResult {
 		
 		public boolean send() {
 			Logger.getGlobal().info("IRへスコア送信中 : " + song.getTitle());
-            IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), score);
+            IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
             if(send1.isSucceeded()) {
                 Logger.getGlobal().info("IRスコア送信完了 : " + song.getTitle());
                 retry = -255;

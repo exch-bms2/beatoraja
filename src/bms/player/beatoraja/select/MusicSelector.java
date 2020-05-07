@@ -137,10 +137,10 @@ public class MusicSelector extends MainState {
 			if(main.getIRStatus()[0].config.isImportscore()) {
 				main.getIRStatus()[0].config.setImportscore(false);
 				try {
-					IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(null, null);
+					IRResponse<bms.player.beatoraja.ir.IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(null, null);
 					if(scores.isSucceeded()) {
 						ScoreDataImporter scoreimport = new ScoreDataImporter(new ScoreDatabaseAccessor(main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + File.separatorChar + "score.db"));
-						scoreimport.importScores(scores.getData(), main.getIRStatus()[0].config.getIrname());
+						scoreimport.importScores(convert(scores.getData()), main.getIRStatus()[0].config.getIrname());
 
 						Logger.getGlobal().info("IRからのスコアインポート完了");
 					} else {
@@ -179,9 +179,9 @@ public class MusicSelector extends MainState {
 							new Thread(() -> {
 								scoredb.createTable();
 								scoredb.setInformation(rival);
-								IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
+								IRResponse<bms.player.beatoraja.ir.IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
 								if(scores.isSucceeded()) {
-									scoredb.setScoreData(scores.getData());
+									scoredb.setScoreData(convert(scores.getData()));
 									Logger.getGlobal().info("IRからのライバルスコア取得完了 : " + rival.getName());
 								} else {
 									Logger.getGlobal().warning("IRからのライバルスコア取得失敗 : " + scores.getMessage());
@@ -242,6 +242,35 @@ public class MusicSelector extends MainState {
 		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
 			main.updateSong(null);
 		}
+	}
+	
+	private IRScoreData[] convert(bms.player.beatoraja.ir.IRScoreData[] irscores) {
+		IRScoreData[] scores = new IRScoreData[irscores.length];
+		for(int i = 0;i < scores.length;i++) {
+			final IRScoreData score = new IRScoreData();
+			final bms.player.beatoraja.ir.IRScoreData irscore = irscores[i];
+			score.setSha256(irscore.sha256);
+			score.setPlayer(irscore.player);
+			score.setClear(irscore.clear.id); 
+			score.setDate(irscore.date);
+			score.setEpg(irscore.pg);
+			score.setEgr(irscore.gr);
+			score.setEgd(irscore.gd);
+			score.setEbd(irscore.bd);
+			score.setLpr(irscore.pr);
+			score.setEms(irscore.ms);
+			score.setCombo(irscore.maxcombo);
+			score.setNotes(irscore.notes);
+			score.setPassnotes(irscore.passnotes != 0 ? irscore.notes : irscore.passnotes);
+			score.setMinbp(irscore.minbp);
+			score.setOption(irscore.option);
+			score.setAssist(irscore.assist);
+			score.setGauge(irscore.gauge);
+			score.setDeviceType(irscore.deviceType);
+			
+			scores[i] = score;
+		}
+		return scores;
 	}
 
 	public void setRival(PlayerInformation rival) {
