@@ -115,6 +115,8 @@ public class IRChartData {
 		this.hasUndefinedLN = song.hasUndefinedLongNote();
 		this.lntype = lntype;
 
-		values.putAll(model.getValues());
+		if(model != null) {
+			values.putAll(model.getValues());			
+		}
 	}
 }
