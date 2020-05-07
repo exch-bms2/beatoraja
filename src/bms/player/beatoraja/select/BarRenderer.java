@@ -10,7 +10,9 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.IRTableData;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
@@ -135,10 +137,64 @@ public class BarRenderer {
 		}
 
 		if(main.getIRStatus().length > 0) {
-			IRResponse<TableData[]> response = main.getIRStatus()[0].connection.getTableDatas();
+			IRResponse<IRTableData[]> response = main.getIRStatus()[0].connection.getTableDatas();
 			if(response.isSucceeded()) {
-				for(TableData td : response.getData()) {
-					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
+				for(IRTableData irtd : response.getData()) {
+					TableData td = new TableData();
+					td.setName(irtd.name);
+					TableData.TableFolder[] folder = new TableData.TableFolder[irtd.folders.length];
+					for(int i = 0;i < folder.length;i++) {
+						TableData.TableFolder tf = new TableData.TableFolder();
+						tf.setName(irtd.folders[i].name);
+						SongData[] songs = new SongData[irtd.folders[i].charts.length];
+						for(int j = 0;j < songs.length;j++) {
+							SongData song = new SongData();
+							IRChartData chart = irtd.folders[i].charts[j];
+							song.setSha256(chart.sha256);
+							song.setMd5(chart.md5);
+							song.setTitle(chart.title);
+							song.setArtist(chart.artist);
+							song.setGenre(chart.genre);
+							song.setUrl(chart.url);
+							song.setAppendurl(chart.appendurl);
+							if(chart.mode != null) {
+								song.setMode(chart.mode.id);								
+							}
+							songs[j] = song;
+						}
+						tf.setSong(songs);
+						folder[i] = tf;
+					}
+					td.setFolder(folder);
+					CourseData[] course = new CourseData[irtd.courses.length];
+					for(int i = 0;i < course.length;i++) {
+						CourseData cd = new CourseData();
+						cd.setName(irtd.courses[i].name);
+						SongData[] songs = new SongData[irtd.courses[i].charts.length];
+						for(int j = 0;j < songs.length;j++) {
+							SongData song = new SongData();
+							IRChartData chart = irtd.courses[i].charts[j];
+							song.setSha256(chart.sha256);
+							song.setMd5(chart.md5);
+							song.setTitle(chart.title);
+							song.setArtist(chart.artist);
+							song.setGenre(chart.genre);
+							song.setUrl(chart.url);
+							song.setAppendurl(chart.appendurl);
+							if(chart.mode != null) {
+								song.setMode(chart.mode.id);								
+							}
+							songs[j] = song;
+						}
+						cd.setSong(songs);
+						cd.setConstraint(irtd.courses[i].constraint);
+						cd.setRelease(true);
+						course[i] = cd;
+					}
+					td.setCourse(course);
+					if(td.validate()) {
+						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));						
+					}
 				}
 			} else {
 				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());

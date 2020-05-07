@@ -1,8 +1,5 @@
 package bms.player.beatoraja.ir;
 
-import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.TableData;
-
 /**
  * IR接続用インターフェイス
  * 
@@ -45,7 +42,7 @@ public interface IRConnection {
 	 * 
 	 * @return IRで取得可能な表データ
 	 */
-	public IRResponse<TableData[]> getTableDatas();
+	public IRResponse<IRTableData[]> getTableDatas();
 
 	/**
 	 * スコアデータを取得する
