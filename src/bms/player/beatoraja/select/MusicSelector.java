@@ -3,22 +3,30 @@ package bms.player.beatoraja.select;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.nio.file.DirectoryStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.io.File;
+import java.lang.StringBuilder;
 import java.nio.file.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.ir.IRPlayerData;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.ObjectMap.Keys;
 
+import bms.model.BMSDecoder;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
@@ -70,10 +78,19 @@ public class MusicSelector extends MainState {
 	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
 	 */
 	private final int previewDuration = 400;
+	
+	private final int rankingDuration = 5000;
+	private final int rankingReloadDuration = 10 * 60 * 1000;
+	
+	private long currentRankingDuration = -1;
+
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
+	
+	private RankingData currentir;
+	private RankingDataCache ircache = new RankingDataCache();
 
 	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
@@ -89,6 +106,9 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_OPTIONCLOSE = 6;
 
 	private PlayMode play = null;
+
+	private SongData playedsong = null;
+	private CourseData playedcourse = null;
 
 	private PixmapResourcePool banners;
 
@@ -118,10 +138,10 @@ public class MusicSelector extends MainState {
 			if(main.getIRStatus()[0].config.isImportscore()) {
 				main.getIRStatus()[0].config.setImportscore(false);
 				try {
-					IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(null, null);
+					IRResponse<bms.player.beatoraja.ir.IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(null, null);
 					if(scores.isSucceeded()) {
 						ScoreDataImporter scoreimport = new ScoreDataImporter(new ScoreDatabaseAccessor(main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + File.separatorChar + "score.db"));
-						scoreimport.importScores(scores.getData(), main.getIRStatus()[0].config.getIrname());
+						scoreimport.importScores(convert(scores.getData()), main.getIRStatus()[0].config.getIrname());
 
 						Logger.getGlobal().info("IRからのスコアインポート完了");
 					} else {
@@ -132,7 +152,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			
-			IRResponse<PlayerInformation[]> response = main.getIRStatus()[0].connection.getRivals();
+			IRResponse<IRPlayerData[]> response = main.getIRStatus()[0].connection.getRivals();
 			if(response.isSucceeded()) {
 				try {
 					
@@ -144,7 +164,11 @@ public class MusicSelector extends MainState {
 
 					// ライバルキャッシュ作成
 					if(main.getIRStatus()[0].config.isImportrival()) {
-						for(PlayerInformation rival : response.getData()) {
+						for(IRPlayerData irplayer : response.getData()) {
+							final PlayerInformation rival = new PlayerInformation();
+							rival.setId(irplayer.id);
+							rival.setName(irplayer.name);
+							rival.setRank(irplayer.rank);
 							final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + main.getIRStatus()[0].config.getIrname() + rival.getId() + ".db");
 							rivalcaches.put(rival,  new ScoreDataCache() {
 
@@ -160,9 +184,9 @@ public class MusicSelector extends MainState {
 							new Thread(() -> {
 								scoredb.createTable();
 								scoredb.setInformation(rival);
-								IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
+								IRResponse<bms.player.beatoraja.ir.IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
 								if(scores.isSucceeded()) {
-									scoredb.setScoreData(scores.getData());
+									scoredb.setScoreData(convert(scores.getData()));
 									Logger.getGlobal().info("IRからのライバルスコア取得完了 : " + rival.getName());
 								} else {
 									Logger.getGlobal().warning("IRからのライバルスコア取得失敗 : " + scores.getMessage());
@@ -224,6 +248,35 @@ public class MusicSelector extends MainState {
 			main.updateSong(null);
 		}
 	}
+	
+	private IRScoreData[] convert(bms.player.beatoraja.ir.IRScoreData[] irscores) {
+		IRScoreData[] scores = new IRScoreData[irscores.length];
+		for(int i = 0;i < scores.length;i++) {
+			final IRScoreData score = new IRScoreData();
+			final bms.player.beatoraja.ir.IRScoreData irscore = irscores[i];
+			score.setSha256(irscore.sha256);
+			score.setPlayer(irscore.player);
+			score.setClear(irscore.clear.id); 
+			score.setDate(irscore.date);
+			score.setEpg(irscore.pg);
+			score.setEgr(irscore.gr);
+			score.setEgd(irscore.gd);
+			score.setEbd(irscore.bd);
+			score.setLpr(irscore.pr);
+			score.setEms(irscore.ms);
+			score.setCombo(irscore.maxcombo);
+			score.setNotes(irscore.notes);
+			score.setPassnotes(irscore.passnotes != 0 ? irscore.notes : irscore.passnotes);
+			score.setMinbp(irscore.minbp);
+			score.setOption(irscore.option);
+			score.setAssist(irscore.assist);
+			score.setGauge(irscore.gauge);
+			score.setDeviceType(irscore.deviceType);
+			
+			scores[i] = score;
+		}
+		return scores;
+	}
 
 	public void setRival(PlayerInformation rival) {
 		this.rival = rival;
@@ -262,8 +315,15 @@ public class MusicSelector extends MainState {
 		play = null;
 		showNoteGraph = false;
 		main.getPlayerResource().setPlayerData(main.getPlayDataAccessor().readPlayerData());
-		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
-			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
+		if (playedsong != null) {
+			scorecache.update(playedsong, config.getLnmode());
+			playedsong = null;
+		}
+		if (playedcourse != null) {
+			for (SongData sd : playedcourse.getSong()) {
+				scorecache.update(sd, config.getLnmode());
+			}
+			playedcourse = null;
 		}
 
 		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
@@ -281,7 +341,9 @@ public class MusicSelector extends MainState {
 		loadSkin(SkinType.MUSIC_SELECT);
 
 		// search text field
-		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
+		Rectangle searchRegion = ((MusicSelectSkin) getSkin()).getSearchTextRegion();
+		if (searchRegion != null && (getStage() == null ||
+				(search != null && !searchRegion.equals(search.getSearchBounds())))) {
 			if(search != null) {
 				search.dispose();
 			}
@@ -323,6 +385,34 @@ public class MusicSelector extends MainState {
 			}
 			showNoteGraph = true;
 		}
+		// get ir ranking
+		if (currentRankingDuration != -1 && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
+			currentRankingDuration = -1;
+			if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
+				SongData song = ((SongBar) current).getSongData();
+				RankingData irc = ircache.get(song, config.getLnmode());
+				if(irc == null) {
+					irc = new RankingData();
+		            ircache.put(song, config.getLnmode(), irc);
+				}
+				irc.load(this, song);
+	            currentir = irc;
+			}				
+			if (current instanceof GradeBar && ((GradeBar) current).existsAllSongs() && play == null) {
+				CourseData course = ((GradeBar) current).getCourseData();
+				RankingData irc = ircache.get(course, config.getLnmode());
+				if(irc == null) {
+					irc = new RankingData();
+		            ircache.put(course, config.getLnmode(), irc);
+				}
+				irc.load(this, course);
+	            currentir = irc;
+			}				
+		}
+		final int irstate = currentir != null ? currentir.getState() : -1;
+		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == RankingData.ACCESS);
+		main.switchTimer(TIMER_IR_CONNECT_SUCCESS, irstate == RankingData.FINISH);
+		main.switchTimer(TIMER_IR_CONNECT_FAIL, irstate == RankingData.FAIL);
 
 		if (play != null) {
 			if (current instanceof SongBar) {
@@ -349,10 +439,14 @@ public class MusicSelector extends MainState {
 								}
 							}
 						}
-						preview.stop();
-						main.changeState(MainStateType.DECIDE);
-						banners.disposeOld();
-						stagefiles.disposeOld();
+						if(main.getIRStatus().length > 0 && currentir == null) {
+							currentir = new RankingData();
+				            ircache.put(song, config.getLnmode(), currentir);
+						}
+						resource.setRankingData(currentir);
+						
+						playedsong = song;
+						changeState(MainStateType.DECIDE);
 					} else {
 						main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 					}
@@ -385,10 +479,8 @@ public class MusicSelector extends MainState {
 							}
 						}
 					}
-					preview.stop();
-					main.changeState(MainStateType.DECIDE);
-					banners.disposeOld();
-					stagefiles.disposeOld();
+					playedsong = song;
+					changeState(MainStateType.DECIDE);
 				} else {
 					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 				}
@@ -409,10 +501,7 @@ public class MusicSelector extends MainState {
 						resource.clear();
 						resource.setAutoPlaySongs(paths.toArray(Path.class), false);
 						if(resource.nextSong()) {
-							preview.stop();
-							main.changeState(MainStateType.DECIDE);
-							banners.disposeOld();
-							stagefiles.disposeOld();
+							changeState(MainStateType.DECIDE);
 						}
 					}
 				}
@@ -425,14 +514,20 @@ public class MusicSelector extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		if (input.getNumberState()[6]) {
-			preview.stop();
-			main.changeState(MainStateType.CONFIG);
+			changeState(MainStateType.CONFIG);
 		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
-			preview.stop();
-			main.changeState(MainStateType.SKINCONFIG);
+			changeState(MainStateType.SKINCONFIG);
 		}
 
 		musicinput.input();
+	}
+	
+	void changeState(MainStateType type) {
+		preview.stop();
+		main.changeState(type);
+		search.unfocus(this);
+		banners.disposeOld();
+		stagefiles.disposeOld();
 	}
 
 	public void select(Bar current) {
@@ -514,13 +609,18 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
-			preview.stop();
 			course.getCourseData().setSong(resource.getCourseBMSModels());
 			resource.setCourseData(course.getCourseData());
 			resource.setBMSFile(files[0], mode);
-			main.changeState(MainStateType.DECIDE);
-			banners.disposeOld();
-			stagefiles.disposeOld();
+			playedcourse = course.getCourseData();
+			
+			if(main.getIRStatus().length > 0 && currentir == null) {
+				currentir = new RankingData();
+	            ircache.put(course.getCourseData(), config.getLnmode(), currentir);
+			}
+			resource.setRankingData(currentir);
+
+			changeState(MainStateType.DECIDE);
 		} else {
 			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
@@ -584,6 +684,12 @@ public class MusicSelector extends MainState {
 
 	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
+		case BUTTON_KEYCONFIG:
+			changeState(MainStateType.CONFIG);
+			break;
+		case BUTTON_SKINSELECT:
+			changeState(MainStateType.SKINCONFIG);
+			break;
 		case BUTTON_PLAY:
 			play = PlayMode.PLAY;
 			break;
@@ -638,8 +744,17 @@ public class MusicSelector extends MainState {
 		case BUTTON_BGA:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
 			break;
+		case BUTTON_JUDGE_TIMING:
+			execute(arg1 >= 0 ? MusicSelectCommand.JUDGETIMING_UP : MusicSelectCommand.JUDGETIMING_DOWN);
+			break;			
 		case BUTTON_GAUGEAUTOSHIFT:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
+			break;
+		case BUTTON_RIVAL:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_RIVAL : MusicSelectCommand.PREV_RIVAL);
+			break;
+		case BUTTON_OPEN_IR_WEBSITE:
+			execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
 			break;
 		case BUTTON_AUTOSAVEREPLAY_1:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_1 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_1);
@@ -682,6 +797,23 @@ public class MusicSelector extends MainState {
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);
 		showNoteGraph = false;
+
+		final Bar current = bar.getSelected();
+		if(main.getIRStatus().length > 0) {
+			if(current instanceof SongBar && ((SongBar) current).existsSong()) {
+				currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
+				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
+			} else if(current instanceof GradeBar && ((GradeBar) current).existsAllSongs()) {
+				currentir = ircache.get(((GradeBar) current).getCourseData(), config.getLnmode());
+				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
+			} else {
+				currentir = null;
+				currentRankingDuration = -1;			
+			}
+		} else {
+			currentir = null;
+			currentRankingDuration = -1;			
+		}
 	}
 
 	public void loadSelectedSongImages() {
@@ -722,5 +854,101 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return pc;
+	}
+	
+	public RankingData getCurrentRankingData() {
+		return currentir;
+	}
+	
+	public long getCurrentRankingDuration() {
+		return currentRankingDuration;
+	}
+	/**
+	 * IRアクセスデータのキャッシュ
+	 *
+	 * @author exch
+	 */
+	public static class RankingDataCache {
+
+	    /**
+	     * IRアクセスデータのキャッシュ
+	     */
+	    private ObjectMap<String, RankingData>[] scorecache;
+	    private ObjectMap<String, RankingData>[] cscorecache;
+
+	    public RankingDataCache() {
+	        scorecache = new ObjectMap[4];
+	        cscorecache = new ObjectMap[4];
+	        for (int i = 0; i < scorecache.length; i++) {
+	            scorecache[i] = new ObjectMap(2000);
+	            cscorecache[i] = new ObjectMap(100);
+	        }
+	    }
+
+	    /**
+	     * 指定した楽曲データ、LN MODEに対するIRアクセスデータを返す
+	     * @param song 楽曲データ
+	     * @param lnmode LN MODE
+	     * @return IRアクセスデータ。存在しない場合はnull
+	     */
+	    public RankingData get(SongData song, int lnmode) {
+	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
+	        if (scorecache[cacheindex].containsKey(song.getSha256())) {
+	            return scorecache[cacheindex].get(song.getSha256());
+	        }
+	        return null;
+	    }
+
+	    public RankingData get(CourseData course, int lnmode) {
+	        int cacheindex = 3;
+	        for(SongData song : course.getSong()) {
+	        	if(song.hasUndefinedLongNote()) {
+	        		cacheindex = lnmode;
+	        	}
+	        }
+	        String hash = createCourseHash(course);
+	        if (cscorecache[cacheindex].containsKey(hash)) {
+	            return cscorecache[cacheindex].get(hash);
+	        }
+	        return null;
+	    }
+
+	    public void put(SongData song, int lnmode, RankingData iras) {
+	        final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
+	        scorecache[cacheindex].put(song.getSha256(), iras);
+	    }
+	    
+	    public void put(CourseData course, int lnmode, RankingData iras) {
+	        int cacheindex = 3;
+	        for(SongData song : course.getSong()) {
+	        	if(song.hasUndefinedLongNote()) {
+	        		cacheindex = lnmode;
+	        	}
+	        }
+	        cscorecache[cacheindex].put(createCourseHash(course), iras);
+	    }
+	    
+		private String createCourseHash(CourseData course) {
+			StringBuilder sb = new StringBuilder();
+			for(SongData song : course.getSong()) {
+				if(song.getSha256() != null && song.getSha256().length() == 64) {
+					sb.append(song.getSha256());
+				} else {
+					return null;
+				}
+			}
+			for(CourseDataConstraint constraint : course.getConstraint()) {
+				sb.append(constraint.name);
+			}
+			try {
+				MessageDigest md = MessageDigest.getInstance("sha-256");
+				md.update(sb.toString().getBytes());
+				return BMSDecoder.convertHexString(md.digest());
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 }

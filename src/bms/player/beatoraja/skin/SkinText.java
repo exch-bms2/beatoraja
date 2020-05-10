@@ -30,6 +30,7 @@ public abstract class SkinText extends SkinObject {
     private final StringProperty ref;
     
     private String text = "";
+    private String constantText;
 
     private boolean editable;
 
@@ -71,13 +72,17 @@ public abstract class SkinText extends SkinObject {
         prepareText(text);
     }
 
+    public void setConstantText(String constantText) {
+        this.constantText = constantText;
+    }
+
     public abstract void prepareFont(String text);
 
     protected abstract void prepareText(String text);
     
     public void prepare(long time, MainState state) {
     	super.prepare(time, state);
-        currentText = ref != null ? ref.get(state) : null;
+        currentText = ref != null ? ref.get(state) : (constantText != null ? constantText : null);
         if(currentText == null || currentText.length() == 0) {
         	draw = false;
             return;

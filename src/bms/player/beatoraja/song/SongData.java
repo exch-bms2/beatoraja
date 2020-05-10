@@ -35,7 +35,8 @@ public class SongData implements Validatable, IpfsInformation {
 
 	public static final int FAVORITE_SONG = 1;
 	public static final int FAVORITE_CHART = 2;
-	public static final int INVISIBLE_CHART = 4;
+	public static final int INVISIBLE_SONG = 4;
+	public static final int INVISIBLE_CHART = 8;
 
 	/**
 	 * 楽曲タイトル

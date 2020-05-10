@@ -859,7 +859,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 		IntMap<SkinConfig.Offset> offset = new IntMap<>();
 		for (CustomOffset of : header.getCustomOffsets()) {
-			offset.put(of.id, (Offset) property.get(of.name));
+			final Object o = property.get(of.name);
+			if(o instanceof Offset) {
+				offset.put(of.id, (Offset)o);				
+			}
 		}
 		skin.setOffset(offset);
 

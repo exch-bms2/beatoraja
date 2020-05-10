@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
@@ -93,6 +94,7 @@ public class BMSPlayer extends MainState {
 						}
 						replay = replays[0];
 					} else {
+						Logger.getGlobal().info("リプレイデータを読み込めなかったため、通常プレイモードに移行");
 						autoplay = PlayMode.PLAY;
 						resource.setPlayMode(autoplay);
 					}
@@ -106,6 +108,7 @@ public class BMSPlayer extends MainState {
 			} else {
 				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay.getReplayIndex());
 				if (replay == null) {
+					Logger.getGlobal().info("リプレイデータを読み込めなかったため、通常プレイモードに移行");
 					autoplay = PlayMode.PLAY;
 					resource.setPlayMode(autoplay);
 				}
@@ -114,12 +117,18 @@ public class BMSPlayer extends MainState {
 
 		boolean isReplayPatternPlay = false;
 		ReplayData HSReplay = null;
+		boolean score = true;
+
 		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
 			//保存された譜面変更ログから譜面再現
+			Logger.getGlobal().info("リプレイ再現モード : 譜面 (アシストモード)");
 			resource.setReplayData(replay);
 			isReplayPatternPlay = true;
+			assist = 1;
+			score = false;
 		} else if(replay != null && main.getInputProcessor().getKeystate()[2]) {
 			//保存された譜面オプションログから譜面オプション再現
+			Logger.getGlobal().info("リプレイ再現モード : オプション");
 			config.setRandom(replay.randomoption);
 			config.setRandom2(replay.randomoption2);
 			config.setDoubleoption(replay.doubleoption);
@@ -127,6 +136,7 @@ public class BMSPlayer extends MainState {
 		}
 		if(replay != null && main.getInputProcessor().getKeystate()[4]) {
 			//保存されたHSオプションログからHSオプション再現
+			Logger.getGlobal().info("リプレイ再現モード : ハイスピード");
 			HSReplay = replay;
 			isReplayPatternPlay = true;
 		}
@@ -136,6 +146,7 @@ public class BMSPlayer extends MainState {
 			resource.setPlayMode(autoplay);
 		}
 
+		// RANDOM構文処理
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
 				model = resource.loadBMSModel(replay.rand);
@@ -153,63 +164,39 @@ public class BMSPlayer extends MainState {
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 
-		boolean score = true;
-
-		Logger.getGlobal().info("アシストオプション設定");
 		if (autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
-				assist = 1;
+				assist = Math.max(assist, 1);
+				score = false;
+			}
+			
+			if (config.getJudgewindowrate() > 100) {
+				assist = Math.max(assist, 2);
 				score = false;
 			}
 
-			if (config.isConstant() && (model.getMinBPM() < model.getMaxBPM())) {
-				// BPM変化がなければコンスタントなし
-				new ConstantBPMModifier().modify(model);
-				assist = 1;
-				score = false;
-			}
+			Array<PatternModifier> mods = new Array<PatternModifier>();
 
 			if(config.getScrollMode() > 0) {
-				ScrollSpeedModifier mod = new ScrollSpeedModifier(config.getScrollMode() - 1);
-				mod.modify(model);
-				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
-					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
-					score = false;
-				}
+				mods.add(new ScrollSpeedModifier(config.getScrollMode() - 1));
 			}
-
-			if (config.isLegacynote()) {
-				// LNがなければアシストなし
-				LongNoteModifier mod = new LongNoteModifier();
-				mod.modify(model);
-				if (mod.longNoteExists()) {
-					assist = 2;
-					score = false;
-				}
+			if(config.getLongnoteMode() > 0) {
+				mods.add(new LongNoteModifier(config.getLongnoteMode() - 1));
 			}
-			if (config.getJudgewindowrate() > 100) {
-				assist = 2;
-				score = false;
-			}
-
-			// 地雷ノートがなければアシストなし
 			if(config.getMineMode() > 0) {
-				MineNoteModifier mod = new MineNoteModifier(config.getMineMode() - 1);
-				mod.modify(model);
-				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
-					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
-					score = false;
-				}
+				mods.add(new MineNoteModifier(config.getMineMode() - 1));
 			}
-
 			if(config.getExtranoteDepth() > 0) {
-				ExtraNoteModifier mod = new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch());
+				mods.add(new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch()));
+			}
+			
+			for(PatternModifier mod : mods) {
 				mod.modify(model);
 				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
 					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
 					score = false;
-				}
+				}				
 			}
 
 			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
@@ -232,8 +219,9 @@ public class BMSPlayer extends MainState {
 					PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
 					as.modify(model);
 				}
-				assist = 1;
+				assist = Math.max(assist, 1);
 				score = false;
+				Logger.getGlobal().info("譜面オプション : BATTLE (L-ASSIST)");
 			}
 		}
 
@@ -243,6 +231,7 @@ public class BMSPlayer extends MainState {
 				model.setMode(Mode.POPN_9K);
 			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
+			Logger.getGlobal().info("リプレイデータから譜面再現");
 		} else if (resource.getReplayData().pattern != null) {
 			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
@@ -262,10 +251,10 @@ public class BMSPlayer extends MainState {
 								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode())
 										.modify(model));
 				if (config.getRandom2() >= 6) {
-					assist = (assist == 0) ? 1 : assist;
+					assist = Math.max(assist, 1);
 					score = false;
 				}
-				Logger.getGlobal().info("譜面オプション :  " + config.getRandom2());
+				Logger.getGlobal().info("譜面オプション(2P) :  " + config.getRandom2());
 			}
 
 			// POPN_9KのSCR系RANDOMにPOPN_5Kは対応していないため、非SCR系RANDOMに変更
@@ -287,10 +276,10 @@ public class BMSPlayer extends MainState {
 							.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode())
 							.modify(model));
 			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
-				assist = (assist == 0) ? 1 : assist;
+				assist = Math.max(assist, 1);
 				score = false;
 			}
-			Logger.getGlobal().info("譜面オプション :  " + config.getRandom());
+			Logger.getGlobal().info("譜面オプション(1P) :  " + config.getRandom());
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
 				model.setMode(Mode.POPN_9K);
@@ -298,7 +287,7 @@ public class BMSPlayer extends MainState {
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				pattern = mod.modify(model);
 				if(config.getSevenToNineType() != 0) {
-					assist = 1;
+					assist = Math.max(assist, 1);
 					score = false;
 				}
 			}
@@ -327,6 +316,8 @@ public class BMSPlayer extends MainState {
 		for(int i = 0; i < gaugelog.length; i++) {
 			gaugelog[i] = new FloatArray(playtime / 500 + 2);
 		}
+
+		Logger.getGlobal().info("アシストレベル : " + assist + " - スコア保存 : " + score);
 
 		resource.setUpdateScore(score);
 		resource.setUpdateCourseScore(resource.isUpdateCourseScore() && score);
@@ -724,6 +715,7 @@ public class BMSPlayer extends MainState {
 				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
+					Logger.getGlobal().info("\"score\": " + resource.getScoreData());
 					main.changeState(MainStateType.RESULT);
 				} else {
 					if (resource.mediaLoadFinished()) {

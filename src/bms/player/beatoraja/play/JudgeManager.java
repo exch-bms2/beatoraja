@@ -282,7 +282,7 @@ public class JudgeManager {
 				} else if (note instanceof MineNote && pressed) {
 					final MineNote mnote = (MineNote) note;
 					// 地雷ノート判定
-					main.getGauge().addValue(-mnote.getDamage());
+					main.getGauge().addValue((float) -mnote.getDamage());
 					System.out.println("Mine Damage : " + mnote.getWav());
 				}
 
@@ -604,7 +604,7 @@ public class JudgeManager {
 			lanemodel.reset();
 			for (Note note = lanemodel.getNote(); note != null
 					&& note.getTime() < time + judge[3][0]; note = lanemodel.getNote()) {
-				final long jud = note.getTime() - time;
+				final int jud = (int) (note.getTime() - time);
 				if (note instanceof NormalNote && note.getState() == 0) {
 					this.update(lane, note, time, 4, jud);
 				} else if (note instanceof LongNote) {
@@ -647,7 +647,7 @@ public class JudgeManager {
 	private final int[] JUDGE_TIMER = { TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P };
 	private final int[] COMBO_TIMER = { TIMER_COMBO_1P, TIMER_COMBO_2P, TIMER_COMBO_3P };
 
-	private void update(int lane, Note n, long time, int judge, long fast) {
+	private void update(int lane, Note n, long time, int judge, int fast) {
 		if (judgeVanish[judge]) {
 			if (pastNotes < ghost.length) {
 				ghost[pastNotes] = judge;

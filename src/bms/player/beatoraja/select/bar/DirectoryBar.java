@@ -18,42 +18,39 @@ public abstract class DirectoryBar extends Bar {
 	/**
 	 * プレイヤーのクリアランプ数
 	 */
-	private int[] lamps = new int[11];
+	private final int[] lamps = new int[11];
 	/**
 	 * ライバルのクリアランプ数
 	 */
-	private int[] rlamps = new int[11];
+	private final int[] rlamps = new int[11];
 	/**
 	 * プレイヤーのランク数
 	 */
-	private int[] ranks = new int[28];
+	private final int[] ranks = new int[28];
+	/**
+	 * 不可視譜面を表示するかどうか
+	 */
+	private final boolean showInvisibleChart;
 
 	public DirectoryBar(MusicSelector selector) {
+		this(selector, false);
+	}
+
+	public DirectoryBar(MusicSelector selector, boolean showInvisibleChart) {
 		this.selector = selector;
+		this.showInvisibleChart = showInvisibleChart;
 	}
 
 	public int[] getLamps() {
 		return lamps;
 	}
 
-	public void setLamps(int[] lamps) {
-		this.lamps = lamps;
-	}
-
 	public int[] getRivalLamps() {
 		return rlamps;
 	}
 
-	public void setRivalLamps(int[] lamps) {
-		this.rlamps = lamps;
-	}
-
 	public int[] getRanks() {
 		return ranks;
-	}
-
-	public void setRanks(int[] ranks) {
-		this.ranks = ranks;
 	}
 
 	public int getLamp(boolean isPlayer) {
@@ -66,6 +63,10 @@ public abstract class DirectoryBar extends Bar {
 		return 0;
 	}
 
+	public boolean isShowInvisibleChart() {
+		return showInvisibleChart;
+	}
+	
 	public void clear() {
 		Arrays.fill(lamps, 0);
 		Arrays.fill(rlamps, 0);

@@ -33,6 +33,21 @@ public enum ClearType {
         this.gaugetype = gaugetype;
     }
 
+    /**
+     * IDに対応するClearTypeを取得する
+     * 
+     * @param id ID
+     * @return 対応するクリアタイプ。存在しない場合はNoPlay
+     */
+    public static ClearType getClearTypeByID(int id) {
+        for(ClearType clear : ClearType.values()) {
+        	if(clear.id == id) {
+        		return clear;
+        	}
+        }
+        return NoPlay;
+    }
+
     public static ClearType getClearTypeByGauge(int gaugetype) {
         for(ClearType clear : ClearType.values()) {
             for(int type : clear.gaugetype) {

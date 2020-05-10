@@ -21,7 +21,6 @@ import com.badlogic.gdx.utils.StringBuilder;
 
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.MessageRenderer.Message;
-import bms.player.beatoraja.PlayerConfig.IRConfig;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -163,7 +162,7 @@ public class MainController extends ApplicationAdapter {
 		playdata = new PlayDataAccessor(config);
 
 		Array<IRStatus> irarray = new Array<IRStatus>();
-		for(PlayerConfig.IRConfig irconfig : player.getIrconfig()) {
+		for(IRConfig irconfig : player.getIrconfig()) {
 			IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
 			if(ir != null) {
 				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {

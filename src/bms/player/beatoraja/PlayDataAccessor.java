@@ -40,7 +40,11 @@ public class PlayDataAccessor {
 	/**
 	 * プレイヤー名
 	 */
-	private String player;
+	private final String player;
+	/**
+	 * プレイヤーデータのルートパス
+	 */
+	private final String playerpath;
 	/**
 	 * スコアデータベースアクセサ
 	 */
@@ -50,7 +54,6 @@ public class PlayDataAccessor {
 	 */
 	private ScoreLogDatabaseAccessor scorelogdb;
 
-	private String playerpath;
 
 	private static final String[] replay = { "", "C", "H" };
 
@@ -60,9 +63,9 @@ public class PlayDataAccessor {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new ScoreDatabaseAccessor(playerpath + File.separatorChar + player + "/score.db");
+			scoredb = new ScoreDatabaseAccessor(playerpath + File.separatorChar + player + File.separatorChar + "score.db");
 			scoredb.createTable();
-			scorelogdb = new ScoreLogDatabaseAccessor(playerpath + File.separatorChar + player + "/scorelog.db");
+			scorelogdb = new ScoreLogDatabaseAccessor(playerpath + File.separatorChar + player + File.separatorChar + "scorelog.db");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -102,8 +105,8 @@ public class PlayDataAccessor {
 	/**
 	 * 指定されたスコアデータを元にプレイヤーデータを更新する
 	 * 
-	 * @param score
-	 * @param time
+	 * @param score スコアデータ
+	 * @param time プレイ時間
 	 */
 	public void updatePlayerData(IRScoreData score, long time) {
 		PlayerData pd = readPlayerData();
@@ -145,7 +148,9 @@ public class PlayDataAccessor {
 
 	/**
 	 * スコアデータを読み込む
-	 * 
+	 *
+	 * @param hash
+	 *            楽曲のハッシュ値
 	 * @param ln
 	 *            対象のbmsが未定義LNを含む場合はtrueを入れる
 	 * @param lnmode
@@ -156,6 +161,12 @@ public class PlayDataAccessor {
 		return scoredb.getScoreData(hash, ln ? lnmode : 0);
 	}
 
+	/**
+	 * スコアデータをまとめて読み込み、collectorに渡す
+	 * @param collector スコアデータのcollector
+	 * @param songs 楽曲データ
+	 * @param lnmode LNモード
+	 */
 	public void readScoreDatas(ScoreDataCollector collector, SongData[] songs, int lnmode) {
 		scoredb.getScoreDatas(collector, songs, lnmode);
 	}
@@ -247,11 +258,12 @@ public class PlayDataAccessor {
 			scorelogdb.setScoreLog(log);
 		}
 
-		int time = 0;
+		// 楽曲のプレイ時間算出(秒)
+		long time = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < model.getMode().key; i++) {
 				if (tl.getNote(i) != null && tl.getNote(i).getState() != 0) {
-					time = tl.getTime() / 1000;
+					time = tl.getMicroTime() / 1000000;
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package bms.player.beatoraja.result;
 
+import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ public enum MusicResultCommand {
                 return;
             }
 
-            String url = ir.getSongURL(result.main.getPlayerResource().getSongdata());
+            String url = ir.getSongURL(new IRChartData(result.main.getPlayerResource().getSongdata()));
             if (url != null) {
                 try {
                     URI uri = new URI(url);

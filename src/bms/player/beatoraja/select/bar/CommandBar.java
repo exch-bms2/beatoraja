@@ -4,7 +4,6 @@ import java.io.File;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.song.SongData;
 
 /**
  * SQLで問い合わせた楽曲を表示するためのバー
@@ -13,11 +12,21 @@ import bms.player.beatoraja.song.SongData;
  */
 public class CommandBar extends DirectoryBar {
 
+	/**
+	 * バータイトル
+	 */
     private String title;
+    /**
+     * DBに対するSQL
+     */
     private String sql;
 
     public CommandBar(MusicSelector selector, String title, String sql) {
-    	super(selector);
+    	this(selector, title, sql, false);
+    }
+
+    public CommandBar(MusicSelector selector, String title, String sql, boolean showInvisibleChart) {
+    	super(selector, showInvisibleChart);
         this.title = title;
         this.sql = sql;
     }

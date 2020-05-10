@@ -10,7 +10,9 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.IRTableData;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
@@ -67,7 +69,7 @@ public class BarRenderer {
 	 */
 	private Array<SearchWordBar> search = new Array<SearchWordBar>();
 
-	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
+	private final String[] TROPHY = { "bronzemedal", "silvermedal", "goldmedal" };
 
 	private int durationlow = 300;
 	private int durationhigh = 50;
@@ -135,10 +137,64 @@ public class BarRenderer {
 		}
 
 		if(main.getIRStatus().length > 0) {
-			IRResponse<TableData[]> response = main.getIRStatus()[0].connection.getTableDatas();
+			IRResponse<IRTableData[]> response = main.getIRStatus()[0].connection.getTableDatas();
 			if(response.isSucceeded()) {
-				for(TableData td : response.getData()) {
-					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
+				for(IRTableData irtd : response.getData()) {
+					TableData td = new TableData();
+					td.setName(irtd.name);
+					TableData.TableFolder[] folder = new TableData.TableFolder[irtd.folders.length];
+					for(int i = 0;i < folder.length;i++) {
+						TableData.TableFolder tf = new TableData.TableFolder();
+						tf.setName(irtd.folders[i].name);
+						SongData[] songs = new SongData[irtd.folders[i].charts.length];
+						for(int j = 0;j < songs.length;j++) {
+							SongData song = new SongData();
+							IRChartData chart = irtd.folders[i].charts[j];
+							song.setSha256(chart.sha256);
+							song.setMd5(chart.md5);
+							song.setTitle(chart.title);
+							song.setArtist(chart.artist);
+							song.setGenre(chart.genre);
+							song.setUrl(chart.url);
+							song.setAppendurl(chart.appendurl);
+							if(chart.mode != null) {
+								song.setMode(chart.mode.id);								
+							}
+							songs[j] = song;
+						}
+						tf.setSong(songs);
+						folder[i] = tf;
+					}
+					td.setFolder(folder);
+					CourseData[] course = new CourseData[irtd.courses.length];
+					for(int i = 0;i < course.length;i++) {
+						CourseData cd = new CourseData();
+						cd.setName(irtd.courses[i].name);
+						SongData[] songs = new SongData[irtd.courses[i].charts.length];
+						for(int j = 0;j < songs.length;j++) {
+							SongData song = new SongData();
+							IRChartData chart = irtd.courses[i].charts[j];
+							song.setSha256(chart.sha256);
+							song.setMd5(chart.md5);
+							song.setTitle(chart.title);
+							song.setArtist(chart.artist);
+							song.setGenre(chart.genre);
+							song.setUrl(chart.url);
+							song.setAppendurl(chart.appendurl);
+							if(chart.mode != null) {
+								song.setMode(chart.mode.id);								
+							}
+							songs[j] = song;
+						}
+						cd.setSong(songs);
+						cd.setConstraint(irtd.courses[i].constraint);
+						cd.setRelease(true);
+						course[i] = cd;
+					}
+					td.setCourse(course);
+					if(td.validate()) {
+						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));						
+					}
 				}
 			} else {
 				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
@@ -219,7 +275,7 @@ public class BarRenderer {
 			}
 			return new ContainerBar(folder.getName(), l.toArray(Bar.class));
 		} else {
-			return new CommandBar(select, folder.getName(), folder.getSql());
+			return new CommandBar(select, folder.getName(), folder.getSql(), folder.isShowall());
 		}
 	}
 
@@ -228,6 +284,7 @@ public class BarRenderer {
 		private String name;
 		private CommandFolder[] folder = new CommandFolder[0];
 		private String sql;
+		private boolean showall = false;
 
 		public String getName() {
 			return name;
@@ -251,6 +308,14 @@ public class BarRenderer {
 
 		public void setSql(String sql) {
 			this.sql = sql;
+		}
+
+		public boolean isShowall() {
+			return showall;
+		}
+
+		public void setShowall(boolean showall) {
+			this.showall = showall;
 		}
 	}
 
@@ -750,6 +815,7 @@ public class BarRenderer {
 	public boolean updateBar(Bar bar) {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		Array<Bar> l = new Array<Bar>();
+		boolean showInvisibleCharts = false;
 
 		if (MainLoader.getIllegalSongCount() > 0) {
 			l.addAll(SongBar.toSongBarArray(select.getSongDatabase().getSongDatas(MainLoader.getIllegalSongs())));
@@ -765,6 +831,7 @@ public class BarRenderer {
 			l.addAll(commands);
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
+			showInvisibleCharts = ((DirectoryBar)bar).isShowInvisibleChart();
 			if(dir.indexOf((DirectoryBar) bar, true) != -1) {
 				while(dir.last() != bar) {
 					prevbar = dir.removeLast();
@@ -794,9 +861,12 @@ public class BarRenderer {
 				config.setMode(mode);
 				Array<Bar> remove = new Array<Bar>();
 				for (Bar b : l) {
-					if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 &&
-							((SongBar) b).getSongData().getMode() != mode.id) {
-						remove.add(b);
+					if(b instanceof SongBar && ((SongBar) b).getSongData() != null) {
+						final SongData song = ((SongBar) b).getSongData();
+						if((!showInvisibleCharts && (song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
+								|| (mode != null && song.getMode() != 0 && song.getMode() != mode.id)) {
+							remove.add(b);
+						}
 					}
 				}
 				if(l.size != remove.size) {

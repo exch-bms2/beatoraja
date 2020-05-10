@@ -6,8 +6,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.IRConfig;
 import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerConfig.IRConfig;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.launcher.PlayConfigurationView.OptionListCell;
 import javafx.fxml.FXML;

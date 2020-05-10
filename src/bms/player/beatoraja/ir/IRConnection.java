@@ -1,20 +1,5 @@
 package bms.player.beatoraja.ir;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-
-import bms.model.BMSModel;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.TableData;
-import bms.player.beatoraja.song.SongData;
-
 /**
  * IR接続用インターフェイス
  * 
@@ -50,14 +35,14 @@ public interface IRConnection {
 	 * 
 	 * @return ライバルデータ
 	 */
-	public IRResponse<PlayerInformation[]> getRivals();
+	public IRResponse<IRPlayerData[]> getRivals();
 
 	/**
 	 * IRに設定されている表データを収録する
 	 * 
 	 * @return IRで取得可能な表データ
 	 */
-	public IRResponse<TableData[]> getTableDatas();
+	public IRResponse<IRTableData[]> getTableDatas();
 
 	/**
 	 * スコアデータを取得する
@@ -68,9 +53,9 @@ public interface IRConnection {
 	 *            スコアデータを取得する譜面。ユーザーIDのスコアデータを全取得する場合はnullを入れる
 	 * @return
 	 */
-	public IRResponse<IRScoreData[]> getPlayData(String id, SongData model);
+	public IRResponse<IRScoreData[]> getPlayData(String id, IRChartData model);
 
-	public IRResponse<IRScoreData[]> getCoursePlayData(String id, CourseData course, int lnmode);
+	public IRResponse<IRScoreData[]> getCoursePlayData(String id, IRCourseData course);
 
 	/**
 	 * スコアデータを送信する
@@ -81,7 +66,7 @@ public interface IRConnection {
 	 *            スコア
 	 * @return 送信結果
 	 */
-	public IRResponse<Object> sendPlayData(SongData model, IRScoreData score);
+	public IRResponse<Object> sendPlayData(IRChartData model, IRScoreData score);
 
 	/**
 	 * コーススコアデータを送信する
@@ -94,7 +79,7 @@ public interface IRConnection {
 	 *            スコア
 	 * @return 送信結果
 	 */
-	public IRResponse<Object> sendCoursePlayData(CourseData course, int lnmode, IRScoreData score);
+	public IRResponse<Object> sendCoursePlayData(IRCourseData course, IRScoreData score);
 
 	/**
 	 * 楽曲のURLを取得する
@@ -103,7 +88,7 @@ public interface IRConnection {
 	 *            譜面データ
 	 * @return 楽曲URL。存在しない場合はnull
 	 */
-	public String getSongURL(SongData song);
+	public String getSongURL(IRChartData chart);
 
 	/**
 	 * コースのURLを取得する
@@ -112,7 +97,7 @@ public interface IRConnection {
 	 *            コースデータ
 	 * @return コースURL。存在しない場合はnull
 	 */
-	public String getCourseURL(CourseData course);
+	public String getCourseURL(IRCourseData course);
 
 	/**
 	 * プレイヤーURLを取得する

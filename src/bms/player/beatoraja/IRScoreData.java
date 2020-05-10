@@ -22,6 +22,10 @@ public class IRScoreData implements Validatable {
 	 * 譜面のハッシュ値
 	 */
 	private String sha256 = "";
+	/**
+	 * プレイヤー名。自身のスコアの場合は空白
+	 */
+	private String player = "";
 
 	private int mode = 0;
 	
@@ -336,11 +340,21 @@ public class IRScoreData implements Validatable {
 	public void setState(int state) {
 		this.state = state;
 	}
+	
 	public String getSha256() {
 		return sha256;
 	}
+
 	public void setSha256(String sha256) {
 		this.sha256 = sha256;
+	}
+	
+	public String getPlayer() {
+		return player;
+	}
+	
+	public void setPlayer(String player) {
+		this.player = player != null ? player : "";
 	}
 
 	public int getExscore() {
@@ -524,5 +538,45 @@ public class IRScoreData implements Validatable {
 			}
 			return null;
 		}
+	}
+
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		sb.append("\"Date\": ").append(getDate()).append(", ");
+		sb.append("\"Playcount\": ").append(getPlaycount()).append(", ");
+		sb.append("\"Clear\": ").append(getClear()).append(", ");
+		sb.append("\"Epg\": ").append(getEpg()).append(", ");
+		sb.append("\"Lpg\": ").append(getLpg()).append(", ");
+		sb.append("\"Egr\": ").append(getEgr()).append(", ");
+		sb.append("\"Lgr\": ").append(getLgr()).append(", ");
+		sb.append("\"Egd\": ").append(getEgd()).append(", ");
+		sb.append("\"Lgd\": ").append(getLgd()).append(", ");
+		sb.append("\"Ebd\": ").append(getEbd()).append(", ");
+		sb.append("\"Lbd\": ").append(getLbd()).append(", ");
+		sb.append("\"Epr\": ").append(getEpr()).append(", ");
+		sb.append("\"Lpr\": ").append(getLpr()).append(", ");
+		sb.append("\"Ems\": ").append(getEms()).append(", ");
+		sb.append("\"Lms\": ").append(getLms()).append(", ");
+		sb.append("\"Combo\": ").append(getCombo()).append(", ");
+		sb.append("\"Mode\": ").append(getMode()).append(", ");
+		sb.append("\"Notes\": ").append(getNotes()).append(", ");
+		sb.append("\"Clearcount\": ").append(getClearcount()).append(", ");
+		sb.append("\"Minbp\": ").append(getMinbp()).append(", ");
+		sb.append("\"Trophy\": \"").append(getTrophy()).append("\", ");
+		sb.append("\"Option\": ").append(getOption()).append(", ");
+		sb.append("\"State\": ").append(getState()).append(", ");
+		sb.append("\"Sha256\": \"").append(getSha256()).append("\", ");
+		sb.append("\"Exscore\": ").append(getExscore()).append(", ");
+		sb.append("\"Random\": ").append(getRandom()).append(", ");
+		sb.append("\"Scorehash\": \"").append(getScorehash()).append("\", ");
+		sb.append("\"Assist\": ").append(getAssist()).append(", ");
+		sb.append("\"Gauge\": ").append(getGauge()).append(", ");
+		sb.append("\"DeviceType\": \"").append(getDeviceType()).append("\", ");
+		sb.append("\"Playmode\": \"").append(getPlaymode()).append("\", ");
+		sb.append("\"Ghost\": \"").append(getGhost()).append("\", ");
+		sb.append("\"Passnotes\": ").append(getPassnotes());
+		sb.append("}");
+		return new String(sb);
 	}
 }

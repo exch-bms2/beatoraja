@@ -124,6 +124,7 @@ public class BMSPlayerInputProcessor {
 
 	private boolean exitPressed;
 	private boolean enterPressed;
+	private boolean enterLocked;
 	private boolean deletePressed;
 
 	boolean[] cursor = new boolean[4];
@@ -336,7 +337,17 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setEnterPressed(boolean enterPressed) {
-		this.enterPressed = enterPressed;
+		if (!enterPressed || !enterLocked) {
+			this.enterPressed = enterPressed;
+		}
+		if (enterLocked) {
+			enterLocked = false;
+		}
+	}
+
+	public void lockEnterPress() {
+		setEnterPressed(false);
+		enterLocked = true;
 	}
 
 	public boolean isDeletePressed() {

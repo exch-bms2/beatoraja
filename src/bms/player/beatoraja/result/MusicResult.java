@@ -20,8 +20,10 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -81,10 +83,10 @@ public class MusicResult extends AbstractResult {
 	
 	public void prepare() {
 		state = STATE_OFFLINE;
-		irrank = irprevrank = irtotal = 0;
 		final PlayerResource resource = main.getPlayerResource();
 		final IRScoreData newscore = getNewScore();
 
+		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
@@ -93,13 +95,13 @@ public class MusicResult extends AbstractResult {
         	for(IRStatus irc : ir) {
     			boolean send = resource.isUpdateScore();
     			switch(irc.config.getIrsend()) {
-    			case PlayerConfig.IR_SEND_ALWAYS:
+    			case IRConfig.IR_SEND_ALWAYS:
     				break;
-    			case PlayerConfig.IR_SEND_COMPLETE_SONG:
+    			case IRConfig.IR_SEND_COMPLETE_SONG:
     				FloatArray gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
     				send &= gauge.get(gauge.size - 1) > 0.0;
     				break;
-    			case PlayerConfig.IR_SEND_UPDATE_SCORE:
+    			case IRConfig.IR_SEND_UPDATE_SCORE:
     				send &= (newscore.getExscore() > oldscore.getExscore() || newscore.getClear() > oldscore.getClear()
     						|| newscore.getCombo() > oldscore.getCombo() || newscore.getMinbp() < oldscore.getMinbp());
     				break;
@@ -130,22 +132,10 @@ public class MusicResult extends AbstractResult {
                 	                	
                 	if(irsend > 0) {
                         main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
-                        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, resource.getSongdata());
+                        
+                        IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
                         if(response.isSucceeded()) {
-                            IRScoreData[] scores = response.getData();
-                            irtotal = scores.length;
-
-                            for(int i = 0;i < scores.length;i++) {
-                                if(irrank == 0 && scores[i].getExscore() <= newscore.getExscore() ) {
-                                    irrank = i + 1;
-                                }
-                                if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-                                    irprevrank = i + 1;
-                                    if(irrank == 0) {
-                                        irrank = irprevrank;
-                                    }
-                                }
-                            }
+                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
                             Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
                         } else {
                             Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
@@ -238,7 +228,12 @@ public class MusicResult extends AbstractResult {
 					} else if (resource.getPlayMode() == PlayMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
-						Logger.getGlobal().info("同じ譜面でリプレイ");
+						if(resource.isUpdateScore()) {
+							Logger.getGlobal().info("同じ譜面でリプレイ");							
+						} else {
+							Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
+							resource.getReplayData().pattern = null;
+						}
 						resource.reloadBMSFile();
 						main.changeState(MainStateType.PLAY);
 					} else {
@@ -502,6 +497,9 @@ public class MusicResult extends AbstractResult {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
+		case BUTTON_OPEN_IR_WEBSITE:
+			execute(MusicResultCommand.OPEN_RANKING_ON_IR);
+			break;
 		default:
 			super.executeEvent(id, arg1, arg2);
 		}
@@ -529,7 +527,7 @@ public class MusicResult extends AbstractResult {
 		
 		public boolean send() {
 			Logger.getGlobal().info("IRへスコア送信中 : " + song.getTitle());
-            IRResponse<Object> send1 = ir.sendPlayData(song, score);
+            IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
             if(send1.isSucceeded()) {
                 Logger.getGlobal().info("IRスコア送信完了 : " + song.getTitle());
                 retry = -255;

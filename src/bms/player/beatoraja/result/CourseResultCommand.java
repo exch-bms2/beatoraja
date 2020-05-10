@@ -1,6 +1,7 @@
 package bms.player.beatoraja.result;
 
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRCourseData;
 
 import java.awt.*;
 import java.net.URI;
@@ -15,7 +16,7 @@ public enum CourseResultCommand {
                 return;
             }
 
-            String url = ir.getCourseURL(result.main.getPlayerResource().getCourseData());
+            String url = ir.getCourseURL(new IRCourseData(result.main.getPlayerResource().getCourseData()));
             if (url != null) {
                 try {
                     URI uri = new URI(url);

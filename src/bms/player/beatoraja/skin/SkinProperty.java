@@ -401,6 +401,49 @@ public class SkinProperty {
 	public static final int NUMBER_BEST_RATE = 183;
 	public static final int NUMBER_BEST_RATE_AFTERDOT = 184;
 
+	public static final int NUMBER_IR_TOTALPLAYER2 = 200;
+	public static final int NUMBER_IR_TOTALPLAYCOUNT = 201;
+	public static final int NUMBER_IR_PLAYER_NOPLAY = 202;
+	public static final int NUMBER_IR_PLAYER_NOPLAY_RATE = 203;
+	public static final int NUMBER_IR_PLAYER_ASSIST = 204;
+	public static final int NUMBER_IR_PLAYER_ASSIST_RATE = 205;
+	public static final int NUMBER_IR_PLAYER_LIGHTASSIST = 206;
+	public static final int NUMBER_IR_PLAYER_LIGHTASSIST_RATE = 207;
+	public static final int NUMBER_IR_PLAYER_EXHARD = 208;
+	public static final int NUMBER_IR_PLAYER_EXHARD_RATE = 209;
+	public static final int NUMBER_IR_PLAYER_FAILED = 210;
+	public static final int NUMBER_IR_PLAYER_FAILED_RATE = 211;
+	public static final int NUMBER_IR_PLAYER_EASY = 212;
+	public static final int NUMBER_IR_PLAYER_EASY_RATE = 213;
+	public static final int NUMBER_IR_PLAYER_NORMAL = 214;
+	public static final int NUMBER_IR_PLAYER_NORMAL_RATE = 215;
+	public static final int NUMBER_IR_PLAYER_HARD = 216;
+	public static final int NUMBER_IR_PLAYER_HARD_RATE = 217;
+	public static final int NUMBER_IR_PLAYER_FULLCOMBO = 218;
+	public static final int NUMBER_IR_PLAYER_FULLCOMBO_RATE = 219;
+	public static final int NUMBER_IR_UPDATE_WAITING_TIME = 220;
+	public static final int NUMBER_IR_PLAYER_PERFECT = 222;
+	public static final int NUMBER_IR_PLAYER_PERFECT_RATE = 223;
+	public static final int NUMBER_IR_PLAYER_MAX = 224;
+	public static final int NUMBER_IR_PLAYER_MAX_RATE = 225;
+	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR = 226;
+	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE = 227;
+	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO = 228;
+	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE = 229;
+	public static final int NUMBER_IR_PLAYER_NOPLAY_RATE_AFTERDOT = 230;
+	public static final int NUMBER_IR_PLAYER_ASSIST_RATE_AFTERDOT = 231;
+	public static final int NUMBER_IR_PLAYER_LIGHTASSIST_RATE_AFTERDOT = 232;
+	public static final int NUMBER_IR_PLAYER_EXHARD_RATE_AFTERDOT = 233;
+	public static final int NUMBER_IR_PLAYER_FAILED_RATE_AFTERDOT = 234;
+	public static final int NUMBER_IR_PLAYER_EASY_RATE_AFTERDOT = 235;
+	public static final int NUMBER_IR_PLAYER_NORMAL_RATE_AFTERDOT = 236;
+	public static final int NUMBER_IR_PLAYER_HARD_RATE_AFTERDOT = 237;
+	public static final int NUMBER_IR_PLAYER_FULLCOMBO_RATE_AFTERDOT = 238;
+	public static final int NUMBER_IR_PLAYER_PERFECT_RATE_AFTERDOT = 239;
+	public static final int NUMBER_IR_PLAYER_MAX_RATE_AFTERDOT = 240;
+	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE_AFTERDOT = 241;
+	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE_AFTERDOT = 242;
+
 	public static final int NUMBER_RIVAL_SCORE = 271;
 	public static final int NUMBER_RIVAL_MAXSCORE = 272;
 	public static final int NUMBER_RIVAL_TOTALNOTES = 274;
@@ -761,6 +804,14 @@ public class SkinProperty {
 	public static final int OPTION_2PWIN = 353;
 	public static final int OPTION_DRAW = 354;
 
+	public static final int OPTION_IR_LOADING = 601;
+	public static final int OPTION_IR_LOADED = 602;
+	public static final int OPTION_IR_NOPLAYER = 603;
+	public static final int OPTION_IR_FAILED = 604;
+	public static final int OPTION_IR_BANNED = 605;
+	public static final int OPTION_IR_WAITING = 606;
+	public static final int OPTION_IR_ACCESSING = 607;
+	public static final int OPTION_IR_BUSY = 608;
 	public static final int OPTION_NOT_COMPARE_RIVAL = 624;
 	public static final int OPTION_COMPARE_RIVAL = 625;
 
@@ -793,6 +844,8 @@ public class SkinProperty {
 
 	public static final int BUTTON_MODE = 11;
 	public static final int BUTTON_SORT = 12;
+	public static final int BUTTON_KEYCONFIG = 13;
+	public static final int BUTTON_SKINSELECT = 14;
 	public static final int BUTTON_PLAY = 15;
 	public static final int BUTTON_AUTOPLAY = 16;
 	public static final int BUTTON_PRACTICE = 315;
@@ -808,8 +861,10 @@ public class SkinProperty {
 	public static final int BUTTON_DPOPTION = 54;
 	public static final int BUTTON_HSFIX = 55;
 	public static final int BUTTON_BGA = 72;
+	public static final int BUTTON_JUDGE_TIMING = 74;
 	public static final int BUTTON_TARGET = 77;
 	public static final int BUTTON_GAUGEAUTOSHIFT = 78;
+	public static final int BUTTON_RIVAL = 79;
 	public static final int BUTTON_FAVORITTE = 90;
 	public static final int BUTTON_SKINSELECT_7KEY = 170;
 	public static final int BUTTON_SKINSELECT_5KEY = 171;
