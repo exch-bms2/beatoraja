@@ -283,6 +283,14 @@ public class PlayModeConfig {
          * アナログスクラッチ停止閾値
          */
         private int analogScratchThreshold = 100;
+        /**
+         * Whether players use mouse to perform scratch
+         */
+        private boolean mouseScratch = false;
+        /**
+         * Keep mouse scratch state high for (ms)
+         */
+        private int mouseScratchDuration = 150;
 
         public ControllerConfig() {
             this(Mode.BEAT_7K, 0, true);
@@ -441,6 +449,22 @@ public class PlayModeConfig {
             	analogScratchThreshold > 0 ? 
             		analogScratchThreshold <= 100 ? analogScratchThreshold : 100 
     			:1;
+        }
+
+        public boolean isMouseScratch() {
+            return mouseScratch;
+        }
+
+        public void setMouseScratch(boolean mouseScratch) {
+            this.mouseScratch = mouseScratch;
+        }
+
+        public int getMouseScratchDuration() {
+            return mouseScratchDuration;
+        }
+
+        public void setMouseScratchDuration(int mouseScratchDuration) {
+            this.mouseScratchDuration = mouseScratchDuration > 0 ? mouseScratchDuration : 1;
         }
     }
 

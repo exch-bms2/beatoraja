@@ -51,4 +51,20 @@
 			</columns>
 		</TableView>
     </HBox>
+    <HBox prefHeight="22.0" prefWidth="740.0">
+        <VBox.margin>
+            <Insets left="10.0" top="10.0"  />
+        </VBox.margin>
+        <CheckBox fx:id="mouseScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="200.0" text="%MOUSE_SCRATCH" textAlignment="CENTER">
+            <tooltip>
+                <Tooltip text="Use mouse to perform scratch." textAlignment="CENTER" />
+            </tooltip>
+        </CheckBox>
+        <Label prefHeight="24.0" prefWidth="250.0" text="%MOUSE_SCRATCH_DURATION" />
+        <NumericSpinner fx:id="mouseScratchDuration" editable="true" prefWidth="100.0">
+            <valueFactory>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="150" max="1000" min="1" />
+            </valueFactory>
+        </NumericSpinner>
+    </HBox>
 </VBox>

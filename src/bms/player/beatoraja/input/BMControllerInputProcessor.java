@@ -1,11 +1,12 @@
 package bms.player.beatoraja.input;
 
 
-import java.io.File;
 import java.util.Arrays;
 
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.utils.TimeUtils;
 
 /**
  * 専用コントローラー入力処理用クラス
@@ -54,6 +55,14 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * ボタン状態変更後の再度変更を受け付ける時間(ms)
 	 */
 	private int duration = 16;
+	/**
+	 * Whether players use mouse to perform scratch
+	 */
+	private boolean mouseScratch = false;
+	/**
+	 * Keep mouse scratch state high for (ms)
+	 */
+	private int mouseScratchDuration = 150;
 
 	/**
 	 * 最後に押したボタン
@@ -67,6 +76,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * アナログ皿のアルゴリズム (null=アナログ皿を通用しない)
 	 */
 	AnalogScratchAlgorithm analogScratchAlgorithm = null;
+	/**
+	 * Algorithm for mouse to perform scratch
+	 */
+	MouseScratchAlgorithm mouseScratchAlgorithm = new MouseScratchAlgorithm(mouseScratchDuration);
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, String name, Controller controller,
 									  ControllerConfig controllerConfig) {
@@ -82,6 +95,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.select = controllerConfig.getSelect();
 		this.duration = controllerConfig.getDuration();
 		this.jkoc = controllerConfig.getJKOC();
+		this.mouseScratch = controllerConfig.isMouseScratch();
+		this.mouseScratchDuration = controllerConfig.getMouseScratchDuration();
 		analogScratchAlgorithm = null;
 		if (controllerConfig.isAnalogScratch()) {
 			int analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
@@ -126,9 +141,15 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 					// アナログ左回転をDOWNに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.DOWN);
 				} else if (button == BMKeys.LEFT) {
-					buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
+					if (mouseScratch)
+						buttonstate[button] = mouseScratchAlgorithm.getPositiveState();
+					else
+						buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
 				} else if (button == BMKeys.RIGHT) {
-					buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
+					if (mouseScratch)
+						buttonstate[button] = mouseScratchAlgorithm.getNegativeState();
+					else
+						buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
 				}
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
 					buttontime[button] = presstime;
@@ -410,4 +431,48 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
             }
         }
     }
+
+	public static class MouseScratchAlgorithm {
+		private long scratchDuration;
+		private long positive_last_time = TimeUtils.millis();
+		private long negative_last_time = TimeUtils.millis();
+
+		public MouseScratchAlgorithm(long scratchDuration) {
+			this.scratchDuration = scratchDuration;
+		}
+
+		public boolean getPositiveState() {
+			if (Gdx.input.getDeltaX() > 0 || Gdx.input.getDeltaY() > 0) {
+				// Triggered positive scratch
+				// Update trigger time
+				Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+				positive_last_time = TimeUtils.millis();
+				return true;
+			} else {
+				long current = TimeUtils.millis();
+				long different = current - positive_last_time;
+				if (positive_last_time < negative_last_time) // Check latest scratch state
+					return false;
+				else
+					return different < scratchDuration; // Check timeout
+			}
+		}
+
+		public boolean getNegativeState() {
+			if (Gdx.input.getDeltaX() < 0 || Gdx.input.getDeltaY() < 0) {
+				// Triggered negative scratch
+				// Update trigger time
+				Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+				negative_last_time = TimeUtils.millis();
+				return true;
+			} else {
+				long current = TimeUtils.millis();
+				long different = current - negative_last_time;
+				if (negative_last_time < positive_last_time) // Check latest scratch state
+					return false;
+				else
+					return different < scratchDuration; // Check timeout
+			}
+		}
+	}
 }

@@ -47,6 +47,10 @@ public class InputConfigurationView implements Initializable {
     private TableColumn<ControllerConfigViewModel, Integer> analogThresholdCol;
     @FXML
     private TableColumn<ControllerConfigViewModel, Integer> analogModeCol;
+    @FXML
+    private CheckBox mouseScratch;
+    @FXML
+    private NumericSpinner<Integer> mouseScratchDuration;
 
     private PlayerConfig player;
 
@@ -133,6 +137,8 @@ public class InputConfigurationView implements Initializable {
 	for (PlayModeConfig.ControllerConfig controller : conf.getController()) {
 	    inputduration.getValueFactory().setValue(controller.getDuration());
 	    jkoc_hack.setSelected(controller.getJKOC());
+      mouseScratch.setSelected(controller.isMouseScratch());
+      mouseScratchDuration.getValueFactory().setValue(controller.getMouseScratchDuration());
 	}
 
     }
@@ -146,6 +152,8 @@ public class InputConfigurationView implements Initializable {
         	PlayModeConfig.ControllerConfig controller = vm.getConfig();
         	controller.setDuration(inputduration.getValue());
                 controller.setJKOC(jkoc_hack.isSelected());
+                controller.setMouseScratch(mouseScratch.isSelected());
+                controller.setMouseScratchDuration(mouseScratchDuration.getValue());
                 controller.setAnalogScratch(vm.getIsAnalogScratchProperty().get());
                 controller.setAnalogScratchThreshold(vm.getAnalogScratchThreshold());
                 controller.setAnalogScratchMode(vm.getAnalogScratchMode());
