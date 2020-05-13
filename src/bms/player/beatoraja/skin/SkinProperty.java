@@ -865,7 +865,8 @@ public class SkinProperty {
 	public static final int BUTTON_TARGET = 77;
 	public static final int BUTTON_GAUGEAUTOSHIFT = 78;
 	public static final int BUTTON_RIVAL = 79;
-	public static final int BUTTON_FAVORITTE = 90;
+	public static final int BUTTON_FAVORITTE_SONG = 89;
+	public static final int BUTTON_FAVORITTE_CHART = 90;
 	public static final int BUTTON_SKINSELECT_7KEY = 170;
 	public static final int BUTTON_SKINSELECT_5KEY = 171;
 	public static final int BUTTON_SKINSELECT_14KEY = 172;

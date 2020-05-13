@@ -753,6 +753,12 @@ public class MusicSelector extends MainState {
 		case BUTTON_RIVAL:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_RIVAL : MusicSelectCommand.PREV_RIVAL);
 			break;
+		case BUTTON_FAVORITTE_SONG:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_FAVORITE_SONG : MusicSelectCommand.PREV_FAVORITE_SONG);
+			break;
+		case BUTTON_FAVORITTE_CHART:
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_FAVORITE_CHART : MusicSelectCommand.PREV_FAVORITE_CHART);
+			break;
 		case BUTTON_OPEN_IR_WEBSITE:
 			execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
 			break;
