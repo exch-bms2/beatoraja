@@ -347,6 +347,14 @@ public class MusicSelectInputProcessor {
     		if(input.isActivated(KeyCommand.OPEN_IR)) {
                 select.execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
             }
+    		
+    		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
+                select.execute(MusicSelectCommand.NEXT_FAVORITE_SONG);
+    		}
+    		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
+                select.execute(MusicSelectCommand.NEXT_FAVORITE_CHART);
+    		}
+
         }
 
         // song bar moved

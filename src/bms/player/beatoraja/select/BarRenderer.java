@@ -744,48 +744,6 @@ public class BarRenderer {
 			select.play(MusicSelector.SOUND_SCRATCH);
 			mov++;
 		}
-
-		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
-			if(getSelected() instanceof SongBar) {
-				SongData sd = ((SongBar) getSelected()).getSongData();
-
-				if(sd != null) {
-					boolean enable = ((sd.getFavorite() & SongData.FAVORITE_SONG) == 0);
-					SongData[] songs = select.getSongDatabase().getSongDatas("folder", sd.getFolder());
-					for(SongData song : songs) {
-						song.setFavorite(enable ? song.getFavorite() | SongData.FAVORITE_SONG : song.getFavorite() & (0xffffffff ^ SongData.FAVORITE_SONG));
-					}
-					sd.setFavorite(enable ? sd.getFavorite() | SongData.FAVORITE_SONG : sd.getFavorite() & (0xffffffff ^ SongData.FAVORITE_SONG));
-					select.getSongDatabase().setSongDatas(songs);
-					select.main.getMessageRenderer().addMessage(enable ? "Added to Favorite Song" : "Removed from Favorite Song", 1200, Color.GREEN, 1);
-				}
-			}
-		}
-		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
-			if(getSelected() instanceof SongBar) {
-				SongData sd = ((SongBar) getSelected()).getSongData();
-
-				if(sd != null) {
-					boolean enable = ((sd.getFavorite() & SongData.FAVORITE_CHART) == 0);
-					sd.setFavorite(sd.getFavorite() ^ SongData.FAVORITE_CHART);
-					select.getSongDatabase().setSongDatas(new SongData[]{sd});
-					select.main.getMessageRenderer().addMessage(enable ? "Added to Favorite Chart" : "Removed from Favorite Chart", 1200, Color.GREEN, 1);
-//					boolean exist = false;
-//					for(TableData.TableSongData element : favorites[0].getElements()) {
-//						if(element.getHash().equals(sd.getSha256())) {
-//							exist = true;
-//							break;
-//						}
-//					}
-//					if(!exist) {
-//						List<TableData.TableSongData> l = new ArrayList(Arrays.asList(favorites[0].getElements()));
-//						l.add(new TableData.TableSongData(sd.getSha256()));
-//						favorites[0].setElements(l.toArray(new TableData.TableSongData[l.size()]));
-//						Logger.getGlobal().info("favorite追加 : " + sd.getTitle());
-//					}
-				}
-			}
-		}
 	}
 
 	public void resetInput() {
