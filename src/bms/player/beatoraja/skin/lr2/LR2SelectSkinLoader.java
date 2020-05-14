@@ -26,6 +26,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 	private SkinBar skinbar = new SkinBar(1);
 
 	private TextureRegion[][] barimage = new TextureRegion[10][];
+	private SkinImage[] barimageon = new SkinImage[SkinBar.BAR_COUNT];
+	private SkinImage[] barimageoff = new SkinImage[SkinBar.BAR_COUNT];
 	private int barcycle;
 
 	private Rectangle gauge = new Rectangle();
@@ -69,7 +71,6 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				if (!added) {
-					skinbar.setBarImages(barimage, barcycle);
 					skin.add(skinbar);
 					added = true;
 				}
@@ -82,7 +83,11 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					values[4] += values[6];
 					values[6] = -values[6];
 				}
-				skinbar.makeBarImages(false, values[1]).setDestination(values[2], values[3] * dstw / srcw,
+				
+				if(barimageoff[values[1]] == null) {
+	                barimageoff[values[1]] = new SkinImage(barimage, 0, barcycle);
+				}
+                barimageoff[values[1]].setDestination(values[2], values[3] * dstw / srcw,
 						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 						values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
@@ -100,7 +105,10 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					values[4] += values[6];
 					values[6] = -values[6];
 				}
-				skinbar.makeBarImages(true, values[1]).setDestination(values[2], values[3] * dstw / srcw,
+				if(barimageon[values[1]] == null) {
+					barimageon[values[1]] = new SkinImage(barimage, 0, barcycle);
+				}
+				barimageon[values[1]].setDestination(values[2], values[3] * dstw / srcw,
 						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 						values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
@@ -551,6 +559,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 
 	public MusicSelectSkin loadSkin(Path f, MainState selector, SkinHeader header,
 			IntIntMap option, ObjectMap property) throws IOException {
-		return this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option, property);
+		MusicSelectSkin skin = this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option, property);
+		skinbar.setBarImage(barimageon, barimageoff);
+		return skin;
 	}
 }

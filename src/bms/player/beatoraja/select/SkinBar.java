@@ -9,6 +9,8 @@ import com.badlogic.gdx.utils.Array;
 
 /**
  * 楽曲バー描画用スキンオブジェクト
+ * 
+ * @author exch
  */
 public class SkinBar extends SkinObject {
 
@@ -68,9 +70,6 @@ public class SkinBar extends SkinObject {
 
     private int position = 0;
 
-    private TextureRegion[][] images;
-    private int cycle;
-
     /**
      * ランプ画像
      */
@@ -87,7 +86,9 @@ public class SkinBar extends SkinObject {
     public static final int BARLAMP_COUNT = 11;
     
     private MusicSelector selector;
-    
+    /**
+     * 描画不可スキンオブジェクト
+     */
     private Array<SkinObject> removes = new Array();
 
     public SkinBar(int position) {
@@ -95,29 +96,9 @@ public class SkinBar extends SkinObject {
         this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
-    public SkinBar(int position, TextureRegion[][] images, int cycle) {
-        setBarImages(images, cycle);
-    }
-
-    public void setBarImages(TextureRegion[][] images, int cycle) {
-        this.images = images;
-        this.cycle = cycle;
-    }
-    
     public void setBarImage(SkinImage[] onimage, SkinImage[] offimage) {
     	barimageon = onimage;
     	barimageoff = offimage;
-    }
-
-    public SkinImage makeBarImages(boolean on, int index) {
-        if ((on ? barimageon[index] : barimageoff[index]) == null) {
-            if (on) {
-                barimageon[index] = new SkinImage(images, 0, cycle);
-            } else {
-                barimageoff[index] = new SkinImage(images, 0, cycle);
-            }
-        }
-        return on ? barimageon[index] : barimageoff[index];
     }
 
     public SkinImage getBarImages(boolean on, int index) {
@@ -324,6 +305,10 @@ public class SkinBar extends SkinObject {
         disposeAll(lamp);
         disposeAll(mylamp);
         disposeAll(rivallamp);
+    	if(graph != null) {
+    		graph.dispose();
+    		graph = null;
+    	}
     }
 
     public SkinNumber getBarlevel(int id) {
