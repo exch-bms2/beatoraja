@@ -10,6 +10,7 @@ import java.util.*;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.LongDeserializer;
 
 /**
  * BPM推移のグラフ
@@ -92,7 +93,7 @@ public class SkinBPMGraph extends SkinObject {
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 		
-		if(current == null || song != current || (this.model == null && model != null) || shapetex == null) {
+		if(shapetex == null || song != current || (this.model == null && model != null)) {
 			current = song;
 			this.model = model;
 			if(song != null && song.getInformation() != null) {
@@ -168,7 +169,6 @@ public class SkinBPMGraph extends SkinObject {
 		Pixmap shape;
 		if (data.length < 2) {
 			shape = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-			shapetex = new TextureRegion(new Texture(shape));
 		} else {
 			final int width = (int) Math.abs(region.width);
 			final int height = (int) Math.abs(region.height);
@@ -213,13 +213,14 @@ public class SkinBPMGraph extends SkinObject {
 			else if(data[data.length - 1][0] <= 0) lineColor = stopLineColor;
 			shape.setColor(lineColor);
 			shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
-			if (shapetex != null) {
-				shapetex.getTexture().dispose();
-				shapetex = null;
-			}
-			shapetex = new TextureRegion(new Texture(shape));
-			shape.dispose();
 		}
+		
+		if(shapetex != null) {
+			shapetex.getTexture().dispose();
+		}
+		shapetex = new TextureRegion(new Texture(shape));
+		shape.dispose();
+
 	}
 
 	@Override
