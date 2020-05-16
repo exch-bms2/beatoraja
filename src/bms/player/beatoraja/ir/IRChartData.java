@@ -86,6 +86,30 @@ public class IRChartData {
 	 * LN TYPE未定義ロングノーツが存在するかどうか
 	 */
 	public final boolean hasUndefinedLN;
+	/**
+	 * LNが存在するかどうか
+	 */
+	public final boolean hasLN;
+	/**
+	 * CNが存在するかどうか
+	 */
+	public final boolean hasCN;
+	/**
+	 * HCNが存在するかどうか
+	 */
+	public final boolean hasHCN;
+	/**
+	 * 地雷ノーツが存在するかどうか
+	 */
+	public final boolean hasMine;
+	/**
+	 * RANDOM定義が存在するかどうか
+	 */
+	public final boolean hasRandom;
+	/**
+	 * ストップシーケンスが存在するかどうか
+	 */
+	public final boolean hasStop;
 	
 	public final Map<String, String> values = new HashMap<String, String>();
 	
@@ -113,6 +137,12 @@ public class IRChartData {
 		this.maxbpm = song.getMaxbpm();
 		this.notes = song.getNotes();
 		this.hasUndefinedLN = song.hasUndefinedLongNote();
+		this.hasLN = (song.getFavorite() & SongData.FEATURE_LONGNOTE) != 0;
+		this.hasCN = (song.getFavorite() & SongData.FEATURE_CHARGENOTE) != 0;
+		this.hasHCN = (song.getFavorite() & SongData.FEATURE_HELLCHARGENOTE) != 0;
+		this.hasMine = (song.getFavorite() & SongData.FEATURE_MINENOTE) != 0;
+		this.hasRandom = (song.getFavorite() & SongData.FEATURE_RANDOM) != 0;
+		this.hasStop = (song.getFavorite() & SongData.FEATURE_STOPSEQUENCE) != 0;
 		this.lntype = lntype;
 
 		if(model != null) {
