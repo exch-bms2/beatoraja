@@ -137,12 +137,12 @@ public class IRChartData {
 		this.maxbpm = song.getMaxbpm();
 		this.notes = song.getNotes();
 		this.hasUndefinedLN = song.hasUndefinedLongNote();
-		this.hasLN = (song.getFavorite() & SongData.FEATURE_LONGNOTE) != 0;
-		this.hasCN = (song.getFavorite() & SongData.FEATURE_CHARGENOTE) != 0;
-		this.hasHCN = (song.getFavorite() & SongData.FEATURE_HELLCHARGENOTE) != 0;
-		this.hasMine = (song.getFavorite() & SongData.FEATURE_MINENOTE) != 0;
-		this.hasRandom = (song.getFavorite() & SongData.FEATURE_RANDOM) != 0;
-		this.hasStop = (song.getFavorite() & SongData.FEATURE_STOPSEQUENCE) != 0;
+		this.hasLN = song.hasLongNote();
+		this.hasCN = song.hasChargeNote();
+		this.hasHCN = song.hasHellChargeNote();
+		this.hasMine = song.hasMineNote();
+		this.hasRandom = song.hasRandomSequence();
+		this.hasStop = song.isBpmstop();
 		this.lntype = lntype;
 
 		if(model != null) {

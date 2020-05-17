@@ -386,6 +386,14 @@ public class SongData implements Validatable, IpfsInformation {
 		return (feature & FEATURE_LONGNOTE) != 0;
 	}
 
+	public boolean hasChargeNote() {
+		return (feature & FEATURE_CHARGENOTE) != 0;
+	}
+
+	public boolean hasHellChargeNote() {
+		return (feature & FEATURE_HELLCHARGENOTE) != 0;
+	}
+
 	public boolean hasAnyLongNote() {
 		return (feature & (FEATURE_UNDEFINEDLN | FEATURE_LONGNOTE | FEATURE_CHARGENOTE | FEATURE_HELLCHARGENOTE)) != 0;
 	}
