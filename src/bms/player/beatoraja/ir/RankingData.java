@@ -100,7 +100,7 @@ public class RankingData {
             if(irrank == 0 && scores[i].player.length() == 0) {
             	irrank = i + 1;
             }
-            if(localscore != null && localrank == 0 && scores[i].pg * 2 + scores[i].gr <=  localscore.getExscore()) {
+            if(localscore != null && localrank == 0 && scores[i].getExscore() <=  localscore.getExscore()) {
             	localrank = i + 1;
             }
             lamps[scores[i].clear.id]++;

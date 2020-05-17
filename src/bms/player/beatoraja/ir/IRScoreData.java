@@ -29,27 +29,33 @@ public class IRScoreData {
 	/**
 	 * 総PGREATノート数
 	 */
-	public final int pg;
+	public final int epg;
+	public final int lpg;
 	/**
 	 * 総GREATノート数
 	 */
-	public final int gr;
+	public final int egr;
+	public final int lgr;
 	/**
 	 * 総GOODノート数
 	 */
-	public final int gd;
+	public final int egd;
+	public final int lgd;
 	/**
 	 * 総BADノート数
 	 */
-	public final int bd;
+	public final int ebd;
+	public final int lbd;
 	/**
 	 * 総POORノート数
 	 */
-	public final int pr;
+	public final int epr;
+	public final int lpr;
 	/**
 	 * 総MISSノート数
 	 */
-	public final int ms;
+	public final int ems;
+	public final int lms;
 	/**
 	 * 最大コンボ数
 	 */
@@ -88,12 +94,18 @@ public class IRScoreData {
 		this.player = score.getPlayer();
 		this.clear = ClearType.getClearTypeByID(score.getClear());
 		this.date = score.getDate();
-		this.pg = score.getJudgeCount(0);
-		this.gr = score.getJudgeCount(1);
-		this.gd = score.getJudgeCount(2);
-		this.bd = score.getJudgeCount(3);
-		this.pr = score.getJudgeCount(4);
-		this.ms = score.getJudgeCount(5);
+		this.epg = score.getEpg();
+		this.lpg = score.getLpg();
+		this.egr = score.getEgr();
+		this.lgr = score.getLgr();
+		this.egd = score.getEgd();
+		this.lgd = score.getLgd();
+		this.ebd = score.getEbd();
+		this.lbd = score.getLbd();
+		this.epr = score.getEpr();
+		this.lpr = score.getLpr();
+		this.ems = score.getEms();
+		this.lms = score.getLms();
 		this.maxcombo = score.getCombo();
 		this.notes = score.getNotes();
 		this.passnotes = score.getPassnotes();
@@ -104,4 +116,7 @@ public class IRScoreData {
 		this.deviceType = score.getDeviceType();
 	}
 	
+	public int getExscore() {
+		return (epg + lpg) * 2 + egr + lgr;
+	}
 }
