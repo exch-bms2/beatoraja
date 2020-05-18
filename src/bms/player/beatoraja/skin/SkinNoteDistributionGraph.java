@@ -81,6 +81,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	 * 処理済みノート数 プレイ時は処理済みノート数に変化があった時だけ更新する
 	 */
 	private int pastNotes = 0;
+	private long lastUpdateTime;
 	
 	private int starttime;
 	private int endtime;
@@ -154,7 +155,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 		}
 
-		if(song != current || (this.model == null && model != null)) {
+		if(shapetex == null || song != current || (this.model == null && model != null)) {
 			current = song;
 			this.model = model;
 			if(type == TYPE_NORMAL && song != null && song.getInformation() != null) {
@@ -163,14 +164,17 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				updateGraph(model);
 			}
 		}
-		if (shapetex == null) {
-			updateGraph(model);
-		}
 
 		//プレイ時、判定をリアルタイムで更新する
-		if(model != null && state instanceof BMSPlayer && type != TYPE_NORMAL && pastNotes != ((BMSPlayer)state).getPastNotes()) {
+		/*
+		 * TODO 高速化のアイデア
+		 * BMSPlayerから更新したノーツの時間だけを渡し。指定時間のデータ/イメージのみ更新する
+		 * backtex更新は初回のみ
+		 */
+		if(model != null && state instanceof BMSPlayer && type != TYPE_NORMAL 
+				&& pastNotes != ((BMSPlayer)state).getPastNotes() && System.currentTimeMillis() > lastUpdateTime + 500) {
 			pastNotes = ((BMSPlayer)state).getPastNotes();
-			// TODO さらなる高速化のアイデア-BMSPlayerから更新したノーツの時間だけを渡し。指定時間のデータ/イメージのみ更新する
+			lastUpdateTime = System.currentTimeMillis();
 			updateData(model);
 			updateTexture();
 		}
@@ -313,18 +317,20 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 	
 	private void updateTexture() {
-		if (shapetex != null && !(state instanceof BMSPlayer)) {
-			shapetex.getTexture().dispose();
-			backtex.getTexture().dispose();
-			shape.dispose();
-		}
-
-		if( shape == null || (shape != null && !(state instanceof BMSPlayer)) ) {
-			shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
+		final int oldw = shape != null ? shape.getWidth() : 0;
+		final int oldh = shape != null ? shape.getHeight() : 0;
+		final int w = data.length * 5;
+		final int h = max * 5;
+		if(shape == null) {
+			shape = new Pixmap(w, h, Pixmap.Format.RGBA8888);									
+		} else if(oldw != w || oldh != h) {
+			shape.dispose();				
+			shape = new Pixmap(w, h, Pixmap.Format.RGBA8888);						
 		} else {
 			shape.setColor(TRANSPARENT_COLOR);
-			shape.fill();
+			shape.fill();			
 		}
+
 		if(!isBackTexOff) {
 			shape.setColor(0, 0, 0, 0.8f);
 			shape.fill();
@@ -337,19 +343,24 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			for (int i = 0; i < data.length; i++) {
 				// x軸補助線描画
 				if (i % 60 == 0) {
-					shape.setColor(Color.valueOf("444444"));
+					shape.setColor(0.25f, 0.25f, 0.25f, 1.0f);
 					shape.drawLine(i * 5, 0, i * 5, max * 5);
 				} else if (i % 10 == 0) {
-					shape.setColor(Color.valueOf("222222"));
+					shape.setColor(0.125f, 0.125f, 0.125f, 1.0f);
 					shape.drawLine(i * 5, 0, i * 5, max * 5);
 				}
 			}
 		}
-		if( backtex == null || (backtex != null && !(state instanceof BMSPlayer)) ) {
+		
+		if(backtex == null) {
+			backtex = new TextureRegion(new Texture(shape));			
+		} else if(oldw != w || oldh != h) {
+			backtex.getTexture().dispose();
 			backtex = new TextureRegion(new Texture(shape));
 		} else {
 			backtex.getTexture().draw(shape, 0, 0);
 		}
+
 		shape.setColor(TRANSPARENT_COLOR);
 		shape.fill();
 
@@ -385,7 +396,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				}
 			}
 		}
-		if( shapetex == null || (shapetex != null && !(state instanceof BMSPlayer)) ) {
+		
+		if(shapetex == null) {
+			shapetex = new TextureRegion(new Texture(shape));
+		} else if(oldw != w || oldh != h) {
+			shapetex.getTexture().dispose();
 			shapetex = new TextureRegion(new Texture(shape));
 		} else {
 			shapetex.getTexture().draw(shape, 0, 0);
