@@ -71,9 +71,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
 						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
 						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
-						+ "[minbpm] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
+						+ "[minbpm] INTEGER," + "[length] INTEGER" + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
 						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
-						+ "[adddate] INTEGER,"  + "[charthash] TEXT," + "PRIMARY KEY(sha256, path));");
+						+ "[adddate] INTEGER," + "[charthash] TEXT," + "PRIMARY KEY(path));");
 			}
 
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%preview%'", new MapListHandler()).size() == 0) {
@@ -84,6 +84,23 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%charthash%'", new MapListHandler()).size() == 0) {
 				qr.update("ALTER TABLE song ADD COLUMN [charthash] TEXT");
+			}
+			if(qr.query("PRAGMA TABLE_INFO(song)", new MapListHandler()).stream().anyMatch(m -> m.get("name").equals("sha256") && (int)(m.get("pk")) == 1)) {
+				qr.update("ALTER TABLE song RENAME TO old_song");
+				qr.update("CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
+						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
+						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
+						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
+						+ "[minbpm] INTEGER," + "[length] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
+						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
+						+ "[adddate] INTEGER," + "[charthash] TEXT," + "PRIMARY KEY(path));");
+				qr.update("INSERT INTO song SELECT "
+						+ "md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
+						+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty,"
+						+ "maxbpm, minbpm, length, mode, judge, feature, content,"
+						+ "date, favorite, notes, adddate, charthash "
+						+ "FROM old_song GROUP BY path HAVING MAX(date)");
+				qr.update("DROP TABLE old_song");
 			}
 
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
