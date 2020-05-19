@@ -77,13 +77,13 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%preview%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE song ADD COLUMN preview [TEXT]");
+				qr.update("ALTER TABLE song ADD COLUMN [preview] TEXT");
 			}
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%length%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE song ADD COLUMN length [INTEGER]");
+				qr.update("ALTER TABLE song ADD COLUMN [length] INTEGER");
 			}
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%charthash%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE song ADD COLUMN charthash [TEXT]");
+				qr.update("ALTER TABLE song ADD COLUMN [charthash] TEXT");
 			}
 
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
