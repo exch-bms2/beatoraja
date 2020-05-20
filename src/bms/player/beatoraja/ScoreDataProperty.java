@@ -1,12 +1,14 @@
 package bms.player.beatoraja;
 
 /**
- * Created by exch on 2017/04/05.
+ * スコアデータから各数値を算出するためのクラス
+ * 
+ * @author exch
  */
 public class ScoreDataProperty {
 
-    private IRScoreData score;
-    private IRScoreData rival;
+    private ScoreData score;
+    private ScoreData rival;
 
     private int nowpoint;
     private int nowscore;
@@ -41,11 +43,11 @@ public class ScoreDataProperty {
     private boolean useBestGhost = false;
     private boolean useRivalGhost = false;
 
-    public void update(IRScoreData score) {
+    public void update(ScoreData score) {
         this.update(score, score != null ? score.getNotes() : 0);
     }
 
-    public void update(IRScoreData score, IRScoreData rival) {
+    public void update(ScoreData score, ScoreData rival) {
         update(score);
         this.rival = rival;
         final int exscore = rival != null ? rival.getExscore() : 0;
@@ -56,7 +58,7 @@ public class ScoreDataProperty {
 
     }
 
-    public void update(IRScoreData score, int notes) {
+    public void update(ScoreData score, int notes) {
         this.score = score;
         final int exscore = score != null ? score.getExscore() : 0;
         final int totalnotes = score != null ? score.getNotes() : 0;
@@ -256,11 +258,11 @@ public class ScoreDataProperty {
         return nowrivalscorerate;
     }
 
-    public IRScoreData getScoreData() {
+    public ScoreData getScoreData() {
         return score;
     }
 
-    public IRScoreData getRivalScoreData() {
+    public ScoreData getRivalScoreData() {
         return rival;
     }
 }

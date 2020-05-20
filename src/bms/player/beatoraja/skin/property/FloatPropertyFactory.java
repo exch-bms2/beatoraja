@@ -3,7 +3,7 @@ package bms.player.beatoraja.skin.property;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.player.beatoraja.BMSResource;
-import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.play.BMSPlayer;
@@ -113,7 +113,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) (score.getEpg() + score.getLpg()))
 										/ ((SongBar) selected).getSongData().getNotes()
@@ -127,7 +127,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) (score.getEgr() + score.getLgr()))
 										/ ((SongBar) selected).getSongData().getNotes()
@@ -141,7 +141,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) (score.getEgd() + score.getLgd()))
 										/ ((SongBar) selected).getSongData().getNotes()
@@ -155,7 +155,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) (score.getEbd() + score.getLbd()))
 										/ ((SongBar) selected).getSongData().getNotes()
@@ -169,7 +169,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) (score.getEpr() + score.getLpr()))
 										/ ((SongBar) selected).getSongData().getNotes()
@@ -183,7 +183,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) score.getCombo()) / ((SongBar) selected).getSongData().getNotes()
 								: 0;
@@ -196,7 +196,7 @@ public class FloatPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					if (selected instanceof SongBar) {
-						IRScoreData score = selected.getScore();
+						ScoreData score = selected.getScore();
 						return score != null
 								? ((float) score.getExscore()) / ((SongBar) selected).getSongData().getNotes() / 2
 								: 0;

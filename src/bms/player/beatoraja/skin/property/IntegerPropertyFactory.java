@@ -110,7 +110,7 @@ public class IntegerPropertyFactory {
 		if (optionid >= NUMBER_PERFECT_RATE && optionid <= NUMBER_POOR_RATE) {
 			final int index = optionid - NUMBER_PERFECT_RATE;
 			result = (state) -> {
-				final IRScoreData score = state.getScoreDataProperty().getScoreData();
+				final ScoreData score = state.getScoreDataProperty().getScoreData();
 				return score != null && score.getNotes() > 0 ? score.getJudgeCount(index) * 100 / score.getNotes() : Integer.MIN_VALUE;
 						};
 		}
@@ -131,7 +131,7 @@ public class IntegerPropertyFactory {
 		if (optionid >= NUMBER_RIVAL_PERFECT_RATE && optionid <= NUMBER_RIVAL_POOR_RATE) {
 			final int index = optionid - NUMBER_RIVAL_PERFECT_RATE;
 			result = (state) -> {
-				final IRScoreData rival = state.getScoreDataProperty().getRivalScoreData();
+				final ScoreData rival = state.getScoreDataProperty().getRivalScoreData();
 				return rival != null && rival.getNotes() > 0 ? rival.getJudgeCount(index) * 100 / rival.getNotes() : Integer.MIN_VALUE;
 						};
 		}
@@ -218,7 +218,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_PLAYCOUNT:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
 					return score != null ? score.getPlaycount() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -226,7 +226,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_CLEARCOUNT:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
 					return score != null ? score.getClearcount() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -234,7 +234,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_FAILCOUNT:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
 					return score != null ? score.getPlaycount() - score.getClearcount() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -598,7 +598,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_MAXCOMBO2:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
 					return score != null ? score.getCombo() : Integer.MIN_VALUE;
 				}
 				if (state instanceof BMSPlayer) {
@@ -684,7 +684,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_MISSCOUNT2:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {

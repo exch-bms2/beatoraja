@@ -122,7 +122,7 @@ public abstract class MainState {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		IRScoreData sd = score.getScoreData();
+		ScoreData sd = score.getScoreData();
 		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
 	}
 

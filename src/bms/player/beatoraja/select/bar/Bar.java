@@ -1,31 +1,50 @@
 package bms.player.beatoraja.select.bar;
 
-import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.ScoreData;
 
 /**
- * Created by exch on 2017/09/03.
+ * 選曲用バーの抽象クラス
+ * 
+ * @author exch
  */
 public abstract class Bar {
 
-    private IRScoreData score;
-    private IRScoreData rscore;
+	/**
+	 * プレイヤースコア
+	 */
+    private ScoreData score;
+	/**
+	 * ライバルスコア
+	 */
+    private ScoreData rscore;
 
+    /**
+     * バーのタイトルを取得する
+     * 
+     * @return バーのタイトル
+     */
     public abstract String getTitle();
+    /**
+     * バーのアーティストを取得する
+     * TODO ソートにしか使用されていないため、不要
+     * 
+     * @return バーのアーティスト
+     */
     public abstract String getArtist();
 
-    public IRScoreData getScore() {
+    public ScoreData getScore() {
         return score;
     }
 
-    public void setScore(IRScoreData score) {
+    public void setScore(ScoreData score) {
         this.score = score;
     }
 
-    public IRScoreData getRivalScore() {
+    public ScoreData getRivalScore() {
         return rscore;
     }
 
-    public void setRivalScore(IRScoreData score) {
+    public void setRivalScore(ScoreData score) {
         this.rscore = score;
     }
 

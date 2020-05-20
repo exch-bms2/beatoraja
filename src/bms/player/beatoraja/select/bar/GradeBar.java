@@ -1,17 +1,30 @@
 package bms.player.beatoraja.select.bar;
 
 import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.song.SongData;
 
 /**
- * Created by exch on 2017/09/02.
+ * コース選択用バー
+ * 
+ * @author exch
  */
 public class GradeBar extends SelectableBar {
 
+	/**
+	 * コースデータ
+	 */
     private CourseData course;
-    private IRScoreData mscore;
-    private IRScoreData rscore;
+	/**
+	 * ミラー使用時のスコア
+	 * TODO 不要かも
+	 */
+    private ScoreData mscore;
+	/**
+	 * ランダム使用時のスコア
+	 * TODO 不要かも
+	 */
+    private ScoreData rscore;
 
     public GradeBar(CourseData course) {
         this.course = course;
@@ -44,28 +57,28 @@ public class GradeBar extends SelectableBar {
         return true;
     }
 
-    public IRScoreData getMirrorScore() {
+    public ScoreData getMirrorScore() {
         return mscore;
     }
 
-    public void setMirrorScore(IRScoreData score) {
+    public void setMirrorScore(ScoreData score) {
         this.mscore = score;
     }
 
-    public IRScoreData getRandomScore() {
+    public ScoreData getRandomScore() {
         return rscore;
     }
 
-    public void setRandomScore(IRScoreData score) {
+    public void setRandomScore(ScoreData score) {
         this.rscore = score;
     }
 
     public CourseData.TrophyData getTrophy() {
-        IRScoreData[] scores = {this.getScore(), mscore, rscore};
+    	ScoreData[] scores = {this.getScore(), mscore, rscore};
 
         CourseData.TrophyData[] trophies = course.getTrophy();
         for (int i = trophies.length - 1; i >= 0; i--) {
-            for (IRScoreData score : scores) {
+            for (ScoreData score : scores) {
                 if (qualified(score, trophies[i])) {
                     return trophies[i];
                 }
@@ -74,7 +87,7 @@ public class GradeBar extends SelectableBar {
         return null;
     }
 
-    private boolean qualified(IRScoreData score, CourseData.TrophyData trophy) {
+    private boolean qualified(ScoreData score, CourseData.TrophyData trophy) {
         return score != null && score.getNotes() != 0
                 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
                 && trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);

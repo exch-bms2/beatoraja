@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.song.SongData;
 
@@ -82,7 +83,7 @@ public class RankingData {
 
 	}
 	
-	public void updateScore(IRScoreData[] scores, bms.player.beatoraja.IRScoreData localscore) {
+	public void updateScore(IRScoreData[] scores, ScoreData localscore) {
 		if(scores == null) {
 			return;
 		}

@@ -285,6 +285,6 @@ public class ScoreDatabaseAccessor {
 	
 	public interface ScoreDataCollector {
 		
-		public void collect(SongData hash, IRScoreData score);
+		public void collect(SongData hash, ScoreData score);
 	}
 }

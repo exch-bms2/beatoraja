@@ -1,6 +1,6 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.utils.*;
@@ -17,7 +17,7 @@ public abstract class ScoreDataCache {
     /**
      * スコアデータのキャッシュ
      */
-    private ObjectMap<String, IRScoreData>[] scorecache;
+    private ObjectMap<String, ScoreData>[] scorecache;
 
     public ScoreDataCache() {
         scorecache = new ObjectMap[4];
@@ -32,12 +32,12 @@ public abstract class ScoreDataCache {
      * @param lnmode LN MODE
      * @return スコアデータ。存在しない場合はnull
      */
-    public IRScoreData readScoreData(SongData song, int lnmode) {
+    public ScoreData readScoreData(SongData song, int lnmode) {
         final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
         if (scorecache[cacheindex].containsKey(song.getSha256())) {
             return scorecache[cacheindex].get(song.getSha256());
         }
-        IRScoreData score = readScoreDatasFromSource(song, lnmode);
+        ScoreData score = readScoreDatasFromSource(song, lnmode);
         scorecache[cacheindex].put(song.getSha256(), score);
         return score;
     }
@@ -91,11 +91,11 @@ public abstract class ScoreDataCache {
 
     public void update(SongData song, int lnmode) {
         final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
-        IRScoreData score = readScoreDatasFromSource(song, lnmode);
+        ScoreData score = readScoreDatasFromSource(song, lnmode);
         scorecache[cacheindex].put(song.getSha256(), score);
     }
 
-    protected abstract IRScoreData readScoreDatasFromSource(SongData songs, int lnmode);
+    protected abstract ScoreData readScoreDatasFromSource(SongData songs, int lnmode);
 
     protected abstract void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode);
 }
