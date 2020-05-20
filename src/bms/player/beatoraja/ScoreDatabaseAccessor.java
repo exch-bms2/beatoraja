@@ -25,7 +25,7 @@ public class ScoreDatabaseAccessor {
 	private final QueryRunner qr;
 	
 	private final ResultSetHandler<List<PlayerInformation>> infoHandler = new BeanListHandler<PlayerInformation>(PlayerInformation.class);
-	private final ResultSetHandler<List<IRScoreData>> scoreHandler = new BeanListHandler<IRScoreData>(IRScoreData.class);
+	private final ResultSetHandler<List<ScoreData>> scoreHandler = new BeanListHandler<ScoreData>(ScoreData.class);
 	private final ResultSetHandler<List<PlayerData>> playerHandler = new BeanListHandler<PlayerData>(PlayerData.class);
 
 	public ScoreDatabaseAccessor(String path) throws ClassNotFoundException {
@@ -107,14 +107,13 @@ public class ScoreDatabaseAccessor {
 		}
 	}
 
-	public IRScoreData getScoreData(String hash, int mode) {
-		IRScoreData result = null;
+	public ScoreData getScoreData(String hash, int mode) {
+		ScoreData result = null;
 		try {
-			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
-			List<IRScoreData> score = Validatable.removeInvalidElements(qr.query("SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh));
+			List<ScoreData> score = Validatable.removeInvalidElements(qr.query("SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, scoreHandler));
 			if (score.size() > 0) {
-				IRScoreData sc = null;
-				for (IRScoreData s : score) {
+				ScoreData sc = null;
+				for (ScoreData s : score) {
 					if (sc == null || s.getClear() > sc.getClear()) {
 						sc = s;
 					}
@@ -148,12 +147,12 @@ public class ScoreDatabaseAccessor {
 				}
 			}
 
-			List<IRScoreData> scores = Validatable.removeInvalidElements(qr
+			List<ScoreData> scores = Validatable.removeInvalidElements(qr
 					.query("SELECT * FROM score WHERE sha256 IN (" + str.toString() + ") AND mode = " + mode, scoreHandler));
 			for(SongData song : songs) {
 				if((hasln && song.hasUndefinedLongNote()) || (!hasln && !song.hasUndefinedLongNote())) {
 					boolean b = true;
-					for (IRScoreData score : scores) {
+					for (ScoreData score : scores) {
 						if(song.getSha256().equals(score.getSha256())) {
 							collector.collect(song, score);
 							b = false;
@@ -170,8 +169,8 @@ public class ScoreDatabaseAccessor {
 		}		
 	}
 
-	public List<IRScoreData> getScoreDatas(String sql) {
-		List<IRScoreData> score = null;
+	public List<ScoreData> getScoreDatas(String sql) {
+		List<ScoreData> score = null;
 		try {
 			score = Validatable.removeInvalidElements(qr.query("SELECT * FROM score WHERE " + sql, scoreHandler));
 		} catch (Exception e) {

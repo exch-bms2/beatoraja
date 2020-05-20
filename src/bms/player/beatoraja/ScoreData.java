@@ -473,7 +473,7 @@ public class ScoreData implements Validatable {
 	 * @param newscore スコアデータ
 	 * @return スコアデータが更新された場合はtrue
 	 */
-	public boolean update(IRScoreData newscore) {
+	public boolean update(ScoreData newscore) {
 		boolean update = false;
 		if (clear < newscore.getClear()) {
 			setClear(newscore.getClear());

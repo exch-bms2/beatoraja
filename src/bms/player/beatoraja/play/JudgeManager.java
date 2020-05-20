@@ -15,7 +15,7 @@ import bms.model.NormalNote;
 import bms.model.Note;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
@@ -44,7 +44,7 @@ public class JudgeManager {
 	/**
 	 * 現在の判定カウント内訳
 	 */
-	private IRScoreData score = new IRScoreData();
+	private ScoreData score = new ScoreData();
 
 	/**
 	 * 現在のコンボ数
@@ -169,7 +169,7 @@ public class JudgeManager {
 		judgenow = new int[judgeregion];
 		judgecombo = new int[judgeregion];
 		judgefast = new long[judgeregion];
-		score = new IRScoreData(orgmode);
+		score = new ScoreData(orgmode);
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
 		ghost = new int[model.getTotalNotes()];
@@ -769,7 +769,7 @@ public class JudgeManager {
 		return sckeyassign[lane] >= 0 ? sjudge : njudge;
 	}
 
-	public IRScoreData getScoreData() {
+	public ScoreData getScoreData() {
 		return score;
 	}
 

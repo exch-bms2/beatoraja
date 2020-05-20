@@ -124,7 +124,7 @@ public class MusicSelector extends MainState {
 
 		scorecache = new ScoreDataCache() {
 			@Override
-			protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
+			protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
 				return pda.readScoreData(song.getSha256(), song.hasUndefinedLongNote(), lnmode);
 			}
 
@@ -173,7 +173,7 @@ public class MusicSelector extends MainState {
 							rivalcaches.put(rival,  new ScoreDataCache() {
 
 								@Override
-								protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
+								protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
 									return scoredb.getScoreData(song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
 								}
 
@@ -215,7 +215,7 @@ public class MusicSelector extends MainState {
 									rivalcaches.put(info,  new ScoreDataCache() {
 
 										@Override
-										protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
+										protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
 											return scoredb.getScoreData(song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
 										}
 
@@ -249,10 +249,10 @@ public class MusicSelector extends MainState {
 		}
 	}
 	
-	private IRScoreData[] convert(bms.player.beatoraja.ir.IRScoreData[] irscores) {
-		IRScoreData[] scores = new IRScoreData[irscores.length];
+	private ScoreData[] convert(bms.player.beatoraja.ir.IRScoreData[] irscores) {
+		ScoreData[] scores = new ScoreData[irscores.length];
 		for(int i = 0;i < scores.length;i++) {
-			final IRScoreData score = new IRScoreData();
+			final ScoreData score = new ScoreData();
 			final bms.player.beatoraja.ir.IRScoreData irscore = irscores[i];
 			score.setSha256(irscore.sha256);
 			score.setPlayer(irscore.player);

@@ -84,7 +84,7 @@ public class MusicResult extends AbstractResult {
 	public void prepare() {
 		state = STATE_OFFLINE;
 		final PlayerResource resource = main.getPlayerResource();
-		final IRScoreData newscore = getNewScore();
+		final ScoreData newscore = getNewScore();
 
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
@@ -150,7 +150,7 @@ public class MusicResult extends AbstractResult {
 			irprocess.start();
 		}
 
-		final IRScoreData cscore = resource.getCourseScoreData();
+		final ScoreData cscore = resource.getCourseScoreData();
 		play(newscore.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id) ? SOUND_CLEAR : SOUND_FAIL);
 	}
 
@@ -331,7 +331,7 @@ public class MusicResult extends AbstractResult {
 
 	private void updateScoreDatabase() {
 		final PlayerResource resource = main.getPlayerResource();
-		IRScoreData newscore = resource.getScoreData();
+		ScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
 				resource.getCourseScoreData()
@@ -340,9 +340,9 @@ public class MusicResult extends AbstractResult {
 			}
 			return;
 		}
-		final IRScoreData oldsc = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(),
+		final ScoreData oldsc = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(),
 				resource.getPlayerConfig().getLnmode());
-		oldscore = oldsc != null ? oldsc : new IRScoreData();
+		oldscore = oldsc != null ? oldsc : new ScoreData();
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
@@ -374,9 +374,9 @@ public class MusicResult extends AbstractResult {
 			if (resource.getScoreData().getClear() == Failed.id) {
 				resource.getScoreData().setClear(NoPlay.id);
 			}
-			IRScoreData cscore = resource.getCourseScoreData();
+			ScoreData cscore = resource.getCourseScoreData();
 			if (cscore == null) {
-				cscore = new IRScoreData();
+				cscore = new ScoreData();
 				cscore.setMinbp(0);
 				int notes = 0;
 				for (BMSModel mo : resource.getCourseBMSModels()) {
@@ -453,7 +453,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		IRScoreData score = main.getPlayerResource().getScoreData();
+		ScoreData score = main.getPlayerResource().getScoreData();
 		if (score != null) {
 			switch (judge) {
 			case 0:
@@ -505,7 +505,7 @@ public class MusicResult extends AbstractResult {
 		}
 	}
 	
-	public IRScoreData getNewScore() {
+	public ScoreData getNewScore() {
 		return main.getPlayerResource().getScoreData();
 	}
 
@@ -516,10 +516,10 @@ public class MusicResult extends AbstractResult {
 	static class IRSendStatus {
 		public final IRConnection ir;
 		public final SongData song;
-		public final IRScoreData score;
+		public final ScoreData score;
 		public int retry = 0;
 		
-		public IRSendStatus(IRConnection ir, SongData song, IRScoreData score) {
+		public IRSendStatus(IRConnection ir, SongData song, ScoreData score) {
 			this.ir = ir;
 			this.song = song;
 			this.score = score;

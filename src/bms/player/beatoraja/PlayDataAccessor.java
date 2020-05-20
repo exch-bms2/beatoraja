@@ -140,7 +140,7 @@ public class PlayDataAccessor {
 	 *            LNモード
 	 * @return スコアデータ
 	 */
-	public IRScoreData readScoreData(BMSModel model, int lnmode) {
+	public ScoreData readScoreData(BMSModel model, int lnmode) {
 		String hash = model.getSHA256();
 		boolean ln = model.containsUndefinedLongNote();
 		return readScoreData(hash, ln, lnmode);
@@ -157,7 +157,7 @@ public class PlayDataAccessor {
 	 *            LNモード
 	 * @return スコアデータ
 	 */
-	public IRScoreData readScoreData(String hash, boolean ln, int lnmode) {
+	public ScoreData readScoreData(String hash, boolean ln, int lnmode) {
 		return scoredb.getScoreData(hash, ln ? lnmode : 0);
 	}
 
@@ -171,7 +171,7 @@ public class PlayDataAccessor {
 		scoredb.getScoreDatas(collector, songs, lnmode);
 	}
 
-	public List<IRScoreData> readScoreDatas(String sql) {
+	public List<ScoreData> readScoreDatas(String sql) {
 		return scoredb.getScoreDatas(sql);
 	}
 
@@ -271,7 +271,7 @@ public class PlayDataAccessor {
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 	}
 	
-	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option,
+	public ScoreData readScoreData(String hash, boolean ln, int lnmode, int option,
 			CourseData.CourseDataConstraint[] constraint) {
 		int hispeed = 0;
 		int judge = 0;
@@ -309,7 +309,7 @@ public class PlayDataAccessor {
 		return scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 	}
 
-	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option,
+	public ScoreData readScoreData(BMSModel[] models, int lnmode, int option,
 			CourseData.CourseDataConstraint[] constraint) {
 		String[] hash = new String[models.length];
 		boolean ln = false;
@@ -320,7 +320,7 @@ public class PlayDataAccessor {
 		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
 
-	public IRScoreData readScoreData(String[] hashes, boolean ln, int lnmode, int option,
+	public ScoreData readScoreData(String[] hashes, boolean ln, int lnmode, int option,
 			CourseData.CourseDataConstraint[] constraint) {
 		String hash = "";
 		for (String s : hashes) {
@@ -375,10 +375,10 @@ public class PlayDataAccessor {
 				break;
 			}
 		}
-		IRScoreData score = scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
+		ScoreData score = scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 
 		if (score == null) {
-			score = new IRScoreData();
+			score = new ScoreData();
 			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 		}
 		score.setSha256(hash);

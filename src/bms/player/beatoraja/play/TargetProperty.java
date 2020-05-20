@@ -1,8 +1,7 @@
 package bms.player.beatoraja.play;
 
-import bms.model.BMSModel;
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.ScoreData;
 
 import java.util.*;
 
@@ -84,7 +83,7 @@ class NextRankTargetProperty extends TargetProperty{
 
     @Override
     public int getTarget(MainController main) {
-        IRScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
+        ScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
                 , main.getPlayerConfig().getLnmode());
         final int nowscore = now != null ? now.getExscore() : 0;
         final int max = main.getPlayerResource().getBMSModel().getTotalNotes() * 2;

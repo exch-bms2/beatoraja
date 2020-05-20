@@ -86,7 +86,7 @@ public class CourseResult extends AbstractResult {
 		state = STATE_OFFLINE;
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final IRScoreData newscore = getNewScore();
+		final ScoreData newscore = getNewScore();
 
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 
@@ -252,7 +252,7 @@ public class CourseResult extends AbstractResult {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
-		final IRScoreData newscore = getNewScore();
+		final ScoreData newscore = getNewScore();
 		if (newscore == null) {
 			return;
 		}
@@ -270,9 +270,9 @@ public class CourseResult extends AbstractResult {
 				&& (!dp || (config.getRandom2() == 1 && config.getDoubleoption() == 1))) {
 			random = 1;
 		}
-		final IRScoreData score = main.getPlayDataAccessor().readScoreData(models,
+		final ScoreData score = main.getPlayDataAccessor().readScoreData(models,
 				config.getLnmode(), random, resource.getConstraint());
-		oldscore = score != null ? score : new IRScoreData();
+		oldscore = score != null ? score : new ScoreData();
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(),
 				Arrays.asList(resource.getCourseData().getSong()).stream().mapToInt(sd -> sd.getNotes()).sum());
@@ -287,7 +287,7 @@ public class CourseResult extends AbstractResult {
 
 	public int getJudgeCount(int judge, boolean fast) {
 		final PlayerResource resource = main.getPlayerResource();
-		IRScoreData score = resource.getCourseScoreData();
+		ScoreData score = resource.getCourseScoreData();
 		if (score != null) {
 			switch (judge) {
 				case 0:
@@ -350,7 +350,7 @@ public class CourseResult extends AbstractResult {
 		}
 	}
 	
-	public IRScoreData getNewScore() {
+	public ScoreData getNewScore() {
 		return main.getPlayerResource().getCourseScoreData();
 	}
 
@@ -362,10 +362,10 @@ public class CourseResult extends AbstractResult {
 		public final IRConnection ir;
 		public final CourseData course;
 		public final int lnmode;
-		public final IRScoreData score;
+		public final ScoreData score;
 		public int retry = 0;
 		
-		public IRSendStatus(IRConnection ir, CourseData course, int lnmode, IRScoreData score) {
+		public IRSendStatus(IRConnection ir, CourseData course, int lnmode, ScoreData score) {
 			this.ir = ir;
 			this.course = course;
 			this.lnmode = lnmode;

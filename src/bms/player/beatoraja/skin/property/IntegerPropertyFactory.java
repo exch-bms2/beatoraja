@@ -605,7 +605,7 @@ public class IntegerPropertyFactory {
 					return ((BMSPlayer) state).getJudgeManager().getScoreData().getCombo();
 				}
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getNewScore();
 					return score != null ? score.getCombo() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -613,7 +613,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_CLEAR:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getNewScore();
 					return score != null ? score.getClear() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -630,7 +630,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_SCORE3:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getNewScore();
 					return score != null ? score.getExscore() : Integer.MIN_VALUE;
 				}
 				return state.getScoreDataProperty().getScoreData() != null
@@ -648,7 +648,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_TARGET_MISSCOUNT:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getOldScore();
 					return score.getMinbp() != Integer.MAX_VALUE ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -656,7 +656,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_DIFF_MISSCOUNT:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getOldScore();
 					return score.getMinbp() != Integer.MAX_VALUE
 							? ((AbstractResult) state).getNewScore().getMinbp() - score.getMinbp()
 							: Integer.MIN_VALUE;
@@ -666,7 +666,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_TARGET_MAXCOMBO:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getOldScore();
 					return score.getCombo() > 0 ? score.getCombo() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -674,7 +674,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_DIFF_MAXCOMBO:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getOldScore();
 					return score.getCombo() > 0 ? ((AbstractResult) state).getNewScore().getCombo() - score.getCombo()
 							: Integer.MIN_VALUE;
 				}
@@ -688,7 +688,7 @@ public class IntegerPropertyFactory {
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getNewScore();
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -700,7 +700,6 @@ public class IntegerPropertyFactory {
 					return irc != null && irc.getState() == RankingData.FINISH ? irc.getRank() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
 					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
 							? ((AbstractResult) state).getIRRank()
 							: Integer.MIN_VALUE;
@@ -710,7 +709,6 @@ public class IntegerPropertyFactory {
 		case NUMBER_IR_PREVRANK:
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
 					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
 							? ((AbstractResult) state).getOldIRRank()
 							: Integer.MIN_VALUE;
@@ -725,7 +723,6 @@ public class IntegerPropertyFactory {
 					return irc != null && irc.getState() == RankingData.FINISH ? irc.getTotalPlayer() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
 					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
 							? ((AbstractResult) state).getIRTotalPlayer()
 							: Integer.MIN_VALUE;
@@ -1013,7 +1010,7 @@ public class IntegerPropertyFactory {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;
 				} else if (state instanceof AbstractResult) {
-					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getNewScore();
 					if (score != null) {
 						return score.getClear();
 					}

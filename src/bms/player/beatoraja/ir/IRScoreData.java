@@ -1,6 +1,7 @@
 package bms.player.beatoraja.ir;
 
 import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.input.BMSPlayerInputDevice;
 
 /**
@@ -89,7 +90,7 @@ public class IRScoreData {
 	 */
 	public final BMSPlayerInputDevice.Type deviceType;
 	
-	public IRScoreData(bms.player.beatoraja.IRScoreData score) {
+	public IRScoreData(ScoreData score) {
 		this.sha256 = score.getSha256();
 		this.player = score.getPlayer();
 		this.clear = ClearType.getClearTypeByID(score.getClear());

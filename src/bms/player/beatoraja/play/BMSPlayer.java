@@ -386,10 +386,10 @@ public class BMSPlayer extends MainState {
 
 		bga = resource.getBGAManager();
 
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
+		ScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
 		if (score == null) {
-			score = new IRScoreData();
+			score = new ScoreData();
 		}
 
 		int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
@@ -786,10 +786,10 @@ public class BMSPlayer extends MainState {
 		pc.setHidden(lanerender.getHiddenCover());
 	}
 
-	public IRScoreData createScoreData() {
+	public ScoreData createScoreData() {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
-		IRScoreData score = judge.getScoreData();
+		ScoreData score = judge.getScoreData();
 		if (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0) {
 			return null;
 		}

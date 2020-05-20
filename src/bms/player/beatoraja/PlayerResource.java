@@ -52,7 +52,7 @@ public class PlayerResource {
 	/**
 	 * スコア
 	 */
-	private IRScoreData score;
+	private ScoreData score;
 	/**
 	 * ライバルスコア
 	 */
@@ -96,7 +96,7 @@ public class PlayerResource {
 	/**
 	 * コーススコア
 	 */
-	private IRScoreData cscore;
+	private ScoreData cscore;
 	/**
 	 * コンボ数。コースプレイ時の引継ぎに使用
 	 */
@@ -227,11 +227,11 @@ public class PlayerResource {
 		return bmsresource.mediaLoadFinished();
 	}
 
-	public IRScoreData getScoreData() {
+	public ScoreData getScoreData() {
 		return score;
 	}
 
-	public void setScoreData(IRScoreData score) {
+	public void setScoreData(ScoreData score) {
 		this.score = score;
 	}
 
@@ -345,11 +345,11 @@ public class PlayerResource {
 		this.replay = replay;
 	}
 
-	public IRScoreData getCourseScoreData() {
+	public ScoreData getCourseScoreData() {
 		return cscore;
 	}
 
-	public void setCourseScoreData(IRScoreData cscore) {
+	public void setCourseScoreData(ScoreData cscore) {
 		this.cscore = cscore;
 	}
 
