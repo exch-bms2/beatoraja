@@ -2,23 +2,16 @@ package bms.player.beatoraja.select;
 
 import java.io.BufferedInputStream;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyCommand;
-import bms.player.beatoraja.ir.IRChartData;
-import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.ir.IRTableData;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
@@ -100,7 +93,7 @@ public class BarRenderer {
 		TableDataAccessor tdaccessor = new TableDataAccessor(main.getConfig().getTablepath());
 
 		TableData[] unsortedtables = tdaccessor.readAll();
-		Array<TableData> sortedtables = new Array(unsortedtables.length);
+		Array<TableData> sortedtables = new Array<TableData>(unsortedtables.length);
 		
 		for(String url : select.main.getConfig().getTableURL()) {
 			for(int i = 0;i < unsortedtables.length;i++) {
@@ -569,7 +562,7 @@ public class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
-			SkinText text = baro.getText(ba.text);
+			final SkinText text = baro.getText(ba.text);
 			if(text != null) {
 				text.setText(ba.sd.getTitle());
 				text.draw(sprite, ba.x, ba.y);				
@@ -586,8 +579,11 @@ public class BarRenderer {
 				final TrophyData trophy = ((GradeBar) ba.sd).getTrophy();
 				if (trophy != null) {
 					for (int j = 0; j < TROPHY.length; j++) {
-						if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy(j) != null) {
-							baro.getTrophy(j).draw(sprite, ba.x, ba.y);
+						if (TROPHY[j].equals(trophy.getName())) {
+							final SkinImage trophyImage = baro.getTrophy(j);
+							if(trophyImage != null) {
+								trophyImage.draw(sprite, ba.x, ba.y);								
+							}
 							break;
 						}
 					}
@@ -602,15 +598,18 @@ public class BarRenderer {
 			}
 			// lamp
 			if(select.getRival() != null) {
-				if (baro.getPlayerLamp(ba.sd.getLamp(true)) != null) {
-					baro.getPlayerLamp(ba.sd.getLamp(true)).draw(sprite, ba.x, ba.y);
+				final SkinImage playerLamp = baro.getPlayerLamp(ba.sd.getLamp(true));
+				if (playerLamp != null) {
+					playerLamp.draw(sprite, ba.x, ba.y);
 				}
-				if (baro.getRivalLamp(ba.sd.getLamp(false)) != null) {
-					baro.getRivalLamp(ba.sd.getLamp(false)).draw(sprite, ba.x, ba.y);
+				final SkinImage rivalLamp = baro.getRivalLamp(ba.sd.getLamp(false));
+				if (rivalLamp != null) {
+					rivalLamp.draw(sprite, ba.x, ba.y);
 				}
 			} else {
-				if (baro.getLamp(ba.sd.getLamp(true)) != null) {
-					baro.getLamp(ba.sd.getLamp(true)).draw(sprite, ba.x, ba.y);
+				final SkinImage lamp = baro.getLamp(ba.sd.getLamp(true));
+				if (lamp != null) {
+					lamp.draw(sprite, ba.x, ba.y);
 				}
 			}
 		}
@@ -622,9 +621,8 @@ public class BarRenderer {
 			}
 			// level
 			if (ba.sd instanceof SongBar && ((SongBar) ba.sd).existsSong()) {
-				SongData song = ((SongBar) ba.sd).getSongData();
-
-				SkinNumber leveln = baro.getBarlevel(song.getDifficulty() >= 0 && song.getDifficulty() < 7
+				final SongData song = ((SongBar) ba.sd).getSongData();
+				final SkinNumber leveln = baro.getBarlevel(song.getDifficulty() >= 0 && song.getDifficulty() < 7
 						? song.getDifficulty() : 0);
 				if (leveln != null) {
 					leveln.draw(sprite, time, song.getLevel(), select, ba.x, ba.y);
@@ -848,7 +846,7 @@ public class BarRenderer {
 			}
 			Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
 			
-			List<Bar> bars = new ArrayList<Bar>();
+			Array<Bar> bars = new Array<Bar>();
 			if (select.main.getPlayerConfig().isRandomSelect()) {
 				SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
 						songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
@@ -859,9 +857,9 @@ public class BarRenderer {
 				}
 			}
 
-			bars.addAll(Arrays.asList(newcurrentsongs));
+			bars.addAll(newcurrentsongs);
 
-			currentsongs = bars.toArray(new Bar[] {});
+			currentsongs = bars.toArray(Bar.class);
 			bartextupdate = true;
 
 			selectedindex = 0;
@@ -880,7 +878,7 @@ public class BarRenderer {
 					}
 				} else {
 					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i].getTitle().equals(prevbar.getTitle())) {
+						if (currentsongs[i].getClass() == prevbar.getClass() && currentsongs[i].getTitle().equals(prevbar.getTitle())) {
 							selectedindex = i;
 							break;
 						}
