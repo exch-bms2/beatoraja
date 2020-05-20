@@ -15,7 +15,7 @@ import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
-import bms.player.beatoraja.IRScoreData.SongTrophy;
+import bms.player.beatoraja.ScoreData.SongTrophy;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
 import bms.player.beatoraja.song.SongData;
@@ -108,7 +108,7 @@ public class PlayDataAccessor {
 	 * @param score スコアデータ
 	 * @param time プレイ時間
 	 */
-	public void updatePlayerData(IRScoreData score, long time) {
+	public void updatePlayerData(ScoreData score, long time) {
 		PlayerData pd = readPlayerData();
 		pd.setEpg(pd.getEpg() + score.getEpg());
 		pd.setLpg(pd.getLpg() + score.getLpg());
@@ -187,15 +187,15 @@ public class PlayDataAccessor {
 	 * @param updateScore
 	 *            プレイ回数のみ反映する場合はfalse
 	 */
-	public void writeScoreDara(IRScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
+	public void writeScoreDara(ScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
 		String hash = model.getSHA256();
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(hash, model.containsUndefinedLongNote() ? lnmode : 0);
+		ScoreData score = scoredb.getScoreData(hash, model.containsUndefinedLongNote() ? lnmode : 0);
 
 		if (score == null) {
-			score = new IRScoreData();
+			score = new ScoreData();
 			score.setMode(model.containsUndefinedLongNote() ? lnmode : 0);
 		}
 		score.setSha256(hash);
@@ -329,7 +329,7 @@ public class PlayDataAccessor {
 		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
 
-	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option,
+	public void writeScoreDara(ScoreData newscore, BMSModel[] models, int lnmode, int option,
 			CourseData.CourseDataConstraint[] constraint, boolean updateScore) {
 		String hash = "";
 		int totalnotes = 0;
@@ -404,7 +404,7 @@ public class PlayDataAccessor {
 
 	}
 
-	private String getScoreHash(IRScoreData score) {
+	private String getScoreHash(ScoreData score) {
 		byte[] cipher_byte;
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -427,7 +427,7 @@ public class PlayDataAccessor {
 		return null;
 	}
 
-	private ScoreLog updateScore(IRScoreData score, IRScoreData newscore, String hash, boolean updateScore) {
+	private ScoreLog updateScore(ScoreData score, ScoreData newscore, String hash, boolean updateScore) {
 		ScoreLog log = new ScoreLog();
 		
 		final int clear = score.getClear();

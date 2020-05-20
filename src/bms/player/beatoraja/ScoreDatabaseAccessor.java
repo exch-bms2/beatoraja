@@ -181,18 +181,18 @@ public class ScoreDatabaseAccessor {
 
 	}
 
-	public void setScoreData(IRScoreData score) {
-		setScoreData(new IRScoreData[] { score });
+	public void setScoreData(ScoreData score) {
+		setScoreData(new ScoreData[] { score });
 	}
 
-	public void setScoreData(IRScoreData[] scores) {
+	public void setScoreData(ScoreData[] scores) {
 		try (Connection con = qr.getDataSource().getConnection()) {
 			con.setAutoCommit(false);
 			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
 					+ "minbp, playcount, clearcount, trophy, ghost, scorehash, option, random, date, state)"
 					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-			for (IRScoreData score : scores) {
+			for (ScoreData score : scores) {
 				qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(),
 						score.getLpg(), score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(),
 						score.getLbd(), score.getEpr(), score.getLpr(), score.getEms(), score.getLms(),
