@@ -99,7 +99,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty,"
 						+ "maxbpm, minbpm, length, mode, judge, feature, content,"
 						+ "date, favorite, notes, adddate, charthash "
-						+ "FROM old_song GROUP BY path HAVING MAX(date)");
+						+ "FROM old_song GROUP BY path HAVING MAX(adddate)");
 				qr.update("DROP TABLE old_song");
 			}
 
