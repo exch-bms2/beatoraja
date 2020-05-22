@@ -20,6 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Luaスキンローダー
+ * 
+ * @author excln
+ */
 public class LuaSkinLoader extends JSONSkinLoader {
 
 	public LuaSkinLoader() {
@@ -55,7 +60,7 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		SkinHeader header = loadHeader(p);
 		try {
 			initFileMap(header, property);
-			lua.exportSkinProperty(property, (String path) -> {
+			lua.exportSkinProperty(header, property, (String path) -> {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
 			LuaValue value = lua.execFile(p);

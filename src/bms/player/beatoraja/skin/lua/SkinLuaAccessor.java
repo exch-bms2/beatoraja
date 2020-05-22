@@ -9,9 +9,17 @@ import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinProperty;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.SkinConfig;
 
+/**
+ * Luaスキンからデータを参照するためのクラス
+ * 
+ * @author excln
+ */
 public class SkinLuaAccessor {
 	
 	private final Globals globals;
@@ -304,16 +312,18 @@ public class SkinLuaAccessor {
 	 * スキン設定をエクスポートする。
 	 * isGlobal にかかわらず、グローバル変数 skin_config にデータがセットされた状態にする。
 	 * Lua スキンは skin_config が nil のときヘッダのみ読み込めるようにする。
+	 * 
+	 * @param header スキンヘッダデータ
 	 * @param property Property (スキン設定データ)
 	 * @param filePathGetter スキン設定を元にファイルパスを解決する関数
 	 */
-	public void exportSkinProperty(SkinConfig.Property property, Function<String, String> filePathGetter) {
+	public void exportSkinProperty(SkinHeader header, SkinConfig.Property property, Function<String, String> filePathGetter) {
 		LuaTable table = new LuaTable();
-		exportSkinPropertyToTable(property, filePathGetter, table);
+		exportSkinPropertyToTable(header, property, filePathGetter, table);
 		globals.set("skin_config", table);
 	}
 
-	private void exportSkinPropertyToTable(SkinConfig.Property property, Function<String, String> filePathGetter, LuaTable table) {
+	private void exportSkinPropertyToTable(SkinHeader header, SkinConfig.Property property, Function<String, String> filePathGetter, LuaTable table) {
 		LuaTable file_path = new LuaTable();
 		for (SkinConfig.FilePath file : property.getFile()) {
 			file_path.set(file.name, file.path);
@@ -329,8 +339,17 @@ public class SkinLuaAccessor {
 		LuaTable options = new LuaTable();
 		LuaTable enabled_options = new LuaTable();
 		for (SkinConfig.Option op : property.getOption()){
-			options.set(op.name, op.value);
-			enabled_options.insert(enabled_options.length() + 1, LuaInteger.valueOf(op.value));
+			int opvalue = op.value;
+			if(opvalue == SkinProperty.OPTION_RANDOM_VALUE) {
+				for (CustomOption option : header.getCustomOptions()) {
+					if(op.name.equals(option.name)) {
+						opvalue = option.option[(int) (Math.random() * option.option.length)];
+						header.setRandomSelectedOptions(option.name, opvalue);
+					}
+				}
+			}
+			options.set(op.name, opvalue);
+			enabled_options.insert(enabled_options.length() + 1, LuaInteger.valueOf(opvalue));				
 		}
 		table.set("option", options);
 		table.set("enabled_options", enabled_options);

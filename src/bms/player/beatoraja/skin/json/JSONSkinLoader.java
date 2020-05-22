@@ -200,7 +200,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 			serializer.setSerializers(json, getEnabledOptions(header, property), p);
 			initFileMap(header, property);
-			lua.exportSkinProperty(property, (String path) -> {
+			lua.exportSkinProperty(header, property, (String path) -> {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
 
