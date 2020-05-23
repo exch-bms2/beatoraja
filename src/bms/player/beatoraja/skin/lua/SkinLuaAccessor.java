@@ -342,7 +342,7 @@ public class SkinLuaAccessor {
 			int opvalue = op.value;
 			if(opvalue == SkinProperty.OPTION_RANDOM_VALUE) {
 				for (CustomOption option : header.getCustomOptions()) {
-					if(op.name.equals(option.name)) {
+					if(option.option.length > 0 && op.name.equals(option.name)) {
 						opvalue = option.option[(int) (Math.random() * option.option.length)];
 						header.setRandomSelectedOptions(option.name, opvalue);
 					}
