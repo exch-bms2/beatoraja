@@ -372,7 +372,7 @@ public class MusicSelector extends MainState {
 		resource.setCourseData(current instanceof GradeBar ? ((GradeBar) current).getCourseData() : null);
 
 		// preview music
-		if (current instanceof SongBar) {
+		if (current instanceof SongBar && main.getConfig().isPlayPreview()) {
 			final SongData song = main.getPlayerResource().getSongdata();
 			if (song != preview.getSongData() && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
 					&& play == null) {
