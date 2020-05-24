@@ -62,10 +62,17 @@ public class SkinTextFont extends SkinText {
     public void prepareFont(String text) {
         if(font != null) {
             font.dispose();                	
+            font = null;
         }
-        preparedFonts = parameter.characters = text;        	
-        font = generator.generateFont(parameter);
-        layout = new GlyphLayout(font, "");
+        
+        try {
+            parameter.characters = text;        	
+            font = generator.generateFont(parameter);
+            layout = new GlyphLayout(font, "");
+            preparedFonts = text;
+        } catch (GdxRuntimeException e) {
+    		Logger.getGlobal().warning("Font準備失敗 : " + text + " - " + e.getMessage());
+    	}
     }    
 
 	@Override
@@ -74,11 +81,17 @@ public class SkinTextFont extends SkinText {
         	return;
         }
         if(font != null) {
-            font.dispose();                	
+            font.dispose();
+            font = null;
         }
-        parameter.characters = text;        	
-        font = generator.generateFont(parameter);
-        layout = new GlyphLayout(font, "");
+        
+        try {
+            parameter.characters = text;
+            font = generator.generateFont(parameter);
+            layout = new GlyphLayout(font, "");        	
+    	} catch (GdxRuntimeException e) {
+    		Logger.getGlobal().warning("Font準備失敗 : " + text + " - " + e.getMessage());
+    	}
 	}
 	
 	@Override
