@@ -256,7 +256,7 @@ public class BarRenderer {
 		}
 
 		// generate folderbars
-		if(main.getConfig().generateFolderBars()) {
+		if(main.getConfig().isGenerateFolderBars()) {
 			Array<FolderBar> bars = createDirectoryBars(main);
 			for (FolderBar bar: bars) {
 				l.add(bar);
