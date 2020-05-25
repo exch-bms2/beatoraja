@@ -194,6 +194,8 @@ public class Config implements Validatable {
 
 	private boolean updatesong = false;
 
+	private boolean generateFolderBars = true;
+
 	private int autosavereplay[] = {0,0,0,0};
 
 	private int skinPixmapGen = 4;
@@ -509,6 +511,10 @@ public class Config implements Validatable {
 	public boolean isUpdatesong() {
 		return updatesong;
 	}
+
+	public void setGenerateFolderBars(boolean flag) { this.generateFolderBars = flag; }
+
+	public boolean isGenerateFolderBars() { return generateFolderBars; }
 
 	public void setUpdatesong(boolean updatesong) {
 		this.updatesong = updatesong;
