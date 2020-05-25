@@ -5,6 +5,8 @@ import java.nio.file.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import java.io.File;
+
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
@@ -253,6 +255,14 @@ public class BarRenderer {
 			e.printStackTrace();
 		}
 
+		// generate folderbars
+		if(main.getConfig().generateFolderBars()) {
+			Array<FolderBar> bars = createDirectoryBars(main);
+			for (FolderBar bar: bars) {
+				l.add(bar);
+			}
+		}
+
 		commands = l.toArray(Bar.class);
 
 		for(int i = 0;i < barlength;i++) {
@@ -270,6 +280,27 @@ public class BarRenderer {
 		} else {
 			return new CommandBar(select, folder.getName(), folder.getSql(), folder.isShowall());
 		}
+	}
+
+	private Array<FolderBar> createDirectoryBars(MainController main) {
+		Array<FolderBar> bars = new Array<FolderBar>();
+
+		for(String _path: main.getConfig().getBmsroot()) {
+			File path = new File(_path);
+			FolderData folder = new FolderData();
+
+			folder.setPath(_path);
+			folder.setTitle(path.getName().toString());
+			folder.setSubtitle(path.getName().toString());
+
+			String crc = SongUtils.crc32(_path, new String[0], new File(".").getAbsolutePath());
+
+			FolderBar bar = new FolderBar(select, folder, crc);
+			if (bar.getChildren().length > 0) {
+				bars.add(bar);
+			}
+		}
+		return bars;
 	}
 
 	public static class CommandFolder {
