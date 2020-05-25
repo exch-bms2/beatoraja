@@ -32,7 +32,7 @@ public class MusicSelectConfigurationView implements Initializable {
 	@FXML
 	private NumericSpinner<Integer> maxsearchbar;
 	@FXML
-	private CheckBox generateFolderBars;
+	private CheckBox genfolderbars;
 
     private Config config;
     private PlayerConfig player;
@@ -46,7 +46,7 @@ public class MusicSelectConfigurationView implements Initializable {
 		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
 
-		generateFolderBars.setSelected(config.isGenerateFolderBars());
+		genfolderbars.setSelected(config.isGenerateFolderBars());
 
         useSongInfo.setSelected(config.isUseSongInfo());
 		folderlamp.setSelected(config.isFolderlamp());
@@ -62,7 +62,7 @@ public class MusicSelectConfigurationView implements Initializable {
         config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());
         config.setShowNoSongExistingBar(shownoexistingbar.isSelected());
-        config.setGenerateFolderBars(generateFolderBars.isSelected());
+        config.setGenerateFolderBars(genfolderbars.isSelected());
         
         config.setMaxSearchBarCount(maxsearchbar.getValue());
 	}
