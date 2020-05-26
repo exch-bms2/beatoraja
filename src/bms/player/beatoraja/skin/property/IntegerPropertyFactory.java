@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfiguration;
+import bms.player.beatoraja.ir.IRScoreData;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.AbstractResult;
@@ -144,6 +145,41 @@ public class IntegerPropertyFactory {
 						: resource.getAudioDriver().getProgress()) * 100);
 			};
 		}
+		if (optionid >= NUMBER_RANKING1_EXSCORE && optionid <= NUMBER_RANKING10_EXSCORE) {
+			final int index = optionid - NUMBER_RANKING1_EXSCORE;
+			result = (state) -> {
+				RankingData irc = null;
+				if (state instanceof MusicSelector) {
+					irc = ((MusicSelector) state).getCurrentRankingData();
+				}
+				if (state instanceof AbstractResult) {
+					irc = ((AbstractResult) state).getRankingData();
+				}
+				IRScoreData[] scores = irc != null ? irc.getScores() : null;
+				if(scores != null && scores.length > index) {
+					return scores[index].getExscore();							
+				}
+				return Integer.MIN_VALUE;
+			};
+		}
+		if (optionid >= NUMBER_RANKING1_CLEAR && optionid <= NUMBER_RANKING10_CLEAR) {
+			final int index = optionid - NUMBER_RANKING1_CLEAR;
+			result = (state) -> {
+				RankingData irc = null;
+				if (state instanceof MusicSelector) {
+					irc = ((MusicSelector) state).getCurrentRankingData();
+				}
+				if (state instanceof AbstractResult) {
+					irc = ((AbstractResult) state).getRankingData();
+				}
+				IRScoreData[] scores = irc != null ? irc.getScores() : null;
+				if(scores != null && scores.length > index) {
+					return scores[index].clear.id;
+				}
+				return Integer.MIN_VALUE;
+			};
+		}
+
 
 		if (optionid >= VALUE_JUDGE_1P_DURATION && optionid <= VALUE_JUDGE_3P_DURATION) {
 			final int player = optionid - VALUE_JUDGE_1P_DURATION;
@@ -156,6 +192,7 @@ public class IntegerPropertyFactory {
 				return 0;
 			};
 		}
+		
 
 		if (result == null) {
 			result = getIntegerProperty0(optionid);

@@ -211,6 +211,10 @@ public abstract class AbstractResult extends MainState {
 		return state;
 	}
 	
+	public RankingData getRankingData() {
+		return ranking;
+	}
+	
 	public int getIRRank() {
 		return ranking != null ? ranking.getRank() : 0;
 	}

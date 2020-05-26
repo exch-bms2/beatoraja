@@ -8,7 +8,10 @@ import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
+import bms.player.beatoraja.ir.IRScoreData;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
@@ -45,6 +48,23 @@ public class StringPropertyFactory {
 					}
 					return "";
 				}
+			};
+		}
+		if (optionid >= STRING_RANKING1_NAME && optionid <= STRING_RANKING10_NAME) {
+			final int index = optionid - STRING_RANKING1_NAME;
+			result = (state) -> {
+				RankingData irc = null;
+				if (state instanceof MusicSelector) {
+					irc = ((MusicSelector) state).getCurrentRankingData();
+				}
+				if (state instanceof AbstractResult) {
+					irc = ((AbstractResult) state).getRankingData();
+				}
+				IRScoreData[] scores = irc != null ? irc.getScores() : null;
+				if(scores != null && scores.length > index) {
+					return scores[index].player.length() > 0 ? scores[index].player : "YOU";							
+				}
+				return "";
 			};
 		}
 		if (SkinPropertyMapper.isSkinCustomizeCategory(optionid)) {
