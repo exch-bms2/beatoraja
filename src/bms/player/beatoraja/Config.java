@@ -127,6 +127,10 @@ public class Config implements Validatable {
 	 */
 	private int scrolldurationhigh = 50;
 	/**
+	 * プレビュー音源を再生するかどうか
+	 */
+	private boolean playPreview = true;
+	/**
 	 * プレビュー音源をループするかどうか
 	 */
 	private boolean loopPreview = true;
@@ -388,6 +392,14 @@ public class Config implements Validatable {
 	}
 	public void setScrollDutationHigh(int scrolldurationhigh){
 		this.scrolldurationhigh = scrolldurationhigh;
+	}
+
+	public boolean isPlayPreview() {
+		return playPreview;
+	}
+
+	public void setPlayPreview(boolean playPreview) {
+		this.playPreview = playPreview;
 	}
 
 	public boolean isLoopPreview() {
