@@ -14,16 +14,26 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * フォルダのランプ分布、ランク分布に使用される棒グラフ
+ * 
+ * @author exch
  */
 public class SkinDistributionGraph extends SkinObject {
 
-    // TODO 分布計算はフォルダ選択時にのみ行う
-
-    private SkinSource[] lampimage;
-
-    private int type;
-
+	/**
+	 * グラフの各イメージソース
+	 */
+    private final SkinSource[] lampimage;
+    /**
+     * グラフタイプ。0:クリアランプ、1:スコアランク
+     */
+    private final int type;
+    /**
+     * 現在のグラフイメージ
+     */
     private TextureRegion[] currentImage;
+    /**
+     * 対象のDirectoryBar
+     */
     private DirectoryBar currentBar;
 
     private static final String[] LAMP = { "ff404040", "ff000080", "ff800080", "ffff00ff", "ff40ff40", "ff00c0f0", "ffffffff",
@@ -50,6 +60,7 @@ public class SkinDistributionGraph extends SkinObject {
             for(int i = 0;i < LAMP.length;i++) {
             	result[i] = new TextureRegion[]{new TextureRegion(lampt,i,0,1,1)};
             }
+            lampp.dispose();
             return result;
         } else {
             Pixmap rankp = new Pixmap(28,1, Pixmap.Format.RGBA8888);
@@ -61,6 +72,7 @@ public class SkinDistributionGraph extends SkinObject {
             for(int i = 0;i < RANK.length;i++) {
             	result[i] = new TextureRegion[]{new TextureRegion(rankt,i,0,1,1)};
             }
+            rankp.dispose();
             return result;
         }
     }
@@ -118,6 +130,7 @@ public class SkinDistributionGraph extends SkinObject {
     	if(current == null) {
     		return;
     	}
+        // TODO 分布計算はフォルダ選択時にのみ行う場合、同一DirectoryBarでbackgroundでのLAMP更新があった場合は？
         int[] lamps = current.getLamps();
         int[] ranks = current.getRanks();
         int count = 0;
