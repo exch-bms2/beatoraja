@@ -514,6 +514,11 @@ public enum MusicSelectCommand {
 				selector.main.updateSong(((FolderBar) selected).getFolderData().getPath());
 			} else if(selected instanceof TableBar) {
 				selector.main.updateTable((TableBar) selected);
+			} else if(selected instanceof SongBar) {
+				final String path = ((SongBar) selected).getSongData().getPath();
+				if(path != null) {
+					selector.main.updateSong(Paths.get(path).getParent().toString());
+				}
 			}
 		}
     },
