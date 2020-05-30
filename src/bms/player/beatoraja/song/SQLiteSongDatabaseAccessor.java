@@ -32,7 +32,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	private SQLiteDataSource ds;
 
 	private final Path root;
-	private String[] bmsroot;
 
 	private final ResultSetHandler<List<SongData>> songhandler = new BeanListHandler<SongData>(SongData.class);
 	private final ResultSetHandler<List<FolderData>> folderhandler = new BeanListHandler<FolderData>(FolderData.class);
@@ -51,7 +50,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		ds.setUrl("jdbc:sqlite:" + filepath);
 		qr = new QueryRunner(ds);
 		root = Paths.get(".");
-		this.bmsroot = bmsroot;
 		createTable();
 	}
 	
@@ -275,8 +273,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 * @param path
 	 *            LR2のルートパス
 	 */
-	public void updateSongDatas(String path, boolean updateAll, SongInformationAccessor info) {
-		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll, info);
+	public void updateSongDatas(String path, String[] bmsroot, boolean updateAll, SongInformationAccessor info) {
+		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll, bmsroot, info);
 		Path[] paths = null;
 		if (path == null) {
 			paths = new Path[bmsroot.length];
@@ -297,11 +295,13 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	class SongDatabaseUpdater {
 
 		private final boolean updateAll;
+		private final String[] bmsroot;
 
 		private SongInformationAccessor info;
 
-		public SongDatabaseUpdater(boolean updateAll, SongInformationAccessor info) {
+		public SongDatabaseUpdater(boolean updateAll, String[] bmsroot, SongInformationAccessor info) {
 			this.updateAll = updateAll;
+			this.bmsroot = bmsroot;
 			this.info = info;
 		}
 
@@ -348,7 +348,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				
 				Arrays.stream(paths).parallel().forEach((p) -> {
 					try {
-						BMSFolder folder = new BMSFolder(p);
+						BMSFolder folder = new BMSFolder(p, bmsroot);
 						folder.processDirectory(property);
 					} catch (IOException | SQLException e) {
 						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
@@ -378,9 +378,11 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private final List<Path> bmsfiles = new ArrayList<Path>();
 		private final List<BMSFolder> dirs = new ArrayList<BMSFolder>();
 		private String previewpath = null;
-		
-		public BMSFolder(Path path) {
+		private final String[] bmsroot;
+
+		public BMSFolder(Path path, String[] bmsroot) {
 			this.path = path;
+			this.bmsroot = bmsroot;
 		}
 		
 		private void processDirectory(SongDatabaseUpdaterProperty property)
@@ -392,7 +394,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
 				for (Path p : paths) {
 					if(Files.isDirectory(p)) {
-						dirs.add(new BMSFolder(p));
+						dirs.add(new BMSFolder(p, bmsroot));
 					} else {
 						final String s = p.getFileName().toString().toLowerCase();
 						if (!txt && s.endsWith(".txt")) {

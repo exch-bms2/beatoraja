@@ -49,7 +49,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.7.4";
+	public static final String VERSION = "beatoraja 0.7.9";
 
 	public static final boolean debug = false;
 
@@ -432,6 +432,15 @@ public class MainController extends ApplicationAdapter {
 				message.setLength(0);
 				systemfont.draw(sprite, message.append("Max Sprite In Batch ").append(sprite.maxSpritesInBatch), 10,
 						config.getResolution().height - 98);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Skin Pixmap Resource Size ").append(SkinLoader.getResource().size()), 10,
+						config.getResolution().height - 122);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Stagefile Pixmap Resource Size ").append(selector.getStagefileResource().size()), 10,
+						config.getResolution().height - 146);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), 10,
+						config.getResolution().height - 170);
 			}
 
 			sprite.end();
@@ -762,7 +771,7 @@ public class MainController extends ApplicationAdapter {
 
 		public void run() {
 			Message message = messageRenderer.addMessage(this.message, Color.CYAN, 1);
-			getSongDatabase().updateSongDatas(path, false, getInfoDatabase());
+			getSongDatabase().updateSongDatas(path, config.getBmsroot(), false, getInfoDatabase());
 			message.stop();
 		}
 	}

@@ -619,15 +619,18 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void loadAllBMS() {
+		commit();
 		loadBMS(null, true);
 	}
 
     @FXML
 	public void loadDiffBMS() {
+		commit();
 		loadBMS(null, false);
 	}
 
 	public void loadBMSPath(String updatepath){
+		commit();
     	loadBMS(updatepath, false);
 	}
 
@@ -644,7 +647,7 @@ public class PlayConfigurationView implements Initializable {
 			SongInformationAccessor infodb = config.isUseSongInfo() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
-			songdb.updateSongDatas(updatepath, updateAll, infodb);
+			songdb.updateSongDatas(updatepath, config.getBmsroot(), updateAll, infodb);
 			Logger.getGlobal().info("song.db更新完了");
 			songUpdated = true;
 		} catch (ClassNotFoundException e) {
