@@ -69,7 +69,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
 						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
 						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
-						+ "[minbpm] INTEGER," + "[length] INTEGER" + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
+						+ "[minbpm] INTEGER," + "[length] INTEGER, " + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
 						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
 						+ "[adddate] INTEGER," + "[charthash] TEXT," + "PRIMARY KEY(path));");
 			}
@@ -274,6 +274,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 *            LR2のルートパス
 	 */
 	public void updateSongDatas(String path, String[] bmsroot, boolean updateAll, SongInformationAccessor info) {
+		if(bmsroot == null || bmsroot.length == 0) {
+			Logger.getGlobal().warning("楽曲ルートフォルダが登録されていません");
+			return;
+		}
 		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll, bmsroot, info);
 		Path[] paths = null;
 		if (path == null) {
