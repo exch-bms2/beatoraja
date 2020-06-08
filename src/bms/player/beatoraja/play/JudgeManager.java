@@ -182,6 +182,9 @@ public class JudgeManager {
 
 		algorithm = JudgeAlgorithm.valueOf(resource.getPlayerConfig().getPlayConfig(orgmode).getPlayconfig().getJudgetype());
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
+		score.setJudgeAlgorithm(algorithm);
+		score.setRule(BMSPlayerRule.getBMSPlayerRule(orgmode));
+		
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;

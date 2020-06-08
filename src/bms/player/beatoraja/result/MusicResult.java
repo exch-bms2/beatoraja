@@ -385,6 +385,8 @@ public class MusicResult extends AbstractResult {
 				cscore.setNotes(notes);
 				cscore.setDeviceType(newscore.getDeviceType());
 				cscore.setOption(newscore.getOption());
+				cscore.setJudgeAlgorithm(newscore.getJudgeAlgorithm());
+				cscore.setRule(newscore.getRule());
 				resource.setCourseScoreData(cscore);
 			}
 			cscore.setPassnotes(cscore.getPassnotes() + newscore.getPassnotes());
