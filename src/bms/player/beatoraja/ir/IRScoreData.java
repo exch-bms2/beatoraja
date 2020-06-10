@@ -18,6 +18,10 @@ public class IRScoreData {
 	 */
 	public final String sha256;
 	/**
+	 * LN TYPE(0: LN, 1: CN, 2: HCN)
+	 */
+	public final int lntype;
+	/**
 	 * プレイヤー名。自身のスコアの場合は空白
 	 */
 	public final String player;
@@ -91,13 +95,18 @@ public class IRScoreData {
 	 * 入力デバイス
 	 */
 	public final BMSPlayerInputDevice.Type deviceType;
-	
+	/**
+	 * 判定アルゴリズム
+	 */
 	public final JudgeAlgorithm judgeAlgorithm;
-	
+	/**
+	 * ルール
+	 */
 	public final BMSPlayerRule rule;
 	
 	public IRScoreData(ScoreData score) {
 		this.sha256 = score.getSha256();
+		this.lntype = score.getMode();
 		this.player = score.getPlayer();
 		this.clear = ClearType.getClearTypeByID(score.getClear());
 		this.date = score.getDate();

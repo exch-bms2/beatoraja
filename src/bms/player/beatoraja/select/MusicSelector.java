@@ -255,6 +255,7 @@ public class MusicSelector extends MainState {
 			final ScoreData score = new ScoreData();
 			final bms.player.beatoraja.ir.IRScoreData irscore = irscores[i];
 			score.setSha256(irscore.sha256);
+			score.setMode(irscore.lntype);
 			score.setPlayer(irscore.player);
 			score.setClear(irscore.clear.id); 
 			score.setDate(irscore.date);
