@@ -25,8 +25,7 @@ import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
-import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.ir.RankingData;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
@@ -138,7 +137,7 @@ public class MusicSelector extends MainState {
 			if(main.getIRStatus()[0].config.isImportscore()) {
 				main.getIRStatus()[0].config.setImportscore(false);
 				try {
-					IRResponse<bms.player.beatoraja.ir.IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(null, null);
+					IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(main.getIRStatus()[0].player, null);
 					if(scores.isSucceeded()) {
 						ScoreDataImporter scoreimport = new ScoreDataImporter(new ScoreDatabaseAccessor(main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + File.separatorChar + "score.db"));
 						scoreimport.importScores(convert(scores.getData()), main.getIRStatus()[0].config.getIrname());
@@ -184,7 +183,7 @@ public class MusicSelector extends MainState {
 							new Thread(() -> {
 								scoredb.createTable();
 								scoredb.setInformation(rival);
-								IRResponse<bms.player.beatoraja.ir.IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(rival.getId(), null);
+								IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(irplayer, null);
 								if(scores.isSucceeded()) {
 									scoredb.setScoreData(convert(scores.getData()));
 									Logger.getGlobal().info("IRからのライバルスコア取得完了 : " + rival.getName());
@@ -249,7 +248,7 @@ public class MusicSelector extends MainState {
 		}
 	}
 	
-	private ScoreData[] convert(bms.player.beatoraja.ir.IRScoreData[] irscores) {
+	private ScoreData[] convert(IRScoreData[] irscores) {
 		ScoreData[] scores = new ScoreData[irscores.length];
 		for(int i = 0;i < scores.length;i++) {
 			final ScoreData score = new ScoreData();

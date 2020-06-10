@@ -18,7 +18,7 @@ public interface IRConnection {
 	 *            ユーザー名
 	 * @return
 	 */
-	public IRResponse<Object> register(String id, String pass, String name);
+	public IRResponse<IRPlayerData> register(String id, String pass, String name);
 
 	/**
 	 * IRにログインする。起動時に呼び出される
@@ -28,7 +28,7 @@ public interface IRConnection {
 	 * @param pass
 	 *            パスワード
 	 */
-	public IRResponse<Object> login(String id, String pass);
+	public IRResponse<IRPlayerData> login(String id, String pass);
 
 	/**
 	 * ライバルデータを収録する
@@ -48,14 +48,14 @@ public interface IRConnection {
 	 * スコアデータを取得する
 	 * 
 	 * @param id
-	 *            ユーザーID。譜面に登録されているスコアデータを全取得する場合はnullを入れる
+	 *            ユーザー。譜面に登録されているスコアデータを全取得する場合はnullを入れる
 	 * @param model
 	 *            スコアデータを取得する譜面。ユーザーIDのスコアデータを全取得する場合はnullを入れる
 	 * @return
 	 */
-	public IRResponse<IRScoreData[]> getPlayData(String id, IRChartData model);
+	public IRResponse<IRScoreData[]> getPlayData(IRPlayerData player, IRChartData chart);
 
-	public IRResponse<IRScoreData[]> getCoursePlayData(String id, IRCourseData course);
+	public IRResponse<IRScoreData[]> getCoursePlayData(IRPlayerData player, IRCourseData course);
 
 	/**
 	 * スコアデータを送信する
@@ -106,6 +106,6 @@ public interface IRConnection {
 	 *            ユーザーID
 	 * @return
 	 */
-	public String getPlayerURL(String id);
+	public String getPlayerURL(IRPlayerData player);
 
 }

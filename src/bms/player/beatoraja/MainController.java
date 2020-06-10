@@ -163,22 +163,19 @@ public class MainController extends ApplicationAdapter {
 
 		Array<IRStatus> irarray = new Array<IRStatus>();
 		for(IRConfig irconfig : player.getIrconfig()) {
-			IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
+			final IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
 			if(ir != null) {
 				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
-					ir = null;
 				} else {
-					IRResponse response = ir.login(irconfig.getUserid(), irconfig.getPassword());
-					if(!response.isSucceeded()) {
+					IRResponse<IRPlayerData> response = ir.login(irconfig.getUserid(), irconfig.getPassword());
+					if(response.isSucceeded()) {
+						irarray.add(new IRStatus(irconfig, ir, response.getData()));
+					} else {
 						Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
-						ir = null;
 					}
 				}
 			}
 			
-			if(ir != null) {
-				irarray.add(new IRStatus(irconfig, ir));
-			}
 		}
 		ir = irarray.toArray(IRStatus.class);
 		
@@ -890,10 +887,12 @@ public class MainController extends ApplicationAdapter {
 		
 		public final IRConfig config;
 		public final IRConnection connection;
+		public final IRPlayerData player;
 		
-		public IRStatus(IRConfig config, IRConnection connection) {
+		public IRStatus(IRConfig config, IRConnection connection, IRPlayerData player) {
 			this.config = config;
 			this.connection = connection;
+			this.player = player;
 		}
 	}
 }
