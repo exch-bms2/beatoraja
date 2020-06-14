@@ -68,6 +68,9 @@ public class SongInformationAccessor {
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'information' AND sql LIKE '%speedchange%'", new MapListHandler()).size() == 0) {
 				qr.update("ALTER TABLE information ADD COLUMN speedchange [TEXT]");
 			}
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'information' AND sql LIKE '%lanenotes%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE information ADD COLUMN lanenotes [TEXT]");
+			}
 
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
@@ -143,9 +146,9 @@ public class SongInformationAccessor {
 		SongInformation info = new SongInformation(model);
 		try {
 			qr.update(conn,
-					"INSERT OR REPLACE INTO information (sha256, n, ln, s, ls, total, density, peakdensity, enddensity, mainbpm, distribution, speedchange)"
-							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?);",
-					model.getSHA256(), info.getN(), info.getLn(), info.getS(), info.getLs(), info.getTotal(), info.getDensity(), info.getPeakdensity(), info.getEnddensity(), info.getMainbpm(), info.getDistribution(), info.getSpeedchange());
+					"INSERT OR REPLACE INTO information (sha256, n, ln, s, ls, total, density, peakdensity, enddensity, mainbpm, distribution, speedchange, lanenotes)"
+							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);",
+					model.getSHA256(), info.getN(), info.getLn(), info.getS(), info.getLs(), info.getTotal(), info.getDensity(), info.getPeakdensity(), info.getEnddensity(), info.getMainbpm(), info.getDistribution(), info.getSpeedchange(), info.getLanenotes());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
