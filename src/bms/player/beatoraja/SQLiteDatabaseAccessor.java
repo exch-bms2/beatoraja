@@ -1,5 +1,10 @@
 package bms.player.beatoraja;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +76,32 @@ public abstract class SQLiteDatabaseAccessor {
 			qr.update("ALTER TABLE " + tablename + " ADD COLUMN [" + add.name() + "] " + add.type()
 					+ (add.notnull() ? " NOT NULL" : ""));
 		}
+	}
+
+	protected void insertOrReplace(QueryRunner qr, Connection con, String tablename, TableColumn[] columns,
+			Object entity) throws IntrospectionException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, SQLException {
+		StringBuilder sql = new StringBuilder("INSERT OR REPLACE INTO " + tablename + " (");
+		boolean comma = false;
+		for (TableColumn column : columns) {
+			sql.append(comma ? "," : "").append(column.name());
+			comma = true;
+		}
+		sql.append(") VALUES(");
+
+		Object[] params = new Object[columns.length];
+		comma = false;
+		for (int i = 0; i < columns.length; i++) {
+			sql.append(comma ? ",?" : "?");
+			comma = true;
+
+			PropertyDescriptor pd = new PropertyDescriptor(columns[i].name(), entity.getClass());
+			Method getterMethod = pd.getReadMethod();
+			params[i] = getterMethod.invoke(entity);
+		}
+		sql.append(");");
+
+		qr.update(con, sql.toString(), params);
 	}
 
 	public interface TableColumn {
