@@ -9,9 +9,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 /**
@@ -21,70 +22,88 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
  */
 public abstract class SQLiteDatabaseAccessor {
 
+	private final ResultSetHandler<List<Column>> columnhandler = new BeanListHandler<Column>(Column.class);
+
+	private final Table[] tables;
+	
+	public SQLiteDatabaseAccessor(Table... tables) {
+		this.tables = tables;
+	}
+
 	/**
 	 * 指定のカラムを持つテーブルを作成する。 テーブルやカラムが存在しない場合、作成する。
 	 * 
 	 * @param qr
 	 *            QueryRunner
-	 * @param tablename
-	 *            テーブル名
-	 * @param columns
-	 *            テーブルカラム
 	 * @throws SQLException
 	 */
-	protected void createTable(QueryRunner qr, String tablename, TableColumn[] columns) throws SQLException {
-		List<TableColumn> pk = new ArrayList<TableColumn>();
-
-		if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), tablename)
-				.size() == 0) {
-			StringBuilder sql = new StringBuilder("CREATE TABLE [" + tablename + "] (");
-			boolean comma = false;
-			for (TableColumn column : columns) {
-				sql.append(comma ? "," : "").append('[').append(column.name()).append("] ").append(column.type())
-						.append(column.notnull() ? " NOT NULL" : "");
-				comma = true;
-				if (column.pk()) {
-					pk.add(column);
-				}
-			}
-
-			if (pk.size() > 0) {
-				sql.append(",PRIMARY KEY(");
-				comma = false;
-				for (TableColumn column : pk) {
-					sql.append(comma ? "," : "").append(column.name());
+	public void validate(QueryRunner qr) throws SQLException {
+		
+		for(Table table : tables) {
+			List<Column> pk = new ArrayList<Column>();
+			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), table.getName())
+					.size() == 0) {
+				StringBuilder sql = new StringBuilder("CREATE TABLE [" + table.getName() + "] (");
+				boolean comma = false;
+				for (Column column : table.getColumn()) {
+					sql.append(comma ? "," : "").append('[').append(column.getName()).append("] ").append(column.getType())
+							.append(column.getNotnull() == 1 ? " NOT NULL" : "");
 					comma = true;
+					if (column.getPk() == 1) {
+						pk.add(column);
+					}
 				}
-				sql.append(")");
+
+				if (pk.size() > 0) {
+					sql.append(",PRIMARY KEY(");
+					comma = false;
+					for (Column column : pk) {
+						sql.append(comma ? "," : "").append(column.getName());
+						comma = true;
+					}
+					sql.append(")");
+				}
+				sql.append(");");
+				qr.update(sql.toString());
 			}
-			sql.append(");");
-			qr.update(sql.toString());
+
+			List<Column> adds = new ArrayList<Column>(Arrays.asList(table.getColumn()));
+			for (Column songcolumn : qr.query("PRAGMA table_info('" + table.getName() + "');",
+					columnhandler)) {
+				final String name = (String) songcolumn.getName();
+				for (int i = 0; i < adds.size(); i++) {
+					if (adds.get(i).getName().equals(name)) {
+						adds.remove(i);
+						break;
+					}
+				}
+			}
+			for (Column add : adds) {
+				qr.update("ALTER TABLE " + table.getName() + " ADD COLUMN [" + add.getName() + "] " + add.getType()
+						+ (add.getNotnull() == 1 ? " NOT NULL" : ""));
+			}			
 		}
 
-		List<TableColumn> adds = new ArrayList<TableColumn>(Arrays.asList(columns));
-		for (Map<String, Object> songcolumn : qr.query("PRAGMA table_info('" + tablename + "');",
-				new MapListHandler())) {
-			final String name = (String) songcolumn.get("name");
-			for (int i = 0; i < adds.size(); i++) {
-				if (adds.get(i).name().equals(name)) {
-					adds.remove(i);
-					break;
-				}
-			}
-		}
-		for (TableColumn add : adds) {
-			qr.update("ALTER TABLE " + tablename + " ADD COLUMN [" + add.name() + "] " + add.type()
-					+ (add.notnull() ? " NOT NULL" : ""));
-		}
 	}
-
-	protected void insertOrReplace(QueryRunner qr, Connection con, String tablename, TableColumn[] columns,
+	
+	protected void insertOrReplace(QueryRunner qr, Connection con, String tablename,
 			Object entity) throws IntrospectionException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, SQLException {
+		Column[] columns = null;
+		for(Table table : tables) {
+			if(table.getName().equals(tablename)) {
+				columns = table.getColumn();
+				break;
+			}
+		}
+		if(columns == null) {
+			return;
+		}
+		
 		StringBuilder sql = new StringBuilder("INSERT OR REPLACE INTO " + tablename + " (");
 		boolean comma = false;
-		for (TableColumn column : columns) {
-			sql.append(comma ? "," : "").append(column.name());
+		for (Column column : columns) {
+			sql.append(comma ? "," : "").append(column.getName());
 			comma = true;
 		}
 		sql.append(") VALUES(");
@@ -95,7 +114,7 @@ public abstract class SQLiteDatabaseAccessor {
 			sql.append(comma ? ",?" : "?");
 			comma = true;
 
-			PropertyDescriptor pd = new PropertyDescriptor(columns[i].name(), entity.getClass());
+			PropertyDescriptor pd = new PropertyDescriptor(columns[i].getName(), entity.getClass());
 			Method getterMethod = pd.getReadMethod();
 			params[i] = getterMethod.invoke(entity);
 		}
@@ -103,16 +122,117 @@ public abstract class SQLiteDatabaseAccessor {
 
 		qr.update(con, sql.toString(), params);
 	}
+	
+	/**
+	 * SQLiteテーブル
+	 * 
+	 * @author exch
+	 */
+	public static class Table {
 
-	public interface TableColumn {
+		/**
+		 * テーブル名
+		 */
+		private String name;
+		
+		/**
+		 * カラム
+		 */
+		private Column[] column;
+		
+		public Table(String name, Column... column) {
+			this.name = name;
+			this.column = column;
+		}
 
-		public String name();
+		public String getName() {
+			return name;
+		}
 
-		public String type();
+		public void setName(String name) {
+			this.name = name;
+		}
 
-		public boolean notnull();
+		public Column[] getColumn() {
+			return column;
+		}
 
-		public boolean pk();
+		public void setColumn(Column[] column) {
+			this.column = column;
+		}
 	}
 
+	/**
+	 * SQLiteカラム
+	 * 
+	 * @author exch
+	 */
+	public static class Column {
+
+		/**
+		 * カラム名
+		 */
+		private String name;
+		/**
+		 * 値の型式
+		 */
+		private String type;
+
+		/**
+		 * NOT NULL = 1
+		 */
+		private int notnull;
+
+		/**
+		 * PRIMAL KEY = 1
+		 */
+		private int pk;
+		
+		public Column() {
+			
+		}
+
+		public Column(String name, String type) {
+			this(name, type, 0, 0);
+		}
+
+		public Column(String name, String type, int notnull, int pk) {
+			this.name = name;
+			this.type = type;
+			this.notnull = notnull;
+			this.pk = pk;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public String getType() {
+			return type;
+		}
+		
+		public void setType(String type) {
+			this.type = type;
+		}
+		
+		public int getNotnull() {
+			return notnull;
+		}
+		
+		public void setNotnull(int notnull) {
+			this.notnull = notnull;
+		}
+		
+		public int getPk() {
+			return pk;
+		}
+		
+		public void setPk(int pk) {
+			this.pk = pk;
+		}
+	}	
 }
