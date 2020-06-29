@@ -50,6 +50,7 @@ public class SearchTextField extends Stage {
 			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 			FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 			parameter.size = (int) r.height;
+			parameter.incremental = true;
 			searchfont = generator.generateFont(parameter);
 
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(); // background
