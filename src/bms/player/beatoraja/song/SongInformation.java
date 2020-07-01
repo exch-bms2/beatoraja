@@ -4,13 +4,10 @@ import bms.model.*;
 import bms.player.beatoraja.Validatable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import com.badlogic.gdx.utils.IntArray;
 
 /**
  * 楽曲詳細情報
@@ -85,6 +82,7 @@ public class SongInformation implements Validatable {
 	}
 	
 	public SongInformation(BMSModel model) {
+		sha256 = model.getSHA256();
 		n = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_KEY);
 		ln = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_KEY);
 		s = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_SCRATCH);
@@ -277,7 +275,7 @@ public class SongInformation implements Validatable {
 
 	public void setSpeedchange(String speedchange) {
 		this.speedchange = speedchange;
-		ArrayList<double[]> result = new ArrayList();
+		ArrayList<double[]> result = new ArrayList<double[]>();
 		int index = 0;
 		double[] values = new double[2];
 		try {
@@ -317,7 +315,7 @@ public class SongInformation implements Validatable {
 
 	public void setLanenotes(String lanenotes) {
 		this.lanenotes = lanenotes;
-		ArrayList<int[]> result = new ArrayList();
+		ArrayList<int[]> result = new ArrayList<int[]>();
 		int index = 0;
 		int[] values = new int[3];
 		try {
