@@ -2,7 +2,6 @@ package bms.player.beatoraja;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -85,10 +84,14 @@ public abstract class SQLiteDatabaseAccessor {
 		}
 
 	}
-	
-	protected void insertOrReplace(QueryRunner qr, Connection con, String tablename,
-			Object entity) throws IntrospectionException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, SQLException {
+
+	protected void insert(QueryRunner qr, String tablename,
+			Object entity) throws SQLException {
+		insert(qr, null, tablename, entity);
+	}
+
+	protected void insert(QueryRunner qr, Connection con, String tablename,
+			Object entity) throws SQLException {
 		Column[] columns = null;
 		for(Table table : tables) {
 			if(table.getName().equals(tablename)) {
@@ -114,13 +117,22 @@ public abstract class SQLiteDatabaseAccessor {
 			sql.append(comma ? ",?" : "?");
 			comma = true;
 
-			PropertyDescriptor pd = new PropertyDescriptor(columns[i].getName(), entity.getClass());
-			Method getterMethod = pd.getReadMethod();
-			params[i] = getterMethod.invoke(entity);
+			PropertyDescriptor pd;
+			try {
+				pd = new PropertyDescriptor(columns[i].getName(), entity.getClass());
+				Method getterMethod = pd.getReadMethod();
+				params[i] = getterMethod.invoke(entity);
+			} catch (IntrospectionException | ReflectiveOperationException | IllegalArgumentException e) {
+				e.printStackTrace();
+			}
 		}
 		sql.append(");");
 
-		qr.update(con, sql.toString(), params);
+		if(con != null) {
+			qr.update(con, sql.toString(), params);
+		} else {
+			qr.update(sql.toString(), params);			
+		}
 	}
 	
 	/**
