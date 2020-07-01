@@ -3,18 +3,36 @@ package bms.player.beatoraja;
 import java.sql.SQLException;
 
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
-public class ScoreLogDatabaseAccessor {
+/**
+ * スコアログデータベースアクセサ
+ * 
+ * @author exch
+ */
+public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 
 	private SQLiteDataSource ds;
 
 	private final QueryRunner qr;
 
 	public ScoreLogDatabaseAccessor(String path) throws ClassNotFoundException {
+		super(	new Table("scorelog",
+						new Column("sha256", "TEXT", 1, 0),
+						new Column("mode", "INTEGER"),
+						new Column("clear", "INTEGER"),
+						new Column("oldclear", "INTEGER"),
+						new Column("score", "INTEGER"),
+						new Column("oldscore", "INTEGER"),
+						new Column("combo", "INTEGER"),
+						new Column("oldcombo", "INTEGER"),
+						new Column("minbp", "INTEGER"),
+						new Column("oldminbp", "INTEGER"),
+						new Column("date", "INTEGER")
+						));
+
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
 		conf.setSharedCache(true);
@@ -23,50 +41,72 @@ public class ScoreLogDatabaseAccessor {
 		ds = new SQLiteDataSource(conf);
 		ds.setUrl("jdbc:sqlite:" + path);
 		qr = new QueryRunner(ds);
-		createTable();		
-	}
-
-	public void createTable() {
-		String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-		// scorelogテーブル作成(存在しない場合)
+		
 		try {
-			if (qr.query(sql, new MapListHandler(), "scorelog").size() == 0) {
-				qr.update("CREATE TABLE [scorelog] ([sha256] TEXT NOT NULL," + "[mode] INTEGER," + "[clear] INTEGER," + "[oldclear] INTEGER,"
-						+ "[score] INTEGER," + "[oldscore] INTEGER," + "[combo] INTEGER,"  + "[oldcombo] INTEGER," 
-						+ "[minbp] INTEGER," + "[oldminbp] INTEGER," + "[date] INTEGER);");
-			}
+			this.validate(qr);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	public void setScoreLog(ScoreLog log) {
 		try {
-			qr.update(
-					"INSERT INTO scorelog "
-							+ "(sha256, mode, clear, oldclear, score, oldscore, combo, oldcombo, minbp, oldminbp, date) "
-							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?);", log.getSha256(), log.getMode(), log.getClear(), log.getOldclear(),
-							log.getScore(), log.getOldscore(), log.getCombo(), log.getOldcombo(), log.getMinbp(), log.getOldminbp()
-							,log.getDate());
+			this.insert(qr, "scorelog", log);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * スコアログ
+	 * 
+	 * @author exch
+	 */
 	public static class ScoreLog {
-		
+
+		/**
+		 * 譜面ハッシュ(SHA256)
+		 */
 		private String sha256;
-		private int mode;		
+		/**
+		 * LNモード
+		 */
+		private int mode;
+		/**
+		 * 新クリアランプ
+		 */
 		private int clear;
+		/**
+		 * 旧クリアランプ
+		 */
 		private int oldclear;
+		/**
+		 * 新スコア
+		 */
 		private int score;		
+		/**
+		 * 旧スコア
+		 */
 		private int oldscore;		
+		/**
+		 * 新コンボ
+		 */
 		private int combo;		
+		/**
+		 * 旧コンボ
+		 */
 		private int oldcombo;		
+		/**
+		 * 新ミスカウント
+		 */
 		private int minbp;		
+		/**
+		 * 旧ミスカウント
+		 */
 		private int oldminbp;
+		/**
+		 * スコア最終更新日時(unixtime, 秒単位)
+		 */
 		private long date;
 		
 		public String getSha256() {
