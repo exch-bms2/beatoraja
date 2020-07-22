@@ -85,13 +85,13 @@ public class BGImageProcessor {
 		int count = 0;
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bga < bgamap.length && bgamap[bga] != null) {
 				getTexture(bga);
 				count++;
 			}
 
 			bga = tl.getLayer();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bga < bgamap.length && bgamap[bga] != null) {
 				getTexture(bga);
 				count++;
 			}
@@ -107,7 +107,7 @@ public class BGImageProcessor {
 			return bgacache[cid];
 		}
 		// BGイメージキャッシュにTextureがない場合
-		if (bgamap[id] != null){
+		if (id < bgamap.length && bgamap[id] != null){
 			if(bgacache[cid] == null) {
 				bgacache[cid] = new Texture(bgamap[id]);				
 			} else if(bgacache[cid].getWidth() != bgamap[id].getWidth() || bgacache[cid].getHeight() != bgamap[id].getHeight()){
