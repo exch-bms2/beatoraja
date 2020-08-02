@@ -17,7 +17,7 @@ It works on Windows, Mac OS, and Linux.
 - import LunaticRave2 scores (clear lamp, score. not including score verifier like scorehash)
 
 # System Requirement
-- Java Runtime Environment 1.8.0 64bit (32bit is not recomended)
+- Java Runtime Environment 1.8.0 64bit (32bit is not recommended)
 - OpenGL 3.1- (may not work under Windows 10 + Intel HD Graphics 2000/3000. See also https://github.com/LWJGL/lwjgl/issues/119)
 
 # How To Use
