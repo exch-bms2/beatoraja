@@ -401,28 +401,24 @@ public class JSONSkinLoader extends SkinLoader {
 					}
 					for (JsonSkin.ImageSet imgs : sk.imageset) {
 						if (dst.id.equals(imgs.id)) {
-							TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
-							TimerProperty timer = null;
-							int cycle = -1;
-							for (int i = 0; i < imgs.images.length; i++) {
+							SkinSourceImage[] sources = new SkinSourceImage[imgs.images.length];
+							for (int index = 0; index < imgs.images.length; index++) {
 								for (JsonSkin.Image img : sk.image) {
-									if (img.id.equals(imgs.images[i])) {
-										Texture tex = getTexture(img.src, p);
-										if(tex != null) {
-											tr[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
-											if (timer == null) {
-												timer = img.timer;
-											}
-											if (cycle == -1) {
-												cycle = img.cycle;
-											}											
-										}
+									if (img.id.equals(imgs.images[index])) {
+										Object data = getSource(img.src, p);
+										
+										if(data instanceof Texture) {
+											Texture tex = (Texture) data;
+											sources[index] = new SkinSourceImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+													img.timer, img.cycle);
+										} 
+										
 										break;
 									}
 								}
 							}
 
-							SkinImage si = new SkinImage(tr, timer, cycle);
+							SkinImage si = new SkinImage(sources);
 							if (imgs.value != null) {
 								si.setReference(imgs.value);
 							} else {

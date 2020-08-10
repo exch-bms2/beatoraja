@@ -62,6 +62,10 @@ public class SkinImage extends SkinObject {
 		this.setImageType(SkinObjectRenderer.TYPE_FFMPEG);
 	}
 
+	public SkinImage(SkinSourceImage[] image) {
+		this.image = image;
+	}
+
 	public TextureRegion getImage(long time, MainState state) {
 		return getImage(0 ,time, state);
 	}
