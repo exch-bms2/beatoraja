@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 
@@ -20,7 +19,7 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
  * 
  * @author exch
  */
-public class ScoreDatabaseAccessor {
+public class ScoreDatabaseAccessor extends SQLiteDatabaseAccessor {
 
 	private final QueryRunner qr;
 	
@@ -29,6 +28,59 @@ public class ScoreDatabaseAccessor {
 	private final ResultSetHandler<List<PlayerData>> playerHandler = new BeanListHandler<PlayerData>(PlayerData.class);
 
 	public ScoreDatabaseAccessor(String path) throws ClassNotFoundException {
+		super(new Table("info", 
+				new Column("id", "TEXT",1,1),
+				new Column("name", "TEXT",1,0),
+				new Column("rank", "TEXT")
+				),
+				new Table("player", 
+						new Column("date", "INTEGER",0,1),
+						new Column("playcount", "INTEGER"),
+						new Column("clear", "INTEGER"),
+						new Column("epg", "INTEGER"),
+						new Column("lpg", "INTEGER"),
+						new Column("egr", "INTEGER"),
+						new Column("lgr", "INTEGER"),
+						new Column("egd", "INTEGER"),
+						new Column("lgd", "INTEGER"),
+						new Column("ebd", "INTEGER"),
+						new Column("lbd", "INTEGER"),
+						new Column("epr", "INTEGER"),
+						new Column("lpr", "INTEGER"),
+						new Column("ems", "INTEGER"),
+						new Column("lms", "INTEGER"),
+						new Column("playtime", "INTEGER"),
+						new Column("maxcombo", "INTEGER")
+						),
+				new Table("score",
+						new Column("sha256", "TEXT", 1, 1),
+						new Column("mode", "INTEGER",0,1),
+						new Column("clear", "INTEGER"),
+						new Column("epg", "INTEGER"),
+						new Column("lpg", "INTEGER"),
+						new Column("egr", "INTEGER"),
+						new Column("lgr", "INTEGER"),
+						new Column("egd", "INTEGER"),
+						new Column("lgd", "INTEGER"),
+						new Column("ebd", "INTEGER"),
+						new Column("lbd", "INTEGER"),
+						new Column("epr", "INTEGER"),
+						new Column("lpr", "INTEGER"),
+						new Column("ems", "INTEGER"),
+						new Column("lms", "INTEGER"),
+						new Column("notes", "INTEGER"),
+						new Column("combo", "INTEGER"),
+						new Column("minbp", "INTEGER"),
+						new Column("playcount", "INTEGER"),
+						new Column("clearcount", "INTEGER"),
+						new Column("trophy", "TEXT"),
+						new Column("ghost", "TEXT"),
+						new Column("option", "INTEGER"),
+						new Column("random", "INTEGER"),
+						new Column("date", "INTEGER"),
+						new Column("state", "INTEGER"),
+						new Column("scorehash", "TEXT")
+						));
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
 		conf.setSharedCache(true);
@@ -41,46 +93,10 @@ public class ScoreDatabaseAccessor {
 
 	public void createTable() {
 		try {
-			final MapListHandler mh = new MapListHandler();
-			String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-			// infoテーブル作成(存在しない場合)
-			if (qr.query(sql, mh, "info").size() == 0) {
-				qr.update("CREATE TABLE [info] ([id] TEXT NOT NULL,[name] TEXT NOT NULL," + "[rank] TEXT, "
-						+ "PRIMARY KEY(id));");
+			validate(qr);
+			if(this.getPlayerDatas(1).length == 0) {
+				this.insert(qr, "player", new PlayerData());
 			}
-			// playerテーブル作成(存在しない場合)
-			if (qr.query(sql, mh, "player").size() == 0) {
-				qr.update("CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
-						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
-						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
-						+ "[ems] INTEGER," + "[lms] INTEGER," + "[playtime] INTEGER," + "[combo] INTEGER,"
-						+ "[maxcombo] INTEGER," + "[scorehash] TEXT," + "PRIMARY KEY(date));");
-
-				qr.update(
-						"insert into player "
-								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
-								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
-			}
-			// scoreテーブル作成(存在しない場合)
-			if (qr.query(sql, mh, "score").size() == 0) {
-				qr.update("CREATE TABLE [score] ([sha256] TEXT NOT NULL," + "[mode] INTEGER," + "[clear] INTEGER,"
-						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
-						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
-						+ "[ems] INTEGER," + "[lms] INTEGER," + "[notes] INTEGER," + "[combo] INTEGER,"
-						+ "[minbp] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[trophy] TEXT," + "[ghost] TEXT,"
-						+ "[scorehash] TEXT," + "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
-						+ "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
-			}
-
-			// 過去のバージョンで作成したテーブルにカラムが存在しない場合に作成
-			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'score' AND sql LIKE '%trophy%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE score ADD COLUMN trophy [TEXT]");
-			}
-			if (qr.query("SELECT * FROM sqlite_master WHERE name = 'score' AND sql LIKE '%ghost%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE score ADD COLUMN ghost [TEXT]");
-			}
-
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
 		}
@@ -101,7 +117,8 @@ public class ScoreDatabaseAccessor {
 	public void setInformation(PlayerInformation info) {
 		try {
 			qr.update("DELETE FROM info");
-			qr.update("insert into info " + "(id, name, rank) " + "values(?,?,?);", info.getId(), info.getName(), info.getRank());
+			insert(qr, "info", info);
+//			qr.update("insert into info " + "(id, name, rank) " + "values(?,?,?);", info.getId(), info.getName(), info.getRank());
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア取得時の例外:" + e.getMessage());
 		}
@@ -187,17 +204,8 @@ public class ScoreDatabaseAccessor {
 	public void setScoreData(ScoreData[] scores) {
 		try (Connection con = qr.getDataSource().getConnection()) {
 			con.setAutoCommit(false);
-			String sql = "INSERT OR REPLACE INTO score "
-					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
-					+ "minbp, playcount, clearcount, trophy, ghost, scorehash, option, random, date, state)"
-					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 			for (ScoreData score : scores) {
-				qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(),
-						score.getLpg(), score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(),
-						score.getLbd(), score.getEpr(), score.getLpr(), score.getEms(), score.getLms(),
-						score.getNotes(), score.getCombo(), score.getMinbp(), score.getPlaycount(),
-						score.getClearcount(), score.getTrophy(), score.getGhost(), score.getScorehash(), score.getOption(),
-						score.getRandom(), score.getDate(), score.getState());
+				this.insert(qr, con, "score", score);
 			}
 			con.commit();
 		} catch (Exception e) {
@@ -259,6 +267,11 @@ public class ScoreDatabaseAccessor {
 		return result != null ? result : new PlayerData[0];
 	}
 
+	/**
+	 * プレイヤーデータを設定する
+	 * 
+	 * @param pd プレイヤーデータ
+	 */
 	public void setPlayerData(PlayerData pd) {
 		try (Connection con = qr.getDataSource().getConnection()) {
 			con.setAutoCommit(false);
@@ -268,14 +281,8 @@ public class ScoreDatabaseAccessor {
 			cal.set(Calendar.SECOND, 0);
 			cal.set(Calendar.MILLISECOND, 0);
 			long unixtime = cal.getTimeInMillis() / 1000L;
-
-			qr.update(con,
-					"INSERT OR REPLACE INTO player "
-							+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
-							+ "scorehash) " + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-					unixtime, pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
-					pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
-					pd.getLms(), pd.getPlaytime(), 0, 0, "");
+			pd.setDate(unixtime);
+			this.insert(qr, con, "player", pd);
 			con.commit();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア更新時の例外:" + e.getMessage());
