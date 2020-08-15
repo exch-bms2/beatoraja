@@ -1,7 +1,9 @@
 package bms.player.beatoraja.song;
 
+import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.SQLiteDatabaseAccessor;
 import bms.player.beatoraja.Validatable;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -27,7 +30,7 @@ import bms.model.*;
  * 
  * @author exch
  */
-public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
+public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implements SongDatabaseAccessor {
 
 	private SQLiteDataSource ds;
 
@@ -41,6 +44,50 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	private List<SongDatabaseAccessorPlugin> plugins = new ArrayList();
 	
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot) throws ClassNotFoundException {
+		super(new Table("folder", 
+				new Column("title", "TEXT"),
+				new Column("subtitle", "TEXT"),
+				new Column("command", "TEXT"),
+				new Column("path", "TEXT", 0, 1),
+				new Column("banner", "TEXT"),
+				new Column("parent", "TEXT"),
+				new Column("type", "INTEGER"),
+				new Column("date", "INTEGER"),
+				new Column("adddate", "INTEGER"),
+				new Column("max", "INTEGER")
+				),
+				new Table("song",
+						new Column("md5", "TEXT", 1, 0),
+						new Column("sha256", "TEXT", 1, 0),
+						new Column("title", "TEXT"),
+						new Column("subtitle", "TEXT"),
+						new Column("genre", "TEXT"),
+						new Column("artist", "TEXT"),
+						new Column("subartist", "TEXT"),
+						new Column("tag", "TEXT"),
+						new Column("path", "TEXT", 0, 1),
+						new Column("folder", "TEXT"),
+						new Column("stagefile", "TEXT"),
+						new Column("banner", "TEXT"),
+						new Column("backbmp", "TEXT"),
+						new Column("preview", "TEXT"),
+						new Column("parent", "TEXT"),
+						new Column("level", "INTEGER"),
+						new Column("difficulty", "INTEGER"),
+						new Column("maxbpm", "INTEGER"),
+						new Column("minbpm", "INTEGER"),
+						new Column("length", "INTEGER"),
+						new Column("mode", "INTEGER"),
+						new Column("judge", "INTEGER"),
+						new Column("feature", "INTEGER"),
+						new Column("content", "INTEGER"),
+						new Column("date", "INTEGER"),
+						new Column("favorite", "INTEGER"),
+						new Column("adddate", "INTEGER"),
+						new Column("notes", "INTEGER"),
+						new Column("charthash", "TEXT")
+						));
+		
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
 		conf.setSharedCache(true);
@@ -52,46 +99,22 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		root = Paths.get(".");
 		createTable();
 	}
-	
+		
 	public void addPlugin(SongDatabaseAccessorPlugin plugin) {
 		plugins.add(plugin);
 	}
-
+	
 	/**
 	 * 楽曲データベースを初期テーブルを作成する。 すでに初期テーブルを作成している場合は何もしない。
 	 */
 	private void createTable() {
 		try {
 			// songテーブル作成(存在しない場合)
-			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "song")
-					.size() == 0) {
-				qr.update("CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
-						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
-						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
-						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
-						+ "[minbpm] INTEGER," + "[length] INTEGER, " + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
-						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
-						+ "[adddate] INTEGER," + "[charthash] TEXT," + "PRIMARY KEY(path));");
-			}
-
-			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%preview%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE song ADD COLUMN [preview] TEXT");
-			}
-			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%length%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE song ADD COLUMN [length] INTEGER");
-			}
-			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%charthash%'", new MapListHandler()).size() == 0) {
-				qr.update("ALTER TABLE song ADD COLUMN [charthash] TEXT");
-			}
+			validate(qr);
+			
 			if(qr.query("PRAGMA TABLE_INFO(song)", new MapListHandler()).stream().anyMatch(m -> m.get("name").equals("sha256") && (int)(m.get("pk")) == 1)) {
-				qr.update("ALTER TABLE song RENAME TO old_song");
-				qr.update("CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
-						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
-						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
-						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
-						+ "[minbpm] INTEGER," + "[length] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
-						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
-						+ "[adddate] INTEGER," + "[charthash] TEXT," + "PRIMARY KEY(path));");
+				qr.update("ALTER TABLE [song] RENAME TO [old_song]");
+				validate(qr);
 				qr.update("INSERT INTO song SELECT "
 						+ "md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 						+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty,"
@@ -100,19 +123,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "FROM old_song GROUP BY path HAVING MAX(adddate)");
 				qr.update("DROP TABLE old_song");
 			}
-
-			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
-					.size() == 0) {
-				qr.update("CREATE TABLE [folder] (" + "[title] TEXT," + "[subtitle] TEXT," + "[command] TEXT,"
-						+ "[path] TEXT," + "[type] INTEGER," + "[banner] TEXT," + "[parent] TEXT," + "[date] INTEGER,"
-						+ "[max] INTEGER," + "[adddate] INTEGER," + "PRIMARY KEY(path));");
-			}
-			
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
 		}
 	}
 
+	
 	/**
 	 * 楽曲を取得する
 	 * 
@@ -245,20 +261,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			conn.setAutoCommit(false);
 
 			for (SongData sd : songs) {
-				// TODO このメソッドは共通化させたい
-				qr.update(conn,
-						"INSERT OR REPLACE INTO song "
-								+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
-								+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
-								+ "maxbpm, minbpm, length, mode, judge, feature, content, "
-								+ "date, favorite, notes, adddate, charthash)"
-								+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-						sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
-						sd.getArtist(), sd.getSubartist(), sd.getTag(), sd.getPath(), sd.getFolder(),
-						sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),sd.getParent(),
-						sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
-						sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-						sd.getDate(), sd.getFavorite(), sd.getNotes(), sd.getAdddate(), sd.getCharthash());
+				this.insert(qr, conn, "song", sd);
 			}
 			conn.commit();
 			conn.close();
@@ -290,7 +293,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		}
 		updater.updateSongDatas(paths);
 	}
-
+	
 	/**
 	 * song database更新用クラス
 	 * 
@@ -354,7 +357,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					try {
 						BMSFolder folder = new BMSFolder(p, bmsroot);
 						folder.processDirectory(property);
-					} catch (IOException | SQLException e) {
+					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
 						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 					}
 				});
@@ -390,7 +393,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		}
 		
 		private void processDirectory(SongDatabaseUpdaterProperty property)
-				throws IOException, SQLException {
+				throws IOException, SQLException, ReflectiveOperationException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
 			final List<SongData> records = qr.query(property.conn, "SELECT path,date FROM song WHERE folder = ?", songhandler,
 					SongUtils.crc32(path.toString(), bmsroot, root.toString()));
 			final List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
@@ -447,7 +450,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				dirs.forEach((bf) -> {
 					try {
 						bf.processDirectory(property);
-					} catch (IOException | SQLException e) {
+					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
 						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 					}					
 				});
@@ -461,14 +464,15 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				Path parentpath = path.getParent();
 				if(parentpath == null) {
 					parentpath = path.toAbsolutePath().getParent();
-				}				
-				qr.update(property.conn,
-						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
-								+ "VALUES(?,?,?,?,?,?,?,?,?,?);",
-								path.getFileName().toString(), "", "", s, 1, "",
-						SongUtils.crc32(parentpath.toString() , bmsroot, root.toString()),
-						Files.getLastModifiedTime(path).toMillis() / 1000, null,
-						property.updatetime);
+				}
+				FolderData folder = new FolderData();
+				folder.setTitle(path.getFileName().toString());
+				folder.setPath(s);
+				folder.setParent(SongUtils.crc32(parentpath.toString() , bmsroot, root.toString()));
+				folder.setDate((int) (Files.getLastModifiedTime(path).toMillis() / 1000));
+				folder.setAdddate((int) property.updatetime);
+				
+				SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "folder", folder);			
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
 			for (FolderData record : folders) {
@@ -560,24 +564,16 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						plugin.update(model, sd);
 					}
 					
+					
 					try {
-						qr.update(property.conn,
-								"INSERT OR REPLACE INTO song "
-										+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
-										+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
-										+ "maxbpm, minbpm, length, mode, judge, feature, content, "
-										+ "date, favorite, notes, adddate, charthash)"
-										+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-								sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
-								sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
-								pathname, SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()),
-								sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),
-								SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()),
-								sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
-								sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-								Files.getLastModifiedTime(path).toMillis() / 1000,
-								favorite != null ? favorite.intValue() : 0, sd.getNotes(), property.updatetime,
-								sd.getCharthash());
+						sd.setTag(tag != null ? tag : "");
+						sd.setPath(pathname);
+						sd.setFolder(SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()));
+						sd.setParent(SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()));
+						sd.setDate((int) (Files.getLastModifiedTime(path).toMillis() / 1000));
+						sd.setFavorite(favorite != null ? favorite.intValue() : 0);
+						sd.setAdddate((int) property.updatetime);
+						SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "song", sd);
 					} catch (SQLException | IOException e) {
 						e.printStackTrace();
 					}
