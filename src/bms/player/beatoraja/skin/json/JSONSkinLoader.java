@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.luaj.vm2.LuaInteger;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -28,6 +30,7 @@ import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 import bms.player.beatoraja.skin.property.*;
@@ -317,32 +320,41 @@ public class JSONSkinLoader extends SkinLoader {
 			}
 			
 			IntIntMap op = new IntIntMap();
-			for (JsonSkin.Property pr : sk.property) {
-				int pop = 0;
-				for(SkinConfig.Option opt : property.getOption()) {
-					if(opt.name.equals(pr.name)) {
-						if(opt.value != OPTION_RANDOM_VALUE) {
-							pop = opt.value;
+			
+			for (CustomOption option : header.getCustomOptions()) {
+				int opvalue = option.getDefaultOption();
+				for (SkinConfig.Option opt : property.getOption()){
+					if(option.option.length > 0 && opt.name.equals(option.name)) {
+						if(opvalue == SkinProperty.OPTION_RANDOM_VALUE) {
+							opvalue = option.option[(int) (Math.random() * option.option.length)];
+							header.setRandomSelectedOptions(option.name, opvalue);
 						} else {
-							if(header.getRandomSelectedOptions(opt.name) >= 0) pop = header.getRandomSelectedOptions(opt.name);
+							opvalue = opt.value;
 						}
 						break;
 					}
 				}
-				for (int i = 0; i < pr.item.length; i++) {
-					op.put(pr.item[i].op, pr.item[i].op == pop ? 1 : 0);
+				
+				for (int i = 0; i < option.option.length; i++) {
+					op.put(option.option[i], option.option[i] == opvalue ? 1 : 0);
 				}
 			}
 			skin.setOption(op);
 
 			IntMap<SkinConfig.Offset> offset = new IntMap<>();
 			for (CustomOffset of : header.getCustomOffsets()) {
-				for(SkinConfig.Offset off : property.getOffset()) {
-					if (off.name.equals(of.name)) {
-						offset.put(of.id, off);
+				SkinConfig.Offset off = null;
+				for(SkinConfig.Offset off2 : property.getOffset()) {
+					if (off2.name.equals(of.name)) {
+						off = off2;
 						break;
 					}
 				}
+				if(off == null) {
+					off = new SkinConfig.Offset();
+					off.name = of.name;
+				}				
+				offset.put(of.id, off);
 			}
 			skin.setOffset(offset);
 
