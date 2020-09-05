@@ -62,7 +62,7 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 	 * 
 	 * @author exch
 	 */
-	public static class ScoreLog {
+	public static class ScoreLog implements Validatable {
 
 		/**
 		 * 譜面ハッシュ(SHA256)
@@ -112,69 +112,95 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		public String getSha256() {
 			return sha256;
 		}
+		
 		public void setSha256(String sha256) {
 			this.sha256 = sha256;
 		}
+		
 		public int getMode() {
 			return mode;
 		}
+		
 		public void setMode(int mode) {
 			this.mode = mode;
 		}
+		
 		public int getClear() {
 			return clear;
 		}
+		
 		public void setClear(int clear) {
 			this.clear = clear;
 		}
+		
 		public int getOldclear() {
 			return oldclear;
 		}
+		
 		public void setOldclear(int oldclear) {
 			this.oldclear = oldclear;
 		}
+		
 		public int getScore() {
 			return score;
 		}
+		
 		public void setScore(int score) {
 			this.score = score;
 		}
+		
 		public int getOldscore() {
 			return oldscore;
 		}
+		
 		public void setOldscore(int oldscore) {
 			this.oldscore = oldscore;
 		}
+		
 		public int getCombo() {
 			return combo;
 		}
+		
 		public void setCombo(int combo) {
 			this.combo = combo;
 		}
+		
 		public int getOldcombo() {
 			return oldcombo;
 		}
+		
 		public void setOldcombo(int oldcombo) {
 			this.oldcombo = oldcombo;
 		}
+		
 		public int getMinbp() {
 			return minbp;
 		}
+		
 		public void setMinbp(int minbp) {
 			this.minbp = minbp;
 		}
+		
 		public int getOldminbp() {
 			return oldminbp;
 		}
+		
 		public void setOldminbp(int oldminbp) {
 			this.oldminbp = oldminbp;
 		}
+		
 		public long getDate() {
 			return date;
 		}
+		
 		public void setDate(long date) {
 			this.date = date;
 		}
-		
+
+		@Override
+		public boolean validate() {
+			return mode >= 0 && clear >= 0 && clear <= ClearType.Max.id && oldclear >= 0 && oldclear<= clear &&
+					score >= 0 && oldscore <= score && combo >= 0 && oldcombo <= combo && minbp >= 0 && oldminbp >= minbp && date >= 0;
+		}
 	}
 }
