@@ -49,7 +49,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.7.9";
+	private static final String VERSION = "beatoraja 0.8";
 
 	public static final boolean debug = false;
 
@@ -742,6 +742,10 @@ public class MainController extends ApplicationAdapter {
 			downloadIpfs.start();
 		}
 	}
+	
+	public static String getVersion() {
+		return VERSION;
+	}
 
 	abstract class UpdateThread extends Thread {
 
@@ -842,10 +846,10 @@ public class MainController extends ApplicationAdapter {
 
 		public SystemSoundManager(Config config) {
 			if(config.getBgmpath() != null && config.getBgmpath().length() > 0) {
-				scan(Paths.get(config.getBgmpath()), bgms, "select.wav");				
+				scan(Paths.get(config.getBgmpath()).toAbsolutePath(), bgms, "select.wav");				
 			}
 			if(config.getSoundpath() != null && config.getSoundpath().length() > 0) {
-				scan(Paths.get(config.getSoundpath()), sounds, "clear.wav");				
+				scan(Paths.get(config.getSoundpath()).toAbsolutePath(), sounds, "clear.wav");				
 			}
 			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
