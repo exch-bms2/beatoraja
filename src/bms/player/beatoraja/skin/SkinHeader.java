@@ -113,13 +113,30 @@ public class SkinHeader {
 		this.offsets = offsets;
 	}
 
+	/**
+	 * 選択可能なオプション
+	 * 
+	 * @author exch
+	 */
 	public static class CustomOption {
 
 		public static final CustomOption[] EMPTY_ARRAY = new CustomOption[0];
 
+		/**
+		 * カスタムオプション名称
+		 */
 		public final String name;
+		/**
+		 * 各オプションID
+		 */
 		public final int[] option;
+		/**
+		 * 各オプション名
+		 */
 		public final String[] contents;
+		/**
+		 * デフォルトオプション名
+		 */
 		public final String def;
 
 		public CustomOption(String name, int[] option, String[] contents) {
@@ -141,16 +158,30 @@ public class SkinHeader {
 				if (contents[i].equals(def))
 					return option[i];
 			}
-			return option[0];
+			return option.length > 0 ? option[0] : SkinProperty.OPTION_RANDOM_VALUE;
 		}
 	}
 
+	/**
+	 * 選択可能なファイル
+	 * 
+	 * @author exch
+	 */
 	public static class CustomFile {
 
 		public static final CustomFile[] EMPTY_ARRAY = new CustomFile[0];
 
+		/**
+		 * カスタムファイル名称
+		 */
 		public final String name;
+		/**
+		 * ファイル名
+		 */
 		public final String path;
+		/**
+		 * デフォルトファイル名
+		 */
 		public final String def;
 		
 		public CustomFile(String name, String path, String def) {
@@ -160,12 +191,27 @@ public class SkinHeader {
 		}
 	}
 	
+	/**
+	 * 選択可能なオフセット
+	 * 
+	 * @author exch
+	 */
 	public static class CustomOffset {
 
 		public static final CustomOffset[] EMPTY_ARRAY = new CustomOffset[0];
 
+		/**
+		 * カスタムオフセット名称
+		 */
 		public final String name;
+		/**
+		 * オフセットID
+		 */
 		public final int id;
+		
+		/**
+		 * それぞれの値の変更を許可するかどうか
+		 */
 		public final boolean x;
 		public final boolean y;
 		public final boolean w;
