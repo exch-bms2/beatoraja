@@ -8,17 +8,12 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
-import org.luaj.vm2.LuaInteger;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.IntIntMap;
-import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.*;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.KeyConfigurationSkin;
@@ -29,8 +24,7 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinHeader.CustomItem;
 import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 import bms.player.beatoraja.skin.property.*;
@@ -53,7 +47,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 	protected final SkinLuaAccessor lua;
 
-	protected ObjectMap<String, String> filemap = new ObjectMap();
+	protected ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
 	protected JsonSkinSerializer serializer;
 	
@@ -127,6 +121,11 @@ public class JSONSkinLoader extends SkinLoader {
 				header.setPath(p);
 				header.setType(SkinHeader.TYPE_BEATORJASKIN);
 
+				ObjectMap<JsonSkin.Category, SkinHeader.CustomItem[]> categories = new ObjectMap<JsonSkin.Category, SkinHeader.CustomItem[]>();
+				for(JsonSkin.Category category : sk.category) {
+					categories.put(category, new SkinHeader.CustomItem[category.item.length]);
+				}
+				
 				SkinHeader.CustomOption[] options = new SkinHeader.CustomOption[sk.property.length];
 				for (int i = 0; i < sk.property.length; i++) {
 					JsonSkin.Property pr = sk.property[i];
@@ -138,6 +137,14 @@ public class JSONSkinLoader extends SkinLoader {
 						name[j] = pr.item[j].name;
 					}
 					options[i] = new SkinHeader.CustomOption(pr.name, op, name, pr.def);
+					
+					for(JsonSkin.Category category : sk.category) {
+						for(int index = 0;index < category.item.length;index++) {
+							if(category.item[index].equals(pr.category)) {
+								categories.get(category)[index] = options[i];
+							}
+						}
+					}
 				}
 				header.setCustomOptions(options);
 
@@ -145,6 +152,13 @@ public class JSONSkinLoader extends SkinLoader {
 				for (int i = 0; i < sk.filepath.length; i++) {
 					JsonSkin.Filepath pr = sk.filepath[i];
 					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path, pr.def);
+					for(JsonSkin.Category category : sk.category) {
+						for(int index = 0;index < category.item.length;index++) {
+							if(category.item[index].equals(pr.category)) {
+								categories.get(category)[index] = files[i];
+							}
+						}
+					}
 				}
 				header.setCustomFiles(files);
 
@@ -164,6 +178,13 @@ public class JSONSkinLoader extends SkinLoader {
 				for (int i = 0; i < sk.offset.length; i++) {
 					JsonSkin.Offset pr = sk.offset[i];
 					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id, pr.x, pr.y, pr.w, pr.h, pr.r, pr.a);
+					for(JsonSkin.Category category : sk.category) {
+						for(int index = 0;index < category.item.length;index++) {
+							if(category.item[index].equals(pr.category)) {
+								categories.get(category)[index] = offsets[i];
+							}
+						}
+					}
 				}
 				switch (header.getSkinType()) {
 					case PLAY_5KEYS:
@@ -181,7 +202,19 @@ public class JSONSkinLoader extends SkinLoader {
 						offsets[sk.offset.length + 3] = new SkinHeader.CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true);
 				}
 				header.setCustomOffsets(offsets);
-
+				
+				SkinHeader.CustomCategory[] category = new SkinHeader.CustomCategory[sk.category.length];
+				for(int i = 0;i < sk.category.length;i++) {
+					JsonSkin.Category pr = sk.category[i];
+					Array<SkinHeader.CustomItem> array = new Array<CustomItem>();
+					for(SkinHeader.CustomItem item : categories.get(pr)) {
+						if(item != null) {
+							array.add(item);
+						}
+					}
+					category[i] = new SkinHeader.CustomCategory(pr.name, array.toArray(SkinHeader.CustomItem.class)); 
+				}
+				header.setCustomCategories(category);
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -321,7 +354,7 @@ public class JSONSkinLoader extends SkinLoader {
 			
 			IntIntMap op = new IntIntMap();
 			
-			for (CustomOption option : header.getCustomOptions()) {
+			for (SkinHeader.CustomOption option : header.getCustomOptions()) {
 				int opvalue = option.getDefaultOption();
 				for (SkinConfig.Option opt : property.getOption()){
 					if(option.option.length > 0 && opt.name.equals(option.name)) {
@@ -342,7 +375,7 @@ public class JSONSkinLoader extends SkinLoader {
 			skin.setOption(op);
 
 			IntMap<SkinConfig.Offset> offset = new IntMap<>();
-			for (CustomOffset of : header.getCustomOffsets()) {
+			for (SkinHeader.CustomOffset of : header.getCustomOffsets()) {
 				SkinConfig.Offset off = null;
 				for(SkinConfig.Offset off2 : property.getOffset()) {
 					if (off2.name.equals(of.name)) {
@@ -568,26 +601,18 @@ public class JSONSkinLoader extends SkinLoader {
 							if (img.type < 0) {
 								Texture tex = getTexture(img.src, p);
 								if(tex != null) {
-									TextureRegion[][] imgs = null;
-									if(tex != null) {
-										TextureRegion[] images = getSourceImage(tex, img.x, img.y, img.w, img.h,
-												img.divx, img.divy);
-										final int len = img.type == -1 ? 11 : 28;
-										imgs = new TextureRegion[len][images.length / len];
-										for(int j = 0 ;j < len;j++) {
-											for(int i = 0 ;i < imgs[j].length;i++) {
-												imgs[j][i] = images[i * len + j];
-											}
+									TextureRegion[] images = getSourceImage(tex, img.x, img.y, img.w, img.h,
+											img.divx, img.divy);
+									final int len = img.type == -1 ? 11 : 28;
+									TextureRegion[][] imgs = new TextureRegion[len][images.length / len];
+									for(int j = 0 ;j < len;j++) {
+										for(int i = 0 ;i < imgs[j].length;i++) {
+											imgs[j][i] = images[i * len + j];
 										}
 									}
 
 									final int graphtype = img.type == -1 ? 0 : 1;
-
-									if(imgs != null) {
-										obj = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);
-									} else {
-										obj = new SkinDistributionGraph(graphtype);
-									}									
+									obj = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);									
 								}
 								
 							} else {

@@ -19,6 +19,7 @@ public class JsonSkin {
 		public int judgetimer = 1;
 		public int finishmargin = 0;
 
+		public Category[] category = new Category[0];
 		public Property[] property = new Property[0];
 		public Filepath[] filepath = new Filepath[0];
 		public Offset[] offset = new Offset[0];
@@ -49,8 +50,9 @@ public class JsonSkin {
 
 		public Destination[] destination;
 	}
-
+	
 	public static class Property {
+		public String category;
 		public String name;
 		public PropertyItem[] item = new PropertyItem[0];
 		public String def;
@@ -62,12 +64,14 @@ public class JsonSkin {
 	}
 
 	public static class Filepath {
+		public String category;
 		public String name;
 		public String path;
 		public String def;
 	}
 
 	public static class Offset {
+		public String category;
 		public String name;
 		public int id;
 		public boolean x;
@@ -76,6 +80,11 @@ public class JsonSkin {
 		public boolean h;
 		public boolean r;
 		public boolean a;
+	}
+
+	public static class Category {
+		public String name;
+		public String[] item = new String[0];
 	}
 
 	public static class Source {
