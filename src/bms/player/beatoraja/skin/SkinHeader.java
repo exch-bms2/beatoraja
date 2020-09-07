@@ -36,10 +36,22 @@ public class SkinHeader {
 	 * スキン名
 	 */
 	private String name;
-	
+	/**
+	 * カスタムオプション
+	 */
 	private CustomOption[] options = CustomOption.EMPTY_ARRAY;
+	/**
+	 * カスタムファイル
+	 */
 	private CustomFile[] files = CustomFile.EMPTY_ARRAY;
+	/**
+	 * カスタムオフセット
+	 */
 	private CustomOffset[] offsets = CustomOffset.EMPTY_ARRAY;
+	/**
+	 * カスタムカテゴリー
+	 */
+	private CustomCategory[] categories = CustomCategory.EMPTY_ARRAY;
 	/**
 	 * スキン解像度
 	 */
@@ -113,19 +125,40 @@ public class SkinHeader {
 		this.offsets = offsets;
 	}
 
+	public CustomCategory[] getCustomCategories() {
+		return categories;
+	}
+
+	public void setCustomCategories(CustomCategory[] categories) {
+		this.categories = categories;
+	}
+
+	/**
+	 * ユーザーが選択可能な項目
+	 * 
+	 * @author exch
+	 */
+	public static abstract class CustomItem {
+
+		/**
+		 * カスタムファイル名称
+		 */
+		public final String name;
+		
+		public CustomItem(String name) {
+			this.name = name;
+		}
+	}
+	
 	/**
 	 * 選択可能なオプション
 	 * 
 	 * @author exch
 	 */
-	public static class CustomOption {
+	public static class CustomOption extends CustomItem {
 
 		public static final CustomOption[] EMPTY_ARRAY = new CustomOption[0];
 
-		/**
-		 * カスタムオプション名称
-		 */
-		public final String name;
 		/**
 		 * 各オプションID
 		 */
@@ -140,14 +173,14 @@ public class SkinHeader {
 		public final String def;
 
 		public CustomOption(String name, int[] option, String[] contents) {
-			this.name = name;
+			super(name);
 			this.option = option;
 			this.contents = contents;
 			this.def = null;
 		}
 
 		public CustomOption(String name, int[] option, String[] contents, String def) {
-			this.name = name;
+			super(name);
 			this.option = option;
 			this.contents = contents;
 			this.def = def;
@@ -167,14 +200,10 @@ public class SkinHeader {
 	 * 
 	 * @author exch
 	 */
-	public static class CustomFile {
+	public static class CustomFile extends CustomItem {
 
 		public static final CustomFile[] EMPTY_ARRAY = new CustomFile[0];
 
-		/**
-		 * カスタムファイル名称
-		 */
-		public final String name;
 		/**
 		 * ファイル名
 		 */
@@ -185,7 +214,7 @@ public class SkinHeader {
 		public final String def;
 		
 		public CustomFile(String name, String path, String def) {
-			this.name = name;
+			super(name);
 			this.path = path;
 			this.def = def;
 		}
@@ -196,14 +225,10 @@ public class SkinHeader {
 	 * 
 	 * @author exch
 	 */
-	public static class CustomOffset {
+	public static class CustomOffset extends CustomItem {
 
 		public static final CustomOffset[] EMPTY_ARRAY = new CustomOffset[0];
 
-		/**
-		 * カスタムオフセット名称
-		 */
-		public final String name;
 		/**
 		 * オフセットID
 		 */
@@ -220,7 +245,7 @@ public class SkinHeader {
 		public final boolean a;
 		
 		public CustomOffset(String name, int id, boolean x, boolean y, boolean w, boolean h,boolean r,boolean a) {
-			this.name = name;
+			super(name);
 			this.id = id;
 			this.x = x;
 			this.y = y;
@@ -229,6 +254,31 @@ public class SkinHeader {
 			this.r = r;
 			this.a = a;
 		}
+	}
+	
+	/**
+	 * カテゴリー
+	 * 
+	 * @author exch
+	 */
+	public static class CustomCategory {
+	
+		public static final CustomCategory[] EMPTY_ARRAY = new CustomCategory[0];
+		
+		/**
+		 * カテゴリー名
+		 */
+		public final String name;
+		/**
+		 * カテゴリーのカスタムアイテム
+		 */
+		public final CustomItem[] items;
+		
+		public CustomCategory(String name, CustomItem[] items) {
+			this.name = name;
+			this.items = items;
+		}
+
 	}
 
 	public int getRandomSelectedOptions(String name) {
