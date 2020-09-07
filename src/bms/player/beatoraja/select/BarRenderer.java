@@ -37,8 +37,12 @@ public class BarRenderer {
 	/**
 	 * 現在のフォルダ階層
 	 */
-	private Queue<DirectoryBar> dir = new Queue<DirectoryBar>();
+	private Queue<DirectoryBar> dir = new Queue<>();
 	private String dirString = "";
+	/**
+	 * 各階層のフォルダを開く元となったバー
+	 */
+	private Queue<Bar> sourcebars = new Queue<>();
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -770,6 +774,8 @@ public class BarRenderer {
 
 	public boolean updateBar(Bar bar) {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
+		int prevdirsize = dir.size;
+		Bar sourcebar = null;
 		Array<Bar> l = new Array<Bar>();
 		boolean showInvisibleCharts = false;
 
@@ -780,6 +786,7 @@ public class BarRenderer {
 				prevbar = dir.first();
 			}
 			dir.clear();
+			sourcebars.clear();
 			l.addAll(new FolderBar(select, null, "e2977170").getChildren());
 			l.add(courses);
 			l.addAll(favorites);
@@ -791,6 +798,7 @@ public class BarRenderer {
 			if(dir.indexOf((DirectoryBar) bar, true) != -1) {
 				while(dir.last() != bar) {
 					prevbar = dir.removeLast();
+					sourcebar = sourcebars.removeLast();
 				}
 				dir.removeLast();
 			}
@@ -833,6 +841,9 @@ public class BarRenderer {
 
 			if (bar != null) {
 				dir.addLast((DirectoryBar) bar);
+				if (dir.size > prevdirsize) {
+					sourcebars.addLast(prevbar);
+				}
 			}
 
 			Bar[] newcurrentsongs = l.toArray(Bar.class);
@@ -865,6 +876,9 @@ public class BarRenderer {
 			selectedindex = 0;
 
 			// 変更前と同じバーがあればカーソル位置を保持する
+			if (sourcebar != null) {
+				prevbar = sourcebar;
+			}
 			if (prevbar != null) {
 				if (prevbar instanceof SongBar && ((SongBar) prevbar).existsSong()) {
 					final SongBar prevsong = (SongBar) prevbar;
