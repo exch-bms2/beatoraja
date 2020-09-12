@@ -138,7 +138,7 @@ public class MainLoader extends Application {
 			cfg.vSyncEnabled = config.isVsync();
 			cfg.backgroundFPS = config.getMaxFramePerSecond();
 			cfg.foregroundFPS = config.getMaxFramePerSecond();
-			cfg.title = MainController.VERSION;
+			cfg.title = MainController.getVersion();
 			
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
@@ -252,7 +252,7 @@ public class MainLoader extends Application {
 			bmsinfo.update(config);
 			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 			primaryStage.setScene(scene);
-			primaryStage.setTitle(MainController.VERSION + " configuration");
+			primaryStage.setTitle(MainController.getVersion() + " configuration");
 			primaryStage.setOnCloseRequest((event) -> {
 				bmsinfo.exit();
 			});
@@ -295,7 +295,7 @@ public class MainLoader extends Application {
 				ObjectMapper mapper = new ObjectMapper();
 				GithubLastestRelease lastestData = mapper.readValue(url, GithubLastestRelease.class);
 				final String name = lastestData.name;
-				if (MainController.VERSION.contains(name)) {
+				if (MainController.getVersion().contains(name)) {
 					message = "最新版を利用中です";
 				} else {
 					message = String.format("最新版[%s]を利用可能です。", name);
