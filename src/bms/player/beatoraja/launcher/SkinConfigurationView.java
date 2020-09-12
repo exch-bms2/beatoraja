@@ -299,143 +299,175 @@ public class SkinConfigurationView implements Initializable {
 		}
 		VBox main = new VBox();
 		
-		// Option項目生成
-		optionbox.clear();
-		for (CustomOption option : header.getCustomOptions()) {
-			HBox hbox = new HBox();
-			ComboBox<String> combo = new ComboBox<String>();
-			combo.getItems().setAll(option.contents);
-			combo.getItems().add("Random");
-			combo.getSelectionModel().select(0);
-			int selection = -1;
-			for(SkinConfig.Option o : property.getOption()) {
-				if (o.name.equals(option.name)) {
-					int i = o.value;
-					if(i != OPTION_RANDOM_VALUE) {
-						for(int index = 0;index < option.option.length;index++) {
-							if(option.option[index] == i) {
-								selection = index;
-								break;
-							}
-						}
-					} else {
-						selection = combo.getItems().size() - 1;
-					}
-					break;
-				}
+		List items = new ArrayList();
+		List<CustomItem> otheritems = new ArrayList<CustomItem>();
+		otheritems.addAll(Arrays.asList(header.getCustomOptions()));
+		otheritems.addAll(Arrays.asList(header.getCustomFiles()));
+		otheritems.addAll(Arrays.asList(header.getCustomOffsets()));		
+		
+		// カテゴリー処理
+		for(CustomCategory category : header.getCustomCategories()) {
+			items.add(category.name);
+			for(Object item : category.items) {
+				items.add(item);
+				otheritems.remove(item);
 			}
-			if (selection < 0 && option.def != null) {
-				for (int index = 0; index < option.option.length; index++) {
-					if (option.contents[index].equals(option.def)) {
-						selection = index;
-					}
-				}
-			}
-			if (selection >= 0) {
-				combo.getSelectionModel().select(selection);
-			}
-
-			Label label = new Label(option.name);
-			label.setMinWidth(250.0);
-			hbox.getChildren().addAll(label, combo);
-			optionbox.put(option, combo);
-			main.getChildren().add(hbox);
+			items.add("");
 		}
 		
-		// File項目生成
+		if(items.size() > 0 && otheritems.size() > 0) {
+			items.add("Other");			
+		}
+		items.addAll(otheritems);
+		
+		optionbox.clear();
 		filebox.clear();
-		for (CustomFile file : header.getCustomFiles()) {
-			String name = file.path.substring(file.path.lastIndexOf('/') + 1);
-			if(file.path.contains("|")) {
-				if(file.path.length() > file.path.lastIndexOf('|') + 1) {
-					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|')) + file.path.substring(file.path.lastIndexOf('|') + 1);
-				} else {
-					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
-				}
-			}
-			
-			final int slashindex = file.path.lastIndexOf('/');
-			final Path dirpath = slashindex != -1 ? Paths.get(file.path.substring(0, slashindex)) : Paths.get(file.path);
-			if (!Files.exists(dirpath)) {
-				continue;
-			}
-			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dirpath,
-					"{" + name.toLowerCase() + "," + name.toUpperCase() + "}")) {
+		offsetbox.clear();
+		
+		for(Object item : items) {
+			if(item instanceof CustomOption) {
+				// Option項目生成
+				final CustomOption option = (CustomOption) item;
 				HBox hbox = new HBox();
 				ComboBox<String> combo = new ComboBox<String>();
-				for (Path p : paths) {
-					combo.getItems().add(p.getFileName().toString());
-				}
+				combo.getItems().setAll(option.contents);
 				combo.getItems().add("Random");
-
-				String selection = null;
-				for(SkinConfig.FilePath f : property.getFile()) {
-					if(f.name.equals(file.name)) {
-						selection = f.path;
+				combo.getSelectionModel().select(0);
+				int selection = -1;
+				for(SkinConfig.Option o : property.getOption()) {
+					if (o.name.equals(option.name)) {
+						int i = o.value;
+						if(i != OPTION_RANDOM_VALUE) {
+							for(int index = 0;index < option.option.length;index++) {
+								if(option.option[index] == i) {
+									selection = index;
+									break;
+								}
+							}
+						} else {
+							selection = combo.getItems().size() - 1;
+						}
 						break;
 					}
 				}
-				if (selection == null && file.def != null) {
-					// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
-					for (String item : combo.getItems()) {
-						if (item.equalsIgnoreCase(file.def)) {
-							selection = item;
-							break;
-						}
-						int point = item.lastIndexOf('.');
-						if (point != -1 && item.substring(0, point).equalsIgnoreCase(file.def)) {
-							selection = item;
-							break;
+				if (selection < 0 && option.def != null) {
+					for (int index = 0; index < option.option.length; index++) {
+						if (option.contents[index].equals(option.def)) {
+							selection = index;
 						}
 					}
 				}
-				if (selection != null) {
-					combo.setValue(selection);
-				} else {
-					combo.getSelectionModel().select(0);
+				if (selection >= 0) {
+					combo.getSelectionModel().select(selection);
 				}
 
-				Label label = new Label(file.name);
+				Label label = new Label(option.name);
 				label.setMinWidth(250.0);
 				hbox.getChildren().addAll(label, combo);
-				filebox.put(file, combo);
+				optionbox.put(option, combo);
 				main.getChildren().add(hbox);
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
-		}
-		
-		// Offset項目生成
-		offsetbox.clear();
-		for (CustomOffset option : header.getCustomOffsets()) {
-			final String[] values = {"x","y","w","h","r","a"};
-			HBox hbox = new HBox();
-			Label label = new Label(option.name);
-			label.setMinWidth(250.0);
-			hbox.getChildren().add(label);
+			if(item instanceof CustomFile) {
+				// File項目生成
+				final CustomFile file = (CustomFile) item;
+				String name = file.path.substring(file.path.lastIndexOf('/') + 1);
+				if(file.path.contains("|")) {
+					if(file.path.length() > file.path.lastIndexOf('|') + 1) {
+						name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|')) + file.path.substring(file.path.lastIndexOf('|') + 1);
+					} else {
+						name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
+					}
+				}
+				
+				final int slashindex = file.path.lastIndexOf('/');
+				final Path dirpath = slashindex != -1 ? Paths.get(file.path.substring(0, slashindex)) : Paths.get(file.path);
+				if (!Files.exists(dirpath)) {
+					continue;
+				}
+				try (DirectoryStream<Path> paths = Files.newDirectoryStream(dirpath,
+						"{" + name.toLowerCase() + "," + name.toUpperCase() + "}")) {
+					HBox hbox = new HBox();
+					ComboBox<String> combo = new ComboBox<String>();
+					for (Path p : paths) {
+						combo.getItems().add(p.getFileName().toString());
+					}
+					combo.getItems().add("Random");
 
-			final boolean[] b = {option.x, option.y, option.w, option.h, option.r, option.a};
-			SkinConfig.Offset offset = null;
-			for(SkinConfig.Offset o : property.getOffset()) {
-				if(o.name.equals(option.name)) {
-					offset = o;
-					break;
+					String selection = null;
+					for(SkinConfig.FilePath f : property.getFile()) {
+						if(f.name.equals(file.name)) {
+							selection = f.path;
+							break;
+						}
+					}
+					if (selection == null && file.def != null) {
+						// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
+						for (String filename : combo.getItems()) {
+							if (filename.equalsIgnoreCase(file.def)) {
+								selection = filename;
+								break;
+							}
+							int point = filename.lastIndexOf('.');
+							if (point != -1 && filename.substring(0, point).equalsIgnoreCase(file.def)) {
+								selection = filename;
+								break;
+							}
+						}
+					}
+					if (selection != null) {
+						combo.setValue(selection);
+					} else {
+						combo.getSelectionModel().select(0);
+					}
+
+					Label label = new Label(file.name);
+					label.setMinWidth(250.0);
+					hbox.getChildren().addAll(label, combo);
+					filebox.put(file, combo);
+					main.getChildren().add(hbox);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
-			final int[] v = offset != null ? new int[]{offset.x, offset.y, offset.w, offset.h, offset.r, offset.a} : new int[values.length];
+			if(item instanceof CustomOffset) {
+				// Offset項目生成
+				final CustomOffset option = (CustomOffset) item;
+				final String[] values = {"x","y","w","h","r","a"};
+				HBox hbox = new HBox();
+				Label label = new Label(option.name);
+				label.setMinWidth(250.0);
+				hbox.getChildren().add(label);
 
-			Spinner<Integer>[] spinner = new Spinner[values.length];
-			for(int i = 0;i < spinner.length;i++) {
-				spinner[i] = new NumericSpinner();
-				spinner[i].setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-9999,9999,v[i],1));
-				spinner[i].setPrefWidth(80);
-				spinner[i].setEditable(true);
-				if(b[i]) {
-					hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
+				final boolean[] b = {option.x, option.y, option.w, option.h, option.r, option.a};
+				SkinConfig.Offset offset = null;
+				for(SkinConfig.Offset o : property.getOffset()) {
+					if(o.name.equals(option.name)) {
+						offset = o;
+						break;
+					}
 				}
+				final int[] v = offset != null ? new int[]{offset.x, offset.y, offset.w, offset.h, offset.r, offset.a} : new int[values.length];
+
+				Spinner<Integer>[] spinner = new Spinner[values.length];
+				for(int i = 0;i < spinner.length;i++) {
+					spinner[i] = new NumericSpinner();
+					spinner[i].setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-9999,9999,v[i],1));
+					spinner[i].setPrefWidth(80);
+					spinner[i].setEditable(true);
+					if(b[i]) {
+						hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
+					}
+				}
+				offsetbox.put(option, spinner);
+				main.getChildren().add(hbox);
 			}
-			offsetbox.put(option, spinner);
-			main.getChildren().add(hbox);
+			if(item instanceof String) {
+				HBox hbox = new HBox();
+				Label label = new Label(item.toString());
+				label.setStyle("-fx-font-size: " + (item.toString().length() > 0 ? 20 : 8) +"px;  -fx-text-fill: #0088ff; -fx-label-padding: 0 0 10px 20px;" );
+				hbox.getChildren().add(label);
+				main.getChildren().add(hbox);
+			}
 		}
 
 		return main;
