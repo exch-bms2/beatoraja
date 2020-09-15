@@ -1,7 +1,11 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.SkinConfig;
 
+import static bms.player.beatoraja.skin.SkinProperty.OPTION_RANDOM_VALUE;
+
+import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -58,6 +62,7 @@ public class SkinHeader {
 	private Resolution resolution = Resolution.SD;
 	/**
 	 * ランダムで選択されたオプション名と値
+	 * TODO 限定的な使用のため、CustomOptionに持たせてこれを削除予定
 	 */
 	private Map<String, Integer> randomSelectedOptions = new HashMap<>();
 
@@ -132,6 +137,77 @@ public class SkinHeader {
 	public void setCustomCategories(CustomCategory[] categories) {
 		this.categories = categories;
 	}
+	
+	public void setSkinConfigProperty(SkinConfig.Property property) {
+		for (SkinHeader.CustomOption customOption : getCustomOptions()) {
+			int op = customOption.getDefaultOption();
+			for (SkinConfig.Option option : property.getOption()) {
+				if (option.name.equals(customOption.name)) {
+					if (option.value != OPTION_RANDOM_VALUE) {
+						op = option.value;
+					} else {
+						if (customOption.option.length > 0) {
+							op = customOption.option[(int) (Math.random() * customOption.option.length)];
+						}
+					}
+					break;
+				}
+			}
+			for(int i = 0;i < customOption.option.length;i++) {
+				if(customOption.option[i] == op) {
+					customOption.selectedIndex = i;
+				}
+			}	
+		}
+		
+		for (SkinHeader.CustomFile customFile : getCustomFiles()) {
+			for (SkinConfig.FilePath file : property.getFile()) {
+				if (customFile.name.equals(file.name)) {
+					if (!file.path.equals("Random")) {
+						customFile.filename = file.path;
+					} else {
+						String ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1);
+						if (customFile.path.contains("|")) {
+							if (customFile.path.length() > customFile.path.lastIndexOf('|') + 1) {
+								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|')) + customFile.path.substring(customFile.path.lastIndexOf('|') + 1);
+							} else {
+								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|'));
+							}
+						}
+						final int slashindex = customFile.path.lastIndexOf('/');
+						File dir = slashindex != -1 ? new File(customFile.path.substring(0, slashindex)) : new File(customFile.path);
+						if (dir.exists() && dir.isDirectory()) {
+							List<File> l = new ArrayList<File>();
+							for (File subfile : dir.listFiles()) {
+								if (subfile.getPath().toLowerCase().endsWith(ext)) {
+									l.add(subfile);
+								}
+							}
+							if (l.size() > 0) {
+								String filename = l.get((int) (Math.random() * l.size())).getName();
+								customFile.filename = filename;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		for (SkinHeader.CustomOffset of : getCustomOffsets()) {
+			SkinConfig.Offset off = null;
+			for(SkinConfig.Offset off2 : property.getOffset()) {
+				if (off2.name.equals(of.name)) {
+					off = off2;
+					break;
+				}
+			}
+			if(off == null) {
+				off = new SkinConfig.Offset();
+				off.name = of.name;
+			}
+			of.offset = off;
+		}
+	}
 
 	/**
 	 * ユーザーが選択可能な項目
@@ -171,6 +247,8 @@ public class SkinHeader {
 		 * デフォルトオプション名
 		 */
 		public final String def;
+		
+		private int selectedIndex = -1;
 
 		public CustomOption(String name, int[] option, String[] contents) {
 			super(name);
@@ -193,6 +271,10 @@ public class SkinHeader {
 			}
 			return option.length > 0 ? option[0] : SkinProperty.OPTION_RANDOM_VALUE;
 		}
+		
+		public int getSelectedOption() {
+			return (selectedIndex >= 0 && selectedIndex < option.length) ? option[selectedIndex] : SkinProperty.OPTION_RANDOM_VALUE;
+		}
 	}
 
 	/**
@@ -205,7 +287,7 @@ public class SkinHeader {
 		public static final CustomFile[] EMPTY_ARRAY = new CustomFile[0];
 
 		/**
-		 * ファイル名
+		 * ファイルパス
 		 */
 		public final String path;
 		/**
@@ -213,10 +295,16 @@ public class SkinHeader {
 		 */
 		public final String def;
 		
+		private String filename;
+		
 		public CustomFile(String name, String path, String def) {
 			super(name);
 			this.path = path;
 			this.def = def;
+		}
+		
+		public String getSelectedFilename() {
+			return filename;
 		}
 	}
 	
@@ -244,6 +332,8 @@ public class SkinHeader {
 		public final boolean r;
 		public final boolean a;
 		
+		private SkinConfig.Offset offset;
+		
 		public CustomOffset(String name, int id, boolean x, boolean y, boolean w, boolean h,boolean r,boolean a) {
 			super(name);
 			this.id = id;
@@ -253,6 +343,10 @@ public class SkinHeader {
 			this.h = h;
 			this.r = r;
 			this.a = a;
+		}
+		
+		public SkinConfig.Offset getOffset() {
+			return offset;
 		}
 	}
 	
@@ -281,6 +375,7 @@ public class SkinHeader {
 
 	}
 
+	 // TODO 限定的な使用のため、CustomOptionに持たせて以下を削除予定
 	public int getRandomSelectedOptions(String name) {
 		if(randomSelectedOptions.containsKey(name)) return randomSelectedOptions.get(name);
 		return -1;
