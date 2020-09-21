@@ -60,11 +60,6 @@ public class SkinHeader {
 	 * スキン解像度
 	 */
 	private Resolution resolution = Resolution.SD;
-	/**
-	 * ランダムで選択されたオプション名と値
-	 * TODO 限定的な使用のため、CustomOptionに持たせてこれを削除予定
-	 */
-	private Map<String, Integer> randomSelectedOptions = new HashMap<>();
 
 	public SkinType getSkinType() {
 		return mode;
@@ -373,15 +368,5 @@ public class SkinHeader {
 			this.items = items;
 		}
 
-	}
-
-	 // TODO 限定的な使用のため、CustomOptionに持たせて以下を削除予定
-	public int getRandomSelectedOptions(String name) {
-		if(randomSelectedOptions.containsKey(name)) return randomSelectedOptions.get(name);
-		return -1;
-	}
-
-	public void setRandomSelectedOptions(String name, int value) {
-		randomSelectedOptions.put(name, value);
 	}
 }
