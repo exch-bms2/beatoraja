@@ -341,18 +341,7 @@ public class SkinLuaAccessor {
 		LuaTable enabled_options = new LuaTable();
 		
 		for (CustomOption option : header.getCustomOptions()) {
-			int opvalue = option.getDefaultOption();
-			for (SkinConfig.Option op : property.getOption()){
-				if(option.option.length > 0 && option.name.equals(op.name)) {
-					if(opvalue == SkinProperty.OPTION_RANDOM_VALUE) {
-						opvalue = option.option[(int) (Math.random() * option.option.length)];
-						header.setRandomSelectedOptions(option.name, opvalue);
-					} else {
-						opvalue = op.value;
-					}
-					break;
-				}
-			}
+			int opvalue = option.getSelectedOption();
 			options.set(option.name, opvalue);
 			enabled_options.insert(enabled_options.length() + 1, LuaInteger.valueOf(opvalue));				
 		}

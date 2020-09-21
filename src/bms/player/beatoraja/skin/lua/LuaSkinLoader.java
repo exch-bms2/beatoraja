@@ -7,6 +7,8 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.json.JsonSkin;
 import bms.player.beatoraja.skin.property.*;
+
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
@@ -58,8 +60,19 @@ public class LuaSkinLoader extends JSONSkinLoader {
 	public Skin load(Path p, SkinType type, SkinConfig.Property property) {
 		Skin skin = null;
 		SkinHeader header = loadHeader(p);
-		try {
-			initFileMap(header, property);
+		if(header == null) {
+			return null;
+		}
+		header.setSkinConfigProperty(property);
+		
+		try {			
+			filemap = new ObjectMap<>();
+			for(SkinHeader.CustomFile customFile : header.getCustomFiles()) {
+				if(customFile.getSelectedFilename() != null) {
+					filemap.put(customFile.path, customFile.getSelectedFilename());
+				}
+			}
+
 			lua.exportSkinProperty(header, property, (String path) -> {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
