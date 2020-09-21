@@ -229,13 +229,21 @@ public class JSONSkinLoader extends SkinLoader {
 		if(header == null) {
 			return null;
 		}
+		header.setSkinConfigProperty(property);
 
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 
-			serializer.setSerializers(json, getEnabledOptions(header, property), p);
-			initFileMap(header, property);
+			serializer.setSerializers(json, getEnabledOptions(header), p);
+			
+			filemap = new ObjectMap<>();
+			for(SkinHeader.CustomFile customFile : header.getCustomFiles()) {
+				if(customFile.getSelectedFilename() != null) {
+					filemap.put(customFile.path, customFile.getSelectedFilename());
+				}
+			}
+
 			lua.exportSkinProperty(header, property, (String path) -> {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
@@ -251,62 +259,12 @@ public class JSONSkinLoader extends SkinLoader {
 		return skin;
 	}
 
-	protected HashSet<Integer> getEnabledOptions(SkinHeader header, SkinConfig.Property property) {
+	protected HashSet<Integer> getEnabledOptions(SkinHeader header) {
 		HashSet<Integer> enabledOptions = new HashSet<>();
 		for (SkinHeader.CustomOption customOption : header.getCustomOptions()) {
-			int op = customOption.getDefaultOption();
-			for (SkinConfig.Option option : property.getOption()) {
-				if (option.name.equals(customOption.name)) {
-					if (option.value != OPTION_RANDOM_VALUE) {
-						op = option.value;
-					} else {
-						if (customOption.option.length > 0) {
-							op = customOption.option[(int) (Math.random() * customOption.option.length)];
-							header.setRandomSelectedOptions(option.name, op);
-						}
-					}
-					break;
-				}
-			}
-			enabledOptions.add(op);
-		}
+			enabledOptions.add(customOption.getSelectedOption());	
+		}		
 		return enabledOptions;
-	}
-
-	protected void initFileMap(SkinHeader header, SkinConfig.Property property) {
-		filemap = new ObjectMap<>();
-		for (SkinHeader.CustomFile customFile : header.getCustomFiles()) {
-			for (SkinConfig.FilePath file : property.getFile()) {
-				if (customFile.name.equals(file.name)) {
-					if (!file.path.equals("Random")) {
-						filemap.put(customFile.path, file.path);
-					} else {
-						String ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1);
-						if (customFile.path.contains("|")) {
-							if (customFile.path.length() > customFile.path.lastIndexOf('|') + 1) {
-								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|')) + customFile.path.substring(customFile.path.lastIndexOf('|') + 1);
-							} else {
-								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|'));
-							}
-						}
-						final int slashindex = customFile.path.lastIndexOf('/');
-						File dir = slashindex != -1 ? new File(customFile.path.substring(0, slashindex)) : new File(customFile.path);
-						if (dir.exists() && dir.isDirectory()) {
-							List<File> l = new ArrayList<File>();
-							for (File subfile : dir.listFiles()) {
-								if (subfile.getPath().toLowerCase().endsWith(ext)) {
-									l.add(subfile);
-								}
-							}
-							if (l.size() > 0) {
-								String filename = l.get((int) (Math.random() * l.size())).getName();
-								filemap.put(customFile.path, filename);
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 
 	protected Skin loadJsonSkin(SkinHeader header, JsonSkin.Skin sk, SkinType type, SkinConfig.Property property, Path p){
@@ -353,41 +311,16 @@ public class JSONSkinLoader extends SkinLoader {
 			}
 			
 			IntIntMap op = new IntIntMap();
-			
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {
-				int opvalue = option.getDefaultOption();
-				for (SkinConfig.Option opt : property.getOption()){
-					if(option.option.length > 0 && opt.name.equals(option.name)) {
-						if(opvalue == SkinProperty.OPTION_RANDOM_VALUE) {
-							opvalue = option.option[(int) (Math.random() * option.option.length)];
-							header.setRandomSelectedOptions(option.name, opvalue);
-						} else {
-							opvalue = opt.value;
-						}
-						break;
-					}
-				}
-				
 				for (int i = 0; i < option.option.length; i++) {
-					op.put(option.option[i], option.option[i] == opvalue ? 1 : 0);
+					op.put(option.option[i], option.option[i] == option.getSelectedOption() ? 1 : 0);
 				}
 			}
 			skin.setOption(op);
 
 			IntMap<SkinConfig.Offset> offset = new IntMap<>();
 			for (SkinHeader.CustomOffset of : header.getCustomOffsets()) {
-				SkinConfig.Offset off = null;
-				for(SkinConfig.Offset off2 : property.getOffset()) {
-					if (off2.name.equals(of.name)) {
-						off = off2;
-						break;
-					}
-				}
-				if(off == null) {
-					off = new SkinConfig.Offset();
-					off.name = of.name;
-				}				
-				offset.put(of.id, off);
+				offset.put(of.id, of.getOffset());
 			}
 			skin.setOffset(offset);
 
