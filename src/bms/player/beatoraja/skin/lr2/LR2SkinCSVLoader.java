@@ -841,28 +841,23 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			ObjectMap<String, Object> property) throws IOException {
 		this.skin = skin;
 		this.state = state;
-		for (String key : property.keys()) {
-			if (property.get(key) != null) {
-				if (property.get(key) instanceof Integer) {
-					op.put((Integer) property.get(key), 1);
-				}
-				if (property.get(key) instanceof String) {
-					for (CustomFile file : header.getCustomFiles()) {
-						if (file.name.equals(key)) {
-							filemap.put(file.path, (String) property.get(key));
-							break;
-						}
-					}
-				}
+
+		for (CustomOption opt : header.getCustomOptions()) {
+			int value = opt.getSelectedOption();
+			if(value != OPTION_RANDOM_VALUE) {
+				op.put((Integer) value, 1);
 			}
 		}
-
-		IntMap<SkinConfig.Offset> offset = new IntMap<>();
-		for (CustomOffset of : header.getCustomOffsets()) {
-			final Object o = property.get(of.name);
-			if(o instanceof Offset) {
-				offset.put(of.id, (Offset)o);				
+		for (CustomFile cf : header.getCustomFiles()) {
+			String filename = cf.getSelectedFilename();
+			if(filename != null) {
+				filemap.put(cf.path, filename);
 			}
+		}
+		
+		IntMap<SkinConfig.Offset> offset = new IntMap<>();
+		for (SkinHeader.CustomOffset of : header.getCustomOffsets()) {
+			offset.put(of.id, of.getOffset());
 		}
 		skin.setOffset(offset);
 
@@ -978,24 +973,6 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	public S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
 		// TODO SkinHeaderに既にproperty値が読まれているため、ObjectMapでの受け渡しは不要。後で削除
 		ObjectMap m = new ObjectMap();
-
-		for (CustomOption opt : header.getCustomOptions()) {
-			int value = opt.getSelectedOption();
-			if(value != OPTION_RANDOM_VALUE) {
-				m.put(opt.name, value);
-			}
-		}
-
-		for (CustomFile cf : header.getCustomFiles()) {
-			String filename = cf.getSelectedFilename();
-			if(filename != null) {
-				m.put(cf.name, filename);
-			}
-		}
-		
-		for(SkinConfig.Offset offset : property.getOffset()) {
-			m.put(offset.name, offset);
-		}
 
 		mode = header.getSkinType().getMode();
 
