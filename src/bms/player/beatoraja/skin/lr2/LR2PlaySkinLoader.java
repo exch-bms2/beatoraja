@@ -792,8 +792,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				values[19], values[20], readOffset(str, 21, offset));
 	}
 
-	public PlaySkin loadSkin(Path f, MainState player, SkinHeader header, IntIntMap option,
-			ObjectMap property) throws IOException {
+	public PlaySkin loadSkin(Path f, MainState player, SkinHeader header, IntIntMap option) throws IOException {
 		mode = type.getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];
@@ -817,7 +816,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			playerr[i] = new Rectangle();
 		}
 
-		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
+		this.loadSkin(new PlaySkin(src, dst), f, player, header, option);
 
 		//白数字が0の時のレーンカバーのy座標の分だけレーンの高さを減らす
 		//TODO 固有実装の汎用化

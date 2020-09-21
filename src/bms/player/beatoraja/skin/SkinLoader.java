@@ -66,8 +66,7 @@ public abstract class SkinLoader {
                 LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(resource.getConfig());
                 SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperties());
                 LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
-                Skin skin = dloader.loadSkin(Paths.get(sc.getPath()), state, header, loader.getOption(),
-                        sc.getProperties());
+                Skin skin = dloader.loadSkin(Paths.get(sc.getPath()), state, header, loader.getOption());
                 SkinLoader.resource.disposeOld();
                 return skin;
             }

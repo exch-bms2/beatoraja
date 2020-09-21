@@ -28,9 +28,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 		addCommandWord(ResultCommand.values());
 	}
 
-	public MusicResultSkin loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option,
-			ObjectMap property) throws IOException {
-		return this.loadSkin(new MusicResultSkin(src, dst), f, state, header, option, property);
+	public MusicResultSkin loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException {
+		return this.loadSkin(new MusicResultSkin(src, dst), f, state, header, option);
 	}
 
 }

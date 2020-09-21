@@ -12,8 +12,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import com.badlogic.gdx.utils.IntIntMap;
-import com.badlogic.gdx.utils.ObjectMap;
 
+/**
+ * LR2スキンセレクトスキン読み込み用クラス
+ * 
+ * @author exch
+ */
 public class LR2SkinSelectSkinLoader extends LR2SkinCSVLoader<SkinConfigurationSkin> {
 
 	public LR2SkinSelectSkinLoader(final Resolution src, final Config c) {
@@ -27,9 +31,8 @@ public class LR2SkinSelectSkinLoader extends LR2SkinCSVLoader<SkinConfigurationS
 		});
 	}
 
-	public SkinConfigurationSkin loadSkin(Path f, MainState selector, SkinHeader header,
-	                                      IntIntMap option, ObjectMap property) throws IOException {
-		SkinConfigurationSkin skin = this.loadSkin(new SkinConfigurationSkin(src, dst), f, selector, header, option, property);
+	public SkinConfigurationSkin loadSkin(Path f, MainState selector, SkinHeader header, IntIntMap option) throws IOException {
+		SkinConfigurationSkin skin = this.loadSkin(new SkinConfigurationSkin(src, dst), f, selector, header, option);
 		int count = 0;
 		for (SkinObject obj : skin.getAllSkinObjects()) {
 			if (SkinPropertyMapper.isSkinCustomizeButton(obj.getClickeventId())) {

@@ -11,7 +11,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -837,10 +836,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	private ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
-	protected S loadSkin(S skin, Path f, MainState state, SkinHeader header, IntIntMap option,
-			ObjectMap<String, Object> property) throws IOException {
+	protected S loadSkin(S skin, Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException {
 		this.skin = skin;
 		this.state = state;
+		mode = header.getSkinType().getMode();
 
 		for (CustomOption opt : header.getCustomOptions()) {
 			int value = opt.getSelectedOption();
@@ -970,16 +969,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return images;
 	}
 
-	public S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
-		// TODO SkinHeaderに既にproperty値が読まれているため、ObjectMapでの受け渡しは不要。後で削除
-		ObjectMap m = new ObjectMap();
-
-		mode = header.getSkinType().getMode();
-
-		return loadSkin(f, state, header, option, m);
-	}
-
-	public abstract S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
+	public abstract S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException;
 
 	/**
 	 * SkinTypeに対応したLR2SkinCSVLoaderを返す

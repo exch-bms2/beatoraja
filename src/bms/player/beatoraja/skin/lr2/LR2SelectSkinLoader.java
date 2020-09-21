@@ -12,7 +12,6 @@ import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.IntIntMap;
-import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * LR2セレクトスキンローダー
@@ -557,9 +556,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 
 	}
 
-	public MusicSelectSkin loadSkin(Path f, MainState selector, SkinHeader header,
-			IntIntMap option, ObjectMap property) throws IOException {
-		MusicSelectSkin skin = this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option, property);
+	public MusicSelectSkin loadSkin(Path f, MainState selector, SkinHeader header, IntIntMap option) throws IOException {
+		MusicSelectSkin skin = this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option);
 		skinbar.setBarImage(barimageon, barimageoff);
 		return skin;
 	}
