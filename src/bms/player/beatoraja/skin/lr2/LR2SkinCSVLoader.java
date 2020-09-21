@@ -976,50 +976,23 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	}
 
 	public S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
+		// TODO SkinHeaderに既にproperty値が読まれているため、ObjectMapでの受け渡しは不要。後で削除
 		ObjectMap m = new ObjectMap();
-		for(SkinConfig.Option op : property.getOption()) {
-			if(op.value != OPTION_RANDOM_VALUE) {
-				m.put(op.name, op.value);
-			} else {
-				for (CustomOption opt : header.getCustomOptions()) {
-					if(op.name.equals(opt.name)) {
-						if(header.getRandomSelectedOptions(op.name) >= 0) m.put(op.name, header.getRandomSelectedOptions(op.name));
-					}
-				}
+
+		for (CustomOption opt : header.getCustomOptions()) {
+			int value = opt.getSelectedOption();
+			if(value != OPTION_RANDOM_VALUE) {
+				m.put(opt.name, value);
 			}
 		}
-		for(SkinConfig.FilePath file : property.getFile()) {
-			if(!file.path.equals("Random")) {
-				m.put(file.name, file.path);
-			} else {
-				for (CustomFile cf : header.getCustomFiles()) {
-					if(file.name.equals(cf.name)) {
-						String ext = cf.path.substring(cf.path.lastIndexOf("*") + 1);
-						if(cf.path.contains("|")) {
-							if(cf.path.length() > cf.path.lastIndexOf('|') + 1) {
-								ext = cf.path.substring(cf.path.lastIndexOf("*") + 1, cf.path.indexOf('|')) + cf.path.substring(cf.path.lastIndexOf('|') + 1);
-							} else {
-								ext = cf.path.substring(cf.path.lastIndexOf("*") + 1, cf.path.indexOf('|'));
-							}
-						}
-						final int slashindex = cf.path.lastIndexOf('/');
-						File dir = slashindex != -1 ? new File(cf.path.substring(0, slashindex)) : new File(cf.path);
-						if (dir.exists() && dir.isDirectory()) {
-							Array<File> l = new Array<File>();
-							for (File subfile : dir.listFiles()) {
-								if (subfile.getPath().toLowerCase().endsWith(ext)) {
-									l.add(subfile);
-								}
-							}
-							if (l.size > 0) {
-								String filename = l.get((int) (Math.random() * l.size)).getName();
-								m.put(file.name, filename);
-							}
-						}
-					}
-				}
+
+		for (CustomFile cf : header.getCustomFiles()) {
+			String filename = cf.getSelectedFilename();
+			if(filename != null) {
+				m.put(cf.name, filename);
 			}
 		}
+		
 		for(SkinConfig.Offset offset : property.getOffset()) {
 			m.put(offset.name, offset);
 		}
