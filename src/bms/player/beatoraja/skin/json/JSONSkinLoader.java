@@ -294,14 +294,19 @@ public class JSONSkinLoader extends SkinLoader {
 			case PLAY_24KEYS:
 			case PLAY_24KEYS_DOUBLE:
 				break;
+			case DECIDE:
+				objectLoader = new JsonDecideSkinObjectLoader(this);
+				break;
 			case RESULT:
 				break;
 			case COURSE_RESULT:
 				break;
 			case SKIN_SELECT:
+				objectLoader = new JsonSkinConfigurationSkinObjectLoader(this);
 				break;
 			case KEY_CONFIG:
 			default:
+				objectLoader = new JsonKeyConfigurationSkinObjectLoader(this);
 				break;				
 			}
 			
@@ -315,22 +320,12 @@ public class JSONSkinLoader extends SkinLoader {
 				((PlaySkin) skin).setJudgetimer(sk.judgetimer);
 				((PlaySkin) skin).setFinishMargin(sk.finishmargin);
 			} else switch(type) {
-			case DECIDE:
-				skin = new MusicDecideSkin(src, dstr);
-				break;
 			case RESULT:
 				skin = new MusicResultSkin(src, dstr);
 				break;
 			case COURSE_RESULT:
 				skin = new CourseResultSkin(src, dstr);
 				break;
-			case SKIN_SELECT:
-				skin = new SkinConfigurationSkin(src, dstr);
-				break;
-			case KEY_CONFIG:
-			default:
-				skin = new KeyConfigurationSkin(src, dstr);
-				break;				
 			}
 			
 			IntIntMap op = new IntIntMap();
@@ -930,7 +925,7 @@ public class JSONSkinLoader extends SkinLoader {
 					}
 					
 					if(objectLoader != null) {
-						SkinObject sobj = objectLoader.loadSkinObject(skin, sk, dst.id, p);
+						SkinObject sobj = objectLoader.loadSkinObject(skin, sk, dst, p);
 						if(sobj != null) {
 							obj = sobj;
 						}
@@ -1074,7 +1069,7 @@ public class JSONSkinLoader extends SkinLoader {
 		}
 	}
 	
-	private Object getSource(String srcid, Path p) {
+	protected Object getSource(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
 		}

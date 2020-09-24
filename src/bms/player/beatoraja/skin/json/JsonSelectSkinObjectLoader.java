@@ -29,8 +29,13 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 	}
 
 	@Override
-	public SkinObject loadSkinObject(Skin skin, JsonSkin.Skin sk, String dstid, Path p) {
-		if (sk.songlist != null && dstid.equals(sk.songlist.id)) {
+	public SkinObject loadSkinObject(Skin skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
+		SkinObject obj =super.loadSkinObject(skin, sk, dst, p);
+		if(obj != null) {
+			return obj;
+		}
+		
+		if (sk.songlist != null && dst.id.equals(sk.songlist.id)) {
 			SkinBar barobj = new SkinBar(0);
 
 			SkinImage[] onimage = new SkinImage[sk.songlist.liston.length];

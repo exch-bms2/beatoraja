@@ -9,14 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.skin.Skin;
-import bms.player.beatoraja.skin.SkinLoader;
-import bms.player.beatoraja.skin.SkinObject;
-import bms.player.beatoraja.skin.SkinSource;
-import bms.player.beatoraja.skin.SkinSourceImage;
-import bms.player.beatoraja.skin.SkinText;
-import bms.player.beatoraja.skin.SkinTextBitmap;
-import bms.player.beatoraja.skin.SkinTextFont;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.json.JSONSkinLoader.SourceData;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
@@ -38,7 +31,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 	
 	public abstract S getSkin(Resolution src, Resolution dst);
 	
-	public abstract SkinObject loadSkinObject(Skin skin, JsonSkin.Skin sk, String dstid, Path p);
+	public SkinObject loadSkinObject(Skin skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
+		return null;
+	}
 
 	protected Texture getTexture(String srcid, Path p) {
 		if(srcid == null) {
