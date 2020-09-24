@@ -29,7 +29,7 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 	}
 
 	@Override
-	public SkinObject loadSkinObject(Skin skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
+	public SkinObject loadSkinObject(MusicSelectSkin skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
 		SkinObject obj =super.loadSkinObject(skin, sk, dst, p);
 		if(obj != null) {
 			return obj;

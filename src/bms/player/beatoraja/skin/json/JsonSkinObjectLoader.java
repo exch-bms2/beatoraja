@@ -23,7 +23,7 @@ import bms.player.beatoraja.skin.property.StringPropertyFactory;
  */
 public abstract class JsonSkinObjectLoader<S extends Skin> {
 	
-	private final JSONSkinLoader loader;
+	protected final JSONSkinLoader loader;
 	
 	public JsonSkinObjectLoader(JSONSkinLoader loader) {
 		this.loader = loader;
@@ -31,7 +31,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 	
 	public abstract S getSkin(Resolution src, Resolution dst);
 	
-	public SkinObject loadSkinObject(Skin skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
+	public SkinObject loadSkinObject(S skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
 		return null;
 	}
 
