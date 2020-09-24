@@ -83,7 +83,7 @@ public abstract class SkinLoader {
         return resource;
     }
 
-    protected static File getPath(String imagepath, ObjectMap<String, String> filemap) {
+    public static File getPath(String imagepath, ObjectMap<String, String> filemap) {
         File imagefile = new File(imagepath);
         for (String key : filemap.keys()) {
             if (imagepath.startsWith(key)) {
@@ -120,11 +120,11 @@ public abstract class SkinLoader {
         return imagefile;
     }
 
-    protected static Texture getTexture(String path, boolean usecim) {
+    public static Texture getTexture(String path, boolean usecim) {
         return getTexture(path, usecim, false);
     }
 
-    protected static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
+    public static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
     	final PixmapResourcePool resource = SkinLoader.getResource();
         if(resource.exists(path)) {
             return new Texture(resource.get(path), useMipMaps);
