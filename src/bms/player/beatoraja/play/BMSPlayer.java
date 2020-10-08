@@ -241,7 +241,6 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
 			Randomizer.setPlayerConfig(config);
-			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
 					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
@@ -283,7 +282,7 @@ public class BMSPlayer extends MainState {
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
 				model.setMode(Mode.POPN_9K);
-				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
+				NoteShuffleModifier mod = new NoteShuffleModifier(config);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				pattern = mod.modify(model);
 				if(config.getSevenToNineType() != 0) {

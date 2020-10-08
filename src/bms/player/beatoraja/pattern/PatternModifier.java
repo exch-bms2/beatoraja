@@ -34,13 +34,6 @@ public abstract class PatternModifier {
 	public static final int SIDE_1P = 0;
 	public static final int SIDE_2P = 1;
 
-	// TODO H乱しきい値取得に使っている リファクタリング後削除予定
-	static PlayerConfig playerConfig;
-
-	static public void setPlayerConfig(PlayerConfig config) {
-		playerConfig = config;
-	}
-
 	public PatternModifier() {
 
 	}
