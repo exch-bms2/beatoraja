@@ -144,7 +144,7 @@ public abstract class PatternModifier {
 		this.modifyTargetSide = type;
 	}
 
-	public static PatternModifier create(int id, int type, Mode mode) {
+	public static PatternModifier create(int id, int type, Mode mode, PlayerConfig config) {
 		PatternModifier pm = null;
 		Random r = Random.getRandom(id);
 		switch (id) {
@@ -164,10 +164,10 @@ public abstract class PatternModifier {
 		case 5:
 		case 6:
 		case 9:
-			pm = new NewNoteShuffleModifier(r, mode);
+			pm = new NewNoteShuffleModifier(r, mode, config);
 			break;
 		case 7:
-			pm = new NewNoteShuffleModifier(r, type, mode);
+			pm = new NewNoteShuffleModifier(r, type, mode, config);
 			break;
 		case 8:
 			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
