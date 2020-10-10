@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import bms.model.*;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.pattern.PatternModifier.AssistLevel;
 
 /**
  * TimeLine毎にレーンを置換するクラス
@@ -47,6 +48,10 @@ public abstract class Randomizer {
 	 * Listは変更してもよい。TimeLineは変更してはならない。
 	 */
 	abstract Map<Integer, Integer> randomize(TimeLine tl, List<Integer> changeableLane, List<Integer> assignableLane);
+	/**
+	 * 譜面変更のアシストレベル
+	 */
+	private AssistLevel assist = AssistLevel.NONE;
 
 	/**
 	 * TimeLineのノーツをrandomizeで定義された方法で入れ替える
@@ -112,6 +117,14 @@ public abstract class Randomizer {
 		return LNactive.values();
 	}
 
+	public AssistLevel getAssistLevel() {
+		return assist;
+	}
+
+	protected void setAssistLevel(AssistLevel assist) {
+		this.assist = (assist != null ? assist : AssistLevel.NONE);
+	}
+
 	/**
 	 * 対応するランダマイザ生成
 	 */
@@ -138,12 +151,15 @@ public abstract class Randomizer {
 			} else {
 				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
 			}
+			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			break;
 		case H_RANDOM:
 			randomizer = new SRandomizer(thresholdMillis);
+			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			break;
 		case SPIRAL:
 			randomizer = new SpiralRandomizer();
+			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			break;
 		case S_RANDOM:
 			if (mode == Mode.POPN_9K) {
@@ -158,6 +174,7 @@ public abstract class Randomizer {
 			} else {
 				randomizer = new SRandomizer(SRAN_THRESHOLD);
 			}
+			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			break;
 		default:
 		}

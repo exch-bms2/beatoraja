@@ -23,7 +23,6 @@ public class NoteShuffleModifier extends PatternModifier {
 	}
 
 	public NoteShuffleModifier(Random r, int type, Mode mode, PlayerConfig config) {
-		super(r.assist);
 		this.isScratchLaneModify = r.isScratchLaneModify;
 		this.randomizer = Randomizer.create(r, type, mode, config);
 	}
@@ -37,6 +36,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				log.add(new PatternModifyLog(tl.getSection(), randomizer.permutate(tl)));
 			}
 		}
+		setAssistLevel(randomizer.getAssistLevel());
 		return log;
 	}
 }
