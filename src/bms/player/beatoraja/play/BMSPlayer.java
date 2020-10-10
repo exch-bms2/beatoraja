@@ -27,8 +27,6 @@ import bms.player.beatoraja.skin.SkinType;
  */
 public class BMSPlayer extends MainState {
 
-	// TODO GLAssistから起動すると楽曲ロード中に止まる
-
 	private BMSModel model;
 
 	private LaneRenderer lanerender;
@@ -280,14 +278,11 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("譜面オプション(1P) :  " + config.getRandom());
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
-				model.setMode(Mode.POPN_9K);
-				NoteShuffleModifier mod = new NoteShuffleModifier(config);
+				ModeModifier mod = new ModeModifier(Mode.BEAT_7K, Mode.POPN_9K, config);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				pattern = mod.modify(model);
-				if(config.getSevenToNineType() != 0) {
-					assist = Math.max(assist, 1);
-					score = false;
-				}
+				assist = Math.max(assist, 1);
+				score = false;
 			}
 		}
 

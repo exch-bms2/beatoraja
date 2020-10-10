@@ -164,10 +164,10 @@ public abstract class PatternModifier {
 		case 5:
 		case 6:
 		case 9:
-			pm = new NewNoteShuffleModifier(r, mode, config);
+			pm = new NoteShuffleModifier(r, mode, config);
 			break;
 		case 7:
-			pm = new NewNoteShuffleModifier(r, type, mode, config);
+			pm = new NoteShuffleModifier(r, type, mode, config);
 			break;
 		case 8:
 			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
