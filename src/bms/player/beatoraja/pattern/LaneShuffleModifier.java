@@ -57,7 +57,6 @@ public class LaneShuffleModifier extends PatternModifier {
 	public static final int BATTLE = 6;
 
 	public LaneShuffleModifier(int type) {
-		super(type == RANDOM_EX ? 1 : 0);
 		this.type = type;
 	}
 
@@ -89,8 +88,12 @@ public class LaneShuffleModifier extends PatternModifier {
 			break;
 		case RANDOM_EX:
 			keys = getKeys(mode, true);
-			if(mode == Mode.POPN_9K) random = keys.length > 0 ? noMurioshiLaneShuffle(model) : keys;
-			else random = keys.length > 0 ? shuffle(keys) : keys;
+			if(mode == Mode.POPN_9K) {
+				random = keys.length > 0 ? noMurioshiLaneShuffle(model) : keys;
+			} else { 
+				random = keys.length > 0 ? shuffle(keys) : keys;
+				setAssistLevel(AssistLevel.LIGHT_ASSIST);
+			}
 			break;
 		case FLIP:
 			if (mode.player == 2) {
@@ -110,6 +113,7 @@ public class LaneShuffleModifier extends PatternModifier {
 				random = new int[keys.length * 2];
 				System.arraycopy(keys, 0, random, 0, keys.length);
 				System.arraycopy(keys, 0, random, keys.length, keys.length);
+				setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}
 			break;
 

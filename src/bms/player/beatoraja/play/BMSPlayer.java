@@ -238,18 +238,15 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
+			
+			Array<PatternModifier> mods = new Array<PatternModifier>();
+			// DP譜面オプション
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
-					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
-					pattern = PatternModifier.merge(pattern,mod.modify(model));
+					mods.add(new LaneShuffleModifier(LaneShuffleModifier.FLIP));
 				}
-				pattern = PatternModifier.merge(pattern,
-								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode(), config)
-										.modify(model));
-				if (config.getRandom2() >= 6) {
-					assist = Math.max(assist, 1);
-					score = false;
-				}
+				Logger.getGlobal().info("譜面オプション(DP) :  " + config.getDoubleoption());
+				mods.add(PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode(), config));
 				Logger.getGlobal().info("譜面オプション(2P) :  " + config.getRandom2());
 			}
 
@@ -267,23 +264,26 @@ public class BMSPlayer extends MainState {
 				}
 			}
 
-			pattern = PatternModifier.merge(pattern,
-					PatternModifier
-							.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode(), config)
-							.modify(model));
-			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
-				assist = Math.max(assist, 1);
-				score = false;
-			}
+			// SP譜面オプション
+			mods.add(PatternModifier.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode(), config));
 			Logger.getGlobal().info("譜面オプション(1P) :  " + config.getRandom());
+
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
 				ModeModifier mod = new ModeModifier(Mode.BEAT_7K, Mode.POPN_9K, config);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
-				pattern = mod.modify(model);
-				assist = Math.max(assist, 1);
-				score = false;
+				mods.add(mod);
 			}
+
+			for(PatternModifier mod : mods) {
+				pattern = PatternModifier.merge(pattern,mod.modify(model));
+				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
+					Logger.getGlobal().info("アシスト譜面オプションが選択されました");
+					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
+					score = false;
+				}				
+			}
+
 		}
 
 		if(HSReplay != null && HSReplay.config != null) {
