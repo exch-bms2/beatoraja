@@ -1077,11 +1077,13 @@ public class IntegerPropertyFactory {
 		}
 		@Override
 		public int get(MainState state) {
+			RankingData irc = null;
 			if (state instanceof MusicSelector) {
-				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
-				return irc != null && irc.getState() == RankingData.FINISH ? irc.getClearCount(clearType) : Integer.MIN_VALUE;
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
 			}
-			return Integer.MIN_VALUE;
+			return irc != null && irc.getState() == RankingData.FINISH ? irc.getClearCount(clearType) : Integer.MIN_VALUE;
 		}		
 	}
 	
@@ -1094,15 +1096,19 @@ public class IntegerPropertyFactory {
 		}
 		@Override
 		public int get(MainState state) {
+			RankingData irc = null;
 			if (state instanceof MusicSelector) {
-				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
-				if(irc != null && irc.getState() == RankingData.FINISH) {
-					int count = 0;
-					for(int c : clearType) {
-						count += irc.getClearCount(c);
-					}
-					return count;
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
+			}
+
+			if(irc != null && irc.getState() == RankingData.FINISH) {
+				int count = 0;
+				for(int c : clearType) {
+					count += irc.getClearCount(c);
 				}
+				return count;
 			}
 			return Integer.MIN_VALUE;
 		}		
@@ -1119,12 +1125,14 @@ public class IntegerPropertyFactory {
 		}
 		@Override
 		public int get(MainState state) {
+			RankingData irc = null;
 			if (state instanceof MusicSelector) {
-				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
-				return irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0 ? 
-						(afterdot ? (irc.getClearCount(clearType) * 1000 / irc.getTotalPlayer()) % 10 : irc.getClearCount(clearType) * 100 / irc.getTotalPlayer()) : Integer.MIN_VALUE;
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
 			}
-			return Integer.MIN_VALUE;
+			return irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0 ?
+					(afterdot ? (irc.getClearCount(clearType) * 1000 / irc.getTotalPlayer()) % 10 : irc.getClearCount(clearType) * 100 / irc.getTotalPlayer()) : Integer.MIN_VALUE;
 		}		
 	}
 	
@@ -1139,15 +1147,18 @@ public class IntegerPropertyFactory {
 		}
 		@Override
 		public int get(MainState state) {
+			RankingData irc = null;
 			if (state instanceof MusicSelector) {
-				final RankingData irc = ((MusicSelector) state).getCurrentRankingData();
-				if(irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
-					int count = 0;
-					for(int c : clearType) {
-						count += irc.getClearCount(c);
-					}
-					return (afterdot ? (count * 1000 / irc.getTotalPlayer()) % 10 : count * 100 / irc.getTotalPlayer());
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
+			}
+			if(irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
+				int count = 0;
+				for(int c : clearType) {
+					count += irc.getClearCount(c);
 				}
+				return (afterdot ? (count * 1000 / irc.getTotalPlayer()) % 10 : count * 100 / irc.getTotalPlayer());
 			}
 			return Integer.MIN_VALUE;
 		}		
