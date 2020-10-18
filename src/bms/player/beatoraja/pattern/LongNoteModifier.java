@@ -4,19 +4,23 @@ import java.util.List;
 
 import bms.model.*;
 
+/**
+ * ロングノーツを除去/追加する譜面オプション
+ *
+ * @author exch
+ */
 public class LongNoteModifier extends PatternModifier {
-
-	private boolean exists = false;
 
 	private Mode mode = Mode.REMOVE;
 
-	private int rate = 50;
+	private double rate = 1.0;
 
 	public LongNoteModifier() {
 	}
 
-	public LongNoteModifier(int mode) {
+	public LongNoteModifier(int mode, double rate) {
 		this.mode = Mode.values()[mode];
+		this.rate = rate;
 	}
 
 	@Override
@@ -26,7 +30,7 @@ public class LongNoteModifier extends PatternModifier {
 			AssistLevel assist = AssistLevel.NONE;
 			for (TimeLine tl : model.getAllTimeLines()) {
 				for(int lane = 0;lane < model.getMode().key;lane++) {
-					if(tl.getNote(lane) instanceof LongNote) {
+					if(tl.getNote(lane) instanceof LongNote && Math.random() > rate) {
 						LongNote ln = (LongNote) tl.getNote(lane);
 						if(ln.isEnd()) {
 							tl.setNote(lane, null);
@@ -34,7 +38,6 @@ public class LongNoteModifier extends PatternModifier {
 							tl.setNote(lane, new NormalNote(ln.getWav()));
 						}
 						assist = AssistLevel.ASSIST;
-						exists = true;
 					}
 				}
 			}
@@ -49,7 +52,7 @@ public class LongNoteModifier extends PatternModifier {
 		TimeLine[] tls = model.getAllTimeLines();
 		for (int i = 0;i < tls.length - 1;i++) {
 			for(int lane = 0;lane < model.getMode().key;lane++) {
-				if(tls[i].getNote(lane) instanceof NormalNote && !tls[i + 1].existNote(lane)) {
+				if(tls[i].getNote(lane) instanceof NormalNote && !tls[i + 1].existNote(lane) && Math.random() > rate) {
 					int lntype = LongNote.TYPE_UNDEFINED;
 					switch(mode) {
 						case ADD_LN:
@@ -83,10 +86,6 @@ public class LongNoteModifier extends PatternModifier {
 		setAssistLevel(assist);
 		return null;
 
-	}
-
-	public boolean longNoteExists() {
-		return exists;
 	}
 
 	public enum Mode {

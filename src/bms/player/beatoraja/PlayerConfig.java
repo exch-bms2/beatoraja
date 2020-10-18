@@ -85,6 +85,7 @@ public class PlayerConfig {
 	 * ロングノート追加/削除モード
 	 */
     private int longnoteMode = 0;
+    private double longnoteRate = 1.0;
 	/**
 	 * アシストオプション:判定拡大
 	 */
@@ -176,6 +177,10 @@ public class PlayerConfig {
 	 * 選曲時でのキー入力方式
 	 */
 	private int musicselectinput = 0;
+
+	public static final int IR_SEND_ALWAYS = 0;
+	public static final int IR_SEND_COMPLETE_SONG = 1;
+	public static final int IR_SEND_UPDATE_SCORE = 2;
 
 	private IRConfig[] irconfig;
 	
@@ -655,6 +660,7 @@ public class PlayerConfig {
 
 		scrollMode = MathUtils.clamp(scrollMode, 0, ScrollSpeedModifier.Mode.values().length);
 		longnoteMode = MathUtils.clamp(longnoteMode, 0, LongNoteModifier.Mode.values().length);
+		longnoteRate = MathUtils.clamp(longnoteRate, 0.0, 1.0);
 		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
 		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
 
@@ -790,5 +796,15 @@ public class PlayerConfig {
 
     public void setLongnoteMode(int longnoteMode) {
         this.longnoteMode = longnoteMode;
-    }	
+    }
+
+    public double getLongnoteRate() {
+        return longnoteRate;
+    }
+
+    public void setLongnoteRate(double longnoteRate) {
+        this.longnoteRate = longnoteRate;
+    }
+
+
 }

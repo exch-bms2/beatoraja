@@ -180,7 +180,7 @@ public class BMSPlayer extends MainState {
 				mods.add(new ScrollSpeedModifier(config.getScrollMode() - 1));
 			}
 			if(config.getLongnoteMode() > 0) {
-				mods.add(new LongNoteModifier(config.getLongnoteMode() - 1));
+				mods.add(new LongNoteModifier(config.getLongnoteMode() - 1, config.getLongnoteRate()));
 			}
 			if(config.getMineMode() > 0) {
 				mods.add(new MineNoteModifier(config.getMineMode() - 1));
