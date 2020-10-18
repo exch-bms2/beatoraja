@@ -10,7 +10,13 @@ public enum Random {
 	H_RANDOM(6, RandomUnit.NOTE, false),
 	ALL_SCR(7, RandomUnit.NOTE, true),
 	RANDOM_EX(8, RandomUnit.LANE, true),
-	S_RANDOM_EX(9, RandomUnit.NOTE, true);
+	S_RANDOM_EX(9, RandomUnit.NOTE, true),
+
+    CROSS(10, RandomUnit.LANE, false),
+
+    FLIP(20, RandomUnit.NOTE, true),
+    BATTLE(21, RandomUnit.NOTE, true),
+    ;
 
 	/**
 	 * PlayerConfigから渡されるid

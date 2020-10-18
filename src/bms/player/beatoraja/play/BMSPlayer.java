@@ -168,7 +168,7 @@ public class BMSPlayer extends MainState {
 				assist = Math.max(assist, 1);
 				score = false;
 			}
-			
+
 			if (config.getJudgewindowrate() > 100) {
 				assist = Math.max(assist, 2);
 				score = false;
@@ -188,13 +188,13 @@ public class BMSPlayer extends MainState {
 			if(config.getExtranoteDepth() > 0) {
 				mods.add(new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch()));
 			}
-			
+
 			for(PatternModifier mod : mods) {
 				mod.modify(model);
 				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
 					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
 					score = false;
-				}				
+				}
 			}
 
 			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
@@ -210,7 +210,7 @@ public class BMSPlayer extends MainState {
 					model.setMode(Mode.KEYBOARD_24K_DOUBLE);
 					break;
 				}
-				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
+				LaneShuffleModifier mod = new LaneShuffleModifier(Random.BATTLE);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				mod.modify(model);
 				if(config.getDoubleoption() == 3) {
@@ -243,7 +243,7 @@ public class BMSPlayer extends MainState {
 			// DP譜面オプション
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
-					mods.add(new LaneShuffleModifier(LaneShuffleModifier.FLIP));
+					mods.add(new LaneShuffleModifier(Random.FLIP));
 				}
 				Logger.getGlobal().info("譜面オプション(DP) :  " + config.getDoubleoption());
 				mods.add(PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode(), config));
@@ -499,7 +499,7 @@ public class BMSPlayer extends MainState {
 				pm.modify(model);
 				if (model.getMode().player == 2) {
 					if (property.doubleop == 1) {
-						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
+						new LaneShuffleModifier(Random.FLIP).modify(model);
 					}
 					PatternModifier.create(property.random2, PatternModifier.SIDE_2P, model.getMode(), config).modify(model);
 				}

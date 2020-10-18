@@ -26,37 +26,9 @@ public class LaneShuffleModifier extends PatternModifier {
 	/**
 	 * ランダムのタイプ
 	 */
-	private int type;
-	/**
-	 * ミラー
-	 */
-	public static final int MIRROR = 0;
-	/**
-	 * ローテート
-	 */
-	public static final int R_RANDOM = 1;
-	/**
-	 * ランダム
-	 */
-	public static final int RANDOM = 2;
-	/**
-	 * クロス
-	 */
-	public static final int CROSS = 3;
-	/**
-	 * スクラッチレーンを含むランダム
-	 */
-	public static final int RANDOM_EX = 4;
-	/**
-	 * 1P-2Pを入れ替える
-	 */
-	public static final int FLIP = 5;
-	/**
-	 * 1Pの譜面を2Pにコピーする
-	 */
-	public static final int BATTLE = 6;
+	private Random type;
 
-	public LaneShuffleModifier(int type) {
+	public LaneShuffleModifier(Random type) {
 		this.type = type;
 	}
 

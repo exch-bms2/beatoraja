@@ -144,38 +144,45 @@ public abstract class PatternModifier {
 		this.modifyTargetSide = type;
 	}
 
-	public static PatternModifier create(int id, int type, Mode mode, PlayerConfig config) {
+    public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config) {
+        return create(id, side, mode, config, null);
+    }
+
+    /**
+     *
+     * @param id 譜面オプションID
+     * @param side 譜面オプションサイド(1P or 2P)
+     * @param mode 譜面のモード
+     * @param seed 譜面オプションの固定用変数(LaneShuffleのみ)
+     * @return
+     */
+    public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config, int[] seed) {
 		PatternModifier pm = null;
 		Random r = Random.getRandom(id);
-		switch (id) {
-		case 0:
+		switch (r) {
+			case IDENTITY:
 			pm = new DummyModifier();
 			break;
-		case 1:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.MIRROR);
+			case MIRROR:
+			case RANDOM:
+			case R_RANDOM:
+			case RANDOM_EX:
+			case CROSS:
+			pm = new LaneShuffleModifier(r);
 			break;
-		case 2:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM);
-			break;
-		case 3:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM);
-			break;
-		case 4:
-		case 5:
-		case 6:
-		case 9:
+			case S_RANDOM:
+			case SPIRAL:
+			case H_RANDOM:
+			case S_RANDOM_EX:
 			pm = new NoteShuffleModifier(r, mode, config);
 			break;
-		case 7:
-			pm = new NoteShuffleModifier(r, type, mode, config);
-			break;
-		case 8:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
+			case ALL_SCR:
+			pm = new NoteShuffleModifier(r, side, mode, config);
 			break;
 		}
 
 		if (pm != null) {
-			pm.setModifyTarget(type);
+			pm.setModifyTarget(side);
 		}
 		return pm;
 	}
