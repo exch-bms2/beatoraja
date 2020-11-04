@@ -515,20 +515,29 @@ public class IntegerPropertyFactory {
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_FOLDER_TOTALSONGS:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
-					if (selected instanceof DirectoryBar) {
-						int[] lamps = ((DirectoryBar) selected).getLamps();
-						int count = 0;
-						for (int lamp : lamps) {
-							count += lamp;
-						}
-						return count;
-					}
-				}
-				return Integer.MIN_VALUE;
-			};
+			return new FolderTotalClearCountProperty(new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		case NUMBER_FOLDER_NOPLAY:
+			return new FolderClearCountProperty(0);
+		case NUMBER_FOLDER_FAILED:
+			return new FolderClearCountProperty(1);
+		case NUMBER_FOLDER_ASSIST:
+			return new FolderClearCountProperty(2);
+		case NUMBER_FOLDER_LASSIST:
+			return new FolderClearCountProperty(3);
+		case NUMBER_FOLDER_EASY:
+			return new FolderClearCountProperty(4);
+		case NUMBER_FOLDER_GROOOVE:
+			return new FolderClearCountProperty(5);
+		case NUMBER_FOLDER_HARD:
+			return new FolderClearCountProperty(6);
+		case NUMBER_FOLDER_EXHARD:
+			return new FolderClearCountProperty(7);
+		case NUMBER_FOLDER_FULLCOMBO:
+			return new FolderClearCountProperty(8);
+		case NUMBER_FOLDER_PERFECT:
+			return new FolderClearCountProperty(9);
+		case NUMBER_FOLDER_MAX:
+			return new FolderClearCountProperty(10);
 		case NUMBER_PLAYTIME_MINUTE:
 			return (state) -> ((int) (((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0))
 					/ 60000));
@@ -1066,6 +1075,49 @@ public class IntegerPropertyFactory {
 			};
 		}
 		return null;
+	}
+
+	private static class FolderClearCountProperty implements IntegerProperty {
+
+		private final int clearType;
+		
+		public FolderClearCountProperty(int clearType) {
+			this.clearType = clearType;
+		}
+		@Override
+		public int get(MainState state) {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+				if (selected instanceof DirectoryBar) {
+					return ((DirectoryBar) selected).getLamps()[clearType];
+				}
+			}
+			return Integer.MIN_VALUE;
+		}		
+	}
+	
+	private static class FolderTotalClearCountProperty implements IntegerProperty {
+
+		private final int[] clearType;
+		
+		public FolderTotalClearCountProperty(int[] clearType) {
+			this.clearType = clearType;
+		}
+		@Override
+		public int get(MainState state) {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+				if (selected instanceof DirectoryBar) {
+					int[] lamps = ((DirectoryBar) selected).getLamps();
+					int count = 0;
+					for (int clear : clearType) {
+						count += lamps[clear];
+					}
+					return count;
+				}
+			}
+			return Integer.MIN_VALUE;
+		}		
 	}
 	
 	private static class IRClearCountProperty implements IntegerProperty {
