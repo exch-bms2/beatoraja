@@ -1049,6 +1049,34 @@ public class IntegerPropertyFactory {
 		case BUTTON_SORT:
 			return (state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSort()
 					: Integer.MIN_VALUE);
+		case BUTTON_FAVORITTE_SONG:
+			return (state) -> {
+				final SongData sd = state.main.getPlayerResource().getSongdata();
+				if(sd != null) {
+					int type = 1;
+					if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
+						type = 0;
+					} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+						type = 2;
+					}
+					return type;
+				}
+				return Integer.MIN_VALUE;
+			};			
+		case BUTTON_FAVORITTE_CHART:
+			return (state) -> {
+				final SongData sd = state.main.getPlayerResource().getSongdata();
+				if(sd != null) {
+					int type = 1;
+					if((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
+						type = 0;
+					} else if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+						type = 2;
+					}
+					return type;
+				}
+				return Integer.MIN_VALUE;
+			};			
 		case NUMBER_CLEAR:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
