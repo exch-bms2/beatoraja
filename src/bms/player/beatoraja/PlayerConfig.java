@@ -89,12 +89,12 @@ public class PlayerConfig {
 	/**
 	 * アシストオプション:判定拡大
 	 */
-	private int judgewindowrate = 100;
-	private int keyJudgeWindowRatePerfectGreat = 100;
-	private int keyJudgeWindowRateGreat = 100;
+	private boolean customJudge = false;
+	private int keyJudgeWindowRatePerfectGreat = 400;
+	private int keyJudgeWindowRateGreat = 400;
 	private int keyJudgeWindowRateGood = 100;
-	private int scratchJudgeWindowRatePerfectGreat = 100;
-	private int scratchJudgeWindowRateGreat = 100;
+	private int scratchJudgeWindowRatePerfectGreat = 400;
+	private int scratchJudgeWindowRateGreat = 400;
 	private int scratchJudgeWindowRateGood = 100;
 
 	/**
@@ -504,12 +504,12 @@ public class PlayerConfig {
 		this.misslayerDuration = misslayerTime;
 	}
 
-	public int getJudgewindowrate() {
-		return judgewindowrate;
+	public boolean isCustomJudge() {
+		return customJudge;
 	}
 
-	public void setJudgewindowrate(int judgewindowrate) {
-		this.judgewindowrate = judgewindowrate;
+	public void setCustomJudge(boolean customJudge) {
+		this.customJudge = customJudge;
 	}
 
 	public int getKeyJudgeWindowRatePerfectGreat() {
@@ -705,7 +705,6 @@ public class PlayerConfig {
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
-		judgewindowrate = MathUtils.clamp(judgewindowrate, 10, 400);
 		keyJudgeWindowRatePerfectGreat = MathUtils.clamp(keyJudgeWindowRatePerfectGreat, 10, 400);
 		keyJudgeWindowRateGreat = MathUtils.clamp(keyJudgeWindowRateGreat, 10, 400);
 		keyJudgeWindowRateGood = MathUtils.clamp(keyJudgeWindowRateGood, 10, 400);
@@ -863,6 +862,4 @@ public class PlayerConfig {
     public void setLongnoteRate(double longnoteRate) {
         this.longnoteRate = longnoteRate;
     }
-
-
 }

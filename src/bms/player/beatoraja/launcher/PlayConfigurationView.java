@@ -144,7 +144,19 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> bottomshiftablegauge;
 	@FXML
-	private Spinner<Integer> exjudge;
+	private CheckBox customjudge;
+	@FXML
+	private Spinner<Integer> njudgepg;
+	@FXML
+	private Spinner<Integer> njudgegr;
+	@FXML
+	private Spinner<Integer> njudgegd;
+	@FXML
+	private Spinner<Integer> sjudgepg;
+	@FXML
+	private Spinner<Integer> sjudgegr;
+	@FXML
+	private Spinner<Integer> sjudgegd;
 	@FXML
 	private ComboBox<Integer> minemode;
 	@FXML
@@ -417,7 +429,13 @@ public class PlayConfigurationView implements Initializable {
 		gaugeautoshift.setValue(player.getGaugeAutoShift());
 		bottomshiftablegauge.setValue(player.getBottomShiftableGauge());
 
-		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
+		customjudge.setSelected(player.isCustomJudge());
+		njudgepg.getValueFactory().setValue(player.getKeyJudgeWindowRatePerfectGreat());
+		njudgegr.getValueFactory().setValue(player.getKeyJudgeWindowRateGreat());
+		njudgegd.getValueFactory().setValue(player.getKeyJudgeWindowRateGood());
+		sjudgepg.getValueFactory().setValue(player.getScratchJudgeWindowRatePerfectGreat());
+		sjudgegr.getValueFactory().setValue(player.getScratchJudgeWindowRateGreat());
+		sjudgegd.getValueFactory().setValue(player.getScratchJudgeWindowRateGood());
 		minemode.getSelectionModel().select(player.getMineMode());
 		scrollmode.getSelectionModel().select(player.getScrollMode());
 		longnotemode.getSelectionModel().select(player.getLongnoteMode());
@@ -505,7 +523,13 @@ public class PlayConfigurationView implements Initializable {
 		player.setBpmguide(bpmguide.isSelected());
 		player.setGaugeAutoShift(gaugeautoshift.getValue());
 		player.setBottomShiftableGauge(bottomshiftablegauge.getValue());
-		player.setJudgewindowrate(getValue(exjudge));
+		player.setCustomJudge(customjudge.isSelected());
+		player.setKeyJudgeWindowRatePerfectGreat(getValue(njudgepg));
+		player.setKeyJudgeWindowRateGreat(getValue(njudgegr));
+		player.setKeyJudgeWindowRateGood(getValue(njudgegd));
+		player.setScratchJudgeWindowRatePerfectGreat(getValue(sjudgepg));
+		player.setScratchJudgeWindowRateGreat(getValue(sjudgegr));
+		player.setScratchJudgeWindowRateGood(getValue(sjudgegd));
 		player.setMineMode(minemode.getValue());
 		player.setScrollMode(scrollmode.getValue());
 		player.setLongnoteMode(longnotemode.getValue());

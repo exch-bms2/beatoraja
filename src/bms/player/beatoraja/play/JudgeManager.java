@@ -212,12 +212,12 @@ public class JudgeManager {
 
 		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] keyJudgeWindowRate = config.getJudgewindowrate() == 100
+		final int[] keyJudgeWindowRate = config.isCustomJudge()
 				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
-				: new int[]{config.getJudgewindowrate(), config.getJudgewindowrate(), config.getJudgewindowrate()};
-		final int[] scratchJudgeWindowRate = config.getJudgewindowrate() == 100
+				: new int[]{100, 100, 100};
+		final int[] scratchJudgeWindowRate = config.isCustomJudge()
 				? new int[]{config.getScratchJudgeWindowRatePerfectGreat(), config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood()}
-				: new int[]{config.getJudgewindowrate(), config.getJudgewindowrate(), config.getJudgewindowrate()};
+				: new int[]{100, 100, 100};
 		int constraint = 2;
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
 			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {

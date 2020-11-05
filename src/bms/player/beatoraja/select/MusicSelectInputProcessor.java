@@ -217,7 +217,7 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_OPTIONOPEN);
             }
             if (property.isPressed(keystate, keytime, JUDGEWINDOW_UP, true)) {
-                config.setJudgewindowrate(config.getJudgewindowrate() == 100 ? 400 : 100);
+                config.setCustomJudge(!config.isCustomJudge());
                 select.play(SOUND_OPTIONCHANGE);
             }
             if (property.isPressed(keystate, keytime, CONSTANT, true)) {

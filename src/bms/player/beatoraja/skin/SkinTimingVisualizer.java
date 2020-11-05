@@ -158,7 +158,10 @@ public class SkinTimingVisualizer extends SkinObject {
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
 
 		final int judgerank = model.getJudgerank();
-		final int judgeWindowRate = resource.getPlayerConfig().getJudgewindowrate();
+		final PlayerConfig config = resource.getPlayerConfig();
+		final int[] judgeWindowRate = config.isCustomJudge()
+				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
+				: new int[]{100, 100, 100};
 		int constraint = 2;
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
 			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {

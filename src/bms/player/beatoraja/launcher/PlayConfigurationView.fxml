@@ -175,12 +175,47 @@
                                          <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
                                          <Label text="%LNTYPE" GridPane.rowIndex="7" />
                                          <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                                         <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                         <NumericSpinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="7">
+                                         <CheckBox fx:id="customjudge" mnemonicParsing="false" text="%EXPAND_JUDGE" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                                         <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="9" GridPane.columnSpan="3">
+                                         <Label text="KEY PG" prefWidth="60.0"/>
+                                         <NumericSpinner fx:id="njudgepg" editable="true" prefWidth="100.0">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
                                              </valueFactory>
                                          </NumericSpinner>
+                                         <Label text="KEY GR" prefWidth="60.0" />
+                                         <NumericSpinner fx:id="njudgegr" editable="true" prefWidth="100.0">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="KEY GD" prefWidth="60.0" />
+                                         <NumericSpinner fx:id="njudgegd" editable="true" prefWidth="100.0">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         </HBox>
+                                         <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.columnSpan="3">
+                                         <Label text="SCR PG" prefWidth="60.0" />
+                                         <NumericSpinner fx:id="sjudgepg" editable="true" prefWidth="100.0">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="SCR GR" prefWidth="60.0" />
+                                         <NumericSpinner fx:id="sjudgegr" editable="true" prefWidth="100.0">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="SCR GD" prefWidth="60.0" />
+                                         <NumericSpinner fx:id="sjudgegd" editable="true" prefWidth="100.0">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         </HBox>
                                          <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="8" />
                                          <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="8">
                                              <valueFactory>

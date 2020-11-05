@@ -915,7 +915,7 @@ public class IntegerPropertyFactory {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
 		}
 		if (optionid == BUTTON_ASSIST_EXJUDGE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0);
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isCustomJudge() ? 1 : 0);
 		}
 		if (optionid == BUTTON_ASSIST_CONSTANT) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getScrollMode() == 1 ? 1 : 0);
