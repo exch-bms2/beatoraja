@@ -169,7 +169,9 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 
-			if (config.getJudgewindowrate() > 100) {
+			if (config.getJudgewindowrate() > 100
+					|| config.getKeyJudgeWindowRatePerfectGreat() > 100 || config.getKeyJudgeWindowRateGreat() > 100 || config.getKeyJudgeWindowRateGood() > 100
+					|| config.getScratchJudgeWindowRatePerfectGreat() > 100 || config.getScratchJudgeWindowRateGreat() > 100 || config.getScratchJudgeWindowRateGood() > 100) {
 				assist = Math.max(assist, 2);
 				score = false;
 			}

@@ -87,19 +87,19 @@ public enum JudgeProperty {
         this.windowrule = windowrule;
     }
 
-    public int[][] getNoteJudge(int judgerank, int judgeWindowRate, int constraint) {
+    public int[][] getNoteJudge(int judgerank, int[] judgeWindowRate, int constraint) {
     	return windowrule.create(note, judgerank, judgeWindowRate, constraint);
     }
 
-    public int[][] getLongNoteEndJudge(int judgerank, int judgeWindowRate, int constraint) {
+    public int[][] getLongNoteEndJudge(int judgerank, int[] judgeWindowRate, int constraint) {
     	return windowrule.create(longnote, judgerank, judgeWindowRate, constraint);
     }
 
-    public int[][] getScratchJudge(int judgerank, int judgeWindowRate, int constraint) {
+    public int[][] getScratchJudge(int judgerank, int[] judgeWindowRate, int constraint) {
     	return windowrule.create(scratch, judgerank, judgeWindowRate, constraint);
     }
 
-    public int[][] getLongScratchEndJudge(int judgerank, int judgeWindowRate, int constraint) {
+    public int[][] getLongScratchEndJudge(int judgerank, int[] judgeWindowRate, int constraint) {
     	return windowrule.create(longscratch, judgerank, judgeWindowRate, constraint);
     }
     
@@ -111,7 +111,7 @@ public enum JudgeProperty {
     	NORMAL (new int[]{25, 50, 75, 100, 125}){
 
 			@Override
-			public int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint) {
+			public int[][] create(int[][] org, int judgerank, int[] judgeWindowRate, int constraint) {
 				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, constraint, false);
 			}
     		
@@ -119,7 +119,7 @@ public enum JudgeProperty {
     	PMS (new int[]{33, 50, 70, 100, 133}) {
 
 			@Override
-			public int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint) {
+			public int[][] create(int[][] org, int judgerank, int[] judgeWindowRate, int constraint) {
 				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, constraint, true);
 			}
     		
@@ -130,7 +130,7 @@ public enum JudgeProperty {
     	 */
     	public final int[] judgerank;
     	
-        private static int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint, boolean pms) {
+        private static int[][] create(int[][] org, int judgerank, int[] judgeWindowRate, int constraint, boolean pms) {
     		final int[][] judge = new int[org.length][2];
     		final boolean[] fix = pms ? new boolean[]{true, false, false, true, true} : new boolean[]{false, false, false, false, true};
     		for (int i = 0; i < judge.length; i++) {
@@ -166,7 +166,7 @@ public enum JudgeProperty {
     		// judgeWindowRateによる補正
     		for (int i = 0; i < Math.min(org.length, 2); i++) {
     			for(int j = 0;j < 2;j++) {
-					judge[i][j] = judge[i][j]*judgeWindowRate / 100;
+					judge[i][j] = judge[i][j]*judgeWindowRate[i] / 100;
 					if(Math.abs(judge[i][j]) > Math.abs(judge[2][j])) {
 						judge[i][j] = judge[2][j];
 					}
@@ -187,6 +187,6 @@ public enum JudgeProperty {
         	this.judgerank = judgerank;
         }
         
-    	public abstract int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint);
+    	public abstract int[][] create(int[][] org, int judgerank, int[] judgeWindowRate, int constraint);
     }
 }

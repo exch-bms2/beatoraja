@@ -90,6 +90,13 @@ public class PlayerConfig {
 	 * アシストオプション:判定拡大
 	 */
 	private int judgewindowrate = 100;
+	private int keyJudgeWindowRatePerfectGreat = 100;
+	private int keyJudgeWindowRateGreat = 100;
+	private int keyJudgeWindowRateGood = 100;
+	private int scratchJudgeWindowRatePerfectGreat = 100;
+	private int scratchJudgeWindowRateGreat = 100;
+	private int scratchJudgeWindowRateGood = 100;
+
 	/**
 	 * 地雷モード
 	 */
@@ -498,14 +505,59 @@ public class PlayerConfig {
 	}
 
 	public int getJudgewindowrate() {
-		if(judgewindowrate < 25 || judgewindowrate > 400) {
-			judgewindowrate = 100;
-		}
 		return judgewindowrate;
 	}
 
 	public void setJudgewindowrate(int judgewindowrate) {
 		this.judgewindowrate = judgewindowrate;
+	}
+
+	public int getKeyJudgeWindowRatePerfectGreat() {
+		return keyJudgeWindowRatePerfectGreat;
+	}
+
+	public void setKeyJudgeWindowRatePerfectGreat(int judgeWindowRatePerfectGreat) {
+		this.keyJudgeWindowRatePerfectGreat = judgeWindowRatePerfectGreat;
+	}
+
+	public int getKeyJudgeWindowRateGreat() {
+		return keyJudgeWindowRateGreat;
+	}
+
+	public void setKeyJudgeWindowRateGreat(int judgeWindowRateGreat) {
+		this.keyJudgeWindowRateGreat = judgeWindowRateGreat;
+	}
+
+	public int getKeyJudgeWindowRateGood() {
+		return keyJudgeWindowRateGood;
+	}
+
+	public void setKeyJudgeWindowRateGood(int judgeWindowRateGood) {
+		this.keyJudgeWindowRateGood = judgeWindowRateGood;
+	}
+
+	public int getScratchJudgeWindowRatePerfectGreat() {
+		return scratchJudgeWindowRatePerfectGreat;
+	}
+
+	public void setScratchJudgeWindowRatePerfectGreat(int judgeWindowRatePerfectGreat) {
+		this.scratchJudgeWindowRatePerfectGreat = judgeWindowRatePerfectGreat;
+	}
+
+	public int getScratchJudgeWindowRateGreat() {
+		return scratchJudgeWindowRateGreat;
+	}
+
+	public void setScratchJudgeWindowRateGreat(int judgeWindowRateGreat) {
+		this.scratchJudgeWindowRateGreat = judgeWindowRateGreat;
+	}
+
+	public int getScratchJudgeWindowRateGood() {
+		return scratchJudgeWindowRateGood;
+	}
+
+	public void setScratchJudgeWindowRateGood(int judgeWindowRateGood) {
+		this.scratchJudgeWindowRateGood = judgeWindowRateGood;
 	}
 
 	public int getHranThresholdBPM() {
@@ -654,6 +706,12 @@ public class PlayerConfig {
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		judgewindowrate = MathUtils.clamp(judgewindowrate, 10, 400);
+		keyJudgeWindowRatePerfectGreat = MathUtils.clamp(keyJudgeWindowRatePerfectGreat, 10, 400);
+		keyJudgeWindowRateGreat = MathUtils.clamp(keyJudgeWindowRateGreat, 10, 400);
+		keyJudgeWindowRateGood = MathUtils.clamp(keyJudgeWindowRateGood, 10, 400);
+		scratchJudgeWindowRatePerfectGreat = MathUtils.clamp(scratchJudgeWindowRatePerfectGreat, 10, 400);
+		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 10, 400);
+		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 10, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
