@@ -353,7 +353,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					}
 				}
 				
-				Arrays.stream(paths).parallel().forEach((p) -> {
+				Arrays.stream(paths).forEach((p) -> {
 					try {
 						BMSFolder folder = new BMSFolder(p, bmsroot);
 						folder.processDirectory(property);
@@ -447,7 +447,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			}
 			
 			if(!containsBMS) {
-				dirs.forEach((bf) -> {
+				dirs.stream().parallel().forEach((bf) -> {
 					try {
 						bf.processDirectory(property);
 					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
