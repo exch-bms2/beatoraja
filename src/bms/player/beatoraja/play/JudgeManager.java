@@ -218,18 +218,19 @@ public class JudgeManager {
 		final int[] scratchJudgeWindowRate = config.isCustomJudge()
 				? new int[]{config.getScratchJudgeWindowRatePerfectGreat(), config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
-		int constraint = 2;
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
 			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-				constraint = 0;
+				keyJudgeWindowRate[1] = keyJudgeWindowRate[2] = 0;
+				scratchJudgeWindowRate[1] = scratchJudgeWindowRate[2] = 0;
 			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-				constraint = 1;
+				keyJudgeWindowRate[2] = 0;
+				scratchJudgeWindowRate[2] = 0;
 			}
 		}
-		njudge = rule.getNoteJudge(judgerank, keyJudgeWindowRate, constraint);
-		cnendjudge = rule.getLongNoteEndJudge(judgerank, keyJudgeWindowRate, constraint);
-		sjudge = rule.getScratchJudge(judgerank, scratchJudgeWindowRate, constraint);
-		scnendjudge = rule.getLongScratchEndJudge(judgerank, scratchJudgeWindowRate, constraint);
+		njudge = rule.getNoteJudge(judgerank, keyJudgeWindowRate);
+		cnendjudge = rule.getLongNoteEndJudge(judgerank, keyJudgeWindowRate);
+		sjudge = rule.getScratchJudge(judgerank, scratchJudgeWindowRate);
+		scnendjudge = rule.getLongScratchEndJudge(judgerank, scratchJudgeWindowRate);
 		judgestart = judgeend = 0;
 		for (int[] i : njudge) {
 			judgestart = Math.min(judgestart, i[0]);
