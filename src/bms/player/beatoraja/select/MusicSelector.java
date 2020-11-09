@@ -531,7 +531,9 @@ public class MusicSelector extends MainState {
 	void changeState(MainStateType type) {
 		preview.stop();
 		main.changeState(type);
-		search.unfocus(this);
+		if (search != null) {
+			search.unfocus(this);
+		}
 		banners.disposeOld();
 		stagefiles.disposeOld();
 	}
