@@ -165,11 +165,13 @@ public class BGAProcessor {
 								break;
 							}
 						}
-						for (String mov : BGImageProcessor.pic_extension) {
-							final Path picfile = dpath.resolve(name + "." + mov);
-							if (Files.exists(picfile)) {
-								f = picfile;
-								break;
+						if (f == null) {
+							for (String mov : BGImageProcessor.pic_extension) {
+								final Path picfile = dpath.resolve(name + "." + mov);
+								if (Files.exists(picfile)) {
+									f = picfile;
+									break;
+								}
 							}
 						}
 					}
