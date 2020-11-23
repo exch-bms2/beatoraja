@@ -25,6 +25,7 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.select.MusicSelectCommand;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
@@ -502,6 +503,12 @@ public class MusicResult extends AbstractResult {
 		case BUTTON_OPEN_IR_WEBSITE:
 			execute(MusicResultCommand.OPEN_RANKING_ON_IR);
 			break;
+		case BUTTON_FAVORITTE_CHART:
+			execute(MusicResultCommand.CHANGE_FAVORITE_CHART, arg1 >= 0);
+			break;
+		case BUTTON_FAVORITTE_SONG:
+			execute(MusicResultCommand.CHANGE_FAVORITE_SONG, arg1 >= 0);
+			break;
 		default:
 			super.executeEvent(id, arg1, arg2);
 		}
@@ -512,7 +519,11 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void execute(MusicResultCommand command) {
-		command.execute(this);
+		command.execute(this, true);
+	}
+
+	public void execute(MusicResultCommand command, boolean next) {
+		command.execute(this, next);
 	}
 
 	static class IRSendStatus {
