@@ -41,6 +41,26 @@
                             </valueFactory>
                         </NumericSpinner>
     </HBox>
+    <HBox prefHeight="37.0" prefWidth="723.0">
+        <VBox.margin>
+            <Insets left="10.0" />
+        </VBox.margin>
+        <CheckBox fx:id="analogScroll" contentDisplay="CENTER" prefHeight="18.0" prefWidth="300.0" text="%ANALOG_SCROLL" textAlignment="CENTER">
+            <tooltip>
+                <Tooltip text="Use analog turntable for menus. (Analog Scratch must be ON)" textAlignment="CENTER" />
+            </tooltip>
+        </CheckBox>
+        <Label prefHeight="18.0" prefWidth="200.0" text="%ANALOG_TICKS_PER_SCROLL" >
+            <tooltip>
+                <Tooltip text="Smaller number = faster scroll." textAlignment="CENTER" />
+            </tooltip>
+        </Label>
+        <NumericSpinner fx:id="analogTicksPerScroll" editable="true" prefWidth="100.0">
+            <valueFactory>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="3" max="100" min="1" />
+            </valueFactory>
+        </NumericSpinner>
+    </HBox>
 	<CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" text="%USE_SONGINFO" />
 	<CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" text="%FOLDER_LAMP" />
     <CheckBox fx:id="shownoexistingbar" mnemonicParsing="false" prefHeight="25.0" text="%SHOW_NO_SONG_EXISTING_BAR" />

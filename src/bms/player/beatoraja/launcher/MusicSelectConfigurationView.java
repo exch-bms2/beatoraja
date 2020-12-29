@@ -22,6 +22,11 @@ public class MusicSelectConfigurationView implements Initializable {
 	private NumericSpinner<Integer> scrolldurationhigh;
 
 	@FXML
+	private CheckBox analogScroll;
+	@FXML
+	private NumericSpinner<Integer> analogTicksPerScroll;
+
+	@FXML
 	private CheckBox folderlamp;
     @FXML
     private CheckBox useSongInfo;
@@ -45,6 +50,9 @@ public class MusicSelectConfigurationView implements Initializable {
 		
 		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
+		
+		analogScroll.setSelected(config.isAnalogScroll());
+		analogTicksPerScroll.getValueFactory().setValue(config.getAnalogTicksPerScroll());
 
         useSongInfo.setSelected(config.isUseSongInfo());
 		folderlamp.setSelected(config.isFolderlamp());
@@ -57,6 +65,9 @@ public class MusicSelectConfigurationView implements Initializable {
 	public void commit() {
 		config.setScrollDutationLow(scrolldurationlow.getValue());
 		config.setScrollDutationHigh(scrolldurationhigh.getValue());
+
+		config.setAnalogScroll(analogScroll.isSelected());
+		config.setAnalogTicksPerScroll(analogTicksPerScroll.getValue());
 
         config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());

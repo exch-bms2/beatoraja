@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 public enum MusicSelectKeyProperty {
 
@@ -53,6 +54,39 @@ public enum MusicSelectKeyProperty {
 	private MusicSelectKeyProperty(MusicSelectKey[][] assign) {
 		this.assign = assign;
 	}
+
+    public int getAnalogChange(BMSPlayerInputProcessor input, MusicSelectKey code) {
+        int dTicks = 0;
+        for (int i = 0; i < assign.length; i++) {
+            for (MusicSelectKey index : assign[i]) {
+                if (code == index && input.isAnalogInput(i)) {
+                    dTicks += input.getAnalogDiffAndReset(i, 200);
+                }
+            }
+        }
+        return dTicks;
+    }
+
+    public boolean isNonAnalogPressed(BMSPlayerInputProcessor input, boolean[] keystate, long[] keytime, MusicSelectKey code, boolean resetState) {
+        for (int i = 0; i < assign.length; i++) {
+            for (MusicSelectKey index : assign[i]) {
+                if (code == index && keystate[i]) {
+                    if (input.isAnalogInput(i)) continue;
+                    if (resetState) {
+                        if (keytime[i] != 0) {
+                            keytime[i] = 0;
+                            return true;
+                        }
+                        return false;
+                    } else {
+                        return true;
+                    }
+
+                }
+            }
+        }
+        return false;
+    }
 
 	public boolean isPressed(boolean[] keystate, long[] keytime, MusicSelectKey code, boolean resetState) {
 		for (int i = 0; i < assign.length; i++) {
