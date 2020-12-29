@@ -18,44 +18,41 @@
 		<Insets left="10.0" top="10.0" />
 	</padding>
 	<HBox prefHeight="37.0" prefWidth="723.0">
-                        <opaqueInsets>
-                            <Insets />
-                        </opaqueInsets>
-                        <VBox.margin>
-                            <Insets left="10.0" />
-                        </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
-                        <NumericSpinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
-                            </valueFactory>
-                        </NumericSpinner>
-                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" >
-                            <HBox.margin>
-                                <Insets left="10.0" />
-                            </HBox.margin>
-                        </Label>
-                        <NumericSpinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
-                            </valueFactory>
-                        </NumericSpinner>
+		<opaqueInsets>
+		    <Insets />
+		</opaqueInsets>
+		<Label prefHeight="24.0" prefWidth="200.0" text="%SCROLL_DURATION_LOW" />
+		<NumericSpinner fx:id="scrolldurationlow" editable="true" prefWidth="100.0">
+		    <valueFactory>
+		        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
+		    </valueFactory>
+		</NumericSpinner>
+		<Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" >
+		    <HBox.margin>
+		        <Insets left="10.0" />
+		    </HBox.margin>
+		</Label>
+		<NumericSpinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
+		    <valueFactory>
+		        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
+		    </valueFactory>
+		</NumericSpinner>
     </HBox>
     <HBox prefHeight="37.0" prefWidth="723.0">
         <VBox.margin>
-            <Insets left="10.0" />
+            <Insets bottom="10.0" />
         </VBox.margin>
-        <CheckBox fx:id="analogScroll" contentDisplay="CENTER" prefHeight="18.0" prefWidth="300.0" text="%ANALOG_SCROLL" textAlignment="CENTER">
+        <CheckBox fx:id="analogScroll" contentDisplay="CENTER" prefHeight="24.0" prefWidth="310.0" text="%ANALOG_SCROLL" textAlignment="CENTER">
             <tooltip>
-                <Tooltip text="Use analog turntable for menus. (Analog Scratch must be ON)" textAlignment="CENTER" />
+                <Tooltip text="%ANALOG_SCROLL_TOOLTIP" textAlignment="CENTER" />
             </tooltip>
         </CheckBox>
-        <Label prefHeight="18.0" prefWidth="200.0" text="%ANALOG_TICKS_PER_SCROLL" >
+        <Label prefHeight="24.0" prefWidth="150.0" text="%ANALOG_TICKS_PER_SCROLL">
             <tooltip>
-                <Tooltip text="Smaller number = faster scroll." textAlignment="CENTER" />
+                <Tooltip text="%ANALOG_TICKS_PER_SCROLL_TOOLTIP" textAlignment="CENTER" />
             </tooltip>
         </Label>
-        <NumericSpinner fx:id="analogTicksPerScroll" editable="true" prefWidth="100.0">
+        <NumericSpinner fx:id="analogTicksPerScroll" editable="true" prefWidth="80.0">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="3" max="100" min="1" />
             </valueFactory>
