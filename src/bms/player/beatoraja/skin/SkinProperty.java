@@ -298,6 +298,9 @@ public class SkinProperty {
 	public static final int NUMBER_FOLDER_HYPER = 47;
 	public static final int NUMBER_FOLDER_ANOTHER = 48;
 	public static final int NUMBER_FOLDER_INSANE = 49;
+	public static final int NUMBER_MASTER_VOLUME = 57;
+	public static final int NUMBER_KEY_VOLUME = 58;
+	public static final int NUMBER_BGM_VOLUME = 59;
 	public static final int NUMBER_CLEAR = 370;
 	public static final int NUMBER_TARGET_CLEAR = 371;
 	public static final int NUMBER_AVERAGE_DURATION = 372;

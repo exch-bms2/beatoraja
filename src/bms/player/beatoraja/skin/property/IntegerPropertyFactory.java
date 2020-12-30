@@ -280,6 +280,12 @@ public class IntegerPropertyFactory {
 			return (state) -> (state.main.getPlayerResource().getSongdata() != null
 					? state.main.getPlayerResource().getSongdata().getLevel()
 					: Integer.MIN_VALUE);
+		case NUMBER_MASTER_VOLUME:
+			return (state) -> ((int)(state.main.getConfig().getSystemvolume() * 100));
+		case NUMBER_KEY_VOLUME:
+			return (state) -> ((int)(state.main.getConfig().getKeyvolume() * 100));
+		case NUMBER_BGM_VOLUME:
+			return (state) -> ((int)(state.main.getConfig().getBgvolume() * 100));
 		case NUMBER_POINT:
 			return (state) -> (state.getScoreDataProperty().getNowScore());
 		case NUMBER_MAXSCORE:
