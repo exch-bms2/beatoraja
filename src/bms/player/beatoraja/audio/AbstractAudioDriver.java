@@ -220,6 +220,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
 			volume = model.getVolwav() / 100f;
+		} else {
+			volume = 1.0f;
 		}
 
 		Array<SliceWav<T>>[] slicesound = new Array[wavcount];
