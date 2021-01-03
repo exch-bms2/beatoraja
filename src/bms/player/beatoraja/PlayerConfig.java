@@ -144,6 +144,11 @@ public class PlayerConfig {
 	private int sevenToNineType = 0;
 
 	/**
+	 * START+SELECTを押すと終了するまでの期間
+	 */
+	private int exitPressDuration = 1000;
+
+	/**
 	 * Guide SE
 	 */
 	private boolean isGuideSE = false;
@@ -584,6 +589,14 @@ public class PlayerConfig {
 		this.sevenToNineType = sevenToNineType;
 	}
 
+	public int getExitPressDuration() {
+		return exitPressDuration;
+	}
+
+	public void setExitPressDuration(int exitPressDuration) {
+		this.exitPressDuration = exitPressDuration;
+	}
+
 	public boolean isGuideSE() {
 		return isGuideSE;
 	}
@@ -714,6 +727,7 @@ public class PlayerConfig {
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
+		exitPressDuration = MathUtils.clamp(exitPressDuration, 0, 100000);
 
 		scrollMode = MathUtils.clamp(scrollMode, 0, ScrollSpeedModifier.Mode.values().length);
 		longnoteMode = MathUtils.clamp(longnoteMode, 0, LongNoteModifier.Mode.values().length);

@@ -23,6 +23,8 @@ public class ControlInputProcessor {
 	private long laneCoverStartTiming = Long.MIN_VALUE;
 	private long exitpressedtime;
 
+	private final long exitPressDuration;
+
 	private boolean enableControl = true;
 	private boolean enableCursor = true;
 
@@ -47,6 +49,8 @@ public class ControlInputProcessor {
 		coverChangeMarginLow = playConfig.getLanecovermarginlow();
 		coverChangeMarginHigh = playConfig.getLanecovermarginhigh();
 		coverSpeedSwitchDuration = playConfig.getLanecoverswitchduration();
+
+		exitPressDuration = player.main.getPlayerConfig().getExitPressDuration();
 
 		switch (this.player.getMode()) {
 		case POPN_9K:
@@ -143,7 +147,7 @@ public class ControlInputProcessor {
 			}
 		}
 		long now = System.currentTimeMillis();
-		if((input.startPressed() && input.isSelectPressed() && now - exitpressedtime > 1000 )||
+		if((input.startPressed() && input.isSelectPressed() && now - exitpressedtime > exitPressDuration )||
 				(player.isNoteEnd() && (input.startPressed() || input.isSelectPressed()))){
 			input.startChanged(false);
 			input.setSelectPressed(false);
