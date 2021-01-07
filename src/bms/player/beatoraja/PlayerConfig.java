@@ -144,7 +144,7 @@ public class PlayerConfig {
 	private int sevenToNineType = 0;
 
 	/**
-	 * START+SELECTを押すと終了するまでの期間
+	 * START+SELECTを押すと終了するまでの時間
 	 */
 	private int exitPressDuration = 1000;
 
