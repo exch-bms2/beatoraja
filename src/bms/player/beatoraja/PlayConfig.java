@@ -72,7 +72,7 @@ public class PlayConfig implements Cloneable {
 	 */
 	private int lanecoverswitchduration = 500;
 	/**
-	 * HI-SPEED自動調整：レーンカバーを変化するとHI-SPEEDを現在のBPMに自動的に調整する（皿チョン）
+	 * HI-SPEED固定自動調整：レーンカバーを変化するとHI-SPEED固定を現在のBPMに自動的に調整する（皿チョン）
 	 */
 	private boolean hispeedautoadjust = false;
 	/**
