@@ -100,6 +100,8 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Integer> gvalue;
 	@FXML
 	private Spinner<Double> hispeedmargin;
+	@FXML
+	private CheckBox hispeedautoadjust;
 
 	@FXML
 	private ComboBox<Integer> scoreop;
@@ -599,7 +601,7 @@ public class PlayConfigurationView implements Initializable {
 			conf.setLift(getValue(lift) / 1000f);
 			conf.setHidden(getValue(hidden) / 1000f);
 			conf.setJudgetype(JudgeAlgorithm.values()[judgealgorithm.getValue()].name());
-
+			conf.setHispeedAutoAdjust(hispeedautoadjust.isSelected());
 		}
 		pc = playconfig.getValue();
 		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
@@ -617,6 +619,7 @@ public class PlayConfigurationView implements Initializable {
 		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));
 		hidden.getValueFactory().setValue((int) (conf.getHidden() * 1000));
 		judgealgorithm.setValue(JudgeAlgorithm.getIndex(conf.getJudgetype()));
+		hispeedautoadjust.setSelected(conf.isEnableHispeedAutoAdjust());
 	}
 
 	private <T> T getValue(Spinner<T> spinner) {

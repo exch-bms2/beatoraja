@@ -37,6 +37,8 @@ public class ControlInputProcessor {
 	private float coverChangeMarginHigh = 0.01f;
 	private long coverSpeedSwitchDuration = 500;
 
+	private boolean hispeedAutoAdjust;
+
 	public ControlInputProcessor(BMSPlayer player, PlayMode autoplay) {
 		this.player = player;
 		this.autoplay = autoplay;
@@ -47,6 +49,7 @@ public class ControlInputProcessor {
 		coverChangeMarginLow = playConfig.getLanecovermarginlow();
 		coverChangeMarginHigh = playConfig.getLanecovermarginhigh();
 		coverSpeedSwitchDuration = playConfig.getLanecoverswitchduration();
+		hispeedAutoAdjust = playConfig.isEnableHispeedAutoAdjust();
 
 		switch (this.player.getMode()) {
 		case POPN_9K:
@@ -189,7 +192,7 @@ public class ControlInputProcessor {
 			lanerender.setHiddenCover(lanerender.getHiddenCover() - value);
 		}
 
-		if (lanerender.getNowBPM() > 0) {
+		if (hispeedAutoAdjust && lanerender.getNowBPM() > 0) {
 			lanerender.resetHispeed(lanerender.getNowBPM());
 		}
 	}
