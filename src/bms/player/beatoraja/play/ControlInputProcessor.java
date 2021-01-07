@@ -188,6 +188,10 @@ public class ControlInputProcessor {
 		} else {
 			lanerender.setHiddenCover(lanerender.getHiddenCover() - value);
 		}
+
+		if (lanerender.getNowBPM() > 0) {
+			lanerender.resetHispeed(lanerender.getNowBPM());
+		}
 	}
 
 	/*
