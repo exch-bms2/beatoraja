@@ -127,6 +127,14 @@ public class Config implements Validatable {
 	 */
 	private int scrolldurationhigh = 50;
 	/**
+	 * 選曲バーとレーンカバーのアナログスクロール
+	 */
+	private boolean analogScroll = true;
+	/**
+	 * 選曲バー移動速度に関連（アナログスクロール）
+	 */
+	private int analogTicksPerScroll = 3;
+	/**
 	 * プレビュー音源を再生するかどうか
 	 */
 	private boolean playPreview = true;
@@ -393,6 +401,20 @@ public class Config implements Validatable {
 	public void setScrollDutationHigh(int scrolldurationhigh){
 		this.scrolldurationhigh = scrolldurationhigh;
 	}
+
+    public boolean isAnalogScroll() {
+        return analogScroll;
+    }
+    public void setAnalogScroll(boolean analogScroll) {
+        this.analogScroll = analogScroll;
+    }
+
+    public int getAnalogTicksPerScroll() {
+        return analogTicksPerScroll;
+    }
+    public void setAnalogTicksPerScroll(int analogTicksPerScroll) {
+        this.analogTicksPerScroll = Math.max(analogTicksPerScroll, 1);
+    }
 
 	public boolean isPlayPreview() {
 		return playPreview;

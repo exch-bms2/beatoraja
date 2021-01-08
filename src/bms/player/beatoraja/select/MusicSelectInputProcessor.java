@@ -35,8 +35,15 @@ public class MusicSelectInputProcessor {
      */
     private int angle;
 
-    private final int durationlow = 300;
-    private final int durationhigh = 50;
+    private final int durationlow;
+    private final int durationhigh;
+
+    /**
+     * バー移動中のカウンタ（アナログスクロール）
+     */
+    private int analogScrollBuffer = 0;
+    private final int analogTicksPerScroll;
+
 
     boolean isOptionKeyPressed = false;
     boolean isOptionKeyReleased = false;
@@ -49,6 +56,10 @@ public class MusicSelectInputProcessor {
 
     public MusicSelectInputProcessor(MusicSelector select) {
         this.select = select;
+
+        durationlow = select.main.getConfig().getScrollDurationLow();
+        durationhigh = select.main.getConfig().getScrollDurationHigh();
+        analogTicksPerScroll = select.main.getConfig().getAnalogTicksPerScroll();
     }
 
     public void input() {
@@ -164,8 +175,13 @@ public class MusicSelectInputProcessor {
             // song bar scroll on mouse wheel
             int mov = -input.getScroll();
             input.resetScroll();
+
+            analogScrollBuffer += property.getAnalogChange(input, TARGET_UP) - property.getAnalogChange(input, TARGET_DOWN);
+            mov += analogScrollBuffer/analogTicksPerScroll;
+            analogScrollBuffer %= analogTicksPerScroll;
+
             // song bar scroll
-            if (property.isPressed(keystate, keytime, TARGET_UP, false) || cursor[1]) {
+            if (property.isNonAnalogPressed(input, keystate, keytime, TARGET_UP, false) || cursor[1]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = 1;
@@ -177,7 +193,7 @@ public class MusicSelectInputProcessor {
                     mov = 1;
                     angle = durationhigh;
                 }
-            } else if (property.isPressed(keystate, keytime, TARGET_DOWN, false) || cursor[0]) {
+            } else if (property.isNonAnalogPressed(input, keystate, keytime, TARGET_DOWN, false) || cursor[0]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = -1;
@@ -198,12 +214,12 @@ public class MusicSelectInputProcessor {
 
             TargetProperty[] targets = TargetProperty.getAllTargetProperties();
             while(mov > 0) {
-                config.setTarget((config.getTarget() + 1) % targets.length);
+                config.setTarget((config.getTarget() + targets.length - 1) % targets.length);
                 select.play(SOUND_SCRATCH);
                 mov--;
             }
             while(mov < 0) {
-                config.setTarget((config.getTarget() + targets.length - 1) % targets.length);
+                config.setTarget((config.getTarget() + 1) % targets.length);
                 select.play(SOUND_SCRATCH);
                 mov++;
             }

@@ -77,6 +77,8 @@ public class BMSPlayerInputProcessor {
 			devices.add(bm);
 		}
 		devices.add(midiinput);
+		
+		this.analogScroll = config.isAnalogScroll();
 	}
 
 	/**
@@ -88,6 +90,19 @@ public class BMSPlayerInputProcessor {
 	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
 	 */
 	private long[] time = new long[256];
+
+    /**
+     * 選曲バーとレーンカバーのアナログスクロール
+     */
+    private boolean analogScroll = true;
+	/**
+	 * 選曲バーのアナログスクロール
+	 * (各キーのアナログ状態)
+	 */
+	private boolean[] isAnalog = new boolean[256];
+	private float[] lastAnalogValue = new float[256];
+	private float[] currentAnalogValue = new float[256];
+	private long[] analogLastResetTime = new long[256];
 
 	private BMSPlayerInputDevice lastKeyDevice;
 	private ArrayList<BMSPlayerInputDevice> devices;
@@ -298,6 +313,45 @@ public class BMSPlayerInputProcessor {
 				keylog.add((int) presstime, i, pressed);
 			}
 		}
+	}
+
+	public void setAnalogState(int i, boolean _isAnalog, float _analogValue) {
+		if (!enable) {
+			return;
+		}
+		if (analogScroll) {
+			isAnalog[i] = _isAnalog;
+			currentAnalogValue[i] = _analogValue;
+		} else {
+			isAnalog[i] = false;
+			currentAnalogValue[i] = 0;
+		}
+	}
+
+	public void resetAnalogInput(int i) {
+		lastAnalogValue[i] = currentAnalogValue[i];
+		analogLastResetTime[i] = System.currentTimeMillis();
+	}
+
+	public long getTimeSinceLastAnalogReset(int i) {
+		return System.currentTimeMillis() - analogLastResetTime[i];
+	}
+
+	public int getAnalogDiff(int i) {
+		return BMControllerInputProcessor.computeAnalogDiff(lastAnalogValue[i], currentAnalogValue[i]);
+	}
+
+	public boolean isAnalogInput(int i) {
+		return isAnalog[i];
+	}
+
+	public int getAnalogDiffAndReset(int i, int msTolerance) {
+		int dTicks = 0;
+        if (getTimeSinceLastAnalogReset(i) <= msTolerance) {
+            dTicks = Math.max(0,getAnalogDiff(i));
+        }
+        resetAnalogInput(i);
+        return dTicks;
 	}
 
 	public KeyInputLog[] getKeyInputLog() {

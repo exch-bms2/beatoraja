@@ -201,16 +201,59 @@ public class ControlInputProcessor {
 		}
 	}
 
-	/*
-	 * レーンカバー移動
-	 * 一定時間入力で高速移動モードに切り替え
-	 */
-	private void coverValueChange(boolean sign) {
-		long l = System.currentTimeMillis();
-		if(laneCoverStartTiming == Long.MIN_VALUE) laneCoverStartTiming = l;
-		if (l - lanecovertiming > 50) {
-			setCoverValue((sign ? 1 : -1) * (l - laneCoverStartTiming > coverSpeedSwitchDuration ? coverChangeMarginHigh : coverChangeMarginLow));
-			lanecovertiming = l;
+	private void coverValueChange(boolean[] key, int up1, int up2, int down1, int down2) {
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
+
+		// move lane cover by START + Scratch
+		// analog
+		int dTicks = 0;
+		if (up1 != -1 && input.isAnalogInput(up1)) dTicks += input.getAnalogDiffAndReset(up1, 200);
+		if (up2 != -1 && input.isAnalogInput(up2)) dTicks += input.getAnalogDiffAndReset(up2, 200);
+		if (down1 != -1 && input.isAnalogInput(down1)) dTicks -= input.getAnalogDiffAndReset(down1, 200);
+		if (down2 != -1 && input.isAnalogInput(down2)) dTicks -= input.getAnalogDiffAndReset(down2, 200);
+		if (dTicks != 0) {
+			setCoverValue(dTicks*coverChangeMarginLow);
+		}
+
+		// non-analog
+		boolean nonAnalogUp = (up1 != -1 && key[up1] && !input.isAnalogInput(up1)) || (up2 != -1 && key[up2] && !input.isAnalogInput(up2));
+		boolean nonAnalogDown = (down1 != -1 && key[down1] && !input.isAnalogInput(down1)) || (down2 != -1 && key[down2] && !input.isAnalogInput(down2));
+		if (nonAnalogUp || nonAnalogDown) {
+			long l = System.currentTimeMillis();
+			if(laneCoverStartTiming == Long.MIN_VALUE) laneCoverStartTiming = l;
+			if (l - lanecovertiming > 50) {
+				setCoverValue((nonAnalogUp ? 1 : -1) * (l - laneCoverStartTiming > coverSpeedSwitchDuration ? coverChangeMarginHigh : coverChangeMarginLow));
+				lanecovertiming = l;
+			}
+		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
+			laneCoverStartTiming = Long.MIN_VALUE;
+		}
+	}
+
+	private void greenNumberChange(boolean[] key, int up1, int up2, int down1, int down2) {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
+
+		// change duration by SELECT + Scratch
+		// analog
+		int dTicks = 0;
+		if (up1 != -1 && input.isAnalogInput(up1)) dTicks += input.getAnalogDiffAndReset(up1, 200);
+		if (up2 != -1 && input.isAnalogInput(up2)) dTicks += input.getAnalogDiffAndReset(up2, 200);
+		if (down1 != -1 && input.isAnalogInput(down1)) dTicks -= input.getAnalogDiffAndReset(down1, 200);
+		if (down2 != -1 && input.isAnalogInput(down2)) dTicks -= input.getAnalogDiffAndReset(down2, 200);
+		if (dTicks != 0) {
+			lanerender.setGreenValue(lanerender.getGreenValue() + dTicks);
+		}
+
+		// non-analog
+		boolean nonAnalogUp = (up1 != -1 && key[up1] && !input.isAnalogInput(up1)) || (up2 != -1 && key[up2] && !input.isAnalogInput(up2));
+		boolean nonAnalogDown = (down1 != -1 && key[down1] && !input.isAnalogInput(down1)) || (down2 != -1 && key[down2] && !input.isAnalogInput(down2));
+		if (nonAnalogUp || nonAnalogDown) {
+			long l = System.currentTimeMillis();
+			if (l - lanecovertiming > 50) {
+				lanerender.setGreenValue(lanerender.getGreenValue() + (nonAnalogUp ? 1 : -1));
+				lanecovertiming = l;
+			}
 		}
 	}
 
@@ -237,11 +280,7 @@ public class ControlInputProcessor {
 		}
 
 		// move lane cover by START + Scratch
-		if (key[7] || key[8] || key[16] || key[17]) {
-			coverValueChange(key[7] || key[16]);
-		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
-			laneCoverStartTiming = Long.MIN_VALUE;
-		}
+		coverValueChange(key, 7, 16, 8, 17);
 	}
 
 	void processSelect7key() {
@@ -250,13 +289,7 @@ public class ControlInputProcessor {
 		boolean[] key = input.getKeystate();
 
 		// change duration by SELECT + Scratch
-		if (key[7] || key[8] || key[16] || key[17]) {
-			long l = System.currentTimeMillis();
-			if (l - lanecovertiming > 50) {
-				lanerender.setGreenValue(lanerender.getGreenValue() + (key[7] || key[16] ? 1 : -1));
-				lanecovertiming = l;
-			}
-		}
+		greenNumberChange(key, 7, 16, 8, 17);
 
 		// change duration by SELECT + Keys
 		for(int i = 0; i <= 15; i++) {
@@ -299,11 +332,7 @@ public class ControlInputProcessor {
 		}
 
 		// move lane cover by START + Scratch
-		if (key[5] || key[6] || key[12] || key[13]) {
-			coverValueChange(key[5] || key[12]);
-		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
-			laneCoverStartTiming = Long.MIN_VALUE;
-		}
+		coverValueChange(key, 5, 12, 6, 13);
 	}
 
 	void processSelect5key() {
@@ -312,13 +341,7 @@ public class ControlInputProcessor {
 		boolean[] key = input.getKeystate();
 
 		// change duration by SELECT + Scratch
-		if (key[5] || key[6] || key[12] || key[13]) {
-			long l = System.currentTimeMillis();
-			if (l - lanecovertiming > 50) {
-				lanerender.setGreenValue(lanerender.getGreenValue() + (key[5] || key[12] ? 1 : -1));
-				lanecovertiming = l;
-			}
-		}
+		greenNumberChange(key, 5, 12, 6, 13);
 
 		// change duration by SELECT + Keys
 		for(int i = 0; i <= 11; i++) {
@@ -361,11 +384,7 @@ public class ControlInputProcessor {
 		}
 
 		// move lane cover by START + Keys(7-8)
-		if (key[7] || key[8]) {
-			coverValueChange(key[8]);
-		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
-			laneCoverStartTiming = Long.MIN_VALUE;
-		}
+		coverValueChange(key, 8, -1, 7, -1);
 	}
 
 	void processSelect9key() {
@@ -413,15 +432,12 @@ public class ControlInputProcessor {
 						hschanged[i] = true;
 					}
 				}
-			} else if (key[i] && j >= 24) {
-				coverValueChange(j == 25);
-				hschanged[i] = false;
-				wheel = true;
 			} else {
 				hschanged[i] = false;
 			}
 		}
-		if(!wheel && laneCoverStartTiming != Long.MIN_VALUE) laneCoverStartTiming = Long.MIN_VALUE;
+
+		coverValueChange(key, 25, 51, 24, 50);
 	}
 
 	void processSelect24key() {
@@ -445,16 +461,10 @@ public class ControlInputProcessor {
 						hschanged[i] = true;
 					}
 				}
-			} else if (key[i] && j >= 24) {
-				long l = System.currentTimeMillis();
-				if (l - lanecovertiming > 50) {
-					lanerender.setGreenValue(lanerender.getGreenValue() + (j == 24 ? 1 : -1));
-					lanecovertiming = l;
-				}
-				hschanged[i] = false;
 			} else {
 				hschanged[i] = false;
 			}
 		}
+		greenNumberChange(key, 25, 51, 24, 50);
 	}
 }

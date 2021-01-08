@@ -26,7 +26,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * ボタンキーアサイン
 	 */
 	private int[] buttons = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS1_MINUS };
 	/**
 	 * スタートキーアサイン
 	 */
@@ -75,11 +75,17 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	/**
 	 * アナログ皿のアルゴリズム (null=アナログ皿を通用しない)
 	 */
-	AnalogScratchAlgorithm analogScratchAlgorithm = null;
+	AnalogScratchAlgorithm[] analogScratchAlgorithm = null;
 	/**
 	 * Algorithm for mouse to perform scratch
 	 */
 	MouseScratchAlgorithm mouseScratchAlgorithm = new MouseScratchAlgorithm(mouseScratchDuration);
+    /**
+     * tick: 皿の最小の動き
+     * INFINITAS, DAO, YuanCon -> 0.00787
+     * arcin board -> 0.00784
+     */
+    private static final float TICK_MAX_SIZE = 0.009f;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, String name, Controller controller,
 									  ControllerConfig controllerConfig) {
@@ -99,15 +105,18 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.mouseScratchDuration = controllerConfig.getMouseScratchDuration();
 		analogScratchAlgorithm = null;
 		if (controllerConfig.isAnalogScratch()) {
+            analogScratchAlgorithm = new AnalogScratchAlgorithm[4];
 			int analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
-			switch (controllerConfig.getAnalogScratchMode()) {
-				case ControllerConfig.ANALOG_SCRATCH_VER_1:
-					analogScratchAlgorithm = new AnalogScratchAlgorithmVersion1(analogScratchThreshold);
-					break;
-				case ControllerConfig.ANALOG_SCRATCH_VER_2:
-					analogScratchAlgorithm = new AnalogScratchAlgorithmVersion2(analogScratchThreshold);
-					break;
-			}
+            for (int i = 0; i < 4; i++) {
+    			switch (controllerConfig.getAnalogScratchMode()) {
+    				case ControllerConfig.ANALOG_SCRATCH_VER_1:
+    					analogScratchAlgorithm[i] = new AnalogScratchAlgorithmVersion1(analogScratchThreshold);
+    					break;
+    				case ControllerConfig.ANALOG_SCRATCH_VER_2:
+    					analogScratchAlgorithm[i] = new AnalogScratchAlgorithmVersion2(analogScratchThreshold);
+    					break;
+    			}
+            }
 		}
 	}
 
@@ -134,23 +143,53 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 				final boolean prev = buttonstate[button];
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
-				} else if (button == BMKeys.UP && !jkoc) {
-					// アナログ右回転をUPに割り当てる
-					buttonstate[button] = scratchInput(BMKeys.UP);
-				} else if (button == BMKeys.DOWN && !jkoc) {
-					// アナログ左回転をDOWNに割り当てる
-					buttonstate[button] = scratchInput(BMKeys.DOWN);
-				} else if (button == BMKeys.LEFT) {
-					if (mouseScratch)
-						buttonstate[button] = mouseScratchAlgorithm.getPositiveState();
-					else
-						buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
-				} else if (button == BMKeys.RIGHT) {
-					if (mouseScratch)
-						buttonstate[button] = mouseScratchAlgorithm.getNegativeState();
-					else
-						buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
-				}
+                } else {
+                    if (mouseScratch) {
+                        if (button == BMKeys.AXIS0_PLUS) {
+                            buttonstate[button] = mouseScratchAlgorithm.getPositiveState();
+                        } else if (button == BMKeys.AXIS0_MINUS) {
+                            buttonstate[button] = mouseScratchAlgorithm.getNegativeState();
+                        } else {
+                            buttonstate[button] = false;
+                        }
+                    } else if (jkoc) {
+                        if (button == BMKeys.AXIS0_PLUS) {
+                            buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
+                        } else if (button == BMKeys.AXIS0_MINUS) {
+                            buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
+                        } else {
+                            buttonstate[button] = false;
+                        }
+                    } else {
+                        switch(button) {
+                            case BMKeys.AXIS0_PLUS:
+                                buttonstate[button] = scratchInput(0, true);
+                                break;
+                            case BMKeys.AXIS0_MINUS:
+                                buttonstate[button] = scratchInput(0, false);
+                                break;
+                            case BMKeys.AXIS1_PLUS:
+                                buttonstate[button] = scratchInput(1, true);
+                                break;
+                            case BMKeys.AXIS1_MINUS:
+                                buttonstate[button] = scratchInput(1, false);
+                                break;
+                            case BMKeys.AXIS2_PLUS:
+                                buttonstate[button] = scratchInput(2, true);
+                                break;
+                            case BMKeys.AXIS2_MINUS:
+                                buttonstate[button] = scratchInput(2, false);
+                                break;
+                            case BMKeys.AXIS3_PLUS:
+                                buttonstate[button] = scratchInput(3, true);
+                                break;
+                            case BMKeys.AXIS3_MINUS:
+                                buttonstate[button] = scratchInput(3, false);
+                                break;
+                        }
+                    }
+                }
+
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
 					buttontime[button] = presstime;
 				}
@@ -173,33 +212,52 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 			this.bmsPlayerInputProcessor.startChanged(buttonstate[start]);
 			buttonchanged[start] = false;
 		}
-		if (select >= 0 && select < BMKeys.MAXID && buttonchanged[select]) {
-			this.bmsPlayerInputProcessor.setSelectPressed(buttonstate[select]);
-			buttonchanged[select] = false;
-		}
+        if (select >= 0 && select < BMKeys.MAXID && buttonchanged[select]) {
+            this.bmsPlayerInputProcessor.setSelectPressed(buttonstate[select]);
+            buttonchanged[select] = false;
+        }
+
+        boolean isAnalog = !mouseScratch && !jkoc && (analogScratchAlgorithm != null);
+        for (int i = 0; i < buttons.length; i++) {
+            final int button = buttons[i];
+            if (isAnalog && button >= BMKeys.AXIS0_PLUS) {
+                this.bmsPlayerInputProcessor.setAnalogState(i, true, getAnalogValue(button));
+            } else {
+                this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
+            }
+        }
 	}
 
-	private boolean scratchInput(int button) {
+    private float getAnalogValue(int button) {
+        // assume isAnalog(button) == true.
+        int axis_index = (button - BMKeys.AXIS0_PLUS)/2;
+        boolean plus = (button - BMKeys.AXIS0_PLUS)%2 == 1;
+        float value = controller.getAxis(axis_index);
+        return plus ? value : -value;
+    }
+
+    public static int computeAnalogDiff(float oldValue, float newValue) {
+        float analogDiff = newValue - oldValue;
+        if (analogDiff > 1.0f) {
+            analogDiff -= (2 + TICK_MAX_SIZE/2);
+        } else if (analogDiff < -1.0f) {
+            analogDiff += (2 + TICK_MAX_SIZE/2);
+        }
+        analogDiff /= TICK_MAX_SIZE;
+        return (int)(analogDiff > 0 ? Math.ceil(analogDiff) : Math.floor(analogDiff));
+    }
+
+	private boolean scratchInput(int axisIndex, boolean plus) { //int button) {
 		if (analogScratchAlgorithm == null) {
 			// アナログ皿を使わない
-			if(button == BMKeys.UP) {
-				return (axis[1] < -0.9) || (axis[2] < -0.9);
-			} else if(button == BMKeys.DOWN){
-				return (axis[1] > 0.9) || (axis[2] > 0.9);
-			} else {
-				return false;
-			}
+            if (plus) {
+                return axis[axisIndex] > 0.9;
+            } else {
+                return axis[axisIndex] < -0.9;
+            }
 		} else {
 			// アナログ皿
-			// Pick correct axis (axis[i] != 0)
-			float analogScratchX = 0f;
-			for (int i = 0; i < 4; i++) {
-				if (axis[i] != 0f) {
-					analogScratchX = axis[i];
-					break;
-				}
-			}
-			return analogScratchAlgorithm.analogScratchInput(button, analogScratchX);
+            return analogScratchAlgorithm[axisIndex].analogScratchInput(axis[axisIndex], plus);
 		}
 	}
 
@@ -229,19 +287,24 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		public static final int BUTTON_14 = 13;
 		public static final int BUTTON_15 = 14;
 		public static final int BUTTON_16 = 15;
-		public static final int UP = 16;
-		public static final int DOWN = 17;
-		public static final int LEFT = 18;
-		public static final int RIGHT = 19;
+        public static final int AXIS0_PLUS = 16;
+        public static final int AXIS0_MINUS = 17;
+        public static final int AXIS1_PLUS = 18;
+        public static final int AXIS1_MINUS = 19;
+        public static final int AXIS2_PLUS = 20;
+        public static final int AXIS2_MINUS = 21;
+        public static final int AXIS3_PLUS = 22;
+        public static final int AXIS3_MINUS = 23;
 		
-		public static final int MAXID = 20;
+		public static final int MAXID = 24;
 
 		/**
 		 * 専コンのキーコードに対応したテキスト
 		 */
-		private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5", "BUTTON 6",
-				"BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13", "BUTTON 14",
-				"BUTTON 15", "BUTTON 16", "UP", "DOWN", "LEFT", "RIGHT" };
+        private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5", "BUTTON 6",
+                "BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13", "BUTTON 14",
+                "BUTTON 15", "BUTTON 16", "UP (AXIS0+)", "DOWN (AXIS0-)", "RIGHT (AXIS1+)", "LEFT (AXIS1-)",
+                "AXIS2+", "AXIS2-", "AXIS3+", "AXIS3-" };
 
 		public static final String toString(int keycode) {
 			if (keycode >= 0 && keycode < BMCODE.length) {
@@ -253,7 +316,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 
     private static interface AnalogScratchAlgorithm {
-        public boolean analogScratchInput(int button, float currentScratchX);
+        public boolean analogScratchInput(float currentScratchX, boolean plus);
     }
 
     private static class AnalogScratchAlgorithmVersion1 implements AnalogScratchAlgorithm {
@@ -282,7 +345,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
             this.analogScratchThreshold = analogScratchThreshold;
         }
 
-        public boolean analogScratchInput(int button, float currentScratchX) {
+        public boolean analogScratchInput(float currentScratchX, boolean plus) {
             if (oldScratchX > 1) {
                 oldScratchX = currentScratchX;
                 scratchActive = false;
@@ -329,12 +392,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
             counter++;
 
-            if(button == BMKeys.UP) {
+            if(plus) {
                 return scratchActive && rightMoveScratching;
-            } else if(button == BMKeys.DOWN){
-                return scratchActive && !rightMoveScratching;
             } else {
-                return false;
+                return scratchActive && !rightMoveScratching;
             }
         }
     }
@@ -369,7 +430,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
             this.analogScratchThreshold = analogScratchThreshold;
         }
 
-        public boolean analogScratchInput(int button, float currentScratchX) {
+        public boolean analogScratchInput(float currentScratchX, boolean plus) {
             if (oldScratchX > 1) {
                 oldScratchX = currentScratchX;
                 scratchActive = false;
@@ -378,19 +439,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
             if (oldScratchX != currentScratchX) {
                 // アナログスクラッチ位置の移動が発生した場合
-
-                // tick: 皿の最小の動き
-                // INFINITAS, DAO, YuanCon -> 0.00787
-                // arcin board -> 0.00784
-                final float TICK_MAX_SIZE = 0.009f;
-                float scratchDifferenceX = currentScratchX - oldScratchX;
-                if (scratchDifferenceX > 1.0f) {
-                    scratchDifferenceX -= (2 + TICK_MAX_SIZE/2);
-                } else if (scratchDifferenceX < -1.0f) {
-                    scratchDifferenceX += (2 + TICK_MAX_SIZE/2);
-                }
-                boolean nowRight = (scratchDifferenceX > 0);
-                int ticks = (int)Math.ceil(Math.abs(scratchDifferenceX)/TICK_MAX_SIZE);
+                int ticks = computeAnalogDiff(oldScratchX, currentScratchX);
+                boolean nowRight = (ticks >= 0);
 
                 if (scratchActive && !(rightMoveScratching == nowRight)) {
                     // 左回転→右回転の場合(右回転→左回転は値の変更がない)
@@ -400,7 +450,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
                 } else if (!scratchActive) {
                     // 移動無し→回転の場合
                     if (analogScratchTickCounter == 0 || counter <= this.analogScratchThreshold) {
-                        analogScratchTickCounter += ticks;
+                        analogScratchTickCounter += Math.abs(ticks);
                     }
                     // scratchActive=true
                     if (analogScratchTickCounter >= 2) {
@@ -422,12 +472,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
             counter++;
 
-            if(button == BMKeys.UP) {
+            if(plus) {
                 return scratchActive && rightMoveScratching;
-            } else if(button == BMKeys.DOWN){
-                return scratchActive && !rightMoveScratching;
             } else {
-                return false;
+                return scratchActive && !rightMoveScratching;
             }
         }
     }

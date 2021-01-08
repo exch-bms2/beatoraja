@@ -68,8 +68,8 @@ public class BarRenderer {
 
 	private final String[] TROPHY = { "bronzemedal", "silvermedal", "goldmedal" };
 
-	private int durationlow = 300;
-	private int durationhigh = 50;
+	private final int durationlow;
+	private final int durationhigh;
 	/**
 	 * バー移動中のカウンタ
 	 */
@@ -79,6 +79,12 @@ public class BarRenderer {
 	 */
 	private int angle;
 	private boolean keyinput;
+
+	/**
+	 * バー移動中のカウンタ（アナログスクロール）
+	 */
+	private int analogScrollBuffer = 0;
+	private final int analogTicksPerScroll;
 
 	private final int barlength = 60;
 	private final BarArea[] bararea = new BarArea[barlength];
@@ -123,6 +129,7 @@ public class BarRenderer {
 
 		durationlow = main.getConfig().getScrollDurationLow();
 		durationhigh = main.getConfig().getScrollDurationHigh();
+		analogTicksPerScroll = main.getConfig().getAnalogTicksPerScroll();
 
 		for (TableData td : sortedtables) {
 			if(td.getName().equals("BMS Search")) {
@@ -427,7 +434,7 @@ public class BarRenderer {
 					if (si2 != null && si2.draw) {
 						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
 								: ((float) (duration - System.currentTimeMillis())) / angle;
-						dx = (si2.region.x - si1.region.x) * a;
+						dx = (si2.region.x - si1.region.x) * Math.max(Math.min(a, 1), -1);
 						dy = (si2.region.y - si1.region.y) * a;
 					}
 				}
@@ -702,8 +709,27 @@ public class BarRenderer {
 		// song bar scroll on mouse wheel
 		int mov = -input.getScroll();
 		input.resetScroll();
+
+		analogScrollBuffer += property.getAnalogChange(input, MusicSelectKey.UP) - property.getAnalogChange(input, MusicSelectKey.DOWN);
+		mov += analogScrollBuffer/analogTicksPerScroll;
+		analogScrollBuffer %= analogTicksPerScroll;
+		if (mov != 0) {
+			// set duration and angle for smooth song bar scroll animation
+			long l = System.currentTimeMillis();
+			int remainingScroll = angle == 0 ? 0 : (int)Math.max(0, duration - l)/angle;
+			remainingScroll = Math.max(Math.min(remainingScroll + mov, 2), -2);
+			if (remainingScroll == 0) {
+				angle = 0;
+				duration = l;
+			} else {
+				final int scrollDuration = 120/remainingScroll/remainingScroll;
+				angle = scrollDuration/remainingScroll;
+				duration = l + scrollDuration;
+			}
+		}
+
 		// song bar scroll
-		if (property.isPressed(keystate, keytime, MusicSelectKey.UP, false) || cursor[1]) {
+		if (property.isNonAnalogPressed(input, keystate, keytime, MusicSelectKey.UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
@@ -716,7 +742,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (property.isPressed(keystate, keytime, MusicSelectKey.DOWN, false) || cursor[0]) {
+		} else if (property.isNonAnalogPressed(input, keystate, keytime, MusicSelectKey.DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
@@ -732,10 +758,10 @@ public class BarRenderer {
 		} else {
 			keyinput = false;
 		}
-			long l = System.currentTimeMillis();
+		long l = System.currentTimeMillis();
 		if (l > duration && keyinput == false) {
-				duration = 0;
-			}
+			duration = 0;
+		}
 		while(mov > 0) {
 			move(true);
 			select.play(MusicSelector.SOUND_SCRATCH);
