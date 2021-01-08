@@ -175,6 +175,11 @@
                                          <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
                                          <Label text="%LNTYPE" GridPane.rowIndex="7" />
                                          <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                         <CheckBox fx:id="hispeedautoadjust" mnemonicParsing="false" text="%HISPEED_AUTO_ADJUST" GridPane.columnIndex="2" GridPane.rowIndex="7" GridPane.columnSpan="2">
+                                            <tooltip>
+                                                <Tooltip text="%HISPEED_AUTO_ADJUST_TOOLTIP" textAlignment="CENTER" />
+                                            </tooltip>
+                                         </CheckBox>
                                          <CheckBox fx:id="customjudge" mnemonicParsing="false" text="%EXPAND_JUDGE" GridPane.columnIndex="0" GridPane.rowIndex="9" />
                                          <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="9" GridPane.columnSpan="3">
                                          <Label text="KEY PG" prefWidth="60.0"/>

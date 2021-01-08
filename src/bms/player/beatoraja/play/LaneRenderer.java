@@ -196,12 +196,16 @@ public class LaneRenderer {
 	public float getLanecover() {
 		return playconfig.getLanecover();
 	}
+
+	public void resetHispeed(double targetbpm) {
+		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
+			playconfig.setHispeed((float) ((2400f / (targetbpm / 100) / playconfig.getDuration()) * (1 - (playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0))));
+		}
+	}
 	
 	public void setLanecover(float lanecover) {
 		playconfig.setLanecover(lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
-		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
-			playconfig.setHispeed((float) ((2400f / (basebpm / 100) / playconfig.getDuration()) * (1 - (playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0))));
-		}
+		resetHispeed(basebpm);
 	}
 
 	public void setEnableLanecover(boolean b) {
