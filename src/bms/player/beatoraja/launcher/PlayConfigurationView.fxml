@@ -296,6 +296,12 @@
                                          <ComboBox fx:id="seventoninepattern" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                          <Label text="%SEVEN_TO_NINE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                          <ComboBox fx:id="seventoninetype" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                                         <Label text="%EXIT_PRESS_DURATION" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                         <NumericSpinner fx:id="exitpressduration" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="1000" max="2000" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
                                      </GridPane>
                                  </VBox>
                            </content>
