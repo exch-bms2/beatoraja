@@ -29,6 +29,8 @@ public class PlayModeConfig {
      */
     private MidiConfig midi = new MidiConfig();
 
+    private int version;
+
     public PlayModeConfig() {
         this(Mode.BEAT_7K);
     }
@@ -69,6 +71,14 @@ public class PlayModeConfig {
         this.controller = controllerassign;
     }
 
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+	
     public void validate(int keys) {
         if(playconfig == null) {
             playconfig = new PlayConfig();
@@ -99,8 +109,20 @@ public class PlayModeConfig {
                 }
                 c.keys = newkeys;
             }
-            c.duration = MathUtils.clamp(c.duration, 0, 100);
+            c.duration = MathUtils.clamp(c.duration, 0, 100);            
         }
+        
+		// ボタsン数拡張(16->32)に伴う変換(0.8.1 -> 0.8.2)。あとで消す
+		if(version == 0) {
+	        for (ControllerConfig c : controller) {
+				for(int i = 0;i < c.keys.length;i++) {
+					if(c.keys[i] >= BMKeys.BUTTON_17 && c.keys[i] <= BMKeys.BUTTON_20) {
+						c.keys[i] += BMKeys.AXIS0_PLUS - BMKeys.BUTTON_17;
+					}
+				}	        	
+	        }
+			version = 1;
+		}
 
         if (midi.keys == null) {
             midi.keys = new MidiConfig().keys;
@@ -292,6 +314,16 @@ public class PlayModeConfig {
          */
         private int mouseScratchDuration = 150;
 
+        private static final ControllerConfig IIDX_PS2 = new ControllerConfig(new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
+				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS3_MINUS, BMKeys.AXIS2_MINUS, BMKeys.AXIS2_PLUS }, 
+					BMKeys.BUTTON_9, BMKeys.BUTTON_10);
+        private static final ControllerConfig DAO = new ControllerConfig(new int[] { BMKeys.BUTTON_1, BMKeys.BUTTON_2, BMKeys.BUTTON_3, BMKeys.BUTTON_4,
+					BMKeys.BUTTON_5, BMKeys.BUTTON_6, BMKeys.BUTTON_7, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS }, 
+						BMKeys.BUTTON_9, BMKeys.BUTTON_10);
+        private static final ControllerConfig IIDX_PREMIUM = new ControllerConfig(new int[] { BMKeys.BUTTON_1, BMKeys.BUTTON_2, BMKeys.BUTTON_3, BMKeys.BUTTON_4,
+					BMKeys.BUTTON_5, BMKeys.BUTTON_6, BMKeys.BUTTON_7, BMKeys.AXIS0_MINUS, BMKeys.AXIS0_PLUS }, 
+						BMKeys.BUTTON_9, BMKeys.BUTTON_10);
+
         public ControllerConfig() {
             this(Mode.BEAT_7K, 0, true);
         }
@@ -327,36 +359,30 @@ public class PlayModeConfig {
         }
 
         public void setKeyAssign(Mode mode, int player, boolean enable) {
+        	final ControllerConfig con = IIDX_PS2;
             if(player == 0) {
                 switch (mode) {
                     case BEAT_5K:
-                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS };
+                        keys = new int[]{ con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[7], con.keys[8]};
                         break;
                     case BEAT_7K:
                     case POPN_5K:
                     case POPN_9K:
                     default:
-                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS };
+                        keys = new int[]{ con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[5], con.keys[6],con.keys[7], con.keys[8]};
                         break;
                     case BEAT_10K:
-                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS, -1,-1,-1,-1,-1,-1,-1 };
+                        keys = new int[]{ con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[7], con.keys[8], -1,-1,-1,-1,-1,-1,-1 };
                         break;
                     case BEAT_14K:
-                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS, -1,-1,-1,-1,-1,-1,-1,-1,-1 };
+                        keys = new int[]{ con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[5], con.keys[6],con.keys[7], con.keys[8]
+                        		, -1,-1,-1,-1,-1,-1,-1,-1,-1 };
                         break;
                     case KEYBOARD_24K:
-                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS };
-                        keys = Arrays.copyOf(keys, 26);
+                        keys = Arrays.copyOf(con.keys, 26);
                         break;
                     case KEYBOARD_24K_DOUBLE:
-                        keys = new int[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS };
-                        keys = Arrays.copyOf(keys, 52);
+                        keys = Arrays.copyOf(con.keys, 52);
                         break;
                 }
             } else {
@@ -370,21 +396,17 @@ public class PlayModeConfig {
                         Arrays.fill(keys, -1);
                         break;
                     case BEAT_10K:
-                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS};
+                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[7], con.keys[8]};
                         break;
                     case BEAT_14K:
-                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS};
+                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[5], con.keys[6],con.keys[7], con.keys[8]};
                         break;
                     case KEYBOARD_24K:
-                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS};
+                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[5], con.keys[6],con.keys[7], con.keys[8]};
                         keys = Arrays.copyOf(keys, 26);
                         break;
                     case KEYBOARD_24K_DOUBLE:
-                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                                BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS};
+                        keys = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,con.keys[0], con.keys[1], con.keys[2], con.keys[3], con.keys[4],con.keys[5], con.keys[6],con.keys[7], con.keys[8]};
                         keys = Arrays.copyOf(keys, 52);
                         break;
                 }
@@ -392,8 +414,8 @@ public class PlayModeConfig {
             if(!enable) {
                 Arrays.fill(keys, -1);
             }
-            start = BMKeys.BUTTON_9;
-            select = BMKeys.BUTTON_10;
+            start = con.start;
+            select = con.select;
         }
 
         public void setKeyAssign(int[] keys) {
