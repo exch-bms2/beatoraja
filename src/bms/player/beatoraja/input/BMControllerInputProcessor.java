@@ -26,7 +26,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * ボタンキーアサイン
 	 */
 	private int[] buttons = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS1_MINUS };
+			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS2_PLUS, BMKeys.AXIS1_PLUS, BMKeys.AXIS2_MINUS };
 	/**
 	 * スタートキーアサイン
 	 */
@@ -146,23 +146,23 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 					buttonstate[button] = controller.getButton(button);
                 } else {
                     if (mouseScratch) {
-                        if (button == BMKeys.AXIS0_PLUS) {
+                        if (button == BMKeys.AXIS1_PLUS) {
                             buttonstate[button] = mouseScratchAlgorithm.getPositiveState();
-                        } else if (button == BMKeys.AXIS0_MINUS) {
+                        } else if (button == BMKeys.AXIS1_MINUS) {
                             buttonstate[button] = mouseScratchAlgorithm.getNegativeState();
                         } else {
                             buttonstate[button] = false;
                         }
                     } else if (jkoc) {
-                        if (button == BMKeys.AXIS0_PLUS) {
+                        if (button == BMKeys.AXIS1_PLUS) {
                             buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
-                        } else if (button == BMKeys.AXIS0_MINUS) {
+                        } else if (button == BMKeys.AXIS1_MINUS) {
                             buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
                         } else {
                             buttonstate[button] = false;
                         }
                     } else {
-                        buttonstate[button] = scratchInput((button - BMKeys.AXIS0_PLUS) / 2, (button - BMKeys.AXIS0_PLUS) % 2 == 0);
+                        buttonstate[button] = scratchInput((button - BMKeys.AXIS1_PLUS) / 2, (button - BMKeys.AXIS1_PLUS) % 2 == 0);
                     }
                 }
 
@@ -196,7 +196,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
         boolean isAnalog = !mouseScratch && !jkoc && (analogScratchAlgorithm != null);
         for (int i = 0; i < buttons.length; i++) {
             final int button = buttons[i];
-            if (isAnalog && button >= BMKeys.AXIS0_PLUS) {
+            if (isAnalog && button >= BMKeys.AXIS1_PLUS) {
                 this.bmsPlayerInputProcessor.setAnalogState(i, true, getAnalogValue(button));
             } else {
                 this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
@@ -206,8 +206,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
     private float getAnalogValue(int button) {
         // assume isAnalog(button) == true.
-        int axis_index = (button - BMKeys.AXIS0_PLUS)/2;
-        boolean plus = (button - BMKeys.AXIS0_PLUS)%2 == 1;
+        int axis_index = (button - BMKeys.AXIS1_PLUS)/2;
+        boolean plus = (button - BMKeys.AXIS1_PLUS)%2 == 1;
         float value = controller.getAxis(axis_index);
         return plus ? value : -value;
     }
@@ -279,22 +279,22 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		public static final int BUTTON_30 = 29;
 		public static final int BUTTON_31 = 30;
 		public static final int BUTTON_32 = 31;
-        public static final int AXIS0_PLUS = 32;
-        public static final int AXIS0_MINUS = 33;
-        public static final int AXIS1_PLUS = 34;
-        public static final int AXIS1_MINUS = 35;
-        public static final int AXIS2_PLUS = 36;
-        public static final int AXIS2_MINUS = 37;
-        public static final int AXIS3_PLUS = 38;
-        public static final int AXIS3_MINUS = 39;
-        public static final int AXIS4_PLUS = 40;
-        public static final int AXIS4_MINUS = 41;
-        public static final int AXIS5_PLUS = 42;
-        public static final int AXIS5_MINUS = 43;
-        public static final int AXIS6_PLUS = 44;
-        public static final int AXIS6_MINUS = 45;
-        public static final int AXIS7_PLUS = 46;
-        public static final int AXIS7_MINUS = 47;
+        public static final int AXIS1_PLUS = 32;
+        public static final int AXIS1_MINUS = 33;
+        public static final int AXIS2_PLUS = 34;
+        public static final int AXIS2_MINUS = 35;
+        public static final int AXIS3_PLUS = 36;
+        public static final int AXIS3_MINUS = 37;
+        public static final int AXIS4_PLUS = 38;
+        public static final int AXIS4_MINUS = 39;
+        public static final int AXIS5_PLUS = 40;
+        public static final int AXIS5_MINUS = 41;
+        public static final int AXIS6_PLUS = 42;
+        public static final int AXIS6_MINUS = 43;
+        public static final int AXIS7_PLUS = 44;
+        public static final int AXIS7_MINUS = 45;
+        public static final int AXIS8_PLUS = 46;
+        public static final int AXIS8_MINUS = 47;
 		
 		public static final int MAXID = 48;
 
@@ -305,8 +305,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
                 "BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13", "BUTTON 14",
                 "BUTTON 15", "BUTTON 16", "BUTTON 17", "BUTTON 18", "BUTTON 19", "BUTTON 20", "BUTTON 21", "BUTTON 22",
                 "BUTTON 23", "BUTTON 24", "BUTTON 25", "BUTTON 26", "BUTTON 27", "BUTTON 28", "BUTTON 29", "BUTTON 30",
-                "BUTTON 31", "BUTTON 32", "UP (AXIS 0 +)", "DOWN (AXIS 0 -)", "RIGHT (AXIS 1 +)", "LEFT (AXIS 1 -)",
-                "AXIS 2 +", "AXIS 2 -", "AXIS 3 +", "AXIS 3 -", "AXIS 4 +", "AXIS 4 -", "AXIS 5 +", "AXIS 5 -", "AXIS 6 +", "AXIS 6 -", "AXIS 7 +", "AXIS 7 -" };
+                "BUTTON 31", "BUTTON 32", "UP (AXIS 1 +)", "DOWN (AXIS 1 -)", "RIGHT (AXIS 2 +)", "LEFT (AXIS 2 -)",
+                "AXIS 3 +", "AXIS 3 -", "AXIS 4 +", "AXIS 4 -", "AXIS 5 +", "AXIS 5 -", "AXIS 6 +", "AXIS 6 -", "AXIS 7 +", "AXIS 7 -", "AXIS 8 +", "AXIS 8 -" };
 
 		public static final String toString(int keycode) {
 			if (keycode >= 0 && keycode < BMCODE.length) {

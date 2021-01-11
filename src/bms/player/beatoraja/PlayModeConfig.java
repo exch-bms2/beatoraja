@@ -99,7 +99,7 @@ public class PlayModeConfig {
         for (ControllerConfig c : controller) {
             if (c.keys == null) {
                 c.keys = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-                        BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS1_PLUS, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS };
+                        BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS2_PLUS, BMKeys.AXIS1_PLUS, BMKeys.AXIS1_MINUS };
             }
             if (c.keys.length != keys) {
                 int[] newkeys = new int[keys];
@@ -117,7 +117,7 @@ public class PlayModeConfig {
 	        for (ControllerConfig c : controller) {
 				for(int i = 0;i < c.keys.length;i++) {
 					if(c.keys[i] >= BMKeys.BUTTON_17 && c.keys[i] <= BMKeys.BUTTON_20) {
-						c.keys[i] += BMKeys.AXIS0_PLUS - BMKeys.BUTTON_17;
+						c.keys[i] += BMKeys.AXIS1_PLUS - BMKeys.BUTTON_17;
 					}
 				}	        	
 	        }
@@ -315,13 +315,13 @@ public class PlayModeConfig {
         private int mouseScratchDuration = 150;
 
         private static final ControllerConfig IIDX_PS2 = new ControllerConfig(new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS3_MINUS, BMKeys.AXIS2_MINUS, BMKeys.AXIS2_PLUS }, 
+				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS4_MINUS, BMKeys.AXIS3_MINUS, BMKeys.AXIS3_PLUS }, 
 					BMKeys.BUTTON_9, BMKeys.BUTTON_10);
         private static final ControllerConfig DAO = new ControllerConfig(new int[] { BMKeys.BUTTON_1, BMKeys.BUTTON_2, BMKeys.BUTTON_3, BMKeys.BUTTON_4,
-					BMKeys.BUTTON_5, BMKeys.BUTTON_6, BMKeys.BUTTON_7, BMKeys.AXIS0_PLUS, BMKeys.AXIS0_MINUS }, 
+					BMKeys.BUTTON_5, BMKeys.BUTTON_6, BMKeys.BUTTON_7, BMKeys.AXIS1_PLUS, BMKeys.AXIS1_MINUS }, 
 						BMKeys.BUTTON_9, BMKeys.BUTTON_10);
         private static final ControllerConfig IIDX_PREMIUM = new ControllerConfig(new int[] { BMKeys.BUTTON_1, BMKeys.BUTTON_2, BMKeys.BUTTON_3, BMKeys.BUTTON_4,
-					BMKeys.BUTTON_5, BMKeys.BUTTON_6, BMKeys.BUTTON_7, BMKeys.AXIS0_MINUS, BMKeys.AXIS0_PLUS }, 
+					BMKeys.BUTTON_5, BMKeys.BUTTON_6, BMKeys.BUTTON_7, BMKeys.AXIS1_MINUS, BMKeys.AXIS1_PLUS }, 
 						BMKeys.BUTTON_9, BMKeys.BUTTON_10);
 
         public ControllerConfig() {
