@@ -218,6 +218,8 @@ public class PlayConfigurationView implements Initializable {
     @FXML
     private Button twitterPINButton;
 
+    	@FXML
+    	private CheckBox enableVersionCheck;
 	@FXML
 	private CheckBox enableIpfs;
 	@FXML
@@ -367,6 +369,7 @@ public class PlayConfigurationView implements Initializable {
 
         usecim.setSelected(config.isCacheSkinImage());
 
+        	enableVersionCheck.setSelected(config.isEnableVersionCheck());
 		enableIpfs.setSelected(config.isEnableIpfs());
 		ipfsurl.setText(config.getIpfsUrl());
 
@@ -493,6 +496,7 @@ public class PlayConfigurationView implements Initializable {
 
         config.setCacheSkinImage(usecim.isSelected());
 
+        	config.setEnableVersionCheck(enableVersionCheck.isSelected());
 		config.setEnableIpfs(enableIpfs.isSelected());
 		config.setIpfsUrl(ipfsurl.getText());
 

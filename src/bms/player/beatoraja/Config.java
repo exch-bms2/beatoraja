@@ -213,6 +213,7 @@ public class Config implements Validatable {
 	private int bannerPixmapGen = 2;
 	private int songResourceGen = 1;
 
+	private boolean enableVersionCheck = true;
 	private boolean enableIpfs = true;
 	private String ipfsurl = "https://gateway.ipfs.io/";
 
@@ -588,6 +589,14 @@ public class Config implements Validatable {
 		this.songResourceGen = songResourceGen;
 	}
 
+        public void setEnableVersionCheck(boolean enableVersionCheck) {
+            	this.enableVersionCheck = enableVersionCheck;
+        }
+
+        public boolean isEnableVersionCheck() {
+            	return enableVersionCheck;
+        }
+        
 	public boolean isEnableIpfs() {
 		return enableIpfs;
 	}
