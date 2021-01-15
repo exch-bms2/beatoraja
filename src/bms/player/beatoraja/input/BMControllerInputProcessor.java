@@ -106,9 +106,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.mouseScratchDuration = controllerConfig.getMouseScratchDuration();
 		analogScratchAlgorithm = null;
 		if (controllerConfig.isAnalogScratch()) {
-            analogScratchAlgorithm = new AnalogScratchAlgorithm[4];
+            analogScratchAlgorithm = new AnalogScratchAlgorithm[AXIS_LENGTH];
 			int analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < AXIS_LENGTH; i++) {
     			switch (controllerConfig.getAnalogScratchMode()) {
     				case ControllerConfig.ANALOG_SCRATCH_VER_1:
     					analogScratchAlgorithm[i] = new AnalogScratchAlgorithmVersion1(analogScratchThreshold);
