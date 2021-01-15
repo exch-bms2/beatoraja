@@ -866,6 +866,8 @@ public class MusicSelector extends MainState {
 					break;
 				}
 			}
+		} else {
+			pc = main.getPlayerConfig().getPlayConfig(config.getMode()).getPlayconfig();
 		}
 		return pc;
 	}

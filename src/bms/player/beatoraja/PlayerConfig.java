@@ -329,7 +329,7 @@ public class PlayerConfig {
 	}
 
 	public PlayModeConfig getPlayConfig(Mode modeId) {
-		switch (modeId) {
+		switch (modeId != null ? modeId : Mode.BEAT_7K) {
 		case BEAT_5K:
 			return getMode5();
 		case BEAT_7K:
