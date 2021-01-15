@@ -395,13 +395,8 @@ public class IntegerPropertyFactory {
 		case NUMBER_DURATION:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
-					if (selected instanceof SongBar && ((SongBar) selected).existsSong()) {
-						SongBar song = (SongBar) selected;
-						PlayConfig pc = state.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-						return pc.getDuration();
-					}
-					return state.main.getPlayerConfig().getMode7().getPlayconfig().getDuration();
+					final PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+					return pc != null ? pc.getDuration() : Integer.MIN_VALUE;
 				} else if (state instanceof BMSPlayer) {
 					return ((BMSPlayer) state).getLanerender().getCurrentDuration();
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
@@ -415,13 +410,8 @@ public class IntegerPropertyFactory {
 		case NUMBER_DURATION_GREEN:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
-					if (selected instanceof SongBar && ((SongBar) selected).existsSong()) {
-						SongBar song = (SongBar) selected;
-						PlayConfig pc = state.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-						return pc.getDuration() * 3 / 5;
-					}
-					return state.main.getPlayerConfig().getMode7().getPlayconfig().getDuration() * 3 / 5;
+					final PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+					return pc != null ? pc.getDuration() * 3 / 5 : Integer.MIN_VALUE;
 				} else if (state instanceof BMSPlayer) {
 					return ((BMSPlayer) state).getLanerender().getCurrentDuration() * 3 / 5;
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
