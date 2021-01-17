@@ -678,6 +678,22 @@ public class BMSPlayer extends MainState {
 				input.setStartTime(0);
 				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
+				} else if ((input.startPressed() ^ input.isSelectPressed())
+						&& resource.getCourseBMSModels() == null
+						&& !autoplay.isAutoPlayMode()){
+					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
+					if (!resource.isUpdateScore()) {
+						resource.getReplayData().pattern = null;
+						Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
+					} else if (input.startPressed()){
+						resource.getReplayData().pattern = null;
+						Logger.getGlobal().info("オプションを変更せずリプレイ");
+					} else {
+						resource.setScoreData(createScoreData());
+						Logger.getGlobal().info("同じ譜面でリプレイ");
+					}
+					resource.reloadBMSFile();
+					main.changeState(MainStateType.PLAY);
 				} else if (resource.getScoreData() != null) {
 					main.changeState(MainStateType.RESULT);
 				} else {
