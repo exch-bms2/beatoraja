@@ -133,6 +133,11 @@ public class PlayerConfig {
 	public static final int GAUGEAUTOSHIFT_BESTCLEAR = 3;
 	public static final int GAUGEAUTOSHIFT_SELECT_TO_UNDER = 4;
 
+	private int autosavereplay[];
+
+	// TODO Configから移行(0.8.2)。ある程度バージョンが進んだら消す
+	private static int autosavereplayConfig[];
+
 	/**
 	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
 	 */
@@ -629,6 +634,14 @@ public class PlayerConfig {
 		this.id = id;
 	}
 
+	public void setAutoSaveReplay(int autoSaveReplay[]){
+		this.autosavereplay = autoSaveReplay;
+	}
+
+	public int[] getAutoSaveReplay(){
+		return autosavereplay;
+	}
+
 	public String getTwitterConsumerKey() {
 		return twitterConsumerKey;
 	}
@@ -725,6 +738,13 @@ public class PlayerConfig {
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
+		
+		if(autosavereplay == null) {
+			autosavereplay = autosavereplayConfig != null ? autosavereplayConfig.clone() : new int[4];
+		}
+		if(autosavereplay.length != 4) {
+			autosavereplay = Arrays.copyOf(autosavereplay, 4);
+		}
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
 		exitPressDuration = MathUtils.clamp(exitPressDuration, 0, 100000);
@@ -758,6 +778,7 @@ public class PlayerConfig {
 	}
 
 	public static void init(Config config) {
+		autosavereplayConfig = config.autosavereplay;
 		// TODO プレイヤーアカウント検証
 		try {
 			if(!Files.exists(Paths.get(config.getPlayerpath()))) {

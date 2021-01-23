@@ -50,66 +50,7 @@ public class Config implements Validatable {
 	 * オーディオコンフィグ
 	 */
 	private AudioConfig audio;
-	/**
-	 * オーディオドライバー
-	 */
-	private int audioDriver = 0;
-	/**
-	 * オーディオ:OpenAL (libGDX Sound)
-	 */
-	public static final int AUDIODRIVER_SOUND = 0;
-	public static final int AUDIODRIVER_AUDIODEVICE = 1;
-	/**
-	 * オーディオ:PortAudio
-	 */
-	public static final int AUDIODRIVER_PORTAUDIO = 2;
 
-	/**
-	 * オーディオドライバー名
-	 */
-	private String audioDriverName = null;
-	/**
-	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
-	 */
-	private int audioDeviceBufferSize = 384;
-	/**
-	 * オーディオ同時発音数
-	 */
-	private int audioDeviceSimultaneousSources = 128;
-
-	/**
-	 * オーディオ再生速度変化の処理:なし
-	 */
-	public static final int AUDIO_PLAY_UNPROCESSED = 0;
-	/**
-	 * オーディオ再生速度変化の処理:周波数を合わせる(速度に応じてピッチも変化)
-	 */
-	public static final int AUDIO_PLAY_FREQ = 1;
-	/**
-	 * オーディオ再生速度変化の処理:ピッチ変化なしに速度を変更(未実装)
-	 */
-	public static final int AUDIO_PLAY_SPEED = 1;
-	/**
-	 * PracticeモードのFREQUENCYオプションに対する音声処理方法
-	 */
-	private int audioFreqOption = AUDIO_PLAY_FREQ;
-	/**
-	 * 早送り再生に対する音声処理方法
-	 */
-	private int audioFastForward = AUDIO_PLAY_FREQ;
-
-	/**
-	 * システム音ボリューム
-	 */
-	private float systemvolume = 0.5f;
-	/**
-	 * キー音のボリューム
-	 */
-	private float keyvolume = 0.5f;
-	/**
-	 * BGノート音のボリューム
-	 */
-	private float bgvolume = 0.5f;
 	/**
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
@@ -212,8 +153,6 @@ public class Config implements Validatable {
 
 	private boolean updatesong = false;
 
-	private int autosavereplay[] = {0,0,0,0};
-
 	private int skinPixmapGen = 4;
 	private int stagefilePixmapGen = 2;
 	private int bannerPixmapGen = 2;
@@ -238,6 +177,18 @@ public class Config implements Validatable {
 			"http://stellawingroad.web.fc2.com/new/pms.html",
 			"https://excln.github.io/table24k/table.html",
 	};
+
+	// TODO 以下の変数は別クラスに移行済(0.8.2)。バージョンが進んだら消す
+	int autosavereplay[] = {0,0,0,0};
+	private int audioDriver = 0;
+	private String audioDriverName = null;
+	private int audioDeviceBufferSize = 384;
+	private int audioDeviceSimultaneousSources = 128;
+	private int audioFreqOption = 1;
+	private int audioFastForward = 1;
+	private float systemvolume = 0.5f;
+	private float keyvolume = 0.5f;
+	private float bgvolume = 0.5f;
 
 	public Config() {
 	}
@@ -437,14 +388,6 @@ public class Config implements Validatable {
 		this.showpastnote = showpastnote;
 	}
 
-	public void setAutoSaveReplay(int autoSaveReplay[]){
-		this.autosavereplay = autoSaveReplay;
-	}
-
-	public int[] getAutoSaveReplay(){
-		return autosavereplay;
-	}
-
 	public boolean isUseSongInfo() {
 		return useSongInfo;
 	}
@@ -585,12 +528,12 @@ public class Config implements Validatable {
 		
 		if(audio == null) {
 			audio = new AudioConfig();
-			audio.setDriver(audioDriver == AUDIODRIVER_PORTAUDIO ? DriverType.PortAudio : DriverType.OpenAL);
+			audio.setDriver(audioDriver == 2 ? DriverType.PortAudio : DriverType.OpenAL);
 			audio.setDriverName(audioDriverName);
 			audio.setDeviceBufferSize(audioDeviceBufferSize);
 			audio.setDeviceSimultaneousSources(audioDeviceSimultaneousSources);
-			audio.setFreqOption(audioFreqOption == AUDIO_PLAY_FREQ ? FrequencyType.FREQUENCY : FrequencyType.UNPROCESSED);
-			audio.setFastForward(audioFastForward == AUDIO_PLAY_FREQ ? FrequencyType.FREQUENCY : FrequencyType.UNPROCESSED);
+			audio.setFreqOption(audioFreqOption == 1 ? FrequencyType.FREQUENCY : FrequencyType.UNPROCESSED);
+			audio.setFastForward(audioFastForward == 1 ? FrequencyType.FREQUENCY : FrequencyType.UNPROCESSED);
 			audio.setSystemvolume(systemvolume);
 			audio.setKeyvolume(keyvolume);
 			audio.setBgvolume(bgvolume);
@@ -617,12 +560,6 @@ public class Config implements Validatable {
 
 		bga = MathUtils.clamp(bga, 0, 2);
 		bgaExpand = MathUtils.clamp(bgaExpand, 0, 2);
-		if(autosavereplay == null) {
-			autosavereplay = new int[4];
-		}
-		if(autosavereplay.length != 4) {
-			autosavereplay = Arrays.copyOf(autosavereplay, 4);
-		}
 		if (ipfsurl == null) {
 			ipfsurl = "https://gateway.ipfs.io/";
 		}

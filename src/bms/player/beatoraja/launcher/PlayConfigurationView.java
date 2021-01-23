@@ -357,11 +357,6 @@ public class PlayConfigurationView implements Initializable {
 
 		showhiddennote.setSelected(config.isShowhiddennote());
 
-		autosavereplay1.getSelectionModel().select(config.getAutoSaveReplay()[0]);
-		autosavereplay2.getSelectionModel().select(config.getAutoSaveReplay()[1]);
-		autosavereplay3.getSelectionModel().select(config.getAutoSaveReplay()[2]);
-		autosavereplay4.getSelectionModel().select(config.getAutoSaveReplay()[3]);
-
 		skinController.update(config);
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
@@ -449,6 +444,11 @@ public class PlayConfigurationView implements Initializable {
 		markprocessednote.setSelected(player.isMarkprocessednote());
 		extranotedepth.getValueFactory().setValue(player.getExtranoteDepth());
 
+		autosavereplay1.getSelectionModel().select(player.getAutoSaveReplay()[0]);
+		autosavereplay2.getSelectionModel().select(player.getAutoSaveReplay()[1]);
+		autosavereplay3.getSelectionModel().select(player.getAutoSaveReplay()[2]);
+		autosavereplay4.getSelectionModel().select(player.getAutoSaveReplay()[3]);
+
 		target.setValue(player.getTarget());
 
 		irController.update(player);
@@ -485,9 +485,6 @@ public class PlayConfigurationView implements Initializable {
 		resourceController.commit(config);
 
 		config.setShowhiddennote(showhiddennote.isSelected());
-
-		config.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
-				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
 
@@ -542,6 +539,9 @@ public class PlayConfigurationView implements Initializable {
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));
 		player.setMarkprocessednote(markprocessednote.isSelected());
 		player.setExtranoteDepth(extranotedepth.getValue());
+
+		player.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
+				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTarget(target.getValue());

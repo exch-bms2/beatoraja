@@ -615,73 +615,49 @@ public enum MusicSelectCommand {
     NEXT_AUTOSAVEREPLAY_1 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[0] = (asr[0] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 0, true);
         }
     },
     PREV_AUTOSAVEREPLAY_1 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[0] = (asr[0] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 0, false);
         }
     },
     NEXT_AUTOSAVEREPLAY_2 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[1] = (asr[1] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 1, true);
         }
     },
     PREV_AUTOSAVEREPLAY_2 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[1] = (asr[1] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 1, false);
         }
     },
     NEXT_AUTOSAVEREPLAY_3 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[2] = (asr[2] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 2, true);
         }
     },
     PREV_AUTOSAVEREPLAY_3 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[2] = (asr[2] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 2, false);
         }
     },
     NEXT_AUTOSAVEREPLAY_4 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[3] = (asr[3] + 1) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 3, true);
         }
     },
     PREV_AUTOSAVEREPLAY_4 {
         @Override
         public void execute(MusicSelector selector) {
-            int[] asr = selector.main.getConfig().getAutoSaveReplay();
-            asr[3] = (asr[3] - 1 + AbstractResult.ReplayAutoSaveConstraint.values().length) % AbstractResult.ReplayAutoSaveConstraint.values().length;
-            selector.main.getConfig().setAutoSaveReplay(asr);
-            selector.play(SOUND_OPTIONCHANGE);
+        	this.changeAutoSaveReplay(selector, 3, false);
         }
     },
     /**
@@ -880,4 +856,12 @@ public enum MusicSelectCommand {
     ;
 
     public abstract void execute(MusicSelector selector);
+    
+    void changeAutoSaveReplay(MusicSelector selector, int index, boolean next) {
+        int[] asr = selector.main.getPlayerConfig().getAutoSaveReplay();
+        final int length = AbstractResult.ReplayAutoSaveConstraint.values().length;
+        asr[index] = (asr[index] + (next ? 1 : length - 1)) % length;
+        selector.main.getPlayerConfig().setAutoSaveReplay(asr);
+        selector.play(SOUND_OPTIONCHANGE);
+    }
 }

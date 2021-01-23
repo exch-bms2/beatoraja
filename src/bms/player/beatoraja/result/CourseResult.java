@@ -73,7 +73,7 @@ public class CourseResult extends AbstractResult {
 		// リプレイの自動保存
 		if(resource.getPlayMode() == PlayMode.PLAY){
 			for(int i=0;i<REPLAY_SIZE;i++){
-				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,getNewScore())) {
+				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getPlayerConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,getNewScore())) {
 					saveReplayData(i);
 				}
 			}
