@@ -72,39 +72,39 @@ public class MainStateAccessor {
 		table.set("volume_sys", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
-				return LuaDouble.valueOf(state.main.getConfig().getSystemvolume());
+				return LuaDouble.valueOf(state.main.getConfig().getAudioConfig().getSystemvolume());
 			}
 		});
 		table.set("set_volume_sys", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
-				state.main.getConfig().setSystemvolume(value.tofloat());
+				state.main.getConfig().getAudioConfig().setSystemvolume(value.tofloat());
 				return LuaBoolean.TRUE;
 			}
 		});
 		table.set("volume_key", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
-				return LuaDouble.valueOf(state.main.getConfig().getKeyvolume());
+				return LuaDouble.valueOf(state.main.getConfig().getAudioConfig().getKeyvolume());
 			}
 		});
 		table.set("set_volume_key", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
-				state.main.getConfig().setKeyvolume(value.tofloat());
+				state.main.getConfig().getAudioConfig().setKeyvolume(value.tofloat());
 				return LuaBoolean.TRUE;
 			}
 		});
 		table.set("volume_bg", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
-				return LuaDouble.valueOf(state.main.getConfig().getBgvolume());
+				return LuaDouble.valueOf(state.main.getConfig().getAudioConfig().getBgvolume());
 			}
 		});
 		table.set("set_volume_bg", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
-				state.main.getConfig().setBgvolume(value.tofloat());
+				state.main.getConfig().getAudioConfig().setBgvolume(value.tofloat());
 				return LuaBoolean.TRUE;
 			}
 		});

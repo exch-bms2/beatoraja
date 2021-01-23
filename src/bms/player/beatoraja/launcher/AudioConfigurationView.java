@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 
 import com.portaudio.DeviceInfo;
 
+import bms.player.beatoraja.AudioConfig;
+import bms.player.beatoraja.AudioConfig.DriverType;
+import bms.player.beatoraja.AudioConfig.FrequencyType;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.launcher.PlayConfigurationView.OptionListCell;
@@ -20,7 +23,7 @@ import javafx.scene.control.Spinner;
 public class AudioConfigurationView implements Initializable {
 
 	@FXML
-	private ComboBox<Integer> audio;
+	private ComboBox<DriverType> audio;
 	@FXML
 	private ComboBox<String> audioname;
 	@FXML
@@ -34,38 +37,28 @@ public class AudioConfigurationView implements Initializable {
 	@FXML
 	private Slider bgvolume;
 	@FXML
-	private ComboBox<Integer> audioFreqOption;
+	private ComboBox<FrequencyType> audioFreqOption;
 	@FXML
-	private ComboBox<Integer> audioFastForward;
+	private ComboBox<FrequencyType> audioFastForward;
 	
-	private Config config;
-
-	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
-		combo.setCellFactory((param) -> new OptionListCell(values));
-		combo.setButtonCell(new OptionListCell(values));
-		for (int i = 0; i < values.length; i++) {
-			combo.getItems().add(i);
-		}
-	}
+	private AudioConfig config;
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
-		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio"});
-		audio.getItems().setAll(0, 2);
+		audio.getItems().setAll(DriverType.OpenAL , DriverType.PortAudio);
 
-		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
-		initComboBox(audioFreqOption, audioPlaySpeedControls);
-		initComboBox(audioFastForward, audioPlaySpeedControls);
+		audioFreqOption.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
+		audioFastForward.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
 
 	}
 
-	public void update(Config config) {
+	public void update(AudioConfig config) {
 		this.config = config;
 		
-		audio.setValue(config.getAudioDriver());
-		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
-		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
-		audioFreqOption.setValue(config.getAudioFreqOption());
-		audioFastForward.setValue(config.getAudioFastForward());
+		audio.setValue(config.getDriver());
+		audiobuffer.getValueFactory().setValue(config.getDeviceBufferSize());
+		audiosim.getValueFactory().setValue(config.getDeviceSimultaneousSources());
+		audioFreqOption.setValue(config.getFreqOption());
+		audioFastForward.setValue(config.getFastForward());
 		systemvolume.setValue((double)config.getSystemvolume());
 		keyvolume.setValue((double)config.getKeyvolume());
 		bgvolume.setValue((double)config.getBgvolume());
@@ -74,12 +67,12 @@ public class AudioConfigurationView implements Initializable {
 	}
 	
 	public void commit() {
-		config.setAudioDriver(audio.getValue());
-		config.setAudioDriverName(audioname.getValue());
-		config.setAudioDeviceBufferSize(audiobuffer.getValue());
-		config.setAudioDeviceSimultaneousSources(audiosim.getValue());
-		config.setAudioFreqOption(audioFreqOption.getValue());
-		config.setAudioFastForward(audioFastForward.getValue());
+		config.setDriver(audio.getValue());
+		config.setDriverName(audioname.getValue());
+		config.setDeviceBufferSize(audiobuffer.getValue());
+		config.setDeviceSimultaneousSources(audiosim.getValue());
+		config.setFreqOption(audioFreqOption.getValue());
+		config.setFastForward(audioFastForward.getValue());
 		config.setSystemvolume((float) systemvolume.getValue());
 		config.setKeyvolume((float) keyvolume.getValue());
 		config.setBgvolume((float) bgvolume.getValue());
@@ -88,13 +81,13 @@ public class AudioConfigurationView implements Initializable {
     @FXML
 	public void updateAudioDriver() {
 		switch(audio.getValue()) {
-		case Config.AUDIODRIVER_SOUND:
+		case OpenAL:
 			audioname.setDisable(true);
 			audioname.getItems().clear();
 			audiobuffer.setDisable(false);
 			audiosim.setDisable(false);
 			break;
-		case Config.AUDIODRIVER_PORTAUDIO:
+		case PortAudio:
 			try {
 				DeviceInfo[] devices = PortAudioDriver.getDevices();
 				List<String> drivers = new ArrayList<String>(devices.length);
@@ -105,8 +98,8 @@ public class AudioConfigurationView implements Initializable {
 					throw new RuntimeException("ドライバが見つかりません");
 				}
 				audioname.getItems().setAll(drivers);
-				if(drivers.contains(config.getAudioDriverName())) {
-					audioname.setValue(config.getAudioDriverName());
+				if(drivers.contains(config.getDriverName())) {
+					audioname.setValue(config.getDriverName());
 				} else {
 					audioname.setValue(drivers.get(0));
 				}
@@ -116,7 +109,7 @@ public class AudioConfigurationView implements Initializable {
 //				PortAudio.terminate();
 			} catch(Throwable e) {
 				Logger.getGlobal().severe("PortAudioは選択できません : " + e.getMessage());
-				audio.setValue(Config.AUDIODRIVER_SOUND);
+				audio.setValue(DriverType.OpenAL);
 			}
 			break;
 		}

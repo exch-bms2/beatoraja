@@ -240,7 +240,6 @@ public class Config implements Validatable {
 	};
 
 	public Config() {
-		validate();
 	}
 
 	public String getPlayername() {
@@ -273,22 +272,6 @@ public class Config implements Validatable {
 	
 	public void setAudioConfig(AudioConfig audio) {
 		this.audio = audio;
-	}
-
-	public int getAudioDeviceBufferSize() {
-		return audioDeviceBufferSize;
-	}
-
-	public void setAudioDeviceBufferSize(int audioDeviceBufferSize) {
-		this.audioDeviceBufferSize = audioDeviceBufferSize;
-	}
-
-	public int getAudioDeviceSimultaneousSources() {
-		return audioDeviceSimultaneousSources;
-	}
-
-	public void setAudioDeviceSimultaneousSources(int audioDeviceSimultaneousSources) {
-		this.audioDeviceSimultaneousSources = audioDeviceSimultaneousSources;
 	}
 
 	public int getMaxFramePerSecond() {
@@ -446,69 +429,12 @@ public class Config implements Validatable {
 		this.loopPreview = loopPreview;
 	}
 
-	public float getKeyvolume() {
-		if(keyvolume < 0 || keyvolume > 1) {
-			keyvolume = 1;
-		}
-		return keyvolume;
-	}
-
-	public void setKeyvolume(float keyvolume) {
-		this.keyvolume = keyvolume;
-	}
-
-	public float getBgvolume() {
-		if(bgvolume < 0 || bgvolume > 1) {
-			bgvolume = 1;
-		}
-		return bgvolume;
-	}
-
-	public void setBgvolume(float bgvolume) {
-		this.bgvolume = bgvolume;
-	}
-
 	public boolean isShowpastnote() {
 		return showpastnote;
 	}
 
 	public void setShowpastnote(boolean showpastnote) {
 		this.showpastnote = showpastnote;
-	}
-
-	public int getAudioDriver() {
-		if(audioDriver != Config.AUDIODRIVER_SOUND && audioDriver != Config.AUDIODRIVER_PORTAUDIO) {
-			audioDriver = Config.AUDIODRIVER_SOUND;
-		}
-		return audioDriver;
-	}
-
-	public void setAudioDriver(int audioDriver) {
-		this.audioDriver = audioDriver;
-	}
-
-	public String getAudioDriverName() {
-		return audioDriverName;
-	}
-
-	public void setAudioDriverName(String audioDriverName) {
-		this.audioDriverName = audioDriverName;
-	}
-
-	public int getAudioFreqOption() {
-		return audioFreqOption;
-	}
-
-	public void setAudioFreqOption(int audioFreqOption) {
-		this.audioFreqOption = audioFreqOption;
-	}
-
-	public int getAudioFastForward() {
-		return audioFastForward;
-	}
-
-	public void setAudioFastForward(int audioFastForward) {
-		this.audioFastForward = audioFastForward;
 	}
 
 	public void setAutoSaveReplay(int autoSaveReplay[]){
@@ -541,17 +467,6 @@ public class Config implements Validatable {
 
 	public void setCacheSkinImage(boolean cacheSkinImage) {
 		this.cacheSkinImage = cacheSkinImage;
-	}
-
-	public float getSystemvolume() {
-		if(systemvolume < 0 || systemvolume > 1) {
-			systemvolume = 1;
-		}
-		return systemvolume;
-	}
-
-	public void setSystemvolume(float systemvolume) {
-		this.systemvolume = systemvolume;
 	}
 
 	public boolean isUpdatesong() {
@@ -668,16 +583,14 @@ public class Config implements Validatable {
 		windowWidth = MathUtils.clamp(windowWidth, Resolution.SD.width, Resolution.ULTRAHD.width);
 		windowHeight = MathUtils.clamp(windowHeight, Resolution.SD.height, Resolution.ULTRAHD.height);
 		
-		// TODO 全てAudioConfig側を参照するようにしたら元に戻す
-		if(true) {
-//		if(audio == null) {
+		if(audio == null) {
 			audio = new AudioConfig();
 			audio.setDriver(audioDriver == AUDIODRIVER_PORTAUDIO ? DriverType.PortAudio : DriverType.OpenAL);
 			audio.setDriverName(audioDriverName);
 			audio.setDeviceBufferSize(audioDeviceBufferSize);
 			audio.setDeviceSimultaneousSources(audioDeviceSimultaneousSources);
-			audio.setFreqOption(audioFreqOption == AUDIO_PLAY_FREQ ? FrequencyType.FREQ : FrequencyType.UNPROCESSED);
-			audio.setFastForward(audioFastForward == AUDIO_PLAY_FREQ ? FrequencyType.FREQ : FrequencyType.UNPROCESSED);
+			audio.setFreqOption(audioFreqOption == AUDIO_PLAY_FREQ ? FrequencyType.FREQUENCY : FrequencyType.UNPROCESSED);
+			audio.setFastForward(audioFastForward == AUDIO_PLAY_FREQ ? FrequencyType.FREQUENCY : FrequencyType.UNPROCESSED);
 			audio.setSystemvolume(systemvolume);
 			audio.setKeyvolume(keyvolume);
 			audio.setBgvolume(bgvolume);

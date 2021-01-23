@@ -91,11 +91,11 @@ public class FloatPropertyFactory {
 			return (state) -> ((state instanceof SkinConfiguration)
 					? ((SkinConfiguration) state).getSkinSelectPosition() : 0);
 		case SLIDER_MASTER_VOLUME:
-			return (state) -> (state.main.getConfig().getSystemvolume());
+			return (state) -> (state.main.getConfig().getAudioConfig().getSystemvolume());
 		case SLIDER_KEY_VOLUME:
-			return (state) -> (state.main.getConfig().getKeyvolume());
+			return (state) -> (state.main.getConfig().getAudioConfig().getKeyvolume());
 		case SLIDER_BGM_VOLUME:
-			return (state) -> (state.main.getConfig().getBgvolume());
+			return (state) -> (state.main.getConfig().getAudioConfig().getBgvolume());
 		case BARGRAPH_LEVEL:
 			return getLevelRate(-1);
 		case BARGRAPH_LEVEL_BEGINNER:
@@ -230,15 +230,15 @@ public class FloatPropertyFactory {
 			};
 			case SLIDER_MASTER_VOLUME:
 				return (state, value) -> {
-					state.main.getConfig().setSystemvolume(value);					
+					state.main.getConfig().getAudioConfig().setSystemvolume(value);					
 				};
 			case SLIDER_KEY_VOLUME:
 				return (state, value) -> {
-					state.main.getConfig().setKeyvolume(value);					
+					state.main.getConfig().getAudioConfig().setKeyvolume(value);					
 				};
 			case SLIDER_BGM_VOLUME:
 				return (state, value) -> {
-					state.main.getConfig().setBgvolume(value);					
+					state.main.getConfig().getAudioConfig().setBgvolume(value);					
 				};
 		}
 		return null;		

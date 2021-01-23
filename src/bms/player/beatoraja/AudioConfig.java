@@ -30,11 +30,11 @@ public class AudioConfig implements Validatable {
 	/**
 	 * PracticeモードのFREQUENCYオプションに対する音声処理方法
 	 */
-	private FrequencyType freqOption = FrequencyType.FREQ;
+	private FrequencyType freqOption = FrequencyType.FREQUENCY;
 	/**
 	 * 早送り再生に対する音声処理方法
 	 */
-	private FrequencyType fastForward = FrequencyType.FREQ;
+	private FrequencyType fastForward = FrequencyType.FREQUENCY;
 
 	/**
 	 * システム音ボリューム
@@ -128,10 +128,10 @@ public class AudioConfig implements Validatable {
 		deviceBufferSize = MathUtils.clamp(deviceBufferSize, 4, 4096);
 		deviceSimultaneousSources = MathUtils.clamp(deviceSimultaneousSources, 16, 1024);
 		if(freqOption == null) {
-			freqOption = FrequencyType.FREQ;
+			freqOption = FrequencyType.FREQUENCY;
 		}
 		if(fastForward == null) {
-			fastForward = FrequencyType.FREQ;
+			fastForward = FrequencyType.FREQUENCY;
 		}
 		systemvolume = MathUtils.clamp(systemvolume, 0f, 1f);
 		keyvolume = MathUtils.clamp(keyvolume, 0f, 1f);
@@ -164,7 +164,7 @@ public class AudioConfig implements Validatable {
 		/**
 		 * オーディオ再生速度変化の処理:周波数を合わせる(速度に応じてピッチも変化)
 		 */
-		FREQ,
+		FREQUENCY,
 		/**
 		 * オーディオ再生速度変化の処理:ピッチ変化なしに速度を変更(未実装)
 		 */

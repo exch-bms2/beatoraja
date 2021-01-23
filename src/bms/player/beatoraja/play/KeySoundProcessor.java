@@ -78,7 +78,7 @@ public class KeySoundProcessor {
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						audio.play(n, config.getBgvolume(), 0);
+						audio.play(n, config.getAudioConfig().getBgvolume(), 0);
 					}
 					p++;
 				}

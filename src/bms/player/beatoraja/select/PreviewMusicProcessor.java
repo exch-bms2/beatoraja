@@ -74,8 +74,8 @@ public class PreviewMusicProcessor {
         private float currentVolume;
 
         public void run() {
-            audio.play(defaultMusic, config.getSystemvolume(), true);
-            currentVolume = config.getSystemvolume();
+            audio.play(defaultMusic, config.getAudioConfig().getSystemvolume(), true);
+            currentVolume = config.getAudioConfig().getSystemvolume();
             while(!stop) {
                 if(!commands.isEmpty()) {
                     String path = commands.removeFirst();
@@ -85,20 +85,20 @@ public class PreviewMusicProcessor {
                     if(!path.equals(playing)) {
                         stopPreview(true);
                         if(path != defaultMusic) {
-                            audio.play(path, config.getSystemvolume(), config.isLoopPreview());
+                            audio.play(path, config.getAudioConfig().getSystemvolume(), config.isLoopPreview());
                         } else {
-                            audio.setVolume(defaultMusic, config.getSystemvolume());
+                            audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
                         }
                         playing = path;
                     }
                 } else if(playing != defaultMusic && !audio.isPlaying(playing)){
                 	// プレビュー演奏終了後に選曲BGMに戻す
                     stopPreview(true);
-                    audio.setVolume(defaultMusic, config.getSystemvolume());
+                    audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
                     playing = defaultMusic;
-                } else if(currentVolume != config.getSystemvolume()){
-                    audio.setVolume(playing, config.getSystemvolume());
-                    currentVolume = config.getSystemvolume();
+                } else if(currentVolume != config.getAudioConfig().getSystemvolume()){
+                    audio.setVolume(playing, config.getAudioConfig().getSystemvolume());
+                    currentVolume = config.getAudioConfig().getSystemvolume();
                 } else {
                     try {
                         sleep(50);
@@ -116,7 +116,7 @@ public class PreviewMusicProcessor {
                     audio.dispose(playing);
                 } else if(pause) {
                 	for(int i = 10;i >= 0;i--) {
-                		float vol = i * 0.1f * config.getSystemvolume();
+                		float vol = i * 0.1f * config.getAudioConfig().getSystemvolume();
                         audio.setVolume(playing, vol);
                         // TODO フェードアウトはAudioDriver側で実装したい
                         try {

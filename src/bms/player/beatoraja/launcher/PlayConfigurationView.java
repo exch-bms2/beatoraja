@@ -347,7 +347,7 @@ public class PlayConfigurationView implements Initializable {
 
 		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 		videoController.update(config);
-		audioController.update(config);
+		audioController.update(config.getAudioConfig());
 		musicselectController.update(config);
 
 		bgmpath.setText(config.getBgmpath());

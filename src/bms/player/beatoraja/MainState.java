@@ -218,7 +218,7 @@ public abstract class MainState {
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if (path != null) {
-			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getSystemvolume(),
+			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getAudioConfig().getSystemvolume(),
 					soundloop.get(id));
 		}
 	}

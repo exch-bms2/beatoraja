@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.AudioConfig.FrequencyType;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.pattern.*;
@@ -491,7 +492,7 @@ public class BMSPlayer extends MainState {
 				control.setEnableCursor(true);
 				if (property.freq != 100) {
 					BMSModelUtils.changeFrequency(model, property.freq / 100f);
-					if (main.getConfig().getAudioFreqOption() == Config.AUDIO_PLAY_FREQ) {
+					if (main.getConfig().getAudioConfig().getFreqOption() == FrequencyType.FREQUENCY) {
 						main.getAudioProcessor().setGlobalPitch(property.freq / 100f);
 					}
 				}
@@ -732,7 +733,7 @@ public class BMSPlayer extends MainState {
 
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
-		if (main.getConfig().getAudioFastForward() == Config.AUDIO_PLAY_FREQ) {
+		if (main.getConfig().getAudioConfig().getFastForward() == FrequencyType.FREQUENCY) {
 			main.getAudioProcessor().setGlobalPitch(playspeed / 100f);
 		}
 	}

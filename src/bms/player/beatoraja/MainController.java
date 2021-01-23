@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.StringBuilder;
 
+import bms.player.beatoraja.AudioConfig.DriverType;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.MessageRenderer.Message;
 import bms.player.beatoraja.PlayerResource.PlayMode;
@@ -49,7 +50,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	private static final String VERSION = "beatoraja 0.8";
+	private static final String VERSION = "beatoraja 0.8.2";
 
 	public static final boolean debug = false;
 
@@ -179,13 +180,13 @@ public class MainController extends ApplicationAdapter {
 		}
 		ir = irarray.toArray(IRStatus.class);
 		
-		switch(config.getAudioDriver()) {
-		case Config.AUDIODRIVER_PORTAUDIO:
+		switch(config.getAudioConfig().getDriver()) {
+		case PortAudio:
 			try {
 				audio = new PortAudioDriver(config);
 			} catch(Throwable e) {
 				e.printStackTrace();
-				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				config.getAudioConfig().setDriver(DriverType.OpenAL);
 			}
 			break;
 		}
@@ -306,13 +307,13 @@ public class MainController extends ApplicationAdapter {
 		messageRenderer = new MessageRenderer();
 
 		input = new BMSPlayerInputProcessor(config, player);
-		switch(config.getAudioDriver()) {
-		case Config.AUDIODRIVER_SOUND:
+		switch(config.getAudioConfig().getDriver()) {
+		case OpenAL:
 			audio = new GdxSoundDriver(config);
 			break;
-		case Config.AUDIODRIVER_AUDIODEVICE:
-			audio = new GdxAudioDeviceDriver(config);
-			break;
+//		case AudioDevice:
+//			audio = new GdxAudioDeviceDriver(config);
+//			break;
 		}
 
 		resource = new PlayerResource(audio, config, player);

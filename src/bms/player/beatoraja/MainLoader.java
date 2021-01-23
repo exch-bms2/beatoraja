@@ -26,6 +26,7 @@ import javafx.scene.layout.VBox;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
+import bms.player.beatoraja.AudioConfig.DriverType;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.launcher.PlayConfigurationView;
@@ -140,10 +141,10 @@ public class MainLoader extends Application {
 			cfg.foregroundFPS = config.getMaxFramePerSecond();
 			cfg.title = MainController.getVersion();
 			
-			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
-			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
+			cfg.audioDeviceBufferSize = config.getAudioConfig().getDeviceBufferSize();
+			cfg.audioDeviceSimultaneousSources = config.getAudioConfig().getDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
-			if(config.getAudioDriver() != Config.AUDIODRIVER_SOUND && config.getAudioDriver() != Config.AUDIODRIVER_AUDIODEVICE) {
+			if(config.getAudioConfig().getDriver() != DriverType.OpenAL) {
 				LwjglApplicationConfiguration.disableAudio = true;				
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",

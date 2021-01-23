@@ -5,6 +5,7 @@ import java.nio.file.*;
 
 import com.portaudio.*;
 
+import bms.player.beatoraja.AudioConfig;
 import bms.player.beatoraja.Config;
 
 /**
@@ -49,7 +50,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		// Get the default device and setup the stream parameters.
 		int deviceId = 0;
 		for(int i = 0;i < devices.length;i++) {
-			if(devices[i].name.equals(config.getAudioDriverName())) {
+			if(devices[i].name.equals(config.getAudioConfig().getDriverName())) {
 				deviceId = i;
 				break;
 			}
@@ -64,7 +65,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		StreamParameters streamParameters = new StreamParameters();
 		streamParameters.channelCount = channels;
 		streamParameters.device = deviceId;
-		int framesPerBuffer = config.getAudioDeviceBufferSize();
+		int framesPerBuffer = config.getAudioConfig().getDeviceBufferSize();
 		streamParameters.suggestedLatency = ((double)framesPerBuffer) / sampleRate;
 //		System.out.println( "  suggestedLatency = " + streamParameters.suggestedLatency );
 
@@ -77,7 +78,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 		mixer = new Thread(this);
 		buffer = new float[framesPerBuffer * channels];
-		inputs = new MixerInput[config.getAudioDeviceSimultaneousSources()];
+		inputs = new MixerInput[config.getAudioConfig().getDeviceSimultaneousSources()];
 		for (int i = 0; i < inputs.length; i++) {
 			inputs[i] = new MixerInput();
 		}
