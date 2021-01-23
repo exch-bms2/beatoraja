@@ -10,7 +10,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
-import bms.player.beatoraja.play.JudgeAlgorithm;
+import bms.player.beatoraja.AudioConfig.DriverType;
+import bms.player.beatoraja.AudioConfig.FrequencyType;
 
 /**
  * 各種設定項目。config.jsonで保持される
@@ -44,6 +45,11 @@ public class Config implements Validatable {
 	 * フォルダランプの有効/無効
 	 */
 	private boolean folderlamp = true;
+	
+	/**
+	 * オーディオコンフィグ
+	 */
+	private AudioConfig audio;
 	/**
 	 * オーディオドライバー
 	 */
@@ -95,15 +101,15 @@ public class Config implements Validatable {
 	/**
 	 * システム音ボリューム
 	 */
-	private float systemvolume = 1.0f;
+	private float systemvolume = 0.5f;
 	/**
 	 * キー音のボリューム
 	 */
-	private float keyvolume = 1.0f;
+	private float keyvolume = 0.5f;
 	/**
 	 * BGノート音のボリューム
 	 */
-	private float bgvolume = 1.0f;
+	private float bgvolume = 0.5f;
 	/**
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
@@ -175,9 +181,9 @@ public class Config implements Validatable {
 	private String skinpath = SKINPATH_DEFAULT;
 	public static final String SKINPATH_DEFAULT = "skin";
 
-	private String bgmpath = "";
+	private String bgmpath = "bgm";
 
-	private String soundpath = "";
+	private String soundpath = "sound";
 
 	/**
 	 * BMSルートディレクトリパス
@@ -197,7 +203,7 @@ public class Config implements Validatable {
 	/**
 	 * BGA拡大
 	 */
-	private int bgaExpand = BGAEXPAND_FULL;
+	private int bgaExpand = BGAEXPAND_KEEP_ASPECT_RATIO;
 	public static final int BGAEXPAND_FULL = 0;
 	public static final int BGAEXPAND_KEEP_ASPECT_RATIO = 1;
 	public static final int BGAEXPAND_OFF = 2;
@@ -259,6 +265,14 @@ public class Config implements Validatable {
 
 	public void setBga(int bga) {
 		this.bga = bga;
+	}
+	
+	public AudioConfig getAudioConfig() {
+		return audio;
+	}
+	
+	public void setAudioConfig(AudioConfig audio) {
+		this.audio = audio;
 	}
 
 	public int getAudioDeviceBufferSize() {
@@ -653,14 +667,22 @@ public class Config implements Validatable {
 		}
 		windowWidth = MathUtils.clamp(windowWidth, Resolution.SD.width, Resolution.ULTRAHD.width);
 		windowHeight = MathUtils.clamp(windowHeight, Resolution.SD.height, Resolution.ULTRAHD.height);
-		audioDriver = MathUtils.clamp(audioDriver, 0, 2);
-		audioDeviceBufferSize = MathUtils.clamp(audioDeviceBufferSize, 4, 4096);
-		audioDeviceSimultaneousSources = MathUtils.clamp(audioDeviceSimultaneousSources, 16, 1024);
-		audioFreqOption = MathUtils.clamp(audioFreqOption, 0, AUDIO_PLAY_SPEED);
-		audioFastForward = MathUtils.clamp(audioFastForward, 0, AUDIO_PLAY_SPEED);
-		systemvolume = MathUtils.clamp(systemvolume, 0f, 1f);
-		keyvolume = MathUtils.clamp(keyvolume, 0f, 1f);
-		bgvolume = MathUtils.clamp(bgvolume, 0f, 1f);
+		
+		// TODO 全てAudioConfig側を参照するようにしたら元に戻す
+		if(true) {
+//		if(audio == null) {
+			audio = new AudioConfig();
+			audio.setDriver(audioDriver == AUDIODRIVER_PORTAUDIO ? DriverType.PortAudio : DriverType.OpenAL);
+			audio.setDriverName(audioDriverName);
+			audio.setDeviceBufferSize(audioDeviceBufferSize);
+			audio.setDeviceSimultaneousSources(audioDeviceSimultaneousSources);
+			audio.setFreqOption(audioFreqOption == AUDIO_PLAY_FREQ ? FrequencyType.FREQ : FrequencyType.UNPROCESSED);
+			audio.setFastForward(audioFastForward == AUDIO_PLAY_FREQ ? FrequencyType.FREQ : FrequencyType.UNPROCESSED);
+			audio.setSystemvolume(systemvolume);
+			audio.setKeyvolume(keyvolume);
+			audio.setBgvolume(bgvolume);
+		}
+		audio.validate();
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
         maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
