@@ -355,8 +355,6 @@ public class PlayConfigurationView implements Initializable {
 
 		resourceController.update(config);
 
-		showhiddennote.setSelected(config.isShowhiddennote());
-
 		skinController.update(config);
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
@@ -450,6 +448,7 @@ public class PlayConfigurationView implements Initializable {
 		autosavereplay4.getSelectionModel().select(player.getAutoSaveReplay()[3]);
 
 		target.setValue(player.getTarget());
+		showhiddennote.setSelected(player.isShowhiddennote());
 
 		irController.update(player);
 
@@ -483,8 +482,6 @@ public class PlayConfigurationView implements Initializable {
 		config.setSoundpath(soundpath.getText());
 
 		resourceController.commit(config);
-
-		config.setShowhiddennote(showhiddennote.isSelected());
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
 
@@ -545,6 +542,8 @@ public class PlayConfigurationView implements Initializable {
 
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTarget(target.getValue());
+
+		player.setShowhiddennote(showhiddennote.isSelected());
 
 		inputController.commit();
 		irController.commit();

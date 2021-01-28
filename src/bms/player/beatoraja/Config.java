@@ -4,7 +4,6 @@ import static bms.player.beatoraja.Resolution.*;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
@@ -97,15 +96,6 @@ public class Config implements Validatable {
      * songinfoデータベースを使用するかどうか
      */
     private boolean useSongInfo = true;
-
-	/**
-	 * HIDDENノートを表示するかどうか
-	 */
-	private boolean showhiddennote = false;
-	/**
-	 * 通過ノートを表示するかどうか
-	 */
-	private boolean showpastnote = false;
 
 	private String songpath = SONGPATH_DEFAULT;
 	public static final String SONGPATH_DEFAULT = "songdata.db";
@@ -289,14 +279,6 @@ public class Config implements Validatable {
 		this.windowHeight = height;
 	}
 
-	public boolean isShowhiddennote() {
-		return showhiddennote;
-	}
-
-	public void setShowhiddennote(boolean showhiddennote) {
-		this.showhiddennote = showhiddennote;
-	}
-
 	public int getFrameskip() {
 		return frameskip;
 	}
@@ -378,14 +360,6 @@ public class Config implements Validatable {
 
 	public void setLoopPreview(boolean loopPreview) {
 		this.loopPreview = loopPreview;
-	}
-
-	public boolean isShowpastnote() {
-		return showpastnote;
-	}
-
-	public void setShowpastnote(boolean showpastnote) {
-		this.showpastnote = showpastnote;
 	}
 
 	public boolean isUseSongInfo() {
