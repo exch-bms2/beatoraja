@@ -666,42 +666,7 @@ public enum MusicSelectCommand {
     NEXT_FAVORITE_SONG {
         @Override
         public void execute(MusicSelector selector) {
-			if(selector.getSelectedBar() instanceof SongBar) {
-				final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
-				if(sd != null) {
-					int type = 2;
-					String message = "Added to Invisible Song";
-					if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
-						type = 1;
-						message = "Added to Favorite Song";
-					} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
-						type = 0;
-						message = "Removed from Invisible Song";
-					}
-					SongData[] songs = selector.getSongDatabase().getSongDatas("folder", sd.getFolder());
-					for(SongData song : songs) {
-						int favorite = song.getFavorite();
-						switch (type) {
-						case 0:
-							favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
-							break;
-						case 1:
-							favorite |= SongData.FAVORITE_SONG;
-							favorite &= 0xffffffff ^ SongData.INVISIBLE_SONG;
-							break;
-						case 2:
-							favorite |= SongData.INVISIBLE_SONG;
-							favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
-							break;
-						}
-						song.setFavorite(favorite);
-					}
-					selector.getSongDatabase().setSongDatas(songs);
-					selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-		            selector.play(SOUND_OPTIONCHANGE);
-				}
-			}
+        	changeFavoriteSong(selector, true);
         }
     },
     /**
@@ -710,42 +675,7 @@ public enum MusicSelectCommand {
     PREV_FAVORITE_SONG {
         @Override
         public void execute(MusicSelector selector) {
-			if(selector.getSelectedBar() instanceof SongBar) {
-				final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
-				if(sd != null) {
-					int type = 0;
-					String message = "Removed from Favorite Song";
-					if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
-						type = 2;
-						message = "Added to Invisible Song";
-					} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
-						type = 1;
-						message = "Added to Favorite Song";
-					}
-					SongData[] songs = selector.getSongDatabase().getSongDatas("folder", sd.getFolder());
-					for(SongData song : songs) {
-						int favorite = song.getFavorite();
-						switch (type) {
-						case 0:
-							favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
-							break;
-						case 1:
-							favorite |= SongData.FAVORITE_SONG;
-							favorite &= 0xffffffff ^ SongData.INVISIBLE_SONG;
-							break;
-						case 2:
-							favorite |= SongData.INVISIBLE_SONG;
-							favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
-							break;
-						}
-						song.setFavorite(favorite);
-					}
-					selector.getSongDatabase().setSongDatas(songs);
-					selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-		            selector.play(SOUND_OPTIONCHANGE);
-				}
-			}
+        	changeFavoriteSong(selector, false);
         }
     },
     /**
@@ -754,39 +684,7 @@ public enum MusicSelectCommand {
     NEXT_FAVORITE_CHART {
         @Override
         public void execute(MusicSelector selector) {
-			if(selector.getSelectedBar() instanceof SongBar) {
-				final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
-				if(sd != null) {
-					int type = 2;
-					String message = "Added to Invisible Chart";
-					if((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
-						type = 1;
-						message = "Added to Favorite Chart";
-					} else if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
-						type = 0;
-						message = "Removed from Invisible Chart";
-					}
-					int favorite = sd.getFavorite();
-					switch (type) {
-					case 0:
-						favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
-						break;
-					case 1:
-						favorite |= SongData.FAVORITE_CHART;
-						favorite &= 0xffffffff ^ SongData.INVISIBLE_CHART;
-						break;
-					case 2:
-						favorite |= SongData.INVISIBLE_CHART;
-						favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
-						break;
-					}
-					sd.setFavorite(favorite);
-					selector.getSongDatabase().setSongDatas(new SongData[]{sd});
-					selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-		            selector.play(SOUND_OPTIONCHANGE);
-				}
-			}
+        	changeFavoriteChart(selector, true);
         }
     },
     /**
@@ -795,39 +693,7 @@ public enum MusicSelectCommand {
     PREV_FAVORITE_CHART {
         @Override
         public void execute(MusicSelector selector) {
-			if(selector.getSelectedBar() instanceof SongBar) {
-				final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
-				if(sd != null) {
-					int type = 0;
-					String message = "Removed from Favorite Chart";
-					if((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
-						type = 2;
-						message = "Added to Invisible Chart";
-					} else if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
-						type = 1;
-						message = "Added to Favorite Chart";
-					}
-					int favorite = sd.getFavorite();
-					switch (type) {
-					case 0:
-						favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
-						break;
-					case 1:
-						favorite |= SongData.FAVORITE_CHART;
-						favorite &= 0xffffffff ^ SongData.INVISIBLE_CHART;
-						break;
-					case 2:
-						favorite |= SongData.INVISIBLE_CHART;
-						favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
-						break;
-					}
-					sd.setFavorite(favorite);
-					selector.getSongDatabase().setSongDatas(new SongData[]{sd});
-					selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-		            selector.play(SOUND_OPTIONCHANGE);
-				}
-			}
+        	changeFavoriteChart(selector, false);
         }
     },
     /**
@@ -863,5 +729,84 @@ public enum MusicSelectCommand {
         asr[index] = (asr[index] + (next ? 1 : length - 1)) % length;
         selector.main.getPlayerConfig().setAutoSaveReplay(asr);
         selector.play(SOUND_OPTIONCHANGE);
+    }
+    
+    void changeFavoriteSong(MusicSelector selector, boolean next) {
+		if(selector.getSelectedBar() instanceof SongBar) {
+			final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
+
+			if(sd != null) {
+				int type = next ? 2 : 0;
+				String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
+				if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
+					type = next ? 1 : 2;
+					message = next ? "Added to Favorite Song" : "Added to Invisible Song";
+				} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+					type = next ? 0 : 1;
+					message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
+				}
+				
+				SongData[] songs = selector.getSongDatabase().getSongDatas("folder", sd.getFolder());
+				for(SongData song : songs) {
+					int favorite = song.getFavorite();
+					switch (type) {
+					case 0:
+						favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
+						break;
+					case 1:
+						favorite |= SongData.FAVORITE_SONG;
+						favorite &= 0xffffffff ^ SongData.INVISIBLE_SONG;
+						break;
+					case 2:
+						favorite |= SongData.INVISIBLE_SONG;
+						favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
+						break;
+					}
+					song.setFavorite(favorite);
+				}
+				selector.getSongDatabase().setSongDatas(songs);
+				selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
+	            selector.getBarRender().updateBar();
+	            selector.play(SOUND_OPTIONCHANGE);
+			}
+		}
+    }
+    
+    void changeFavoriteChart(MusicSelector selector, boolean next) {
+		if(selector.getSelectedBar() instanceof SongBar) {
+			final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
+
+			if(sd != null) {
+				int type = next ? 2 : 0;
+				String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
+				if((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
+					type = next ? 1 : 2;
+					message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
+				} else if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+					type = next ? 0 : 1;
+					message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
+				}
+				
+				int favorite = sd.getFavorite();
+				switch (type) {
+				case 0:
+					favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
+					break;
+				case 1:
+					favorite |= SongData.FAVORITE_CHART;
+					favorite &= 0xffffffff ^ SongData.INVISIBLE_CHART;
+					break;
+				case 2:
+					favorite |= SongData.INVISIBLE_CHART;
+					favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
+					break;
+				}
+				sd.setFavorite(favorite);
+				selector.getSongDatabase().setSongDatas(new SongData[]{sd});
+				selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
+	            selector.getBarRender().updateBar();
+	            selector.play(SOUND_OPTIONCHANGE);
+			}
+		}
     }
 }
