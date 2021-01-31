@@ -129,6 +129,12 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 	
 	@Override
+	protected boolean isPlaying(Sound id) {
+		// TODO 未実装'(Soundにはplay中かどうかを判断するメソッドがない)
+		return true;
+	}
+
+	@Override
 	protected void stop(Sound id) {
 		if (soundthread) {
 			mixer.stop(id, 0);

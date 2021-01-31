@@ -4,8 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.*;
 
 import com.portaudio.*;
-
-import bms.player.beatoraja.AudioConfig;
 import bms.player.beatoraja.Config;
 
 /**
@@ -136,6 +134,19 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 		return -1;
 	}
+
+	@Override
+	protected boolean isPlaying(PCM id) {
+		synchronized (inputs) {
+			for (MixerInput input : inputs) {
+				if (input.pcm == id) {
+					return input.pos != -1;
+				}
+			}				
+		}
+		return false;
+	}
+
 
 	@Override
 	protected void stop(PCM id) {

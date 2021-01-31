@@ -130,6 +130,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param id
 	 *            音源データ
 	 */
+	protected abstract boolean isPlaying(T id);
+
+	/**
+	 * 音源データが再生されていれば停止する
+	 * 
+	 * @param id
+	 *            音源データ
+	 */
 	protected abstract void stop(T id);
 
 	/**
@@ -177,8 +185,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public boolean isPlaying(String p) {
-		// TODO 未実装
-		return true;
+		if (p == null || p.length() == 0) {
+			return false;
+		}
+		AudioElement<T> sound = soundmap.get(p);
+		if (sound != null) {
+			return isPlaying(sound.audio);
+		}
+		return false;
 	}
 
 	public void stop(String p) {

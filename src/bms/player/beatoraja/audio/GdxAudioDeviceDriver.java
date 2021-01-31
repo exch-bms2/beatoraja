@@ -47,6 +47,12 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 	}
 
 	@Override
+	protected boolean isPlaying(Object id) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
 	protected void stop(Object id) {
 		// TODO Auto-generated method stub
 		
