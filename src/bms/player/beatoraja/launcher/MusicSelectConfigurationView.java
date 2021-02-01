@@ -4,10 +4,12 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.PlayerConfig;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 
 /**
  * 選曲コンフィグ
@@ -33,7 +35,7 @@ public class MusicSelectConfigurationView implements Initializable {
 	@FXML
 	private CheckBox shownoexistingbar;
 	@FXML
-	private CheckBox playPreview;
+	private ComboBox<SongPreview> songPreview;
 	@FXML
 	private CheckBox randomselect;
 	@FXML
@@ -43,6 +45,7 @@ public class MusicSelectConfigurationView implements Initializable {
     private PlayerConfig player;
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		songPreview.getItems().setAll(SongPreview.values());
 	}
 
 	public void update(Config config) {
@@ -57,7 +60,7 @@ public class MusicSelectConfigurationView implements Initializable {
         useSongInfo.setSelected(config.isUseSongInfo());
 		folderlamp.setSelected(config.isFolderlamp());
 		shownoexistingbar.setSelected(config.isShowNoSongExistingBar());
-		playPreview.setSelected(config.isPlayPreview());
+		songPreview.setValue(config.getSongPreview());
 		
 		maxsearchbar.getValueFactory().setValue(config.getMaxSearchBarCount());
 	}
@@ -72,7 +75,7 @@ public class MusicSelectConfigurationView implements Initializable {
         config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());
         config.setShowNoSongExistingBar(shownoexistingbar.isSelected());
-        config.setPlayPreview(playPreview.isSelected());
+        config.setSongPreview(songPreview.getValue());
         
         config.setMaxSearchBarCount(maxsearchbar.getValue());
 	}

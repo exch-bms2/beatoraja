@@ -80,14 +80,11 @@ public class Config implements Validatable {
 	 * 選曲バー移動速度に関連（アナログスクロール）
 	 */
 	private int analogTicksPerScroll = 3;
+	
 	/**
-	 * プレビュー音源を再生するかどうか
+	 * プレビュー再生
 	 */
-	private boolean playPreview = true;
-	/**
-	 * プレビュー音源をループするかどうか
-	 */
-	private boolean loopPreview = true;
+	private SongPreview songPreview = SongPreview.LOOP;
 	/**
 	 * スキン画像のキャッシュイメージを作成するかどうか
 	 */
@@ -346,20 +343,12 @@ public class Config implements Validatable {
         this.analogTicksPerScroll = Math.max(analogTicksPerScroll, 1);
     }
 
-	public boolean isPlayPreview() {
-		return playPreview;
+	public SongPreview getSongPreview() {
+		return songPreview;
 	}
 
-	public void setPlayPreview(boolean playPreview) {
-		this.playPreview = playPreview;
-	}
-
-	public boolean isLoopPreview() {
-		return loopPreview;
-	}
-
-	public void setLoopPreview(boolean loopPreview) {
-		this.loopPreview = loopPreview;
+	public void setSongPreview(SongPreview songPreview) {
+		this.songPreview = songPreview;
 	}
 
 	public boolean isUseSongInfo() {
@@ -491,12 +480,9 @@ public class Config implements Validatable {
 	}
 
 	public boolean validate() {
-		if(displaymode == null) {
-			displaymode = DisplayMode.WINDOW;
-		}
-		if(resolution == null) {
-			resolution = Resolution.HD;
-		}
+		displaymode = (displaymode != null) ? displaymode : DisplayMode.WINDOW;
+		resolution = (resolution != null) ? resolution : Resolution.HD;
+
 		windowWidth = MathUtils.clamp(windowWidth, Resolution.SD.width, Resolution.ULTRAHD.width);
 		windowHeight = MathUtils.clamp(windowHeight, Resolution.SD.height, Resolution.ULTRAHD.height);
 		
@@ -516,6 +502,8 @@ public class Config implements Validatable {
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
         maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
+        songPreview = (songPreview != null) ? songPreview : SongPreview.LOOP;
+
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
 		irSendCount = MathUtils.clamp(irSendCount, 1, 100);
@@ -597,5 +585,9 @@ public class Config implements Validatable {
 
 	public enum DisplayMode {
 		FULLSCREEN,BORDERLESS,WINDOW;
+	}
+	
+	public enum SongPreview {
+		NONE,ONCE,LOOP;
 	}
 }

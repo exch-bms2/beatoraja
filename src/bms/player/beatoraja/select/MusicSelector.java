@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.ObjectMap.Keys;
 import bms.model.BMSDecoder;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
@@ -372,7 +373,7 @@ public class MusicSelector extends MainState {
 		resource.setCourseData(current instanceof GradeBar ? ((GradeBar) current).getCourseData() : null);
 
 		// preview music
-		if (current instanceof SongBar && main.getConfig().isPlayPreview()) {
+		if (current instanceof SongBar && main.getConfig().getSongPreview() != SongPreview.NONE) {
 			final SongData song = main.getPlayerResource().getSongdata();
 			if (song != preview.getSongData() && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
 					&& play == null) {

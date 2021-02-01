@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.song.SongData;
 
@@ -85,7 +86,7 @@ public class PreviewMusicProcessor {
                     if(!path.equals(playing)) {
                         stopPreview(true);
                         if(path != defaultMusic) {
-                            audio.play(path, config.getAudioConfig().getSystemvolume(), config.isLoopPreview());
+                            audio.play(path, config.getAudioConfig().getSystemvolume(), config.getSongPreview() == SongPreview.LOOP);
                         } else {
                             audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
                         }
