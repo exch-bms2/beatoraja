@@ -223,9 +223,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	public synchronized void setModel(BMSModel model) {
 		Logger.getGlobal().info("音源ファイル読み込み開始。");
-		final int wavcount = model.getWavList().length;
-		wavmap = (T[]) new Object[wavcount];
-		slicesound = new SliceWav[wavcount][];
+		String[] wavlist = model.getWavList();
+		final int wavcount = wavlist.length;
+		boolean use_defaultsound = false;
+		Array<SliceWav<T>>[] slicesound;
 
 		progress = new AtomicInteger();
 		noteMapSize = 0;
@@ -238,14 +239,17 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			volume = 1.0f;
 		}
 
-		Array<SliceWav<T>>[] slicesound = new Array[wavcount];
-
 		IntMap<List<Note>> notemap = new IntMap<List<Note>>();
 		final int lanes = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
 				final Note n = tl.getNote(i);
 				if (n != null) {
+					// 地雷ノートに音が定義されていない場合のみ、本体側で音の定義を追加
+					if (n instanceof MineNote && n.getWav() < 0) {
+						n.setWav(wavcount);
+						use_defaultsound = true;
+					}
 					addNoteList(notemap, n);
 					for (Note ln : n.getLayeredNotes()) {
 						addNoteList(notemap, ln);
@@ -259,7 +263,15 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				addNoteList(notemap, n);
 			}
 		}
-
+		if (use_defaultsound) {
+			wavmap = (T[]) new Object[wavcount+1];
+			this.slicesound = new SliceWav[wavcount+1][];
+			slicesound = new Array[wavcount+1];
+		} else {
+			wavmap = (T[]) new Object[wavcount];
+			this.slicesound = new SliceWav[wavcount][];
+			slicesound = new Array[wavcount];
+		}
 		noteMapSize = notemap.size;
 		Map<Integer, List<Note>> map = new HashMap<>();
 		notemap.iterator().forEachRemaining(m -> map.put(m.key, m.value));
@@ -271,9 +283,17 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			if (wavid < 0) {
 				return;
 			}
-			String name = model.getWavList()[wavid];
+			String name = "";
+			if (wavid < wavcount) {
+				name = wavlist[wavid];
+			}
 			try {
-				Path p = dpath.resolve(name).toAbsolutePath();
+				Path p;
+				if (name != "") {
+					p = dpath.resolve(name).toAbsolutePath();
+				} else {
+					p = Paths.get("defaultsound/landmine.wav").toAbsolutePath();
+				}
 				for (Note note : waventry.getValue()) {
 					// 音切りあり・なし両方のデータが必要になるケースがある
 					if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
