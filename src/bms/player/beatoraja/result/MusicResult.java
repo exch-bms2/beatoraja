@@ -317,7 +317,7 @@ public class MusicResult extends AbstractResult {
 		}
 	}
 
-	private void saveReplayData(int index) {
+	public void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null
 				&& resource.getScoreData() != null) {
@@ -486,25 +486,6 @@ public class MusicResult extends AbstractResult {
 		return resource.getBMSModel().getTotalNotes();
 	}
 
-	public void executeEvent(int id, int arg1, int arg2) {
-		switch (id) {
-		case BUTTON_REPLAY:
-			saveReplayData(0);
-			break;
-		case BUTTON_REPLAY2:
-			saveReplayData(1);
-			break;
-		case BUTTON_REPLAY3:
-			saveReplayData(2);
-			break;
-		case BUTTON_REPLAY4:
-			saveReplayData(3);
-			break;
-		default:
-			super.executeEvent(id, arg1, arg2);
-		}
-	}
-	
 	public ScoreData getNewScore() {
 		return main.getPlayerResource().getScoreData();
 	}

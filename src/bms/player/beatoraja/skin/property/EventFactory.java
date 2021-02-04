@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.MusicSelectCommand;
 import bms.player.beatoraja.select.MusicSelector;
@@ -17,6 +18,19 @@ public class EventFactory {
 	 * @return イベントオブジェクト
 	 */
 	public static Event getEvent(int eventId) {
+		if (eventId == BUTTON_REPLAY) {
+			return createZeroArgEvent(getReplayEventConsumer(0), eventId);
+		}
+		if (eventId == BUTTON_REPLAY2) {
+			return createZeroArgEvent(getReplayEventConsumer(1), eventId);
+		}
+		if (eventId == BUTTON_REPLAY3) {
+			return createZeroArgEvent(getReplayEventConsumer(2), eventId);
+		}
+		if (eventId == BUTTON_REPLAY4) {
+			return createZeroArgEvent(getReplayEventConsumer(3), eventId);
+		}
+		
 		if (eventId == BUTTON_OPEN_IR_WEBSITE) {
 			return createZeroArgEvent((state) -> {
 				if(state instanceof MusicSelector) {
@@ -51,6 +65,20 @@ public class EventFactory {
 
 		// 0～2引数に対応できるように2引数取っておく
 		return createTwoArgEvent((state, arg1, arg2) -> state.executeEvent(eventId, arg1, arg2), eventId);
+	}
+	
+	private static Consumer<MainState> getReplayEventConsumer(int index) {
+		return (state) -> {
+			if(state instanceof MusicSelector) {
+				((MusicSelector) state).selectSong(PlayMode.getReplayMode(index));;
+			}
+			if(state instanceof MusicResult) {
+				((MusicResult) state).saveReplayData(index);
+			}
+			if(state instanceof CourseResult) {
+				((CourseResult) state).saveReplayData(index);
+			}
+		};
 	}
 	
 	@FunctionalInterface

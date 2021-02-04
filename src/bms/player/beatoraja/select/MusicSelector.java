@@ -708,18 +708,6 @@ public class MusicSelector extends MainState {
 		case BUTTON_PRACTICE:
 			play = PlayMode.PRACTICE;
 			break;
-		case BUTTON_REPLAY:
-			play = PlayMode.REPLAY_1;
-			break;
-		case BUTTON_REPLAY2:
-			play = PlayMode.REPLAY_2;
-			break;
-		case BUTTON_REPLAY3:
-			play = PlayMode.REPLAY_3;
-			break;
-		case BUTTON_REPLAY4:
-			play = PlayMode.REPLAY_4;
-			break;
 		case BUTTON_READTEXT:
 			execute(MusicSelectCommand.OPEN_DOCUMENT);
 			break;
@@ -778,7 +766,7 @@ public class MusicSelector extends MainState {
 			super.executeEvent(id, arg1, arg2);
 		}
 	}
-
+	
 	public Bar getSelectedBar() {
 		return bar.getSelected();
 	}
@@ -833,11 +821,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void selectSong(PlayMode mode) {
-		if (!mode.isReplayMode()) {
-			play = mode;
-		} else {
-			play = (selectedreplay >= 0) ? PlayMode.getReplayMode(selectedreplay) : PlayMode.PLAY;
-		}
+		play = mode;
 	}
 
 	public PlayConfig getSelectedBarPlayConfig() {

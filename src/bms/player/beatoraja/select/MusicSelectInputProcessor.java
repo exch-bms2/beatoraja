@@ -323,7 +323,7 @@ public class MusicSelectInputProcessor {
                     select.selectSong(PlayMode.AUTOPLAY);
                 } else if (property.isPressed(keystate, keytime, MusicSelectKey.REPLAY, true)) {
                     // replay
-                    select.selectSong(PlayMode.REPLAY_1);
+                    select.selectSong((select.getSelectedReplay() >= 0) ? PlayMode.getReplayMode(select.getSelectedReplay()) : PlayMode.PLAY);
                 }
             } else {
                 if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
