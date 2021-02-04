@@ -342,9 +342,6 @@ public class CourseResult extends AbstractResult {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
-		case BUTTON_OPEN_IR_WEBSITE:
-			execute(CourseResultCommand.OPEN_RANKING_ON_IR);
-			break;
 		default:
 			super.executeEvent(id, arg1, arg2);
 		}

@@ -500,15 +500,6 @@ public class MusicResult extends AbstractResult {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
-		case BUTTON_OPEN_IR_WEBSITE:
-			execute(MusicResultCommand.OPEN_RANKING_ON_IR);
-			break;
-		case BUTTON_FAVORITTE_CHART:
-			execute(MusicResultCommand.CHANGE_FAVORITE_CHART, arg1 >= 0);
-			break;
-		case BUTTON_FAVORITTE_SONG:
-			execute(MusicResultCommand.CHANGE_FAVORITE_SONG, arg1 >= 0);
-			break;
 		default:
 			super.executeEvent(id, arg1, arg2);
 		}

@@ -1,6 +1,11 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.result.*;
+import bms.player.beatoraja.select.MusicSelectCommand;
+import bms.player.beatoraja.select.MusicSelector;
+
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.function.*;
 
@@ -12,10 +17,42 @@ public class EventFactory {
 	 * @return イベントオブジェクト
 	 */
 	public static Event getEvent(int eventId) {
+		if (eventId == BUTTON_OPEN_IR_WEBSITE) {
+			return createZeroArgEvent((state) -> {
+				if(state instanceof MusicSelector) {
+					MusicSelectCommand.OPEN_RANKING_ON_IR.execute((MusicSelector) state);
+				}
+				if(state instanceof MusicResult) {
+					MusicResultCommand.OPEN_RANKING_ON_IR.execute((MusicResult) state, true);
+				}
+				if(state instanceof CourseResult) {
+					CourseResultCommand.OPEN_RANKING_ON_IR.execute((CourseResult) state);
+				}
+			}, eventId);			
+		}		
+		if (eventId == BUTTON_FAVORITTE_CHART) {
+			return createOneArgEvent((state, arg1) -> {
+				if(state instanceof MusicSelector) {
+					(arg1 >= 0 ? MusicSelectCommand.NEXT_FAVORITE_CHART : MusicSelectCommand.PREV_FAVORITE_CHART)	.execute((MusicSelector) state);			}
+				if(state instanceof MusicResult) {
+					MusicResultCommand.CHANGE_FAVORITE_CHART.execute((MusicResult) state, arg1 >= 0);
+				}
+			}, eventId);
+		}
+		if (eventId == BUTTON_FAVORITTE_SONG) {
+			return createOneArgEvent((state, arg1) -> {
+				if(state instanceof MusicSelector) {
+					(arg1 >= 0 ? MusicSelectCommand.NEXT_FAVORITE_SONG : MusicSelectCommand.PREV_FAVORITE_SONG).execute((MusicSelector) state);			}
+				if(state instanceof MusicResult) {
+					MusicResultCommand.CHANGE_FAVORITE_SONG.execute((MusicResult) state, arg1 >= 0);
+				}
+			}, eventId);
+		}
+
 		// 0～2引数に対応できるように2引数取っておく
 		return createTwoArgEvent((state, arg1, arg2) -> state.executeEvent(eventId, arg1, arg2), eventId);
 	}
-
+	
 	@FunctionalInterface
 	public interface TriConsumer<T, U, V> {
 		void accept(T t, U u, V v);
