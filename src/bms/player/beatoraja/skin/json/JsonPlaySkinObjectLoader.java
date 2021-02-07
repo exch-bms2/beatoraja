@@ -47,14 +47,26 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 			SkinSource[][] lns = new SkinSource[10][];
 			lns[0] = getNoteTexture(sk.note.lnend, p);
 			lns[1] = getNoteTexture(sk.note.lnstart, p);
-			lns[2] = getNoteTexture(sk.note.lnbody, p);
-			lns[3] = getNoteTexture(sk.note.lnactive, p);
+			if(sk.note.lnbodyActive != null && sk.note.lnbodyActive.length > 0) {
+				lns[2] = getNoteTexture(sk.note.lnbodyActive, p);
+				lns[3] = getNoteTexture(sk.note.lnbody, p);
+			} else {
+				lns[2] = getNoteTexture(sk.note.lnbody, p);
+				lns[3] = getNoteTexture(sk.note.lnactive, p);
+			}
 			lns[4] = getNoteTexture(sk.note.hcnend, p);
 			lns[5] = getNoteTexture(sk.note.hcnstart, p);
-			lns[6] = getNoteTexture(sk.note.hcnbody, p);
-			lns[7] = getNoteTexture(sk.note.hcnactive, p);
-			lns[8] = getNoteTexture(sk.note.hcndamage, p);
-			lns[9] = getNoteTexture(sk.note.hcnreactive, p);
+			if(sk.note.hcnbodyActive != null && sk.note.hcnbodyActive.length > 0) {
+				lns[6] = getNoteTexture(sk.note.hcnbodyActive, p);
+				lns[7] = getNoteTexture(sk.note.hcnbody, p);
+				lns[8] = getNoteTexture(sk.note.hcnbodyReactive, p);
+				lns[9] = getNoteTexture(sk.note.hcnbodyMiss, p);
+			} else {
+				lns[6] = getNoteTexture(sk.note.hcnbody, p);
+				lns[7] = getNoteTexture(sk.note.hcnactive, p);
+				lns[8] = getNoteTexture(sk.note.hcndamage, p);
+				lns[9] = getNoteTexture(sk.note.hcnreactive, p);
+			}
 			final SkinSource[][] lnss = new SkinSource[lns[0].length][10];
 			for(int i = 0;i < 10;i++) {
 				for(int j = 0;j < lns[0].length;j++) {

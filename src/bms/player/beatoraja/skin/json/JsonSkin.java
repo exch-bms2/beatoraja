@@ -282,13 +282,17 @@ public class JsonSkin {
 		public String[] lnstart = new String[0];
 		public String[] lnend = new String[0];
 		public String[] lnbody = new String[0];
+		public String[] lnbodyActive = new String[0];
 		public String[] lnactive = new String[0];
 		public String[] hcnstart = new String[0];
 		public String[] hcnend = new String[0];
 		public String[] hcnbody = new String[0];
 		public String[] hcnactive = new String[0];
+		public String[] hcnbodyActive = new String[0];
 		public String[] hcndamage = new String[0];
+		public String[] hcnbodyMiss = new String[0];
 		public String[] hcnreactive = new String[0];
+		public String[] hcnbodyReactive = new String[0];
 		public String[] mine = new String[0];
 		public String[] hidden = new String[0];
 		public String[] processed = new String[0];
