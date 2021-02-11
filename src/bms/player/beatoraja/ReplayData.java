@@ -50,10 +50,14 @@ public class ReplayData implements Validatable {
 	 * 譜面オプション
 	 */
 	public int randomoption = 0;
+	
+	public long randomoptionseed = -1;
 	/**
 	 * 譜面オプション(2P)
 	 */
 	public int randomoption2 = 0;
+	
+	public long randomoption2seed = -1;
 	/**
 	 * DP用オプション
 	 */
