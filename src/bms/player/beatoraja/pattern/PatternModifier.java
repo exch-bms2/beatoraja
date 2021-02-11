@@ -33,6 +33,8 @@ public abstract class PatternModifier {
 
 	public static final int SIDE_1P = 0;
 	public static final int SIDE_2P = 1;
+	
+	private long seed = (long) (Math.random() * 65536 * 65536 * 65536);
 
 	public PatternModifier() {
 
@@ -144,19 +146,25 @@ public abstract class PatternModifier {
 		this.modifyTargetSide = type;
 	}
 
-    public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config) {
-        return create(id, side, mode, config, null);
-    }
+	public long getSeed() {
+		return seed;
+	}
+
+	public void setSeed(long seed) {
+		if(seed >= 0) {
+			this.seed = seed;			
+		}
+	}
 
     /**
+     * 譜面オプションに対応したPatternModifierを生成する
      *
      * @param id 譜面オプションID
      * @param side 譜面オプションサイド(1P or 2P)
      * @param mode 譜面のモード
-     * @param seed 譜面オプションの固定用変数(LaneShuffleのみ)
      * @return
      */
-    public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config, int[] seed) {
+    public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config) {
 		PatternModifier pm = null;
 		Random r = Random.getRandom(id);
 		switch (r) {
@@ -212,7 +220,8 @@ public abstract class PatternModifier {
 		}
 	}
 
-	protected static int[] shuffle(int[] keys) {
+	protected static int[] shuffle(int[] keys, long seed) {
+		java.util.Random rand = new java.util.Random(seed);
 		List<Integer> l = new ArrayList<Integer>(keys.length);
 		for (int key : keys) {
 			l.add(key);
@@ -226,7 +235,7 @@ public abstract class PatternModifier {
 			result[i] = i;
 		}
 		for (int lane = 0; lane < keys.length; lane++) {
-			int r = (int) (Math.random() * l.size());
+			int r = rand.nextInt(l.size());
 			result[keys[lane]] = l.get(r);
 			l.remove(r);
 		}
@@ -234,9 +243,10 @@ public abstract class PatternModifier {
 		return result;
 	}
 
-	protected static int[] rotate(int[] keys) {
-		boolean inc = (int) (Math.random() * 2) == 1;
-		int start = (int) (Math.random() * (keys.length - 1)) + (inc ? 1 : 0);
+	protected static int[] rotate(int[] keys, long seed) {
+		java.util.Random rand = new java.util.Random(seed);
+		boolean inc = (rand.nextInt(2) == 1);
+		int start = rand.nextInt(keys.length - 1) + (inc ? 1 : 0);
 		return rotate(keys, start, inc);
 	}
 

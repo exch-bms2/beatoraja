@@ -42,11 +42,11 @@ public class LaneShuffleModifier extends PatternModifier {
 			break;
 		case R_RANDOM:
 			keys = getKeys(mode, false);
-			random = keys.length > 0 ? rotate(keys) : keys;
+			random = keys.length > 0 ? rotate(keys, getSeed()) : keys;
 			break;
 		case RANDOM:
 			keys = getKeys(mode, false);
-			random = keys.length > 0 ? shuffle(keys) : keys;
+			random = keys.length > 0 ? shuffle(keys, getSeed()) : keys;
 			break;
 		case CROSS:
 			keys = getKeys(mode, false);
@@ -63,7 +63,7 @@ public class LaneShuffleModifier extends PatternModifier {
 			if(mode == Mode.POPN_9K) {
 				random = keys.length > 0 ? noMurioshiLaneShuffle(model) : keys;
 			} else { 
-				random = keys.length > 0 ? shuffle(keys) : keys;
+				random = keys.length > 0 ? shuffle(keys, getSeed()) : keys;
 				setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}
 			break;
