@@ -34,7 +34,7 @@ public abstract class PatternModifier {
 	public static final int SIDE_1P = 0;
 	public static final int SIDE_2P = 1;
 	
-	private long seed = (long) (Math.random() * 65536 * 65536 * 65536);
+	private long seed = (long) (Math.random() * 65536 * 256);
 
 	public PatternModifier() {
 

@@ -30,6 +30,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
+		randomizer.setRandomSeed(getSeed());
 		randomizer.setModifyLanes(getKeys(model.getMode(), isScratchLaneModify));
 		for(TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
