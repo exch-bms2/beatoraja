@@ -245,7 +245,7 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
-			
+
 			Array<PatternModifier> mods = new Array<PatternModifier>();
 			// DP譜面オプション
 			if(model.getMode().player == 2) {
@@ -301,7 +301,7 @@ public class BMSPlayer extends MainState {
 					Logger.getGlobal().info("アシスト譜面オプションが選択されました");
 					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
 					score = false;
-				}				
+				}
 			}
 
 		}
@@ -371,10 +371,10 @@ public class BMSPlayer extends MainState {
 				if(paths.length > 0) {
 					main.getAudioProcessor().setAdditionalKeySound(i, true, paths[0].toString());
 					main.getAudioProcessor().setAdditionalKeySound(i, false, paths[0].toString());
-				}				
+				}
 			} else {
 				main.getAudioProcessor().setAdditionalKeySound(i, true, null);
-				main.getAudioProcessor().setAdditionalKeySound(i, false, null);								
+				main.getAudioProcessor().setAdditionalKeySound(i, false, null);
 			}
 		}
 
@@ -394,7 +394,7 @@ public class BMSPlayer extends MainState {
 
 		judge.init(model, resource);
 
-		rhythm = new RhythmTimerProcessor(model, 
+		rhythm = new RhythmTimerProcessor(model,
 				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
 
 		bga = resource.getBGAManager();
@@ -670,8 +670,21 @@ public class BMSPlayer extends MainState {
 		case STATE_FAILED:
 			keyinput.stopJudge();
 			keysound.stopBGPlay();
-
-			if (main.getNowTime(TIMER_FAILED) > skin.getClose()) {
+			if ((input.startPressed() ^ input.isSelectPressed())
+					&& resource.getCourseBMSModels() == null
+					&& !autoplay.isAutoPlayMode()
+					&& autoplay != PlayMode.PRACTICE) {
+				if (!resource.isUpdateScore()) {
+					Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
+				} else if (input.startPressed()) {
+					Logger.getGlobal().info("オプションを変更せずリプレイ");
+				} else {
+					resource.setScoreData(createScoreData());
+					Logger.getGlobal().info("同じ譜面でリプレイ");
+				}
+				resource.reloadBMSFile();
+				main.changeState(MainStateType.PLAY);
+			} else if (main.getNowTime(TIMER_FAILED) > skin.getClose()) {
 				main.getAudioProcessor().setGlobalPitch(1f);
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
