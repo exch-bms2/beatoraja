@@ -98,6 +98,10 @@ public class ScoreData implements Validatable {
 	 */
 	private int option;
 	/**
+	 * オプションのRandom Seed
+	 */	
+	private long seed = -1;
+	/**
 	 * アシストオプション
 	 */
 	private int assist;
@@ -373,6 +377,15 @@ public class ScoreData implements Validatable {
 	public void setRandom(int random) {
 		this.random = random;
 	}
+	
+	public long getSeed() {
+		return seed;
+	}
+
+	public void setSeed(long seed) {
+		this.seed = seed;
+	}
+
 	public String getScorehash() {
 		return scorehash;
 	}
@@ -478,6 +491,7 @@ public class ScoreData implements Validatable {
 		if (clear < newscore.getClear()) {
 			setClear(newscore.getClear());
 			setOption(newscore.getOption());
+			setSeed(newscore.getSeed());
 			update = true;
 		}
 		if (getExscore() < newscore.getExscore()) {
@@ -494,6 +508,7 @@ public class ScoreData implements Validatable {
 			setEms(newscore.getEms());
 			setLms(newscore.getLms());
 			setOption(newscore.getOption());
+			setSeed(newscore.getSeed());
 			setGhost(newscore.getGhost());
 			update = true;
 		}

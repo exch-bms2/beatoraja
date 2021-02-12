@@ -843,6 +843,7 @@ public class BMSPlayer extends MainState {
 		score.setGauge(gauge.isTypeChanged() ? -1 : gauge.getType());
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
+		score.setSeed((model.getMode().player == 2 ? randomoption2seed * 65536 * 256 : 0) + randomoptionseed); 
 		score.encodeGhost(judge.getGhost());
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
 		final ReplayData replay = resource.getReplayData();

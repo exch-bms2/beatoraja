@@ -276,6 +276,7 @@ public class MusicSelector extends MainState {
 			score.setPassnotes(irscore.passnotes != 0 ? irscore.notes : irscore.passnotes);
 			score.setMinbp(irscore.minbp);
 			score.setOption(irscore.option);
+			score.setSeed(irscore.seed);
 			score.setAssist(irscore.assist);
 			score.setGauge(irscore.gauge);
 			score.setDeviceType(irscore.deviceType);

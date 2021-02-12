@@ -83,6 +83,8 @@ public class IRScoreData {
 	 * 更新時のオプション
 	 */
 	public final int option;
+	
+	public final long seed;
 	/**
 	 * アシストオプション
 	 */
@@ -127,6 +129,7 @@ public class IRScoreData {
 		this.passnotes = score.getPassnotes();
 		this.minbp = score.getMinbp();
 		this.option = score.getOption();
+		this.seed = score.getSeed();
 		this.assist = score.getAssist();
 		this.gauge = score.getGauge();
 		this.deviceType = score.getDeviceType();
