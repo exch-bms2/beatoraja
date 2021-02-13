@@ -430,51 +430,32 @@ public class PlayDataAccessor {
 	private ScoreLog updateScore(ScoreData score, ScoreData newscore, String hash, boolean updateScore) {
 		ScoreLog log = new ScoreLog();
 		
-		final int clear = score.getClear();
-		log.setOldclear(clear);
-		log.setClear(clear);
-		if (clear < newscore.getClear()) {
-			score.setClear(newscore.getClear());
-			score.setOption(newscore.getOption());
+		log.setOldclear(score.getClear());
+		log.setClear(score.getClear());
+		if (score.getClear() < newscore.getClear()) {
 			log.setSha256(hash);
 			log.setClear(newscore.getClear());
 		}
 		log.setOldscore(score.getExscore());
 		log.setScore(score.getExscore());
 		if (score.getExscore() < newscore.getExscore() && updateScore) {
-			score.setEpg(newscore.getEpg());
-			score.setLpg(newscore.getLpg());
-			score.setEgr(newscore.getEgr());
-			score.setLgr(newscore.getLgr());
-			score.setEgd(newscore.getEgd());
-			score.setLgd(newscore.getLgd());
-			score.setEbd(newscore.getEbd());
-			score.setLbd(newscore.getLbd());
-			score.setEpr(newscore.getEpr());
-			score.setLpr(newscore.getLpr());
-			score.setEms(newscore.getEms());
-			score.setLms(newscore.getLms());
-			score.setOption(newscore.getOption());
-			score.setGhost(newscore.getGhost());
 			log.setSha256(hash);
 			log.setScore(newscore.getExscore());
 		}
 		log.setOldminbp(score.getMinbp());
 		log.setMinbp(score.getMinbp());
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
-			score.setMinbp(newscore.getMinbp());
-			score.setOption(newscore.getOption());
 			log.setSha256(hash);
 			log.setMinbp(newscore.getMinbp());
 		}
 		log.setOldcombo(score.getCombo());
 		log.setCombo(score.getCombo());
 		if (score.getCombo() < newscore.getCombo() && updateScore) {
-			score.setCombo(newscore.getCombo());
-			score.setOption(newscore.getOption());
 			log.setSha256(hash);
 			log.setCombo(newscore.getCombo());
 		}
+		
+		score.update(newscore, updateScore);
 
 		return log;
 	}

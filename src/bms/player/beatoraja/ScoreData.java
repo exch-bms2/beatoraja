@@ -487,6 +487,16 @@ public class ScoreData implements Validatable {
 	 * @return スコアデータが更新された場合はtrue
 	 */
 	public boolean update(ScoreData newscore) {
+		return update(newscore, true);
+	}
+
+	/**
+	 * 指定したスコアデータを元に更新する
+	 * @param newscore スコアデータ
+	 * @param updateScore スコアを更新するかどうか。falseの場合はクリアのみ更新対象にする
+	 * @return スコアデータが更新された場合はtrue
+	 */
+	public boolean update(ScoreData newscore, boolean updateScore) {
 		boolean update = false;
 		if (clear < newscore.getClear()) {
 			setClear(newscore.getClear());
@@ -494,7 +504,7 @@ public class ScoreData implements Validatable {
 			setSeed(newscore.getSeed());
 			update = true;
 		}
-		if (getExscore() < newscore.getExscore()) {
+		if (getExscore() < newscore.getExscore() && updateScore) {
 			setEpg(newscore.getEpg());
 			setLpg(newscore.getLpg());
 			setEgr(newscore.getEgr());
@@ -512,14 +522,16 @@ public class ScoreData implements Validatable {
 			setGhost(newscore.getGhost());
 			update = true;
 		}
-		if (getMinbp() > newscore.getMinbp()) {
+		if (getMinbp() > newscore.getMinbp() && updateScore) {
 			setMinbp(newscore.getMinbp());
 			setOption(newscore.getOption());
+			setSeed(newscore.getSeed());
 			update = true;
 		}
-		if (getCombo() < newscore.getCombo()) {
+		if (getCombo() < newscore.getCombo() && updateScore) {
 			setCombo(newscore.getCombo());
 			setOption(newscore.getOption());
+			setSeed(newscore.getSeed());
 			update = true;
 		}
 		return update;

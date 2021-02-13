@@ -76,6 +76,7 @@ public class ScoreDatabaseAccessor extends SQLiteDatabaseAccessor {
 						new Column("trophy", "TEXT"),
 						new Column("ghost", "TEXT"),
 						new Column("option", "INTEGER"),
+						new Column("seed", "INTEGER"),
 						new Column("random", "INTEGER"),
 						new Column("date", "INTEGER"),
 						new Column("state", "INTEGER"),
