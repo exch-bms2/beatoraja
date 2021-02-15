@@ -104,9 +104,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.jkoc = controllerConfig.getJKOC();
 		this.mouseScratch = controllerConfig.isMouseScratch();
 		this.mouseScratchDuration = controllerConfig.getMouseScratchDuration();
-		analogScratchAlgorithm = null;
+
 		if (controllerConfig.isAnalogScratch()) {
-            analogScratchAlgorithm = new AnalogScratchAlgorithm[AXIS_LENGTH];
+			final AnalogScratchAlgorithm[] analogScratchAlgorithm = new AnalogScratchAlgorithm[AXIS_LENGTH];
 			int analogScratchThreshold = controllerConfig.getAnalogScratchThreshold();
             for (int i = 0; i < AXIS_LENGTH; i++) {
     			switch (controllerConfig.getAnalogScratchMode()) {
@@ -118,6 +118,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
     					break;
     			}
             }
+			this.analogScratchAlgorithm = analogScratchAlgorithm;
+		} else {
+			this.analogScratchAlgorithm = null;
 		}
 	}
 
@@ -224,6 +227,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
     }
 
 	private boolean scratchInput(int axisIndex, boolean plus) { //int button) {
+		final AnalogScratchAlgorithm[] analogScratchAlgorithm = this.analogScratchAlgorithm;
 		if (analogScratchAlgorithm == null) {
 			// アナログ皿を使わない
             if (plus) {
