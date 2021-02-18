@@ -28,10 +28,12 @@ public class SongData implements Validatable, IpfsInformation {
 	public static final int FEATURE_CHARGENOTE = 16;
 	public static final int FEATURE_HELLCHARGENOTE = 32;
 	public static final int FEATURE_STOPSEQUENCE = 64;
+	public static final int FEATURE_SCROLL = 128;
 
 	public static final int CONTENT_TEXT = 1;
 	public static final int CONTENT_BGA = 2;
 	public static final int CONTENT_PREVIEW = 4;
+	public static final int CONTENT_NOKEYSOUND = 128;
 
 	public static final int FAVORITE_SONG = 1;
 	public static final int FAVORITE_CHART = 2;
@@ -164,7 +166,12 @@ public class SongData implements Validatable, IpfsInformation {
 		feature = 0;
 		final int keys = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			if(tl.getStop() > 0) feature |= FEATURE_STOPSEQUENCE;
+			if(tl.getStop() > 0) {
+				feature |= FEATURE_STOPSEQUENCE;
+			}
+			if(tl.getScroll() != 1.0) {
+				feature |= FEATURE_SCROLL;
+			}
 
 			for(int i = 0;i < keys;i++) {
 				if(tl.getNote(i) instanceof LongNote) {
@@ -194,8 +201,8 @@ public class SongData implements Validatable, IpfsInformation {
 		timelines = model.getAllTimeLines();
 
 		feature |= model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
-		feature |= model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+		content |= length >= 30000 && model.getWavList().length <= (length / (50 * 1000)) + 3 ? CONTENT_NOKEYSOUND : 0;
 		
 		info = new SongInformation(model);
 		try {
@@ -346,10 +353,6 @@ public class SongData implements Validatable, IpfsInformation {
 		this.maxbpm = maxbpm;
 	}
 
-	public boolean isBpmstop() {
-		return (feature & FEATURE_STOPSEQUENCE) != 0;
-	}
-
 	public String getBanner() {
 		return banner;
 	}
@@ -397,6 +400,15 @@ public class SongData implements Validatable, IpfsInformation {
 	public boolean hasAnyLongNote() {
 		return (feature & (FEATURE_UNDEFINEDLN | FEATURE_LONGNOTE | FEATURE_CHARGENOTE | FEATURE_HELLCHARGENOTE)) != 0;
 	}
+
+	public boolean isBpmstop() {
+		return (feature & FEATURE_STOPSEQUENCE) != 0;
+	}
+
+	public boolean hasScrollChange() {
+		return (feature & FEATURE_SCROLL) != 0;
+	}
+
 
 	public String getMd5() {
 		if(md5 == null) {
