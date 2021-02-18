@@ -50,9 +50,11 @@ public class BMSPlayer extends MainState {
 
 	private int assist = 0;
 
+	//TODO ReplayDataと重複する内容のため、ReplayDataでまとめたい
 	private List<PatternModifyLog> pattern = new ArrayList<PatternModifyLog>();
 	private long randomoptionseed = -1;
 	private long randomoption2seed = -1;
+	private int[] randomsequence = new int[0];
 
 	private ReplayData replay = null;
 
@@ -128,6 +130,7 @@ public class BMSPlayer extends MainState {
 			config.setRandom2(replay.randomoption2);
 			randomoption2seed = replay.randomoption2seed;
 			config.setDoubleoption(replay.doubleoption);
+			randomsequence = replay.rand;
 			isReplayPatternPlay = true;
 		} else if(replay != null && main.getInputProcessor().getKeystate()[2]) {
 			//保存された譜面オプションログから譜面オプション再現
@@ -152,17 +155,20 @@ public class BMSPlayer extends MainState {
 		// RANDOM構文処理
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
-				model = resource.loadBMSModel(replay.rand);
-				// 暫定処置
-				BMSModelUtils.setStartNoteTime(model, 1000);
-				BMSPlayerRule.validate(model);
+				randomsequence = replay.rand;
 			} else if (resource.getReplayData().pattern != null) {
-				model = resource.loadBMSModel(resource.getReplayData().rand);
+				// この処理はMusicResult、QuickRetry時にのみ通る
+				randomsequence = resource.getReplayData().rand;
+			}
+			
+			if(randomsequence != null && randomsequence.length > 0) {
+				model = resource.loadBMSModel(randomsequence);
 				// 暫定処置
 				BMSModelUtils.setStartNoteTime(model, 1000);
-				BMSPlayerRule.validate(model);
+				BMSPlayerRule.validate(model);				
 			}
-			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
+			randomsequence = model.getRandom();
+			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(randomsequence));
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
@@ -238,6 +244,7 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 			Logger.getGlobal().info("リプレイデータから譜面再現");
 		} else if (resource.getReplayData().pattern != null) {
+			// TODO この処理はMusicResult、QuickRetry時にのみ通る。Random/Seedでの譜面再現に置き換えたい
 			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
 			}
@@ -856,7 +863,7 @@ public class BMSPlayer extends MainState {
 			keyinput.time -= resource.getMarginTime();
 		}
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
-		replay.rand = model.getRandom();
+		replay.rand = this.randomsequence;
 		replay.gauge = config.getGauge();
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
 		replay.randomoption = config.getRandom();
