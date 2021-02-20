@@ -252,6 +252,8 @@ public class BMSPlayer extends MainState {
 				model.setMode(Mode.POPN_9K);
 			}
 			playinfo.pattern = resource.getReplayData().pattern;
+			playinfo.randomoptionseed = resource.getReplayData().randomoptionseed;
+			playinfo.randomoption2seed = resource.getReplayData().randomoption2seed;
 			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
@@ -687,8 +689,10 @@ public class BMSPlayer extends MainState {
 					&& !autoplay.isAutoPlayMode()
 					&& autoplay != PlayMode.PRACTICE) {
 				if (!resource.isUpdateScore()) {
+					resource.getReplayData().pattern = null;
 					Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
 				} else if (input.startPressed()) {
+					resource.getReplayData().pattern = null;
 					Logger.getGlobal().info("オプションを変更せずリプレイ");
 				} else {
 					resource.setScoreData(createScoreData());
