@@ -17,15 +17,15 @@ public abstract class TargetProperty {
     public static TargetProperty[] getAllTargetProperties() {
         if(available == null) {
             List<TargetProperty> targets = new ArrayList<TargetProperty>();
-            targets.add(new StaticTargetProperty("RANK A-", 66.6f));
-            targets.add(new StaticTargetProperty("RANK A", 70.3f));
-            targets.add(new StaticTargetProperty("RANK A+", 74.0f));
-            targets.add(new StaticTargetProperty("RANK AA-", 77.7f));
-            targets.add(new StaticTargetProperty("RANK AA", 81.4f));
-            targets.add(new StaticTargetProperty("RANK AA+", 85.1f));
-            targets.add(new StaticTargetProperty("RANK AAA-", 88.8f));
-            targets.add(new StaticTargetProperty("RANK AAA", 92.5f));
-            targets.add(new StaticTargetProperty("RANK AAA+", 96.2f));
+            targets.add(new StaticTargetProperty("RANK A-",   100.0f * 18.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK A",    100.0f * 19.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK A+",   100.0f * 20.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK AA-",  100.0f * 21.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK AA",   100.0f * 22.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK AA+",  100.0f * 23.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK AAA-", 100.0f * 24.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK AAA",  100.0f * 25.0f / 27.0f));
+            targets.add(new StaticTargetProperty("RANK AAA+", 100.0f * 26.0f / 27.0f));
             targets.add(new StaticTargetProperty("MAX", 100.0f));
             targets.add(new NextRankTargetProperty());
             available = targets.toArray(new TargetProperty[targets.size()]);
