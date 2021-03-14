@@ -118,6 +118,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = presstime;
 					this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, pressed);
+					this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
 				}
 			}
 

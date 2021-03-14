@@ -154,6 +154,7 @@ public class BMSPlayerInputProcessor {
 	public void setControllerConfig(ControllerConfig[] configs) {
 		boolean[] b = new boolean[configs.length];
 		for (BMControllerInputProcessor controller : bminput) {
+			controller.setEnable(false);
 			for(int i = 0;i < configs.length;i++) {
 				if(b[i]) {
 					continue;
@@ -163,6 +164,7 @@ public class BMSPlayerInputProcessor {
 				}
 				if(controller.getName().equals(configs[i].getName())) {
 					controller.setConfig(configs[i]);
+					controller.setEnable(true);
 					b[i] = true;
 					break;
 				}

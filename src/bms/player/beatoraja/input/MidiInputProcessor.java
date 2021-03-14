@@ -75,6 +75,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 			final int key = i;
 			setHandler(keys[i], (Boolean pressed) -> {
 				bmsPlayerInputProcessor.keyChanged(this, currentTime(), key, pressed);
+				bmsPlayerInputProcessor.setAnalogState(key, false, 0);
 			});
 		}
 
