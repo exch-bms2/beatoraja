@@ -210,7 +210,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
     private float getAnalogValue(int button) {
         // assume isAnalog(button) == true.
         int axis_index = (button - BMKeys.AXIS1_PLUS)/2;
-        boolean plus = (button - BMKeys.AXIS1_PLUS)%2 == 1;
+        boolean plus = (button - BMKeys.AXIS1_PLUS)%2 == 0;
         float value = controller.getAxis(axis_index);
         return plus ? value : -value;
     }
