@@ -223,7 +223,7 @@ public class MusicResult extends AbstractResult {
 							&& key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
 						Logger.getGlobal().info("オプションを変更せずリプレイ");
 						// オプションを変更せず同じ譜面でリプレイ
-						resource.getReplayData().pattern = null;
+						resource.getReplayData().randomoptionseed = -1;
 						resource.reloadBMSFile();
 						main.changeState(MainStateType.PLAY);
 					} else if (resource.getPlayMode() == PlayMode.PLAY
@@ -233,7 +233,7 @@ public class MusicResult extends AbstractResult {
 							Logger.getGlobal().info("同じ譜面でリプレイ");							
 						} else {
 							Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
-							resource.getReplayData().pattern = null;
+							resource.getReplayData().randomoptionseed = -1;
 						}
 						resource.reloadBMSFile();
 						main.changeState(MainStateType.PLAY);

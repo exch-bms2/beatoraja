@@ -159,7 +159,7 @@ public class BMSPlayer extends MainState {
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
 				playinfo.rand = replay.rand;
-			} else if (resource.getReplayData().pattern != null) {
+			} else if (resource.getReplayData().randomoptionseed != -1) {
 				// この処理はMusicResult、QuickRetry時にのみ通る
 				playinfo.rand = resource.getReplayData().rand;
 			}
@@ -241,23 +241,24 @@ public class BMSPlayer extends MainState {
 
 		Logger.getGlobal().info("譜面オプション設定");
 		if (replay != null) {
+			// TODO リプレイ時もseedが存在するものについてはpatternを使わず譜面再現する
 			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
 			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 			Logger.getGlobal().info("リプレイデータから譜面再現");
-		} else if (resource.getReplayData().pattern != null) {
-			// TODO この処理はMusicResult、QuickRetry時にのみ通る。Random/Seedでの譜面再現に置き換えたい
-			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
-				model.setMode(Mode.POPN_9K);
-			}
-			playinfo.pattern = resource.getReplayData().pattern;
-			playinfo.randomoptionseed = resource.getReplayData().randomoptionseed;
-			playinfo.randomoption2seed = resource.getReplayData().randomoption2seed;
-			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
-			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
 
+			if (resource.getReplayData().randomoptionseed != -1) {
+				// この処理はMusicResult、QuickRetry時にのみ通る
+				if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+					model.setMode(Mode.POPN_9K);
+				}
+				playinfo.randomoptionseed = resource.getReplayData().randomoptionseed;
+				playinfo.randomoption2seed = resource.getReplayData().randomoption2seed;
+				Logger.getGlobal().info("前回プレイ時の譜面再現");
+			}
+			
 			Array<PatternModifier> mods = new Array<PatternModifier>();
 			// DP譜面オプション
 			if(model.getMode().player == 2) {
@@ -689,10 +690,10 @@ public class BMSPlayer extends MainState {
 					&& !autoplay.isAutoPlayMode()
 					&& autoplay != PlayMode.PRACTICE) {
 				if (!resource.isUpdateScore()) {
-					resource.getReplayData().pattern = null;
+					resource.getReplayData().randomoptionseed = -1;
 					Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
 				} else if (input.startPressed()) {
-					resource.getReplayData().pattern = null;
+					resource.getReplayData().randomoptionseed = -1;
 					Logger.getGlobal().info("オプションを変更せずリプレイ");
 				} else {
 					resource.setScoreData(createScoreData());
