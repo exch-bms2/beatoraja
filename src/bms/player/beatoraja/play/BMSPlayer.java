@@ -713,6 +713,7 @@ public class BMSPlayer extends MainState {
 					resource.setScoreData(createScoreData());
 					Logger.getGlobal().info("同じ譜面でリプレイ");
 				}
+				saveConfig();
 				resource.reloadBMSFile();
 				main.changeState(MainStateType.PLAY);
 			} else if (main.getNowTime(TIMER_FAILED) > skin.getClose()) {
