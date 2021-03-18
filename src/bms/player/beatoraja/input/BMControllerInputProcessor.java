@@ -23,6 +23,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 */
 	private final String name;
 	/**
+	 * コントローラー使用してる
+	 */
+	private boolean enabled = false;
+	/**
 	 * ボタンキーアサイン
 	 */
 	private int[] buttons = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
@@ -137,6 +141,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	}
 
 	public void poll(final long presstime) {
+		if (!enabled) return;
+
 		// AXISの更新
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
 			axis[i] = controller.getAxis(i);
@@ -199,6 +205,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
         boolean isAnalog = !mouseScratch && !jkoc && (analogScratchAlgorithm != null);
         for (int i = 0; i < buttons.length; i++) {
             final int button = buttons[i];
+            if (button < 0 || button >= BMKeys.MAXID) continue;
             if (isAnalog && button >= BMKeys.AXIS1_PLUS) {
                 this.bmsPlayerInputProcessor.setAnalogState(i, true, getAnalogValue(button));
             } else {
@@ -247,6 +254,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 	public void setLastPressedButton(int lastPressedButton) {
 		this.lastPressedButton = lastPressedButton;
+	}
+
+	public void setEnable(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 	public static class BMKeys {
