@@ -83,6 +83,10 @@ public class BMSPlayer extends MainState {
 		this.model = resource.getBMSModel();
 		PlayMode autoplay = resource.getPlayMode();
 		PlayerConfig config = resource.getPlayerConfig();
+		
+		playinfo.randomoption = config.getRandom();
+		playinfo.randomoption2 = config.getRandom2();
+		playinfo.doubleoption = config.getDoubleoption();
 
 		ReplayData HSReplay = null;
 
@@ -119,19 +123,19 @@ public class BMSPlayer extends MainState {
 					if(main.getInputProcessor().getKeystate()[1]) {
 						//保存された譜面オプション/Random Seedから譜面再現
 						Logger.getGlobal().info("リプレイ再現モード : 譜面");
-						config.setRandom(replay.randomoption);
+						playinfo.randomoption = replay.randomoption;
 						playinfo.randomoptionseed = replay.randomoptionseed;
-						config.setRandom2(replay.randomoption2);
+						playinfo.randomoption2 = replay.randomoption2;
 						playinfo.randomoption2seed = replay.randomoption2seed;
-						config.setDoubleoption(replay.doubleoption);
+						playinfo.doubleoption = replay.doubleoption;
 						playinfo.rand = replay.rand;
 						isReplayPatternPlay = true;
 					} else if(main.getInputProcessor().getKeystate()[2]) {
 						//保存された譜面オプションログから譜面オプション再現
 						Logger.getGlobal().info("リプレイ再現モード : オプション");
-						config.setRandom(replay.randomoption);
-						config.setRandom2(replay.randomoption2);
-						config.setDoubleoption(replay.doubleoption);
+						playinfo.randomoption = replay.randomoption;
+						playinfo.randomoption2 = replay.randomoption2;
+						playinfo.doubleoption = replay.doubleoption;
 						isReplayPatternPlay = true;
 					}
 					if(main.getInputProcessor().getKeystate()[4]) {
@@ -213,7 +217,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 
-			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
+			if (playinfo.doubleoption >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
 				// SPでなければBATTLEは未適用
 				switch (model.getMode()) {
 				case BEAT_5K:
@@ -229,7 +233,7 @@ public class BMSPlayer extends MainState {
 				LaneShuffleModifier mod = new LaneShuffleModifier(Random.BATTLE);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				mod.modify(model);
-				if(config.getDoubleoption() == 3) {
+				if(playinfo.doubleoption == 3) {
 					PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
 					as.modify(model);
 				}
@@ -240,51 +244,61 @@ public class BMSPlayer extends MainState {
 		}
 
 		Logger.getGlobal().info("譜面オプション設定");
-		if (replay != null) {
-			// TODO リプレイ時もseedが存在するものについてはpatternを使わず譜面再現する
+		if (replay != null && replay.pattern != null) {
+			// リプレイ譜面再現(PatternModifyLog使用。旧verとの互換性維持用)
 			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
 			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
-			Logger.getGlobal().info("リプレイデータから譜面再現");
+			Logger.getGlobal().info("リプレイデータから譜面再現 : PatternModifyLog");
 		} else if (autoplay != PlayMode.PRACTICE) {
 
-			if (resource.getReplayData().randomoptionseed != -1) {
-				// この処理はMusicResult、QuickRetry時にのみ通る
-				if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+			// リプレイデータからのoption/seed再現
+			ReplayData rd = null;
+			if(replay != null) {
+				rd = replay;
+				Logger.getGlobal().info("リプレイデータから譜面再現 : option/seed");				
+			} else if(resource.getReplayData().randomoptionseed != -1) {
+				rd = resource.getReplayData();
+				Logger.getGlobal().info("前回プレイ時の譜面再現");				
+			}			
+			if (rd != null) {
+				if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 					model.setMode(Mode.POPN_9K);
 				}
-				playinfo.randomoptionseed = resource.getReplayData().randomoptionseed;
-				playinfo.randomoption2seed = resource.getReplayData().randomoption2seed;
-				Logger.getGlobal().info("前回プレイ時の譜面再現");
+				playinfo.randomoption = rd.randomoption;
+				playinfo.randomoptionseed = rd.randomoptionseed;
+				playinfo.randomoption2 = rd.randomoption2;
+				playinfo.randomoption2seed = rd.randomoption2seed;
+				playinfo.doubleoption = rd.doubleoption;
 			}
 			
 			Array<PatternModifier> mods = new Array<PatternModifier>();
 			// DP譜面オプション
 			if(model.getMode().player == 2) {
-				if (config.getDoubleoption() == 1) {
+				if (playinfo.doubleoption == 1) {
 					mods.add(new LaneShuffleModifier(Random.FLIP));
 				}
-				Logger.getGlobal().info("譜面オプション(DP) :  " + config.getDoubleoption());
+				Logger.getGlobal().info("譜面オプション(DP) :  " + playinfo.doubleoption);
 				
-				PatternModifier pm = PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode(), config);
+				PatternModifier pm = PatternModifier.create(playinfo.randomoption2, PatternModifier.SIDE_2P, model.getMode(), config);
 				if(playinfo.randomoption2seed != -1) {
 					pm.setSeed(playinfo.randomoption2seed);
 				} else {
 					playinfo.randomoption2seed = pm.getSeed();					
 				}
 				mods.add(pm);
-				Logger.getGlobal().info("譜面オプション(2P) :  " + config.getRandom2() + ", Seed : " + playinfo.randomoption2seed);
+				Logger.getGlobal().info("譜面オプション(2P) :  " + playinfo.randomoption2 + ", Seed : " + playinfo.randomoption2seed);
 			}
 
 			// POPN_9KのSCR系RANDOMにPOPN_5Kは対応していないため、非SCR系RANDOMに変更
 			if(model.getMode() == Mode.POPN_5K) {
-				switch(Random.getRandom(config.getRandom())) {
-				case ALL_SCR: config.setRandom(Random.IDENTITY.id);
+				switch(Random.getRandom(playinfo.randomoption)) {
+				case ALL_SCR: playinfo.randomoption = Random.IDENTITY.id;
 					break;
-				case RANDOM_EX: config.setRandom(Random.RANDOM.id);
+				case RANDOM_EX: playinfo.randomoption = Random.RANDOM.id;
 					break;
-				case S_RANDOM_EX: config.setRandom(Random.S_RANDOM.id);
+				case S_RANDOM_EX: playinfo.randomoption = Random.S_RANDOM.id;
 					break;
 				default:
 					break;
@@ -292,14 +306,14 @@ public class BMSPlayer extends MainState {
 			}
 
 			// SP譜面オプション
-			PatternModifier pm = PatternModifier.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode(), config);
+			PatternModifier pm = PatternModifier.create(playinfo.randomoption, PatternModifier.SIDE_1P, model.getMode(), config);
 			if(playinfo.randomoptionseed != -1) {
 				pm.setSeed(playinfo.randomoptionseed);
 			} else {
 				playinfo.randomoptionseed = pm.getSeed();					
 			}
 			mods.add(pm);
-			Logger.getGlobal().info("譜面オプション(1P) :  " + config.getRandom() + ", Seed : " + playinfo.randomoptionseed);
+			Logger.getGlobal().info("譜面オプション(1P) :  " + playinfo.randomoption + ", Seed : " + playinfo.randomoptionseed);
 
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
@@ -317,7 +331,7 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 			}
-			playinfo.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
+//			playinfo.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 
 		}
 
@@ -872,7 +886,7 @@ public class BMSPlayer extends MainState {
 		for(KeyInputLog keyinput : replay.keylog) {
 			keyinput.time -= resource.getMarginTime();
 		}
-		replay.pattern = playinfo.pattern;
+//		replay.pattern = playinfo.pattern;
 		replay.rand = playinfo.rand;
 		replay.gauge = config.getGauge();
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
