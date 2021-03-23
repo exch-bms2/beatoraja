@@ -429,7 +429,7 @@ public class MusicSelector extends MainState {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
-						if(!(dir.last() instanceof SameFolderBar)) {
+						if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
 							Array<String> urls = new Array(main.getConfig().getTableURL());
 
 							boolean isdtable = false;
@@ -469,7 +469,7 @@ public class MusicSelector extends MainState {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
-					if(!(dir.last() instanceof SameFolderBar)) {
+					if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
 						Array<String> urls = new Array(main.getConfig().getTableURL());
 
 						boolean isdtable = false;
