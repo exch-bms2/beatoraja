@@ -49,6 +49,9 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
+	/*
+	 * NOTE: Version number is updated by ant's 'inject_version' task
+	 */
 	private static final String VERSION = "beatoraja 0.8.3";
 
 	public static final boolean debug = false;
