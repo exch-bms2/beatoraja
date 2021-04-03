@@ -175,10 +175,10 @@ public class MainController extends ApplicationAdapter {
 					}
 				}
 			}
-			
+
 		}
 		ir = irarray.toArray(IRStatus.class);
-		
+
 		switch(config.getAudioConfig().getDriver()) {
 		case PortAudio:
 			try {
@@ -266,7 +266,7 @@ public class MainController extends ApplicationAdapter {
 			}
 			newState.create();
 			if(newState.getSkin() != null) {
-				newState.getSkin().prepare(newState);				
+				newState.getSkin().prepare(newState);
 			}
 			current = newState;
 			starttime = System.nanoTime();
@@ -279,7 +279,7 @@ public class MainController extends ApplicationAdapter {
 			Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());
 		}
 	}
-	
+
 	public MainState getCurrentState() {
 		return current;
 	}
@@ -299,7 +299,7 @@ public class MainController extends ApplicationAdapter {
 			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
-			systemfont = generator.generateFont(parameter);			
+			systemfont = generator.generateFont(parameter);
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("System Font１読み込み失敗");
 		}
@@ -378,7 +378,7 @@ public class MainController extends ApplicationAdapter {
 			});
 			download.start(null);
 		}
-		
+
 		if(ir.length > 0) {
 			messageRenderer.addMessage(ir.length + " IR Connection Succeed" ,5000, Color.GREEN, 1);
 		}
@@ -628,7 +628,7 @@ public class MainController extends ApplicationAdapter {
 	public MusicDownloadProcessor getMusicDownloadProcessor(){
 		return download;
 	}
-	
+
 	public MessageRenderer getMessageRenderer() {
 		return messageRenderer;
 	}
@@ -742,7 +742,7 @@ public class MainController extends ApplicationAdapter {
 			downloadIpfs.start();
 		}
 	}
-	
+
 	public static String getVersion() {
 		return VERSION;
 	}
@@ -823,7 +823,7 @@ public class MainController extends ApplicationAdapter {
 
 	/**
 	 * BGM、効果音セット管理用クラス
-	 * 
+	 *
 	 * @author exch
 	 */
 	public static class SystemSoundManager {
@@ -846,10 +846,10 @@ public class MainController extends ApplicationAdapter {
 
 		public SystemSoundManager(Config config) {
 			if(config.getBgmpath() != null && config.getBgmpath().length() > 0) {
-				scan(Paths.get(config.getBgmpath()).toAbsolutePath(), bgms, "select.wav");				
+				scan(Paths.get(config.getBgmpath()).toAbsolutePath(), bgms, "select.wav");
 			}
 			if(config.getSoundpath() != null && config.getSoundpath().length() > 0) {
-				scan(Paths.get(config.getSoundpath()).toAbsolutePath(), sounds, "clear.wav");				
+				scan(Paths.get(config.getSoundpath()).toAbsolutePath(), sounds, "clear.wav");
 			}
 			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
@@ -883,16 +883,16 @@ public class MainController extends ApplicationAdapter {
 					}
 				} catch (IOException e) {
 				}
-			} 
+			}
 		}
 	}
 
 	public static class IRStatus {
-		
+
 		public final IRConfig config;
 		public final IRConnection connection;
 		public final IRPlayerData player;
-		
+
 		public IRStatus(IRConfig config, IRConnection connection, IRPlayerData player) {
 			this.config = config;
 			this.connection = connection;
