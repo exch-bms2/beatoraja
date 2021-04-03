@@ -32,7 +32,7 @@
 		<mkdir dir="${dir.release}/linux" />
 	</target>
 
-	<target name="compile" depends="clean">
+	<target name="compile" depends="clean,inject_version">
 		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" encoding="UTF-8" />
 	</target>
 
@@ -109,6 +109,11 @@
 				<include name="beatoraja.jar" />
 			</fileset>
 		</copy>
+	</target>
+
+	<target name="inject_version">
+		<echo message="Updating game version in src/bms/player/beatoraja/MainController.java to ${app.version}" />
+		<replaceregexp file="src/bms/player/beatoraja/MainController.java" match="beatoraja \d+(?:\.\d+)+" replace="beatoraja ${app.version}" />
 	</target>
 
 	<target name="make_zip">
