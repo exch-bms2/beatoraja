@@ -288,6 +288,27 @@ public class BooleanPropertyFactory {
 			result = new ReplayDrawCondition(3, 2);
 		}
 
+		if (id >= OPTION_COURSE_STAGE1 && id <= OPTION_COURSE_STAGE4) {
+			int index = id - OPTION_COURSE_STAGE1;
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					final CourseData course = state.main.getPlayerResource().getCourseData();
+					final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+					return course != null && index == courseIndex && index != course.getSong().length - 1;
+				}
+			};
+		} else if (id == OPTION_COURSE_STAGE_FINAL) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					final CourseData course = state.main.getPlayerResource().getCourseData();
+					final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+					return course != null && courseIndex == course.getSong().length - 1;
+				}
+			};
+		}
+
 		if (result == null) {
 			result = getBooleanProperty0(id);
 		}
