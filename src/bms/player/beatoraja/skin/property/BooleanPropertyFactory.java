@@ -712,6 +712,9 @@ public class BooleanPropertyFactory {
 		case OPTION_1P_BORDER_OR_MORE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getGauge().getGauge().isQualified() : false));
+		case OPTION_MODE_COURSE:
+			return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+					(state) -> (state.main.getPlayerResource().getCourseData() != null));
 		case OPTION_UPDATE_SCORE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getExscore() > ((AbstractResult) state).getOldScore().getExscore() : false));
