@@ -23,25 +23,29 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	/**
 	 * 数字
 	 */
-	private final int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
+	private final int[] numbers = { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
 			Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
 	/**
 	 * カーソル
 	 */
-	private final int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
+	private final int[] cover = { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
 	/**
 	 * 機能
 	 */
-	private final int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
+	private final int[] function = { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
 			Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
 	/**
 	 * 終了キー
 	 */
-	private int exit = Keys.ESCAPE;
-
-	private int enter = Keys.ENTER;
-
-	private int delete = Keys.FORWARD_DEL;
+	private final int exit = Keys.ESCAPE;
+	/**
+	 * ENTERキー
+	 */
+	private final int enter = Keys.ENTER;
+	/**
+	 * DELキー
+	 */
+	private final int delete = Keys.FORWARD_DEL;
 
 	private final IntArray reserved;
 	/**
@@ -184,8 +188,17 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return false;
 	}
 
+	/**
+	 * 旧InputProcessorのメソッド
+	 * libGDX更新時に削除
+	 */
 	public boolean scrolled(int amount) {
-		this.bmsPlayerInputProcessor.scroll -= amount;
+		return scrolled(0, amount);
+	}
+
+	public boolean scrolled(float amountX, float amountY) {
+		this.bmsPlayerInputProcessor.scrollX += amountX;
+		this.bmsPlayerInputProcessor.scrollY += amountY;
 		return false;
 	}
 

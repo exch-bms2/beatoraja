@@ -132,7 +132,8 @@ public class BMSPlayerInputProcessor {
 	boolean mousedragged;
 	private boolean mouseMoved = false;
 
-	int scroll;
+	float scrollX;
+	float scrollY;
 
 	private boolean startPressed;
 	private boolean selectPressed;
@@ -507,11 +508,19 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public int getScroll() {
-		return scroll;
+		return (int) -scrollY;
+	}
+
+	public float getScrollX() {
+		return scrollX;
+	}
+
+	public float getScrollY() {
+		return scrollY;
 	}
 
 	public void resetScroll() {
-		scroll = 0;
+		scrollX = scrollY = 0;
 	}
 
 	public void poll() {
