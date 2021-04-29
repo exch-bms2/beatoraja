@@ -78,6 +78,24 @@ public class BMSPlayer extends MainState {
 	public static final int SOUND_READY = 0;
 	public static final int SOUND_PLAYSTOP = 1;
 
+	private int state = STATE_PRELOAD;
+
+	public static final int STATE_PRELOAD = 0;
+	public static final int STATE_PRACTICE = 1;
+	public static final int STATE_PRACTICE_FINISHED = 2;
+	public static final int STATE_READY = 3;
+	public static final int STATE_PLAY = 4;
+	public static final int STATE_FAILED = 5;
+	public static final int STATE_FINISHED = 6;
+
+	private long prevtime;
+
+	private PracticeConfiguration practice = new PracticeConfiguration();
+	private long starttimeoffset;
+
+	private RhythmTimerProcessor rhythm;
+	private long startpressedtime;
+
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
 		this.model = resource.getBMSModel();
@@ -263,7 +281,7 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("前回プレイ時の譜面再現");				
 			}			
 			if (rd != null) {
-				if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+				if(rd.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 					model.setMode(Mode.POPN_9K);
 				}
 				playinfo.randomoption = rd.randomoption;
@@ -385,7 +403,6 @@ public class BMSPlayer extends MainState {
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, laneProperty);
-		Config conf = resource.getConfig();
 		PlayerConfig config = resource.getPlayerConfig();
 
 		loadSkin(getSkinType());
@@ -446,24 +463,6 @@ public class BMSPlayer extends MainState {
 			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), rivalscore, null, model.getTotalNotes());
 		}
 	}
-
-	public static final int STATE_PRELOAD = 0;
-	public static final int STATE_PRACTICE = 1;
-	public static final int STATE_PRACTICE_FINISHED = 2;
-	public static final int STATE_READY = 3;
-	public static final int STATE_PLAY = 4;
-	public static final int STATE_FAILED = 5;
-	public static final int STATE_FINISHED = 6;
-
-	private int state = STATE_PRELOAD;
-
-	private long prevtime;
-
-	private PracticeConfiguration practice = new PracticeConfiguration();
-	private long starttimeoffset;
-
-	private RhythmTimerProcessor rhythm;
-	private long startpressedtime;
 
 	@Override
 	public void render() {
