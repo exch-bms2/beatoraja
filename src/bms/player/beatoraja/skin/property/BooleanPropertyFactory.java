@@ -288,6 +288,27 @@ public class BooleanPropertyFactory {
 			result = new ReplayDrawCondition(3, 2);
 		}
 
+		if (id >= OPTION_COURSE_STAGE1 && id <= OPTION_COURSE_STAGE4) {
+			int index = id - OPTION_COURSE_STAGE1;
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					final CourseData course = state.main.getPlayerResource().getCourseData();
+					final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+					return course != null && index == courseIndex && index != course.getSong().length - 1;
+				}
+			};
+		} else if (id == OPTION_COURSE_STAGE_FINAL) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					final CourseData course = state.main.getPlayerResource().getCourseData();
+					final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+					return course != null && courseIndex == course.getSong().length - 1;
+				}
+			};
+		}
+
 		if (result == null) {
 			result = getBooleanProperty0(id);
 		}
@@ -691,6 +712,9 @@ public class BooleanPropertyFactory {
 		case OPTION_1P_BORDER_OR_MORE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getGauge().getGauge().isQualified() : false));
+		case OPTION_MODE_COURSE:
+			return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+					(state) -> (state.main.getPlayerResource().getCourseData() != null));
 		case OPTION_UPDATE_SCORE:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getExscore() > ((AbstractResult) state).getOldScore().getExscore() : false));
