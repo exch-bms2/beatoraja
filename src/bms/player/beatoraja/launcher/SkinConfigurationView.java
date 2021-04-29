@@ -241,6 +241,7 @@ public class SkinConfigurationView implements Initializable {
 
     public void commit() {
     	commitSkinType();
+    	commitSkinHeader();
     }
     
     @FXML
