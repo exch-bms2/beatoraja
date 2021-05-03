@@ -3,9 +3,7 @@ package bms.player.beatoraja.result;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.KeyCommand;
@@ -15,10 +13,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.ir.IRCourseData;
-import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.ir.RankingData;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -70,7 +65,7 @@ public class CourseResult extends AbstractResult {
 		updateScoreDatabase();
 
 		// リプレイの自動保存
-		if(resource.getPlayMode() == BMSPlayerMode.PLAY){
+		if(resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY){
 			for(int i=0;i<REPLAY_SIZE;i++){
 				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getPlayerConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,getNewScore())) {
 					saveReplayData(i);
@@ -90,7 +85,7 @@ public class CourseResult extends AbstractResult {
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 
 		final IRStatus[] ir = main.getIRStatus();
-		if (ir.length > 0 && resource.getPlayMode() == BMSPlayerMode.PLAY) {
+		if (ir.length > 0 && resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
 			state = STATE_IR_PROCESSING;
 			
 			boolean uln = false;
@@ -313,7 +308,7 @@ public class CourseResult extends AbstractResult {
 
 	public void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getPlayMode() == BMSPlayerMode.PLAY && resource.getCourseScoreData() != null) {
+		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY && resource.getCourseScoreData() != null) {
 			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateCourseScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
