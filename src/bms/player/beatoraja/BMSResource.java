@@ -5,7 +5,6 @@ import java.util.ArrayDeque;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -64,7 +63,7 @@ public class BMSResource {
 		bga = new BGAProcessor(config, player);
 	}
 
-	public boolean setBMSFile(BMSModel model, final Path f, final Config config, PlayMode mode) {
+	public boolean setBMSFile(BMSModel model, final Path f, final Config config, BMSPlayerMode mode) {
 		if(stagefile != null) {
 			stagefile.getTexture().dispose();
 			stagefile = null;
@@ -104,7 +103,7 @@ public class BMSResource {
 		if(MainLoader.getIllegalSongCount() == 0) {
 			// Audio, BGAともキャッシュがあるため、何があっても全リロードする
 			BGALoaderThread bgaloader = new BGALoaderThread(
-					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == PlayMode.AUTOPLAY || mode.isReplayMode())) ? model : null);
+					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == BMSPlayerMode.AUTOPLAY || mode.isReplayMode())) ? model : null);
 			bgaloaders.addLast(bgaloader);
 			bgaloader.start();
 			AudioLoaderThread audioloader = new AudioLoaderThread(model);

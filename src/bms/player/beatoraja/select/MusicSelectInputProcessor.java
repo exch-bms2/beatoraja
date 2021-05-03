@@ -1,7 +1,6 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.play.TargetProperty;
@@ -314,16 +313,16 @@ public class MusicSelectInputProcessor {
                     // play
                     input.setEnterPressed(false);
                     cursortime[3] = 0;
-                    select.selectSong(PlayMode.PLAY);
+                    select.selectSong(BMSPlayerMode.PLAY);
                 } else if (property.isPressed(keystate, keytime, PRACTICE, true)) {
                     // practice mode
-                    select.selectSong(PlayMode.PRACTICE);
+                    select.selectSong(BMSPlayerMode.PRACTICE);
                 } else if (property.isPressed(keystate, keytime, AUTO, true)) {
                     // auto play
-                    select.selectSong(PlayMode.AUTOPLAY);
+                    select.selectSong(BMSPlayerMode.AUTOPLAY);
                 } else if (property.isPressed(keystate, keytime, MusicSelectKey.REPLAY, true)) {
                     // replay
-                    select.selectSong((select.getSelectedReplay() >= 0) ? PlayMode.getReplayMode(select.getSelectedReplay()) : PlayMode.PLAY);
+                    select.selectSong((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY);
                 }
             } else {
                 if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
@@ -357,7 +356,7 @@ public class MusicSelectInputProcessor {
 
     		if(input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
     			if(current instanceof DirectoryBar) {
-    				select.selectSong(PlayMode.AUTOPLAY);
+    				select.selectSong(BMSPlayerMode.AUTOPLAY);
     			}
     		}
     		if(input.isActivated(KeyCommand.OPEN_IR)) {

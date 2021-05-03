@@ -18,7 +18,6 @@ import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
@@ -63,7 +62,7 @@ public class MusicResult extends AbstractResult {
 
 		updateScoreDatabase();
 		// リプレイの自動保存
-		if (resource.getPlayMode() == PlayMode.PLAY) {
+		if (resource.getPlayMode() == BMSPlayerMode.PLAY) {
 			for (int i = 0; i < REPLAY_SIZE; i++) {
 				if (ReplayAutoSaveConstraint.get(resource.getPlayerConfig().getAutoSaveReplay()[i]).isQualified(oldscore,
 						resource.getScoreData())) {
@@ -90,7 +89,7 @@ public class MusicResult extends AbstractResult {
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 		final IRStatus[] ir = main.getIRStatus();
-		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
+		if (ir.length > 0 && resource.getPlayMode() == BMSPlayerMode.PLAY) {
 			state = STATE_IR_PROCESSING;
 			
         	for(IRStatus irc : ir) {
@@ -219,14 +218,14 @@ public class MusicResult extends AbstractResult {
 							break;
 						}
 					}
-					if (resource.getPlayMode() == PlayMode.PLAY
+					if (resource.getPlayMode() == BMSPlayerMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
 						Logger.getGlobal().info("オプションを変更せずリプレイ");
 						// オプションを変更せず同じ譜面でリプレイ
 						resource.getReplayData().randomoptionseed = -1;
 						resource.reloadBMSFile();
 						main.changeState(MainStateType.PLAY);
-					} else if (resource.getPlayMode() == PlayMode.PLAY
+					} else if (resource.getPlayMode() == BMSPlayerMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
 						if(resource.isUpdateScore()) {
@@ -319,7 +318,7 @@ public class MusicResult extends AbstractResult {
 
 	public void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null
+		if (resource.getPlayMode() == BMSPlayerMode.PLAY && resource.getCourseBMSModels() == null
 				&& resource.getScoreData() != null) {
 			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
@@ -446,7 +445,7 @@ public class MusicResult extends AbstractResult {
 			newscore = cscore;
 		}
 
-		if (resource.getPlayMode() == PlayMode.PLAY) {
+		if (resource.getPlayMode() == BMSPlayerMode.PLAY) {
 			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
 		} else {

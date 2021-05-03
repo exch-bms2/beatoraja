@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import bms.model.Mode;
 import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 public class ControlInputProcessor {
@@ -28,7 +28,7 @@ public class ControlInputProcessor {
 	private boolean enableControl = true;
 	private boolean enableCursor = true;
 
-	private final PlayMode autoplay;
+	private final BMSPlayerMode autoplay;
 
 	private Runnable processStart;
 	private Runnable processSelect;
@@ -41,7 +41,7 @@ public class ControlInputProcessor {
 
 	private boolean hispeedAutoAdjust;
 
-	public ControlInputProcessor(BMSPlayer player, PlayMode autoplay) {
+	public ControlInputProcessor(BMSPlayer player, BMSPlayerMode autoplay) {
 		this.player = player;
 		this.autoplay = autoplay;
 		hschanged = new boolean[player.main.getInputProcessor().getKeystate().length];
@@ -111,9 +111,9 @@ public class ControlInputProcessor {
 			}
 			if ((input.startPressed() && !input.isSelectPressed())
 					|| (player.main.getPlayerResource().getPlayerConfig().isWindowHold() && player.main.isTimerOn(TIMER_PLAY) && !player.isNoteEnd())) {
-				if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && startpressed) {
+				if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && startpressed) {
 					processStart.run();
-				} else if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && !startpressed) {
+				} else if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && !startpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				// show-hide lane cover by double-press START
@@ -131,9 +131,9 @@ public class ControlInputProcessor {
 				startpressed = false;
 			}
 			if(input.isSelectPressed() && !input.startPressed()){
-				if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && selectpressed) {
+				if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && selectpressed) {
 					processSelect.run();
-				} else if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && !selectpressed) {
+				} else if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && !selectpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				selectpressed = true;

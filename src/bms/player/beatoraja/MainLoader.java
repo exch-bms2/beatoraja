@@ -28,7 +28,6 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.AudioConfig.DriverType;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.launcher.PlayConfigurationView;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
@@ -68,34 +67,34 @@ public class MainLoader extends Application {
 			e.printStackTrace();
 		}
 
-		PlayMode auto = null;
+		BMSPlayerMode auto = null;
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
-					auto = PlayMode.AUTOPLAY;
+					auto = BMSPlayerMode.AUTOPLAY;
 				}
 				if (s.equals("-p")) {
-					auto = PlayMode.PRACTICE;
+					auto = BMSPlayerMode.PRACTICE;
 				}
 				if (s.equals("-r") || s.equals("-r1")) {
-					auto = PlayMode.REPLAY_1;
+					auto = BMSPlayerMode.REPLAY_1;
 				}
 				if (s.equals("-r2")) {
-					auto = PlayMode.REPLAY_2;
+					auto = BMSPlayerMode.REPLAY_2;
 				}
 				if (s.equals("-r3")) {
-					auto = PlayMode.REPLAY_3;
+					auto = BMSPlayerMode.REPLAY_3;
 				}
 				if (s.equals("-r4")) {
-					auto = PlayMode.REPLAY_4;
+					auto = BMSPlayerMode.REPLAY_4;
 				}
 				if (s.equals("-s")) {
-					auto = PlayMode.PLAY;
+					auto = BMSPlayerMode.PLAY;
 				}
 			} else {
 				bmsPath = Paths.get(s);
 				if(auto == null) {
-					auto = PlayMode.PLAY;
+					auto = BMSPlayerMode.PLAY;
 				}
 			}
 		}
@@ -108,7 +107,7 @@ public class MainLoader extends Application {
 		}
 	}
 
-	public static void play(Path f, PlayMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
+	public static void play(Path f, BMSPlayerMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
 		if(config == null) {
 			config = Config.read();			
 		}

@@ -17,9 +17,9 @@ import bms.model.Mode;
 import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.ScoreDataProperty;
 import bms.player.beatoraja.ScoreData.SongTrophy;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.JudgeManager;
@@ -678,13 +678,13 @@ public class BooleanPropertyFactory {
 					});
 		case OPTION_AUTOPLAYON:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == PlayMode.AUTOPLAY : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == BMSPlayerMode.AUTOPLAY : false));
 		case OPTION_AUTOPLAYOFF:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() != PlayMode.AUTOPLAY : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() != BMSPlayerMode.AUTOPLAY : false));
 		case OPTION_REPLAY_OFF:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == PlayMode.PLAY || ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == PlayMode.PRACTICE : false));
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == BMSPlayerMode.PLAY || ((BMSPlayer) state).main.getPlayerResource().getPlayMode() == BMSPlayerMode.PRACTICE : false));
 		case OPTION_REPLAY_PLAYING:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().isReplayMode() : false));

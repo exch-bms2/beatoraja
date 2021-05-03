@@ -22,7 +22,6 @@ import com.badlogic.gdx.utils.StringBuilder;
 import bms.player.beatoraja.AudioConfig.DriverType;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.MessageRenderer.Message;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
@@ -50,7 +49,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	private static final String VERSION = "beatoraja 0.8.2";
+	private static final String VERSION = "beatoraja 0.8.3";
 
 	public static final boolean debug = false;
 
@@ -86,7 +85,7 @@ public class MainController extends ApplicationAdapter {
 
 	private Config config;
 	private PlayerConfig player;
-	private PlayMode auto;
+	private BMSPlayerMode auto;
 	private boolean songUpdated;
 
 	private SongInformationAccessor infodb;
@@ -125,7 +124,7 @@ public class MainController extends ApplicationAdapter {
 	protected TextureRegion black;
 	protected TextureRegion white;
 
-	public MainController(Path f, Config config, PlayerConfig player, PlayMode auto, boolean songUpdated) {
+	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated) {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
@@ -285,7 +284,7 @@ public class MainController extends ApplicationAdapter {
 		return current;
 	}
 
-	public void setPlayMode(PlayMode auto) {
+	public void setPlayMode(BMSPlayerMode auto) {
 		this.auto = auto;
 
 	}

@@ -36,7 +36,7 @@ public class PlayerResource {
 	/**
 	 * BMSModelの元々のモード
 	 */
-	private Mode orgmode;
+	private bms.model.Mode orgmode;
 
 	private PlayerData playerdata = new PlayerData();
 
@@ -45,7 +45,7 @@ public class PlayerResource {
 	/**
 	 * プレイモード
 	 */
-	private PlayMode mode;
+	private BMSPlayerMode mode;
 	
 	private BMSResource bmsresource;
 
@@ -142,7 +142,7 @@ public class PlayerResource {
 		setTablelevel("");
 	}
 
-	public boolean setBMSFile(final Path f, PlayMode mode) {
+	public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
 		// TODO play mode, リプレイデータでの読み込み分岐をここで行う
 		this.mode = mode;
 		replay = new ReplayData();
@@ -203,11 +203,11 @@ public class PlayerResource {
 		return marginTime;
 	}
 
-	public PlayMode getPlayMode() {
+	public BMSPlayerMode getPlayMode() {
 		return mode;
 	}
 
-	public void setPlayMode(PlayMode mode) {
+	public void setPlayMode(BMSPlayerMode mode) {
 		this.mode = mode;
 	}
 
@@ -288,7 +288,7 @@ public class PlayerResource {
 				}
 			}
 			songdata = null;
-			if(setBMSFile(bmsPaths[courseindex++], PlayMode.AUTOPLAY)) {
+			if(setBMSFile(bmsPaths[courseindex++], BMSPlayerMode.AUTOPLAY)) {
 				return true;
 			};
 		} while(orgindex != courseindex);
@@ -513,60 +513,11 @@ public class PlayerResource {
 		setTablelevel("");
 	}
 
-	public Mode getOriginalMode() {
+	public bms.model.Mode getOriginalMode() {
 		return orgmode;
 	}
 
-	public void setOriginalMode(Mode orgmode) {
+	public void setOriginalMode(bms.model.Mode orgmode) {
 		this.orgmode = orgmode;
-	}
-
-	public enum PlayMode {
-		PLAY,
-		PRACTICE,
-		AUTOPLAY,
-		AUTOPLAY_LOOP,
-		REPLAY_1,
-		REPLAY_2,
-		REPLAY_3,
-		REPLAY_4;
-		
-		public boolean isAutoPlayMode() {
-			return this == AUTOPLAY || this == AUTOPLAY_LOOP; 
-		}
-		
-		public boolean isReplayMode() {
-			return this == REPLAY_1 || this == REPLAY_2 || this == REPLAY_3 || this == REPLAY_4; 
-		}
-		
-		public static PlayMode getReplayMode(int index) {
-			switch(index) {
-			case 0:
-				return REPLAY_1;
-			case 1:
-				return REPLAY_2;
-			case 2:
-				return REPLAY_3;
-			case 3:
-				return REPLAY_4;
-			default:
-				return null;
-			}			
-		}
-		
-		public int getReplayIndex() {
-			switch(this) {
-			case REPLAY_1:
-				return 0;
-			case REPLAY_2:
-				return 1;
-			case REPLAY_3:
-				return 2;
-			case REPLAY_4:
-				return 3;
-			default:
-				return 0;
-			}
-		}
 	}
 }

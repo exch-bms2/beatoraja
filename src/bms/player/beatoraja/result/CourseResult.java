@@ -14,7 +14,6 @@ import com.badlogic.gdx.utils.FloatArray;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRCourseData;
@@ -71,7 +70,7 @@ public class CourseResult extends AbstractResult {
 		updateScoreDatabase();
 
 		// リプレイの自動保存
-		if(resource.getPlayMode() == PlayMode.PLAY){
+		if(resource.getPlayMode() == BMSPlayerMode.PLAY){
 			for(int i=0;i<REPLAY_SIZE;i++){
 				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getPlayerConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,getNewScore())) {
 					saveReplayData(i);
@@ -91,7 +90,7 @@ public class CourseResult extends AbstractResult {
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 
 		final IRStatus[] ir = main.getIRStatus();
-		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
+		if (ir.length > 0 && resource.getPlayMode() == BMSPlayerMode.PLAY) {
 			state = STATE_IR_PROCESSING;
 			
 			boolean uln = false;
@@ -314,7 +313,7 @@ public class CourseResult extends AbstractResult {
 
 	public void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseScoreData() != null) {
+		if (resource.getPlayMode() == BMSPlayerMode.PLAY && resource.getCourseScoreData() != null) {
 			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateCourseScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();

@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.MusicSelectCommand;
 import bms.player.beatoraja.select.MusicSelector;
@@ -70,7 +70,7 @@ public class EventFactory {
 	private static Consumer<MainState> getReplayEventConsumer(int index) {
 		return (state) -> {
 			if(state instanceof MusicSelector) {
-				((MusicSelector) state).selectSong(PlayMode.getReplayMode(index));;
+				((MusicSelector) state).selectSong(BMSPlayerMode.getReplayMode(index));;
 			}
 			if(state instanceof MusicResult) {
 				((MusicResult) state).saveReplayData(index);

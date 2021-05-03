@@ -21,7 +21,6 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -105,7 +104,7 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_OPTIONOPEN = 5;
 	public static final int SOUND_OPTIONCLOSE = 6;
 
-	private PlayMode play = null;
+	private BMSPlayerMode play = null;
 
 	private SongData playedsong = null;
 	private CourseData playedcourse = null;
@@ -493,8 +492,8 @@ public class MusicSelector extends MainState {
 					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 				}
 			}else if (current instanceof GradeBar) {
-				if (play == PlayMode.PRACTICE) {
-					play = PlayMode.PLAY;
+				if (play == BMSPlayerMode.PRACTICE) {
+					play = BMSPlayerMode.PLAY;
 				}
 				readCourse(play);
 			} else if (current instanceof DirectoryBar) {
@@ -547,7 +546,7 @@ public class MusicSelector extends MainState {
 			}
 			execute(MusicSelectCommand.RESET_REPLAY);
 		} else {
-			play = PlayMode.PLAY;
+			play = BMSPlayerMode.PLAY;
 		}
 	}
 
@@ -563,7 +562,7 @@ public class MusicSelector extends MainState {
 		command.execute(this);
 	}
 
-	private void readCourse(PlayMode mode) {
+	private void readCourse(BMSPlayerMode mode) {
 		final PlayerResource resource = main.getPlayerResource();
 		final GradeBar course = (GradeBar) bar.getSelected();
 		if (!course.existsAllSongs()) {
@@ -579,7 +578,7 @@ public class MusicSelector extends MainState {
 			files[i++] = Paths.get(song.getPath());
 		}
 		if (resource.setCourseBMSFiles(files)) {
-			if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
+			if (mode == BMSPlayerMode.PLAY || mode.isAutoPlayMode()) {
 				for (CourseData.CourseDataConstraint constraint : course.getCourseData().getConstraint()) {
 					switch (constraint) {
 					case CLASS:
@@ -701,13 +700,13 @@ public class MusicSelector extends MainState {
 			changeState(MainStateType.SKINCONFIG);
 			break;
 		case BUTTON_PLAY:
-			play = PlayMode.PLAY;
+			play = BMSPlayerMode.PLAY;
 			break;
 		case BUTTON_AUTOPLAY:
-			play = PlayMode.AUTOPLAY;
+			play = BMSPlayerMode.AUTOPLAY;
 			break;
 		case BUTTON_PRACTICE:
-			play = PlayMode.PRACTICE;
+			play = BMSPlayerMode.PRACTICE;
 			break;
 		case BUTTON_READTEXT:
 			execute(MusicSelectCommand.OPEN_DOCUMENT);
@@ -821,7 +820,7 @@ public class MusicSelector extends MainState {
 				current instanceof SongBar ? ((SongBar) current).getStagefile() : null);
 	}
 
-	public void selectSong(PlayMode mode) {
+	public void selectSong(BMSPlayerMode mode) {
 		play = mode;
 	}
 

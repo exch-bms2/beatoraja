@@ -644,7 +644,7 @@ public class PlayConfigurationView implements Initializable {
 		irTab.setDisable(true);
 		controlPanel.setDisable(true);
 
-		MainLoader.play(null, bms.player.beatoraja.PlayerResource.PlayMode.PLAY, true, config, player, songUpdated);
+		MainLoader.play(null, bms.player.beatoraja.BMSPlayerMode.PLAY, true, config, player, songUpdated);
 	}
 
     @FXML
