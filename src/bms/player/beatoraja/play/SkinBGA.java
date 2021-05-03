@@ -51,7 +51,7 @@ public class SkinBGA extends SkinObject {
 
 	public void draw(SkinObjectRenderer sprite) {
 		final PlayerResource resource = player.main.getPlayerResource();
-		if (resource.getPlayMode() == BMSPlayerMode.PRACTICE) {
+		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE) {
 			player.getPracticeConfiguration().draw(region, sprite, time, player);
 		} else if (resource.getBGAManager() != null) {
 			resource.getBGAManager().drawBGA(this,sprite,region);

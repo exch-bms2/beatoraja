@@ -6,19 +6,8 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.utils.FloatArray;
 
-import bms.model.BMSModel;
-import bms.model.Lane;
-import bms.model.LongNote;
-import bms.model.MineNote;
-import bms.model.Mode;
-import bms.model.NormalNote;
-import bms.model.Note;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.ScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
+import bms.model.*;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.JudgeProperty.MissCondition;
@@ -241,7 +230,7 @@ public class JudgeManager {
 			judgeend = Math.max(judgeend, i[1]);
 		}
 
-		this.autoplay = resource.getPlayMode().isAutoPlayMode();
+		this.autoplay = resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY;
 
 		FloatArray[] f = resource.getGauge();
 		if (f != null) {

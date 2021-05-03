@@ -4,11 +4,15 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
 
-import bms.model.Mode;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
+/**
+ * BMSPlayerの制御系の入力処理を行うクラス
+ * 
+ * @author exch
+ */
 public class ControlInputProcessor {
 
 	private final BMSPlayer player;
@@ -111,9 +115,9 @@ public class ControlInputProcessor {
 			}
 			if ((input.startPressed() && !input.isSelectPressed())
 					|| (player.main.getPlayerResource().getPlayerConfig().isWindowHold() && player.main.isTimerOn(TIMER_PLAY) && !player.isNoteEnd())) {
-				if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && startpressed) {
+				if ((autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) && startpressed) {
 					processStart.run();
-				} else if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && !startpressed) {
+				} else if ((autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) && !startpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				// show-hide lane cover by double-press START
@@ -131,9 +135,9 @@ public class ControlInputProcessor {
 				startpressed = false;
 			}
 			if(input.isSelectPressed() && !input.startPressed()){
-				if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && selectpressed) {
+				if ((autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) && selectpressed) {
 					processSelect.run();
-				} else if ((autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) && !selectpressed) {
+				} else if ((autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) && !selectpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				selectpressed = true;
@@ -164,7 +168,7 @@ public class ControlInputProcessor {
 			player.stopPlay();
 		}
 		// play speed change (autoplay or replay only)
-		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
+		if (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 			if (input.getNumberState()[1]) {
 				player.setPlaySpeed(25);
 			} else if (input.getNumberState()[2]) {
