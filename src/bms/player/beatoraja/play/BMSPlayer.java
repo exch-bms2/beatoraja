@@ -107,13 +107,13 @@ public class BMSPlayer extends MainState {
 
 		ReplayData HSReplay = null;
 
-		if (autoplay.isReplayMode()) {
+		if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 			if (resource.getCourseBMSModels() != null) {
 				// コースモードのリプレイ読み込み
 				if (resource.getCourseReplay().length == 0) {
 					// コースモード1曲目の処理
 					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(),
-							config.getLnmode(), autoplay.getReplayIndex(), resource.getConstraint());
+							config.getLnmode(), autoplay.id, resource.getConstraint());
 					if (replays != null) {
 						for (ReplayData rd : replays) {
 							resource.addCourseReplay(rd);
@@ -134,7 +134,7 @@ public class BMSPlayer extends MainState {
 				}
 			} else {
 				// 1曲モードのリプレイ読み込み
-				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay.getReplayIndex());
+				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay.id);
 				if (replay != null) {
 					boolean isReplayPatternPlay = false;
 					if(main.getInputProcessor().getKeystate()[1]) {
@@ -178,7 +178,7 @@ public class BMSPlayer extends MainState {
 
 		// RANDOM構文処理
 		if (model.getRandom() != null && model.getRandom().length > 0) {
-			if (autoplay.isReplayMode()) {
+			if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 				playinfo.rand = replay.rand;
 			} else if (resource.getReplayData().randomoptionseed != -1) {
 				// この処理はMusicResult、QuickRetry時にのみ通る
@@ -195,9 +195,9 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(playinfo.rand));
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
-		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
+		playtime = (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 
-		if (autoplay == BMSPlayerMode.PLAY || autoplay.isAutoPlayMode()) {
+		if (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
 				assist = Math.max(assist, 1);
@@ -268,7 +268,7 @@ public class BMSPlayer extends MainState {
 			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 			Logger.getGlobal().info("リプレイデータから譜面再現 : PatternModifyLog");
-		} else if (autoplay != BMSPlayerMode.PRACTICE) {
+		} else if (autoplay.mode != BMSPlayerMode.Mode.PRACTICE) {
 
 			// リプレイデータからのoption/seed再現
 			ReplayData rd = null;
@@ -424,9 +424,9 @@ public class BMSPlayer extends MainState {
 		}
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		if(autoplay == BMSPlayerMode.PLAY || autoplay == BMSPlayerMode.PRACTICE) {
+		if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 			input.setPlayConfig(config.getPlayConfig(model.getMode()));
-		} else if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
+		} else if (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 			input.setEnable(false);
 		}
 		lanerender = new LaneRenderer(this, model);
@@ -454,7 +454,7 @@ public class BMSPlayer extends MainState {
 				.getTarget(main);
 		resource.setRivalScoreData(rivalscore);
 
-		if (autoplay == BMSPlayerMode.PRACTICE) {
+		if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 			getScoreDataProperty().setTargetScore(0, null, 0, null, model.getTotalNotes());
 			practice.create(model);
 			state = STATE_PRACTICE;
@@ -585,7 +585,7 @@ public class BMSPlayer extends MainState {
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 				input.setStartTime(now + main.getStartTime() - starttimeoffset);
-				if (autoplay.isReplayMode()) {
+				if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 					for(KeyInputLog keyinput : replay.keylog) {
 						keyinput.time += resource.getMarginTime();
 					}
@@ -699,8 +699,7 @@ public class BMSPlayer extends MainState {
 			keysound.stopBGPlay();
 			if ((input.startPressed() ^ input.isSelectPressed())
 					&& resource.getCourseBMSModels() == null
-					&& !autoplay.isAutoPlayMode()
-					&& autoplay != BMSPlayerMode.PRACTICE) {
+					&& (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY)) {
 				if (!resource.isUpdateScore()) {
 					resource.getReplayData().randomoptionseed = -1;
 					Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
@@ -719,7 +718,7 @@ public class BMSPlayer extends MainState {
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
 				}
-				if (!autoplay.isAutoPlayMode() && autoplay != BMSPlayerMode.PRACTICE) {
+				if (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 					resource.setScoreData(createScoreData());
 				}
 				resource.setCombo(judge.getCourseCombo());
@@ -737,7 +736,7 @@ public class BMSPlayer extends MainState {
 				resource.setAssist(assist);
 				input.setEnable(true);
 				input.setStartTime(0);
-				if (autoplay == BMSPlayerMode.PRACTICE) {
+				if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
 					main.changeState(MainStateType.RESULT);
@@ -756,7 +755,8 @@ public class BMSPlayer extends MainState {
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				main.getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
-				if (!autoplay.isAutoPlayMode() && autoplay != BMSPlayerMode.PRACTICE) {
+				
+				if (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 					resource.setScoreData(createScoreData());
 				}
 				resource.setCombo(judge.getCourseCombo());
@@ -767,7 +767,7 @@ public class BMSPlayer extends MainState {
 				resource.setAssist(assist);
 				input.setEnable(true);
 				input.setStartTime(0);
-				if (autoplay == BMSPlayerMode.PRACTICE) {
+				if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
 					Logger.getGlobal().info("\"score\": " + resource.getScoreData());

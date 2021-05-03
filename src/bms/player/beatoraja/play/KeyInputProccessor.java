@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
+import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -75,7 +76,7 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if(!isJudgeStarted || main.getPlayerResource().getPlayMode().isAutoPlayMode()) {
+				if(!isJudgeStarted || main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY) {
 					if (!main.isTimerOn(timerOn) || scratch) {
 						main.setTimerOn(timerOn);
 						main.setTimerOff(timerOff);
