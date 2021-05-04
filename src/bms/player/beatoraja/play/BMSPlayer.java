@@ -697,9 +697,8 @@ public class BMSPlayer extends MainState {
 		case STATE_FAILED:
 			keyinput.stopJudge();
 			keysound.stopBGPlay();
-			if ((input.startPressed() ^ input.isSelectPressed())
-					&& resource.getCourseBMSModels() == null
-					&& (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY)) {
+			if ((input.startPressed() ^ input.isSelectPressed()) && resource.getCourseBMSModels() == null 
+					&& autoplay.mode == BMSPlayerMode.Mode.PLAY) {
 				if (!resource.isUpdateScore()) {
 					resource.getReplayData().randomoptionseed = -1;
 					Logger.getGlobal().info("アシストモード時は同じ譜面でリプレイできません");
