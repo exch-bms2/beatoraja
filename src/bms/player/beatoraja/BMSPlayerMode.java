@@ -1,16 +1,25 @@
 package bms.player.beatoraja;
 
+/**
+ * BMSPlayerのモード
+ * 
+ * @author exch
+ */
 public class BMSPlayerMode {
+	
+	// TODO ReplayDataを含めたい
 	
 	public static final BMSPlayerMode PLAY = new BMSPlayerMode(Mode.PLAY);
 	public static final BMSPlayerMode PRACTICE = new BMSPlayerMode(Mode.PRACTICE);
 	public static final BMSPlayerMode AUTOPLAY = new BMSPlayerMode(Mode.AUTOPLAY);
-	public static final BMSPlayerMode AUTOPLAY_LOOP = new BMSPlayerMode(Mode.AUTOPLAY_LOOP);
 	public static final BMSPlayerMode REPLAY_1 = new BMSPlayerMode(Mode.REPLAY, 0);
 	public static final BMSPlayerMode REPLAY_2 = new BMSPlayerMode(Mode.REPLAY, 1);
 	public static final BMSPlayerMode REPLAY_3 = new BMSPlayerMode(Mode.REPLAY, 2);
 	public static final BMSPlayerMode REPLAY_4 = new BMSPlayerMode(Mode.REPLAY, 3);
-	
+
+	/**
+	 * モード
+	 */
 	public final Mode mode;
 	public final int id;
 	
@@ -21,14 +30,6 @@ public class BMSPlayerMode {
 	public BMSPlayerMode(Mode mode, int id) {
 		this.mode = mode;
 		this.id = id;
-	}
-	
-	public boolean isAutoPlayMode() {
-		return this == AUTOPLAY || this == AUTOPLAY_LOOP; 
-	}
-	
-	public boolean isReplayMode() {
-		return this.mode == Mode.REPLAY; 
 	}
 	
 	public static BMSPlayerMode getReplayMode(int index) {
@@ -46,15 +47,7 @@ public class BMSPlayerMode {
 		}			
 	}
 	
-	public int getReplayIndex() {
-		return id;
-	}
-	
-	public String name() {
-		return mode.name();
-	}
-	
 	public enum Mode {
-		PLAY, PRACTICE, AUTOPLAY, AUTOPLAY_LOOP, REPLAY;
+		PLAY, PRACTICE, AUTOPLAY, REPLAY;
 	}
 }

@@ -103,7 +103,7 @@ public class BMSResource {
 		if(MainLoader.getIllegalSongCount() == 0) {
 			// Audio, BGAともキャッシュがあるため、何があっても全リロードする
 			BGALoaderThread bgaloader = new BGALoaderThread(
-					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == BMSPlayerMode.AUTOPLAY || mode.isReplayMode())) ? model : null);
+					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode.mode == BMSPlayerMode.Mode.AUTOPLAY || mode.mode == BMSPlayerMode.Mode.REPLAY)) ? model : null);
 			bgaloaders.addLast(bgaloader);
 			bgaloader.start();
 			AudioLoaderThread audioloader = new AudioLoaderThread(model);

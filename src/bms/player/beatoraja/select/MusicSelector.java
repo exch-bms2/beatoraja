@@ -11,6 +11,7 @@ import java.nio.file.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.ir.IRPlayerData;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
@@ -429,7 +430,7 @@ public class MusicSelector extends MainState {
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
 						if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
-							Array<String> urls = new Array(main.getConfig().getTableURL());
+							Array<String> urls = new Array<String>(main.getConfig().getTableURL());
 
 							boolean isdtable = false;
 							for (DirectoryBar bar : dir) {
@@ -469,7 +470,7 @@ public class MusicSelector extends MainState {
 				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
 					if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
-						Array<String> urls = new Array(main.getConfig().getTableURL());
+						Array<String> urls = new Array<String>(main.getConfig().getTableURL());
 
 						boolean isdtable = false;
 						for (DirectoryBar bar : dir) {
@@ -492,12 +493,12 @@ public class MusicSelector extends MainState {
 					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 				}
 			}else if (current instanceof GradeBar) {
-				if (play == BMSPlayerMode.PRACTICE) {
+				if (play.mode == BMSPlayerMode.Mode.PRACTICE) {
 					play = BMSPlayerMode.PLAY;
 				}
 				readCourse(play);
 			} else if (current instanceof DirectoryBar) {
-				if(play.isAutoPlayMode()) {
+				if(play.mode == BMSPlayerMode.Mode.AUTOPLAY) {
 					Array<Path> paths = new Array<Path>();
 					for(Bar bar : ((DirectoryBar) current).getChildren()) {
 						if(bar instanceof SongBar && ((SongBar) bar).getSongData() != null && ((SongBar) bar).getSongData().getPath() != null) {
@@ -578,7 +579,7 @@ public class MusicSelector extends MainState {
 			files[i++] = Paths.get(song.getPath());
 		}
 		if (resource.setCourseBMSFiles(files)) {
-			if (mode == BMSPlayerMode.PLAY || mode.isAutoPlayMode()) {
+			if (mode.mode == BMSPlayerMode.Mode.PLAY || mode.mode == BMSPlayerMode.Mode.AUTOPLAY) {
 				for (CourseData.CourseDataConstraint constraint : course.getCourseData().getConstraint()) {
 					switch (constraint) {
 					case CLASS:
