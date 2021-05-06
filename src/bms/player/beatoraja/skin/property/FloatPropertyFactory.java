@@ -12,236 +12,262 @@ import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
 
+/**
+ * FloatProperty/FloatWriterのFactoryクラス
+ * 
+ * @author exch
+ */
 public class FloatPropertyFactory {
 
+	/**
+	 * property IDに対応するFloatPropertyを返す
+	 * 
+	 * @param id property ID
+	 * @return 対応するFloatProperty
+	 */
 	public static FloatProperty getFloatProperty(int optionid) {
-		FloatProperty result = null;
-		if (optionid == SLIDER_MUSICSELECT_POSITION) {
-			result = (state) -> (state instanceof MusicSelector
-					? ((MusicSelector) state).getBarRender().getSelectedPosition()
-					: 0);
+		for(FloatType t : FloatType.values()) {
+			if(t.id == optionid) {
+				return t.property;
+			}
 		}
-		if (optionid == BARGRAPH_SCORERATE) {
-			result = (state) -> (state.getScoreDataProperty().getRate());
-		}
-		if (optionid == BARGRAPH_SCORERATE_FINAL) {
-			result = (state) -> (state.getScoreDataProperty().getNowRate());
-		}
-		if (optionid == BARGRAPH_BESTSCORERATE_NOW) {
-			result = (state) -> (state.getScoreDataProperty().getNowBestScoreRate());
-		}
-		if (optionid == BARGRAPH_BESTSCORERATE) {
-			result = (state) -> (state.getScoreDataProperty().getBestScoreRate());
-		}
-		if (optionid == BARGRAPH_TARGETSCORERATE_NOW) {
-			result = (state) -> (state.getScoreDataProperty().getNowRivalScoreRate());
-		}
-		if (optionid == BARGRAPH_TARGETSCORERATE) {
-			result = (state) -> (state.getScoreDataProperty().getRivalScoreRate());
-		}
-		if (optionid == BARGRAPH_LOAD_PROGRESS) {
-			result = (state) -> {
-				final BMSResource resource = state.main.getPlayerResource().getBMSResource();
-				return resource.isBGAOn()
-						? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2
-						: resource.getAudioDriver().getProgress();
-			};
-		}
-		if (optionid == SLIDER_MUSIC_PROGRESS || optionid == BARGRAPH_MUSIC_PROGRESS) {
-			result = (state) -> {
-				if (state instanceof BMSPlayer) {
-					if (state.main.isTimerOn(TIMER_PLAY)) {
-						return Math.min((float) state.main.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
-								1);
-					}
-				}
-				return 0;
-			};
-		}
-		if (optionid == SLIDER_LANECOVER || optionid == SLIDER_LANECOVER2) {
-			result = (state) -> {
-				if (state instanceof BMSPlayer) {
-					final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
-					if (pc.isEnablelanecover()) {
-						float lane = pc.getLanecover();
-						if (pc.isEnablelift()) {
-							lane = lane * (1 - pc.getLift());
-						}
-						return lane;
-					}
-				}
-				return 0;
-			};
-		}
-
-		if (result == null) {
-			result = getFloatProperty0(optionid);
-		}
-
-		return result;
+		return null;
 	}
 
-	private static FloatProperty getFloatProperty0(int optionid) {
-		switch (optionid) {
-		case SLIDER_MUSICSELECT_POSITION:
-			return (state) -> ((state instanceof MusicSelector)
-					? ((MusicSelector) state).getBarRender().getSelectedPosition()
-					: 0);
-		case SLIDER_SKINSELECT_POSITION:
-			return (state) -> ((state instanceof SkinConfiguration)
-					? ((SkinConfiguration) state).getSkinSelectPosition() : 0);
-		case SLIDER_MASTER_VOLUME:
-			return (state) -> (state.main.getConfig().getAudioConfig().getSystemvolume());
-		case SLIDER_KEY_VOLUME:
-			return (state) -> (state.main.getConfig().getAudioConfig().getKeyvolume());
-		case SLIDER_BGM_VOLUME:
-			return (state) -> (state.main.getConfig().getAudioConfig().getBgvolume());
-		case BARGRAPH_LEVEL:
-			return getLevelRate(-1);
-		case BARGRAPH_LEVEL_BEGINNER:
-			return getLevelRate(1);
-		case BARGRAPH_LEVEL_NORMAL:
-			return getLevelRate(2);
-		case BARGRAPH_LEVEL_HYPER:
-			return getLevelRate(3);
-		case BARGRAPH_LEVEL_ANOTHER:
-			return getLevelRate(4);
-		case BARGRAPH_LEVEL_INSANE:
-			return getLevelRate(5);
-		case BARGRAPH_RATE_PGREAT:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) (score.getEpg() + score.getLpg()))
-										/ ((SongBar) selected).getSongData().getNotes()
-								: 0;
-					}
-				}
-				return 0;
-			};
-		case BARGRAPH_RATE_GREAT:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) (score.getEgr() + score.getLgr()))
-										/ ((SongBar) selected).getSongData().getNotes()
-								: 0;
-					}
-				}
-				return 0;
-			};
-		case BARGRAPH_RATE_GOOD:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) (score.getEgd() + score.getLgd()))
-										/ ((SongBar) selected).getSongData().getNotes()
-								: 0;
-					}
-				}
-				return 0;
-			};
-		case BARGRAPH_RATE_BAD:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) (score.getEbd() + score.getLbd()))
-										/ ((SongBar) selected).getSongData().getNotes()
-								: 0;
-					}
-				}
-				return 0;
-			};
-		case BARGRAPH_RATE_POOR:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) (score.getEpr() + score.getLpr()))
-										/ ((SongBar) selected).getSongData().getNotes()
-								: 0;
-					}
-				}
-				return 0;
-			};
-		case BARGRAPH_RATE_MAXCOMBO:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) score.getCombo()) / ((SongBar) selected).getSongData().getNotes()
-								: 0;
-					}
-				}
-				return 0;
-			};
-		case BARGRAPH_RATE_EXSCORE:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					if (selected instanceof SongBar) {
-						ScoreData score = selected.getScore();
-						return score != null
-								? ((float) score.getExscore()) / ((SongBar) selected).getSongData().getNotes() / 2
-								: 0;
-					}
-				}
-				return 0;
-			};
+	/**
+	 * property nameに対応するFloatPropertyを返す
+	 * 
+	 * @param name property name
+	 * @return 対応するFloatProperty
+	 */
+	public static FloatProperty getFloatProperty(String name) {
+		for(FloatType t : FloatType.values()) {
+			if(t.name().equals(name)) {
+				return t.property;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * property IDに対応するFloatWriterを返す
+	 * 
+	 * @param id property ID
+	 * @return 対応するFloatWriter
+	 */
+	public static FloatWriter getFloatWriter(int id) {
+		for(FloatType t : FloatType.values()) {
+			if(t.id == id) {
+				return t.writer;
+			}
 		}
 		return null;
 	}
 	
-	public static FloatWriter getFloatWriter(int optionid) {
-		FloatWriter result = null;
-		
-		if(result == null) {
-			result = getFloatWriter0(optionid);
+	/**
+	 * property nameに対応するFloatWriterを返す
+	 * 
+	 * @param name property name
+	 * @return 対応するFloatWriter
+	 */
+	public static FloatWriter getFloatWriter(String name) {
+		for(FloatType t : FloatType.values()) {
+			if(t.name().equals(name)) {
+				return t.writer;
+			}
 		}
-		
-		return result;
+		return null;
 	}
-	
-	private static FloatWriter getFloatWriter0(int optionid) {
-		switch(optionid) {
-		case SLIDER_MUSICSELECT_POSITION:
-			return (state, value) -> {
-				if(state instanceof MusicSelector) {
-					final MusicSelector select = (MusicSelector) state;
-					select.selectedBarMoved();
-					select.getBarRender().setSelectedPosition(value);
-				}
-			};
-			case SLIDER_MASTER_VOLUME:
-				return (state, value) -> {
-					state.main.getConfig().getAudioConfig().setSystemvolume(value);					
-				};
-			case SLIDER_KEY_VOLUME:
-				return (state, value) -> {
-					state.main.getConfig().getAudioConfig().setKeyvolume(value);					
-				};
-			case SLIDER_BGM_VOLUME:
-				return (state, value) -> {
-					state.main.getConfig().getAudioConfig().setBgvolume(value);					
-				};
+
+	private static final FloatProperty PROPERTY_MUSIC_PROGRESS = (state) -> {
+		if (state instanceof BMSPlayer) {
+			if (state.main.isTimerOn(TIMER_PLAY)) {
+				return Math.min((float) state.main.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
+						1);
+			}
 		}
-		return null;		
+		return 0;
+	};
+	
+	public enum FloatType {
+		
+		musicselect_position(1, 
+				(state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarRender().getSelectedPosition() : 0), 
+				(state, value) -> {
+					if(state instanceof MusicSelector) {
+						final MusicSelector select = (MusicSelector) state;
+						select.selectedBarMoved();
+						select.getBarRender().setSelectedPosition(value);
+					}
+				}),
+		lanecover(4, (state) -> {
+			if (state instanceof BMSPlayer) {
+				final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
+				if (pc.isEnablelanecover()) {
+					float lane = pc.getLanecover();
+					if (pc.isEnablelift()) {
+						lane = lane * (1 - pc.getLift());
+					}
+					return lane;
+				}
+			}
+			return 0;
+		}),
+		lanecover2(5, (state) -> {
+			if (state instanceof BMSPlayer) {
+				final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
+				if (pc.isEnablelanecover()) {
+					float lane = pc.getLanecover();
+					if (pc.isEnablelift()) {
+						lane = lane * (1 - pc.getLift());
+					}
+					return lane;
+				}
+			}
+			return 0;
+		}),
+		music_progress(6, PROPERTY_MUSIC_PROGRESS),
+		skinselect_position(7,
+				(state) -> ((state instanceof SkinConfiguration) ? ((SkinConfiguration) state).getSkinSelectPosition() : 0)
+				),
+		mastervolume(17,
+				(state) -> (state.main.getConfig().getAudioConfig().getSystemvolume()),
+				(state, value) -> {
+					state.main.getConfig().getAudioConfig().setSystemvolume(value);					
+				}),
+		keyvolume(18,
+				(state) -> (state.main.getConfig().getAudioConfig().getKeyvolume()),
+				(state, value) -> {
+					state.main.getConfig().getAudioConfig().setKeyvolume(value);					
+				}),
+		bgmvolume(19,
+				(state) -> (state.main.getConfig().getAudioConfig().getBgvolume()),
+				(state, value) -> {
+					state.main.getConfig().getAudioConfig().setBgvolume(value);					
+				}),
+		music_progress_bar(101, PROPERTY_MUSIC_PROGRESS),
+		load_progress(102, (state) -> {
+			final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+			return resource.isBGAOn()
+					? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2
+					: resource.getAudioDriver().getProgress();
+		}),
+		level(103, getLevelRate(-1)),
+		level_beginner(105, getLevelRate(1)),
+		level_normal(106, getLevelRate(2)),
+		level_hyper(107, getLevelRate(3)),
+		level_another(108, getLevelRate(4)),
+		level_insane(109, getLevelRate(5)),
+		scorerate(110, (state) -> (state.getScoreDataProperty().getRate())),
+		scorerate_final(111, (state) -> (state.getScoreDataProperty().getNowRate())),
+		bestscorerate_now(112, (state) -> (state.getScoreDataProperty().getNowBestScoreRate())),
+		bestscorerate(113, (state) -> (state.getScoreDataProperty().getBestScoreRate())),
+		targetscorerate_now(114, (state) -> (state.getScoreDataProperty().getNowRivalScoreRate())),
+		targetscorerate(115, (state) -> (state.getScoreDataProperty().getRivalScoreRate())),
+		rate_pgreat(140, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) (score.getEpg() + score.getLpg()))
+									/ ((SongBar) selected).getSongData().getNotes()
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		rate_great(141, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) (score.getEgr() + score.getLgr()))
+									/ ((SongBar) selected).getSongData().getNotes()
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		rate_good(142, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) (score.getEgd() + score.getLgd()))
+									/ ((SongBar) selected).getSongData().getNotes()
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		rate_bad(143, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) (score.getEbd() + score.getLbd()))
+									/ ((SongBar) selected).getSongData().getNotes()
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		rate_poor(144, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) (score.getEpr() + score.getLpr()))
+									/ ((SongBar) selected).getSongData().getNotes()
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		rate_maxcombo(145, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) score.getCombo()) / ((SongBar) selected).getSongData().getNotes()
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		rate_exscore(147, (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) score.getExscore()) / ((SongBar) selected).getSongData().getNotes() / 2
+							: 0;
+				}
+			}
+			return 0;
+		}),
+		;
+		
+		private final int id;
+		private final FloatProperty property;
+		private final FloatWriter writer;
+
+		private FloatType(int id, FloatProperty property) {
+			this(id, property, null);
+		}
+
+		private FloatType(int id, FloatProperty property, FloatWriter writer) {
+			this.id = id;
+			this.property = property;
+			this.writer = writer;
+		}
 	}
 
 
