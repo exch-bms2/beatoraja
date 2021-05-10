@@ -283,14 +283,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			if (wavid < 0) {
 				return;
 			}
-			String name = "";
-			if (wavid < wavcount) {
-				name = wavlist[wavid];
-			}
 			try {
 				Path p;
-				if (name != "") {
-					p = dpath.resolve(name).toAbsolutePath();
+				if (wavid < wavcount) {
+					p = dpath.resolve(wavlist[wavid]).toAbsolutePath();
 				} else {
 					p = Paths.get("defaultsound/landmine.wav").toAbsolutePath();
 				}
