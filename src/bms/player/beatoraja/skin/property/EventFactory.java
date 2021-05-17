@@ -152,6 +152,14 @@ public class EventFactory {
 				CourseResultCommand.OPEN_RANKING_ON_IR.execute((CourseResult) state);
 			}
 		}),
+		gaugeautoshift(78, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final MusicSelector selector = (MusicSelector) state;
+				final int gaslength = 5;
+	            selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() + (arg1 >= 0 ?1 : gaslength - 1)) % gaslength);
+	            selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
 		favorite_chart(90, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
@@ -243,6 +251,23 @@ public class EventFactory {
 				MusicResultCommand.CHANGE_FAVORITE_SONG.execute((MusicResult) state, arg1 >= 0);
 			}
 		}),
+	    /**
+	     * LNモードの変更
+	     */
+		lnmode(308, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int lnmodelength = 3;
+				final MusicSelector selector = (MusicSelector) state;
+	            PlayerConfig config = selector.main.getPlayerConfig();
+	            config.setLnmode((config.getLnmode() + (arg1 >= 0 ? 1 : lnmodelength - 1)) % lnmodelength);
+	            selector.getBarRender().updateBar();
+	            selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		autosavereplay1(321, changeAutoSaveReplay(0)),
+		autosavereplay2(322, changeAutoSaveReplay(1)),
+		autosavereplay3(323, changeAutoSaveReplay(2)),
+		autosavereplay4(324, changeAutoSaveReplay(3)),
 		;
 
 		/**
@@ -263,6 +288,19 @@ public class EventFactory {
 			this.id = id;
 			this.event = createOneArgEvent(action, id);
 		}
+		
+	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(int index) {
+	    	return (state, arg1) -> {
+	    		if(state instanceof MusicSelector) {
+					final MusicSelector selector = (MusicSelector) state;
+	    	        int[] asr = selector.main.getPlayerConfig().getAutoSaveReplay();
+	    	        final int length = AbstractResult.ReplayAutoSaveConstraint.values().length;
+	    	        asr[index] = (asr[index] + (arg1 >= 0 ? 1 : length - 1)) % length;
+	    	        selector.main.getPlayerConfig().setAutoSaveReplay(asr);
+	    	        selector.play(SOUND_OPTIONCHANGE);
+	    		}
+	    	};
+	    }
 	}
 	
 	private static Consumer<MainState> getReplayEventConsumer(int index) {

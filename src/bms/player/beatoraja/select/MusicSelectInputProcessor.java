@@ -7,6 +7,7 @@ import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.property.EventFactory;
+import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -93,17 +94,17 @@ public class MusicSelectInputProcessor {
         if (numberstate[1] && numtime[1] != 0) {
             // KEYフィルターの切り替え
             numtime[1] = 0;
-            EventFactory.EventType.mode.event.exec(select);
+            select.executeEvent(EventType.mode);
         }
         if (numberstate[2] && numtime[2] != 0) {
             // ソートの切り替え
             numtime[2] = 0;
-            EventFactory.EventType.sort.event.exec(select);
+            select.executeEvent(EventType.sort);
         }
         if (numberstate[3] && numtime[3] != 0) {
             // LNモードの切り替え
             numtime[3] = 0;
-            select.execute(MusicSelectCommand.NEXT_LNMODE);
+            select.executeEvent(EventType.lnmode);
         }
 
         boolean[] keystate = input.getKeystate();
@@ -273,7 +274,7 @@ public class MusicSelectInputProcessor {
                 select.execute(MusicSelectCommand.NEXT_BGA_SHOW);
             }
             if (property.isPressed(keystate, keytime, GAUGEAUTOSHIFT_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_GAUGEAUTOSHIFT);
+            	select.executeEvent(EventType.gaugeautoshift);
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
                 select.execute(MusicSelectCommand.JUDGETIMING_DOWN);
@@ -346,7 +347,7 @@ public class MusicSelectInputProcessor {
             }
             if (numberstate[9] && numtime[9] != 0) {
                 numtime[9] = 0;
-                EventFactory.EventType.open_document.event.exec(select);
+                select.executeEvent(EventType.open_document);
             }
             // close folder
             if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
@@ -361,13 +362,13 @@ public class MusicSelectInputProcessor {
     			}
     		}
     		if(input.isActivated(KeyCommand.OPEN_IR)) {
-                EventFactory.EventType.open_ir.event.exec(select);
+                select.executeEvent(EventType.open_ir);
             }
     		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
-                EventFactory.EventType.favorite_song.event.exec(select);
+                select.executeEvent(EventType.favorite_song);
     		}
     		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
-                EventFactory.EventType.favorite_chart.event.exec(select);
+                select.executeEvent(EventType.favorite_chart);
     		}
 
         }

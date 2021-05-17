@@ -709,9 +709,6 @@ public class MusicSelector extends MainState {
 		case BUTTON_PRACTICE:
 			play = BMSPlayerMode.PRACTICE;
 			break;
-		case BUTTON_LNMODE:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_LNMODE : MusicSelectCommand.PREV_LNMODE);
-			break;
 		case BUTTON_RANDOM_1P:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_1P : MusicSelectCommand.PREV_OPTION_1P);
 			break;
@@ -736,23 +733,8 @@ public class MusicSelector extends MainState {
 		case BUTTON_JUDGE_TIMING:
 			execute(arg1 >= 0 ? MusicSelectCommand.JUDGETIMING_UP : MusicSelectCommand.JUDGETIMING_DOWN);
 			break;			
-		case BUTTON_GAUGEAUTOSHIFT:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
-			break;
 		case BUTTON_RIVAL:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_RIVAL : MusicSelectCommand.PREV_RIVAL);
-			break;
-		case BUTTON_AUTOSAVEREPLAY_1:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_1 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_1);
-			break;
-		case BUTTON_AUTOSAVEREPLAY_2:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_2 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_2);
-			break;
-		case BUTTON_AUTOSAVEREPLAY_3:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_3 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_3);
-			break;
-		case BUTTON_AUTOSAVEREPLAY_4:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_AUTOSAVEREPLAY_4 : MusicSelectCommand.PREV_AUTOSAVEREPLAY_4);
 			break;
 		default:
 			super.executeEvent(id, arg1, arg2);

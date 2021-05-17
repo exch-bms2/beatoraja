@@ -5,9 +5,6 @@ import static bms.player.beatoraja.select.MusicSelector.*;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -19,42 +16,13 @@ import java.util.stream.Collectors;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.ir.IRChartData;
-import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.ir.IRCourseData;
 import bms.player.beatoraja.select.bar.*;
-import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Queue;
 
 public enum MusicSelectCommand {
 
-    /**
-     * 次のLNモードへ移動
-     */
-    NEXT_LNMODE {
-        @Override
-        public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.main.getPlayerConfig();
-            config.setLnmode((config.getLnmode() + 1) % 3);
-            selector.getBarRender().updateBar();
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
-    /**
-     * 前のLNモードへ移動
-     */
-    PREV_LNMODE {
-        @Override
-        public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.main.getPlayerConfig();
-            config.setLnmode((config.getLnmode() - 1 + 3) % 3);
-            selector.getBarRender().updateBar();
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
     RESET_REPLAY {
         @Override
         public void execute(MusicSelector selector) {
@@ -492,68 +460,6 @@ public enum MusicSelectCommand {
             selector.play(SOUND_OPTIONCHANGE);
         }
     },
-    NEXT_GAUGEAUTOSHIFT {
-		@Override
-		public void execute(MusicSelector selector) {
-            selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() + 1) % 5);
-            selector.play(SOUND_OPTIONCHANGE);
-		}
-    },
-    PREV_GAUGEAUTOSHIFT {
-        @Override
-        public void execute(MusicSelector selector) {
-            selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() - 1 + 5) % 5);
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
-    NEXT_AUTOSAVEREPLAY_1 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 0, true);
-        }
-    },
-    PREV_AUTOSAVEREPLAY_1 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 0, false);
-        }
-    },
-    NEXT_AUTOSAVEREPLAY_2 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 1, true);
-        }
-    },
-    PREV_AUTOSAVEREPLAY_2 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 1, false);
-        }
-    },
-    NEXT_AUTOSAVEREPLAY_3 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 2, true);
-        }
-    },
-    PREV_AUTOSAVEREPLAY_3 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 2, false);
-        }
-    },
-    NEXT_AUTOSAVEREPLAY_4 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 3, true);
-        }
-    },
-    PREV_AUTOSAVEREPLAY_4 {
-        @Override
-        public void execute(MusicSelector selector) {
-        	this.changeAutoSaveReplay(selector, 3, false);
-        }
-    },
     /**
      * 同一フォルダにある譜面を全て表示する．コースの場合は構成譜面を全て表示する
      */
@@ -580,13 +486,5 @@ public enum MusicSelectCommand {
     ;
 
     public abstract void execute(MusicSelector selector);
-    
-    void changeAutoSaveReplay(MusicSelector selector, int index, boolean next) {
-        int[] asr = selector.main.getPlayerConfig().getAutoSaveReplay();
-        final int length = AbstractResult.ReplayAutoSaveConstraint.values().length;
-        asr[index] = (asr[index] + (next ? 1 : length - 1)) % length;
-        selector.main.getPlayerConfig().setAutoSaveReplay(asr);
-        selector.play(SOUND_OPTIONCHANGE);
-    }
     
 }

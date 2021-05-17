@@ -11,6 +11,7 @@ import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
@@ -363,7 +364,7 @@ public class BarRenderer {
 
 	public void close() {
 		if(dir.size == 0) {
-			select.execute(MusicSelectCommand.NEXT_SORT);
+			select.executeEvent(EventType.sort);
 			return;
 		}
 

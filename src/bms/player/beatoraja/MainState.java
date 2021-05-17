@@ -6,6 +6,8 @@ import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.property.Event;
+import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -88,6 +90,18 @@ public abstract class MainState {
 		}
 	}
 
+	public void executeEvent(EventType e) {
+		executeEvent(e, 0, 0);
+	}
+
+	public void executeEvent(EventType e, int arg) {
+		executeEvent(e, arg, 0);
+	}
+
+	public void executeEvent(EventType e, int arg1, int arg2) {
+		e.event.exec(this, arg1, arg2);
+	}
+	
 	public ScoreDataProperty getScoreDataProperty() {
 		return score;
 	}
