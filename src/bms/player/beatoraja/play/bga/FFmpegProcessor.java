@@ -133,9 +133,6 @@ public class FFmpegProcessor implements MovieProcessor {
 								+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
 								+ grabber.getLengthInTime());
 
-				final long[] nativeData = { 0, grabber.getImageWidth(), grabber.getImageHeight(),
-						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
-
 				offset = grabber.getTimestamp();
 				Frame frame = null;
 				boolean halt = false;
@@ -165,6 +162,8 @@ public class FFmpegProcessor implements MovieProcessor {
 						} else if (frame.image != null && frame.image[0] != null) {
 							try {
 								if (pixmap == null) {
+									final long[] nativeData = { 0, frame.image[0].remaining() / frame.imageHeight / 3, frame.imageHeight,
+											Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
 									pixmap = new Pixmap(new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData));
 								}
 								Gdx.app.postRunnable(() -> {
