@@ -31,56 +31,6 @@ import com.badlogic.gdx.utils.Queue;
 
 public enum MusicSelectCommand {
 
-	/**
-	 * 次のMODEフィルター(5KEY, 7KEY, ...)へ移動
-	 */
-    NEXT_MODE {
-        @Override
-        public void execute(MusicSelector selector) {
-            int mode = 0;
-            PlayerConfig config = selector.main.getPlayerConfig();
-            for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
-            config.setMode(MusicSelector.MODE[(mode + 1) % MusicSelector.MODE.length]);
-            selector.getBarRender().updateBar();
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
-	/**
-	 * 前のMODEフィルター(5KEY, 7KEY, ...)へ移動
-	 */
-    PREV_MODE {
-        @Override
-        public void execute(MusicSelector selector) {
-            int mode = 0;
-            PlayerConfig config = selector.main.getPlayerConfig();
-            for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
-            config.setMode(MusicSelector.MODE[(mode - 1 + MusicSelector.MODE.length) % MusicSelector.MODE.length]);
-            selector.getBarRender().updateBar();
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
-    /**
-     * 次の選曲バーソート(曲名,  クリアランプ, ...)へ移動
-     */
-    NEXT_SORT {
-        @Override
-        public void execute(MusicSelector selector) {
-            selector.setSort((selector.getSort() + 1) % BarSorter.values().length);
-            selector.getBarRender().updateBar();
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
-    /**
-     * 前の選曲バーソート(曲名,  クリアランプ, ...)へ移動
-     */
-    PREV_SORT {
-        @Override
-        public void execute(MusicSelector selector) {
-            selector.setSort((selector.getSort() - 1 + BarSorter.values().length) % BarSorter.values().length);
-            selector.getBarRender().updateBar();
-            selector.play(SOUND_OPTIONCHANGE);
-        }
-    },
     /**
      * 次のLNモードへ移動
      */
@@ -410,35 +360,6 @@ public enum MusicSelectCommand {
             }
         }
     },
-    /**
-     * 楽曲ファイルのIRサイトをOS既定のブラウザーで開く
-     */
-    OPEN_RANKING_ON_IR {
-        @Override
-        public void execute(MusicSelector selector) {
-            IRConnection ir = selector.main.getIRStatus().length > 0 ? selector.main.getIRStatus()[0].connection : null;
-            if(ir == null) {
-                return;
-            }
-
-            Bar current = selector.getBarRender().getSelected();
-            String url = null;
-            if(current instanceof SongBar) {
-                url = ir.getSongURL(new IRChartData(((SongBar) current).getSongData()));
-            }
-            if(current instanceof GradeBar) {
-                url = ir.getCourseURL(new IRCourseData(((GradeBar) current).getCourseData()));
-            }
-            if (url != null) {
-                try {
-                    URI uri = new URI(url);
-                    Desktop.getDesktop().browse(uri);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    },
     DOWNLOAD_IPFS {
         @Override
         public void execute(MusicSelector selector) {
@@ -473,33 +394,6 @@ public enum MusicSelectCommand {
 
 			}
 
-        }
-    },
-    /**
-     * 楽曲ファイルのドキュメントをOS既定のドキュメントビューアーで開く
-     */
-    OPEN_DOCUMENT {
-        @Override
-        public void execute(MusicSelector selector) {
-            if (!Desktop.isDesktopSupported()) {
-            	return;
-            }
-            Bar current = selector.getBarRender().getSelected();
-            if(current instanceof SongBar && ((SongBar) current).existsSong()) {
-    			try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(((SongBar) current).getSongData().getPath()).getParent())) {
-    				paths.forEach(p -> {
-    					if(!Files.isDirectory(p) && p.toString().toLowerCase().endsWith(".txt")) {
-                            try {
-								Desktop.getDesktop().open(p.toFile());
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-    					}
-    				});
-    			} catch (Throwable e) {
-    				e.printStackTrace();
-    			}
-            }
         }
     },
     /**
@@ -661,42 +555,6 @@ public enum MusicSelectCommand {
         }
     },
     /**
-     * 次の楽曲FAVORITE属性へ遷移
-     */
-    NEXT_FAVORITE_SONG {
-        @Override
-        public void execute(MusicSelector selector) {
-        	changeFavoriteSong(selector, true);
-        }
-    },
-    /**
-     * 前の楽曲FAVORITE属性へ遷移
-     */
-    PREV_FAVORITE_SONG {
-        @Override
-        public void execute(MusicSelector selector) {
-        	changeFavoriteSong(selector, false);
-        }
-    },
-    /**
-     * 次の譜面FAVORITE属性へ遷移
-     */
-    NEXT_FAVORITE_CHART {
-        @Override
-        public void execute(MusicSelector selector) {
-        	changeFavoriteChart(selector, true);
-        }
-    },
-    /**
-     * 前の譜面FAVORITE属性へ遷移
-     */
-    PREV_FAVORITE_CHART {
-        @Override
-        public void execute(MusicSelector selector) {
-        	changeFavoriteChart(selector, false);
-        }
-    },
-    /**
      * 同一フォルダにある譜面を全て表示する．コースの場合は構成譜面を全て表示する
      */
     SHOW_SONGS_ON_SAME_FOLDER {
@@ -731,82 +589,4 @@ public enum MusicSelectCommand {
         selector.play(SOUND_OPTIONCHANGE);
     }
     
-    void changeFavoriteSong(MusicSelector selector, boolean next) {
-		if(selector.getSelectedBar() instanceof SongBar) {
-			final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
-			if(sd != null) {
-				int type = next ? 2 : 0;
-				String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
-				if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
-					type = next ? 1 : 2;
-					message = next ? "Added to Favorite Song" : "Added to Invisible Song";
-				} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
-					type = next ? 0 : 1;
-					message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
-				}
-				
-				SongData[] songs = selector.getSongDatabase().getSongDatas("folder", sd.getFolder());
-				for(SongData song : songs) {
-					int favorite = song.getFavorite();
-					switch (type) {
-					case 0:
-						favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
-						break;
-					case 1:
-						favorite |= SongData.FAVORITE_SONG;
-						favorite &= 0xffffffff ^ SongData.INVISIBLE_SONG;
-						break;
-					case 2:
-						favorite |= SongData.INVISIBLE_SONG;
-						favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
-						break;
-					}
-					song.setFavorite(favorite);
-				}
-				selector.getSongDatabase().setSongDatas(songs);
-				selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-	            selector.getBarRender().updateBar();
-	            selector.play(SOUND_OPTIONCHANGE);
-			}
-		}
-    }
-    
-    void changeFavoriteChart(MusicSelector selector, boolean next) {
-		if(selector.getSelectedBar() instanceof SongBar) {
-			final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
-			if(sd != null) {
-				int type = next ? 2 : 0;
-				String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
-				if((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
-					type = next ? 1 : 2;
-					message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
-				} else if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
-					type = next ? 0 : 1;
-					message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
-				}
-				
-				int favorite = sd.getFavorite();
-				switch (type) {
-				case 0:
-					favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
-					break;
-				case 1:
-					favorite |= SongData.FAVORITE_CHART;
-					favorite &= 0xffffffff ^ SongData.INVISIBLE_CHART;
-					break;
-				case 2:
-					favorite |= SongData.INVISIBLE_CHART;
-					favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
-					break;
-				}
-				sd.setFavorite(favorite);
-				selector.getSongDatabase().setSongDatas(new SongData[]{sd});
-				selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-	            selector.getBarRender().updateBar();
-	            selector.play(SOUND_OPTIONCHANGE);
-			}
-		}
-    }
 }

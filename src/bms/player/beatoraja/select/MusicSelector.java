@@ -709,15 +709,6 @@ public class MusicSelector extends MainState {
 		case BUTTON_PRACTICE:
 			play = BMSPlayerMode.PRACTICE;
 			break;
-		case BUTTON_READTEXT:
-			execute(MusicSelectCommand.OPEN_DOCUMENT);
-			break;
-		case BUTTON_MODE:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_MODE : MusicSelectCommand.PREV_MODE);
-			break;
-		case BUTTON_SORT:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_SORT : MusicSelectCommand.PREV_SORT);
-			break;
 		case BUTTON_LNMODE:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_LNMODE : MusicSelectCommand.PREV_LNMODE);
 			break;

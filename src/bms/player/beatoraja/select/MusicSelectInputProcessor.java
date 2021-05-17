@@ -6,6 +6,7 @@ import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
+import bms.player.beatoraja.skin.property.EventFactory;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -92,12 +93,12 @@ public class MusicSelectInputProcessor {
         if (numberstate[1] && numtime[1] != 0) {
             // KEYフィルターの切り替え
             numtime[1] = 0;
-            select.execute(MusicSelectCommand.NEXT_MODE);
+            EventFactory.EventType.mode.event.exec(select);
         }
         if (numberstate[2] && numtime[2] != 0) {
             // ソートの切り替え
             numtime[2] = 0;
-            select.execute(MusicSelectCommand.NEXT_SORT);
+            EventFactory.EventType.sort.event.exec(select);
         }
         if (numberstate[3] && numtime[3] != 0) {
             // LNモードの切り替え
@@ -345,7 +346,7 @@ public class MusicSelectInputProcessor {
             }
             if (numberstate[9] && numtime[9] != 0) {
                 numtime[9] = 0;
-                select.execute(MusicSelectCommand.OPEN_DOCUMENT);
+                EventFactory.EventType.open_document.event.exec(select);
             }
             // close folder
             if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
@@ -360,14 +361,13 @@ public class MusicSelectInputProcessor {
     			}
     		}
     		if(input.isActivated(KeyCommand.OPEN_IR)) {
-                select.execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
+                EventFactory.EventType.open_ir.event.exec(select);
             }
-    		
     		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
-                select.execute(MusicSelectCommand.NEXT_FAVORITE_SONG);
+                EventFactory.EventType.favorite_song.event.exec(select);
     		}
     		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
-                select.execute(MusicSelectCommand.NEXT_FAVORITE_CHART);
+                EventFactory.EventType.favorite_chart.event.exec(select);
     		}
 
         }
