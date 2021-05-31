@@ -240,7 +240,7 @@ public class FFmpegProcessor implements MovieProcessor {
 		private void restart() throws Exception {
 			pixmap = null;
 			grabber.restart();
-			grabber.grabFrame();
+			grabber.grabImage();
 			eof = false;
 			offset = grabber.getTimestamp() - time * 1000;
 			framecount = 1;
