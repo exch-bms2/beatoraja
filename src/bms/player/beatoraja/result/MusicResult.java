@@ -18,6 +18,7 @@ import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -301,7 +302,7 @@ public class MusicResult extends AbstractResult {
 				}
 
 				if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
-					this.execute(MusicResultCommand.OPEN_RANKING_ON_IR);
+					this.executeEvent(EventType.open_ir);
 				}
 			}
 		}
@@ -478,14 +479,6 @@ public class MusicResult extends AbstractResult {
 
 	public ScoreData getNewScore() {
 		return main.getPlayerResource().getScoreData();
-	}
-
-	public void execute(MusicResultCommand command) {
-		command.execute(this, true);
-	}
-
-	public void execute(MusicResultCommand command, boolean next) {
-		command.execute(this, next);
 	}
 
 	static class IRSendStatus {

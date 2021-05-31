@@ -16,6 +16,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
 /**
  * コースリザルト
@@ -237,7 +238,7 @@ public class CourseResult extends AbstractResult {
 			}
 
 			if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
-				this.execute(CourseResultCommand.OPEN_RANKING_ON_IR);
+				this.executeEvent(EventType.open_ir);
 			}
 		}
 	}
@@ -326,10 +327,6 @@ public class CourseResult extends AbstractResult {
 		return main.getPlayerResource().getCourseScoreData();
 	}
 
-	public void execute(CourseResultCommand command) {
-		command.execute(this);
-	}
-	
 	static class IRSendStatus {
 		public final IRConnection ir;
 		public final CourseData course;

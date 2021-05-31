@@ -26,10 +26,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.*;
 
+/**
+ * EventのFactoryクラス
+ * 
+ * @author excln
+ */
 public class EventFactory {
 
 	/**
 	 * ID指定によるイベント取得(組み込みまたはカスタムイベントとして登録したもの)
+	 * 
 	 * @param eventId イベントID
 	 * @return イベントオブジェクト
 	 */
@@ -46,6 +52,7 @@ public class EventFactory {
 
 	/**
 	 * name指定によるイベント取得(組み込みまたはカスタムイベントとして登録したもの)
+	 * 
 	 * @param eventName イベント名称
 	 * @return イベントオブジェクト
 	 */
@@ -121,35 +128,30 @@ public class EventFactory {
 		 * 楽曲ファイルのIRサイトをOS既定のブラウザーで開く
 		 */
 		open_ir(210, (state) -> {
+			IRConnection ir = state.main.getIRStatus().length > 0 ? state.main.getIRStatus()[0].connection : null;
+			if(ir == null) {
+				return;
+			}
+			String url = null;
 			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector)state;
-				IRConnection ir = selector.main.getIRStatus().length > 0 ? selector.main.getIRStatus()[0].connection : null;
-				if(ir == null) {
-					return;
-				}
-
-				Bar current = selector.getBarRender().getSelected();
-				String url = null;
+				Bar current = ((MusicSelector)state).getBarRender().getSelected();
 				if(current instanceof SongBar) {
 					url = ir.getSongURL(new IRChartData(((SongBar) current).getSongData()));
-				}
-				if(current instanceof GradeBar) {
+				} else if(current instanceof GradeBar) {
 					url = ir.getCourseURL(new IRCourseData(((GradeBar) current).getCourseData()));
 				}
-				if (url != null) {
-					try {
-						URI uri = new URI(url);
-						Desktop.getDesktop().browse(uri);
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
+			} else if(state instanceof MusicResult) {
+	            url = ir.getSongURL(new IRChartData(state.main.getPlayerResource().getSongdata()));
+			} else if(state instanceof CourseResult) {
+	            url = ir.getCourseURL(new IRCourseData(state.main.getPlayerResource().getCourseData()));
+			}
+			if (url != null) {
+				try {
+					URI uri = new URI(url);
+					Desktop.getDesktop().browse(uri);
+				} catch (Throwable e) {
+					e.printStackTrace();
 				}
-			}
-			if(state instanceof MusicResult) {
-				MusicResultCommand.OPEN_RANKING_ON_IR.execute((MusicResult) state, true);
-			}
-			if(state instanceof CourseResult) {
-				CourseResultCommand.OPEN_RANKING_ON_IR.execute((CourseResult) state);
 			}
 		}),
 		gaugeautoshift(78, (state, arg1) -> {
@@ -161,39 +163,47 @@ public class EventFactory {
 			}
 		}),
 		favorite_chart(90, (state, arg1) -> {
+			final boolean next = arg1 >= 0;
+			final Consumer<SongData> changeFav = (sd) -> {
+				int type = 0;
+				if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+					type = 2;
+				} else if((sd.getFavorite() & SongData.FAVORITE_CHART) != 0) {
+					type = 1;
+				}				
+				type = (type + (next ? 1 : 2)) % 3;
+				int favorite = sd.getFavorite();
+				switch (type) {
+				case 0:
+					favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
+					break;
+				case 1:
+					favorite |= SongData.FAVORITE_CHART;
+					favorite &= 0xffffffff ^ SongData.INVISIBLE_CHART;
+					break;
+				case 2:
+					favorite |= SongData.INVISIBLE_CHART;
+					favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
+					break;
+				}
+				sd.setFavorite(favorite);
+				state.main.getSongDatabase().setSongDatas(new SongData[]{sd});
+			};
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
-				final boolean next = arg1 >= 0;
 				if (selector.getSelectedBar() instanceof SongBar) {
 					final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
 
 					if (sd != null) {
-						int type = next ? 2 : 0;
 						String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
 						if ((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
-							type = next ? 1 : 2;
 							message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
 						} else if ((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
-							type = next ? 0 : 1;
 							message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
 						}
+						
+						changeFav.accept(sd);
 
-						int favorite = sd.getFavorite();
-						switch (type) {
-							case 0:
-								favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
-								break;
-							case 1:
-								favorite |= SongData.FAVORITE_CHART;
-								favorite &= 0xffffffff ^ SongData.INVISIBLE_CHART;
-								break;
-							case 2:
-								favorite |= SongData.INVISIBLE_CHART;
-								favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
-								break;
-						}
-						sd.setFavorite(favorite);
-						selector.getSongDatabase().setSongDatas(new SongData[]{sd});
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
 						selector.getBarRender().updateBar();
 						selector.play(SOUND_OPTIONCHANGE);
@@ -201,46 +211,55 @@ public class EventFactory {
 				}
 			}
 			if(state instanceof MusicResult) {
-				MusicResultCommand.CHANGE_FAVORITE_CHART.execute((MusicResult) state, arg1 >= 0);
+				final SongData sd = state.main.getPlayerResource().getSongdata();
+				if(sd != null) {
+					changeFav.accept(sd);					
+				}
 			}
 		}),
 		favorite_song(89, (state, arg1) -> {
+			final boolean next = arg1 >= 0;
+			final Consumer<SongData> changeFav = (sd) -> {
+				int type = 0;
+				if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+					type = 2;
+				} else if((sd.getFavorite() & SongData.FAVORITE_SONG) != 0) {
+					type = 1;
+				}				
+				type = (type + (next ? 1 : 2)) % 3;
+				SongData[] songs = state.main.getSongDatabase().getSongDatas("folder", sd.getFolder());
+				for(SongData song : songs) {
+					int favorite = song.getFavorite();
+					switch (type) {
+						case 0:
+							favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
+							break;
+						case 1:
+							favorite |= SongData.FAVORITE_SONG;
+							favorite &= 0xffffffff ^ SongData.INVISIBLE_SONG;
+							break;
+						case 2:
+							favorite |= SongData.INVISIBLE_SONG;
+							favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
+							break;
+					}
+					song.setFavorite(favorite);
+				}
+				state.main.getSongDatabase().setSongDatas(songs);
+			};
+
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
-				final boolean next = arg1 >= 0;
 				if(selector.getSelectedBar() instanceof SongBar) {
 					final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-
 					if(sd != null) {
-						int type = next ? 2 : 0;
 						String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
 						if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
-							type = next ? 1 : 2;
 							message = next ? "Added to Favorite Song" : "Added to Invisible Song";
 						} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
-							type = next ? 0 : 1;
 							message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
 						}
-
-						SongData[] songs = selector.getSongDatabase().getSongDatas("folder", sd.getFolder());
-						for(SongData song : songs) {
-							int favorite = song.getFavorite();
-							switch (type) {
-								case 0:
-									favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
-									break;
-								case 1:
-									favorite |= SongData.FAVORITE_SONG;
-									favorite &= 0xffffffff ^ SongData.INVISIBLE_SONG;
-									break;
-								case 2:
-									favorite |= SongData.INVISIBLE_SONG;
-									favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
-									break;
-							}
-							song.setFavorite(favorite);
-						}
-						selector.getSongDatabase().setSongDatas(songs);
+						changeFav.accept(sd);					
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
 						selector.getBarRender().updateBar();
 						selector.play(SOUND_OPTIONCHANGE);
@@ -248,7 +267,10 @@ public class EventFactory {
 				}
 			}
 			if(state instanceof MusicResult) {
-				MusicResultCommand.CHANGE_FAVORITE_SONG.execute((MusicResult) state, arg1 >= 0);
+				final SongData sd = state.main.getPlayerResource().getSongdata();
+				if(sd != null) {
+					changeFav.accept(sd);					
+				}
 			}
 		}),
 	    /**
@@ -275,7 +297,7 @@ public class EventFactory {
 		 */
 		public final int id;
 		/**
-		 * StringProperty
+		 * event
 		 */
 		public final Event event;
 
@@ -301,20 +323,20 @@ public class EventFactory {
 	    		}
 	    	};
 	    }
-	}
-	
-	private static Consumer<MainState> getReplayEventConsumer(int index) {
-		return (state) -> {
-			if(state instanceof MusicSelector) {
-				((MusicSelector) state).selectSong(BMSPlayerMode.getReplayMode(index));;
-			}
-			if(state instanceof MusicResult) {
-				((MusicResult) state).saveReplayData(index);
-			}
-			if(state instanceof CourseResult) {
-				((CourseResult) state).saveReplayData(index);
-			}
-		};
+	    
+		private static Consumer<MainState> getReplayEventConsumer(int index) {
+			return (state) -> {
+				if(state instanceof MusicSelector) {
+					((MusicSelector) state).selectSong(BMSPlayerMode.getReplayMode(index));;
+				}
+				if(state instanceof MusicResult) {
+					((MusicResult) state).saveReplayData(index);
+				}
+				if(state instanceof CourseResult) {
+					((CourseResult) state).saveReplayData(index);
+				}
+			};
+		}
 	}
 	
 	@FunctionalInterface
