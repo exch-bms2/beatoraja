@@ -572,19 +572,18 @@ public abstract class SkinObject implements Disposable {
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (clickevent != null) {
 			final Rectangle r = region;
-			// System.out.println(obj.getClickeventId() + " : " + r.x +
-			// "," + r.y + "," + r.width + "," + r.height + " - " + x +
-			// "," + y);
+			final int[] buttonEvents = {1,-1,1,1,-1};
+			final int inc = button >= 0 && button < buttonEvents.length ? buttonEvents[button] : 0;
 			switch (clickeventType) {
 			case 0:
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					clickevent.exec(state, 1);
+					clickevent.exec(state, inc);
 					return true;
 				}
 				break;
 			case 1:
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					clickevent.exec(state, -1);
+					clickevent.exec(state, -inc);
 					return true;
 				}
 				break;
