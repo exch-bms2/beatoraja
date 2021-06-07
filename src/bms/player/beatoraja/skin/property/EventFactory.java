@@ -1,11 +1,14 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRCourseData;
+import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.select.MusicSelector;
@@ -94,6 +97,37 @@ public class EventFactory {
 			}
 		}),
 		/**
+		 * キーコンフィグへ遷移
+		 */
+		keyconfig(13, (state) -> {
+			if(state instanceof MusicSelector) {
+				((MusicSelector) state).changeState(MainStateType.CONFIG);
+			}
+		}),
+		/**
+		 * スキンコンフィグへ遷移
+		 */
+		skinconfig(14, (state) -> {
+			if(state instanceof MusicSelector) {
+				((MusicSelector) state).changeState(MainStateType.SKINCONFIG);
+			}			
+		}),
+		play(15, (state) -> {
+			if(state instanceof MusicSelector) {
+				((MusicSelector) state).selectSong(BMSPlayerMode.PLAY);
+			}						
+		}),
+		autoplay(16, (state) -> {
+			if(state instanceof MusicSelector) {
+				((MusicSelector) state).selectSong(BMSPlayerMode.AUTOPLAY);
+			}						
+		}),
+		practice(315, (state) -> {
+			if(state instanceof MusicSelector) {
+				((MusicSelector) state).selectSong(BMSPlayerMode.PRACTICE);
+			}						
+		}),
+		/**
 		 * 楽曲ファイルのドキュメントをOS既定のドキュメントビューアーで開く
 		 */
 		open_document(17, (state) -> {
@@ -117,6 +151,59 @@ public class EventFactory {
 						e.printStackTrace();
 					}
 				}
+			}
+		}),
+		
+	    /**
+	     * ゲージオプションの変更
+	     */
+		gauge1p(40, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+	            PlayerConfig config = state.main.getPlayerConfig();
+	            config.setGauge((config.getGauge() + (arg1 >= 0 ? 1 : 5)) % 6);
+	            state.play(SOUND_OPTIONCHANGE);				
+			}
+		}),
+	    /**
+	     * 1P側譜面オプションの変更
+	     */
+		option1p(42, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+	            PlayerConfig config = state.main.getPlayerConfig();
+	            config.setRandom((config.getRandom() + (arg1 >= 0 ? 1 : 9)) % 10);
+	            state.play(SOUND_OPTIONCHANGE);				
+			}
+		}),
+	    /**
+	     * 2P側譜面オプションの変更
+	     */
+		option2p(43, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+	            PlayerConfig config = state.main.getPlayerConfig();
+	            config.setRandom2((config.getRandom2() + (arg1 >= 0 ? 1 : 9)) % 10);
+	            state.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+	    /**
+	     * DP譜面オプションの変更
+	     */
+		optiondp(54, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+	            PlayerConfig config = state.main.getPlayerConfig();
+	            config.setDoubleoption((config.getDoubleoption() + (arg1 >= 0 ? 1 : 3)) % 4);
+	            state.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+	    /**
+	     * ハイスピード固定オプションの変更
+	     */
+		hsfix(55, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+	            PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+	            if (pc != null) {
+	                pc.setFixhispeed((pc.getFixhispeed() + (arg1 >= 0 ? 1 : 4)) % 5);
+	                state.play(SOUND_OPTIONCHANGE);
+	            }				
 			}
 		}),
 
@@ -154,11 +241,52 @@ public class EventFactory {
 				}
 			}
 		}),
+		bga(72, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				state.main.getConfig().setBga((state.main.getConfig().getBga() + (arg1 >= 0 ? 1 : 2)) % 3);
+				state.play(SOUND_OPTIONCHANGE);				
+			}
+		}),
+		judgetiming(74, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+		        final PlayerConfig config = state.main.getPlayerConfig();
+
+		        int inc = arg1 >= 0 ? (config.getJudgetiming() < PlayerConfig.JUDGETIMING_MAX ? 1 : 0)
+		        		: (config.getJudgetiming() > PlayerConfig.JUDGETIMING_MIN ? -1 : 0);
+		        
+		        if(inc != 0) {
+	                config.setJudgetiming(config.getJudgetiming() + inc);
+	                state.play(SOUND_OPTIONCHANGE);		        	
+		        }
+			}
+		}),
+		target(77, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+		        final PlayerConfig config = state.main.getPlayerResource().getPlayerConfig();
+	            final TargetProperty[] targets = TargetProperty.getAllTargetProperties();
+	            config.setTarget((config.getTarget() + (arg1 >= 0 ? 1 : targets.length - 1)) % targets.length);
+			}
+		}),
 		gaugeautoshift(78, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
 				final int gaslength = 5;
 	            selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() + (arg1 >= 0 ?1 : gaslength - 1)) % gaslength);
+	            selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		rival(79, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final MusicSelector selector = (MusicSelector) state;
+	            int index = -1;
+	            for(int i = 0;i < selector.getRivals().length;i++) {
+	            	if(selector.getRival() == selector.getRivals()[i]) {
+	            		index = i;
+	            		break;
+	            	}
+	            }	            
+	            index = (index + (arg1 >= 0 ? 2 : 0)) % (selector.getRivals().length + 1) - 1;
+	            selector.setRival(index != -1 ? selector.getRivals()[index] : null);
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),

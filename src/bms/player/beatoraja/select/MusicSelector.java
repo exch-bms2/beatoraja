@@ -92,8 +92,9 @@ public class MusicSelector extends MainState {
 	private RankingData currentir;
 	private RankingDataCache ircache = new RankingDataCache();
 
-	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
+	private PlayerInformation[] rivals = new PlayerInformation[0];
+	private ScoreDataCache[] rivalcaches = new ScoreDataCache[0];
 
 	private int panelstate;
 
@@ -163,6 +164,9 @@ public class MusicSelector extends MainState {
 					}
 
 					// ライバルキャッシュ作成
+					Array<PlayerInformation> rivals = new Array();
+					Array<ScoreDataCache> rivalcaches = new Array();
+					
 					if(main.getIRStatus()[0].config.isImportrival()) {
 						for(IRPlayerData irplayer : response.getData()) {
 							final PlayerInformation rival = new PlayerInformation();
@@ -170,7 +174,9 @@ public class MusicSelector extends MainState {
 							rival.setName(irplayer.name);
 							rival.setRank(irplayer.rank);
 							final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + main.getIRStatus()[0].config.getIrname() + rival.getId() + ".db");
-							rivalcaches.put(rival,  new ScoreDataCache() {
+							
+							rivals.add(rival);
+							rivalcaches.add(new ScoreDataCache() {
 
 								@Override
 								protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
@@ -192,13 +198,13 @@ public class MusicSelector extends MainState {
 									Logger.getGlobal().warning("IRからのライバルスコア取得失敗 : " + scores.getMessage());
 								}
 							}).start();
-						}						
+						}
 					}
 					
 					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
 						for (Path p : paths) {
 							boolean exists = false;
-							for(PlayerInformation info : rivalcaches.keys()) {
+							for(PlayerInformation info : rivals) {
 								if(p.getFileName().toString().equals(main.getIRStatus()[0].config.getIrname() + info.getId() + ".db")) {
 									exists = true;
 									break;
@@ -212,7 +218,8 @@ public class MusicSelector extends MainState {
 								final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(p.toString());
 								PlayerInformation info = scoredb.getInformation();
 								if(info != null) {
-									rivalcaches.put(info,  new ScoreDataCache() {
+									rivals.add(info);
+									rivalcaches.add(new ScoreDataCache() {
 
 										@Override
 										protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
@@ -230,6 +237,8 @@ public class MusicSelector extends MainState {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
+					this.rivals = rivals.toArray(PlayerInformation.class);
+					this.rivalcaches = rivalcaches.toArray(ScoreDataCache.class);
 
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -287,10 +296,16 @@ public class MusicSelector extends MainState {
 	}
 
 	public void setRival(PlayerInformation rival) {
-		this.rival = rival;
-		rivalcache = rival != null ? rivalcaches.get(rival) : null;
+		int index = -1;
+		for(int i = 0;i < rivals.length;i++) {
+			if(rival == rivals[i]) {
+				index = i;
+				break;
+			}
+		}
+		this.rival = index != -1 ? rivals[index] : null;
+		rivalcache = index != -1 ? rivalcaches[index] : null;
 		bar.updateBar();
-
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
 	}
 
@@ -298,8 +313,8 @@ public class MusicSelector extends MainState {
 		return rival;
 	}
 
-	public Keys<PlayerInformation> getRivals() {
-		return rivalcaches.keys();
+	public PlayerInformation[] getRivals() {
+		return rivals;
 	}
 
 	public ScoreDataCache getScoreDataCache() {
@@ -530,7 +545,7 @@ public class MusicSelector extends MainState {
 		musicinput.input();
 	}
 	
-	void changeState(MainStateType type) {
+	public void changeState(MainStateType type) {
 		preview.stop();
 		main.changeState(type);
 		if (search != null) {
@@ -692,55 +707,6 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public void executeEvent(int id, int arg1, int arg2) {
-		switch (id) {
-		case BUTTON_KEYCONFIG:
-			changeState(MainStateType.CONFIG);
-			break;
-		case BUTTON_SKINSELECT:
-			changeState(MainStateType.SKINCONFIG);
-			break;
-		case BUTTON_PLAY:
-			play = BMSPlayerMode.PLAY;
-			break;
-		case BUTTON_AUTOPLAY:
-			play = BMSPlayerMode.AUTOPLAY;
-			break;
-		case BUTTON_PRACTICE:
-			play = BMSPlayerMode.PRACTICE;
-			break;
-		case BUTTON_RANDOM_1P:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_1P : MusicSelectCommand.PREV_OPTION_1P);
-			break;
-		case BUTTON_RANDOM_2P:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_2P : MusicSelectCommand.PREV_OPTION_2P);
-			break;
-		case BUTTON_DPOPTION:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_DP : MusicSelectCommand.PREV_OPTION_DP);
-			break;
-		case BUTTON_GAUGE_1P:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGE_1P : MusicSelectCommand.PREV_GAUGE_1P);
-			break;
-		case BUTTON_HSFIX:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_HSFIX : MusicSelectCommand.PREV_HSFIX);
-			break;
-		case BUTTON_TARGET:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_TARGET : MusicSelectCommand.PREV_TARGET);
-			break;
-		case BUTTON_BGA:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
-			break;
-		case BUTTON_JUDGE_TIMING:
-			execute(arg1 >= 0 ? MusicSelectCommand.JUDGETIMING_UP : MusicSelectCommand.JUDGETIMING_DOWN);
-			break;			
-		case BUTTON_RIVAL:
-			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_RIVAL : MusicSelectCommand.PREV_RIVAL);
-			break;
-		default:
-			super.executeEvent(id, arg1, arg2);
-		}
-	}
-	
 	public Bar getSelectedBar() {
 		return bar.getSelected();
 	}

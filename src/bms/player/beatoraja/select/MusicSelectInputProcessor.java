@@ -139,38 +139,34 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_OPTIONOPEN);
             }
             if (property.isPressed(keystate, keytime, OPTION1_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_OPTION_1P);
+                select.executeEvent(EventType.option1p, 1);
             }
             if (property.isPressed(keystate, keytime, OPTION1_UP, true)) {
-                config.setRandom((config.getRandom() + 9) % 10);
-                select.play(SOUND_OPTIONCHANGE);
+                select.executeEvent(EventType.option1p, -1);
             }
             if (property.isPressed(keystate, keytime, GAUGE_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_GAUGE_1P);
+                select.executeEvent(EventType.gauge1p, 1);
             }
             if (property.isPressed(keystate, keytime, GAUGE_UP, true)) {
-                config.setGauge((config.getGauge() + 5) % 6);
-                select.play(SOUND_OPTIONCHANGE);
+                select.executeEvent(EventType.gauge1p, -1);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_OPTION_DP);
+                select.executeEvent(EventType.optiondp, 1);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_UP, true)) {
-                config.setDoubleoption((config.getDoubleoption() + 2) % 3);
-                select.play(SOUND_OPTIONCHANGE);
+                select.executeEvent(EventType.optiondp, -1);
             }
             if (property.isPressed(keystate, keytime, OPTION2_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_OPTION_2P);
+                select.executeEvent(EventType.option2p, 1);
             }
             if (property.isPressed(keystate, keytime, OPTION2_UP, true)) {
-                config.setRandom2((config.getRandom2() + 9) % 10);
-                select.play(SOUND_OPTIONCHANGE);
+                select.executeEvent(EventType.option2p, -1);
             }
             if (property.isPressed(keystate, keytime, HSFIX_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_HSFIX);
+                select.executeEvent(EventType.hsfix, 1);
             }
             if (property.isPressed(keystate, keytime, HSFIX_UP, true)) {
-                select.execute(MusicSelectCommand.PREV_HSFIX);
+                select.executeEvent(EventType.hsfix, -1);
             }
 
             // song bar scroll on mouse wheel
@@ -271,13 +267,13 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_OPTIONOPEN);
             }
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
-                select.execute(MusicSelectCommand.NEXT_BGA_SHOW);
+            	select.executeEvent(EventType.bga);
             }
             if (property.isPressed(keystate, keytime, GAUGEAUTOSHIFT_DOWN, true)) {
             	select.executeEvent(EventType.gaugeautoshift);
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
-                select.execute(MusicSelectCommand.JUDGETIMING_DOWN);
+                select.executeEvent(EventType.judgetiming, -1);
             }
             if (property.isPressed(keystate, keytime, DURATION_DOWN, false)) {
                 long l = System.currentTimeMillis();
@@ -304,7 +300,7 @@ public class MusicSelectInputProcessor {
                 countChangeDuration = 0;
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_UP, true)) {
-                select.execute(MusicSelectCommand.JUDGETIMING_UP);
+                select.executeEvent(EventType.judgetiming);
             }
         } else {
             bar.input();
@@ -339,7 +335,7 @@ public class MusicSelectInputProcessor {
 
             if (numberstate[7] && numtime[7] != 0) {
                 numtime[7] = 0;
-                select.execute(MusicSelectCommand.NEXT_RIVAL);
+                select.executeEvent(EventType.rival);
             }
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
