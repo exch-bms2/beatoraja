@@ -14,10 +14,17 @@ public class PlayConfig implements Cloneable {
 	 * ハイスピード。1.0で等速
 	 */
 	private float hispeed = 1.0f;
+	
+	public static final float HISPEED_MAX = 20f;
+	public static final float HISPEED_MIN = 0.01f;
+
 	/**
 	 * デュレーション(ノーツ表示時間)
 	 */
 	private int duration = 500;
+	
+	public static final int DURATION_MAX = 10000;
+	public static final int DURATION_MIN = 1;
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
 	 */
@@ -33,6 +40,9 @@ public class PlayConfig implements Cloneable {
 	 * ハイスピード変化間隔
 	 */
 	public float hispeedmargin = 0.25f;
+
+	public static final float HISPEEDMARGIN_MAX = 10f;
+	public static final float HISPEEDMARGIN_MIN = 0f;
 
 	/**
 	 * レーンカバー表示量(0-1)
@@ -210,9 +220,9 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public void validate() {
-		hispeed = MathUtils.clamp(hispeed, 0.01f, 20);
-		duration = MathUtils.clamp(duration, 1, 10000);
-		hispeedmargin = MathUtils.clamp(hispeedmargin, 0f, 10f);
+		hispeed = MathUtils.clamp(hispeed, HISPEED_MIN, HISPEED_MAX);
+		duration = MathUtils.clamp(duration, DURATION_MIN, DURATION_MAX);
+		hispeedmargin = MathUtils.clamp(hispeedmargin, HISPEEDMARGIN_MIN, HISPEEDMARGIN_MAX);
 		fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
 		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
 		lift = MathUtils.clamp(lift, 0f, 1f);
