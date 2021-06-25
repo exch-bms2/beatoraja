@@ -128,8 +128,12 @@ public class FloatPropertyFactory {
 		}),
 		music_progress(6, PROPERTY_MUSIC_PROGRESS),
 		skinselect_position(7,
-				(state) -> ((state instanceof SkinConfiguration) ? ((SkinConfiguration) state).getSkinSelectPosition() : 0)
-				),
+				(state) -> ((state instanceof SkinConfiguration) ? ((SkinConfiguration) state).getSkinSelectPosition() : 0),
+				(state, value) -> {
+					if(state instanceof SkinConfiguration) {
+						((SkinConfiguration) state).setSkinSelectPosition(value);
+					}
+				}),
 		mastervolume(17,
 				(state) -> (state.main.getConfig().getAudioConfig().getSystemvolume()),
 				(state, value) -> {

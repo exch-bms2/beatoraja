@@ -78,6 +78,12 @@ public class SkinConfiguration extends MainState {
 		return (float)customOptionOffset / customOptionOffsetMax;		
 	}
 	
+	public void setSkinSelectPosition(float value) {
+		if (value >= 0 && value < 1) {
+			customOptionOffset = (int) (customOptionOffsetMax * value);
+		}
+	}
+
 	public String getCategoryName(int index) {
 		if (customOptions != null && index + customOptionOffset < customOptions.size()) {
 			return customOptions.get(index + customOptionOffset).getCategoryName();
