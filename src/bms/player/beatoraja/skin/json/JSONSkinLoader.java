@@ -159,8 +159,8 @@ public class JSONSkinLoader extends SkinLoader {
 					case PLAY_14KEYS:
 					case PLAY_24KEYS:
 					case PLAY_24KEYS_DOUBLE:
-					default:
 						offsetLengthAddition = 4;
+					default:
 				}
 				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length + offsetLengthAddition];
 				for (int i = 0; i < sk.offset.length; i++) {
@@ -182,12 +182,11 @@ public class JSONSkinLoader extends SkinLoader {
 					case PLAY_14KEYS:
 					case PLAY_24KEYS:
 					case PLAY_24KEYS_DOUBLE:
-					default:
 						offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false);
-
 						offsets[sk.offset.length + 1] = new SkinHeader.CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false);
 						offsets[sk.offset.length + 2] = new SkinHeader.CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true);
 						offsets[sk.offset.length + 3] = new SkinHeader.CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true);
+					default:
 				}
 				header.setCustomOffsets(offsets);
 				
