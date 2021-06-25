@@ -216,7 +216,12 @@ public class MainLoader extends Application {
 
 	public static VersionChecker getVersionChecker() {
 		if(version == null) {
-			version = new GithubVersionChecker();
+                        Config config = Config.read();
+                        if (config.isEnableVersionCheck()) {
+                            	version = new GithubVersionChecker();
+                        } else {
+                            	version = new NullVersionChecker();
+                        }
 		}
 		return version;
 	}
@@ -313,6 +318,18 @@ public class MainLoader extends Application {
 			}
 		}
 	}
+	
+        private static class NullVersionChecker implements VersionChecker {
+            	@Override
+            	public String getMessage() {
+            	    	return "Latest version unknown";
+            	}
+
+            	@Override
+            	public String getDownloadURL() {
+            	    	return "https://mocha-repository.info/download.php";
+            	}
+        }
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	static class GithubLastestRelease{

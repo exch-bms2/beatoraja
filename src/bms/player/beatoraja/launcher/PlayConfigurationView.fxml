@@ -377,6 +377,7 @@
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </padding>
                 <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <CheckBox fx:id="enableVersionCheck" mnemonicParsing="false" prefHeight="18.0" text="%ENABLE_VERSION_CHECK" />
                     <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" text="%CACHE_SKIN_IMAGE" />
                     <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%IMPORT_LR2_SCORE">
                         <VBox.margin>
