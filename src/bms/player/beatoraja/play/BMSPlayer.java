@@ -452,7 +452,10 @@ public class BMSPlayer extends MainState {
 
 		int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
 				.getTarget(main);
-		resource.setRivalScoreData(rivalscore);
+		ScoreData rivalScore = new ScoreData();
+		rivalScore.setEpg(rivalscore / 2);
+		rivalScore.setEgr(rivalscore % 2);
+		resource.setRivalScoreData(rivalScore);
 
 		if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 			getScoreDataProperty().setTargetScore(0, null, 0, null, model.getTotalNotes());

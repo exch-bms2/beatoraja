@@ -56,7 +56,7 @@ public class PlayerResource {
 	/**
 	 * ライバルスコア
 	 */
-	private int rscore;
+	private ScoreData rscore;
 	
 	private RankingData ranking;
 	/**
@@ -131,7 +131,7 @@ public class PlayerResource {
 		courseindex = 0;
 		cscore = null;
 		score = null;
-		rscore = 0;
+		rscore = null;
 		gauge = null;
 		courseReplay.clear();
 		coursegauge.clear();
@@ -235,11 +235,11 @@ public class PlayerResource {
 		this.score = score;
 	}
 
-	public int getRivalScoreData() {
+	public ScoreData getRivalScoreData() {
 		return rscore;
 	}
 
-	public void setRivalScoreData(int rscore) {
+	public void setRivalScoreData(ScoreData rscore) {
 		this.rscore = rscore;
 	}
 	

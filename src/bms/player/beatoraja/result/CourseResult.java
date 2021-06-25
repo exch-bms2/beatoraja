@@ -269,7 +269,7 @@ public class CourseResult extends AbstractResult {
 				config.getLnmode(), random, resource.getConstraint());
 		oldscore = score != null ? score : new ScoreData();
 
-		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(),
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0,
 				Arrays.asList(resource.getCourseData().getSong()).stream().mapToInt(sd -> sd.getNotes()).sum());
 		getScoreDataProperty().update(newscore);
 

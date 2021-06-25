@@ -336,7 +336,7 @@ public class MusicResult extends AbstractResult {
 				resource.getPlayerConfig().getLnmode());
 		oldscore = oldsc != null ? oldsc : new ScoreData();
 
-		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0, resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
 		// duration average
 		int count = 0;
