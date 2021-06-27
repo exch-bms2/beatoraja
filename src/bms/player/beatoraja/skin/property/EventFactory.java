@@ -17,6 +17,7 @@ import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 
 import static bms.player.beatoraja.select.MusicSelector.SOUND_OPTIONCHANGE;
 
@@ -204,6 +205,37 @@ public class EventFactory {
 	                pc.setFixhispeed((pc.getFixhispeed() + (arg1 >= 0 ? 1 : 4)) % 5);
 	                state.play(SOUND_OPTIONCHANGE);
 	            }				
+			}
+		}),
+	    /**
+	     * hispeedの変更
+	     */
+		hispeed1p(57, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final MusicSelector selector = (MusicSelector) state;
+	            PlayConfig pc = selector.getSelectedBarPlayConfig();	            
+            	float hispeed = pc.getHispeed() + (arg1 >= 0 ? pc.getHispeedMargin() : -pc.getHispeedMargin());
+            	hispeed = MathUtils.clamp(hispeed, PlayConfig.HISPEED_MIN, PlayConfig.HISPEED_MAX);
+            	if(hispeed != pc.getHispeed()) {
+            		pc.setHispeed(hispeed);
+	                state.play(SOUND_OPTIONCHANGE);		        	
+            	}
+			}
+		}),
+	    /**
+	     * durationの変更
+	     */
+		duration1p(59, (state, arg1, arg2) -> {
+			if(state instanceof MusicSelector) {
+				final MusicSelector selector = (MusicSelector) state;
+	            PlayConfig pc = selector.getSelectedBarPlayConfig();	            
+            	final int inc = arg2 > 0 ? arg2 : 1;
+            	int duration = pc.getDuration() + (arg1 >= 0 ? inc : -inc);
+        		duration = MathUtils.clamp(duration, PlayConfig.DURATION_MIN, PlayConfig.DURATION_MAX);
+		        if(duration != pc.getDuration()) {
+		        	pc.setDuration(duration);
+	                state.play(SOUND_OPTIONCHANGE);		        	
+		        }	            	
 			}
 		}),
 
@@ -437,6 +469,11 @@ public class EventFactory {
 		private EventType(int id, BiConsumer<MainState, Integer> action) {
 			this.id = id;
 			this.event = createOneArgEvent(action, id);
+		}
+		
+		private EventType(int id, TriConsumer<MainState, Integer, Integer> action) {
+			this.id = id;
+			this.event = createTwoArgEvent(action, id);
 		}
 		
 	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(int index) {

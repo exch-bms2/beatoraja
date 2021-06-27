@@ -202,48 +202,6 @@ public enum MusicSelectCommand {
 			}
 		}
     },
-    DURATION_UP {
-		@Override
-		public void execute(MusicSelector selector) {
-            PlayConfig pc = selector.getSelectedBarPlayConfig();
-            if (pc != null && pc.getDuration() < 5000) {
-                pc.setDuration(pc.getDuration() + 1);
-                selector.play(SOUND_OPTIONCHANGE);
-            }
-		}
-    },
-    DURATION_DOWN {
-		@Override
-		public void execute(MusicSelector selector) {
-            PlayConfig pc = selector.getSelectedBarPlayConfig();
-            if (pc != null && pc.getDuration() > 1) {
-                pc.setDuration(pc.getDuration() - 1);
-                selector.play(SOUND_OPTIONCHANGE);
-            }
-		}
-    },
-    DURATION_UP_LARGE {
-        @Override
-        public void execute(MusicSelector selector) {
-            PlayConfig pc = selector.getSelectedBarPlayConfig();
-            if (pc != null && pc.getDuration() < 5000) {
-                int duration = pc.getDuration() + 10;
-                pc.setDuration(duration - duration % 10);
-                selector.play(SOUND_OPTIONCHANGE);
-            }
-        }
-    },
-    DURATION_DOWN_LARGE {
-        @Override
-        public void execute(MusicSelector selector) {
-            PlayConfig pc = selector.getSelectedBarPlayConfig();
-            if (pc != null && pc.getDuration() > 10) {
-                int duration = pc.getDuration() - 10;
-                pc.setDuration(duration - duration % 10);
-                selector.play(SOUND_OPTIONCHANGE);
-            }
-        }
-    },
     /**
      * 同一フォルダにある譜面を全て表示する．コースの場合は構成譜面を全て表示する
      */

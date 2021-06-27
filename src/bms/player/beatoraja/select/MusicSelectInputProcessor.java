@@ -279,21 +279,21 @@ public class MusicSelectInputProcessor {
                 long l = System.currentTimeMillis();
                 if (timeChangeDuration == 0) {
                     timeChangeDuration = l + durationlow;
-                    select.execute(MusicSelectCommand.DURATION_DOWN);
+                	select.executeEvent(EventType.duration1p, -1);
                 } else if (l > timeChangeDuration) {
                     countChangeDuration++;
                     timeChangeDuration = l + durationhigh;
-                    select.execute(countChangeDuration > 50 ? MusicSelectCommand.DURATION_DOWN_LARGE : MusicSelectCommand.DURATION_DOWN);
+                	select.executeEvent(EventType.duration1p, -1, countChangeDuration > 50 ? 10 : 0);
                 }
             } else if (property.isPressed(keystate, keytime, DURATION_UP, false)) {
                 long l = System.currentTimeMillis();
                 if (timeChangeDuration == 0) {
                     timeChangeDuration = l + durationlow;
-                    select.execute(MusicSelectCommand.DURATION_UP);
+                	select.executeEvent(EventType.duration1p, 1);
                 } else if (l > timeChangeDuration) {
                     countChangeDuration++;
                     timeChangeDuration = l + durationhigh;
-                    select.execute(countChangeDuration > 50 ? MusicSelectCommand.DURATION_UP_LARGE : MusicSelectCommand.DURATION_UP);
+                	select.executeEvent(EventType.duration1p, 1, countChangeDuration > 50 ? 10 : 0);
                 }
             } else {
                 timeChangeDuration = 0;
