@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import java.util.Optional;
 
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 
@@ -101,6 +102,11 @@ public class SkinTimingDistributionGraph extends SkinObject {
 					shape.fillRectangle(beforex2, 0, Math.abs(x2 - beforex2), max);
 					beforex2 = x2;
 				}
+			}
+			
+			shape.setColor(0f, 0f, 0f, 0.25f);
+			for(int x = c % 10;x < c * 2 + 1;x += 10) {
+				shape.drawLine(x, 0, x, 1);
 			}
 
 			//平均描画

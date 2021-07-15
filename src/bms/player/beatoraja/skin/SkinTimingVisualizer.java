@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import java.util.Optional;
 
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 
@@ -23,9 +24,18 @@ public class SkinTimingVisualizer extends SkinObject {
 	private Pixmap shape = null;
 
 	private Color[] JColor;
-	private Color lineColor;
-	private Color centerColor;
+	/**
+	 * 判定履歴表示用ラインの色
+	 */
+	private final Color lineColor;
+	/**
+	 * センターラインの色
+	 */
+	private final Color centerColor;
 
+	/**
+	 * 判定履歴表示用ラインの幅
+	 */
 	private final int lineWidth;
 	private final int width;
 	private final int center;
@@ -108,6 +118,11 @@ public class SkinTimingVisualizer extends SkinObject {
 					shape.fillRectangle(beforex2, 0, Math.abs(x2 - beforex2), 1);
 					beforex2 = x2;
 				}
+			}
+			
+			shape.setColor(0f, 0f, 0f, 0.25f);
+			for(int x = center % 10;x < pwidth;x += 10) {
+				shape.drawLine(x, 0, x, 1);
 			}
 
 			backtex = new TextureRegion(new Texture(shape));
