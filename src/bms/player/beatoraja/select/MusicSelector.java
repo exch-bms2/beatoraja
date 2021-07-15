@@ -227,7 +227,12 @@ public class MusicSelector extends MainState {
 										}
 
 										protected void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode) {
-											scoredb.getScoreDatas(collector,songs, lnmode);
+											scoredb.getScoreDatas((song, score) -> {
+												if(score != null) {
+													score.setPlayer(info.getName());
+												}
+												collector.collect(song, score);
+											},songs, lnmode);
 										}
 									});
 									Logger.getGlobal().info("ローカルに保存されているライバルスコア取得完了 : " + info.getName());
@@ -467,6 +472,7 @@ public class MusicSelector extends MainState {
 				            ircache.put(song, config.getLnmode(), currentir);
 						}
 						resource.setRankingData(currentir);
+						resource.setRivalScoreData(current.getRivalScore());
 						
 						playedsong = song;
 						changeState(MainStateType.DECIDE);
