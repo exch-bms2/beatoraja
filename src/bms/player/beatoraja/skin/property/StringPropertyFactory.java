@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.ir.IRScoreData;
@@ -59,8 +60,8 @@ public class StringPropertyFactory {
 				final PlayerInformation rival = ((MusicSelector) state).getRival();
 				return rival != null ? rival.getName() : "";
 			} else {
-				return TargetProperty.getAllTargetProperties()[state.main.getPlayerResource().getPlayerConfig()
-						.getTarget()].getName();
+				final ScoreData rival = state.main.getPlayerResource().getRivalScoreData();
+				return rival != null ? rival.getPlayer() : "";
 			}
 		}),
 		player(2, (state) -> (state.main.getPlayerConfig().getName())),

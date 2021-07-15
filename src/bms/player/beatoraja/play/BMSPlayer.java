@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -106,6 +107,28 @@ public class BMSPlayer extends MainState {
 		playinfo.doubleoption = config.getDoubleoption();
 
 		ReplayData HSReplay = null;
+		
+		// TODO ターゲットスコアはPlayerResourceで受け渡す
+		if(resource.getRivalScoreData() == null) {
+			int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
+					.getTarget(main);
+			ScoreData rivalScore = new ScoreData();
+			rivalScore.setPlayer(TargetProperty.getAllTargetProperties()[config.getTarget()].getName());
+			rivalScore.setEpg(rivalscore / 2);
+			rivalScore.setEgr(rivalscore % 2);
+			resource.setRivalScoreData(rivalScore);			
+		} else {
+			ScoreData rival = resource.getRivalScoreData();
+			if(rival.getSeed() != -1) {
+				playinfo.randomoption = rival.getOption() % 10;
+				playinfo.randomoption2 = (rival.getOption() / 10) % 10;
+				playinfo.doubleoption = rival.getOption() / 100;
+				playinfo.randomoptionseed = rival.getSeed() % (65536 * 256);
+				playinfo.randomoption2seed = rival.getSeed() / (65536 * 256);
+//				main.getMessageRenderer().addMessage("Rival Chart Option Mode - Option : " + playinfo.randomoption + "/" + 
+//						playinfo.randomoption2 + "/" + playinfo.doubleoption + " , Seed : " + playinfo.randomoptionseed + "/" + playinfo.randomoption2seed, 3000, Color.GOLD, 0);
+			}
+		}
 
 		if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 			if (resource.getCourseBMSModels() != null) {
@@ -450,19 +473,12 @@ public class BMSPlayer extends MainState {
 			score = new ScoreData();
 		}
 
-		int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
-				.getTarget(main);
-		ScoreData rivalScore = new ScoreData();
-		rivalScore.setEpg(rivalscore / 2);
-		rivalScore.setEgr(rivalscore % 2);
-		resource.setRivalScoreData(rivalScore);
-
 		if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 			getScoreDataProperty().setTargetScore(0, null, 0, null, model.getTotalNotes());
 			practice.create(model);
 			state = STATE_PRACTICE;
 		} else {
-			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), rivalscore, null, model.getTotalNotes());
+			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0 , null, model.getTotalNotes());
 		}
 	}
 
@@ -873,8 +889,8 @@ public class BMSPlayer extends MainState {
 		}
 		score.setClear(clear.id);
 		score.setGauge(gauge.isTypeChanged() ? -1 : gauge.getType());
-		score.setOption(config.getRandom() + (model.getMode().player == 2
-				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
+		score.setOption(playinfo.randomoption + (model.getMode().player == 2
+				? (playinfo.randomoption2 * 10 + playinfo.doubleoption * 100) : 0));
 		score.setSeed((model.getMode().player == 2 ? playinfo.randomoption2seed * 65536 * 256 : 0) + playinfo.randomoptionseed); 
 		score.encodeGhost(judge.getGhost());
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
@@ -891,11 +907,11 @@ public class BMSPlayer extends MainState {
 		replay.rand = playinfo.rand;
 		replay.gauge = config.getGauge();
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
-		replay.randomoption = config.getRandom();
+		replay.randomoption = playinfo.randomoption;
 		replay.randomoptionseed = playinfo.randomoptionseed;
-		replay.randomoption2 = config.getRandom2();
+		replay.randomoption2 = playinfo.randomoption2;
 		replay.randomoption2seed = playinfo.randomoption2seed;
-		replay.doubleoption = config.getDoubleoption();
+		replay.doubleoption = playinfo.doubleoption;
 		replay.config = replayConfig;
 
 		score.setPassnotes(notes);
