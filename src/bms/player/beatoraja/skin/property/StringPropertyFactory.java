@@ -209,15 +209,17 @@ public class StringPropertyFactory {
 		private static StringProperty createRankingname(final int index) {
 			return (state) -> {
 				RankingData irc = null;
+				int rankingOffset = 0;
 				if (state instanceof MusicSelector) {
 					irc = ((MusicSelector) state).getCurrentRankingData();
 				}
 				if (state instanceof AbstractResult) {
 					irc = ((AbstractResult) state).getRankingData();
+					rankingOffset = ((AbstractResult) state).getRankingOffset();
 				}
 				IRScoreData[] scores = irc != null ? irc.getScores() : null;
-				if(scores != null && scores.length > index) {
-					return scores[index].player.length() > 0 ? scores[index].player : "YOU";							
+				if(scores != null && scores.length > index + rankingOffset) {
+					return scores[index + rankingOffset].player.length() > 0 ? scores[index + rankingOffset].player : "YOU";							
 				}
 				return "";
 			};

@@ -4,9 +4,12 @@ import static bms.player.beatoraja.ClearType.NoPlay;
 
 import java.util.Arrays;
 
+import com.badlogic.gdx.math.MathUtils;
+
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreData;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.RankingData;
 
 public abstract class AbstractResult extends MainState {
@@ -30,6 +33,10 @@ public abstract class AbstractResult extends MainState {
 	 * ランキングデータ
 	 */
 	protected RankingData ranking;
+	/**
+	 * ランキング表示位置
+	 */
+	protected int rankingOffset = 0;
 	/**
 	 * 全ノーツの平均ズレ
 	 */
@@ -239,6 +246,32 @@ public abstract class AbstractResult extends MainState {
 	
 	public TimingDistribution getTimingDistribution() {
 		return timingDistribution;
+	}
+
+	public void input() {
+		BMSPlayerInputProcessor input = main.getInputProcessor();
+		int mov = -input.getScroll();
+		input.resetScroll();
+		if (mov != 0 && ranking != null) {
+			final int rankingMax = Math.max(1, ranking.getTotalPlayer());
+			rankingOffset = MathUtils.clamp(rankingOffset + mov, 0, rankingMax - 1);
+		}
+	}
+	
+	public int getRankingOffset() {
+		return rankingOffset;
+	}
+	
+	public float getRankingPosition() {
+		final int rankingMax = ranking != null ? Math.max(1, ranking.getTotalPlayer()) : 1;
+		return (float)rankingOffset / rankingMax;		
+	}
+	
+	public void setRankingPosition(float value) {
+		if (value >= 0 && value < 1) {
+			final int rankingMax = ranking != null ? Math.max(1, ranking.getTotalPlayer()) : 1;
+			rankingOffset = (int) (rankingMax * value);
+		}
 	}
 
 	/**

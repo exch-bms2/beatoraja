@@ -83,8 +83,8 @@ public class CourseResult extends AbstractResult {
 		final PlayerConfig config = resource.getPlayerConfig();
 		final ScoreData newscore = getNewScore();
 
-		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
-
+		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() != null ? resource.getRankingData() : new RankingData();
+		rankingOffset = 0;
 		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
 			state = STATE_IR_PROCESSING;
@@ -189,6 +189,7 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public void input() {
+		super.input();
 		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 

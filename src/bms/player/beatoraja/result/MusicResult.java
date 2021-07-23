@@ -79,6 +79,7 @@ public class MusicResult extends AbstractResult {
 		final ScoreData newscore = getNewScore();
 
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
+		rankingOffset = 0;
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
@@ -247,6 +248,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void input() {
+		super.input();
 		long time = main.getNowTime();
 		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();

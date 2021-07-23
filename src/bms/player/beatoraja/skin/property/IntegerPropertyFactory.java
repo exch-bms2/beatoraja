@@ -321,11 +321,7 @@ public class IntegerPropertyFactory {
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
 					final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
-					return (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD
-							|| gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS
-							|| gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
-							&& gauge.getValue() > 0 && gauge.getValue() < 0.1 ? 1
-									: ((int) (gauge.getValue() * 10)) % 10;
+					return gauge.getValue() > 0 && gauge.getValue() < 0.1 ? 1 : ((int) (gauge.getValue() * 10)) % 10;
 				}
 				if (state instanceof AbstractResult) {
 					final int gaugeType = ((AbstractResult) state).getGaugeType();
@@ -880,15 +876,17 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createRankingexscore(int index) {
 			return (state) -> {
 				RankingData irc = null;
+				int rankingOffset = 0;
 				if (state instanceof MusicSelector) {
 					irc = ((MusicSelector) state).getCurrentRankingData();
 				}
 				if (state instanceof AbstractResult) {
 					irc = ((AbstractResult) state).getRankingData();
+					rankingOffset = ((AbstractResult) state).getRankingOffset();
 				}
 				IRScoreData[] scores = irc != null ? irc.getScores() : null;
-				if(scores != null && scores.length > index) {
-					return scores[index].getExscore();							
+				if(scores != null && scores.length > index + rankingOffset) {
+					return scores[index + rankingOffset].getExscore();							
 				}
 				return Integer.MIN_VALUE;
 			};
@@ -1095,15 +1093,17 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createRankinCleartypeProperty(int index) {
 			return (state) -> {
 				RankingData irc = null;
+				int rankingOffset = 0;
 				if (state instanceof MusicSelector) {
 					irc = ((MusicSelector) state).getCurrentRankingData();
 				}
 				if (state instanceof AbstractResult) {
 					irc = ((AbstractResult) state).getRankingData();
+					rankingOffset = ((AbstractResult) state).getRankingOffset();
 				}
 				IRScoreData[] scores = irc != null ? irc.getScores() : null;
-				if(scores != null && scores.length > index) {
-					return scores[index].clear.id;
+				if(scores != null && scores.length > index + rankingOffset) {
+					return scores[index + rankingOffset].clear.id;
 				}
 				return Integer.MIN_VALUE;
 			};
