@@ -102,9 +102,7 @@ public class MainLoader extends Application {
 			}
 		}
 
-
-
-		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
+		if(Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();
 			play(bmsPath, auto, true, null, null, bmsPath != null);
 		} else {

@@ -99,7 +99,7 @@ public class BMSResource {
 		while(!bgaloaders.isEmpty() && !bgaloaders.getFirst().isAlive()) {
 			bgaloaders.removeFirst();
 		}
-		
+
 		if(MainLoader.getIllegalSongCount() == 0) {
 			// Audio, BGAともキャッシュがあるため、何があっても全リロードする
 			BGALoaderThread bgaloader = new BGALoaderThread(
@@ -108,7 +108,7 @@ public class BMSResource {
 			bgaloader.start();
 			AudioLoaderThread audioloader = new AudioLoaderThread(model);
 			audioloaders.addLast(audioloader);
-			audioloader.start();			
+			audioloader.start();
 		}
 		return true;
 	}
