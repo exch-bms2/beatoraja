@@ -860,9 +860,7 @@ public class BarRenderer {
 		boolean showInvisibleCharts = false;
 		boolean isSortable = true;
 
-		if (MainLoader.getIllegalSongCount() > 0) {
-			l.addAll(SongBar.toSongBarArray(select.getSongDatabase().getSongDatas(MainLoader.getIllegalSongs())));
-		} else if (bar == null) {
+		if (bar == null) {
 			if (dir.size > 0) {
 				prevbar = dir.first();
 			}

@@ -8,6 +8,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 
@@ -115,17 +116,11 @@ public class MainLoader extends Application {
 			config = Config.read();
 		}
 
+		verifyIllegalSongs();
+
 		if(config.isUseDiscordRPC()) {
 			discord = new Discord("", "");
 			discord.startup();
-		}
-
-		for(SongData song : getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs)) {
-			MainLoader.putIllegalSong(song.getSha256());
-		}
-		if(illegalSongs.size() > 0) {
-			JOptionPane.showMessageDialog(null, "This Application detects " + illegalSongs.size() + " illegal BMS songs. \n Remove them, update song database and restart.", "Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
 		}
 
 		try {
@@ -201,6 +196,23 @@ public class MainLoader extends Application {
 		}
 	}
 
+	private static void verifyIllegalSongs() {
+		SongData[] foundIllegalSongs = getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs);
+		if (foundIllegalSongs.length > 0) {
+			String paths = Arrays.stream(foundIllegalSongs)
+					.limit(30)
+					.map(song -> Paths.get(song.getPath()).getParent().toString())
+					.distinct()
+					.collect(Collectors.joining("\n"));
+			JOptionPane.showMessageDialog(null,
+					"This Application detects " + foundIllegalSongs.length + " illegal BMS songs.\nRemove them, update song database and restart.\n\n" +
+							"Do not use this application to play copyrighted content.\n\n" + paths,
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
+	}
+
 	public static Graphics.DisplayMode[] getAvailableDisplayMode() {
 		return LwjglApplicationConfiguration.getDisplayModes();
 	}
@@ -237,18 +249,6 @@ public class MainLoader extends Application {
 
 	public static Path getBMSPath() {
 		return bmsPath;
-	}
-
-	public static void putIllegalSong(String hash) {
-		illegalSongs.add(hash);
-	}
-
-	public static String[] getIllegalSongs() {
-		return illegalSongs.toArray(new String[illegalSongs.size()]);
-	}
-
-	public static int getIllegalSongCount() {
-		return illegalSongs.size();
 	}
 
 	@Override
