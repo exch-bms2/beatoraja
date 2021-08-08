@@ -51,8 +51,8 @@ public class ScoreDataImporter {
                     result.add(sd);
                 }
             }
-            
-            this.importScores(result.toArray(new ScoreData[result.size()]), "LR2");
+
+            this.importScores(result.toArray(new ScoreData[0]), "LR2");
         } catch (Exception e) {
             Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
         }
@@ -76,8 +76,8 @@ public class ScoreDataImporter {
                 result.add(oldsd);
             }
         }
-        
-        scoredb.setScoreData(result.toArray(new ScoreData[result.size()]));
+
+        scoredb.setScoreData(result.toArray(new ScoreData[0]));
 		Logger.getGlobal().info("スコアインポート完了 - インポート数 : " + result.size());
     }
 }

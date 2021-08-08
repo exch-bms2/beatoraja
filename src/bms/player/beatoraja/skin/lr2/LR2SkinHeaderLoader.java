@@ -126,7 +126,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 			for(int i = 0;i < op.length;i++) {
 				op[i] = Integer.parseInt(str[2]) + i;
 			}
-			loader.options.add(new CustomOption(str[1], op, contents.toArray(new String[contents.size()])));
+			loader.options.add(new CustomOption(str[1], op, contents.toArray(new String[0])));
 		}
 	},
 	CUSTOMFILE {

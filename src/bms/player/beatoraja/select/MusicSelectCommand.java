@@ -91,8 +91,7 @@ public enum MusicSelectCommand {
 						if (songbar.existsSong()) {
 							Desktop.getDesktop().open(Paths.get(songbar.getSongData().getPath()).getParent().toFile());
 						} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
-							String[] md5 = songbar.getSongData().getOrg_md5().toArray(
-									new String[songbar.getSongData().getOrg_md5().size()]);
+							String[] md5 = songbar.getSongData().getOrg_md5().toArray(new String[0]);
 							SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
 							for (SongData sd : songdata) {
 								if (sd.getPath() != null) {
@@ -267,7 +266,7 @@ public enum MusicSelectCommand {
                         .distinct()
                         .map(SongBar::new)
                         .collect(Collectors.toList());
-                bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
+                bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[0])));
                 selector.play(SOUND_FOLDEROPEN);
             }
         }

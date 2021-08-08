@@ -93,8 +93,8 @@ public class IRConfigurationView implements Initializable {
 				}
 			}
 		}
-		
-		player.setIrconfig(irlist.toArray(new IRConfig[irlist.size()]));
+
+		player.setIrconfig(irlist.toArray(new IRConfig[0]));
     }
 
 	@FXML

@@ -138,7 +138,7 @@ public class IRConnectionManager {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		irconnections = classes.toArray(new Class[classes.size()]);
+		irconnections = classes.toArray(new Class[0]);
 		return irconnections;
 	}
 

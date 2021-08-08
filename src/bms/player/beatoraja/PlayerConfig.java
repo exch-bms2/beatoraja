@@ -919,7 +919,7 @@ public class PlayerConfig {
 		} catch(Throwable e) {
 			e.printStackTrace();
 		}
-		return l.toArray(new String[l.size()]);
+		return l.toArray(new String[0]);
 	}
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {

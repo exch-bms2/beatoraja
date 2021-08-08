@@ -163,7 +163,7 @@ public interface AudioDriver extends Disposable {
 				}
 			}
 		}
-		
-		return result.toArray(new Path[result.size()]);
+
+		return result.toArray(new Path[0]);
 	}
 }

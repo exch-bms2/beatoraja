@@ -68,7 +68,7 @@ public class SongInformationAccessor extends SQLiteDatabaseAccessor {
 	public SongInformation[] getInformations(String sql) {
 		try {
 			List<SongInformation> m = Validatable.removeInvalidElements(qr.query("SELECT * FROM information WHERE " + sql, songhandler));
-			return m.toArray(new SongInformation[m.size()]);
+			return m.toArray(new SongInformation[0]);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

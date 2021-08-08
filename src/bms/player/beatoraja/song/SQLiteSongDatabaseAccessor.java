@@ -256,7 +256,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 	public FolderData[] getFolderDatas(String key, String value) {
 		try {
 			final List<FolderData> m = qr.query("SELECT * FROM folder WHERE " + key + " = ?", folderhandler, value);
-			return m.toArray(new FolderData[m.size()]);
+			return m.toArray(new FolderData[0]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}

@@ -103,7 +103,7 @@ public class FolderEditorView implements Initializable {
 			return;
 		}
 		selectedFolder.setName(folderName.getText());
-		selectedFolder.setSong(folderSongs.getItems().toArray(new SongData[folderSongs.getItems().size()]));
+		selectedFolder.setSong(folderSongs.getItems().toArray(new SongData[0]));
 	}
 
 	private void updateFolder(TableFolder course) {
@@ -189,7 +189,7 @@ public class FolderEditorView implements Initializable {
 
 	public TableFolder[] getTableFolder() {
 		commitFolder();
-		return folders.getItems().toArray(new TableFolder[folders.getItems().size()]);
+		return folders.getItems().toArray(new TableFolder[0]);
 	}
 
 	public void setTableFolder(TableFolder[] folder) {

@@ -108,7 +108,7 @@ public class LaneRenderer {
 			cbpm = tl.getBPM();
 			cscr = tl.getScroll();
 		}
-		this.timelines = tls.toArray(new TimeLine[tls.size()]);
+		this.timelines = tls.toArray(new TimeLine[0]);
 		// Logger.getGlobal().info("省略したTimeLine数:" +
 		// (model.getAllTimeLines().length - timelines.length) + " / " +
 		// model.getAllTimeLines().length);

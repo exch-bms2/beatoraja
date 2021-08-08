@@ -80,7 +80,7 @@ public class SkinConfigurationView implements Initializable {
 				options.add(o);
 			}
 		}
-		property.setOption(options.toArray(new SkinConfig.Option[options.size()]));
+		property.setOption(options.toArray(new SkinConfig.Option[0]));
 
 		List<SkinConfig.FilePath> files = new ArrayList<>();
 		for (CustomFile file : selected.getCustomFiles()) {
@@ -91,7 +91,7 @@ public class SkinConfigurationView implements Initializable {
 				files.add(o);
 			}
 		}
-		property.setFile(files.toArray(new SkinConfig.FilePath[files.size()]));
+		property.setFile(files.toArray(new SkinConfig.FilePath[0]));
 
 		List<SkinConfig.Offset> offsets = new ArrayList<>();
 		for (CustomOffset offset : selected.getCustomOffsets()) {
@@ -114,7 +114,7 @@ public class SkinConfigurationView implements Initializable {
 				offsets.add(o);
 			}
 		}
-		property.setOffset(offsets.toArray(new SkinConfig.Offset[offsets.size()]));
+		property.setOffset(offsets.toArray(new SkinConfig.Offset[0]));
 
 		return property;
 	}
@@ -126,7 +126,7 @@ public class SkinConfigurationView implements Initializable {
 				result.add(header);
 			}
 		}
-		return result.toArray(new SkinHeader[result.size()]);
+		return result.toArray(new SkinHeader[0]);
 	}
 
     @FXML

@@ -124,7 +124,7 @@ public class CourseEditorView implements Initializable {
 
 	public CourseData[] getCourseData() {
 		commitCourse();
-		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
+		return courses.getItems().toArray(new CourseData[0]);
 	}
 
 	public void setCourseData(CourseData[] course) {
@@ -159,14 +159,14 @@ public class CourseEditorView implements Initializable {
 		if(lnType.getValue() != null) {
 			constraint.add(lnType.getValue());
 		}
-		selectedCourse.setConstraint(constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]));
+		selectedCourse.setConstraint(constraint.toArray(new CourseData.CourseDataConstraint[0]));
 		CourseData.TrophyData[] trophy = new CourseData.TrophyData[3];
 		trophy[0] = new CourseData.TrophyData("bronzemedal", getValue(bronzemiss).floatValue(), getValue(bronzescore).floatValue());
 		trophy[1] = new CourseData.TrophyData("silvermedal", getValue(silvermiss).floatValue(), getValue(silverscore).floatValue());
 		trophy[2] = new CourseData.TrophyData("goldmedal", getValue(goldmiss).floatValue(), getValue(goldscore).floatValue());
 		selectedCourse.setTrophy(trophy);
 
-		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));
+		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[0]));
 	}
 
 	private void updateCourse(CourseData course) {

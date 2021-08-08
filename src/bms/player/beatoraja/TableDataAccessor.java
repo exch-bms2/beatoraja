@@ -116,7 +116,7 @@ public class TableDataAccessor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return result.toArray(new TableData[result.size()]);
+		return result.toArray(new TableData[0]);
 	}
 
 	/**
@@ -207,10 +207,10 @@ public class TableDataAccessor {
 							hashes.add(sd);
 						}
 					}
-					tde.setSong(hashes.toArray(new SongData[hashes.size()]));
+					tde.setSong(hashes.toArray(new SongData[0]));
 					tdes.add(tde);
 				}
-				td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));
+				td.setFolder(tdes.toArray(new TableData.TableFolder[0]));
 
 				if (dt.getCourse() != null && dt.getCourse().length > 0) {
 					List<CourseData> gname = new ArrayList<CourseData>();
@@ -232,7 +232,7 @@ public class TableDataAccessor {
 									}
 								}
 							}
-							cd.setConstraint(l.toArray(new CourseData.CourseDataConstraint[l.size()]));
+							cd.setConstraint(l.toArray(new CourseData.CourseDataConstraint[0]));
 							if (g.getTrophy() != null) {
 								List<TrophyData> tr = new ArrayList<TrophyData>();
 								for (Trophy trophy : g.getTrophy()) {
@@ -242,13 +242,13 @@ public class TableDataAccessor {
 									t.setScorerate((float) trophy.getScorerate());
 									tr.add(t);
 								}
-								cd.setTrophy(tr.toArray(new TrophyData[tr.size()]));
+								cd.setTrophy(tr.toArray(new TrophyData[0]));
 							}
 							gname.add(cd);
 						}
 					}
 
-					td.setCourse(gname.toArray(new CourseData[gname.size()]));
+					td.setCourse(gname.toArray(new CourseData[0]));
 				}
 				if(td == null || !td.validate()) {
 					throw new RuntimeException("難易度表の値が不正です");
