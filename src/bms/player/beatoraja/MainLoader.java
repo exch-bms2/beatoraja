@@ -73,26 +73,29 @@ public class MainLoader extends Application {
 		BMSPlayerMode auto = null;
 		for (String s : args) {
 			if (s.startsWith("-")) {
-				if (s.equals("-a")) {
-					auto = BMSPlayerMode.AUTOPLAY;
-				}
-				if (s.equals("-p")) {
-					auto = BMSPlayerMode.PRACTICE;
-				}
-				if (s.equals("-r") || s.equals("-r1")) {
-					auto = BMSPlayerMode.REPLAY_1;
-				}
-				if (s.equals("-r2")) {
-					auto = BMSPlayerMode.REPLAY_2;
-				}
-				if (s.equals("-r3")) {
-					auto = BMSPlayerMode.REPLAY_3;
-				}
-				if (s.equals("-r4")) {
-					auto = BMSPlayerMode.REPLAY_4;
-				}
-				if (s.equals("-s")) {
-					auto = BMSPlayerMode.PLAY;
+				switch (s) {
+					case "-a":
+						auto = BMSPlayerMode.AUTOPLAY;
+						break;
+					case "-p":
+						auto = BMSPlayerMode.PRACTICE;
+						break;
+					case "-r":
+					case "-r1":
+						auto = BMSPlayerMode.REPLAY_1;
+						break;
+					case "-r2":
+						auto = BMSPlayerMode.REPLAY_2;
+						break;
+					case "-r3":
+						auto = BMSPlayerMode.REPLAY_3;
+						break;
+					case "-r4":
+						auto = BMSPlayerMode.REPLAY_4;
+						break;
+					case "-s":
+						auto = BMSPlayerMode.PLAY;
+						break;
 				}
 			} else {
 				bmsPath = Paths.get(s);
