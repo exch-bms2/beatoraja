@@ -16,11 +16,11 @@ import bms.table.*;
 
 /**
  * 難易度表データアクセス用クラス
- * 
+ *
  * @author exch
  */
 public class TableDataAccessor {
-	
+
 	private final String tabledir;
 
 	public TableDataAccessor(String tabledir) {
@@ -34,7 +34,7 @@ public class TableDataAccessor {
             if(td != null) {
                 write(td);
             }
-		});		
+		});
 	}
 
 	public void loadNewTableData(String[] urls) {
@@ -48,7 +48,7 @@ public class TableDataAccessor {
             if(td != null) {
                 write(td);
             }
-		});		
+		});
 	}
 
 	private HashSet<String> getLocalTableFilenames() {
@@ -85,10 +85,10 @@ public class TableDataAccessor {
 		}
 		return urlToTableNameMap;
 	}
-	
+
 	/**
 	 * 難易度表データをキャッシュする
-	 * 
+	 *
 	 * @param td 難易度表データ
 	 */
 	public void write(TableData td) {
@@ -101,7 +101,7 @@ public class TableDataAccessor {
 
 	/**
 	 * 全てのキャッシュされた難易度表データを読み込む
-	 * 
+	 *
 	 * @return 全てのキャッシュされた難易度表データ
 	 */
 	public TableData[] readAll() {
@@ -110,7 +110,7 @@ public class TableDataAccessor {
 			for (Path p : paths) {
 				TableData td = TableData.read(p);
 				if(td != null) {
-					result.add(td);						
+					result.add(td);
 				}
 			}
 		} catch (IOException e) {
@@ -121,7 +121,7 @@ public class TableDataAccessor {
 
 	/**
 	 * 指定のキャッシュされた難易度表データを読み込む
-	 * 
+	 *
 	 * @param name 難易度表URL
 	 * @return キャッシュされた難易度表データ。存在しない場合はnull
 	 */
@@ -139,7 +139,7 @@ public class TableDataAccessor {
 		}
 		return td;
 	}
-	
+
 	public TableData read(String filename) {
 		return TableData.read(Paths.get(tabledir + "/" + filename));
 	}
@@ -266,7 +266,7 @@ public class TableDataAccessor {
 			new TableDataAccessor(tabledir).write(td);
 		}
 	}
-	
+
 	private static SongData toSongData(BMSTableElement te, Mode defaultMode) {
 		SongData song = new SongData();
 		if(te.getMD5() != null) {
@@ -287,7 +287,7 @@ public class TableDataAccessor {
 			song.setAppendurl(dte.getAppendURL());
 			song.setAppendIpfs(dte.getAppendIPFS());
 		}
-		
+
 		return song;
 	}
 }

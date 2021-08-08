@@ -92,7 +92,7 @@ public class SkinBPMGraph extends SkinObject {
 	public void draw(SkinObjectRenderer sprite) {
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
-		
+
 		if(shapetex == null || song != current || (this.model == null && model != null)) {
 			current = song;
 			this.model = model;
@@ -114,12 +114,12 @@ public class SkinBPMGraph extends SkinObject {
 		maxbpm = Double.MIN_VALUE;
 		for(double[] d : data) {
 			if(d[0] > 0) {
-				minbpm = Math.min(d[0], minbpm);				
+				minbpm = Math.min(d[0], minbpm);
 			}
 			maxbpm = Math.min(d[0], maxbpm);
 		}
 		this.mainbpm = info.getMainbpm();
-		
+
 		updateTexture();
 	}
 
@@ -138,7 +138,7 @@ public class SkinBPMGraph extends SkinObject {
 
 				if(tl.getStop() > 0) {
 					if(nowSpeed != 0) {
-						nowSpeed = 0;					
+						nowSpeed = 0;
 						speedList.add(new double[] {nowSpeed, tl.getTime()});
 					}
 				} else if(nowSpeed != tl.getBPM() * tl.getScroll()) {
@@ -146,7 +146,7 @@ public class SkinBPMGraph extends SkinObject {
 					speedList.add(new double[] {nowSpeed, tl.getTime()});
 				}
 			}
-			
+
 			int maxcount = 0;
 			for (double bpm : bpmNoteCountMap.keySet()) {
 				if (bpmNoteCountMap.get(bpm) > maxcount) {
@@ -155,16 +155,16 @@ public class SkinBPMGraph extends SkinObject {
 				}
 			}
 			if(speedList.get(speedList.size() - 1)[1] != tls[tls.length - 1].getTime()) {
-				speedList.add(new double[] {nowSpeed, tls[tls.length - 1].getTime()});			
+				speedList.add(new double[] {nowSpeed, tls[tls.length - 1].getTime()});
 			}
-			
+
 			data = speedList.toArray(new double[speedList.size()][]);
 			minbpm = model.getMinBPM();
-			maxbpm = model.getMaxBPM();	
+			maxbpm = model.getMaxBPM();
 		}
 		updateTexture();
 	}
-	
+
 	private void updateTexture() {
 		Pixmap shape;
 		if (data.length < 2) {
@@ -219,7 +219,7 @@ public class SkinBPMGraph extends SkinObject {
 			shape.setColor(lineColor);
 			shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
 		}
-		
+
 		if(shapetex != null) {
 			shapetex.getTexture().dispose();
 		}

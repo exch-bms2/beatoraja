@@ -23,27 +23,27 @@ import static bms.player.beatoraja.Resolution.*;
 
 /**
  * LR2スキンヘッダファイル(lr2skin)のローダー
- * 
+ *
  * @author exch
  */
 public class LR2SkinHeaderLoader extends LR2SkinLoader {
-	
+
 	SkinHeader header = new SkinHeader();
 	Array<CustomFile> files = new Array<CustomFile>();
 	Array<CustomOption> options = new Array<CustomOption>();
 	Array<CustomOffset> offsets = new Array<CustomOffset>();
-	
+
 	final String skinpath;
 
 	public LR2SkinHeaderLoader(Config c) {
 		addCommandWord(HeaderCommand.values());
 		skinpath = c.getSkinpath();
 	}
-	
+
 	public SkinHeader loadSkin(Path f, MainState state) throws IOException {
 		return this.loadSkin(f, state, new SkinConfig.Property());
 	}
-	
+
 	public SkinHeader loadSkin(Path f, MainState state, SkinConfig.Property property) throws IOException {
 		// TODO header読み込みに失敗したらnullを返す
 		header = new SkinHeader();
@@ -56,7 +56,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		try (Stream<String> lines = Files.lines(f, Charset.forName("MS932"))) {
 			lines.forEach(line -> {
 				try {
-					processLine(line, state);				
+					processLine(line, state);
 				} catch(Throwable e) {
 					e.printStackTrace();
 				}
@@ -65,9 +65,9 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		header.setCustomOptions(options.toArray(CustomOption.class));
 		header.setCustomFiles(files.toArray(CustomFile.class));
 		header.setCustomOffsets(offsets.toArray(CustomOffset.class));
-		
+
 		header.setSkinConfigProperty(property);
-		
+
 		for (CustomOption option : header.getCustomOptions()) {
 			for(int i = 0;i < option.option.length;i++) {
 				op.put(option.option[i], option.getSelectedOption() == option.option[i] ? 1 : 0);
@@ -75,7 +75,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 
 		return header;
-	}	
+	}
 }
 
 enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
@@ -102,7 +102,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 					loader.offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
 					loader.offsets.add(new CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true));
 			}
-		}		
+		}
 	},
 	RESOLUTION {
 		final Resolution res[] = {SD, HD, FULLHD, ULTRAHD};
@@ -111,7 +111,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 		public void execute(LR2SkinHeaderLoader loader, String[] str) {
 			loader.header.setResolution(res[Integer.parseInt(str[1])]);
 		}
-		
+
 	},
 	CUSTOMOPTION {
 		@Override

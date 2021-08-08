@@ -26,7 +26,7 @@ public class FolderEditorView implements Initializable {
 	@FXML
 	private ListView<TableFolder> folders;
 	@FXML
-	private GridPane folderPane;	
+	private GridPane folderPane;
 	@FXML
 	private TextField folderName;
 	@FXML
@@ -35,17 +35,17 @@ public class FolderEditorView implements Initializable {
 	private SongDataView folderSongsController;
 
 	private Path filepath;
-	
+
 	private TableFolder selectedFolder;
-	
+
 	private SongDatabaseAccessor songdb;
-	
+
 	private CourseData[] courses;
-	
-	public void initialize(URL arg0, ResourceBundle arg1) {		
+
+	public void initialize(URL arg0, ResourceBundle arg1) {
 		folders.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
 			if(oldVal != newVal) {
-				updateTableFolder();				
+				updateTableFolder();
 			}
 		});
 		folders.setCellFactory((ListView) -> {
@@ -61,7 +61,7 @@ public class FolderEditorView implements Initializable {
 		searchSongsController.setVisible("fullTitle", "fullArtist", "mode", "level", "notes", "sha256");
 
 		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		
+
 		searchSongs.setOnMouseClicked((click) -> {
 			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
 			if (click.getClickCount() == 2 && !isHeader) {
@@ -77,7 +77,7 @@ public class FolderEditorView implements Initializable {
 
 		updateFolder(null);
 	}
-	
+
 	protected void init(SongDatabaseAccessor songdb) {
 		this.songdb = songdb;
 	}
@@ -87,9 +87,9 @@ public class FolderEditorView implements Initializable {
 			return;
 		}
 		if(TableEditorView.isMd5OrSha256Hash(search.getText())) {
-			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));			
+			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));
 		} else if(search.getText().length() > 1) {
-			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
+			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));
 		}
 	}
 
@@ -97,13 +97,13 @@ public class FolderEditorView implements Initializable {
 		commitFolder();
 		updateFolder(folders.getSelectionModel().getSelectedItem());
 	}
-	
+
 	private void commitFolder() {
 		if(selectedFolder == null) {
 			return;
 		}
-		selectedFolder.setName(folderName.getText());		
-		selectedFolder.setSong(folderSongs.getItems().toArray(new SongData[folderSongs.getItems().size()]));		
+		selectedFolder.setName(folderName.getText());
+		selectedFolder.setSong(folderSongs.getItems().toArray(new SongData[folderSongs.getItems().size()]));
 	}
 
 	private void updateFolder(TableFolder course) {
@@ -113,11 +113,11 @@ public class FolderEditorView implements Initializable {
 			return;
 		}
 		folderPane.setVisible(true);
-		
+
 		folderName.setText(selectedFolder.getName());
 		folderSongs.getItems().setAll(course.getSong());
 	}
-	
+
 	public void addTableFolder() {
 		TableFolder course = new TableFolder();
 		course.setName("New Folder");
@@ -130,7 +130,7 @@ public class FolderEditorView implements Initializable {
 			folders.getItems().remove(song);
 		}
 	}
- 
+
 	public void moveTableFolderUp() {
 		final int index = folders.getSelectionModel().getSelectedIndex();
 		if(index > 0) {
@@ -150,7 +150,7 @@ public class FolderEditorView implements Initializable {
 			folders.getSelectionModel().select(index + 1);
 		}
 	}
-	
+
 	public void addSongData() {
 		List<SongData> songs = searchSongs.getSelectionModel().getSelectedItems();
 		for (SongData song : songs) {
@@ -166,7 +166,7 @@ public class FolderEditorView implements Initializable {
 			folderSongs.getItems().remove(song);
 		}
 	}
- 
+
 	public void moveSongDataUp() {
 		final int index = folderSongs.getSelectionModel().getSelectedIndex();
 		if(index > 0) {
@@ -186,12 +186,12 @@ public class FolderEditorView implements Initializable {
 			folderSongs.getSelectionModel().select(index + 1);
 		}
 	}
-	
+
 	public TableFolder[] getTableFolder() {
 		commitFolder();
 		return folders.getItems().toArray(new TableFolder[folders.getItems().size()]);
 	}
-	
+
 	public void setTableFolder(TableFolder[] folder) {
 		folders.getItems().setAll(folder);
 	}
@@ -221,7 +221,7 @@ public class FolderEditorView implements Initializable {
 
 	private void displayChartDetailsDialog(SongData song) {
 		if (song == null) return;
-		TableEditorView.displayChartDetailsDialog(songdb, song, "In custom folder(s):\n" + 
+		TableEditorView.displayChartDetailsDialog(songdb, song, "In custom folder(s):\n" +
 				getFoldersContainingSong(folders.getItems().toArray(new TableFolder[0]), song));
 	}
 }

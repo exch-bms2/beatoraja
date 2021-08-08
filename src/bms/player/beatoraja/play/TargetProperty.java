@@ -8,7 +8,7 @@ import bms.player.beatoraja.select.ScoreDataCache;
 
 /**
  * スコアターゲット
- * 
+ *
  * @author exch
  */
 public abstract class TargetProperty {
@@ -17,23 +17,23 @@ public abstract class TargetProperty {
 	 * Target ID
 	 */
 	public final String id;
-	
+
     /**
      * ターゲットスコア
      */
     protected final ScoreData targetScore = new ScoreData();
-    
+
     private static String[] targets = new String[0];
     private static String[] targetNames =  new String[0];
-    
+
     public TargetProperty(String id) {
     	this.id = id;
     }
-    
+
     public static String[] getTargets() {
         return targets;
     }
-    
+
     public static String getTargetName(String target) {
     	for(int i = 0;i <targets.length;i++) {
     		if(targets[i].equals(target)) {
@@ -42,7 +42,7 @@ public abstract class TargetProperty {
     	}
         return "";
     }
-    
+
     public static void setTargets(String[] s, MainController main) {
     	if(s != null) {
     		targets = s;
@@ -53,7 +53,7 @@ public abstract class TargetProperty {
     		targetNames[i] = target != null ? target.getName(main) : "";
     	}
     }
-    
+
     public static TargetProperty getTargetProperty(String id) {
     	TargetProperty target = StaticTargetProperty.getTargetProperty(id);
     	if(target == null) {
@@ -72,7 +72,7 @@ public abstract class TargetProperty {
     }
 
     public abstract String getName(MainController main);
-    public abstract ScoreData getTarget(MainController main);    
+    public abstract ScoreData getTarget(MainController main);
 }
 
 /**
@@ -86,7 +86,7 @@ class StaticTargetProperty extends TargetProperty {
 	 * スコアレート(0%-100%)
 	 */
     private float rate;
-    
+
     private String name;
 
     public StaticTargetProperty(String id, String name, float rate) {
@@ -108,7 +108,7 @@ class StaticTargetProperty extends TargetProperty {
 		targetScore.setEgr(rivalscore % 2);
         return targetScore;
     }
-    
+
     public static TargetProperty getTargetProperty(String id) {
     	switch(id) {
     	case "RATE_A-":
@@ -178,20 +178,20 @@ class RivalTargetProperty extends TargetProperty {
     		targetScore.setPlayer(info[index].getName());
     		ScoreData score = cache[index].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
     		if(score != null) {
-        		targetScore.setPlayer(info[index].getName());    			
+        		targetScore.setPlayer(info[index].getName());
         		targetScore.setEpg(score.getEpg());
         		targetScore.setLpg(score.getLpg());
         		targetScore.setEgr(score.getEgr());
         		targetScore.setLgr(score.getLgr());
     		} else {
-        		targetScore.setPlayer("NO DATA");    			
+        		targetScore.setPlayer("NO DATA");
     		}
     	} else {
-    		targetScore.setPlayer("NO RIVAL");    		
+    		targetScore.setPlayer("NO RIVAL");
     	}
         return targetScore;
     }
-    
+
     public static TargetProperty getTargetProperty(String id) {
     	if(id.startsWith("RIVAL_")) {
     		try {
@@ -200,7 +200,7 @@ class RivalTargetProperty extends TargetProperty {
         			return new RivalTargetProperty(index - 1);
         		}
     		} catch (NumberFormatException e) {
-    			
+
     		}
     	}
     	return null;
@@ -248,9 +248,9 @@ class NextRankTargetProperty extends TargetProperty {
 class InternetRankingTargetProperty extends TargetProperty {
 
     private Target target;
-    
+
     private int value;
-    
+
     private InternetRankingTargetProperty(Target target, int value) {
     	super("IR_" + target.name() + "_" + value);
         this.target = target;
@@ -275,9 +275,9 @@ class InternetRankingTargetProperty extends TargetProperty {
     	final RankingData ranking = main.getPlayerResource().getRankingData();
     	if(ranking == null) {
 			targetScore.setPlayer("NO DATA");
-			return targetScore;    		
+			return targetScore;
     	}
-    	
+
     	if(ranking.getState() == RankingData.FINISH) {
     		if(ranking.getTotalPlayer() > 0) {
     			int index = getTargetRank(main, ranking);
@@ -286,7 +286,7 @@ class InternetRankingTargetProperty extends TargetProperty {
         		targetScore.setEpg(targetscore / 2);
         		targetScore.setEgr(targetscore % 2);
     		} else {
-    			targetScore.setPlayer("NO DATA");    			
+    			targetScore.setPlayer("NO DATA");
     		}
     		return targetScore;
     	}
@@ -306,16 +306,16 @@ class InternetRankingTargetProperty extends TargetProperty {
 	        		targetScore.setEpg(targetscore / 2);
 	        		targetScore.setEgr(targetscore % 2);
 	    		} else {
-	    			targetScore.setPlayer("NO DATA");    			
+	    			targetScore.setPlayer("NO DATA");
 	    		}
-	    		
-				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
+
+				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());
 	    	}
 		});
 		irprocess.start();
         return targetScore;
     }
-    
+
     private int getTargetRank(MainController main, RankingData ranking) {
         ScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
                 , main.getPlayerConfig().getLnmode());
@@ -324,12 +324,12 @@ class InternetRankingTargetProperty extends TargetProperty {
 		case NEXT:
 			// n位上のプレイヤー
 			for(int i = 0;i  < ranking.getTotalPlayer(); i++) {
-				if(ranking.getScore(i).getExscore() <= nowscore) { 
+				if(ranking.getScore(i).getExscore() <= nowscore) {
 					return Math.max(i - value , 0);
 				}
 			}
 			return 0;
-			
+
 		case RANK:
 			// n位のプレイヤー
 			return Math.min(ranking.getTotalPlayer(), value) - 1;
@@ -339,7 +339,7 @@ class InternetRankingTargetProperty extends TargetProperty {
 		}
     	return 0;
     }
-    
+
     public static TargetProperty getTargetProperty(String id) {
     	if(id.startsWith("IR_NEXT_")) {
     		try {
@@ -348,7 +348,7 @@ class InternetRankingTargetProperty extends TargetProperty {
         			return new InternetRankingTargetProperty(Target.NEXT, index);
         		}
     		} catch (NumberFormatException e) {
-    			
+
     		}
     	}
     	if(id.startsWith("IR_RANK_")) {
@@ -358,7 +358,7 @@ class InternetRankingTargetProperty extends TargetProperty {
         			return new InternetRankingTargetProperty(Target.RANK, index);
         		}
     		} catch (NumberFormatException e) {
-    			
+
     		}
     	}
     	if(id.startsWith("IR_RANKRATE_")) {
@@ -368,12 +368,12 @@ class InternetRankingTargetProperty extends TargetProperty {
         			return new InternetRankingTargetProperty(Target.RANKRATE, index);
         		}
     		} catch (NumberFormatException e) {
-    			
+
     		}
     	}
     	return null;
     }
-    
+
     enum Target {
     	NEXT, RANK, RANKRATE
     }

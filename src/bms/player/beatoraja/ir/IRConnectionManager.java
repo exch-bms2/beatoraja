@@ -13,11 +13,11 @@ import java.util.logging.Logger;
 
 /**
  * IRConnectionの管理用クラス
- * 
+ *
  * @author exch
  */
 public class IRConnectionManager {
-	
+
 	/**
 	 * 検出されたIRConnection
 	 */
@@ -26,7 +26,7 @@ public class IRConnectionManager {
 
 	/**
 	 * 利用可能な全てのIRConnectionの名称を返す
-	 * 
+	 *
 	 * @return IRConnectionの名称
 	 */
 	public static String[] getAllAvailableIRConnectionName() {
@@ -44,7 +44,7 @@ public class IRConnectionManager {
 
 	/**
 	 * 名称に対応したIRConnectionインスタンスを返す
-	 * 
+	 *
 	 * @param name
 	 *            IRCOnnectionの名称
 	 * @return 対応するIRConnectionインスタンス。存在しない場合はnull

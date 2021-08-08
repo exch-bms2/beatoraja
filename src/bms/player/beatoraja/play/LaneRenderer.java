@@ -24,11 +24,11 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * レーン描画用クラス
- * 
+ *
  * @author exch
  */
 public class LaneRenderer {
-	
+
 	private float basehispeed;
 
 	private float hispeedmargin = 0.25f;
@@ -53,7 +53,7 @@ public class LaneRenderer {
 	private double mainbpm;
 	private double minbpm;
 	private double maxbpm;
-	
+
 	private TextureRegion blank;
 
 	//PMSのリズムに合わせたノートの拡大用
@@ -200,7 +200,7 @@ public class LaneRenderer {
 			playconfig.setHispeed((float) ((2400f / (targetbpm / 100) / playconfig.getDuration()) * (1 - (playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0))));
 		}
 	}
-	
+
 	public void setLanecover(float lanecover) {
 		playconfig.setLanecover(lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
 		resetHispeed(basebpm);
@@ -237,7 +237,7 @@ public class LaneRenderer {
 			playconfig.setHispeed(playconfig.getHispeed() + f);
 		}
 	}
-	
+
 	public PlayConfig getPlayConfig() {
 		return playconfig;
 	}
@@ -253,7 +253,7 @@ public class LaneRenderer {
 			offsetW += offset.w;
 			offsetH += offset.h;
 		}
-		
+
 		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
@@ -283,7 +283,7 @@ public class LaneRenderer {
 
 		final float lanecover = playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0;
 		currentduration = (int) Math.round(region * (1 - lanecover));
-		
+
 		main.main.getOffset(OFFSET_LIFT).y = (float) (hl - lanes[0].region.y);
 		main.main.getOffset(OFFSET_LANECOVER).y = (float) ((hl - hu) * lanecover);
 		// TODO HIDDENとLIFT混在の必要性とHIDDENの必要性
@@ -406,7 +406,7 @@ public class LaneRenderer {
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		y = orgy;
 		final long now = main.main.getNowTime();
-		
+
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getMicroTime() >= microtime) {
@@ -511,7 +511,7 @@ public class LaneRenderer {
 		}
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
 		// + (ltime * (hu - hl) / yy));
-		
+
 		//PMS見逃しPOOR描画
 		// TODO dstnote2をレーン毎に変更
 		if (lanes[0].dstnote2 != Integer.MIN_VALUE) {

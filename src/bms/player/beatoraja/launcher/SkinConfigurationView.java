@@ -128,13 +128,13 @@ public class SkinConfigurationView implements Initializable {
 		}
 		return result.toArray(new SkinHeader[result.size()]);
 	}
-	
+
     @FXML
 	public void changeSkinType() {
     	commitSkinType();
-    	updateSkinType(skintypeSelector.getValue());    	
+    	updateSkinType(skintypeSelector.getValue());
 	}
-    
+
 	public void updateSkinType(SkinType type) {
 		mode = type;
 
@@ -156,13 +156,13 @@ public class SkinConfigurationView implements Initializable {
 			}
 		}
 	}
-    
+
     @FXML
 	public void commitSkinType() {
 		if(player == null) {
 			return;
 		}
-		
+
 		if (selected != null) {
 			SkinConfig skin = new SkinConfig(selected.getPath().toString());
 			skin.setProperties(getProperty());
@@ -171,7 +171,7 @@ public class SkinConfigurationView implements Initializable {
 			player.getSkin()[mode.getId()] = null;
 		}
 	}
-    
+
     public void update(Config config) {
 		List<Path> skinpaths = new ArrayList<Path>();
 		scan(Paths.get(config.getSkinpath()), skinpaths);
@@ -217,7 +217,7 @@ public class SkinConfigurationView implements Initializable {
 			}
 		}
     }
-    
+
 	private void scan(Path p, final List<Path> paths) {
 		if (Files.isDirectory(p)) {
 			try (Stream<Path> sub = Files.list(p)) {
@@ -243,13 +243,13 @@ public class SkinConfigurationView implements Initializable {
     	commitSkinType();
     	commitSkinHeader();
     }
-    
+
     @FXML
 	public void changeSkinHeader() {
     	commitSkinHeader();
 		updateSkinHeader(skinheaderSelector.getValue());
 	}
-    
+
     public void updateSkinHeader(SkinHeader header) {
 		// historyからconfig抽出
 		SkinConfig.Property property = null;
@@ -262,9 +262,9 @@ public class SkinConfigurationView implements Initializable {
 			}
 		}
 		skinconfig.setContent(create(header, property));
-    	
+
     }
-    
+
     public void commitSkinHeader() {
 		// history保存
 		if(selected != null) {
@@ -299,13 +299,13 @@ public class SkinConfigurationView implements Initializable {
 			property = new SkinConfig.Property();
 		}
 		VBox main = new VBox();
-		
+
 		List items = new ArrayList();
 		List<CustomItem> otheritems = new ArrayList<CustomItem>();
 		otheritems.addAll(Arrays.asList(header.getCustomOptions()));
 		otheritems.addAll(Arrays.asList(header.getCustomFiles()));
-		otheritems.addAll(Arrays.asList(header.getCustomOffsets()));		
-		
+		otheritems.addAll(Arrays.asList(header.getCustomOffsets()));
+
 		// カテゴリー処理
 		for(CustomCategory category : header.getCustomCategories()) {
 			items.add(category.name);
@@ -315,16 +315,16 @@ public class SkinConfigurationView implements Initializable {
 			}
 			items.add("");
 		}
-		
+
 		if(items.size() > 0 && otheritems.size() > 0) {
-			items.add("Other");			
+			items.add("Other");
 		}
 		items.addAll(otheritems);
-		
+
 		optionbox.clear();
 		filebox.clear();
 		offsetbox.clear();
-		
+
 		for(Object item : items) {
 			if(item instanceof CustomOption) {
 				// Option項目生成
@@ -379,7 +379,7 @@ public class SkinConfigurationView implements Initializable {
 						name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
 					}
 				}
-				
+
 				final int slashindex = file.path.lastIndexOf('/');
 				final Path dirpath = slashindex != -1 ? Paths.get(file.path.substring(0, slashindex)) : Paths.get(file.path);
 				if (!Files.exists(dirpath)) {
@@ -456,7 +456,7 @@ public class SkinConfigurationView implements Initializable {
 					spinner[i].setPrefWidth(80);
 					spinner[i].setEditable(true);
 					if(b[i]) {
-						hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
+						hbox.getChildren().addAll(new Label(values[i]), spinner[i]);
 					}
 				}
 				offsetbox.put(option, spinner);
@@ -473,7 +473,7 @@ public class SkinConfigurationView implements Initializable {
 
 		return main;
 	}
-	
+
 	static class SkinTypeCell extends ListCell<SkinType> {
 
 		@Override

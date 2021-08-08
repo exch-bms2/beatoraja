@@ -60,21 +60,21 @@ public class CourseEditorView implements Initializable {
 	private SongDataView courseSongsController;
 
 	private String filename;
-	
+
 	private CourseData selectedCourse;
-	
+
 	private SongDatabaseAccessor songdb;
-	
+
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		gradeType.getItems().setAll(null, CLASS, MIRROR, RANDOM);
 		hispeedType.getItems().setAll(null, NO_SPEED);
 		judgeType.getItems().setAll(null, NO_GOOD, NO_GREAT);
 		gaugeType.getItems().setAll(null, GAUGE_LR2,  GAUGE_5KEYS,  GAUGE_7KEYS,  GAUGE_9KEYS,  GAUGE_24KEYS);
 		lnType.getItems().setAll(null, LN,  CN,  HCN);
-		
+
 		courses.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
 			if(oldVal != newVal) {
-				updateCourseData();				
+				updateCourseData();
 			}
 		});
 		courses.setCellFactory((ListView) -> {
@@ -106,7 +106,7 @@ public class CourseEditorView implements Initializable {
 
 		updateCourse(null);
 	}
-	
+
 	protected void setSongDatabaseAccessor(SongDatabaseAccessor songdb) {
 		this.songdb = songdb;
 	}
@@ -116,9 +116,9 @@ public class CourseEditorView implements Initializable {
 			return;
 		}
 		if(TableEditorView.isMd5OrSha256Hash(search.getText())) {
-			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));			
+			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));
 		} else if(search.getText().length() > 1) {
-			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
+			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));
 		}
 	}
 
@@ -126,23 +126,23 @@ public class CourseEditorView implements Initializable {
 		commitCourse();
 		return courses.getItems().toArray(new CourseData[courses.getItems().size()]);
 	}
-	
+
 	public void setCourseData(CourseData[] course) {
 		courses.getItems().setAll(course);
 	}
-	
+
 	public void updateCourseData() {
 		commitCourse();
 		updateCourse(courses.getSelectionModel().getSelectedItem());
 	}
-	
+
 	private void commitCourse() {
 		if(selectedCourse == null) {
 			return;
 		}
 		selectedCourse.setName(courseName.getText());
 		selectedCourse.setRelease(release.isSelected());
-		
+
 		List<CourseData.CourseDataConstraint> constraint = new ArrayList<CourseData.CourseDataConstraint>();
 		if(gradeType.getValue() != null) {
 			constraint.add(gradeType.getValue());
@@ -165,8 +165,8 @@ public class CourseEditorView implements Initializable {
 		trophy[1] = new CourseData.TrophyData("silvermedal", getValue(silvermiss).floatValue(), getValue(silverscore).floatValue());
 		trophy[2] = new CourseData.TrophyData("goldmedal", getValue(goldmiss).floatValue(), getValue(goldscore).floatValue());
 		selectedCourse.setTrophy(trophy);
-		
-		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));		
+
+		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));
 	}
 
 	private void updateCourse(CourseData course) {
@@ -174,9 +174,9 @@ public class CourseEditorView implements Initializable {
 		if(selectedCourse == null) {
 			coursePane.setVisible(false);
 			return;
-		} 
+		}
 		coursePane.setVisible(true);
-		
+
 		courseName.setText(selectedCourse.getName());
 		release.setSelected(selectedCourse.isRelease());
 		gradeType.setValue(null);
@@ -219,17 +219,17 @@ public class CourseEditorView implements Initializable {
 			}
 			if(trophy.getName().equals("silvermedal")) {
 				silvermiss.getValueFactory().setValue(Double.valueOf(trophy.getMissrate()));
-				silverscore.getValueFactory().setValue(Double.valueOf(trophy.getScorerate()));				
+				silverscore.getValueFactory().setValue(Double.valueOf(trophy.getScorerate()));
 			}
 			if(trophy.getName().equals("goldmedal")) {
 				goldmiss.getValueFactory().setValue(Double.valueOf(trophy.getMissrate()));
 				goldscore.getValueFactory().setValue(Double.valueOf(trophy.getScorerate()));
 			}
 		}
-		
+
 		courseSongs.getItems().setAll(course.getSong());
 	}
-	
+
 	private <T> T getValue(Spinner<T> spinner) {
 		spinner.getValueFactory()
 				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
@@ -254,7 +254,7 @@ public class CourseEditorView implements Initializable {
 			courses.getItems().remove(song);
 		}
 	}
- 
+
 	public void moveCourseDataUp() {
 		final int index = courses.getSelectionModel().getSelectedIndex();
 		if(index > 0) {
@@ -290,7 +290,7 @@ public class CourseEditorView implements Initializable {
 			courseSongs.getItems().remove(song);
 		}
 	}
- 
+
 	public void moveSongDataUp() {
 		final int index = courseSongs.getSelectionModel().getSelectedIndex();
 		if(index > 0) {

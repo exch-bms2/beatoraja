@@ -13,21 +13,21 @@ import com.badlogic.gdx.utils.Disposable;
 
 /**
  * 各種音源再生インターフェイス
- * 
+ *
  * @author exch
  */
 public interface AudioDriver extends Disposable {
 
 	/**
 	 * 指定したパスの音源を鳴らす
-	 * 
+	 *
 	 * @param path
 	 *            音源のファイルパス
 	 * @param loop
 	 *            ループ再生するかどうか
 	 */
 	public void play(String path, float volume, boolean loop);
-	
+
 	/**
 	 * 指定したパスの音源のボリュームを設定する
 	 * @param path
@@ -36,18 +36,18 @@ public interface AudioDriver extends Disposable {
 	 *            ボリューム
 	 */
 	public void setVolume(String path, float volume);
-	
+
 	/**
 	 * 指定したパスの音源がなっている場合はtrueを返す
-	 * 
+	 *
 	 * @param path
 	 *            音源のファイルパス
 	 */
 	public boolean isPlaying(String path);
-	
+
 	/**
 	 * 指定したパスの音源がなっている場合は止める
-	 * 
+	 *
 	 * @param path
 	 *            音源のファイルパス
 	 */
@@ -55,7 +55,7 @@ public interface AudioDriver extends Disposable {
 
 	/**
 	 * 指定したパスの音源を開放する
-	 * 
+	 *
 	 * @param path
 	 *            音源のファイルパス
 	 */
@@ -63,12 +63,12 @@ public interface AudioDriver extends Disposable {
 
 	/**
 	 * BMSの音源データを読み込む
-	 * 
+	 *
 	 * @param model
 	 *            BMSモデル
 	 */
 	public void setModel(BMSModel model);
-	
+
 	/**
 	 * 判定に対応した追加キー音を定義する
 	 * @param judge 判定
@@ -84,14 +84,14 @@ public interface AudioDriver extends Disposable {
 
 	/**
 	 * 音源の読み込み状況を返す
-	 * 
+	 *
 	 * @return 音源の読み込み状況(0.0 - 1.0)
 	 */
 	public float getProgress();
 
 	/**
 	 * 指定したNoteの音を鳴らす
-	 * 
+	 *
 	 * @param n
 	 *            Note
 	 * @param volume
@@ -104,7 +104,7 @@ public interface AudioDriver extends Disposable {
 	public void play(int judge, boolean fast);
 	/**
 	 * 指定したNoteの音を止める。nullの場合は再生されている音を全て止める
-	 * 
+	 *
 	 * @param n
 	 *            Note
 	 */
@@ -131,12 +131,12 @@ public interface AudioDriver extends Disposable {
 	 * @return ピッチ(0.5 - 2.0)
 	 */
 	public float getGlobalPitch();
-	
+
 	/**
 	 * 古い音源リソースを開放する
 	 */
 	public void disposeOld();
-	
+
 	/**
 	 * 指定されたパスから対応している音源ファイルのパスを全て取得する
 	 * @param path 指定されたパス
@@ -149,7 +149,7 @@ public interface AudioDriver extends Disposable {
 		final int index = path.lastIndexOf('.');
 		final String name = path.substring(0, index < 0 ? path.length() : index);
 		final String ext = index < 0 ? "" : path.substring(index, path.length());
-		
+
 		Path p = Paths.get(path);
 		if (Files.exists(p)) {
 			result.add(p);
@@ -159,7 +159,7 @@ public interface AudioDriver extends Disposable {
 			if (!_ext.equals(ext)) {
 				final Path p2 = p.resolve(name + _ext);
 				if(Files.exists(p2)) {
-					result.add(p2);					
+					result.add(p2);
 				}
 			}
 		}

@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Array;
  * @author exch
  */
 public class BMSPlayerInputProcessor {
-	
+
 	private boolean enable = true;
 
 	private KeyBoardInputProcesseor kbinput;
@@ -29,7 +29,7 @@ public class BMSPlayerInputProcessor {
 	private BMControllerInputProcessor[] bminput;
 
 	private MidiInputProcessor midiinput;
-	
+
 	private KeyLogger keylog = new KeyLogger();
 
 	public BMSPlayerInputProcessor(Config config, PlayerConfig player) {
@@ -74,7 +74,7 @@ public class BMSPlayerInputProcessor {
 			devices.add(bm);
 		}
 		devices.add(midiinput);
-		
+
 		this.analogScroll = config.isAnalogScroll();
 	}
 
@@ -164,7 +164,7 @@ public class BMSPlayerInputProcessor {
 		}
 		midiinput.setStartTime(starttime);
 	}
-	
+
 	public void setKeyLogMarginTime(long milliMarginTime) {
 		microMarginTime = milliMarginTime * 1000;
 	}
@@ -181,7 +181,7 @@ public class BMSPlayerInputProcessor {
 	public boolean getKeyState(int id) {
 		return id >= 0 && id < keystate.length ? keystate[id] : false;
 	}
-	
+
 	/**
 	 * 指定のキーIDのキー状態を設定する
 	 * @param id キーID
@@ -194,14 +194,14 @@ public class BMSPlayerInputProcessor {
 			this.time[id] = time;
 		}
 	}
-	
+
 	/**
 	 * 指定のキーIDのキー状態変更時間を返す
 	 * @param id キーID
 	 * @return キー状態の変更時間。変更されていない場合はLong.MIN_VALUE
 	 */
 	public long getKeyChangedTime(int id) {
-		return id >= 0 && id < time.length ? time[id] : Long.MIN_VALUE;		
+		return id >= 0 && id < time.length ? time[id] : Long.MIN_VALUE;
 	}
 
 	/**
@@ -217,7 +217,7 @@ public class BMSPlayerInputProcessor {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 全てのキー状態をリセットする
 	 */
@@ -249,16 +249,16 @@ public class BMSPlayerInputProcessor {
 			keystate[i] = false;
 			time[i] = Long.MIN_VALUE;
 		}
-		
+
 		int kbcount = setPlayConfig0(kbkeys,  exclusive);
-		
+
 		int[][] cokeys = new int[playconfig.getController().length][];
 		int cocount = 0;
 		for(int i = 0;i < cokeys.length;i++) {
 			cokeys[i] = playconfig.getController()[i].getKeyAssign();
 			cocount += setPlayConfig0(cokeys[i],  exclusive);
 		}
-				
+
 		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
 		int micount = 0;
 		for(int i = 0;i < mikeys.length;i++) {
@@ -269,7 +269,7 @@ public class BMSPlayerInputProcessor {
 				micount++;
 			}
 		}
-		
+
 		// 各デバイスにキーコンフィグをセット
 		kbinput.setConfig(playconfig.getKeyboardConfig());
 		for(int i = 0;i < bminput.length;i++) {
@@ -281,20 +281,20 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 		midiinput.setConfig(playconfig.getMidiConfig());
-		
+
 		if(kbcount >= cocount && kbcount >= micount) {
 			type = Type.KEYBOARD;
 		} else if(cocount >= kbcount && cocount >= micount) {
 			type = Type.BM_CONTROLLER;
 		} else {
-			type = Type.MIDI;			
+			type = Type.MIDI;
 		}
 	}
-	
+
 	public BMSPlayerInputDevice.Type getDeviceType() {
 		return type;
 	}
-	
+
 	private int setPlayConfig0(int[] keys, boolean[] exclusive) {
 		int count = 0;
 		for(int i = 0;i < keys.length;i++) {
@@ -307,7 +307,7 @@ public class BMSPlayerInputProcessor {
 		}
 		return count;
 	}
-	
+
 	public void setEnable(boolean enable) {
 		this.enable = enable;
 		if(!enable) {
@@ -317,7 +317,7 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 	}
-	
+
 	public boolean getControlKeyState(ControlKeys key) {
 		return kbinput.getKeyState(key.keycode);
 	}
@@ -325,11 +325,10 @@ public class BMSPlayerInputProcessor {
 	public boolean isControlKeyPressed(ControlKeys key) {
 		return kbinput.isKeyPressed(key.keycode);
 	}
-
-	public boolean isControlKeyPressed(ControlKeys key, int heldModifiers, int... notHeldModifiers) {
+public boolean isControlKeyPressed(ControlKeys key, int heldModifiers, int... notHeldModifiers) {
 		return kbinput.isKeyPressed(key.keycode, heldModifiers, notHeldModifiers);
 	}
-	
+
 	protected void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
 		if (!enable) {
 			return;
@@ -429,7 +428,8 @@ public class BMSPlayerInputProcessor {
 		}
 		return false;
 	}
-	
+
+
 	public boolean isSelectPressed() {
 		return selectPressed;
 	}
@@ -513,18 +513,17 @@ public class BMSPlayerInputProcessor {
 	public void dispose() {
 		midiinput.close();
 	}
-	
+
 	/**
 	 * キーロガー
-	 * 
+	 *
 	 * @author exch
 	 */
 	private static class KeyLogger {
-		
 		public static final int INITIAL_LOG_COUNT = 10000;
-		
+
 		private final Array<KeyInputLog> keylog;
-		
+
 		private final KeyInputLog[] logpool;
 		private int poolindex;
 
@@ -533,15 +532,15 @@ public class BMSPlayerInputProcessor {
 			logpool = new KeyInputLog[INITIAL_LOG_COUNT];
 			clear();
 		}
-		
-		/**
-		 * キー入力ログを追加する
-		 * 
-		 * @param presstime キー入力時間(us)
-		 * @param keycode キーコード
-		 * @param pressed 押されたかどうか
-		 */
-		public void add(long presstime, int keycode, boolean pressed) {
+
+        /**
+         * キー入力ログを追加する
+         *
+         * @param presstime キー入力時間(us)
+         * @param keycode   キーコード
+         * @param pressed   押されたかどうか
+         */
+        public void add(long presstime, int keycode, boolean pressed) {
 			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
 			poolindex++;
 			log.presstime = presstime;
@@ -549,23 +548,23 @@ public class BMSPlayerInputProcessor {
 			log.pressed = pressed;
 			keylog.add(log);
 		}
-		
-		/**
-		 * キーログをクリアする
-		 */
-		public void clear() {
+
+        /**
+         * キーログをクリアする
+         */
+        public void clear() {
 			keylog.clear();
 			for(int i = 0;i < logpool.length;i++) {
 				logpool[i] = new KeyInputLog();
 			}
 		}
-		
-		/**
-		 * 
-		 * @return
-		 */
-		public KeyInputLog[] toArray() {
+
+        /**
+         * @return
+         */
+        public KeyInputLog[] toArray() {
 			return keylog.toArray(KeyInputLog.class);
 		}
 	}
 }
+

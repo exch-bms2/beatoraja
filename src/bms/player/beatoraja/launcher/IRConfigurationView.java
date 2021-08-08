@@ -20,7 +20,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 public class IRConfigurationView implements Initializable {
-	
+
 	@FXML
 	private Button primarybutton;
 	@FXML
@@ -37,13 +37,13 @@ public class IRConfigurationView implements Initializable {
 	private CheckBox importrival;
 	@FXML
 	private CheckBox importscore;
-	
+
 	private Map<String, IRConfig> irmap = new HashMap<String, IRConfig>();
-	
+
 	private String primary;
-	
+
 	private IRConfig currentir;
-	
+
 	private PlayerConfig player;
 
 	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
@@ -57,14 +57,14 @@ public class IRConfigurationView implements Initializable {
 		initComboBox(irsend, new String[] { arg1.getString("IR_SEND_ALWAYS"), arg1.getString("IR_SEND_FINISH"), arg1.getString("IR_SEND_UPDATE")});
 		irname.getItems().setAll(IRConnectionManager.getAllAvailableIRConnectionName());
 	}
-	
+
     public void update(PlayerConfig player) {
     	this.player = player;
-    	
+
     	for(IRConfig ir : player.getIrconfig()) {
     		irmap.put(ir.getIrname(), ir);
     	}
-    	    	
+
 		primary = player.getIrconfig().length > 0 ? player.getIrconfig()[0].getIrname() : null;
 		if(!irname.getItems().contains(primary)) {
 			if (irname.getItems().size() == 0) {
@@ -80,9 +80,9 @@ public class IRConfigurationView implements Initializable {
 
     public void commit() {
 		updateIRConnection();
-		
+
 		List<IRConfig> irlist = new ArrayList<IRConfig>();
-		
+
 		for(String s : irname.getItems()) {
 			IRConfig ir = irmap.get(s);
 			if(ir != null && ir.getUserid().length() > 0) {
@@ -96,7 +96,7 @@ public class IRConfigurationView implements Initializable {
 		
 		player.setIrconfig(irlist.toArray(new IRConfig[irlist.size()]));
     }
-    
+
 	@FXML
 	public void setPrimary() {
 		primary = irname.getValue();
@@ -112,7 +112,7 @@ public class IRConfigurationView implements Initializable {
 			currentir.setImportscore(importscore.isSelected());
 			currentir.setImportrival(importrival.isSelected());
 		}
-		
+
     	String homeurl = IRConnectionManager.getHomeURL(irname.getValue());
 		irhome.setText(homeurl);
 		irhome.setOnAction((event) -> {
@@ -125,7 +125,7 @@ public class IRConfigurationView implements Initializable {
                 Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
             }
         });
-		
+
 		if(!irmap.containsKey(irname.getValue())) {
 			IRConfig ir = new IRConfig();
 			ir.setIrname(irname.getValue());

@@ -66,7 +66,7 @@ public class PlayerConfig {
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
-	
+
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
 	
@@ -172,7 +172,7 @@ public class PlayerConfig {
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
-	
+
 	/**
 	 * Enable folder random select bar
 	 */
@@ -202,7 +202,7 @@ public class PlayerConfig {
 	 * 通過ノートを表示するかどうか
 	 */
 	private boolean showpastnote = false;
-	
+
 	/**
 	 * 選択中の選曲時ソート
 	 */
@@ -214,7 +214,7 @@ public class PlayerConfig {
 	private int musicselectinput = 0;
 
 	private IRConfig[] irconfig;
-	
+
 	private String twitterConsumerKey;
 
 	private String twitterConsumerSecret;
@@ -477,7 +477,7 @@ public class PlayerConfig {
 	public Mode getMode()  {
 		return mode;
 	}
-	
+
 	public int getSort() {
 		return this.sort ;
 	}
@@ -652,11 +652,11 @@ public class PlayerConfig {
 	public void setWindowHold(boolean isWindowHold) {
 		this.isWindowHold = isWindowHold;
 	}
-	
+
 	public boolean isRandomSelect() {
 		return isRandomSelect;
 	}
-	
+
 	public void setRandomSelect(boolean isRandomSelect) {
 		this.isRandomSelect = isRandomSelect;
 	}
@@ -796,7 +796,7 @@ public class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
+
 		sort = MathUtils.clamp(sort, 0 , BarSorter.values().length - 1);
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
@@ -815,7 +815,7 @@ public class PlayerConfig {
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
-		
+
 		if(autosavereplay == null) {
 			autosavereplay = config.autosavereplay != null ? config.autosavereplay.clone() : new int[4];
 		}
@@ -842,7 +842,7 @@ public class PlayerConfig {
 				irconfig[i].setIrname(irnames[i]);
 			}
 		}
-		
+
 		for(int i = 0;i < irconfig.length;i++) {
 			if(irconfig[i] == null || irconfig[i].getIrname() == null) {
 				continue;
@@ -850,7 +850,7 @@ public class PlayerConfig {
 			for(int j = i + 1;j < irconfig.length;j++) {
 				if(irconfig[j] != null && irconfig[i].getIrname().equals(irconfig[j].getIrname())) {
 					irconfig[j].setIrname(null);
-				}				
+				}
 			}
 		}
 		irconfig = Validatable.removeInvalidElements(irconfig);

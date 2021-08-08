@@ -270,10 +270,10 @@ public enum MusicSelectCommand {
                 bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
                 selector.play(SOUND_FOLDEROPEN);
             }
-        }    	
+        }
     }
     ;
 
     public abstract void execute(MusicSelector selector);
-    
+
 }

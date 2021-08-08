@@ -96,13 +96,11 @@ public class MainLoader extends Application {
 				}
 			} else {
 				bmsPath = Paths.get(s);
-				if(auto == null) {
+				if (auto == null) {
 					auto = BMSPlayerMode.PLAY;
 				}
 			}
 		}
-
-
 
 		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();

@@ -11,11 +11,11 @@ import java.util.logging.Logger;
 
 /**
  * 楽曲詳細情報
- * 
+ *
  * @author exch
  */
 public class SongInformation implements Validatable {
-	
+
 	/**
 	 * 譜面のハッシュ値
 	 */
@@ -53,34 +53,34 @@ public class SongInformation implements Validatable {
 	 * TOTAL
 	 */
 	private double total;
-	
+
 	private double mainbpm;
 
 	/**
 	 * 分布
 	 */
 	private String distribution = "";
-	
+
 	private int[][] distributionValues = new int[0][7];
 
 	/**
 	 * BPM遷移
 	 */
 	private String speedchange = "";
-	
+
 	private double[][] speedchangeValues = new double[0][2];
 
 	/**
 	 * 各レーンのノーツ数
 	 */
 	private String lanenotes = "";
-	
+
 	private int[][] lanenotesValues = new int[0][3];
 
 	public SongInformation() {
-		
+
 	}
-	
+
 	public SongInformation(BMSModel model) {
 		sha256 = model.getSHA256();
 		n = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_KEY);
@@ -88,7 +88,7 @@ public class SongInformation implements Validatable {
 		s = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_SCRATCH);
 		ls = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_SCRATCH);
 		total = model.getTotal();
-		
+
 		int[][] lanenotes = new int[model.getMode().key][3];
 		int[][] data = new int[model.getLastTime() / 1000 + 2][7];
 		int pos = 0;
@@ -122,11 +122,11 @@ public class SongInformation implements Validatable {
 							data[tl.getTime() / 1000][6]++;
 							lanenotes[i][2]++;
 						}
-						
+
 						border--;
 						if(border == 0) {
 							borderpos = pos;
-						}						
+						}
 					}
 				}
 			}
@@ -156,7 +156,7 @@ public class SongInformation implements Validatable {
 			enddensity = Math.max(enddensity, ((double)notes) / d);
 		}
 		setDistributionValues(data);
-		
+
 		List<double[]> speedList = new ArrayList<double[]>();
 		Map<Double, Integer> bpmNoteCountMap = new HashMap<Double, Integer>();
 		double nowSpeed = model.getBpm();
@@ -168,7 +168,7 @@ public class SongInformation implements Validatable {
 
 			if(tl.getStop() > 0) {
 				if(nowSpeed != 0) {
-					nowSpeed = 0;					
+					nowSpeed = 0;
 					speedList.add(new double[] {nowSpeed, tl.getTime()});
 				}
 			} else if(nowSpeed != tl.getBPM() * tl.getScroll()) {
@@ -176,7 +176,7 @@ public class SongInformation implements Validatable {
 				speedList.add(new double[] {nowSpeed, tl.getTime()});
 			}
 		}
-		
+
 		int maxcount = 0;
 		for (double bpm : bpmNoteCountMap.keySet()) {
 			if (bpmNoteCountMap.get(bpm) > maxcount) {
@@ -185,15 +185,15 @@ public class SongInformation implements Validatable {
 			}
 		}
 		if(speedList.get(speedList.size() - 1)[1] != tls[tls.length - 1].getTime()) {
-			speedList.add(new double[] {nowSpeed, tls[tls.length - 1].getTime()});			
+			speedList.add(new double[] {nowSpeed, tls[tls.length - 1].getTime()});
 		}
 
 		setSpeedchangeValues(speedList.toArray(new double[speedList.size()][]));
-		
+
 		setLanenotesValues(lanenotes);
 
 	}
-	
+
 	public String getDistribution() {
 		return distribution;
 	}
@@ -219,9 +219,9 @@ public class SongInformation implements Validatable {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	public int[][] getDistributionValues() {
 		return distributionValues;
 	}
@@ -412,7 +412,7 @@ public class SongInformation implements Validatable {
 	public void setPeakdensity(double peakdensity) {
 		this.peakdensity = peakdensity;
 	}
-	
+
 	public double getEnddensity() {
 		return enddensity;
 	}

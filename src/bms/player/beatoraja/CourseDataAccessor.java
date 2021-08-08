@@ -37,7 +37,7 @@ public class CourseDataAccessor {
         }
         return result.toArray(new CourseData[result.size()]) ;
     }
-    
+
     public String[] readAllNames() {
         List<String> result = new ArrayList<>();
         try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(coursedir))) {
@@ -61,7 +61,7 @@ public class CourseDataAccessor {
 			json.setIgnoreUnknownFields(true);
             CourseData[] courses =  json.fromJson(CourseData[].class,
                     new BufferedInputStream(Files.newInputStream(p)));
-            List<CourseData> result = new ArrayList<CourseData>();            
+            List<CourseData> result = new ArrayList<CourseData>();
             for(CourseData course : courses) {
             	if(course.validate()) {
                 	result.add(course);
