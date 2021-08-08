@@ -42,7 +42,7 @@ public class RhythmTimerProcessor {
 						}
 					}
 					for(double j = 0.25; j <= nextSectionLineSection; j += 0.25) {
-						if((!last && j != nextSectionLineSection) || last) {
+						if (last || j != nextSectionLineSection) {
 							int prevIndex;
 							for(prevIndex = i; timelines[prevIndex].getSection() - sectionLineSection < j; prevIndex++) {}
 							prevIndex--;

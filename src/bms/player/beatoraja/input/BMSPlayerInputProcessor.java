@@ -70,9 +70,7 @@ public class BMSPlayerInputProcessor {
 
 		devices = new Array<BMSPlayerInputDevice>();
 		devices.add(kbinput);
-		for (BMControllerInputProcessor bm : bminput) {
-			devices.add(bm);
-		}
+		devices.addAll(bminput);
 		devices.add(midiinput);
 
 		this.analogScroll = config.isAnalogScroll();
