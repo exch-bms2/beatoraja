@@ -163,7 +163,7 @@ public class SongInformation implements Validatable {
 		speedList.add(new double[] {nowSpeed, 0.0});
 		final TimeLine[] tls = model.getAllTimeLines();
 		for (TimeLine tl : tls) {
-			int notecount = bpmNoteCountMap.containsKey(tl.getBPM()) ? bpmNoteCountMap.get(tl.getBPM()) : 0;
+			int notecount = bpmNoteCountMap.getOrDefault(tl.getBPM(), 0);
 			bpmNoteCountMap.put(tl.getBPM(), notecount + tl.getTotalNotes());
 
 			if(tl.getStop() > 0) {
