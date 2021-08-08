@@ -2,7 +2,9 @@ package bms.player.beatoraja.pattern;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -62,7 +64,7 @@ public class LaneShuffleModifier extends PatternModifier {
 			keys = getKeys(mode, true);
 			if(mode == Mode.POPN_9K) {
 				random = keys.length > 0 ? noMurioshiLaneShuffle(model) : keys;
-			} else { 
+			} else {
 				random = keys.length > 0 ? shuffle(keys, getSeed()) : keys;
 				setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}
@@ -105,10 +107,10 @@ public class LaneShuffleModifier extends PatternModifier {
 			max = Math.max(max, key);
 		}
 		boolean isImpossible = false; //7個押し以上が存在するかどうか
-		List<Integer> originalPatternList = new ArrayList<Integer>(); //3個押し以上の同時押しパターンのリスト
+		Set<Integer> originalPatternList = new HashSet<>(); //3個押し以上の同時押しパターンのセット
 		Arrays.fill(ln, -1);
 		Arrays.fill(endLnNoteTime, -1);
-		
+
 		//3個押し以上の同時押しパターンのリストを作る
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote()) {
@@ -129,42 +131,35 @@ public class LaneShuffleModifier extends PatternModifier {
 					}
 				}
 				//通常ノート
-				List<Integer> noteLane = new ArrayList<Integer>(keys.length);
+				List<Integer> noteLane = new ArrayList<>(keys.length);
 				for (int i = 0; i < lanes; i++) {
 					Note n = tl.getNote(i);
-					if((n != null && n instanceof NormalNote ) || (ln != null && ln[i] != -1)) {
-							noteLane.add((Integer) i);
+					if (n != null && n instanceof NormalNote || ln[i] != -1) {
+						noteLane.add(i);
 					}
 				}
 				//7個押し以上が一つでも存在すれば無理押しが来ない譜面は存在しない
-				if(noteLane.size() >= 7) {
+				if (noteLane.size() >= 7) {
 					isImpossible = true;
 					break;
-				} else if(noteLane.size() >= 3) {
-					int pattern=0;
-					for(int i=0;i<noteLane.size();i++) {
-						pattern += (int) Math.pow(2, noteLane.get(i));
+				} else if (noteLane.size() >= 3) {
+					int pattern = 0;
+					for (Integer i : noteLane) {
+						pattern += (int) Math.pow(2, i);
 					}
-					originalPatternList.add((Integer) pattern);
+					originalPatternList.add(pattern);
 				}
 			}
 		}
-		
+
 		List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>(); //無理押しが来ない譜面のリスト
 		if(!isImpossible) {
-			//重複する同時押しパターンを除去
-			for(int i = 0 ; i < originalPatternList.size()-1 ; i++ ) {
-				for(int j = originalPatternList.size()-1 ; j > i; j-- ) {
-					if (originalPatternList.get(i).equals(originalPatternList.get(j))) {
-						originalPatternList.remove(j);
-					}
-				}
-			}
+
 			//無理押しが来ない譜面を探す
 			int[] searchLane = new int[9];
 			boolean[] searchLaneFlag = new boolean[9];
 			Arrays.fill(searchLaneFlag, false);
-			List<Integer> tempPattern = new ArrayList<Integer>(keys.length);
+			List<Integer> tempPattern = new ArrayList<>(keys.length);
 			for(searchLane[0]=0;searchLane[0]<9;searchLane[0]++) {
 				searchLaneFlag[searchLane[0]] = true;
 				for(searchLane[1]=0;searchLane[1]<9;searchLane[1]++) {
@@ -192,29 +187,32 @@ public class LaneShuffleModifier extends PatternModifier {
 												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)
 																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; //正規鏡は除外
 												boolean murioshiFlag = false;
-												for(int i=0;i<originalPatternList.size();i++) {
+												for (Integer pattern : originalPatternList) {
 													tempPattern.clear();
-													for(int j=0;j<9;j++) {
-														if(((int)(originalPatternList.get(i)/Math.pow(2,j))%2)==1) tempPattern.add((Integer) searchLane[j]+1);
+													for (int j = 0; j < 9; j++) {
+														if (((int) (pattern / Math.pow(2, j)) % 2) == 1) {
+															tempPattern.add(searchLane[j] + 1);
+														}
 													}
+
 													if(
-															(tempPattern.indexOf((Integer)1)!=-1&&tempPattern.indexOf((Integer)4)!=-1&&tempPattern.indexOf((Integer)7)!=-1)||
-															(tempPattern.indexOf((Integer)1)!=-1&&tempPattern.indexOf((Integer)4)!=-1&&tempPattern.indexOf((Integer)8)!=-1)||
-															(tempPattern.indexOf((Integer)1)!=-1&&tempPattern.indexOf((Integer)4)!=-1&&tempPattern.indexOf((Integer)9)!=-1)||
-															(tempPattern.indexOf((Integer)1)!=-1&&tempPattern.indexOf((Integer)5)!=-1&&tempPattern.indexOf((Integer)8)!=-1)||
-															(tempPattern.indexOf((Integer)1)!=-1&&tempPattern.indexOf((Integer)5)!=-1&&tempPattern.indexOf((Integer)9)!=-1)||
-															(tempPattern.indexOf((Integer)1)!=-1&&tempPattern.indexOf((Integer)6)!=-1&&tempPattern.indexOf((Integer)9)!=-1)||
-															(tempPattern.indexOf((Integer)2)!=-1&&tempPattern.indexOf((Integer)5)!=-1&&tempPattern.indexOf((Integer)8)!=-1)||
-															(tempPattern.indexOf((Integer)2)!=-1&&tempPattern.indexOf((Integer)5)!=-1&&tempPattern.indexOf((Integer)9)!=-1)||
-															(tempPattern.indexOf((Integer)2)!=-1&&tempPattern.indexOf((Integer)6)!=-1&&tempPattern.indexOf((Integer)9)!=-1)||
-															(tempPattern.indexOf((Integer)3)!=-1&&tempPattern.indexOf((Integer)6)!=-1&&tempPattern.indexOf((Integer)9)!=-1)
+															(tempPattern.contains(1) && tempPattern.contains(4) && tempPattern.contains(7))||
+															(tempPattern.contains(1) && tempPattern.contains(4) && tempPattern.contains(8))||
+															(tempPattern.contains(1) && tempPattern.contains(4) && tempPattern.contains(9))||
+															(tempPattern.contains(1) && tempPattern.contains(5) && tempPattern.contains(8))||
+															(tempPattern.contains(1) && tempPattern.contains(5) && tempPattern.contains(9))||
+															(tempPattern.contains(1) && tempPattern.contains(6) && tempPattern.contains(9))||
+															(tempPattern.contains(2) && tempPattern.contains(5) && tempPattern.contains(8))||
+															(tempPattern.contains(2) && tempPattern.contains(5) && tempPattern.contains(9))||
+															(tempPattern.contains(2) && tempPattern.contains(6) && tempPattern.contains(9))||
+															(tempPattern.contains(3) && tempPattern.contains(6) && tempPattern.contains(9))
 															) {
 														murioshiFlag=true;
 														break;
 													}
 												}
 												if(!murioshiFlag) {
-													kouhoPatternList.add(new ArrayList<Integer>());
+													kouhoPatternList.add(new ArrayList<>());
 													for(int i=0;i<9;i++) {
 														kouhoPatternList.get(kouhoPatternList.size()-1).add(searchLane[i]);
 													}
@@ -237,9 +235,9 @@ public class LaneShuffleModifier extends PatternModifier {
 				searchLaneFlag[searchLane[0]] = false;
 			}
 		}
-		
+
 		Logger.getGlobal().info("無理押し無し譜面数 : "+(kouhoPatternList.size()));
-		
+
 		int[] result = new int[9];
 		if(kouhoPatternList.size() > 0) {
 			int r = (int) (Math.random() * kouhoPatternList.size());
