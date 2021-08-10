@@ -1,18 +1,9 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
+import bms.model.*;
 
-import bms.model.BMSModel;
-import bms.model.LongNote;
-import bms.model.Mode;
-import bms.model.NormalNote;
-import bms.model.Note;
-import bms.model.TimeLine;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * レーン単位でノーツを入れ替えるオプション MIRROR、RANDOM、R-RANDOMが該当する
@@ -152,97 +143,18 @@ public class LaneShuffleModifier extends PatternModifier {
 			}
 		}
 
-		List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>(); //無理押しが来ない譜面のリスト
-		if(!isImpossible) {
-
-			//無理押しが来ない譜面を探す
-			int[] searchLane = new int[9];
-			boolean[] searchLaneFlag = new boolean[9];
-			Arrays.fill(searchLaneFlag, false);
-			List<Integer> tempPattern = new ArrayList<>(keys.length);
-			for(searchLane[0]=0;searchLane[0]<9;searchLane[0]++) {
-				searchLaneFlag[searchLane[0]] = true;
-				for(searchLane[1]=0;searchLane[1]<9;searchLane[1]++) {
-					if(searchLaneFlag[searchLane[1]]) continue;
-					searchLaneFlag[searchLane[1]] = true;
-					for(searchLane[2]=0;searchLane[2]<9;searchLane[2]++) {
-						if(searchLaneFlag[searchLane[2]]) continue;
-						searchLaneFlag[searchLane[2]] = true;
-						for(searchLane[3]=0;searchLane[3]<9;searchLane[3]++) {
-							if(searchLaneFlag[searchLane[3]]) continue;
-							searchLaneFlag[searchLane[3]] = true;
-							for(searchLane[4]=0;searchLane[4]<9;searchLane[4]++) {
-								if(searchLaneFlag[searchLane[4]]) continue;
-								searchLaneFlag[searchLane[4]] = true;
-								for(searchLane[5]=0;searchLane[5]<9;searchLane[5]++) {
-									if(searchLaneFlag[searchLane[5]]) continue;
-									searchLaneFlag[searchLane[5]] = true;
-									for(searchLane[6]=0;searchLane[6]<9;searchLane[6]++) {
-										if(searchLaneFlag[searchLane[6]]) continue;
-										searchLaneFlag[searchLane[6]] = true;
-										for(searchLane[7]=0;searchLane[7]<9;searchLane[7]++) {
-											if(searchLaneFlag[searchLane[7]]) continue;
-											searchLaneFlag[searchLane[7]] = true;
-											for(searchLane[8]=0;searchLane[8]<9;searchLane[8]++) {
-												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)
-																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; //正規鏡は除外
-												boolean murioshiFlag = false;
-												for (Integer pattern : originalPatternList) {
-													tempPattern.clear();
-													for (int j = 0; j < 9; j++) {
-														if (((int) (pattern / Math.pow(2, j)) % 2) == 1) {
-															tempPattern.add(searchLane[j] + 1);
-														}
-													}
-
-													if(
-															(tempPattern.contains(1) && tempPattern.contains(4) && tempPattern.contains(7))||
-															(tempPattern.contains(1) && tempPattern.contains(4) && tempPattern.contains(8))||
-															(tempPattern.contains(1) && tempPattern.contains(4) && tempPattern.contains(9))||
-															(tempPattern.contains(1) && tempPattern.contains(5) && tempPattern.contains(8))||
-															(tempPattern.contains(1) && tempPattern.contains(5) && tempPattern.contains(9))||
-															(tempPattern.contains(1) && tempPattern.contains(6) && tempPattern.contains(9))||
-															(tempPattern.contains(2) && tempPattern.contains(5) && tempPattern.contains(8))||
-															(tempPattern.contains(2) && tempPattern.contains(5) && tempPattern.contains(9))||
-															(tempPattern.contains(2) && tempPattern.contains(6) && tempPattern.contains(9))||
-															(tempPattern.contains(3) && tempPattern.contains(6) && tempPattern.contains(9))
-															) {
-														murioshiFlag=true;
-														break;
-													}
-												}
-												if(!murioshiFlag) {
-													kouhoPatternList.add(new ArrayList<>());
-													for(int i=0;i<9;i++) {
-														kouhoPatternList.get(kouhoPatternList.size()-1).add(searchLane[i]);
-													}
-												}
-											}
-											searchLaneFlag[searchLane[7]] = false;
-										}
-										searchLaneFlag[searchLane[6]] = false;
-									}
-									searchLaneFlag[searchLane[5]] = false;
-								}
-								searchLaneFlag[searchLane[4]] = false;
-							}
-							searchLaneFlag[searchLane[3]] = false;
-						}
-						searchLaneFlag[searchLane[2]] = false;
-					}
-					searchLaneFlag[searchLane[1]] = false;
-				}
-				searchLaneFlag[searchLane[0]] = false;
-			}
+		List<List<Integer>> kouhoPatternList = new ArrayList<>(); //無理押しが来ない譜面のリスト
+		if (!isImpossible) {
+			kouhoPatternList = searchForNoMurioshiLaneCombinations(originalPatternList, keys);
 		}
 
 		Logger.getGlobal().info("無理押し無し譜面数 : "+(kouhoPatternList.size()));
 
 		int[] result = new int[9];
-		if(kouhoPatternList.size() > 0) {
+		if (kouhoPatternList.size() > 0) {
 			int r = (int) (Math.random() * kouhoPatternList.size());
 			for (int i = 0; i < 9; i++) {
-				result[(int) (kouhoPatternList.get(r)).get(i)] = i;
+				result[kouhoPatternList.get(r).get(i)] = i;
 			}
 		//無理押しが来ない譜面が存在しない場合は正規か鏡でランダム
 		} else {
@@ -252,6 +164,74 @@ public class LaneShuffleModifier extends PatternModifier {
 			}
 		}
 		return result;
+	}
+
+	private List<List<Integer>> searchForNoMurioshiLaneCombinations(Set<Integer> originalPatternList, int[] keys) {
+		List<List<Integer>> noMurioshiLaneCombinations = new ArrayList<>(); // 無理押しが来ない譜面のリスト
+		List<Integer> tempPattern = new ArrayList<>(keys.length);
+		int[] indexes = new int[9];
+		int[] laneNumbers = new int[9];
+		for (int i = 0; i < 9; i++) {
+			laneNumbers[i] = i;
+			indexes[i] = 0;
+		}
+
+		List<List<Integer>> murioshiChords = Arrays.asList(
+				Arrays.asList(1, 4, 7),
+				Arrays.asList(1, 4, 8),
+				Arrays.asList(1, 4, 9),
+				Arrays.asList(1, 5, 8),
+				Arrays.asList(1, 5, 9),
+				Arrays.asList(1, 6, 9),
+				Arrays.asList(2, 5, 8),
+				Arrays.asList(2, 5, 9),
+				Arrays.asList(2, 6, 9),
+				Arrays.asList(3, 6, 9)
+		);
+
+		int i = 0;
+		while (i < 9) {
+			if (indexes[i] < i) {
+				swap(laneNumbers, i % 2 == 0 ? 0 : indexes[i], i);
+
+				boolean murioshiFlag = false;
+				for (Integer pattern : originalPatternList) {
+					tempPattern.clear();
+					for (int j = 0; j < 9; j++) {
+						if (((int) (pattern / Math.pow(2, j)) % 2) == 1) {
+							tempPattern.add(laneNumbers[j] + 1);
+						}
+					}
+
+					murioshiFlag = murioshiChords.stream().anyMatch(tempPattern::containsAll);
+					if (murioshiFlag) {
+						break;
+					}
+				}
+				if (!murioshiFlag) {
+					List<Integer> randomCombination = new ArrayList<>();
+					for (int j = 0; j < 9; j++) {
+						randomCombination.add(laneNumbers[j]);
+					}
+					noMurioshiLaneCombinations.add(randomCombination);
+				}
+
+				indexes[i]++;
+				i = 0;
+			} else {
+				indexes[i] = 0;
+				i++;
+			}
+		}
+
+		noMurioshiLaneCombinations.remove(Arrays.asList(8, 7, 6, 5, 4, 3, 2, 1, 0));
+		return noMurioshiLaneCombinations;
+	}
+
+	private void swap(int[] input, int a, int b) {
+		int tmp = input[a];
+		input[a] = input[b];
+		input[b] = tmp;
 	}
 
 	@Override
