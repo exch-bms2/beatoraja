@@ -11,6 +11,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.result.AbstractResult;
 
 /**
  * FloatProperty/FloatWriterのFactoryクラス
@@ -132,6 +133,24 @@ public class FloatPropertyFactory {
 				(state, value) -> {
 					if(state instanceof SkinConfiguration) {
 						((SkinConfiguration) state).setSkinSelectPosition(value);
+					}
+				}),
+		ranking_position(8,
+				(state) -> {
+					if(state instanceof MusicSelector) {
+						return ((MusicSelector) state).getRankingPosition();
+					}
+					if(state instanceof AbstractResult) {
+						return ((AbstractResult) state).getRankingPosition();
+					}
+					return 0;
+				},
+				(state, value) -> {
+					if(state instanceof MusicSelector) {
+						((MusicSelector) state).setRankingPosition(value);
+					}
+					if(state instanceof AbstractResult) {
+						((AbstractResult) state).setRankingPosition(value);
 					}
 				}),
 		mastervolume(17,
