@@ -212,6 +212,7 @@ public class StringPropertyFactory {
 				int rankingOffset = 0;
 				if (state instanceof MusicSelector) {
 					irc = ((MusicSelector) state).getCurrentRankingData();
+					rankingOffset = ((MusicSelector) state).getRankingOffset();
 				}
 				if (state instanceof AbstractResult) {
 					irc = ((AbstractResult) state).getRankingData();

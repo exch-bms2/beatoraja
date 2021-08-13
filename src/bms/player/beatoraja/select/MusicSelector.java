@@ -91,6 +91,10 @@ public class MusicSelector extends MainState {
 	
 	private RankingData currentir;
 	private RankingDataCache ircache = new RankingDataCache();
+	/**
+	 * ランキング表示位置
+	 */
+	protected int rankingOffset = 0;
 
 	private PlayerInformation rival;
 	private PlayerInformation[] rivals = new PlayerInformation[0];
@@ -801,6 +805,23 @@ public class MusicSelector extends MainState {
 	public long getCurrentRankingDuration() {
 		return currentRankingDuration;
 	}
+	
+	public int getRankingOffset() {
+		return rankingOffset;
+	}
+	
+	public float getRankingPosition() {
+		final int rankingMax = currentir != null ? Math.max(1, currentir.getTotalPlayer()) : 1;
+		return (float)rankingOffset / rankingMax;		
+	}
+	
+	public void setRankingPosition(float value) {
+		if (value >= 0 && value < 1) {
+			final int rankingMax = currentir != null ? Math.max(1, currentir.getTotalPlayer()) : 1;
+			rankingOffset = (int) (rankingMax * value);
+		}
+	}
+
 	/**
 	 * IRアクセスデータのキャッシュ
 	 *
