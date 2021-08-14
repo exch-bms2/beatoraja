@@ -533,38 +533,47 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		private ObjectMap<String, PCM> pcmMap = new ObjectMap<String, PCM>();
 
+		private T loadSlice(AudioKey key) {
+            PCM wav = null;
+            synchronized(pcmMap) {
+                wav = pcmMap.get(key.path);
+                if (wav == null) {
+                    wav = PCM.load(key.path, AbstractAudioDriver.this);
+                    if(wav != null) {
+                        pcmMap.put(key.path, wav);
+                    }
+                }
+            }
+
+            if (wav != null) {
+                try {
+                    final PCM slicewav = wav.slice(key.start, key.duration);
+                    return slicewav != null ? getKeySound(slicewav) : null;
+                    // System.out.println("WAV slicing - Name:"
+                    // + name + " ID:" + note.getWav() +
+                    // " start:" + note.getStarttime() +
+                    // " duration:" + note.getDuration());
+                } catch (Throwable e) {
+                    Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
+        }
+
 		@Override
 		protected T load(AudioKey key) {
-			if (key.start == 0 && key.duration == 0) {
-				// 音切りなしのケース
-				return getKeySound(Paths.get(key.path));
-			} else {
-				PCM wav = null;
-				synchronized(pcmMap) {
-					wav = pcmMap.get(key.path);
-					if (wav == null) {
-						wav = PCM.load(key.path, AbstractAudioDriver.this);
-						if(wav != null) {
-							pcmMap.put(key.path, wav);
-						}
-					}					
-				}
+		    Logger.getGlobal().fine("音源ファイルを読み込む中：" + key.path);
 
-				if (wav != null) {
-					try {
-						final PCM slicewav = wav.slice(key.start, key.duration);
-						return slicewav != null ? getKeySound(slicewav) : null;
-						// System.out.println("WAV slicing - Name:"
-						// + name + " ID:" + note.getWav() +
-						// " start:" + note.getStarttime() +
-						// " duration:" + note.getDuration());
-					} catch (Throwable e) {
-						Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
-						e.printStackTrace();
-					}
-				}
-			}
-			return null;
+		    T sound = key.start == 0 && key.duration == 0
+                    ? getKeySound(Paths.get(key.path)) // 音切りなしのケース
+                    : loadSlice(key);
+
+		    if (sound == null) {
+                Logger.getGlobal().warning("音源ファイル読み込み失敗：" + key.path);
+            }
+			return sound;
 		}
 
 		
