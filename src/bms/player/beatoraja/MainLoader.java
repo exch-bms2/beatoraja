@@ -56,6 +56,8 @@ public class MainLoader extends Application {
 
 	public static Discord discord;
 
+	private static final boolean ALLOWS_DISCORD_RPC = true;
+
 	public static void main(String[] args) {
 
 		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
@@ -102,9 +104,11 @@ public class MainLoader extends Application {
 			}
 		}
 
-		discord = new Discord("");
-		discord.startup();
-
+		if(ALLOWS_DISCORD_RPC) {
+			logger.info("Discord RPC Start!");
+			discord = new Discord("");
+			discord.startup();
+		}
 
 		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();

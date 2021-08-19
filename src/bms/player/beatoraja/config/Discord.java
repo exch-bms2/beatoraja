@@ -38,7 +38,6 @@ public class Discord {
     }
 
     public void update() {
-
         presence.details = details;
         lib.Discord_UpdatePresence(presence);
     }
