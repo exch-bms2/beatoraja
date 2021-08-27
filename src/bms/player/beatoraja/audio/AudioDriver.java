@@ -109,6 +109,15 @@ public interface AudioDriver extends Disposable {
 	 *            Note
 	 */
 	public void stop(Note n);
+	
+	/**
+	 * 指定したパスの音源のボリュームを設定する
+	 * @param n
+	 *            Note
+	 * @param volume
+	 *            ボリューム
+	 */
+	public void setVolume(Note n, float volume);
 
 	/**
 	 * 全体のピッチを変更する。可能な場合は再生中の音のピッチも変更する

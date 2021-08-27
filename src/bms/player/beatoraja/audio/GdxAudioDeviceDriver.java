@@ -63,4 +63,10 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	protected void setVolume(Object id, int channel, float volume) {
+		// TODO Auto-generated method stub
+		
+	}
 }

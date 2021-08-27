@@ -170,6 +170,17 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 	}
 
+	@Override
+	protected void setVolume(PCM id, int channel, float volume) {
+		synchronized (inputs) {
+			for (MixerInput input : inputs) {
+				if (input.pcm == id && input.channel == channel) {
+					input.volume = volume;
+				}
+			}
+		}
+	}
+
 	public void run() {
 		while(!stop) {
 			final float gpitch = getGlobalPitch();
