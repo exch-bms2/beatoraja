@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
+import bms.player.beatoraja.ir.IRCourseData.IRTrophyData;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
@@ -193,6 +194,16 @@ public class BarRenderer {
 						}
 						cd.setSong(songs);
 						cd.setConstraint(irtd.courses[i].constraint);
+						TrophyData[] trophyDatas = new TrophyData[irtd.courses[i].trophy.length];
+                        for(int j = 0;j < irtd.courses[i].trophy.length; j++) {
+                            TrophyData trophyData = new TrophyData();
+                            IRTrophyData t = irtd.courses[i].trophy[j];
+                            trophyData.setName(t.name);
+                            trophyData.setMissrate(t.smissrate);
+                            trophyData.setScorerate(t.scorerate);
+                            trophyDatas[j] = trophyData;
+                        }
+                        cd.setTrophy(trophyDatas);
 						cd.setRelease(true);
 						course[i] = cd;
 					}
