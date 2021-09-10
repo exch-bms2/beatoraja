@@ -961,6 +961,7 @@ public class IntegerPropertyFactory {
 		lnmode(BUTTON_LNMODE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode())),
 		target(BUTTON_TARGET, (state) -> (state.main.getPlayerResource().getPlayerConfig().getTarget())),
 		gaugeautoshift(78, (state) -> (state.main.getPlayerResource().getPlayerConfig().getGaugeAutoShift())),
+		bottomshiftablegauge(BUTTON_BOTTOMSIFTABLEFGAUGE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getBottomShiftableGauge())),
 		bga(72, (state) -> (state.main.getPlayerResource().getConfig().getBga())),
 		
 		mode(11, (state) -> {
@@ -1038,10 +1039,35 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 
+		judgealgorithm(BUTTON_JUDGEALGORITHM, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc == null) {
+					return Integer.MIN_VALUE;
+				}
+				final String[] algorithms = {JudgeAlgorithm.Combo.name(), JudgeAlgorithm.Duration.name(), JudgeAlgorithm.Lowest.name()};
+				final String jt = pc.getJudgetype();
+				for (int i = 0; i < algorithms.length; i++) {
+					if (jt.equals(algorithms[i])) {
+						return i;
+					}
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
+
 		autosave_replay1(321, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[0])),
 		autosave_replay2(322, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[1])),
 		autosave_replay3(323, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[2])),
 		autosave_replay4(324, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[3])),
+
+		extranotedepth(BUTTON_EXTRANOTE, (state) -> (state.main.getPlayerConfig().getExtranoteDepth())),
+		minemode(BUTTON_MINEMODE, (state) -> (state.main.getPlayerConfig().getMineMode())),
+		scrollmode(BUTTON_SCROLLMODE, (state) -> (state.main.getPlayerConfig().getScrollMode())),
+		longnotemode(BUTTON_LONGNOTEMODE, (state) -> (state.main.getPlayerConfig().getLongnoteMode())),
+
+		seventonine_pattern(BUTTON_SEVENTONINE_PATTERN, (state) -> (state.main.getPlayerConfig().getSevenToNinePattern())),
+		seventonine_type(BUTTON_SEVENTONINE_TYPE, (state) -> (state.main.getPlayerConfig().getSevenToNineType())),
 
 		cleartype(370, (state) -> {
 			if (state instanceof MusicSelector) {

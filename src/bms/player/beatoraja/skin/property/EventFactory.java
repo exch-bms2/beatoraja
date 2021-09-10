@@ -8,6 +8,7 @@ import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRCourseData;
+import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.BarSorter;
@@ -307,6 +308,14 @@ public class EventFactory {
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
+		bottomshiftablegauge(311, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final MusicSelector selector = (MusicSelector) state;
+				final int gaugelength = 3;
+				selector.main.getPlayerConfig().setBottomShiftableGauge((selector.main.getPlayerConfig().getBottomShiftableGauge() + (arg1 >= 0 ? 1 : gaugelength - 1)) % gaugelength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
 		rival(79, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
@@ -446,10 +455,80 @@ public class EventFactory {
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
+		judgealgorithm(310, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc == null) {
+					return;
+				}
+				final String[] algorithms = {JudgeAlgorithm.Combo.name(), JudgeAlgorithm.Duration.name(), JudgeAlgorithm.Lowest.name()};
+				final String jt = pc.getJudgetype();
+				for (int i = 0; i < algorithms.length; i++) {
+					if (jt.equals(algorithms[i])) {
+						pc.setJudgetype(algorithms[(arg1 >= 0 ? i + 1 : i + algorithms.length - 1) % algorithms.length]);
+						state.play(SOUND_OPTIONCHANGE);
+					}
+				}
+			}
+		}),
 		autosavereplay1(321, changeAutoSaveReplay(0)),
 		autosavereplay2(322, changeAutoSaveReplay(1)),
 		autosavereplay3(323, changeAutoSaveReplay(2)),
 		autosavereplay4(324, changeAutoSaveReplay(3)),
+		extranotedepth(330, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int depthlength = 4;
+				final MusicSelector selector = (MusicSelector) state;
+				PlayerConfig config = selector.main.getPlayerConfig();
+				config.setExtranoteDepth((config.getExtranoteDepth() + (arg1 >= 0 ? 1 : depthlength - 1)) % depthlength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		minemode(331, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int modelength = 5;
+				final MusicSelector selector = (MusicSelector) state;
+				PlayerConfig config = selector.main.getPlayerConfig();
+				config.setMineMode((config.getMineMode() + (arg1 >= 0 ? 1 : modelength - 1)) % modelength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		scrollmode(332, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int modelength = 3;
+				final MusicSelector selector = (MusicSelector) state;
+				PlayerConfig config = selector.main.getPlayerConfig();
+				config.setScrollMode((config.getScrollMode() + (arg1 >= 0 ? 1 : modelength - 1)) % modelength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		longnotemode(333, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int modelength = 6;
+				final MusicSelector selector = (MusicSelector) state;
+				PlayerConfig config = selector.main.getPlayerConfig();
+				config.setLongnoteMode((config.getLongnoteMode() + (arg1 >= 0 ? 1 : modelength - 1)) % modelength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		seventonine_pattern(340, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int patternlength = 7;
+				final MusicSelector selector = (MusicSelector) state;
+				PlayerConfig config = selector.main.getPlayerConfig();
+				config.setSevenToNinePattern((config.getSevenToNinePattern() + (arg1 >= 0 ? 1 : patternlength - 1)) % patternlength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
+		seventonine_type(341, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final int typelength = 3;
+				final MusicSelector selector = (MusicSelector) state;
+				PlayerConfig config = selector.main.getPlayerConfig();
+				config.setSevenToNineType((config.getSevenToNineType() + (arg1 >= 0 ? 1 : typelength - 1)) % typelength);
+				selector.play(SOUND_OPTIONCHANGE);
+			}
+		}),
 		;
 
 		/**
