@@ -31,6 +31,7 @@ public class MainStateAccessor {
 		table.set("time", this.new time());
 		table.set("set_timer", this.new set_timer());
 		table.set("event_exec", this.new event_exec());
+		table.set("event_index", this.new event_index());
 
 		// 具体的な数値の取得・設定など
 		table.set("rate", new ZeroArgFunction() {
@@ -275,4 +276,17 @@ public class MainStateAccessor {
 			return id;
 		}
 	}
+
+	/**
+	 * ID指定でイベント(BUTTON_*)のインデックスを取得する関数
+	 * NOTE: 呼び出しの度にIntegerPropertyを生成しており効率が悪いため非推奨
+	 */
+	private class event_index extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue luaValue) {
+			IntegerProperty prop = IntegerPropertyFactory.getImageIndexProperty(luaValue.toint());
+			return LuaNumber.valueOf(prop.get(state));
+		}
+	}
+
 }
