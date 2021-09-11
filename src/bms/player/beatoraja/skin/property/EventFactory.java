@@ -239,7 +239,7 @@ public class EventFactory {
 		        }	            	
 			}
 		}),
-		hispeedautoadjust(312, (state) -> {
+		hispeedautoadjust(342, (state) -> {
 			if(state instanceof MusicSelector) {
 				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 				if (pc != null) {
@@ -317,7 +317,7 @@ public class EventFactory {
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		bottomshiftablegauge(311, (state, arg1) -> {
+		bottomshiftablegauge(341, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
 				final int gaugelength = 3;
@@ -464,7 +464,38 @@ public class EventFactory {
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		judgealgorithm(310, (state, arg1) -> {
+		autosavereplay1(321, changeAutoSaveReplay(0)),
+		autosavereplay2(322, changeAutoSaveReplay(1)),
+		autosavereplay3(323, changeAutoSaveReplay(2)),
+		autosavereplay4(324, changeAutoSaveReplay(3)),
+		lanecover(330, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnablelanecover(!pc.isEnablelanecover());
+					state.play(SOUND_OPTIONCHANGE);
+				}
+			}
+		}),
+		lift(331, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnablelift(!pc.isEnablelift());
+					state.play(SOUND_OPTIONCHANGE);
+				}
+			}
+		}),
+		hidden(332, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnablehidden(!pc.isEnablehidden());
+					state.play(SOUND_OPTIONCHANGE);
+				}
+			}
+		}),
+		judgealgorithm(340, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 				if (pc == null) {
@@ -480,38 +511,7 @@ public class EventFactory {
 				}
 			}
 		}),
-		lanecover(350, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					pc.setEnablelanecover(!pc.isEnablelanecover());
-					state.play(SOUND_OPTIONCHANGE);
-				}
-			}
-		}),
-		lift(351, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					pc.setEnablelift(!pc.isEnablelift());
-					state.play(SOUND_OPTIONCHANGE);
-				}
-			}
-		}),
-		hidden(352, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					pc.setEnablehidden(!pc.isEnablehidden());
-					state.play(SOUND_OPTIONCHANGE);
-				}
-			}
-		}),
-		autosavereplay1(321, changeAutoSaveReplay(0)),
-		autosavereplay2(322, changeAutoSaveReplay(1)),
-		autosavereplay3(323, changeAutoSaveReplay(2)),
-		autosavereplay4(324, changeAutoSaveReplay(3)),
-		extranotedepth(330, (state, arg1) -> {
+		extranotedepth(350, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int depthlength = 4;
 				final MusicSelector selector = (MusicSelector) state;
@@ -520,7 +520,7 @@ public class EventFactory {
 				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		minemode(331, (state, arg1) -> {
+		minemode(351, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int modelength = 5;
 				final MusicSelector selector = (MusicSelector) state;
@@ -529,7 +529,7 @@ public class EventFactory {
 				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		scrollmode(332, (state, arg1) -> {
+		scrollmode(352, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int modelength = 3;
 				final MusicSelector selector = (MusicSelector) state;
@@ -538,7 +538,7 @@ public class EventFactory {
 				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		longnotemode(333, (state, arg1) -> {
+		longnotemode(353, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int modelength = 6;
 				final MusicSelector selector = (MusicSelector) state;
@@ -547,7 +547,7 @@ public class EventFactory {
 				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		seventonine_pattern(340, (state, arg1) -> {
+		seventonine_pattern(360, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int patternlength = 7;
 				final MusicSelector selector = (MusicSelector) state;
@@ -556,7 +556,7 @@ public class EventFactory {
 				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
-		seventonine_type(341, (state, arg1) -> {
+		seventonine_type(361, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int typelength = 3;
 				final MusicSelector selector = (MusicSelector) state;

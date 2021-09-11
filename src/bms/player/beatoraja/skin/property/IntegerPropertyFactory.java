@@ -1048,22 +1048,10 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 
-		judgealgorithm(BUTTON_JUDGEALGORITHM, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc == null) {
-					return Integer.MIN_VALUE;
-				}
-				final String[] algorithms = {JudgeAlgorithm.Combo.name(), JudgeAlgorithm.Duration.name(), JudgeAlgorithm.Lowest.name()};
-				final String jt = pc.getJudgetype();
-				for (int i = 0; i < algorithms.length; i++) {
-					if (jt.equals(algorithms[i])) {
-						return i;
-					}
-				}
-			}
-			return Integer.MIN_VALUE;
-		}),
+		autosave_replay1(321, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[0])),
+		autosave_replay2(322, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[1])),
+		autosave_replay3(323, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[2])),
+		autosave_replay4(324, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[3])),
 
 		lanecover(BUTTON_LANECOVER, (state) -> {
 			if(state instanceof MusicSelector) {
@@ -1093,10 +1081,22 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 
-		autosave_replay1(321, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[0])),
-		autosave_replay2(322, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[1])),
-		autosave_replay3(323, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[2])),
-		autosave_replay4(324, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[3])),
+		judgealgorithm(BUTTON_JUDGEALGORITHM, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc == null) {
+					return Integer.MIN_VALUE;
+				}
+				final String[] algorithms = {JudgeAlgorithm.Combo.name(), JudgeAlgorithm.Duration.name(), JudgeAlgorithm.Lowest.name()};
+				final String jt = pc.getJudgetype();
+				for (int i = 0; i < algorithms.length; i++) {
+					if (jt.equals(algorithms[i])) {
+						return i;
+					}
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
 
 		extranotedepth(BUTTON_EXTRANOTE, (state) -> (state.main.getPlayerConfig().getExtranoteDepth())),
 		minemode(BUTTON_MINEMODE, (state) -> (state.main.getPlayerConfig().getMineMode())),
