@@ -239,6 +239,15 @@ public class EventFactory {
 		        }	            	
 			}
 		}),
+		hispeedautoadjust(312, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setHispeedAutoAdjust(!pc.isEnableHispeedAutoAdjust());
+					state.play(SOUND_OPTIONCHANGE);
+				}
+			}
+		}),
 
 		replay1(19, getReplayEventConsumer(0)),
 		replay2(316, getReplayEventConsumer(1)),
@@ -468,6 +477,33 @@ public class EventFactory {
 						pc.setJudgetype(algorithms[(arg1 >= 0 ? i + 1 : i + algorithms.length - 1) % algorithms.length]);
 						state.play(SOUND_OPTIONCHANGE);
 					}
+				}
+			}
+		}),
+		lanecover(350, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnablelanecover(!pc.isEnablelanecover());
+					state.play(SOUND_OPTIONCHANGE);
+				}
+			}
+		}),
+		lift(351, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnablelift(!pc.isEnablelift());
+					state.play(SOUND_OPTIONCHANGE);
+				}
+			}
+		}),
+		hidden(352, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnablehidden(!pc.isEnablehidden());
+					state.play(SOUND_OPTIONCHANGE);
 				}
 			}
 		}),

@@ -871,6 +871,7 @@ public class SkinProperty {
 	public static final int BUTTON_RANDOM_2P = 43;
 	public static final int BUTTON_DPOPTION = 54;
 	public static final int BUTTON_HSFIX = 55;
+	public static final int BUTTON_HISPEEDAUTOADJUST = 312;
 	public static final int BUTTON_BGA = 72;
 	public static final int BUTTON_JUDGE_TIMING = 74;
 	public static final int BUTTON_TARGET = 77;
@@ -918,6 +919,9 @@ public class SkinProperty {
 	public static final int BUTTON_LONGNOTEMODE = 333;
 	public static final int BUTTON_SEVENTONINE_PATTERN = 340;
 	public static final int BUTTON_SEVENTONINE_TYPE = 341;
+	public static final int BUTTON_LANECOVER = 350;
+	public static final int BUTTON_LIFT = 351;
+	public static final int BUTTON_HIDDEN = 352;
 
 	public static final int BUTTON_SKINSELECT_24KEY = 386;
 	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;

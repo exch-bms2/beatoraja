@@ -1011,6 +1011,15 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
+		hispeedautoadjust(BUTTON_HISPEEDAUTOADJUST, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					return pc.isEnableHispeedAutoAdjust() ? 1 : 0;
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
 
 		favorite_song(89, (state) -> {
 			final SongData sd = state.main.getPlayerResource().getSongdata();
@@ -1051,6 +1060,34 @@ public class IntegerPropertyFactory {
 					if (jt.equals(algorithms[i])) {
 						return i;
 					}
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
+
+		lanecover(BUTTON_LANECOVER, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					return pc.isEnablelanecover() ? 1 : 0;
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
+		lift(BUTTON_LIFT, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					return pc.isEnablelift() ? 1 : 0;
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
+		hidden(BUTTON_HIDDEN, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					return pc.isEnablehidden() ? 1 : 0;
 				}
 			}
 			return Integer.MIN_VALUE;
