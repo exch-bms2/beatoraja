@@ -1012,11 +1012,14 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 		hispeedautoadjust(BUTTON_HISPEEDAUTOADJUST, (state) -> {
+			PlayConfig pc = null;
 			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					return pc.isEnableHispeedAutoAdjust() ? 1 : 0;
-				}
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnableHispeedAutoAdjust() ? 1 : 0;
 			}
 			return Integer.MIN_VALUE;
 		}),
@@ -1054,39 +1057,50 @@ public class IntegerPropertyFactory {
 		autosave_replay4(324, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[3])),
 
 		lanecover(BUTTON_LANECOVER, (state) -> {
+			PlayConfig pc = null;
 			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					return pc.isEnablelanecover() ? 1 : 0;
-				}
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnablelanecover() ? 1 : 0;
 			}
 			return Integer.MIN_VALUE;
 		}),
 		lift(BUTTON_LIFT, (state) -> {
+			PlayConfig pc = null;
 			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					return pc.isEnablelift() ? 1 : 0;
-				}
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnablelift() ? 1 : 0;
 			}
 			return Integer.MIN_VALUE;
 		}),
 		hidden(BUTTON_HIDDEN, (state) -> {
+			PlayConfig pc = null;
 			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc != null) {
-					return pc.isEnablehidden() ? 1 : 0;
-				}
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnablehidden() ? 1 : 0;
 			}
 			return Integer.MIN_VALUE;
 		}),
 
 		judgealgorithm(BUTTON_JUDGEALGORITHM, (state) -> {
+			PlayConfig pc = null;
 			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-				if (pc == null) {
-					return Integer.MIN_VALUE;
-				}
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
 				final String[] algorithms = {JudgeAlgorithm.Combo.name(), JudgeAlgorithm.Duration.name(), JudgeAlgorithm.Lowest.name()};
 				final String jt = pc.getJudgetype();
 				for (int i = 0; i < algorithms.length; i++) {
