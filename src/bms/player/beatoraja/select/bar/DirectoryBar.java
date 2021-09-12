@@ -31,6 +31,10 @@ public abstract class DirectoryBar extends Bar {
 	 * 不可視譜面を表示するかどうか
 	 */
 	private final boolean showInvisibleChart;
+	/**
+	 * （Settingの内容で）ソートできるどうか
+	 */
+	private boolean isSortable = true;
 
 	public DirectoryBar(MusicSelector selector) {
 		this(selector, false);
@@ -66,6 +70,17 @@ public abstract class DirectoryBar extends Bar {
 	public boolean isShowInvisibleChart() {
 		return showInvisibleChart;
 	}
+	
+	/**
+	 * フォルダをソートできるどうか
+	 */
+	public boolean isSortable() {
+        return isSortable;
+    }
+	
+	public void setSortable(boolean val) {
+        isSortable = val;
+    }
 	
 	public void clear() {
 		Arrays.fill(lamps, 0);
