@@ -150,6 +150,18 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	protected abstract void stop(T id, int channel);
 
+	/**
+	 * 音源データが再生されていればボリュームを設定する。
+	 *
+	 * @param id
+	 *            音源データ
+	 * @param channel
+	 *            チャンネル番号(0-)
+	 * @param volume
+	 *            ボリューム(0.0-1.0)
+	 */
+	protected abstract void setVolume(T id, int channel, float volume);
+
 	public void play(String p, float volume, boolean loop) {
 		final AudioElement<T> sound = getSound(p);
 		if (sound != null) {
@@ -471,6 +483,44 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			for (SliceWav<T> slice : slicesound[id]) {
 				if (slice.starttime == starttime && slice.duration == duration) {
 					stop((T) slice.wav, channel);
+					break;
+				}
+			}
+		}
+	}
+
+	public void setVolume(Note n, float volume) {
+		try {
+			if (n == null) {
+				return;
+			} else {
+				setVolume0(n, volume);
+				for (Note ln : n.getLayeredNotes()) {
+					setVolume0(ln, volume);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private final void setVolume0(Note n, float volume) {
+		final int id = n.getWav();
+		final int channel = channel(id, 0);
+		if (id < 0) {
+			return;
+		}
+		final long starttime = n.getMicroStarttime();
+		final long duration = n.getMicroDuration();
+		if (starttime == 0 && duration == 0) {
+			final T sound = (T) wavmap[id];
+			if (sound != null) {
+				setVolume(sound, channel, volume);
+			}
+		} else {
+			for (SliceWav<T> slice : slicesound[id]) {
+				if (slice.starttime == starttime && slice.duration == duration) {
+					setVolume((T) slice.wav, channel, volume);
 					break;
 				}
 			}

@@ -2,11 +2,13 @@ package bms.player.beatoraja.select;
 
 import java.io.BufferedInputStream;
 import java.nio.file.*;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
+import bms.player.beatoraja.ir.IRCourseData.IRTrophyData;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
@@ -58,6 +60,10 @@ public class BarRenderer {
 	private TableBar courses;
 
 	private HashBar[] favorites = new HashBar[0];
+
+	// システム側で挿入されるルートフォルダ
+	private HashMap<String, Bar> appendFolders = new HashMap<String, Bar>();
+
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -193,6 +199,16 @@ public class BarRenderer {
 						}
 						cd.setSong(songs);
 						cd.setConstraint(irtd.courses[i].constraint);
+						TrophyData[] trophyDatas = new TrophyData[irtd.courses[i].trophy.length];
+						for(int j = 0;j < irtd.courses[i].trophy.length; j++) {
+						    TrophyData trophyData = new TrophyData();
+						    IRTrophyData t = irtd.courses[i].trophy[j];
+						    trophyData.setName(t.name);
+						    trophyData.setMissrate(t.smissrate);
+						    trophyData.setScorerate(t.scorerate);
+						    trophyDatas[j] = trophyData;
+						}
+						cd.setTrophy(trophyDatas);
 						cd.setRelease(true);
 						course[i] = cd;
 					}
@@ -322,6 +338,10 @@ public class BarRenderer {
 		public void setShowall(boolean showall) {
 			this.showall = showall;
 		}
+	}
+
+	synchronized public void setAppendDirectoryBar(String key, Bar bar) {
+	    this.appendFolders.put(key, bar);
 	}
 
 	public Bar getSelected() {
@@ -805,6 +825,7 @@ public class BarRenderer {
 		Bar sourcebar = null;
 		Array<Bar> l = new Array<Bar>();
 		boolean showInvisibleCharts = false;
+		boolean isSortable = true;
 
 		if (MainLoader.getIllegalSongCount() > 0) {
 			l.addAll(SongBar.toSongBarArray(select.getSongDatabase().getSongDatas(MainLoader.getIllegalSongs())));
@@ -817,6 +838,9 @@ public class BarRenderer {
 			l.addAll(new FolderBar(select, null, "e2977170").getChildren());
 			l.add(courses);
 			l.addAll(favorites);
+			appendFolders.keySet().forEach((key) -> {
+			    l.add(appendFolders.get(key));
+			});
 			l.addAll(tables);
 			l.addAll(commands);
 			l.addAll(search);
@@ -830,6 +854,7 @@ public class BarRenderer {
 				dir.removeLast();
 			}
 			l.addAll(((DirectoryBar) bar).getChildren());
+			isSortable = ((DirectoryBar) bar).isSortable();
 		}
 
 		if(!select.main.getConfig().isShowNoSongExistingBar()) {
@@ -882,8 +907,11 @@ public class BarRenderer {
 					}
 				}
 			}
-			Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
-			
+
+			if(isSortable) {
+			    Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
+			}
+
 			Array<Bar> bars = new Array<Bar>();
 			if (select.main.getPlayerConfig().isRandomSelect()) {
 				SongData[] randomTargets = Stream.of(newcurrentsongs).filter(

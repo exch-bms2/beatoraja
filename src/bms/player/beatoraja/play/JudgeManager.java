@@ -366,6 +366,9 @@ public class JudgeManager {
 				}
 				mc.switchTimer(timerActive, true);
 				mc.setTimerOff(timerDamage);
+				if(passing[lane].getPair().getState() > 3) {
+					keysound.setVolume(passing[lane], config.getAudioConfig().getKeyvolume());
+				}
 			} else {
 				passingcount[lane] -= (time - prevtime);
 				if (passingcount[lane] < -hcnduration) {
@@ -375,6 +378,7 @@ public class JudgeManager {
 				}
 				mc.setTimerOff(timerActive);
 				mc.switchTimer(timerDamage, true);
+				keysound.setVolume(passing[lane], 0);
 			}
 		}
 		prevtime = time;
@@ -511,7 +515,7 @@ public class JudgeManager {
 							}
 						}
 
-						if (n != null) {
+						if (n != null && passing[lane] == null) {
 							keysound.play(n, config.getAudioConfig().getKeyvolume(), 0);
 						}
 					}
@@ -542,7 +546,7 @@ public class JudgeManager {
 						}
 						if (release) {
 							if (j >= 3) {
-								keysound.stop(processing[lane].getPair());
+								keysound.setVolume(processing[lane].getPair(), 0.0f);
 							}
 							this.update(lane, processing[lane], time, j, dtime);
 							keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);
@@ -566,7 +570,7 @@ public class JudgeManager {
 									;
 							}
 							if (j >= 3) {
-								keysound.stop(processing[lane].getPair());
+								keysound.setVolume(processing[lane].getPair(), 0.0f);
 							}
 							this.update(lane, processing[lane].getPair(), time, j, dtime);
 							keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);

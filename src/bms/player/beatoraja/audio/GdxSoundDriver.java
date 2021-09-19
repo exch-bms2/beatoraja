@@ -162,6 +162,21 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	@Override
+	protected void setVolume(Sound id, int channel, float volume) {
+		if (soundthread) {
+			mixer.setVolume(id, channel, volume);
+		} else {
+			for (int i = 0; i < sounds.length; i++) {
+				if (sounds[i].sound == id && sounds[i].channel == channel) {
+					synchronized (lock) {
+						sounds[i].sound.setVolume(sounds[i].id, volume);						
+					}
+				}
+			}
+		}
+	}
+
+	@Override
 	protected void disposeKeySound(Sound pcm) {
 		pcm.dispose();
 	}
@@ -200,6 +215,14 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 				if (sound[i] == snd && this.channels[i] == channel) {
 					sound[i].stop(ids[i]);
 					sound[i] = null;
+				}
+			}
+		}
+
+		public synchronized void setVolume(Sound snd, int channel, float volume) {
+			for (int i = 0; i < sound.length; i++) {
+				if (sound[i] == snd && this.channels[i] == channel) {
+					sound[i].setVolume(ids[i], volume);
 				}
 			}
 		}
