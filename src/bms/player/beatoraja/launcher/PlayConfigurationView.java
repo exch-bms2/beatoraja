@@ -75,6 +75,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Tab courseTab;
 	@FXML
+    private Tab streamTab;
+	@FXML
 	private HBox controlPanel;
 
 	@FXML
@@ -241,6 +243,8 @@ public class PlayConfigurationView implements Initializable {
 	private IRConfigurationView irController;
 	@FXML
 	private TableEditorView tableController;
+	@FXML
+    private StreamEditorView streamController;
 
 	private Config config;
 	private PlayerConfig player;
@@ -451,6 +455,7 @@ public class PlayConfigurationView implements Initializable {
 		showhiddennote.setSelected(player.isShowhiddennote());
 
 		irController.update(player);
+		streamController.update(player);
 
 		txtTwitterPIN.setDisable(true);
 		twitterPINButton.setDisable(true);
@@ -547,6 +552,7 @@ public class PlayConfigurationView implements Initializable {
 
 		inputController.commit();
 		irController.commit();
+		streamController.commit();
 
 		updatePlayConfig();
 		skinController.commit();
@@ -642,6 +648,7 @@ public class PlayConfigurationView implements Initializable {
 		optionTab.setDisable(true);
 		otherTab.setDisable(true);
 		irTab.setDisable(true);
+		streamTab.setDisable(true);
 		controlPanel.setDisable(true);
 
 		MainLoader.play(null, bms.player.beatoraja.BMSPlayerMode.PLAY, true, config, player, songUpdated);

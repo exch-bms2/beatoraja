@@ -206,6 +206,10 @@ public class PlayerConfig {
 
 	private String twitterAccessTokenSecret;
 
+	// -- Stream
+	private boolean enableRequest = false;
+	private int maxRequestCount = 30;
+
 	public PlayerConfig() {
 		validate();
 	}
@@ -686,6 +690,23 @@ public class PlayerConfig {
 	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
 		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
 	}
+	
+	// --Stream
+	public boolean getRequestEnable() {
+        return enableRequest;
+    }
+
+    public void setRequestEnable(boolean requestEnable) {
+        this.enableRequest = requestEnable;
+    }
+    
+    public int getMaxRequestCount() {
+        return maxRequestCount;
+    }
+
+    public void setMaxRequestCount(int maxRequestCount) {
+        this.maxRequestCount = maxRequestCount;
+    }
 
 	public void validate() {
 		if(skin == null) {
@@ -788,6 +809,9 @@ public class PlayerConfig {
 			}
 		}
 		irconfig = Validatable.removeInvalidElements(irconfig);
+
+		// --Stream
+		maxRequestCount = MathUtils.clamp(maxRequestCount, 0, 100);
 	}
 
 	public static void init(Config config) {

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.StreamEditorView">
+	<padding>
+		<Insets left="10.0" top="10.0" />
+	</padding>
+    <HBox prefHeight="37.0" prefWidth="723.0">
+        <CheckBox fx:id="enableRequest" contentDisplay="CENTER" prefHeight="24.0" prefWidth="150.0" text="%ENABLE_REQUEST" textAlignment="CENTER"/>
+        <Label prefHeight="24.0" prefWidth="150.0" text="%MAX_REQUEST_COUNT"/>
+        <NumericSpinner fx:id="maxRequestCount" editable="true" prefWidth="80.0">
+            <valueFactory>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="3" max="100" min="1" />
+            </valueFactory>
+        </NumericSpinner>
+    </HBox>
+</VBox>

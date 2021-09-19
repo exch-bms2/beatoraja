@@ -40,6 +40,7 @@ import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.*;
+import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
 
 /**
@@ -115,6 +116,8 @@ public class MainController extends ApplicationAdapter {
 	private Thread screenshot;
 
 	private MusicDownloadProcessor download;
+	
+	private StreamController streamController;
 
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
 	private final long[] timer = new long[timerCount];
@@ -317,6 +320,10 @@ public class MainController extends ApplicationAdapter {
 
 		resource = new PlayerResource(audio, config, player);
 		selector = new MusicSelector(this, songUpdated);
+		if(player.getRequestEnable()) {
+		    streamController = new StreamController(selector);
+	        streamController.run();
+		}
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new CourseResult(this);
@@ -558,6 +565,9 @@ public class MainController extends ApplicationAdapter {
 		if (selector != null) {
 			selector.dispose();
 		}
+		if (streamController != null) {
+		    streamController.dispose();
+        }
 		if (decide != null) {
 			decide.dispose();
 		}
