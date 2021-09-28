@@ -190,9 +190,10 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			stmt.execute("ATTACH DATABASE '" + score + "' as scoredb");
 			stmt.execute("ATTACH DATABASE '" + scorelog + "' as scorelogdb");
 			List<SongData> m;
+
 			if(info != null) {
 				stmt.execute("ATTACH DATABASE '" + info + "' as infodb");
-				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
+				String s = "SELECT DISTINCT md5, song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
 						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length, charthash"
 						+ " FROM song INNER JOIN (information LEFT OUTER JOIN (score LEFT OUTER JOIN scorelog ON score.sha256 = scorelog.sha256) ON information.sha256 = score.sha256) "
 						+ "ON song.sha256 = information.sha256 WHERE " + sql;
@@ -201,7 +202,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 //				System.out.println(s + " -> result : " + m.size());
 				stmt.execute("DETACH DATABASE infodb");
 			} else {
-				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
+				String s = "SELECT DISTINCT md5, song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
 						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length, charthash"
 						+ " FROM song LEFT OUTER JOIN (score LEFT OUTER JOIN scorelog ON score.sha256 = scorelog.sha256) ON song.sha256 = score.sha256 WHERE " + sql;
 				ResultSet rs = stmt.executeQuery(s);
