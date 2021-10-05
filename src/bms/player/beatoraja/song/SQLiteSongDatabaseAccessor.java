@@ -12,7 +12,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-
+import java.util.stream.Collectors;
 import bms.player.beatoraja.SQLiteDatabaseAccessor;
 import bms.player.beatoraja.Validatable;
 import org.apache.commons.dbutils.QueryRunner;
@@ -175,8 +175,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			}
 			List<SongData> m = qr.query("SELECT * FROM song WHERE md5 IN (" + md5str.toString() + ") OR sha256 IN ("
 					+ sha256str.toString() + ")", songhandler);
+			
+			// 検索並び順保持
+			List<SongData> sorted = m.stream().sorted((a, b) -> {
+			    int aIndexSha256 = Arrays.asList(hashes).indexOf(a.getSha256());
+			    int aIndexMd5 = Arrays.asList(hashes).indexOf(a.getMd5());
+			    int bIndexSha256 = Arrays.asList(hashes).indexOf(b.getSha256());
+			    int bIndexMd5 = Arrays.asList(hashes).indexOf(b.getMd5());
+			    int aIndex = Math.min((aIndexSha256 == -1 ? Integer.MAX_VALUE : aIndexSha256), (aIndexMd5 == -1 ? Integer.MAX_VALUE : aIndexMd5));
+			    int bIndex = Math.min((bIndexSha256 == -1 ? Integer.MAX_VALUE : bIndexSha256), (bIndexMd5 == -1 ? Integer.MAX_VALUE : bIndexMd5));
+			    return bIndex - aIndex;
+            }).collect(Collectors.toList());
 
-			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
+			SongData[] validated = Validatable.removeInvalidElements(sorted).toArray(new SongData[m.size()]);
+			return validated;
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());

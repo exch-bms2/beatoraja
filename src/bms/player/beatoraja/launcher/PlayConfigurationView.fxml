@@ -436,6 +436,11 @@
             </padding>
             </AnchorPane>
         </Tab>
+        <Tab fx:id="streamTab" closable="false" text="Stream">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <fx:include fx:id="stream" source="StreamConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            </AnchorPane>
+        </Tab>
     </TabPane>
     <HBox fx:id="controlPanel" prefWidth="552.0">
         <VBox.margin>

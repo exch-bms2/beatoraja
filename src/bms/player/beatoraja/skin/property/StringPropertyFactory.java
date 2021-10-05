@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRConfig;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.config.SkinConfiguration;
@@ -172,6 +173,14 @@ public class StringPropertyFactory {
 		tablename(1001, (state) -> (state.main.getPlayerResource().getTablename())),
 		tablelevel(1002, (state) -> (state.main.getPlayerResource().getTablelevel())),
 		tablefull(1003, (state) -> (state.main.getPlayerResource().getTableFullname())),
+		version(1010, (state) -> (state.main.getVersion())),
+		irname(1020, (state) -> {
+			final IRConfig[] irconfig = state.main.getPlayerResource().getPlayerConfig().getIrconfig();
+			if (irconfig.length > 0) {
+				return irconfig[0].getIrname();
+			}
+			return "";
+		}),
 		;
 		
 		/**
