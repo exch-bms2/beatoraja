@@ -437,6 +437,14 @@ public class BarRenderer {
 	
 	public void prepare(MusicSelectSkin skin, SkinBar baro, long time) {
 		this.time = time;		
+		final long timeMillis = System.currentTimeMillis();
+		boolean applyMovement = duration != 0 && duration > timeMillis;
+		float angleLerp = 0;
+		if (applyMovement) {
+			angleLerp = angle < 0 ? ((float) (timeMillis - duration)) / angle
+				: ((float) (duration - timeMillis)) / angle;
+		}
+
 		for (int i = 0; i < barlength; i++) {
 			// calcurate song bar position
 			final BarArea ba = bararea[i];
@@ -448,15 +456,13 @@ public class BarRenderer {
 			float dy = 0;
 			final SkinImage si1 = baro.getBarImages(on, i);
 			if (si1.draw) {
-				if (duration != 0) {
+				if (applyMovement) {
 					int nextindex = i + (angle >= 0 ? 1 : -1);
 					SkinImage si2 = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
 							: null;
 					if (si2 != null && si2.draw) {
-						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
-								: ((float) (duration - System.currentTimeMillis())) / angle;
-						dx = (si2.region.x - si1.region.x) * Math.max(Math.min(a, 1), -1);
-						dy = (si2.region.y - si1.region.y) * a;
+						dx = (si2.region.x - si1.region.x) * Math.max(Math.min(angleLerp, 1), -1);
+						dy = (si2.region.y - si1.region.y) * angleLerp;
 					}
 				}
 				ba.x = (int) (si1.region.x + dx);
