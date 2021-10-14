@@ -44,7 +44,7 @@ public class Config implements Validatable {
 	 * フォルダランプの有効/無効
 	 */
 	private boolean folderlamp = true;
-	
+
 	/**
 	 * オーディオコンフィグ
 	 */
@@ -54,7 +54,7 @@ public class Config implements Validatable {
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
 	private int maxFramePerSecond = 240;
-	
+
 	private int prepareFramePerSecond = 10000;
 	/**
 	 * 検索バー同時表示上限数
@@ -80,7 +80,7 @@ public class Config implements Validatable {
 	 * 選曲バー移動速度に関連（アナログスクロール）
 	 */
 	private int analogTicksPerScroll = 3;
-	
+
 	/**
 	 * プレビュー再生
 	 */
@@ -150,6 +150,8 @@ public class Config implements Validatable {
 
 	private int irSendCount = 5;
 
+	private boolean useDiscordRPC = true;
+
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
 			"http://www.ribbit.xyz/bms/tables/normal.html",
@@ -203,11 +205,11 @@ public class Config implements Validatable {
 	public void setBga(int bga) {
 		this.bga = bga;
 	}
-	
+
 	public AudioConfig getAudioConfig() {
 		return audio;
 	}
-	
+
 	public void setAudioConfig(AudioConfig audio) {
 		this.audio = audio;
 	}
@@ -375,6 +377,14 @@ public class Config implements Validatable {
 		this.cacheSkinImage = cacheSkinImage;
 	}
 
+	public boolean isUseDiscordRPC() {
+		return useDiscordRPC;
+	}
+
+	public void setUseDiscordRPC(boolean useDiscordRPC) {
+		this.useDiscordRPC = useDiscordRPC;
+	}
+
 	public boolean isUpdatesong() {
 		return updatesong;
 	}
@@ -485,7 +495,7 @@ public class Config implements Validatable {
 
 		windowWidth = MathUtils.clamp(windowWidth, Resolution.SD.width, Resolution.ULTRAHD.width);
 		windowHeight = MathUtils.clamp(windowHeight, Resolution.SD.height, Resolution.ULTRAHD.height);
-		
+
 		if(audio == null) {
 			audio = new AudioConfig();
 			audio.setDriver(audioDriver == 2 ? DriverType.PortAudio : DriverType.OpenAL);
@@ -586,7 +596,7 @@ public class Config implements Validatable {
 	public enum DisplayMode {
 		FULLSCREEN,BORDERLESS,WINDOW;
 	}
-	
+
 	public enum SongPreview {
 		NONE,ONCE,LOOP;
 	}

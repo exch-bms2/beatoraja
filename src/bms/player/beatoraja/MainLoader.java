@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import bms.player.beatoraja.config.Discord;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -42,19 +43,21 @@ import bms.player.beatoraja.song.SongUtils;
  * @author exch
  */
 public class MainLoader extends Application {
-	
+
 	private static final boolean ALLOWS_32BIT_JAVA = false;
-	
+
 	private static SongDatabaseAccessor songdb;
-	
+
 	private static final Set<String> illegalSongs = new HashSet<String>();
 
 	private static Path bmsPath;
 
 	private static VersionChecker version;
-	
+
+	public static Discord discord;
+
 	public static void main(String[] args) {
-		
+
 		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
 			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Java.", "Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
@@ -98,23 +101,30 @@ public class MainLoader extends Application {
 				}
 			}
 		}
-		
-		if(Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
+
+
+
+		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();
 			play(bmsPath, auto, true, null, null, bmsPath != null);
 		} else {
-			launch(args);			
+			launch(args);
 		}
 	}
 
 	public static void play(Path f, BMSPlayerMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
 		if(config == null) {
-			config = Config.read();			
+			config = Config.read();
+		}
+
+		if(config.isUseDiscordRPC()) {
+			discord = new Discord("");
+			discord.startup();
 		}
 
 		for(SongData song : getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs)) {
 			MainLoader.putIllegalSong(song.getSha256());
-		}		
+		}
 		if(illegalSongs.size() > 0) {
 			JOptionPane.showMessageDialog(null, "This Application detects " + illegalSongs.size() + " illegal BMS songs. \n Remove them, update song database and restart.", "Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
@@ -145,12 +155,12 @@ public class MainLoader extends Application {
 			cfg.backgroundFPS = config.getMaxFramePerSecond();
 			cfg.foregroundFPS = config.getMaxFramePerSecond();
 			cfg.title = MainController.getVersion();
-			
+
 			cfg.audioDeviceBufferSize = config.getAudioConfig().getDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioConfig().getDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
 			if(config.getAudioConfig().getDriver() != DriverType.OpenAL) {
-				LwjglApplicationConfiguration.disableAudio = true;				
+				LwjglApplicationConfiguration.disableAudio = true;
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
@@ -200,13 +210,13 @@ public class MainLoader extends Application {
 	public static Graphics.DisplayMode getDesktopDisplayMode() {
 		return LwjglApplicationConfiguration.getDesktopDisplayMode();
 	}
-	
+
 	public static SongDatabaseAccessor getScoreDatabaseAccessor() {
 		if(songdb == null) {
 			try {
 				Config config = Config.read();
 				Class.forName("org.sqlite.JDBC");
-				songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(), config.getBmsroot());			
+				songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(), config.getBmsroot());
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -234,15 +244,15 @@ public class MainLoader extends Application {
 	public static void putIllegalSong(String hash) {
 		illegalSongs.add(hash);
 	}
-	
+
 	public static String[] getIllegalSongs() {
 		return illegalSongs.toArray(new String[illegalSongs.size()]);
 	}
-	
+
 	public static int getIllegalSongCount() {
 		return illegalSongs.size();
 	}
-	
+
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
 		Config config = Config.read();
