@@ -873,10 +873,12 @@ public class SkinProperty {
 	public static final int BUTTON_RANDOM_2P = 43;
 	public static final int BUTTON_DPOPTION = 54;
 	public static final int BUTTON_HSFIX = 55;
+	public static final int BUTTON_HISPEEDAUTOADJUST = 342;
 	public static final int BUTTON_BGA = 72;
 	public static final int BUTTON_JUDGE_TIMING = 74;
 	public static final int BUTTON_TARGET = 77;
 	public static final int BUTTON_GAUGEAUTOSHIFT = 78;
+	public static final int BUTTON_BOTTOMSIFTABLEFGAUGE = 341;
 	public static final int BUTTON_RIVAL = 79;
 	public static final int BUTTON_FAVORITTE_SONG = 89;
 	public static final int BUTTON_FAVORITTE_CHART = 90;
@@ -912,6 +914,16 @@ public class SkinProperty {
 	public static final int BUTTON_AUTOSAVEREPLAY_2 = 322;
 	public static final int BUTTON_AUTOSAVEREPLAY_3 = 323;
 	public static final int BUTTON_AUTOSAVEREPLAY_4 = 324;
+	public static final int BUTTON_LANECOVER = 330;
+	public static final int BUTTON_LIFT = 331;
+	public static final int BUTTON_HIDDEN = 332;
+	public static final int BUTTON_JUDGEALGORITHM = 340;
+	public static final int BUTTON_EXTRANOTE = 350;
+	public static final int BUTTON_MINEMODE = 351;
+	public static final int BUTTON_SCROLLMODE = 352;
+	public static final int BUTTON_LONGNOTEMODE = 353;
+	public static final int BUTTON_SEVENTONINE_PATTERN = 360;
+	public static final int BUTTON_SEVENTONINE_TYPE = 361;
 
 	public static final int BUTTON_SKINSELECT_24KEY = 386;
 	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;

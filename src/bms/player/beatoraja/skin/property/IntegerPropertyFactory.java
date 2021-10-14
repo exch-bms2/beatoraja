@@ -961,6 +961,7 @@ public class IntegerPropertyFactory {
 		lnmode(BUTTON_LNMODE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode())),
 		target(BUTTON_TARGET, (state) -> (state.main.getPlayerResource().getPlayerConfig().getTarget())),
 		gaugeautoshift(78, (state) -> (state.main.getPlayerResource().getPlayerConfig().getGaugeAutoShift())),
+		bottomshiftablegauge(BUTTON_BOTTOMSIFTABLEFGAUGE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getBottomShiftableGauge())),
 		bga(72, (state) -> (state.main.getPlayerResource().getConfig().getBga())),
 		
 		mode(11, (state) -> {
@@ -1010,6 +1011,18 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
+		hispeedautoadjust(BUTTON_HISPEEDAUTOADJUST, (state) -> {
+			PlayConfig pc = null;
+			if(state instanceof MusicSelector) {
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnableHispeedAutoAdjust() ? 1 : 0;
+			}
+			return Integer.MIN_VALUE;
+		}),
 
 		favorite_song(89, (state) -> {
 			final SongData sd = state.main.getPlayerResource().getSongdata();
@@ -1042,6 +1055,70 @@ public class IntegerPropertyFactory {
 		autosave_replay2(322, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[1])),
 		autosave_replay3(323, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[2])),
 		autosave_replay4(324, (state) -> (state.main.getPlayerConfig().getAutoSaveReplay()[3])),
+
+		lanecover(BUTTON_LANECOVER, (state) -> {
+			PlayConfig pc = null;
+			if(state instanceof MusicSelector) {
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnablelanecover() ? 1 : 0;
+			}
+			return Integer.MIN_VALUE;
+		}),
+		lift(BUTTON_LIFT, (state) -> {
+			PlayConfig pc = null;
+			if(state instanceof MusicSelector) {
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnablelift() ? 1 : 0;
+			}
+			return Integer.MIN_VALUE;
+		}),
+		hidden(BUTTON_HIDDEN, (state) -> {
+			PlayConfig pc = null;
+			if(state instanceof MusicSelector) {
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				return pc.isEnablehidden() ? 1 : 0;
+			}
+			return Integer.MIN_VALUE;
+		}),
+
+		judgealgorithm(BUTTON_JUDGEALGORITHM, (state) -> {
+			PlayConfig pc = null;
+			if(state instanceof MusicSelector) {
+				pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			} else {
+				pc = state.main.getPlayerConfig().getPlayConfig(state.main.getPlayerConfig().getMode()).getPlayconfig();
+			}
+			if (pc != null) {
+				final String[] algorithms = {JudgeAlgorithm.Combo.name(), JudgeAlgorithm.Duration.name(), JudgeAlgorithm.Lowest.name()};
+				final String jt = pc.getJudgetype();
+				for (int i = 0; i < algorithms.length; i++) {
+					if (jt.equals(algorithms[i])) {
+						return i;
+					}
+				}
+			}
+			return Integer.MIN_VALUE;
+		}),
+
+		extranotedepth(BUTTON_EXTRANOTE, (state) -> (state.main.getPlayerConfig().getExtranoteDepth())),
+		minemode(BUTTON_MINEMODE, (state) -> (state.main.getPlayerConfig().getMineMode())),
+		scrollmode(BUTTON_SCROLLMODE, (state) -> (state.main.getPlayerConfig().getScrollMode())),
+		longnotemode(BUTTON_LONGNOTEMODE, (state) -> (state.main.getPlayerConfig().getLongnoteMode())),
+
+		seventonine_pattern(BUTTON_SEVENTONINE_PATTERN, (state) -> (state.main.getPlayerConfig().getSevenToNinePattern())),
+		seventonine_type(BUTTON_SEVENTONINE_TYPE, (state) -> (state.main.getPlayerConfig().getSevenToNineType())),
 
 		cleartype(370, (state) -> {
 			if (state instanceof MusicSelector) {
