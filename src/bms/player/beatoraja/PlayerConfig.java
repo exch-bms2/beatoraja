@@ -74,6 +74,8 @@ public class PlayerConfig {
 	 * スクロール追加/削除モード
 	 */
     private int scrollMode = 0;
+    private int scrollSection = 4;
+    private double scrollRate = 0.5;
 	/**
 	 * ロングノート追加/削除モード
 	 */
@@ -784,6 +786,8 @@ public class PlayerConfig {
 		exitPressDuration = MathUtils.clamp(exitPressDuration, 0, 100000);
 
 		scrollMode = MathUtils.clamp(scrollMode, 0, ScrollSpeedModifier.Mode.values().length);
+		scrollSection = MathUtils.clamp(scrollSection, 1, 1024);
+		scrollRate = MathUtils.clamp(scrollRate, 0, 1.0);
 		longnoteMode = MathUtils.clamp(longnoteMode, 0, LongNoteModifier.Mode.values().length);
 		longnoteRate = MathUtils.clamp(longnoteRate, 0.0, 1.0);
 		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
@@ -918,6 +922,22 @@ public class PlayerConfig {
     public void setScrollMode(int scrollMode) {
         this.scrollMode = scrollMode;
     }
+    
+	public int getScrollSection() {
+		return scrollSection;
+	}
+
+	public void setScrollSection(int scrollSection) {
+		this.scrollSection = scrollSection;
+	}
+
+	public double getScrollRate() {
+		return scrollRate;
+	}
+
+	public void setScrollRate(double scrollRate) {
+		this.scrollRate = scrollRate;
+	}
 
     public int getLongnoteMode() {
         return longnoteMode;

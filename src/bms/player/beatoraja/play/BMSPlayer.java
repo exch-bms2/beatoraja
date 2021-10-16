@@ -240,7 +240,7 @@ public class BMSPlayer extends MainState {
 			Array<PatternModifier> mods = new Array<PatternModifier>();
 
 			if(config.getScrollMode() > 0) {
-				mods.add(new ScrollSpeedModifier(config.getScrollMode() - 1));
+				mods.add(new ScrollSpeedModifier(config.getScrollMode() - 1, config.getScrollSection(), config.getScrollRate()));
 			}
 			if(config.getLongnoteMode() > 0) {
 				mods.add(new LongNoteModifier(config.getLongnoteMode() - 1, config.getLongnoteRate()));

@@ -14,13 +14,23 @@ public class ScrollSpeedModifier extends PatternModifier {
 
     private Mode mode = Mode.REMOVE;
 
-    private double rate = 0.5;
+    /**
+     * スクロールを変更する小節単位
+     */
+    private int section = 4;
 
+    /**
+     * 変更するスクロール幅
+     */
+    private double rate = 0.5;
+    
     public ScrollSpeedModifier() {
     }
 
-    public ScrollSpeedModifier(int mode) {
+    public ScrollSpeedModifier(int mode, int section, double scrollrate) {
         this.mode = Mode.values()[mode];
+        this.section = section;
+        this.rate = scrollrate;
     }
 
     @Override
@@ -45,9 +55,14 @@ public class ScrollSpeedModifier extends PatternModifier {
 
         final double base = model.getAllTimeLines()[0].getScroll();
         double current = base;
+        int sectioncount = 0;
         for (TimeLine tl : model.getAllTimeLines()) {
             if(tl.getSectionLine()) {
-                current = base * (1.0 + Math.random() * rate * 2 - rate);
+            	sectioncount++;
+            	if(section == sectioncount) {
+                    current = base * (1.0 + Math.random() * rate * 2 - rate);
+                    sectioncount = 0;
+            	}
             }
             tl.setScroll(current);
         }
