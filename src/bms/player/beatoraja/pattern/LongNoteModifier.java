@@ -73,7 +73,7 @@ public class LongNoteModifier extends PatternModifier {
 						assist = AssistLevel.ASSIST;
 					}
 
-					LongNote lnstart = new LongNote(tls[i].getNote(lane).getWav());
+					LongNote lnstart = new LongNote(tls[i].getNote(lane).getWav(),tls[i].getNote(lane).getMicroStarttime(),tls[i].getNote(lane).getMicroDuration());
 					lnstart.setType(lntype);
 					LongNote lnend = new LongNote(-2);
 
