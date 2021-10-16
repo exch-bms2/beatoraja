@@ -288,8 +288,10 @@ public class PlayModeConfig {
         public static final int MOUSE_SCRATCH_VER_1 = 1;
 
         private static final String[] MOUSESCRATCH_STRING = new String[]{
-            "MOUSE+",
-            "MOUSE-"
+            "MOUSE RIGHT",
+            "MOUSE LEFT",
+            "MOUSE DOWN",
+            "MOUSE UP",
         };
 
         private int[] keys;

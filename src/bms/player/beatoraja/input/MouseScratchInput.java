@@ -13,16 +13,18 @@ public class MouseScratchInput {
     private int[] keys;
     private int[] control;
 
-    private boolean[] mouseScratchState = new boolean[2];
-    private boolean[] mouseScratchChanged = new boolean[2];
-    private static final int MOUSESCRATCH_PLUS = 0;
-    private static final int MOUSESCRATCH_MINUS = 1;
+    private boolean[] mouseScratchState = new boolean[4];
+    private boolean[] mouseScratchChanged = new boolean[4];
+    private static final int MOUSESCRATCH_RIGHT = 0;
+    private static final int MOUSESCRATCH_LEFT = 1;
+    private static final int MOUSESCRATCH_UP = 2;
+    private static final int MOUSESCRATCH_DOWN = 3;
 
-    MouseToAnalog mouseToAnalog = null;
+    private MouseToAnalog mouseToAnalog = null;
     /**
      * マウス皿のアルゴリズム (null=アナログ皿を通用しない)
      */
-    MouseScratchAlgorithm mouseScratchAlgorithm = null;
+    private final MouseScratchAlgorithm[] mouseScratchAlgorithm = new MouseScratchAlgorithm[2];
     /**
      * 最後に押されたマウス皿
      */
@@ -54,17 +56,13 @@ public class MouseScratchInput {
         // MOUSEの更新
         if (mouseScratchEnabled) {
             mouseToAnalog.update();
-            mouseScratchAlgorithm.update(presstime);
+            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+                mouseScratchAlgorithm[i].update(presstime);
+            }
 
             for (int mouseInput=0; mouseInput<mouseScratchState.length; mouseInput++) {
                 final boolean prev = mouseScratchState[mouseInput];
-                if (mouseInput == MOUSESCRATCH_PLUS) {
-                    mouseScratchState[mouseInput] = mouseScratchAlgorithm.getPositiveScratch();
-                } else if (mouseInput == MOUSESCRATCH_MINUS) {
-                    mouseScratchState[mouseInput] = mouseScratchAlgorithm.getNegativeScratch();
-                } else {
-                    mouseScratchState[mouseInput] = false;
-                }
+                mouseScratchState[mouseInput] = mouseScratchAlgorithm[mouseInput/2].isScratchActive(mouseInput%2 == 0);
                 if (prev != mouseScratchState[mouseInput]) {
                     mouseScratchChanged[mouseInput] = true;
                     if (!prev) this.lastMouseScratch = mouseInput;
@@ -108,31 +106,40 @@ public class MouseScratchInput {
         this.mouseScratchDistance = msconfig.getMouseScratchDistance();
         if (mouseScratchEnabled) {
             this.mouseToAnalog = new MouseToAnalog(mouseScratchDistance);
-            switch (msconfig.getMouseScratchMode()) {
-                case MouseScratchConfig.MOUSE_SCRATCH_VER_1:
-                    this.mouseScratchAlgorithm = new MouseScratchAlgorithmVersion1(mouseScratchTimeThreshold, mouseToAnalog);
-                    break;
-                case MouseScratchConfig.MOUSE_SCRATCH_VER_2:
-                    this.mouseScratchAlgorithm = new MouseScratchAlgorithmVersion2(mouseScratchTimeThreshold, mouseToAnalog);
-                    break;
+            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+                boolean xAxis = (i == 0);
+                switch (msconfig.getMouseScratchMode()) {
+                    case MouseScratchConfig.MOUSE_SCRATCH_VER_1:
+                        this.mouseScratchAlgorithm[i] = new MouseScratchAlgorithmVersion1(mouseScratchTimeThreshold, mouseToAnalog, xAxis);
+                        break;
+                    case MouseScratchConfig.MOUSE_SCRATCH_VER_2:
+                        this.mouseScratchAlgorithm[i] = new MouseScratchAlgorithmVersion2(mouseScratchTimeThreshold, mouseToAnalog, xAxis);
+                        break;
+                }
             }
         } else {
             this.mouseToAnalog = null;
-            this.mouseScratchAlgorithm = null;
+            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+                this.mouseScratchAlgorithm[i] = null;
+            }
         }
     }
 
     public void clear() {
         //Arrays.fill(keytime, -duration);
-        if (mouseScratchAlgorithm != null) {
-            mouseScratchAlgorithm.reset();
+        for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+            if (mouseScratchAlgorithm[i] != null) {
+                mouseScratchAlgorithm[i].reset();
+            }
         }
         lastMouseScratch = -1;
     }
 
     private float getMouseAnalogValue(int mouseInput) {
-        float value = mouseToAnalog.getAnalogValue();
-        return (mouseInput == MOUSESCRATCH_PLUS) ? value : -value;
+        final boolean plus = mouseInput%2 == 0;
+        final boolean xAxis = mouseInput < 2;
+        final float value = mouseToAnalog.getAnalogValue(xAxis);
+        return plus ? value : -value;
     }
 
     public int getLastMouseScratch() {
@@ -148,7 +155,8 @@ public class MouseScratchInput {
         private final int tickLength;
         private final int domain;
 
-        private int totalDistanceMoved;
+        private int totalXDistanceMoved;
+        private int totalYDistanceMoved;
 
         public static final int TICKS_FOR_SCRATCH = 2;
 
@@ -159,15 +167,12 @@ public class MouseScratchInput {
         }
 
         public void update() {
-            int distanceMoved = (Gdx.input.getX() - Gdx.graphics.getWidth() / 2) + (Gdx.input.getY() - Gdx.graphics.getHeight() / 2);
+            int xDistanceMoved = Gdx.input.getX() - Gdx.graphics.getWidth() / 2;
+            int yDistanceMoved = Gdx.input.getY() - Gdx.graphics.getHeight() / 2;
             Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 
-            totalDistanceMoved = (totalDistanceMoved+distanceMoved)%domain;
-            totalDistanceMoved = (totalDistanceMoved < 0) ? (totalDistanceMoved+domain) : totalDistanceMoved;
-        }
-
-        public int getDistanceMoved() {
-            return totalDistanceMoved;
+            totalXDistanceMoved = ((totalXDistanceMoved+xDistanceMoved)%domain + domain)%domain;
+            totalYDistanceMoved = ((totalYDistanceMoved+yDistanceMoved)%domain + domain)%domain;
         }
 
         public int getScratchDistance() {
@@ -181,16 +186,19 @@ public class MouseScratchInput {
             return v;
         }
 
-        public float getAnalogValue() {
-            return (float)(totalDistanceMoved%256)/128 - 1;
+        public int getDistanceMoved(boolean xAxis) {
+            return xAxis ? totalXDistanceMoved : totalYDistanceMoved;
+        }
+
+        public float getAnalogValue(boolean xAxis) {
+            return (float)(getDistanceMoved(xAxis)%256)/128 - 1;
         }
     }
 
     private static abstract class MouseScratchAlgorithm {
         protected long lastpresstime;
 
-        public abstract boolean getPositiveScratch();
-        public abstract boolean getNegativeScratch();
+        public abstract boolean isScratchActive(boolean positive);
         public abstract void update(final long presstime);
 
         public void reset() {
@@ -211,31 +219,29 @@ public class MouseScratchInput {
     public static final class MouseScratchAlgorithmVersion1 extends MouseScratchAlgorithm {
         private final MouseToAnalog mouseToAnalog;
         private final int scratchDuration;
+        private final boolean xAxis;
 
         private int prevPosition;
         private int remainingTime;
 
         private int currentScratch;
 
-        public boolean getPositiveScratch() {
-            return currentScratch > 0;
+        public boolean isScratchActive(boolean positive) {
+            return positive ? currentScratch > 0 : currentScratch < 0;
         }
 
-        public boolean getNegativeScratch() {
-            return currentScratch < 0;
-        }
-
-        public MouseScratchAlgorithmVersion1(int scratchDuration, MouseToAnalog mouseToAnalog) {
+        public MouseScratchAlgorithmVersion1(int scratchDuration, MouseToAnalog mouseToAnalog, boolean xAxis) {
+            this.xAxis = xAxis;
             this.scratchDuration = scratchDuration;
             this.mouseToAnalog = mouseToAnalog;
-            this.prevPosition = mouseToAnalog.getDistanceMoved();
+            this.prevPosition = mouseToAnalog.getDistanceMoved(xAxis);
             reset();
         }
 
         public void update(final long presstime) {
             long dtime = getTimeDiff(presstime);
 
-            int currPosition = mouseToAnalog.getDistanceMoved();
+            int currPosition = mouseToAnalog.getDistanceMoved(xAxis);
             int dTicks = mouseToAnalog.computeDistanceDiff(prevPosition, currPosition);
             prevPosition = currPosition;
 
@@ -259,6 +265,7 @@ public class MouseScratchInput {
         private final int scratchDuration;
         private final int scratchDistance;
         private final int scratchReverseDistance;
+        private final boolean xAxis;
 
         private int currentScratch = 0;
 
@@ -270,26 +277,23 @@ public class MouseScratchInput {
         private int positiveDistance = 0;
         private int negativeDistance = 0;
 
-        public boolean getPositiveScratch() {
-            return currentScratch > 0;
+        public boolean isScratchActive(boolean positive) {
+            return positive ? currentScratch > 0 : currentScratch < 0;
         }
 
-        public boolean getNegativeScratch() {
-            return currentScratch < 0;
-        }
-
-        public MouseScratchAlgorithmVersion2(int scratchDuration, MouseToAnalog mouseToAnalog) {
+        public MouseScratchAlgorithmVersion2(int scratchDuration, MouseToAnalog mouseToAnalog, boolean xAxis) {
+            this.xAxis = xAxis;
             this.scratchDuration = scratchDuration;
             this.mouseToAnalog = mouseToAnalog;
             this.scratchDistance = mouseToAnalog.getScratchDistance();
             this.scratchReverseDistance = this.scratchDistance/3;
-            this.prevPosition = mouseToAnalog.getDistanceMoved();
+            this.prevPosition = mouseToAnalog.getDistanceMoved(xAxis);
             reset();
         }
 
         public void update(final long presstime) {
             long dtime = getTimeDiff(presstime);
-            int currPosition = mouseToAnalog.getDistanceMoved();
+            int currPosition = mouseToAnalog.getDistanceMoved(xAxis);
             int distanceDiff = mouseToAnalog.computeDistanceDiff(prevPosition, currPosition);
             prevPosition = currPosition;
             if (positiveDistance == 0) {
