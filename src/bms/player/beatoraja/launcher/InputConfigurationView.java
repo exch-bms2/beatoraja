@@ -105,7 +105,7 @@ public class InputConfigurationView implements Initializable {
 
 	nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
 	isAnalogCol.setCellFactory(CheckBoxTableCell.forTableColumn(isAnalogCol));
-	analogThresholdCol.setCellFactory(col -> new SpinnerCell(1, 100, 100, 1));
+	analogThresholdCol.setCellFactory(col -> new SpinnerCell(1, 1000, 100, 1));
 	analogModeCol.setCellFactory(ComboBoxTableCell.forTableColumn(new IntegerStringConverter() {
 	    private String v2String = "Ver. 2 (Newest)";
 	    private String v1String = "Ver. 1 (~0.6.9)";

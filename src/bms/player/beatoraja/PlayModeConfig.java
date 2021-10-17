@@ -469,7 +469,7 @@ public class PlayModeConfig {
         public void setAnalogScratchThreshold(int analogScratchThreshold) {
             this.analogScratchThreshold = 
             	analogScratchThreshold > 0 ? 
-            		analogScratchThreshold <= 100 ? analogScratchThreshold : 100 
+            		analogScratchThreshold <= 1000 ? analogScratchThreshold : 1000 
     			:1;
         }
 
