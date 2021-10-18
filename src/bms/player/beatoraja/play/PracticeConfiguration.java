@@ -115,7 +115,7 @@ public class PracticeConfiguration {
 	}
 
 	public void processInput(BMSPlayerInputProcessor input) {
-		final int values = model.getMode().player == 2 ? 12 : 10;
+		final int values = model.getMode().player == 2 ? 13 : 11;
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
 		if (cursor[0] && cursortime[0] != 0) {
@@ -184,13 +184,16 @@ public class PracticeConfiguration {
 				property.graphtype = (property.graphtype + 2) % 3;
 				break;
 			case 9:
+				property.metronome = !(property.metronome);
+				break;
+			case 10:
 				property.random = (property.random + (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 6 : 9))
 						% (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
-			case 10:
+			case 11:
 				property.random2 = (property.random2 + 9) % 10;
 				break;
-			case 11:
+			case 12:
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 			}
@@ -255,12 +258,15 @@ public class PracticeConfiguration {
 				property.graphtype = (property.graphtype + 1) % 3;
 				break;
 			case 9:
-				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
+				property.metronome = !(property.metronome);
 				break;
 			case 10:
-				property.random2 = (property.random2 + 1) % 10;
+				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
 			case 11:
+				property.random2 = (property.random2 + 1) % 10;
+				break;
+			case 12:
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 
@@ -284,14 +290,15 @@ public class PracticeConfiguration {
 		sprite.draw(titlefont, "TOTAL : " + (int)property.total, x, y - 132, cursorpos == 6 ? Color.YELLOW : Color.CYAN);
 		sprite.draw(titlefont, "FREQUENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
 		sprite.draw(titlefont, "GRAPHTYPE : " + GRAPHTYPE[property.graphtype], x, y - 176, cursorpos == 8 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 198, cursorpos == 9 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont,"METRONOME : "+property.metronome,x,y-198,cursorpos == 9 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
 		if (model.getMode().player == 2) {
-			sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 242, cursorpos == 11 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 242, cursorpos == 11 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 266, cursorpos == 12 ? Color.YELLOW : Color.CYAN);
 		}
 
 		if (state.main.getPlayerResource().mediaLoadFinished()) {
-			sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 276, Color.ORANGE);
+			sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 290, Color.ORANGE);
 		}
 		
 		String[] judge = {"PGREAT :","GREAT  :","GOOD   :", "BAD    :", "POOR   :", "KPOOR  :"};
@@ -321,5 +328,6 @@ public class PracticeConfiguration {
 		public int freq = 100;
 		public double total = 0;
 		public int graphtype = 0;
+		public boolean metronome = false;
 	}
 }
