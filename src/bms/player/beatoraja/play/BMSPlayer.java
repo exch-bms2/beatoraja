@@ -98,6 +98,7 @@ public class BMSPlayer extends MainState {
 	private long startpressedtime;
 
 	public static Discord discord;
+	private Metronome metronome;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -469,7 +470,10 @@ public class BMSPlayer extends MainState {
 		judge.init(model, resource);
 
 		rhythm = new RhythmTimerProcessor(model,
-				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
+//				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
+				true);	// とりあえず常にtrue TODO 設定参照
+
+		metronome = new Metronome(this);
 
 		bga = resource.getBGAManager();
 
@@ -628,6 +632,10 @@ public class BMSPlayer extends MainState {
 			main.setMicroTimer(TIMER_PLAY, main.getMicroTimer(TIMER_PLAY) + deltaplay);
 
 			rhythm.update(this, deltatime, lanerender.getNowBPM(), property.freq);
+
+			if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
+				metronome.update();
+			}
 
 			final long ptime = main.getNowTime(TIMER_PLAY);
 			float g = gauge.getValue();
@@ -975,6 +983,10 @@ public class BMSPlayer extends MainState {
 
 	public JudgeManager getJudgeManager() {
 		return judge;
+	}
+
+	public RhythmTimerProcessor getRhythmTimerProcessor() {
+		return rhythm;
 	}
 
 	public void update(int judge, long time) {
