@@ -78,7 +78,15 @@ public class RhythmTimerProcessor {
 			}
 		}
 	}
-	
+
+	public int getSections() {
+		return sections;
+	}
+
+	public int getQuarterNote() {
+		return quarterNote;
+	}
+
 	public long getNowQuarterNoteTime() {
 		return nowQuarterNoteTime;
 	}
