@@ -470,10 +470,11 @@ public class BMSPlayer extends MainState {
 		judge.init(model, resource);
 
 		rhythm = new RhythmTimerProcessor(model,
-//				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
-				true);	// とりあえず常にtrue TODO 設定参照
+				(getSkin() instanceof PlaySkin && (((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100))
+						|| autoplay.mode == BMSPlayerMode.Mode.PRACTICE	// for Metronome
+		);
 
-		metronome = new Metronome(this);
+		metronome = new Metronome(this, autoplay.mode == BMSPlayerMode.Mode.PRACTICE && practice.getPracticeProperty().metronome);
 
 		bga = resource.getBGAManager();
 
@@ -590,6 +591,7 @@ public class BMSPlayer extends MainState {
 				PMcharaLastnotes[1] = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
 				playtime = (property.endtime + 1000) * 100 / property.freq + TIME_MARGIN;
+				metronome.setEnabled(property.metronome);
 				bga.prepare(this);
 				state = STATE_READY;
 				main.setTimerOn(TIMER_READY);
