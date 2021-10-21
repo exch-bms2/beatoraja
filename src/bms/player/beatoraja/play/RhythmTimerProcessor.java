@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.LongArray;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 
+import java.util.Arrays;
+
 public class RhythmTimerProcessor {
 
 	private long[] sectiontimes;
@@ -77,6 +79,26 @@ public class RhythmTimerProcessor {
 				nowQuarterNoteTime = now;
 			}
 		}
+	}
+
+	// いいメソッド名が思いつかない。実装も暫定。
+	public void setAtStart(BMSPlayer player, int freq) {
+		final long now = player.main.getNowTime();
+		final long micronow = player.main.getNowMicroTime();
+
+		// これでいいのか？要検証(特にTimerまわり)
+		rhythmtimer = micronow;
+		player.main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
+		nowQuarterNoteTime = now;
+
+		sections = Arrays.binarySearch(sectiontimes, player.main.getNowMicroTime(TIMER_PLAY) / (100 / freq)) + 1;
+		if (sections <= 0) sections *= -1;
+
+		if (quarterNoteTimes.length != 0) {
+			quarterNote = Arrays.binarySearch(quarterNoteTimes, player.main.getNowMicroTime(TIMER_PLAY) / (100 / freq)) + 1;
+			if (quarterNote <= 0) quarterNote *= -1;
+		}
+
 	}
 
 	public int getSections() {
