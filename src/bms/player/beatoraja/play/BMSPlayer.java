@@ -614,6 +614,7 @@ public class BMSPlayer extends MainState {
 				state = STATE_PLAY;
 				main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
+				rhythm.setAtStart(this, practice.getPracticeProperty().freq);
 
 				input.setStartTime(now + main.getStartTime() - starttimeoffset);
 				if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
