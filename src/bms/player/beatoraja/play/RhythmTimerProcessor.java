@@ -66,16 +66,16 @@ public class RhythmTimerProcessor {
 		rhythmtimer += deltatime * (100 - nowbpm * player.getPlaySpeed() / 60) / 100;
 		player.main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
-		if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / freq)) <= player.main.getNowMicroTime(TIMER_PLAY)) {
+		if(sections < sectiontimes.length && (sectiontimes[sections] * 100 / freq) <= player.main.getNowMicroTime(TIMER_PLAY)) {
 			sections++;;
 			player.main.setTimerOn(TIMER_RHYTHM);
 			rhythmtimer = micronow;
 		}
 		if(quarterNoteTimes.length > 0) {
-			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / freq)) <= player.main.getNowMicroTime(TIMER_PLAY)) {
+			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * 100 / freq) <= player.main.getNowMicroTime(TIMER_PLAY)) {
 				quarterNote++;
 				nowQuarterNoteTime = now;
-			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / nowbpm) * (100 / freq)) <= now)  {
+			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / nowbpm) * 100 / freq) <= now)  {
 				nowQuarterNoteTime = now;
 			}
 		}
@@ -91,11 +91,11 @@ public class RhythmTimerProcessor {
 		player.main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 		nowQuarterNoteTime = now;
 
-		sections = Arrays.binarySearch(sectiontimes, player.main.getNowMicroTime(TIMER_PLAY) / (100 / freq)) + 1;
+		sections = Arrays.binarySearch(sectiontimes, player.main.getNowMicroTime(TIMER_PLAY) * freq / 100) + 1;
 		if (sections <= 0) sections *= -1;
 
 		if (quarterNoteTimes.length != 0) {
-			quarterNote = Arrays.binarySearch(quarterNoteTimes, player.main.getNowMicroTime(TIMER_PLAY) / (100 / freq)) + 1;
+			quarterNote = Arrays.binarySearch(quarterNoteTimes, player.main.getNowMicroTime(TIMER_PLAY) * freq / 100) + 1;
 			if (quarterNote <= 0) quarterNote *= -1;
 		}
 
