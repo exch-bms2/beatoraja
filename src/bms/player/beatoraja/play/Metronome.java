@@ -1,6 +1,9 @@
 package bms.player.beatoraja.play;
 
-//import bms.player.beatoraja.MainState;
+
+import java.nio.file.Path;
+
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.audio.AudioDriver;
 
 public class Metronome  {
@@ -12,11 +15,9 @@ public class Metronome  {
 	private int lastSections = 0;
 	private int lastQuarterNote = 0;
 
-	private String downbeatPath="defaultsound/m-down.wav";//ハードコード
-	private String upbeatPath="defaultsound/m-up.wav";
+	private final Path downbeatPath;
+	private final Path upbeatPath;
 
-	public static final int SOUND_M_DOWN = 0;
-	public static final int SOUND_M_UP = 1;
 
 	public Metronome(BMSPlayer main, boolean enabled) {
 		this.rhythm = main.getRhythmTimerProcessor();
@@ -24,9 +25,9 @@ public class Metronome  {
 		this.config = main.getPracticeConfiguration();
 		this.enabled = enabled;
 
-
-
-
+		//TODO:複数入っていた時の挙動および一つも得られなかった時の挙動
+		downbeatPath=main.main.getCurrentState().getSoundPaths("m-down.wav", MainState.SoundType.SOUND)[0];
+		upbeatPath=main.main.getCurrentState().getSoundPaths("m-up.wav", MainState.SoundType.SOUND)[0];
 
 	}
 
@@ -39,9 +40,9 @@ public class Metronome  {
 		if (enabled && rhythm != null) {
 			float volume = config.getPracticeProperty().metronomevolume / 100f;
 			if (rhythm.getSections() > lastSections) {
-				audio.play(downbeatPath, volume, false);
+				audio.play(downbeatPath.toString(), volume, false);
 			}else if (rhythm.getQuarterNote() > lastQuarterNote) {
-				audio.play(upbeatPath, volume, false);
+				audio.play(upbeatPath.toString(), volume, false);
 			}
 			lastSections = rhythm.getSections();
 			lastQuarterNote = rhythm.getQuarterNote();
