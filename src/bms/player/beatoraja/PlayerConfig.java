@@ -56,6 +56,8 @@ public class PlayerConfig {
 	
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
+	
+	private boolean notesDisplayTimingAutoAdjust = false;
 
     /**
      * 選曲時のモードフィルター
@@ -246,6 +248,14 @@ public class PlayerConfig {
 
 	public void setJudgetiming(int judgetiming) {
 		this.judgetiming = judgetiming;
+	}
+
+	public boolean isNotesDisplayTimingAutoAdjust() {
+		return notesDisplayTimingAutoAdjust;
+	}
+
+	public void setNotesDisplayTimingAutoAdjust(boolean notesDisplayTimingAutoAdjust) {
+		this.notesDisplayTimingAutoAdjust = notesDisplayTimingAutoAdjust;
 	}
 
 	public boolean isBpmguide() {

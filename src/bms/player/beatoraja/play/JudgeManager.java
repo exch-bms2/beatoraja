@@ -708,6 +708,16 @@ public class JudgeManager {
 		}
 		main.update(judge, time);
 		keysound.play(judge, fast >= 0);
+
+		final PlayerConfig player = main.main.getPlayerConfig();
+		if(player.isNotesDisplayTimingAutoAdjust()) {
+			final BMSPlayerMode autoplay = main.main.getPlayerResource().getPlayMode();
+			if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
+				if (judge <= 2 && fast >= -150 && fast <= 150) {
+					player.setJudgetiming(player.getJudgetiming() - ((fast >= 0 ? fast + 15 : fast - 15) / 30));
+				}			
+			}			
+		}
 	}
 
 	public long[] getRecentJudges() {
