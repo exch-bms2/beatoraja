@@ -97,6 +97,8 @@ public enum BarSorter implements Comparator<Bar> {
 				return -1;
 			}
 			return ((SongBar) o1).getSongData().getLength() - ((SongBar) o2).getSongData().getLength();
+
+
 		}
 	},
 	/**
@@ -117,7 +119,16 @@ public enum BarSorter implements Comparator<Bar> {
 			if (!((SongBar)o2).existsSong()) {
 				return -1;
 			}
-			return ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+
+//			return ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+
+			//levelが同じ場合はDifficultyでソート
+			int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+			if(revelSort==0){
+				return ((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty();
+			}else{
+				return revelSort;
+			}
 		}
 	},
 	/**
