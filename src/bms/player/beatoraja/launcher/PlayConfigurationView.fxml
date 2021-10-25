@@ -157,31 +157,38 @@
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="%JUDGETIMING" GridPane.rowIndex="4" />
-                                         <NumericSpinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                         <Label text="%NOTESDISPLAYTIMING" GridPane.rowIndex="4" />
+                                         <NumericSpinner fx:id="notesdisplaytiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                         <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                                         <Label text="%NOTE_MODIFIER" GridPane.rowIndex="5" />
-                                         <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                         <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                                         <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-                                         <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION" GridPane.rowIndex="6" />
-                                         <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                                         <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                                         <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
-                                         <Label text="%LNTYPE" GridPane.rowIndex="7" />
-                                         <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                                         <CheckBox fx:id="hispeedautoadjust" mnemonicParsing="false" text="%HISPEED_AUTO_ADJUST" GridPane.columnIndex="2" GridPane.rowIndex="7" GridPane.columnSpan="2">
+                                         <CheckBox fx:id="notesdisplaytimingautoadjust" mnemonicParsing="false" text="%NOTESDISPLAYTIMING_AUTOADJUST" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.columnSpan="2" />
+                                         <Label text="%HISPEED_FIX" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                         <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                         <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                         <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <CheckBox fx:id="hispeedautoadjust" mnemonicParsing="false" text="%HISPEED_AUTO_ADJUST" GridPane.columnIndex="4" GridPane.rowIndex="5" GridPane.columnSpan="8">
                                             <tooltip>
                                                 <Tooltip text="%HISPEED_AUTO_ADJUST_TOOLTIP" textAlignment="CENTER" />
                                             </tooltip>
                                          </CheckBox>
-                                         <CheckBox fx:id="customjudge" mnemonicParsing="false" text="%EXPAND_JUDGE" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-                                         <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="9" GridPane.columnSpan="3">
+                                         <Label text="%NOTE_MODIFIER" GridPane.rowIndex="6" />
+                                         <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                         <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                         <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                                         <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION" GridPane.rowIndex="7" />
+                                         <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                         <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                         <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                                         <Label text="%LNTYPE" GridPane.rowIndex="8" />
+                                         <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                                         <CheckBox fx:id="customjudge" mnemonicParsing="false" text="%EXPAND_JUDGE" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+                                         <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.columnSpan="3">
                                          <Label text="KEY PG" prefWidth="60.0"/>
                                          <NumericSpinner fx:id="njudgepg" editable="true" prefWidth="100.0">
                                              <valueFactory>
@@ -201,7 +208,7 @@
                                              </valueFactory>
                                          </NumericSpinner>
                                          </HBox>
-                                         <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.columnSpan="3">
+                                         <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="11" GridPane.columnSpan="3">
                                          <Label text="SCR PG" prefWidth="60.0" />
                                          <NumericSpinner fx:id="sjudgepg" editable="true" prefWidth="100.0">
                                              <valueFactory>
@@ -221,16 +228,10 @@
                                              </valueFactory>
                                          </NumericSpinner>
                                          </HBox>
-                                         <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="8" />
-                                         <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                                         <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                                         <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="9">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
-                                             </valueFactory>
-                                         </NumericSpinner>
-                                         <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="8" />
-                                         <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="8">
-                                             <valueFactory>
-                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
                                              </valueFactory>
                                          </NumericSpinner>
                                      </GridPane>
@@ -255,18 +256,20 @@
                                          <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                          <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                         <Label text="Extra Note" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                         <NumericSpinner fx:id="extranotedepth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2">
+                                         <Label text="%EXTRA_NOTE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                         <NumericSpinner fx:id="extranotedepth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="3" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="Mine Mode" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="minemode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                         <Label text="Scroll Mode" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="scrollmode" prefWidth="150.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-                                         <Label text="Long Note Mode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                         <ComboBox fx:id="longnotemode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                         <Label text="%MINE_MODE" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                         <ComboBox fx:id="minemode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                         <Label text="%SCROLL_MODE" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                         <ComboBox fx:id="scrollmode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                         <Label text="%LONGNOTE_MODE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                         <ComboBox fx:id="longnotemode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                         <Label text="%LONGNOTE_MODIFYRATE" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                                         <Slider fx:id="longnoterate" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="150.0" value="1.0" GridPane.columnIndex="4" GridPane.rowIndex="6" />
                                      </GridPane>
                                      <GridPane hgap="10.0" vgap="4.0">
                                          <columnConstraints>
