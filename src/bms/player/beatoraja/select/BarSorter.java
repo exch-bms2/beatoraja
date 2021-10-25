@@ -120,8 +120,6 @@ public enum BarSorter implements Comparator<Bar> {
 				return -1;
 			}
 
-//			return ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
-
 			//levelが同じ場合はDifficultyでソート
 			int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
 			if(revelSort==0){
