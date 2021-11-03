@@ -51,19 +51,44 @@
 			</columns>
 		</TableView>
     </HBox>
-    <HBox prefHeight="22.0" prefWidth="740.0">
+    <HBox prefHeight="24.0" prefWidth="740.0">
         <VBox.margin>
             <Insets left="10.0" top="10.0"  />
         </VBox.margin>
-        <CheckBox fx:id="mouseScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="200.0" text="%MOUSE_SCRATCH" textAlignment="CENTER">
+        <CheckBox fx:id="mouseScratch" contentDisplay="CENTER" prefHeight="24.0" prefWidth="280.0" text="%MOUSE_SCRATCH" textAlignment="CENTER">
             <tooltip>
                 <Tooltip text="Use mouse to perform scratch." textAlignment="CENTER" />
             </tooltip>
         </CheckBox>
-        <Label prefHeight="24.0" prefWidth="250.0" text="%MOUSE_SCRATCH_DURATION" />
-        <NumericSpinner fx:id="mouseScratchDuration" editable="true" prefWidth="100.0">
+        <Label prefHeight="24.0" prefWidth="150.0" text="%MOUSE_SCRATCH_ALGORITHM">
+            <HBox.margin>
+                <Insets left="10.0"/>
+            </HBox.margin>
+        </Label>
+        <ComboBox fx:id="mouseScratchMode" prefHeight="24.0" prefWidth="130.0">
+            <tooltip>
+                <Tooltip text="Choose Mouse Scratch Algorithm." textAlignment="CENTER" />
+            </tooltip>
+        </ComboBox>
+    </HBox>
+    <HBox prefHeight="24.0" prefWidth="740.0">
+        <VBox.margin>
+            <Insets left="10.0" top="10.0"  />
+        </VBox.margin>
+        <Label prefHeight="24.0" prefWidth="200.0" text="%MOUSE_SCRATCH_TIME_THRESHOLD" />
+        <NumericSpinner fx:id="mouseScratchTimeThreshold" editable="true" prefWidth="80.0">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="150" max="1000" min="1" />
+            </valueFactory>
+        </NumericSpinner>
+        <Label prefHeight="24.0" prefWidth="200.0" text="%MOUSE_SCRATCH_DISTANCE">
+            <HBox.margin>
+                <Insets left="10.0" />
+            </HBox.margin>
+        </Label>
+        <NumericSpinner fx:id="mouseScratchDistance" editable="true" prefWidth="80.0">
+            <valueFactory>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="12" max="1000" min="1" />
             </valueFactory>
         </NumericSpinner>
     </HBox>

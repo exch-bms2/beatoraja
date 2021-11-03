@@ -27,6 +27,8 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor;
 import bms.player.beatoraja.input.MidiInputProcessor;
 
+import java.util.Arrays;
+
 /**
  * キーコンフィグ画面
  *
@@ -61,25 +63,6 @@ public class KeyConfiguration extends MainState {
 					"2P-D2", "2P-D#2", "2P-E2", "2P-F2", "2P-F#2", "2P-G2", "2P-G#2", "2P-A2", "2P-A#2", "2P-B2",
 					"2P-WHEEL-UP", "2P-WHEEL-DOWN", "START", "SELECT" } };;
 	private static final int[][] KEYSA = { { 0, 1, 2, 3, 4, 5, 6, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-					29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1,
-					-2 } };
-	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-					29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1,
-					-2 } };
-	private static final int[][] MIDIKEYSA = {
-			{ 0, 1, 2, 3, 4, 5, 6, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2 },
@@ -160,8 +143,6 @@ public class KeyConfiguration extends MainState {
 
 		String[] keys = KEYS[mode];
 		int[] keysa = KEYSA[mode];
-		int[] bmkeysa = BMKEYSA[mode];
-		int[] midikeysa = MIDIKEYSA[mode];
 
 		if (keyinput) {
 			if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
@@ -169,16 +150,21 @@ public class KeyConfiguration extends MainState {
 				// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
 				keyinput = false;
 			}
+			if (keyinput && input.getKeyBoardInputProcesseor().getMouseScratchInput().getLastMouseScratch() != -1) {
+				setMouseScratchKeyAssign(keysa[cursorpos], input.getKeyBoardInputProcesseor());
+				// System.out.println(input.getKeyBoardInputProcesseor().getLastMouseScratch());
+				keyinput = false;
+			}
 			for (BMControllerInputProcessor bmc : controllers) {
 				if (keyinput && bmc.getLastPressedButton() != -1) {
-					setControllerKeyAssign(bmkeysa[cursorpos], bmc);
+					setControllerKeyAssign(keysa[cursorpos], bmc);
 					// System.out.println(bmc.getLastPressedButton());
 					keyinput = false;
 					break;
 				}
 			}
 			if (keyinput && midiinput.hasLastPressedKey()) {
-				setMidiKeyAssign(midikeysa[cursorpos]);
+				setMidiKeyAssign(keysa[cursorpos]);
 				keyinput = false;
 			}
 			if (input.isDeletePressed()) {
@@ -233,6 +219,7 @@ public class KeyConfiguration extends MainState {
 			if (number[7] && input.getNumberTime()[7] != 0) {
 				input.getNumberTime()[7] = 0;
 				keyboardConfig.setKeyAssign(MODE_HINT[mode], true);
+				keyboardConfig.getMouseScratchConfig().setKeyAssign(MODE_HINT[mode]);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
@@ -241,6 +228,7 @@ public class KeyConfiguration extends MainState {
 			if (number[8] && input.getNumberTime()[8] != 0) {
 				input.getNumberTime()[8] = 0;
 				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				keyboardConfig.getMouseScratchConfig().setKeyAssign(MODE_HINT[mode]);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
 				}
@@ -249,6 +237,7 @@ public class KeyConfiguration extends MainState {
 			if (number[9] && input.getNumberTime()[9] != 0) {
 				input.getNumberTime()[9] = 0;
 				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				keyboardConfig.getMouseScratchConfig().setKeyAssign(MODE_HINT[mode]);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
@@ -258,6 +247,7 @@ public class KeyConfiguration extends MainState {
 			if (input.isEnterPressed()) {
 				input.setEnterPressed(false);
 				input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
+				input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
 				for (BMControllerInputProcessor bmc : controllers) {
 					bmc.setLastPressedButton(-1);
 				}
@@ -272,7 +262,7 @@ public class KeyConfiguration extends MainState {
 			}
 
 			if (input.isDeletePressed()) {
-				if(!deletepressed) resetKeyAssign(keysa[cursorpos], bmkeysa[cursorpos], midikeysa[cursorpos]);
+				if(!deletepressed) deleteKeyAssign(keysa[cursorpos]);
 				deletepressed = true;
 				input.setDeletePressed(false);
 			} else deletepressed = false;
@@ -322,18 +312,18 @@ public class KeyConfiguration extends MainState {
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getKeyboardKeyAssign(keysa[i]) != -1 ? Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----",
-					202 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getControllerKeyAssign(0, bmkeysa[i]) != -1
-					? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, bmkeysa[i])) : "----",
+			titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ? 
+				Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
+			titlefont.draw(sprite, getControllerKeyAssign(0, keysa[i]) != -1
+					? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, keysa[i])) : "----",
 					352 * scaleX, (y + 22) * scaleY);
 			if (pc.getController().length > 1) {
-				titlefont.draw(sprite, getControllerKeyAssign(1, bmkeysa[i]) != -1 ?
-						BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(1, bmkeysa[i])) : "----", 502 * scaleX,
+				titlefont.draw(sprite, getControllerKeyAssign(1, keysa[i]) != -1 ?
+						BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(1, keysa[i])) : "----", 502 * scaleX,
 						(y + 22) * scaleY);
 			}
 			titlefont.draw(sprite,
-					getMidiKeyAssign(midikeysa[i]) != null ? getMidiKeyAssign(midikeysa[i]).toString() : "----",
+					getMidiKeyAssign(keysa[i]) != null ? getMidiKeyAssign(keysa[i]).toString() : "----",
 					652 * scaleX, (y + 22) * scaleY);
 			sprite.end();
 		}
@@ -379,6 +369,34 @@ public class KeyConfiguration extends MainState {
 			keyboardConfig.setStart(keyboard.getLastPressedKey());
 		} else if (index == -2) {
 			keyboardConfig.setSelect(keyboard.getLastPressedKey());
+		}
+	}
+
+	private String getMouseScratchKeyString(int index, String defaultKeyString) {
+		String keyString = null;
+		if (index >= 0) {
+			keyString = keyboardConfig.getMouseScratchConfig().getKeyString(index);
+		} else if (index == -1) {
+			keyString = keyboardConfig.getMouseScratchConfig().getStartString();
+		} else if (index == -2) {
+			keyString = keyboardConfig.getMouseScratchConfig().getSelectString();
+		}
+		if (keyString == null) {
+			return defaultKeyString;
+		} else {
+			return keyString;
+		}
+	}
+
+	private void setMouseScratchKeyAssign(int index, KeyBoardInputProcesseor kbp) {
+		resetKeyAssign(index);
+		int lastMouseScratch = kbp.getMouseScratchInput().getLastMouseScratch();
+		if (index >= 0) {
+			keyboardConfig.getMouseScratchConfig().getKeyAssign()[index] = lastMouseScratch;
+		} else if (index == -1) {
+			keyboardConfig.getMouseScratchConfig().setStart(lastMouseScratch);
+		} else if (index == -2) {
+			keyboardConfig.getMouseScratchConfig().setSelect(lastMouseScratch);
 		}
 	}
 
@@ -432,30 +450,31 @@ public class KeyConfiguration extends MainState {
 			for (ControllerConfig cc : controllerConfigs) {
 				cc.getKeyAssign()[index] = -1;
 			}
+			keyboardConfig.getMouseScratchConfig().getKeyAssign()[index] = -1;
 			midiconfig.setKeyAssign(index, null);
 		}
 	}
 
-	private void resetKeyAssign(int KBIndex, int BMIndex, int MidiIndex) {
+	private void deleteKeyAssign(int index) {
 		final int noAssign = -1;
-		if (KBIndex >= 0) keyboardConfig.getKeyAssign()[KBIndex] = noAssign;
-		if(BMIndex >= 0) {
-				for (ControllerConfig cc : controllerConfigs) {
-					cc.getKeyAssign()[BMIndex] = noAssign;
-				}
-		} else if (BMIndex == -1) {
+		if (index >= 0) keyboardConfig.getKeyAssign()[index] = noAssign;
+		if(index >= 0) {
+			keyboardConfig.getMouseScratchConfig().getKeyAssign()[index] = noAssign;
+			for (ControllerConfig cc : controllerConfigs) {
+				cc.getKeyAssign()[index] = noAssign;
+			}
+			midiconfig.setKeyAssign(index, null);
+		} else if (index == -1) {
+			keyboardConfig.getMouseScratchConfig().setStart(noAssign);
 			for (int i = 0; i < controllerConfigs.length; i++) {
 				controllerConfigs[i].setStart(noAssign);
 			}
-		} else if (BMIndex == -2) {
+			midiconfig.setStart(null);
+		} else if (index == -2) {
+			keyboardConfig.getMouseScratchConfig().setSelect(noAssign);
 			for (int i = 0; i < controllerConfigs.length; i++) {
 				controllerConfigs[i].setSelect(noAssign);
 			}
-		}
-		if(MidiIndex >= 0) midiconfig.setKeyAssign(MidiIndex, null);
-		else if (MidiIndex == -1) {
-			midiconfig.setStart(null);
-		} else if (MidiIndex == -2) {
 			midiconfig.setSelect(null);
 		}
 	}
@@ -490,7 +509,7 @@ public class KeyConfiguration extends MainState {
 	private void validateControllerLength() {
 		int maxPlayer = 0;
 		int maxKey = 0;
-		for (int key : BMKEYSA[mode]) {
+		for (int key : KEYSA[mode]) {
 			if (key / playerOffset > maxPlayer) {
 				maxPlayer = key / playerOffset;
 			}
@@ -519,7 +538,7 @@ public class KeyConfiguration extends MainState {
 
 	private void validateMidiLength() {
 		int maxKey = 0;
-		for (int key : MIDIKEYSA[mode]) {
+		for (int key : KEYSA[mode]) {
 			if (key > maxKey) {
 				maxKey = key;
 			}
