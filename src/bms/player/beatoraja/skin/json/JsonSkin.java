@@ -34,6 +34,7 @@ public class JsonSkin {
 		public GaugeGraph[] gaugegraph = new GaugeGraph[0];
 		public JudgeGraph[] judgegraph = new JudgeGraph[0];
 		public BPMGraph[] bpmgraph = new BPMGraph[0];
+		public HitErrorVisualizer[] hiterrorvisualizer = new HitErrorVisualizer[0];
 		public TimingVisualizer[] timingvisualizer = new TimingVisualizer[0];
 		public TimingDistributionGraph[] timingdistributiongraph = new TimingDistributionGraph[0];
 		public NoteSet note;
@@ -242,6 +243,28 @@ public class JsonSkin {
 		public String otherBPMColor = "ffff00";
 		public String stopLineColor = "ff00ff";
 		public String transitionLineColor = "7f7f7f";
+	}
+
+	public static class HitErrorVisualizer {
+		public String id;
+		public int width = 301;
+		public int judgeWidthMillis = 150;
+		public int lineWidth = 1;
+		public int colorMode = 1;
+		public int hiterrorMode = 1;
+		public int emaMode = 1;
+		public String lineColor = "99CCFF80";
+		public String centerColor = "FFFFFFFF";
+		public String PGColor = "99CCFF80";
+		public String GRColor = "F2CB3080";
+		public String GDColor = "14CC8f80";
+		public String BDColor = "FF1AB380";
+		public String PRColor = "CC292980";
+		public String emaColor = "FF0000FF";
+		public float alpha = 0.1f;
+		public int windowLength = 30;
+		public int transparent = 0;
+		public int drawDecay = 1;
 	}
 
 	public static class TimingVisualizer {
