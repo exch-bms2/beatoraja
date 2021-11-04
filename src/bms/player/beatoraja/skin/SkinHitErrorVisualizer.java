@@ -24,9 +24,6 @@ import java.util.Optional;
  */
 public class SkinHitErrorVisualizer extends SkinObject {
 
-
-	private TextureRegion matex = null; // Moving Average
-	private TextureRegion backtex = null;
 	private TextureRegion shapetex = null;
 	private Pixmap shape = null;
 
@@ -211,7 +208,6 @@ public class SkinHitErrorVisualizer extends SkinObject {
 
 	@Override
 	public void dispose() {
-		Optional.ofNullable(backtex).ifPresent(t -> t.getTexture().dispose());
 		Optional.ofNullable(shapetex).ifPresent(t -> t.getTexture().dispose());
 		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
 	}
