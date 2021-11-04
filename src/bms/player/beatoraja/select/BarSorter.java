@@ -28,7 +28,21 @@ public enum BarSorter implements Comparator<Bar> {
 			if (!(o2 instanceof SongBar || o2 instanceof FolderBar)) {
 				return -1;
 			}
-			return o1.getTitle().compareToIgnoreCase(o2.getTitle());
+
+			if((o1 instanceof SongBar && o2 instanceof SongBar)){
+				//タイトルの比較値を変数で保持
+				int title_compare;
+				title_compare = ((SongBar)o1).getSongData().getTitle().compareToIgnoreCase(((SongBar)o2).getSongData().getTitle());
+
+				if(title_compare == 0){ //タイトルが一致
+					return (((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty());
+				}else{ //タイトルが不一致
+					return title_compare;
+				}
+			}else{
+				return o1.getTitle().compareToIgnoreCase(o2.getTitle()) ;
+			}
+
 		}
 	},
 	/**
@@ -83,6 +97,8 @@ public enum BarSorter implements Comparator<Bar> {
 				return -1;
 			}
 			return ((SongBar) o1).getSongData().getLength() - ((SongBar) o2).getSongData().getLength();
+
+
 		}
 	},
 	/**
@@ -103,7 +119,14 @@ public enum BarSorter implements Comparator<Bar> {
 			if (!((SongBar)o2).existsSong()) {
 				return -1;
 			}
-			return ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+
+			//levelが同じ場合はDifficultyでソート
+			int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+			if(revelSort==0){
+				return ((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty();
+			}else{
+				return revelSort;
+			}
 		}
 	},
 	/**

@@ -50,7 +50,11 @@ public class InputConfigurationView implements Initializable {
     @FXML
     private CheckBox mouseScratch;
     @FXML
-    private NumericSpinner<Integer> mouseScratchDuration;
+    private NumericSpinner<Integer> mouseScratchTimeThreshold;
+    @FXML
+    private NumericSpinner<Integer> mouseScratchDistance;
+    @FXML
+    private ComboBox<Integer> mouseScratchMode;
 
     private PlayerConfig player;
 
@@ -59,6 +63,7 @@ public class InputConfigurationView implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         inputconfig.getItems().setAll(PlayConfigurationView.PlayMode.values());
+        PlayConfigurationView.initComboBox(mouseScratchMode, new String[] { "Ver. 2 (Newest)", "Ver. 1 (~0.8.3)" });
     }
 
     @FXML
@@ -85,6 +90,11 @@ public class InputConfigurationView implements Initializable {
 		.map(config -> new ControllerConfigViewModel(config)).collect(Collectors.toList());
 	
 	inputduration.getValueFactory().setValue(conf.getKeyboardConfig().getDuration());
+    mouseScratch.setSelected(conf.getKeyboardConfig().getMouseScratchConfig().isMouseScratchEnabled());
+    mouseScratchTimeThreshold.getValueFactory().setValue(conf.getKeyboardConfig().getMouseScratchConfig().getMouseScratchTimeThreshold());
+    mouseScratchDistance.getValueFactory().setValue(conf.getKeyboardConfig().getMouseScratchConfig().getMouseScratchDistance());
+    mouseScratchMode.getSelectionModel().select(conf.getKeyboardConfig().getMouseScratchConfig().getMouseScratchMode());
+
 	controller_tableView.setEditable(true);
 	playsideCol.setEditable(false);
 	nameCol.setEditable(false);
@@ -105,7 +115,7 @@ public class InputConfigurationView implements Initializable {
 
 	nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
 	isAnalogCol.setCellFactory(CheckBoxTableCell.forTableColumn(isAnalogCol));
-	analogThresholdCol.setCellFactory(col -> new SpinnerCell(1, 100, 100, 1));
+	analogThresholdCol.setCellFactory(col -> new SpinnerCell(1, 1000, 100, 1));
 	analogModeCol.setCellFactory(ComboBoxTableCell.forTableColumn(new IntegerStringConverter() {
 	    private String v2String = "Ver. 2 (Newest)";
 	    private String v1String = "Ver. 1 (~0.6.9)";
@@ -137,8 +147,6 @@ public class InputConfigurationView implements Initializable {
 	for (PlayModeConfig.ControllerConfig controller : conf.getController()) {
 	    inputduration.getValueFactory().setValue(controller.getDuration());
 	    jkoc_hack.setSelected(controller.getJKOC());
-      mouseScratch.setSelected(controller.isMouseScratch());
-      mouseScratchDuration.getValueFactory().setValue(controller.getMouseScratchDuration());
 	}
 
     }
@@ -147,13 +155,15 @@ public class InputConfigurationView implements Initializable {
         if (mode != null) {
             PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(mode.name()));
             conf.getKeyboardConfig().setDuration(inputduration.getValue());
+            conf.getKeyboardConfig().getMouseScratchConfig().setMouseScratchEnabled(mouseScratch.isSelected());
+            conf.getKeyboardConfig().getMouseScratchConfig().setMouseScratchTimeThreshold(mouseScratchTimeThreshold.getValue());
+            conf.getKeyboardConfig().getMouseScratchConfig().setMouseScratchDistance(mouseScratchDistance.getValue());
+            conf.getKeyboardConfig().getMouseScratchConfig().setMouseScratchMode(mouseScratchMode.getValue());
             
             for(ControllerConfigViewModel vm : this.controller_tableView.getItems()) {
         	PlayModeConfig.ControllerConfig controller = vm.getConfig();
         	controller.setDuration(inputduration.getValue());
                 controller.setJKOC(jkoc_hack.isSelected());
-                controller.setMouseScratch(mouseScratch.isSelected());
-                controller.setMouseScratchDuration(mouseScratchDuration.getValue());
                 controller.setAnalogScratch(vm.getIsAnalogScratchProperty().get());
                 controller.setAnalogScratchThreshold(vm.getAnalogScratchThreshold());
                 controller.setAnalogScratchMode(vm.getAnalogScratchMode());

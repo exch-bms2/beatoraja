@@ -20,6 +20,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
 			Keys.BACKSLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
 	private int[] control = new int[] { Keys.Q, Keys.W };
+
+	private MouseScratchInput mouseScratchInput;
 	/**
 	 * 数字
 	 */
@@ -75,6 +77,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
 		super(bmsPlayerInputProcessor, Type.KEYBOARD);
+		this.mouseScratchInput = new MouseScratchInput(bmsPlayerInputProcessor, this, config);
 		this.setConfig(config);
 		this.resolution = resolution;
 		
@@ -90,6 +93,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		this.keys = config.getKeyAssign().clone();
 		this.duration = config.getDuration();
 		this.control = new int[] { config.getStart(), config.getSelect() };
+		mouseScratchInput.setConfig(config);
 	}
 
 	public boolean keyDown(int keycode) {
@@ -109,6 +113,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		// Arrays.fill(keystate, false);
 		Arrays.fill(keytime, -duration);
 		lastPressedKey = -1;
+		mouseScratchInput.clear();
 	}
 
 	public void poll(final long presstime) {
@@ -164,6 +169,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
 			}
 		}
+
+		mouseScratchInput.poll(presstime);
+
 		final boolean exitpressed = Gdx.input.isKeyPressed(exit);
 		if (exitpressed != keystate[exit]) {
 			keystate[exit] = exitpressed;
@@ -229,6 +237,10 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void setLastPressedKey(int lastPressedKey) {
 		this.lastPressedKey = lastPressedKey;
+	}
+
+	public MouseScratchInput getMouseScratchInput() {
+		return mouseScratchInput;
 	}
 
 	public void setEnable(boolean enable) {
