@@ -81,12 +81,10 @@ public class RhythmTimerProcessor {
 		}
 	}
 
-	// いいメソッド名が思いつかない。実装も暫定。
 	public void setAtStart(BMSPlayer player, int freq) {
 		final long now = player.main.getNowTime();
 		final long micronow = player.main.getNowMicroTime();
 
-		// これでいいのか？要検証(特にTimerまわり)
 		rhythmtimer = micronow;
 		player.main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 		nowQuarterNoteTime = now;

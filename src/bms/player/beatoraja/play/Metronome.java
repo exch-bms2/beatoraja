@@ -25,7 +25,6 @@ public class Metronome  {
 		this.config = main.getPracticeConfiguration();
 		this.enabled = enabled;
 
-		//TODO:複数入っていた時の挙動および一つも得られなかった時の挙動
 		downbeatPath=main.main.getCurrentState().getSoundPaths("m-down.wav", MainState.SoundType.SOUND)[0];
 		upbeatPath=main.main.getCurrentState().getSoundPaths("m-up.wav", MainState.SoundType.SOUND)[0];
 
