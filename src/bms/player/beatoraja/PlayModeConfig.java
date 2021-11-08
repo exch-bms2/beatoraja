@@ -95,6 +95,14 @@ public class PlayModeConfig {
         }
         keyboard.duration = MathUtils.clamp(keyboard.duration, 0, 100);
 
+        MouseScratchConfig mousescratch = keyboard.mouseScratchConfig;
+        if (mousescratch.keys == null || mousescratch.keys.length != keys) {
+            mousescratch.keys = new int[keys];
+            Arrays.fill(mousescratch.keys, -1);
+        }
+        mousescratch.mouseScratchDistance = MathUtils.clamp(mousescratch.mouseScratchDistance, 1, 10000);
+        mousescratch.mouseScratchTimeThreshold = MathUtils.clamp(mousescratch.mouseScratchTimeThreshold, 1, 10000);
+
         int index = 0;
         for (ControllerConfig c : controller) {
             if (c.keys == null) {
@@ -169,6 +177,10 @@ public class PlayModeConfig {
      * @author exch
      */
     public static class KeyboardConfig {
+        /**
+         * マウス皿設定
+         */
+        private final MouseScratchConfig mouseScratchConfig;
 
         private int[] keys;
 
@@ -184,12 +196,11 @@ public class PlayModeConfig {
 
         public KeyboardConfig(Mode mode, boolean enable) {
             this.setKeyAssign(mode, enable);
+            mouseScratchConfig = new MouseScratchConfig(mode);
         }
 
-        public KeyboardConfig(int[] keys, int start, int select) {
-            this.keys = keys;
-            this.start = start;
-            this.select = select;
+        public MouseScratchConfig getMouseScratchConfig() {
+            return mouseScratchConfig;
         }
 
         public int[] getKeyAssign() {
@@ -270,6 +281,155 @@ public class PlayModeConfig {
     }
 
     /**
+     * マウス皿設定定義用クラス
+     */
+    public static class MouseScratchConfig {
+        public static final int MOUSE_SCRATCH_VER_2 = 0;
+        public static final int MOUSE_SCRATCH_VER_1 = 1;
+
+        private static final String[] MOUSESCRATCH_STRING = new String[]{
+            "MOUSE RIGHT",
+            "MOUSE LEFT",
+            "MOUSE DOWN",
+            "MOUSE UP",
+        };
+
+        private int[] keys;
+
+        private int start = -1;
+
+        private int select = -1;
+
+        /**
+         * マウス皿を利用すてる
+         */
+        private boolean mouseScratchEnabled = false;
+        /**
+         * スクラッチ停止閾値 (ms)
+         */
+        private int mouseScratchTimeThreshold = 150;
+        /**
+         * スクラッチ距離
+         */
+        private int mouseScratchDistance = 12;
+        /**
+         * マウス皿モード
+         */
+        private int mouseScratchMode = 0;
+        
+        public MouseScratchConfig() {
+            this(Mode.BEAT_7K);
+        }
+
+        public MouseScratchConfig(Mode mode) {
+            this.setKeyAssign(mode);
+        }
+
+
+        public void setKeyAssign(Mode mode) {
+            switch (mode) {
+                case BEAT_5K:
+                    keys = new int[7];
+                    break;
+                case BEAT_7K:
+                    keys = new int[9];
+                    break;
+                case BEAT_10K:
+                    keys = new int[14];
+                    break;
+                case BEAT_14K:
+                default:
+                    keys = new int[18];
+                    break;
+                case POPN_5K:
+                case POPN_9K:
+                    keys = new int[9];
+                    break;
+                case KEYBOARD_24K:
+                    keys = new int[26];
+                    break;
+                case KEYBOARD_24K_DOUBLE:
+                    keys = new int[52];
+                    break;
+            }
+            Arrays.fill(keys, -1);
+            start = -1;
+            select = -1;
+        }
+
+        public int[] getKeyAssign() {
+            return keys;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getSelect() {
+            return select;
+        }
+
+        public void setKeyAssign(int[] keys) {
+            this.keys = keys;
+        }
+
+        public void setStart(int start) {
+            this.start = start;
+        }
+
+        public void setSelect(int select) {
+            this.select = select;
+        }
+
+        public boolean isMouseScratchEnabled() {
+            return mouseScratchEnabled;
+        }
+
+        public void setMouseScratchEnabled(boolean mouseScratchEnabled) {
+            this.mouseScratchEnabled = mouseScratchEnabled;
+        }
+
+        public int getMouseScratchTimeThreshold() {
+            return mouseScratchTimeThreshold;
+        }
+
+        public void setMouseScratchTimeThreshold(int mouseScratchTimeThreshold) {
+            this.mouseScratchTimeThreshold = mouseScratchTimeThreshold > 0 ? mouseScratchTimeThreshold : 1;
+        }
+
+        public int getMouseScratchDistance() {
+            return mouseScratchDistance;
+        }
+
+        public void setMouseScratchDistance(int mouseScratchDistance) {
+            this.mouseScratchDistance = mouseScratchDistance > 0 ? mouseScratchDistance : 1;
+        }
+
+        public int getMouseScratchMode() {
+            return mouseScratchMode;
+        }
+
+        public void setMouseScratchMode(int mouseScratchMode) {
+            this.mouseScratchMode = mouseScratchMode;
+        }
+
+        public String getKeyString(int index) {
+            if (keys[index] == -1) return null;
+            return MOUSESCRATCH_STRING[keys[index]];
+        }
+
+        public String getStartString() {
+            if (start == -1) return null;
+            return MOUSESCRATCH_STRING[start];
+        }
+
+        public String getSelectString() {
+            if (select == -1) return null;
+            return MOUSESCRATCH_STRING[select];
+        }
+    }
+
+    /**
      * コントローラー設定定義用クラス
      *
      * @author exch
@@ -305,14 +465,6 @@ public class PlayModeConfig {
          * アナログスクラッチ停止閾値
          */
         private int analogScratchThreshold = 100;
-        /**
-         * Whether players use mouse to perform scratch
-         */
-        private boolean mouseScratch = false;
-        /**
-         * Keep mouse scratch state high for (ms)
-         */
-        private int mouseScratchDuration = 150;
 
         private static final ControllerConfig IIDX_PS2 = new ControllerConfig(new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
 				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS4_MINUS, BMKeys.AXIS3_MINUS, BMKeys.AXIS3_PLUS }, 
@@ -469,24 +621,8 @@ public class PlayModeConfig {
         public void setAnalogScratchThreshold(int analogScratchThreshold) {
             this.analogScratchThreshold = 
             	analogScratchThreshold > 0 ? 
-            		analogScratchThreshold <= 100 ? analogScratchThreshold : 100 
+            		analogScratchThreshold <= 1000 ? analogScratchThreshold : 1000 
     			:1;
-        }
-
-        public boolean isMouseScratch() {
-            return mouseScratch;
-        }
-
-        public void setMouseScratch(boolean mouseScratch) {
-            this.mouseScratch = mouseScratch;
-        }
-
-        public int getMouseScratchDuration() {
-            return mouseScratchDuration;
-        }
-
-        public void setMouseScratchDuration(int mouseScratchDuration) {
-            this.mouseScratchDuration = mouseScratchDuration > 0 ? mouseScratchDuration : 1;
         }
     }
 
