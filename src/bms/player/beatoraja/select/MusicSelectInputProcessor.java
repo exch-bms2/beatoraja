@@ -272,8 +272,8 @@ public class MusicSelectInputProcessor {
             if (property.isPressed(keystate, keytime, GAUGEAUTOSHIFT_DOWN, true)) {
             	select.executeEvent(EventType.gaugeautoshift);
             }
-            if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
-                select.executeEvent(EventType.judgetiming, -1);
+            if (property.isPressed(keystate, keytime, NOTESDISPLAYTIMING_DOWN, true)) {
+                select.executeEvent(EventType.notesdisplaytiming, -1);
             }
             if (property.isPressed(keystate, keytime, DURATION_DOWN, false)) {
                 long l = System.currentTimeMillis();
@@ -299,8 +299,11 @@ public class MusicSelectInputProcessor {
                 timeChangeDuration = 0;
                 countChangeDuration = 0;
             }
-            if (property.isPressed(keystate, keytime, JUDGETIMING_UP, true)) {
-                select.executeEvent(EventType.judgetiming);
+            if (property.isPressed(keystate, keytime, NOTESDISPLAYTIMING_UP, true)) {
+                select.executeEvent(EventType.notesdisplaytiming);
+            }
+            if (property.isPressed(keystate, keytime, NOTESDISPLAYTIMING_AUTOADJUST, true)) {
+                select.executeEvent(EventType.notesdisplaytimingautoadjust);
             }
         } else {
             bar.input();
