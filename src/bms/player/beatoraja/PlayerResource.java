@@ -192,6 +192,21 @@ public class PlayerResource {
 
 		marginTime = BMSModelUtils.setStartNoteTime(model, 1000);
 		BMSPlayerRule.validate(model);
+
+		// 地雷ノートに爆発音が定義されていない場合、デフォルト爆発音をセットする
+		final int lanes = model.getMode().key;
+		final int wavcount = model.getWavList().length;
+		for (TimeLine tl : model.getAllTimeLines()) {
+			for (int i = 0; i < lanes; i++) {
+				final Note n = tl.getNote(i);
+				if (n != null) {
+					if (n instanceof MineNote && n.getWav() < 0) {
+						n.setWav(wavcount);
+					}
+				}
+			}
+		}
+
 		return model;
 	}
 
