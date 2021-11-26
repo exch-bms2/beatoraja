@@ -282,7 +282,8 @@ public class JudgeManager {
 					final MineNote mnote = (MineNote) note;
 					// 地雷ノート判定
 					main.getGauge().addValue((float) -mnote.getDamage());
-					System.out.println("Mine Damage : " + mnote.getWav());
+					System.out.println("Mine Damage : " + (float) mnote.getDamage());
+					keysound.play(note, config.getAudioConfig().getKeyvolume(), 0);
 				}
 
 				if (autoplay) {
@@ -515,7 +516,7 @@ public class JudgeManager {
 							}
 						}
 
-						if (n != null && passing[lane] == null) {
+						if (n != null && passing[lane] == null && !(n instanceof MineNote)) {
 							keysound.play(n, config.getAudioConfig().getKeyvolume(), 0);
 						}
 					}
