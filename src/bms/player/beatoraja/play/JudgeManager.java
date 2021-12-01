@@ -282,7 +282,7 @@ public class JudgeManager {
 					final MineNote mnote = (MineNote) note;
 					// 地雷ノート判定
 					main.getGauge().addValue((float) -mnote.getDamage());
-					System.out.println("Mine Damage : " + (float) mnote.getDamage());
+//					System.out.println("Mine Damage : " + (float) mnote.getDamage());
 					keysound.play(note, config.getAudioConfig().getKeyvolume(), 0);
 				}
 
@@ -412,7 +412,7 @@ public class JudgeManager {
 
 						keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);
 						this.update(lane, processing[lane], time, j, dtime);
-						//						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
+//						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 						processing[lane] = null;
 						sckey[sc] = 0;
 					} else {
@@ -482,7 +482,7 @@ public class JudgeManager {
 								processing[lane] = ln.getPair();
 								if (sc >= 0) {
 									// BSS処理開始
-									//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
+//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
 									sckey[sc] = key;
 								}
 							}
@@ -541,7 +541,7 @@ public class JudgeManager {
 							if (j != 4 || key != sckey[sc]) {
 								release = false;
 							} else {
-								//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
 								sckey[sc] = 0;
 							}
 						}
@@ -559,7 +559,7 @@ public class JudgeManager {
 							if (key != sckey[sc]) {
 								release = false;
 							} else {
-								//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
 								sckey[sc] = 0;
 							}
 						}
