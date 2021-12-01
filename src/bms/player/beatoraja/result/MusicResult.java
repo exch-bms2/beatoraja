@@ -128,7 +128,8 @@ public class MusicResult extends AbstractResult {
                         
                         IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
                         if(response.isSucceeded()) {
-                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
+                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
+                    		rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
                             Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
                         } else {
                             Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
