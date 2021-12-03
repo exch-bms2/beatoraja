@@ -12,8 +12,15 @@ import com.badlogic.gdx.utils.Json;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.TableFolder;
 
+/**
+ * BMS Searchアクセス用クラス
+ * 
+ * @author exch
+ */
 public class BMSSearchAccessor extends TableDataAccessor.TableAccessor {
 
+	// TODO  旧API仕様のため、新APIへの変更が必要
+	
 	private String tabledir;
 	
 	public BMSSearchAccessor(String tabledir) {
