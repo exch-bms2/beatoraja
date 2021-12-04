@@ -67,17 +67,13 @@ public enum MusicSelectKeyProperty {
         return dTicks;
     }
 
-    public boolean isNonAnalogPressed(BMSPlayerInputProcessor input, boolean[] keystate, long[] keytime, MusicSelectKey code, boolean resetState) {
-        for (int i = 0; i < assign.length; i++) {
+    public boolean isNonAnalogPressed(BMSPlayerInputProcessor input, MusicSelectKey code, boolean resetState) {
+    	for (int i = 0; i < assign.length; i++) {
             for (MusicSelectKey index : assign[i]) {
-                if (code == index && keystate[i]) {
+                if (code == index && input.getKeyState(i)) {
                     if (input.isAnalogInput(i)) continue;
                     if (resetState) {
-                        if (keytime[i] != 0) {
-                            keytime[i] = 0;
-                            return true;
-                        }
-                        return false;
+						return input.resetKeyChangedTime(i);
                     } else {
                         return true;
                     }
@@ -88,16 +84,12 @@ public enum MusicSelectKeyProperty {
         return false;
     }
 
-	public boolean isPressed(boolean[] keystate, long[] keytime, MusicSelectKey code, boolean resetState) {
+	public boolean isPressed(BMSPlayerInputProcessor input, MusicSelectKey code, boolean resetState) {
 		for (int i = 0; i < assign.length; i++) {
 			for (MusicSelectKey index : assign[i]) {
-				if (code == index && keystate[i]) {
+				if (code == index && input.getKeyState(i)) {
 					if (resetState) {
-						if (keytime[i] != 0) {
-							keytime[i] = 0;
-							return true;
-						}
-						return false;
+						return input.resetKeyChangedTime(i);
 					} else {
 						return true;
 					}

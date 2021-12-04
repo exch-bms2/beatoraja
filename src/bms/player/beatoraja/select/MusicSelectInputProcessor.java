@@ -107,8 +107,6 @@ public class MusicSelectInputProcessor {
             select.executeEvent(EventType.lnmode);
         }
 
-        boolean[] keystate = input.getKeystate();
-        long[] keytime = input.getTime();
         boolean[] cursor = input.getCursorState();
         long[] cursortime = input.getCursorTime();
 
@@ -124,7 +122,7 @@ public class MusicSelectInputProcessor {
         }
 
         if (numberstate[4] && numtime[4] != 0
-                || (!input.startPressed() && !input.isSelectPressed() && !input.getNumberState()[5] && property.isPressed(keystate, keytime, NEXT_REPLAY, true))) {
+                || (!input.startPressed() && !input.isSelectPressed() && !input.getNumberState()[5] && property.isPressed(input, NEXT_REPLAY, true))) {
             // change replay
             numtime[4] = 0;
             select.execute(MusicSelectCommand.NEXT_REPLAY);
@@ -138,34 +136,34 @@ public class MusicSelectInputProcessor {
                 isOptionKeyReleased = false;
                 select.play(SOUND_OPTIONOPEN);
             }
-            if (property.isPressed(keystate, keytime, OPTION1_DOWN, true)) {
+            if (property.isPressed(input, OPTION1_DOWN, true)) {
                 select.executeEvent(EventType.option1p, 1);
             }
-            if (property.isPressed(keystate, keytime, OPTION1_UP, true)) {
+            if (property.isPressed(input, OPTION1_UP, true)) {
                 select.executeEvent(EventType.option1p, -1);
             }
-            if (property.isPressed(keystate, keytime, GAUGE_DOWN, true)) {
+            if (property.isPressed(input, GAUGE_DOWN, true)) {
                 select.executeEvent(EventType.gauge1p, 1);
             }
-            if (property.isPressed(keystate, keytime, GAUGE_UP, true)) {
+            if (property.isPressed(input, GAUGE_UP, true)) {
                 select.executeEvent(EventType.gauge1p, -1);
             }
-            if (property.isPressed(keystate, keytime, OPTIONDP_DOWN, true)) {
+            if (property.isPressed(input, OPTIONDP_DOWN, true)) {
                 select.executeEvent(EventType.optiondp, 1);
             }
-            if (property.isPressed(keystate, keytime, OPTIONDP_UP, true)) {
+            if (property.isPressed(input, OPTIONDP_UP, true)) {
                 select.executeEvent(EventType.optiondp, -1);
             }
-            if (property.isPressed(keystate, keytime, OPTION2_DOWN, true)) {
+            if (property.isPressed(input, OPTION2_DOWN, true)) {
                 select.executeEvent(EventType.option2p, 1);
             }
-            if (property.isPressed(keystate, keytime, OPTION2_UP, true)) {
+            if (property.isPressed(input, OPTION2_UP, true)) {
                 select.executeEvent(EventType.option2p, -1);
             }
-            if (property.isPressed(keystate, keytime, HSFIX_DOWN, true)) {
+            if (property.isPressed(input, HSFIX_DOWN, true)) {
                 select.executeEvent(EventType.hsfix, 1);
             }
-            if (property.isPressed(keystate, keytime, HSFIX_UP, true)) {
+            if (property.isPressed(input, HSFIX_UP, true)) {
                 select.executeEvent(EventType.hsfix, -1);
             }
 
@@ -178,7 +176,7 @@ public class MusicSelectInputProcessor {
             analogScrollBuffer %= analogTicksPerScroll;
 
             // song bar scroll
-            if (property.isNonAnalogPressed(input, keystate, keytime, TARGET_UP, false) || cursor[1]) {
+            if (property.isNonAnalogPressed(input, TARGET_UP, false) || cursor[1]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = 1;
@@ -190,7 +188,7 @@ public class MusicSelectInputProcessor {
                     mov = 1;
                     angle = durationhigh;
                 }
-            } else if (property.isNonAnalogPressed(input, keystate, keytime, TARGET_DOWN, false) || cursor[0]) {
+            } else if (property.isNonAnalogPressed(input, TARGET_DOWN, false) || cursor[0]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = -1;
@@ -229,31 +227,31 @@ public class MusicSelectInputProcessor {
                 isOptionKeyReleased = false;
                 select.play(SOUND_OPTIONOPEN);
             }
-            if (property.isPressed(keystate, keytime, JUDGEWINDOW_UP, true)) {
+            if (property.isPressed(input, JUDGEWINDOW_UP, true)) {
                 config.setCustomJudge(!config.isCustomJudge());
                 select.play(SOUND_OPTIONCHANGE);
             }
-            if (property.isPressed(keystate, keytime, CONSTANT, true)) {
+            if (property.isPressed(input, CONSTANT, true)) {
                 config.setScrollMode(config.getScrollMode() == 1 ? 0 : 1);
                 select.play(SOUND_OPTIONCHANGE);
             }
-            if (property.isPressed(keystate, keytime, JUDGEAREA, true)) {
+            if (property.isPressed(input, JUDGEAREA, true)) {
                 config.setShowjudgearea(!config.isShowjudgearea());
                 select.play(SOUND_OPTIONCHANGE);
             }
-            if (property.isPressed(keystate, keytime, LEGACYNOTE, true)) {
+            if (property.isPressed(input, LEGACYNOTE, true)) {
                 config.setLongnoteMode(config.getLongnoteMode() == 1 ? 0 : 1);
                 select.play(SOUND_OPTIONCHANGE);
             }
-            if (property.isPressed(keystate, keytime, MARKNOTE, true)) {
+            if (property.isPressed(input, MARKNOTE, true)) {
                 config.setMarkprocessednote(!config.isMarkprocessednote());
                 select.play(SOUND_OPTIONCHANGE);
             }
-            if (property.isPressed(keystate, keytime, BPMGUIDE, true)) {
+            if (property.isPressed(input, BPMGUIDE, true)) {
                 config.setBpmguide(!config.isBpmguide());
                 select.play(SOUND_OPTIONCHANGE);
             }
-            if (property.isPressed(keystate, keytime, NOMINE, true)) {
+            if (property.isPressed(input, NOMINE, true)) {
                 config.setMineMode(config.getMineMode() == 1 ? 0 : 1);
                 select.play(SOUND_OPTIONCHANGE);
             }
@@ -266,16 +264,16 @@ public class MusicSelectInputProcessor {
                 isOptionKeyReleased = false;
                 select.play(SOUND_OPTIONOPEN);
             }
-            if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
+            if (property.isPressed(input, BGA_DOWN, true)) {
             	select.executeEvent(EventType.bga);
             }
-            if (property.isPressed(keystate, keytime, GAUGEAUTOSHIFT_DOWN, true)) {
+            if (property.isPressed(input, GAUGEAUTOSHIFT_DOWN, true)) {
             	select.executeEvent(EventType.gaugeautoshift);
             }
-            if (property.isPressed(keystate, keytime, NOTESDISPLAYTIMING_DOWN, true)) {
+            if (property.isPressed(input, NOTESDISPLAYTIMING_DOWN, true)) {
                 select.executeEvent(EventType.notesdisplaytiming, -1);
             }
-            if (property.isPressed(keystate, keytime, DURATION_DOWN, false)) {
+            if (property.isPressed(input, DURATION_DOWN, false)) {
                 long l = System.currentTimeMillis();
                 if (timeChangeDuration == 0) {
                     timeChangeDuration = l + durationlow;
@@ -285,7 +283,7 @@ public class MusicSelectInputProcessor {
                     timeChangeDuration = l + durationhigh;
                 	select.executeEvent(EventType.duration1p, -1, countChangeDuration > 50 ? 10 : 0);
                 }
-            } else if (property.isPressed(keystate, keytime, DURATION_UP, false)) {
+            } else if (property.isPressed(input, DURATION_UP, false)) {
                 long l = System.currentTimeMillis();
                 if (timeChangeDuration == 0) {
                     timeChangeDuration = l + durationlow;
@@ -299,10 +297,10 @@ public class MusicSelectInputProcessor {
                 timeChangeDuration = 0;
                 countChangeDuration = 0;
             }
-            if (property.isPressed(keystate, keytime, NOTESDISPLAYTIMING_UP, true)) {
+            if (property.isPressed(input, NOTESDISPLAYTIMING_UP, true)) {
                 select.executeEvent(EventType.notesdisplaytiming);
             }
-            if (property.isPressed(keystate, keytime, NOTESDISPLAYTIMING_AUTOADJUST, true)) {
+            if (property.isPressed(input, NOTESDISPLAYTIMING_AUTOADJUST, true)) {
                 select.executeEvent(EventType.notesdisplaytimingautoadjust);
             }
         } else {
@@ -310,23 +308,23 @@ public class MusicSelectInputProcessor {
             select.setPanelState(0);
 
             if (current instanceof SelectableBar) {
-                if (property.isPressed(keystate, keytime, PLAY, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
+                if (property.isPressed(input, PLAY, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
                     // play
                     input.setEnterPressed(false);
                     cursortime[3] = 0;
                     select.selectSong(BMSPlayerMode.PLAY);
-                } else if (property.isPressed(keystate, keytime, PRACTICE, true)) {
+                } else if (property.isPressed(input, PRACTICE, true)) {
                     // practice mode
                     select.selectSong(BMSPlayerMode.PRACTICE);
-                } else if (property.isPressed(keystate, keytime, AUTO, true)) {
+                } else if (property.isPressed(input, AUTO, true)) {
                     // auto play
                     select.selectSong(BMSPlayerMode.AUTOPLAY);
-                } else if (property.isPressed(keystate, keytime, MusicSelectKey.REPLAY, true)) {
+                } else if (property.isPressed(input, MusicSelectKey.REPLAY, true)) {
                     // replay
                     select.selectSong((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY);
                 }
             } else {
-                if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
+                if (property.isPressed(input, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
                     input.setEnterPressed(false);
                     // open folder
                     cursortime[3] = 0;
@@ -349,8 +347,8 @@ public class MusicSelectInputProcessor {
                 select.executeEvent(EventType.open_document);
             }
             // close folder
-            if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
-                keytime[1] = 0;
+            if (property.isPressed(input, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
+                input.resetKeyChangedTime(1);
                 cursortime[2] = 0;
                 bar.close();
             }
