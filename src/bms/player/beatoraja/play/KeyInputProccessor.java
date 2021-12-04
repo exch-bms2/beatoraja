@@ -52,7 +52,7 @@ class KeyInputProccessor {
 	public void input() {
 		final MainController main = player.main;
 		final long now = main.getNowTime();
-		final boolean[] keystate = main.getInputProcessor().getKeystate();
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final long[] auto_presstime = player.getJudgeManager().getAutoPresstime();
 
 		final int[] laneoffset = laneProperty.getLaneSkinOffset();
@@ -63,7 +63,7 @@ class KeyInputProccessor {
 			boolean scratch = false;
 			if(!keyBeamStop) {
 				for (int key : laneProperty.getLaneKeyAssign()[lane]) {
-					if (keystate[key] || auto_presstime[key] != Long.MIN_VALUE) {
+					if (input.getKeyState(key) || auto_presstime[key] != Long.MIN_VALUE) {
 						pressed = true;
 						if(laneProperty.getLaneScratchAssign()[lane] != -1
 								&& scratchKey[laneProperty.getLaneScratchAssign()[lane]] != key) {
@@ -96,9 +96,9 @@ class KeyInputProccessor {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
 				final int key0 = laneProperty.getScratchKeyAssign()[s][1];
 				final int key1 = laneProperty.getScratchKeyAssign()[s][0];
-				if (keystate[key0] || auto_presstime[key0] != Long.MIN_VALUE) {
+				if (input.getKeyState(key0) || auto_presstime[key0] != Long.MIN_VALUE) {
 					scratch[s] += deltatime * 2;
-				} else if (keystate[key1] || auto_presstime[key1] != Long.MIN_VALUE) {
+				} else if (input.getKeyState(key1) || auto_presstime[key1] != Long.MIN_VALUE) {
 					scratch[s] += 2160 - deltatime * 2;
 				}
 				scratch[s] %= 2160;
@@ -178,8 +178,7 @@ class KeyInputProccessor {
 							// key.keycode + " pressed - " + key.pressed +
 							// " time - " + key.time);
 							// }
-							input.getKeystate()[key.keycode] = key.pressed;
-							input.getTime()[key.keycode] = key.time;
+							input.setKeyState(key.keycode, key.pressed, key.time);
 							index++;
 						}
 					}
@@ -205,8 +204,7 @@ class KeyInputProccessor {
 			}
 
 			if (keylog != null) {
-				Arrays.fill(input.getKeystate(), false);
-				Arrays.fill(input.getTime(), 0);
+				input.resetAllKeyState();
 			}
 
 			Logger.getGlobal().info("入力パフォーマンス(max ms) : " + frametime);

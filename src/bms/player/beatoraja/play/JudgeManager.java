@@ -246,8 +246,6 @@ public class JudgeManager {
 		final MainController mc = main.main;
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
 		final Config config = mc.getPlayerResource().getConfig();
-		final long[] keytime = input.getTime();
-		final boolean[] keystate = input.getKeystate();
 		final long now = mc.getNowTime();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
@@ -257,7 +255,7 @@ public class JudgeManager {
 			lanemodel.mark((int) (prevtime + judgestart - 100));
 			boolean pressed = false;
 			for (int key : laneassign[lane]) {
-				if (keystate[key]) {
+				if (input.getKeyState(key)) {
 					pressed = true;
 					break;
 				}
@@ -389,14 +387,14 @@ public class JudgeManager {
 			if (lane == -1) {
 				continue;
 			}
-			final long ptime = keytime[key];
-			if (ptime == 0) {
+			final long ptime = input.getKeyChangedTime(key);
+			if (ptime == Long.MIN_VALUE) {
 				continue;
 			}
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
 			final int sc = sckeyassign[lane];
-			if (keystate[key]) {
+			if (input.getKeyState(key)) {
 				// キーが押されたときの処理
 				if (processing[lane] != null) {
 					// BSS終端処理
@@ -581,7 +579,7 @@ public class JudgeManager {
 					}
 				}
 			}
-			keytime[key] = 0;
+			input.resetKeyChangedTime(key);
 		}
 
 		for (int lane = 0; lane < sckeyassign.length; lane++) {
