@@ -191,14 +191,6 @@ public class BMSPlayerInputProcessor {
 		return starttime;
 	}
 
-	public long[] getTime() {
-		return time;
-	}
-
-	public boolean[] getKeystate() {
-		return keystate;
-	}
-
 	/**
 	 * 指定のキーIDのキー状態を返す
 	 * @param id キーID
