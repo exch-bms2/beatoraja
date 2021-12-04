@@ -195,16 +195,11 @@ public class CourseResult extends AbstractResult {
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
 		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
-			boolean[] keystate = inputProcessor.getKeystate();
-			long[] keytime = inputProcessor.getTime();
-
 			boolean ok = false;
 			for (int i = 0; i < property.getAssignLength(); i++) {
-				if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && keystate[i] && keytime[i] != 0) {
+				if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 					gaugeType = (gaugeType - 5) % 3 + 6;
-					keytime[i] = 0;
-				} else if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
-					keytime[i] = 0;
+				} else if (property.getAssign(i) != null && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 					ok = true;
 				}
 			}

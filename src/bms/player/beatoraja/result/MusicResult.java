@@ -169,10 +169,8 @@ public class MusicResult extends AbstractResult {
 				stop(SOUND_CLOSE);
 				main.getAudioProcessor().stop((Note) null);
 
-				boolean[] keystate = main.getInputProcessor().getKeystate();
-				//				System.out.println(Arrays.toString(keystate));
-				long[] keytime = main.getInputProcessor().getTime();
-				Arrays.fill(keytime, 0);
+				final BMSPlayerInputProcessor input = main.getInputProcessor();
+				main.getInputProcessor().resetAllKeyChangedTime();
 
 				if (resource.getCourseBMSModels() != null) {
 					if (resource.getGauge()[resource.getGrooveGauge().getType()]
@@ -203,11 +201,11 @@ public class MusicResult extends AbstractResult {
 					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
 					ResultKeyProperty.ResultKey key = null;
 					for (int i = 0; i < property.getAssignLength(); i++) {
-						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && keystate[i]) {
+						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && input.getKeyState(i)) {
 							key = ResultKeyProperty.ResultKey.REPLAY_DIFFERENT;
 							break;
 						}
-						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && keystate[i]) {
+						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && input.getKeyState(i)) {
 							key = ResultKeyProperty.ResultKey.REPLAY_SAME;
 							break;
 						}
@@ -256,19 +254,15 @@ public class MusicResult extends AbstractResult {
 
 		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
-				boolean[] keystate = inputProcessor.getKeystate();
-				long[] keytime = inputProcessor.getTime();
 				boolean ok = false;
 				for (int i = 0; i < property.getAssignLength(); i++) {
-					if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && keystate[i] && keytime[i] != 0) {
+					if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 						if(gaugeType >= GrooveGauge.ASSISTEASY && gaugeType <= GrooveGauge.HAZARD) {
 							gaugeType = (gaugeType + 1) % 6;
 						} else {
 							gaugeType = (gaugeType - 5) % 3 + 6;
 						}
-						keytime[i] = 0;
-					} else if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
-						keytime[i] = 0;
+					} else if (property.getAssign(i) != null && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 						ok = true;
 					}
 				}
