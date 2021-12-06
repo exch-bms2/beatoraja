@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -291,11 +293,14 @@ public class MusicResult extends AbstractResult {
 					}
 				}
 
-				for (int i = 0; i < MusicSelector.REPLAY; i++) {
-					if (inputProcessor.getNumberState()[i + 1]) {
-						saveReplayData(i);
-						break;
-					}
+				if(inputProcessor.isControlKeyPressed(ControlKeys.NUM1)) {
+					saveReplayData(0);				
+				} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM2)) {
+					saveReplayData(1);				
+				} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM3)) {
+					saveReplayData(2);				
+				} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM4)) {
+					saveReplayData(3);				
 				}
 
 				if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {

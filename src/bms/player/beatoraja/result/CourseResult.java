@@ -13,6 +13,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -227,11 +228,14 @@ public class CourseResult extends AbstractResult {
 				}
 			}
 
-			for (int i = 0; i < MusicSelector.REPLAY; i++) {
-				if (inputProcessor.getNumberState()[i + 1]) {
-					saveReplayData(i);
-					break;
-				}
+			if(inputProcessor.isControlKeyPressed(ControlKeys.NUM1)) {
+				saveReplayData(0);				
+			} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM2)) {
+				saveReplayData(1);				
+			} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM3)) {
+				saveReplayData(2);				
+			} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM4)) {
+				saveReplayData(3);				
 			}
 
 			if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
