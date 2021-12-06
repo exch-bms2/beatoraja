@@ -117,7 +117,7 @@ public class SearchTextField extends Stage {
 				public boolean handle(Event e) {
 					if (e.isHandled()) {
 						selector.main.getInputProcessor().getKeyBoardInputProcesseor()
-								.setEnable(getKeyboardFocus() == null);
+								.setTextInputMode(getKeyboardFocus() != null);
 					}
 					return false;
 				}
@@ -146,7 +146,7 @@ public class SearchTextField extends Stage {
 		search.getStyle().messageFontColor = Color.GRAY;
 		search.getOnscreenKeyboard().show(false);
 		setKeyboardFocus(null);
-		selector.main.getInputProcessor().getKeyBoardInputProcesseor().setEnable(true);
+		selector.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
 	}
 
 	public void dispose() {

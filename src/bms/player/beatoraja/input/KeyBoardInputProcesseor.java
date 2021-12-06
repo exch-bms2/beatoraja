@@ -41,7 +41,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 */
 	private int lastPressedKey = -1;
 
-	private boolean enable = true;
+	private boolean textmode = false;
 
 	/**
 	 * 画面の解像度。マウスの入力イベント処理で使用
@@ -103,7 +103,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void poll(final long presstime) {
-		if (enable) {
+		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
@@ -117,14 +117,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
-			for (ControlKeys key : ControlKeys.values()) {
-				final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
-				if (pressed != keystate[key.keycode]) {
-					keystate[key.keycode] = pressed;
-					keytime[key.keycode] = presstime;
-				}
-			}
-
 			final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
 			if (startpressed != keystate[control[0]]) {
 				keystate[control[0]] = startpressed;
@@ -134,6 +126,14 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			if (selectpressed != keystate[control[1]]) {
 				keystate[control[1]] = selectpressed;
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
+			}
+		}
+		
+		for (ControlKeys key : ControlKeys.values()) {
+			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
+			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
+				keystate[key.keycode] = pressed;
+				keytime[key.keycode] = presstime;
 			}
 		}
 		
@@ -222,8 +222,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return mouseScratchInput;
 	}
 
-	public void setEnable(boolean enable) {
-		this.enable = enable;
+	public void setTextInputMode(boolean textmode) {
+		this.textmode = textmode;
 	}
 	
 	public boolean isReservedKey(int key) {
@@ -231,34 +231,34 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 	
 	public enum ControlKeys {
-		NUM0(0, Keys.NUM_0),
-		NUM1(1, Keys.NUM_1),
-		NUM2(2, Keys.NUM_2),
-		NUM3(3, Keys.NUM_3),
-		NUM4(4, Keys.NUM_4),
-		NUM5(5, Keys.NUM_5),
-		NUM6(6, Keys.NUM_6),
-		NUM7(7, Keys.NUM_7),
-		NUM8(8, Keys.NUM_8),
-		NUM9(9, Keys.NUM_9),
+		NUM0(0, Keys.NUM_0, true),
+		NUM1(1, Keys.NUM_1, true),
+		NUM2(2, Keys.NUM_2, true),
+		NUM3(3, Keys.NUM_3, true),
+		NUM4(4, Keys.NUM_4, true),
+		NUM5(5, Keys.NUM_5, true),
+		NUM6(6, Keys.NUM_6, true),
+		NUM7(7, Keys.NUM_7, true),
+		NUM8(8, Keys.NUM_8, true),
+		NUM9(9, Keys.NUM_9, true),
 		
-		F1(10, Keys.F1),
-		F2(11, Keys.F2),
-		F3(12, Keys.F3),
-		F4(13, Keys.F4),
-		F5(14, Keys.F5),
-		F6(15, Keys.F6),
-		F7(16, Keys.F7),
-		F8(17, Keys.F8),
-		F9(18, Keys.F9),
-		F10(19, Keys.F10),
-		F11(20, Keys.F11),		
-		F12(21, Keys.F12),
+		F1(10, Keys.F1, false),
+		F2(11, Keys.F2, false),
+		F3(12, Keys.F3, false),
+		F4(13, Keys.F4, false),
+		F5(14, Keys.F5, false),
+		F6(15, Keys.F6, false),
+		F7(16, Keys.F7, false),
+		F8(17, Keys.F8, false),
+		F9(18, Keys.F9, false),
+		F10(19, Keys.F10, false),
+		F11(20, Keys.F11, false),
+		F12(21, Keys.F12, false),
 		
-		UP(22, Keys.UP),
-		DOWN(23, Keys.DOWN),
-		LEFT(24, Keys.LEFT),
-		RIGHT(25, Keys.RIGHT),
+		UP(22, Keys.UP, false),
+		DOWN(23, Keys.DOWN, false),
+		LEFT(24, Keys.LEFT, false),
+		RIGHT(25, Keys.RIGHT, false),
 		
 //		ENTER(26, Keys.ENTER),
 //		DEL(27, Keys.FORWARD_DEL),
@@ -269,9 +269,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		
 		public final int keycode;
 		
-		private ControlKeys(int id, int keycode) {
+		public final boolean text;
+		
+		private ControlKeys(int id, int keycode, boolean text) {
 			this.id = id;
 			this.keycode = keycode;
+			this.text = text;
 		}
 	}
 
