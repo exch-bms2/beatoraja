@@ -7,6 +7,7 @@ import java.util.Arrays;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 
 /**
  * BMSPlayerの制御系の入力処理を行うクラス
@@ -94,12 +95,12 @@ public class ControlInputProcessor {
 		// 各種コントロール入力判定
 		if (enableControl) {
 			if (enableCursor) {
-				if (input.getCursorState()[0]) {
+				if (input.getControlKeyState(ControlKeys.UP)) {
 					if (!cursorpressed) {
 						setCoverValue(-0.01f);
 						cursorpressed = true;
 					}
-				} else if (input.getCursorState()[1]) {
+				} else if (input.getControlKeyState(ControlKeys.DOWN)) {
 					if (!cursorpressed) {
 						setCoverValue(0.01f);
 						cursorpressed = true;
@@ -169,13 +170,13 @@ public class ControlInputProcessor {
 		}
 		// play speed change (autoplay or replay only)
 		if (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
-			if (input.getNumberState()[1]) {
+			if (input.getControlKeyState(ControlKeys.NUM1)) {
 				player.setPlaySpeed(25);
-			} else if (input.getNumberState()[2]) {
+			} else if (input.getControlKeyState(ControlKeys.NUM2)) {
 				player.setPlaySpeed(50);
-			} else if (input.getNumberState()[3]) {
+			} else if (input.getControlKeyState(ControlKeys.NUM3)) {
 				player.setPlaySpeed(200);
-			} else if (input.getNumberState()[4]) {
+			} else if (input.getControlKeyState(ControlKeys.NUM4)) {
 				player.setPlaySpeed(300);
 			} else {
 				player.setPlaySpeed(100);
