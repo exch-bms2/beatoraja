@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.ir.IRCourseData.IRTrophyData;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
@@ -712,7 +713,6 @@ public class BarRenderer {
 
 	public void input() {
 		BMSPlayerInputProcessor input = select.main.getInputProcessor();
-		boolean[] cursor = input.getCursorState();
 
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.main.getPlayerResource().getPlayerConfig().getMusicselectinput()];
 
@@ -739,7 +739,7 @@ public class BarRenderer {
 		}
 
 		// song bar scroll
-		if (property.isNonAnalogPressed(input, MusicSelectKey.UP, false) || cursor[1]) {
+		if (property.isNonAnalogPressed(input, MusicSelectKey.UP, false) || input.getControlKeyState(ControlKeys.DOWN)) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
@@ -752,7 +752,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (property.isNonAnalogPressed(input, MusicSelectKey.DOWN, false) || cursor[0]) {
+		} else if (property.isNonAnalogPressed(input, MusicSelectKey.DOWN, false) || input.getControlKeyState(ControlKeys.UP)) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
