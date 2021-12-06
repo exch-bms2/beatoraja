@@ -269,14 +269,8 @@ public class MusicResult extends AbstractResult {
 					}
 				}
 
-				if (inputProcessor.isEnterPressed()) {
+				if (inputProcessor.isControlKeyPressed(ControlKeys.ESCAPE) || inputProcessor.isControlKeyPressed(ControlKeys.ENTER)) {
 					ok = true;
-					inputProcessor.setEnterPressed(false);
-				}
-
-				if (inputProcessor.isExitPressed()) {
-					ok = true;
-					inputProcessor.setExitPressed(false);
 				}
 
 				if (resource.getScoreData() == null || ok) {
