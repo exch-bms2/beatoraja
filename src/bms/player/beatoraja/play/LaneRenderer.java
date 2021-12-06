@@ -486,8 +486,9 @@ public class LaneRenderer {
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
+								final float dscale = dsth > scale ? (dsth - scale) / 2 : 0;
 								this.drawLongNote(sprite, lanes[lane].longImage, dstx, (float) (dsty + dy), dstw,
-										(float) (dsty < (lanes[lane].region.y - (dsth - scale) / 2) ? dsty - (lanes[lane].region.y - (dsth - scale) / 2) : dy), dsth, lane,
+										(float) (dsty < (lanes[lane].region.y - dscale) ? dsty - (lanes[lane].region.y -dscale) : dy), dsth, lane,
 										ln);
 							}
 							// System.out.println(dy);
