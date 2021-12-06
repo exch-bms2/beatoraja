@@ -22,18 +22,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	private int[] control = new int[] { Keys.Q, Keys.W };
 
 	private MouseScratchInput mouseScratchInput;
-	/**
-	 * 終了キー
-	 */
-	private final int exit = Keys.ESCAPE;
-	/**
-	 * ENTERキー
-	 */
-	private final int enter = Keys.ENTER;
-	/**
-	 * DELキー
-	 */
-	private final int delete = Keys.FORWARD_DEL;
 
 	private final IntArray reserved;
 	/**
@@ -69,8 +57,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		
 		reserved = new IntArray();
 		Arrays.stream(ControlKeys.values()).forEach(keys -> reserved.add(keys.keycode));
-		reserved.addAll(exit);
-		reserved.addAll(enter);
 		
 		Arrays.fill(keytime, Long.MIN_VALUE);
 	}
@@ -138,26 +124,14 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		}
 		
 		mouseScratchInput.poll(presstime);
-
-		final boolean exitpressed = Gdx.input.isKeyPressed(exit);
-		if (exitpressed != keystate[exit]) {
-			keystate[exit] = exitpressed;
-			this.bmsPlayerInputProcessor.setExitPressed(exitpressed);
-		}
-		final boolean enterpressed = Gdx.input.isKeyPressed(enter);
-		if (enterpressed != keystate[enter]) {
-			keystate[enter] = enterpressed;
-			this.bmsPlayerInputProcessor.setEnterPressed(enterpressed);
-		}
-		final boolean deletepressed = Gdx.input.isKeyPressed(delete);
-		if (deletepressed != keystate[delete]) {
-			keystate[delete] = deletepressed;
-			this.bmsPlayerInputProcessor.setDeletePressed(deletepressed);
-		}
 	}
 
 	public boolean getKeyState(int keycode) {
 		return keystate[keycode];
+	}
+	
+	protected void setKeyState(int keycode, boolean pressed) {
+		keystate[keycode] = pressed;
 	}
 
 	public boolean isKeyPressed(int keycode) {
@@ -260,9 +234,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		LEFT(24, Keys.LEFT, false),
 		RIGHT(25, Keys.RIGHT, false),
 		
-//		ENTER(26, Keys.ENTER),
-//		DEL(27, Keys.FORWARD_DEL),
-//		ESCAPE(28, Keys.ESCAPE),
+		ENTER(26, Keys.ENTER, false),
+		DEL(27, Keys.FORWARD_DEL, false),
+		ESCAPE(28, Keys.ESCAPE, false),
 		;
 		
 		public final int id;

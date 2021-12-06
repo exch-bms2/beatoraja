@@ -120,10 +120,7 @@ public class BMSPlayerInputProcessor {
 	private boolean startPressed;
 	private boolean selectPressed;
 
-	private boolean exitPressed;
-	private boolean enterPressed;
 	private boolean enterLocked;
-	private boolean deletePressed;
 
 	private Type type = Type.KEYBOARD;
 
@@ -392,20 +389,20 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public boolean isExitPressed() {
-		return exitPressed;
+		return kbinput.getKeyState(ControlKeys.ESCAPE.keycode);
 	}
 
 	public void setExitPressed(boolean exitPressed) {
-		this.exitPressed = exitPressed;
+		kbinput.setKeyState(ControlKeys.ESCAPE.keycode, exitPressed);
 	}
 
 	public boolean isEnterPressed() {
-		return enterPressed;
+		return kbinput.getKeyState(ControlKeys.ENTER.keycode);
 	}
 
 	public void setEnterPressed(boolean enterPressed) {
 		if (!enterPressed || !enterLocked) {
-			this.enterPressed = enterPressed;
+			kbinput.setKeyState(ControlKeys.ENTER.keycode, enterPressed);
 		}
 		if (enterLocked) {
 			enterLocked = false;
@@ -418,11 +415,11 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public boolean isDeletePressed() {
-		return deletePressed;
+		return kbinput.getKeyState(ControlKeys.DEL.keycode);
 	}
 
 	public void setDeletePressed(boolean deletePressed) {
-		this.deletePressed = deletePressed;
+		kbinput.setKeyState(ControlKeys.DEL.keycode, deletePressed);
 	}
 
 	public boolean isActivated(KeyCommand key) {
