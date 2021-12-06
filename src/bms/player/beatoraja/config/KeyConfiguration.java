@@ -160,9 +160,8 @@ public class KeyConfiguration extends MainState {
 				setMidiKeyAssign(keysa[cursorpos]);
 				keyinput = false;
 			}
-			if (input.isDeletePressed()) {
+			if (input.isControlKeyPressed(ControlKeys.DEL)) {
 				deletepressed = true;
-				input.setDeletePressed(false);
 			}
 		} else {
 			if (input.isControlKeyPressed(ControlKeys.UP)) {
@@ -228,8 +227,7 @@ public class KeyConfiguration extends MainState {
 				midiconfig.setKeyAssign(MODE_HINT[mode], true);
 			}
 
-			if (input.isEnterPressed()) {
-				input.setEnterPressed(false);
+			if (input.isControlKeyPressed(ControlKeys.ENTER)) {
 				input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
 				input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
 				for (BMControllerInputProcessor bmc : controllers) {
@@ -239,16 +237,14 @@ public class KeyConfiguration extends MainState {
 				keyinput = true;
 			}
 
-			if (input.isExitPressed()) {
-				input.setExitPressed(false);
+			if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
 				main.saveConfig();
 				main.changeState(MainStateType.MUSICSELECT);
 			}
 
-			if (input.isDeletePressed()) {
+			if (input.isControlKeyPressed(ControlKeys.DEL)) {
 				if(!deletepressed) deleteKeyAssign(keysa[cursorpos]);
 				deletepressed = true;
-				input.setDeletePressed(false);
 			} else deletepressed = false;
 		}
 
