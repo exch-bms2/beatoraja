@@ -120,8 +120,6 @@ public class BMSPlayerInputProcessor {
 	private boolean startPressed;
 	private boolean selectPressed;
 
-	private boolean enterLocked;
-
 	private Type type = Type.KEYBOARD;
 
 	public void setKeyboardConfig(KeyboardConfig config) {
@@ -386,40 +384,6 @@ public class BMSPlayerInputProcessor {
 
 	public boolean startPressed() {
 		return startPressed;
-	}
-
-	public boolean isExitPressed() {
-		return kbinput.getKeyState(ControlKeys.ESCAPE.keycode);
-	}
-
-	public void setExitPressed(boolean exitPressed) {
-		kbinput.setKeyState(ControlKeys.ESCAPE.keycode, exitPressed);
-	}
-
-	public boolean isEnterPressed() {
-		return kbinput.getKeyState(ControlKeys.ENTER.keycode);
-	}
-
-	public void setEnterPressed(boolean enterPressed) {
-		if (!enterPressed || !enterLocked) {
-			kbinput.setKeyState(ControlKeys.ENTER.keycode, enterPressed);
-		}
-		if (enterLocked) {
-			enterLocked = false;
-		}
-	}
-
-	public void lockEnterPress() {
-		setEnterPressed(false);
-		enterLocked = true;
-	}
-
-	public boolean isDeletePressed() {
-		return kbinput.getKeyState(ControlKeys.DEL.keycode);
-	}
-
-	public void setDeletePressed(boolean deletePressed) {
-		kbinput.setKeyState(ControlKeys.DEL.keycode, deletePressed);
 	}
 
 	public boolean isActivated(KeyCommand key) {
