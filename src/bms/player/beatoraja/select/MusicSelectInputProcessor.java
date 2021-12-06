@@ -299,9 +299,8 @@ public class MusicSelectInputProcessor {
             select.setPanelState(0);
 
             if (current instanceof SelectableBar) {
-                if (property.isPressed(input, PLAY, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isEnterPressed()) {
+                if (property.isPressed(input, PLAY, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
                     // play
-                    input.setEnterPressed(false);
                     select.selectSong(BMSPlayerMode.PLAY);
                 } else if (property.isPressed(input, PRACTICE, true)) {
                     // practice mode
@@ -314,8 +313,7 @@ public class MusicSelectInputProcessor {
                     select.selectSong((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY);
                 }
             } else {
-                if (property.isPressed(input, FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isEnterPressed()) {
-                    input.setEnterPressed(false);
+                if (property.isPressed(input, FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
                     // open folder
                     if (bar.updateBar(current)) {
                         select.play(SOUND_FOLDEROPEN);
@@ -369,7 +367,7 @@ public class MusicSelectInputProcessor {
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
 
-        if (input.isExitPressed()) {
+        if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
             select.main.exit();
         }
     }
