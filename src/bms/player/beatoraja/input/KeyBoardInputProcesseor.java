@@ -131,6 +131,14 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
+			for (ControlKeys key : ControlKeys.values()) {
+				final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
+				if (pressed != keystate[key.keycode]) {
+//					keystate[key.keycode] = pressed;
+					keytime[key.keycode] = presstime;
+				}
+			}
+
 			for (int i = 0; i < cover.length; i++) {
 				final boolean pressed = Gdx.input.isKeyPressed(cover[i]);
 				if (pressed != keystate[cover[i]]) {
@@ -169,7 +177,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
 			}
 		}
-
+		
 		mouseScratchInput.poll(presstime);
 
 		final boolean exitpressed = Gdx.input.isKeyPressed(exit);
@@ -187,6 +195,20 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			keystate[delete] = deletepressed;
 			this.bmsPlayerInputProcessor.setDeletePressed(deletepressed);
 		}
+	}
+
+	public boolean getKeyState(int keycode) {
+		return keystate[keycode];
+	}
+
+	public long getKeyChangedTime(int keycode) {
+		return keytime[keycode];
+	}
+
+	public boolean resetKeyChangedTime(int keycode) {
+		final boolean result = keytime[keycode] != 0;
+		keytime[keycode] = 0;
+		return result;
 	}
 
 	public boolean mouseMoved(int x, int y) {
@@ -250,4 +272,50 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	public boolean isReservedKey(int key) {
 		return reserved.contains(key);
 	}
+	
+	public enum ControlKeys {
+		NUM0(0, Keys.NUM_0),
+		NUM1(1, Keys.NUM_1),
+		NUM2(2, Keys.NUM_2),
+		NUM3(3, Keys.NUM_3),
+		NUM4(4, Keys.NUM_4),
+		NUM5(5, Keys.NUM_5),
+		NUM6(6, Keys.NUM_6),
+		NUM7(7, Keys.NUM_7),
+		NUM8(8, Keys.NUM_8),
+		NUM9(9, Keys.NUM_9),
+		
+		F1(10, Keys.F1),
+		F2(11, Keys.F2),
+		F3(12, Keys.F3),
+		F4(13, Keys.F4),
+		F5(14, Keys.F5),
+		F6(15, Keys.F6),
+		F7(16, Keys.F7),
+		F8(17, Keys.F8),
+		F9(18, Keys.F9),
+		F10(19, Keys.F10),
+		F11(20, Keys.F11),		
+		F12(21, Keys.F12),
+		
+		UP(22, Keys.UP),
+		DOWN(23, Keys.DOWN),
+		LEFT(24, Keys.LEFT),
+		RIGHT(25, Keys.RIGHT),
+		
+//		ENTER(26, Keys.ENTER),
+//		DEL(27, Keys.FORWARD_DEL),
+//		ESCAPE(28, Keys.ESCAPE),
+		;
+		
+		public final int id;
+		
+		public final int keycode;
+		
+		private ControlKeys(int id, int keycode) {
+			this.id = id;
+			this.keycode = keycode;
+		}
+	}
+
 }

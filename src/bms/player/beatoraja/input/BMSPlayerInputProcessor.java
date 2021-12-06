@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.PlayModeConfig.*;
 import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
@@ -343,7 +344,19 @@ public class BMSPlayerInputProcessor {
 	public long[] getNumberTime() {
 		return numtime;
 	}
+	
+	public boolean getControlKeyState(ControlKeys key) {
+		return kbinput.getKeyState(key.keycode);
+	}
 
+	public long getControlKeyChangedTime(ControlKeys key) {
+		return kbinput.getKeyChangedTime(key.keycode);
+	}
+	
+	public boolean isControlKeyPressed(ControlKeys key) {
+		return kbinput.getKeyState(key.keycode) && kbinput.resetKeyChangedTime(key.keycode);
+	}
+	
 	protected void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
 		if (!enable) {
 			return;
