@@ -104,22 +104,6 @@ public class BMSPlayerInputProcessor {
 
 	private BMSPlayerInputDevice lastKeyDevice;
 	private Array<BMSPlayerInputDevice> devices;
-	/**
-	 * 0-9キーのON/OFF状態
-	 */
-	boolean[] numberstate = new boolean[10];
-	/**
-	 * 0-9キーの最終更新時間
-	 */
-	long[] numtime = new long[10];
-	/**
-	 * F1-F12キーのON/OFF状態
-	 */
-	boolean[] functionstate = new boolean[12];
-	/**
-	 * F1-F12キーの最終更新時間
-	 */
-	long[] functiontime = new long[12];
 
 	long starttime;
 
@@ -140,9 +124,6 @@ public class BMSPlayerInputProcessor {
 	private boolean enterPressed;
 	private boolean enterLocked;
 	private boolean deletePressed;
-
-	boolean[] cursor = new boolean[4];
-	long[] cursortime = new long[4];
 
 	private Type type = Type.KEYBOARD;
 
@@ -337,24 +318,12 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 	
-	public boolean[] getNumberState() {
-		return numberstate;
-	}
-
-	public long[] getNumberTime() {
-		return numtime;
-	}
-	
 	public boolean getControlKeyState(ControlKeys key) {
 		return kbinput.getKeyState(key.keycode);
 	}
 
-	public long getControlKeyChangedTime(ControlKeys key) {
-		return kbinput.getKeyChangedTime(key.keycode);
-	}
-	
 	public boolean isControlKeyPressed(ControlKeys key) {
-		return kbinput.getKeyState(key.keycode) && kbinput.resetKeyChangedTime(key.keycode);
+		return kbinput.isKeyPressed(key.keycode);
 	}
 	
 	protected void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
@@ -422,18 +391,6 @@ public class BMSPlayerInputProcessor {
 		return startPressed;
 	}
 
-	public boolean[] getCursorState() {
-		return cursor;
-	}
-
-	public long[] getCursorTime() {
-		return cursortime;
-	}
-
-	public void setCursorState(boolean[] cursor) {
-		this.cursor = cursor;
-	}
-
 	public boolean isExitPressed() {
 		return exitPressed;
 	}
@@ -471,39 +428,31 @@ public class BMSPlayerInputProcessor {
 	public boolean isActivated(KeyCommand key) {
 		switch(key) {
 		case SHOW_FPS:
-			return isFunctionPressed(0);
+			return isControlKeyPressed(ControlKeys.F1);
 		case UPDATE_FOLDER:
-			return isFunctionPressed(1);
+			return isControlKeyPressed(ControlKeys.F2);
 		case OPEN_EXPLORER:
-			return isFunctionPressed(2);
+			return isControlKeyPressed(ControlKeys.F3);
 		case SWITCH_SCREEN_MODE:
-			return isFunctionPressed(3);
+			return isControlKeyPressed(ControlKeys.F4);
 		case SAVE_SCREENSHOT:
-			return isFunctionPressed(5);
+			return isControlKeyPressed(ControlKeys.F6);
 		case POST_TWITTER:
-			return isFunctionPressed(6);
+			return isControlKeyPressed(ControlKeys.F7);
 		case ADD_FAVORITE_SONG:
-			return isFunctionPressed(7);
+			return isControlKeyPressed(ControlKeys.F8);
 		case ADD_FAVORITE_CHART:
-			return isFunctionPressed(8);
+			return isControlKeyPressed(ControlKeys.F9);
 		case AUTOPLAY_FOLDER:
-			return isFunctionPressed(9);
+			return isControlKeyPressed(ControlKeys.F10);
 		case OPEN_IR:
-			return isFunctionPressed(10);
+			return isControlKeyPressed(ControlKeys.F11);
 		case OPEN_SKIN_CONFIGURATION:
-			return isFunctionPressed(11);
+			return isControlKeyPressed(ControlKeys.F12);
 		}
 		return false;
 	}
 	
-	private boolean isFunctionPressed(int key) {
-        if (functionstate[key] && functiontime[key] != 0) {
-        	functiontime[key] = 0;
-        	return true;
-        }
-		return false;
-	}
-
 	public boolean isSelectPressed() {
 		return selectPressed;
 	}

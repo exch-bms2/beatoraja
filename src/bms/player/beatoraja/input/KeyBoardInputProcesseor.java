@@ -23,20 +23,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	private MouseScratchInput mouseScratchInput;
 	/**
-	 * 数字
-	 */
-	private final int[] numbers = { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
-			Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
-	/**
-	 * カーソル
-	 */
-	private final int[] cover = { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
-	/**
-	 * 機能
-	 */
-	private final int[] function = { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
-			Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
-	/**
 	 * 終了キー
 	 */
 	private final int exit = Keys.ESCAPE;
@@ -65,11 +51,11 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	/**
 	 * 各キーのon/off状態
 	 */
-	private boolean[] keystate = new boolean[256];
+	private final boolean[] keystate = new boolean[256];
 	/**
 	 * 各キーの状態変化時間
 	 */
-	private long[] keytime = new long[256];
+	private final long[] keytime = new long[256];
 	/**
 	 * キーの最少入力感覚
 	 */
@@ -82,11 +68,11 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		this.resolution = resolution;
 		
 		reserved = new IntArray();
-		reserved.addAll(cover);
-		reserved.addAll(function);
-		reserved.addAll(numbers);
+		Arrays.stream(ControlKeys.values()).forEach(keys -> reserved.add(keys.keycode));
 		reserved.addAll(exit);
 		reserved.addAll(enter);
+		
+		Arrays.fill(keytime, Long.MIN_VALUE);
 	}
 
 	public void setConfig(KeyboardConfig config) {
@@ -111,7 +97,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void clear() {
 		// Arrays.fill(keystate, false);
-		Arrays.fill(keytime, -duration);
+		Arrays.fill(keytime, Long.MIN_VALUE);
 		lastPressedKey = -1;
 		mouseScratchInput.clear();
 	}
@@ -134,35 +120,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			for (ControlKeys key : ControlKeys.values()) {
 				final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
 				if (pressed != keystate[key.keycode]) {
-//					keystate[key.keycode] = pressed;
+					keystate[key.keycode] = pressed;
 					keytime[key.keycode] = presstime;
-				}
-			}
-
-			for (int i = 0; i < cover.length; i++) {
-				final boolean pressed = Gdx.input.isKeyPressed(cover[i]);
-				if (pressed != keystate[cover[i]]) {
-					keystate[cover[i]] = pressed;
-					this.bmsPlayerInputProcessor.cursor[i] = pressed;
-					this.bmsPlayerInputProcessor.cursortime[i] = presstime;
-				}
-			}
-
-			for (int i = 0; i < numbers.length; i++) {
-				final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
-				if (pressed != keystate[numbers[i]]) {
-					keystate[numbers[i]] = pressed;
-					this.bmsPlayerInputProcessor.numberstate[i] = pressed;
-					this.bmsPlayerInputProcessor.numtime[i] = presstime;
-				}
-			}
-
-			for (int i = 0; i < function.length; i++) {
-				final boolean pressed = Gdx.input.isKeyPressed(function[i]);
-				if (pressed != keystate[function[i]]) {
-					keystate[function[i]] = pressed;
-					this.bmsPlayerInputProcessor.functionstate[i] = pressed;
-					this.bmsPlayerInputProcessor.functiontime[i] = presstime;
 				}
 			}
 
@@ -201,14 +160,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return keystate[keycode];
 	}
 
-	public long getKeyChangedTime(int keycode) {
-		return keytime[keycode];
-	}
-
-	public boolean resetKeyChangedTime(int keycode) {
-		final boolean result = keytime[keycode] != 0;
-		keytime[keycode] = 0;
-		return result;
+	public boolean isKeyPressed(int keycode) {
+		if(keystate[keycode] && keytime[keycode] != Long.MIN_VALUE) {
+			keytime[keycode] = Long.MIN_VALUE;
+			return true;
+		}
+		return false;
 	}
 
 	public boolean mouseMoved(int x, int y) {
