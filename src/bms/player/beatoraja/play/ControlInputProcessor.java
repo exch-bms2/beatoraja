@@ -164,8 +164,7 @@ public class ControlInputProcessor {
 			exitpressedtime = now;
 		}
 		// stop playing
-		if (input.isExitPressed()) {
-			input.setExitPressed(false);
+		if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
 			player.stopPlay();
 		}
 		// play speed change (autoplay or replay only)
