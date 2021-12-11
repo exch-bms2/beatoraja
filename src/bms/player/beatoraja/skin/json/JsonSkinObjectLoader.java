@@ -1,14 +1,5 @@
 package bms.player.beatoraja.skin.json;
 
-import java.io.File;
-import java.nio.file.Path;
-
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
@@ -19,6 +10,14 @@ import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.json.JSONSkinLoader.SourceData;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+
+import java.io.File;
+import java.nio.file.Path;
 
 /**
  * JSONスキンオブジェクトローダー
@@ -292,6 +291,12 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		for (JsonSkin.BPMGraph ggraph : sk.bpmgraph) {
 			if (dst.id.equals(ggraph.id)) {
 				SkinBPMGraph st = new SkinBPMGraph(ggraph.delay, ggraph.lineWidth, ggraph.mainBPMColor, ggraph.minBPMColor, ggraph.maxBPMColor, ggraph.otherBPMColor, ggraph.stopLineColor, ggraph.transitionLineColor);
+				return st;
+			}
+		}
+		for (JsonSkin.HitErrorVisualizer hev : sk.hiterrorvisualizer) {
+			if (dst.id.equals(hev.id)) {
+				SkinHitErrorVisualizer st = new SkinHitErrorVisualizer(hev.width, hev.judgeWidthMillis, hev.lineWidth, hev.colorMode, hev.hiterrorMode, hev.emaMode, hev.lineColor, hev.centerColor, hev.PGColor, hev.GRColor, hev.GDColor, hev.BDColor, hev.PRColor, hev.emaColor, hev.alpha, hev.windowLength, hev.transparent, hev.drawDecay);
 				return st;
 			}
 		}
