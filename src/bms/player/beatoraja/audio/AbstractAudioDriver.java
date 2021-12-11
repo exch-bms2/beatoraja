@@ -258,8 +258,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				final Note n = tl.getNote(i);
 				if (n != null) {
 					// 地雷ノートに音が定義されていない場合のみ、本体側で音の定義を追加
-					if (n instanceof MineNote && n.getWav() < 0) {
-						n.setWav(wavcount);
+					if (!use_defaultsound && n instanceof MineNote && n.getWav() == wavcount) {
 						use_defaultsound = true;
 					}
 					addNoteList(notemap, n);
