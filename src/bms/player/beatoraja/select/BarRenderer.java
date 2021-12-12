@@ -129,7 +129,9 @@ public class BarRenderer {
 				sortedtables.add(td);
 			}
 		}
-		
+
+		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(main.getConfig().getTablepath());
+
 		Array<TableBar> table = new Array<TableBar>();
 
 		durationlow = main.getConfig().getScrollDurationLow();
@@ -137,7 +139,13 @@ public class BarRenderer {
 		analogTicksPerScroll = main.getConfig().getAnalogTicksPerScroll();
 
 		for (TableData td : sortedtables) {
-			table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
+			if (td.getName().equals("BMS Search")) {
+				TableBar bmssearch = new TableBar(select, td, bmssearcha);
+				table.add(bmssearch);
+			} else {
+				table.add(new TableBar(select, td,
+						new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
+			}
 		}
 
 		if(main.getIRStatus().length > 0) {
@@ -214,6 +222,13 @@ public class BarRenderer {
 				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
 			}
 		}
+
+		new Thread(() -> {
+			TableData td = bmssearcha.read();
+			if (td != null) {
+				tdaccessor.write(td);
+			}
+		}).start();
 
 		this.tables = table.toArray(TableBar.class);
 
