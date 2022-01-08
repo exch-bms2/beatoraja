@@ -21,9 +21,14 @@ public class KeyInputLog implements Validatable {
 	public static final KeyInputLog[] EMPTYARRAY = new KeyInputLog[0];
 
 	/**
-	 * キー入力時間
+	 * キー入力時間(ms)
 	 */
-	public int time;
+	public long time;
+	/**
+	 * キー入力時間(us)
+	 */	
+	public long presstime;
+
 	/**
 	 * キーコード
 	 */
@@ -36,7 +41,7 @@ public class KeyInputLog implements Validatable {
 	public KeyInputLog() {
 	}
 
-	public KeyInputLog(int time, int keycode, boolean pressed) {
+	public KeyInputLog(long time, int keycode, boolean pressed) {
 		this.time = time;
 		this.keycode = keycode;
 		this.pressed = pressed;
@@ -54,7 +59,7 @@ public class KeyInputLog implements Validatable {
 		int[] sc = model.getMode().scratchKey;
 		Note[] ln = new Note[keys];
 		for (TimeLine tl : model.getAllTimeLines()) {
-			int i = tl.getTime();
+			long i = tl.getTime();
 			for (int lane = 0; lane < keys; lane++) {
 				Note note = tl.getNote(lane);
 				if (note != null) {
