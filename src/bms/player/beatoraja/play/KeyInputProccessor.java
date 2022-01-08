@@ -167,6 +167,7 @@ class KeyInputProccessor {
 			long prevtime = -1;
 			while (!stop) {
 				final long time = player.main.getNowTime(TIMER_PLAY);
+				final long mtime = player.main.getNowMicroTime(TIMER_PLAY);
 				if (time != prevtime) {
 					// リプレイデータ再生
 					if (keylog != null) {
@@ -183,7 +184,7 @@ class KeyInputProccessor {
 						}
 					}
 
-					judge.update(time);
+					judge.update(mtime);
 
 					if (prevtime != -1) {
 						final long nowtime = time - prevtime;
