@@ -88,7 +88,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		mouseScratchInput.clear();
 	}
 
-	public void poll(final long presstime) {
+	public void poll(final long microtime) {
+		final long presstime = microtime / 1000;
 		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
@@ -98,7 +99,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = presstime;
-					this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, pressed);
+					this.bmsPlayerInputProcessor.keyChanged(this, microtime, i, pressed);
 					this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
 				}
 			}
@@ -123,7 +124,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			}
 		}
 		
-		mouseScratchInput.poll(presstime);
+		mouseScratchInput.poll(microtime);
 	}
 
 	public boolean getKeyState(int keycode) {

@@ -52,7 +52,8 @@ public class MouseScratchInput {
         this.setConfig(config);
     }
 
-    public void poll(final long presstime) {
+    public void poll(final long microtime) {
+		final long presstime = microtime / 1000;
         // MOUSEの更新
         if (mouseScratchEnabled) {
             mouseToAnalog.update();
@@ -72,7 +73,7 @@ public class MouseScratchInput {
             for (int i=0; i<keys.length; i++) {
                 final int axis = keys[i];
                 if (axis >= 0 && mouseScratchChanged[axis]) {
-                    this.bmsPlayerInputProcessor.keyChanged(keyboardInputProcessor, presstime, i, mouseScratchState[axis]);
+                    this.bmsPlayerInputProcessor.keyChanged(keyboardInputProcessor, microtime, i, mouseScratchState[axis]);
                     mouseScratchChanged[axis] = false;
                 }
             }

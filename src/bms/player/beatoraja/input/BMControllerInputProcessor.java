@@ -123,8 +123,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		lastPressedButton = -1;
 	}
 
-	public void poll(final long presstime) {
+	public void poll(final long microtime) {
 		if (!enabled) return;
+		
+		final long presstime = microtime / 1000;
 
 		// AXISの更新
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
@@ -163,7 +165,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		for (int i = 0; i < buttons.length; i++) {
 			final int button = buttons[i];
 			if (button >= 0 && button < BMKeys.MAXID && buttonchanged[button]) {
-				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, buttonstate[button]);
+				this.bmsPlayerInputProcessor.keyChanged(this, microtime, i, buttonstate[button]);
 				buttonchanged[button] = false;
 			}
 		}

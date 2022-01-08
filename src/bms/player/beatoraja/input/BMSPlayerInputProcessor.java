@@ -105,7 +105,7 @@ public class BMSPlayerInputProcessor {
 	private BMSPlayerInputDevice lastKeyDevice;
 	private Array<BMSPlayerInputDevice> devices;
 
-	long starttime;
+	private long starttime;
 
 	int mousex;
 	int mousey;
@@ -186,7 +186,7 @@ public class BMSPlayerInputProcessor {
 	public void setKeyState(int id, boolean pressed, long time) {
 		if(id >= 0 && id < keystate.length) {
 			keystate[id] = pressed;
-			this.time[id] = time;
+			this.time[id] = time * 1000;
 		}
 	}
 	
@@ -196,7 +196,7 @@ public class BMSPlayerInputProcessor {
 	 * @return キー状態の変更時間。変更されていない場合はLong.MIN_VALUE
 	 */
 	public long getKeyChangedTime(int id) {
-		return id >= 0 && id < time.length ? time[id] : Long.MIN_VALUE;		
+		return id >= 0 && id < time.length ? (time[id] != Long.MIN_VALUE ? time[id] / 1000 : Long.MIN_VALUE ) : Long.MIN_VALUE;		
 	}
 
 	/**
@@ -329,8 +329,8 @@ public class BMSPlayerInputProcessor {
 			keystate[i] = pressed;
 			time[i] = presstime;
 			lastKeyDevice = device;
-			if (this.getStartTime() != 0) {
-				keylog.add((int) presstime, i, pressed);
+			if (starttime != 0) {
+				keylog.add(presstime, i, pressed);
 			}
 		}
 	}
@@ -487,7 +487,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void poll() {
-		final long now = System.nanoTime() / 1000000 - starttime;
+		final long now = System.nanoTime() / 1000 - starttime;
 		kbinput.poll(now);
 		for (BMControllerInputProcessor controller : bminput) {
 			controller.poll(now);
@@ -513,10 +513,11 @@ public class BMSPlayerInputProcessor {
 			clear();
 		}
 		
-		public void add(int time, int keycode, boolean pressed) {
+		public void add(long presstime, int keycode, boolean pressed) {
 			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
 			poolindex++;
-			log.time = time;
+			log.time = presstime / 1000;
+			log.presstime = presstime;
 			log.keycode = keycode;
 			log.pressed = pressed;
 			keylog.add(log);
