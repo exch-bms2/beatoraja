@@ -171,7 +171,7 @@ class KeyInputProccessor {
 				if (time != prevtime) {
 					// リプレイデータ再生
 					if (keylog != null) {
-						while (index < keylog.length && keylog[index].time <= time) {
+						while (index < keylog.length && (keylog[index].presstime != 0 ? keylog[index].presstime <= mtime : keylog[index].time <= time)) {
 							final KeyInputLog key = keylog[index];
 							// if(input.getKeystate()[key.keycode] ==
 							// key.pressed) {
@@ -179,7 +179,7 @@ class KeyInputProccessor {
 							// key.keycode + " pressed - " + key.pressed +
 							// " time - " + key.time);
 							// }
-							input.setKeyState(key.keycode, key.pressed, key.time);
+							input.setKeyState(key.keycode, key.pressed, key.presstime != 0 ? key.presstime : key.time * 1000);
 							index++;
 						}
 					}

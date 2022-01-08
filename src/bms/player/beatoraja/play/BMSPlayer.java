@@ -608,7 +608,7 @@ public class BMSPlayer extends MainState {
 				main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
-				input.setStartTime(now + main.getStartTime() - starttimeoffset);
+				input.setStartTime(micronow + main.getStartMicroTime() - starttimeoffset * 1000);
 				if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 					for(KeyInputLog keyinput : replay.keylog) {
 						keyinput.time += resource.getMarginTime();

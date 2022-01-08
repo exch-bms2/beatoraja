@@ -186,7 +186,7 @@ public class BMSPlayerInputProcessor {
 	public void setKeyState(int id, boolean pressed, long time) {
 		if(id >= 0 && id < keystate.length) {
 			keystate[id] = pressed;
-			this.time[id] = time * 1000;
+			this.time[id] = time;
 		}
 	}
 	
@@ -516,7 +516,6 @@ public class BMSPlayerInputProcessor {
 		public void add(long presstime, int keycode, boolean pressed) {
 			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
 			poolindex++;
-			log.time = presstime / 1000;
 			log.presstime = presstime;
 			log.keycode = keycode;
 			log.pressed = pressed;
