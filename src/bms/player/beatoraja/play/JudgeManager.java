@@ -393,8 +393,7 @@ public class JudgeManager {
 			if (lane == -1) {
 				continue;
 			}
-			final long ptime = input.getKeyChangedTime(key);
-			final long pmtime = ptime != Long.MIN_VALUE ? input.getKeyChangedTime(key) * 1000 : Long.MIN_VALUE;
+			final long pmtime = input.getKeyChangedTime(key);
 			if (pmtime == Long.MIN_VALUE) {
 				continue;
 			}

@@ -196,7 +196,7 @@ public class BMSPlayerInputProcessor {
 	 * @return キー状態の変更時間。変更されていない場合はLong.MIN_VALUE
 	 */
 	public long getKeyChangedTime(int id) {
-		return id >= 0 && id < time.length ? (time[id] != Long.MIN_VALUE ? time[id] / 1000 : Long.MIN_VALUE ) : Long.MIN_VALUE;		
+		return id >= 0 && id < time.length ? time[id] : Long.MIN_VALUE;		
 	}
 
 	/**
@@ -498,13 +498,18 @@ public class BMSPlayerInputProcessor {
 		midiinput.close();
 	}
 	
-	static class KeyLogger {
+	/**
+	 * キーロガー
+	 * 
+	 * @author exch
+	 */
+	private static class KeyLogger {
 		
 		public static final int INITIAL_LOG_COUNT = 10000;
 		
-		public final Array<KeyInputLog> keylog;
+		private final Array<KeyInputLog> keylog;
 		
-		public final KeyInputLog[] logpool;
+		private final KeyInputLog[] logpool;
 		private int poolindex;
 
 		public KeyLogger() {
@@ -513,6 +518,13 @@ public class BMSPlayerInputProcessor {
 			clear();
 		}
 		
+		/**
+		 * キー入力ログを追加する
+		 * 
+		 * @param presstime キー入力時間(us)
+		 * @param keycode キーコード
+		 * @param pressed 押されたかどうか
+		 */
 		public void add(long presstime, int keycode, boolean pressed) {
 			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
 			poolindex++;
@@ -522,6 +534,9 @@ public class BMSPlayerInputProcessor {
 			keylog.add(log);
 		}
 		
+		/**
+		 * キーログをクリアする
+		 */
 		public void clear() {
 			keylog.clear();
 			for(int i = 0;i < logpool.length;i++) {
@@ -529,6 +544,10 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 		
+		/**
+		 * 
+		 * @return
+		 */
 		public KeyInputLog[] toArray() {
 			return keylog.toArray(KeyInputLog.class);
 		}
