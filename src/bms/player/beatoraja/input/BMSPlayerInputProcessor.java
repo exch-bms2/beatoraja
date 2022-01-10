@@ -106,6 +106,7 @@ public class BMSPlayerInputProcessor {
 	private Array<BMSPlayerInputDevice> devices;
 
 	private long starttime;
+	private long microMarginTime;
 
 	int mousex;
 	int mousey;
@@ -162,6 +163,10 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 		midiinput.setStartTime(starttime);
+	}
+	
+	public void setKeyLogMarginTime(long milliMarginTime) {
+		microMarginTime = milliMarginTime * 1000;
 	}
 
 	public long getStartTime() {
@@ -330,7 +335,7 @@ public class BMSPlayerInputProcessor {
 			time[i] = presstime;
 			lastKeyDevice = device;
 			if (starttime != 0) {
-				keylog.add(presstime, i, pressed);
+				keylog.add(presstime - microMarginTime, i, pressed);
 			}
 		}
 	}

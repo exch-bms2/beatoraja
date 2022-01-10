@@ -23,20 +23,20 @@ public class KeyInputLog implements Validatable {
 	/**
 	 * キー入力時間(ms)
 	 */
-	public long time;
+	long time;
 	/**
 	 * キー入力時間(us)
 	 */	
-	public long presstime;
+	long presstime;
 
 	/**
 	 * キーコード
 	 */
-	public int keycode;
+	int keycode;
 	/**
 	 * キー押し離し
 	 */
-	public boolean pressed;
+	boolean pressed;
 
 	public KeyInputLog() {
 	}
@@ -45,6 +45,18 @@ public class KeyInputLog implements Validatable {
 		this.time = time;
 		this.keycode = keycode;
 		this.pressed = pressed;
+	}
+	
+	public long getTime() {
+		return presstime != 0 ? presstime : time * 1000;
+	}
+	
+	public int getKeycode() {
+		return keycode;
+	}
+	
+	public boolean isPressed() {
+		return pressed;
 	}
 
 	/**
@@ -93,6 +105,6 @@ public class KeyInputLog implements Validatable {
 
 	@Override
 	public boolean validate() {
-		return time >= 0 && keycode >= 0;
+		return presstime >= 0 && time >= 0 && keycode >= 0;
 	}
 }

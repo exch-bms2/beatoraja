@@ -609,12 +609,8 @@ public class BMSPlayer extends MainState {
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 				input.setStartTime(micronow + main.getStartMicroTime() - starttimeoffset * 1000);
-				if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
-					for(KeyInputLog keyinput : replay.keylog) {
-						keyinput.time += resource.getMarginTime();
-					}
-				}
-				keyinput.startJudge(model, replay != null ? replay.keylog : null);
+				input.setKeyLogMarginTime(resource.getMarginTime());
+				keyinput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime());
 				keysound.startBGPlay(model, starttimeoffset * 1000);
 				Logger.getGlobal().info("STATE_PLAYに移行");
 			}
@@ -905,9 +901,6 @@ public class BMSPlayer extends MainState {
 		replay.mode = config.getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = main.getInputProcessor().getKeyInputLog();
-		for(KeyInputLog keyinput : replay.keylog) {
-			keyinput.time -= resource.getMarginTime();
-		}
 //		replay.pattern = playinfo.pattern;
 		replay.rand = playinfo.rand;
 		replay.gauge = config.getGauge();
