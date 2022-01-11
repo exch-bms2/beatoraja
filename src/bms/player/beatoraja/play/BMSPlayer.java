@@ -499,20 +499,19 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final PlayerConfig config = resource.getPlayerConfig();
 
-		final long now = main.getNowTime();
 		final long micronow = main.getNowMicroTime();
 
-		if(now > skin.getInput()){
+		if(micronow > skin.getInput() * 1000){
 			main.switchTimer(TIMER_STARTINPUT, true);
 		}
 		if(input.startPressed() || input.isSelectPressed()){
-			startpressedtime = now;
+			startpressedtime = micronow;
 		}
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
-			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& now - startpressedtime > 1000) {
+			if (resource.mediaLoadFinished() && micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
+					&& micronow - startpressedtime > 1000000) {
 				bga.prepare(this);
 				final long mem = Runtime.getRuntime().freeMemory();
 				System.gc();
@@ -553,8 +552,8 @@ public class BMSPlayer extends MainState {
 			control.setEnableCursor(false);
 			practice.processInput(input);
 
-			if (input.getKeyState(0) && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& now - startpressedtime > 1000) {
+			if (input.getKeyState(0) && resource.mediaLoadFinished() &&  micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
+					&& micronow - startpressedtime > 1000000) {
 				PracticeProperty property = practice.getPracticeProperty();
 				control.setEnableControl(true);
 				control.setEnableCursor(true);
