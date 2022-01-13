@@ -409,6 +409,9 @@ public class BooleanPropertyFactory {
 		case OPTION_RANDOMSELECTBAR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof ExecutableBar : false));
+		case OPTION_RANDOMCOURSEBAR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof RandomCourseBar : false));
 		case OPTION_PLAYABLEBAR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> {
@@ -416,6 +419,7 @@ public class BooleanPropertyFactory {
 							Bar selected = ((MusicSelector) state).getSelectedBar();
 							return ((selected instanceof SongBar) && ((SongBar)selected).getSongData().getPath() != null) ||
 									((selected instanceof GradeBar) && ((GradeBar)selected).existsAllSongs()) ||
+									((selected instanceof RandomCourseBar) && ((RandomCourseBar)selected).existsAllSongs()) ||
 									(selected instanceof ExecutableBar);
 						}
 						return false;

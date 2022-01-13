@@ -523,6 +523,11 @@ public class MusicSelector extends MainState {
 					play = BMSPlayerMode.PLAY;
 				}
 				readCourse(play);
+			} else if (current instanceof RandomCourseBar) {
+				if (play.mode == BMSPlayerMode.Mode.PRACTICE) {
+					play = BMSPlayerMode.PLAY;
+				}
+				readRandomCourse(play);
 			} else if (current instanceof DirectoryBar) {
 				if(play.mode == BMSPlayerMode.Mode.AUTOPLAY) {
 					Array<Path> paths = new Array<Path>();
@@ -590,15 +595,48 @@ public class MusicSelector extends MainState {
 	}
 
 	private void readCourse(BMSPlayerMode mode) {
-		final PlayerResource resource = main.getPlayerResource();
-		final GradeBar course = (GradeBar) bar.getSelected();
-		if (!course.existsAllSongs()) {
+		final GradeBar gradeBar = (GradeBar) bar.getSelected();
+		if (!gradeBar.existsAllSongs()) {
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 			return;
 		}
 
+		if (!_readCourse(mode, gradeBar)) {
+			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
+			Logger.getGlobal().info("段位の楽曲が揃っていません");
+		}
+	}
+
+	private void readRandomCourse(BMSPlayerMode mode) {
+		final RandomCourseBar randomCourseBar = (RandomCourseBar) bar.getSelected();
+		if (!randomCourseBar.existsAllSongs()) {
+			Logger.getGlobal().info("ランダムコースの楽曲が揃っていません");
+			return;
+		}
+
+		randomCourseBar.getCourseData().lotterySongDatas(main);
+		final GradeBar gradeBar = new GradeBar(randomCourseBar.getCourseData().createCourseData());
+		if (!gradeBar.existsAllSongs()) {
+			main.getMessageRenderer().addMessage("Failed to loading Random Course : Some of songs not found", 1200, Color.RED, 1);
+			Logger.getGlobal().info("ランダムコースの楽曲が揃っていません");
+			return;
+		}
+
+		if (_readCourse(mode, gradeBar)) {
+			bar.addRandomCourse(gradeBar, bar.getDirectoryString());
+			bar.updateBar();
+			bar.setSelected(gradeBar);
+		} else {
+			main.getMessageRenderer().addMessage("Failed to loading Random Course : Some of songs not found", 1200, Color.RED, 1);
+			Logger.getGlobal().info("ランダムコースの楽曲が揃っていません");
+		}
+	}
+
+	private boolean _readCourse(BMSPlayerMode mode, GradeBar gradeBar) {
+		final PlayerResource resource = main.getPlayerResource();
+
 		resource.clear();
-		final SongData[] songs = course.getSongDatas();
+		final SongData[] songs = gradeBar.getSongDatas();
 		Path[] files = new Path[songs.length];
 		int i = 0;
 		for (SongData song : songs) {
@@ -606,61 +644,60 @@ public class MusicSelector extends MainState {
 		}
 		if (resource.setCourseBMSFiles(files)) {
 			if (mode.mode == BMSPlayerMode.Mode.PLAY || mode.mode == BMSPlayerMode.Mode.AUTOPLAY) {
-				for (CourseData.CourseDataConstraint constraint : course.getCourseData().getConstraint()) {
+				for (CourseData.CourseDataConstraint constraint : gradeBar.getCourseData().getConstraint()) {
 					switch (constraint) {
-					case CLASS:
-						config.setRandom(0);
-						config.setRandom2(0);
-						config.setDoubleoption(0);
-						break;
-					case MIRROR:
-						if (config.getRandom() == 1) {
-							config.setRandom2(1);
-							config.setDoubleoption(1);
-						} else {
+						case CLASS:
 							config.setRandom(0);
 							config.setRandom2(0);
 							config.setDoubleoption(0);
-						}
-						break;
-					case RANDOM:
-						if (config.getRandom() > 5) {
-							config.setRandom(0);
-						}
-						if (config.getRandom2() > 5) {
-							config.setRandom2(0);
-						}
-						break;
-					case LN:
-						config.setLnmode(0);
-						break;
-					case CN:
-						config.setLnmode(1);
-						break;
-					case HCN:
-						config.setLnmode(2);
-						break;
-					default:
-						break;
+							break;
+						case MIRROR:
+							if (config.getRandom() == 1) {
+								config.setRandom2(1);
+								config.setDoubleoption(1);
+							} else {
+								config.setRandom(0);
+								config.setRandom2(0);
+								config.setDoubleoption(0);
+							}
+							break;
+						case RANDOM:
+							if (config.getRandom() > 5) {
+								config.setRandom(0);
+							}
+							if (config.getRandom2() > 5) {
+								config.setRandom2(0);
+							}
+							break;
+						case LN:
+							config.setLnmode(0);
+							break;
+						case CN:
+							config.setLnmode(1);
+							break;
+						case HCN:
+							config.setLnmode(2);
+							break;
+						default:
+							break;
 					}
 				}
 			}
-			course.getCourseData().setSong(resource.getCourseBMSModels());
-			resource.setCourseData(course.getCourseData());
+			gradeBar.getCourseData().setSong(resource.getCourseBMSModels());
+			resource.setCourseData(gradeBar.getCourseData());
 			resource.setBMSFile(files[0], mode);
-			playedcourse = course.getCourseData();
-			
+			playedcourse = gradeBar.getCourseData();
+
 			if(main.getIRStatus().length > 0 && currentir == null) {
 				currentir = new RankingData();
-	            ircache.put(course.getCourseData(), config.getLnmode(), currentir);
+				ircache.put(gradeBar.getCourseData(), config.getLnmode(), currentir);
 			}
 			resource.setRankingData(currentir);
 
 			changeState(MainStateType.DECIDE);
-		} else {
-			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
-			Logger.getGlobal().info("段位の楽曲が揃っていません");
+			return true;
 		}
+		return false;
 	}
 
 	public int getSort() {
@@ -705,12 +742,16 @@ public class MusicSelector extends MainState {
 	}
 
 	public boolean existsConstraint(CourseData.CourseDataConstraint constraint) {
-		if (!(bar.getSelected() instanceof GradeBar)) {
+		CourseData.CourseDataConstraint[] cons;
+		if ((bar.getSelected() instanceof GradeBar)) {
+			cons = ((GradeBar) bar.getSelected()).getCourseData().getConstraint();
+		} else if (bar.getSelected() instanceof RandomCourseBar) {
+			cons = ((RandomCourseBar) bar.getSelected()).getCourseData().getConstraint();
+		} else {
 			return false;
 		}
 
-		GradeBar gb = (GradeBar) bar.getSelected();
-		for (CourseData.CourseDataConstraint con : gb.getCourseData().getConstraint()) {
+		for (CourseData.CourseDataConstraint con : cons) {
 			if(con == constraint) {
 				return true;
 			}

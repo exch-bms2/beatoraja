@@ -1,9 +1,6 @@
 package bms.player.beatoraja.skin.property;
 
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRConfig;
-import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.ScoreData;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.ir.IRScoreData;
@@ -15,6 +12,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.select.bar.GradeBar;
+import bms.player.beatoraja.select.bar.RandomCourseBar;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -243,6 +241,13 @@ public class StringPropertyFactory {
 							final String songname = song != null && song.getTitle() != null ? song.getTitle()
 									: "----";
 							return song != null && song.getPath() != null ? songname : "(no song) " + songname;
+						}
+					} else if (bar instanceof RandomCourseBar) {
+						if (((RandomCourseBar) bar).getCourseData().getStage().length > index) {
+							RandomStageData stage = ((RandomCourseBar) bar).getCourseData().getStage()[index];
+							final String stagename = stage != null && stage.getTitle() != null ? stage.getTitle()
+									: "----";
+							return stage != null ? stagename : "(no song) " + stagename;
 						}
 					}
 				} else {

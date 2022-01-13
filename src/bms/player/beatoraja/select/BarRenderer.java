@@ -73,6 +73,20 @@ public class BarRenderer {
 	 * 検索結果バー一覧
 	 */
 	private Array<SearchWordBar> search = new Array<SearchWordBar>();
+	/**
+	 * ランダムコース結果バー一覧
+	 */
+	private Array<RandomCourseResult> randamCourseResult = new Array<>();
+
+	private class RandomCourseResult {
+		public GradeBar course;
+		public String dirString;
+
+		public RandomCourseResult(GradeBar course, String dirString) {
+			this.course = course;
+			this.dirString = dirString;
+		}
+	}
 
 	private final String[] TROPHY = { "bronzemedal", "silvermedal", "goldmedal" };
 
@@ -290,10 +304,13 @@ public class BarRenderer {
 	}
 
 	private Bar createCommandBar(MainController main, CommandFolder folder) {
-		if(folder.getFolder() != null && folder.getFolder().length > 0) {
+		if(folder.getFolder() != null && folder.getFolder().length > 0 || folder.getRandomCourse() != null && folder.getRandomCourse().length > 0) {
 			Array<Bar> l = new Array<Bar>();
 			for(CommandFolder child : folder.getFolder()) {
 				l.add(createCommandBar(main, child));
+			}
+			for(RandomCourseData course : folder.getRandomCourse()) {
+				l.add(new RandomCourseBar(course));
 			}
 			return new ContainerBar(folder.getName(), l.toArray(Bar.class));
 		} else {
@@ -306,6 +323,7 @@ public class BarRenderer {
 		private String name;
 		private CommandFolder[] folder = new CommandFolder[0];
 		private String sql;
+		private RandomCourseData[] rcourse = RandomCourseData.EMPTY;
 		private boolean showall = false;
 
 		public String getName() {
@@ -331,6 +349,10 @@ public class BarRenderer {
 		public void setSql(String sql) {
 			this.sql = sql;
 		}
+
+		public RandomCourseData[] getRandomCourse() { return rcourse; }
+
+		public void setRandomCourse(RandomCourseData[] course) { this.rcourse = course; }
 
 		public boolean isShowall() {
 			return showall;
@@ -409,6 +431,13 @@ public class BarRenderer {
 		search.add(bar);
 	}
 
+	public void addRandomCourse(GradeBar bar, String dirString) {
+		if (randamCourseResult.size >= 100) {
+			randamCourseResult.removeIndex(0);
+		}
+		randamCourseResult.add(new RandomCourseResult(bar, dirString));
+	}
+
 	public boolean mousePressed(SkinBar baro, int button, int x, int y) {
 		for (int i : ((MusicSelectSkin) select.getSkin()).getClickableBar()) {
 			boolean on = (i == ((MusicSelectSkin) select.getSkin()).getCenterBar());
@@ -481,6 +510,8 @@ public class BarRenderer {
 					ba.value = 2;
 				} else if (sd instanceof GradeBar) {
 					ba.value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
+				} else if (sd instanceof RandomCourseBar) {
+					ba.value = ((RandomCourseBar) sd).existsAllSongs() ? 2 : 4;
 				} else if (sd instanceof FolderBar) {
 					ba.value = 1;
 				} else if (sd instanceof SongBar) {
@@ -859,6 +890,20 @@ public class BarRenderer {
 			}
 			l.addAll(((DirectoryBar) bar).getChildren());
 			isSortable = ((DirectoryBar) bar).isSortable();
+
+			if (bar instanceof ContainerBar && randamCourseResult.size > 0) {
+				StringBuilder str = new StringBuilder();
+				for (Bar b : dir) {
+					str.append(b.getTitle()).append(" > ");
+				}
+				str.append(bar.getTitle()).append(" > ");
+				final String ds = str.toString();
+				for (RandomCourseResult r : randamCourseResult) {
+					if (r.dirString.equals(ds)) {
+						l.add(r.course);
+					}
+				}
+			}
 		}
 
 		if(!select.main.getConfig().isShowNoSongExistingBar()) {
