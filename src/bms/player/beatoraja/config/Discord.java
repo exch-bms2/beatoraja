@@ -9,7 +9,7 @@ public class Discord {
 
     private static final DiscordRPC lib = DiscordRPC.INSTANCE;
 
-    private static final String APPLICATIONID = ""; // DISCORD APPLICATION ID   (https://discord.com/developers/applications)
+    private static final String APPLICATIONID = "876968973126746182"; // DISCORD APPLICATION ID   (https://discord.com/developers/applications)
 
     public String details;
 
