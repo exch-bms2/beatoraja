@@ -289,7 +289,7 @@ public class EventFactory {
 				state.play(SOUND_OPTIONCHANGE);				
 			}
 		}),
-		judgetiming(74, (state, arg1) -> {
+		notesdisplaytiming(74, (state, arg1) -> {
 	        final PlayerConfig config = state.main.getPlayerConfig();
 
 	        int inc = arg1 >= 0 ? (config.getJudgetiming() < PlayerConfig.JUDGETIMING_MAX ? 1 : 0)
