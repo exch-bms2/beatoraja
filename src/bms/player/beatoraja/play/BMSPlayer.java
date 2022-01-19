@@ -163,7 +163,7 @@ public class BMSPlayer extends MainState {
 				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay.id);
 				if (replay != null) {
 					boolean isReplayPatternPlay = false;
-					if(main.getInputProcessor().getKeystate()[1]) {
+					if(main.getInputProcessor().getKeyState(1)) {
 						//保存された譜面オプション/Random Seedから譜面再現
 						Logger.getGlobal().info("リプレイ再現モード : 譜面");
 						playinfo.randomoption = replay.randomoption;
@@ -173,7 +173,7 @@ public class BMSPlayer extends MainState {
 						playinfo.doubleoption = replay.doubleoption;
 						playinfo.rand = replay.rand;
 						isReplayPatternPlay = true;
-					} else if(main.getInputProcessor().getKeystate()[2]) {
+					} else if(main.getInputProcessor().getKeyState(2)) {
 						//保存された譜面オプションログから譜面オプション再現
 						Logger.getGlobal().info("リプレイ再現モード : オプション");
 						playinfo.randomoption = replay.randomoption;
@@ -181,7 +181,7 @@ public class BMSPlayer extends MainState {
 						playinfo.doubleoption = replay.doubleoption;
 						isReplayPatternPlay = true;
 					}
-					if(main.getInputProcessor().getKeystate()[4]) {
+					if(main.getInputProcessor().getKeyState(4)) {
 						//保存されたHSオプションログからHSオプション再現
 						Logger.getGlobal().info("リプレイ再現モード : ハイスピード");
 						HSReplay = replay;
@@ -385,14 +385,13 @@ public class BMSPlayer extends MainState {
 
 		Logger.getGlobal().info("ゲージ設定");
 		if(replay != null) {
-			boolean[] keystate = main.getInputProcessor().getKeystate();
-			for(int count = (keystate[5] ? 1 : 0) + (keystate[3] ? 2 : 0);count > 0; count--) {
+			for(int count = (main.getInputProcessor().getKeyState(5) ? 1 : 0) + (main.getInputProcessor().getKeyState(3) ? 2 : 0);count > 0; count--) {
 				if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
 					replay.gauge++;
 				}
 			}
 		}
-		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
+		if(replay != null && main.getInputProcessor().getKeyState(5)) {
 		}
 		// プレイゲージ、初期値設定
 		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource);
@@ -500,20 +499,19 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final PlayerConfig config = resource.getPlayerConfig();
 
-		final long now = main.getNowTime();
 		final long micronow = main.getNowMicroTime();
 
-		if(now > skin.getInput()){
+		if(micronow > skin.getInput() * 1000){
 			main.switchTimer(TIMER_STARTINPUT, true);
 		}
 		if(input.startPressed() || input.isSelectPressed()){
-			startpressedtime = now;
+			startpressedtime = micronow;
 		}
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
-			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& now - startpressedtime > 1000) {
+			if (resource.mediaLoadFinished() && micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
+					&& micronow - startpressedtime > 1000000) {
 				bga.prepare(this);
 				final long mem = Runtime.getRuntime().freeMemory();
 				System.gc();
@@ -554,8 +552,8 @@ public class BMSPlayer extends MainState {
 			control.setEnableCursor(false);
 			practice.processInput(input);
 
-			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& now - startpressedtime > 1000) {
+			if (input.getKeyState(0) && resource.mediaLoadFinished() &&  micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
+					&& micronow - startpressedtime > 1000000) {
 				PracticeProperty property = practice.getPracticeProperty();
 				control.setEnableControl(true);
 				control.setEnableCursor(true);
@@ -609,13 +607,9 @@ public class BMSPlayer extends MainState {
 				main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
-				input.setStartTime(now + main.getStartTime() - starttimeoffset);
-				if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
-					for(KeyInputLog keyinput : replay.keylog) {
-						keyinput.time += resource.getMarginTime();
-					}
-				}
-				keyinput.startJudge(model, replay != null ? replay.keylog : null);
+				input.setStartTime(micronow + main.getStartMicroTime() - starttimeoffset * 1000);
+				input.setKeyLogMarginTime(resource.getMarginTime());
+				keyinput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime());
 				keysound.startBGPlay(model, starttimeoffset * 1000);
 				Logger.getGlobal().info("STATE_PLAYに移行");
 			}
@@ -906,9 +900,6 @@ public class BMSPlayer extends MainState {
 		replay.mode = config.getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = main.getInputProcessor().getKeyInputLog();
-		for(KeyInputLog keyinput : replay.keylog) {
-			keyinput.time -= resource.getMarginTime();
-		}
 //		replay.pattern = playinfo.pattern;
 		replay.rand = playinfo.rand;
 		replay.gauge = config.getGauge();

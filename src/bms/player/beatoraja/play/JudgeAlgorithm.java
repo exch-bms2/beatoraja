@@ -1,7 +1,6 @@
 package bms.player.beatoraja.play;
 
 import bms.model.*;
-import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 
 /**
  * 判定アルゴリズム
@@ -15,8 +14,8 @@ public enum JudgeAlgorithm {
 	 */
 	Combo {
 		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[2][0] && t2.getTime() <= ptime + judgetable[2][1];
+		public boolean compare(Note t1, Note t2, long ptime, long[][] judgetable) {
+			return t2.getState() == 0 && t1.getMicroTime() < ptime + judgetable[2][0] && t2.getMicroTime() <= ptime + judgetable[2][1];
 		}
 	},
 	/**
@@ -24,8 +23,8 @@ public enum JudgeAlgorithm {
 	 */
 	Duration {
 		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return Math.abs(t1.getTime() - ptime) > Math.abs(t2.getTime() - ptime) && t2.getState() == 0;
+		public boolean compare(Note t1, Note t2, long ptime, long[][] judgetable) {
+			return Math.abs(t1.getMicroTime() - ptime) > Math.abs(t2.getMicroTime() - ptime) && t2.getState() == 0;
 		}
 	},
 	/**
@@ -33,7 +32,7 @@ public enum JudgeAlgorithm {
 	 */
 	Lowest {
 		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
+		public boolean compare(Note t1, Note t2, long ptime, long[][] judgetable) {
 			return false;
 		}
 	},
@@ -42,8 +41,8 @@ public enum JudgeAlgorithm {
 	 */
 	Score {
 		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[1][0] && t2.getTime() <= ptime + judgetable[1][1];
+		public boolean compare(Note t1, Note t2, long ptime, long[][] judgetable) {
+			return t2.getState() == 0 && t1.getMicroTime() < ptime + judgetable[1][0] && t2.getMicroTime() <= ptime + judgetable[1][1];
 		}
 	}
 	;
@@ -57,7 +56,7 @@ public enum JudgeAlgorithm {
 	 * @param judgetable 判定テーブル
 	 * @return ノーツ2が選ばれた場合はtrue, ノーツ1が選ばれた場合はfalse
 	 */
-	public abstract boolean compare(Note t1, Note t2, long ptime, int[][] judgetable);
+	public abstract boolean compare(Note t1, Note t2, long ptime, long[][] judgetable);
 
 	public static int getIndex(String algorithm) {
 		for(int i = 0;i < values().length;i++) {

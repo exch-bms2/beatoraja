@@ -2,7 +2,6 @@ package bms.player.beatoraja.play;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -43,8 +42,8 @@ class KeyInputProccessor {
 		this.scratchKey = new int[laneProperty.getScratchKeyAssign().length];
 	}
 
-	public void startJudge(BMSModel model, KeyInputLog[] keylog) {
-		judge = new JudgeThread(model.getAllTimeLines(), keylog);
+	public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime) {
+		judge = new JudgeThread(model.getAllTimeLines(), keylog, milliMarginTime);
 		judge.start();
 		isJudgeStarted = true;
 	}
@@ -52,7 +51,7 @@ class KeyInputProccessor {
 	public void input() {
 		final MainController main = player.main;
 		final long now = main.getNowTime();
-		final boolean[] keystate = main.getInputProcessor().getKeystate();
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final long[] auto_presstime = player.getJudgeManager().getAutoPresstime();
 
 		final int[] laneoffset = laneProperty.getLaneSkinOffset();
@@ -63,7 +62,7 @@ class KeyInputProccessor {
 			boolean scratch = false;
 			if(!keyBeamStop) {
 				for (int key : laneProperty.getLaneKeyAssign()[lane]) {
-					if (keystate[key] || auto_presstime[key] != Long.MIN_VALUE) {
+					if (input.getKeyState(key) || auto_presstime[key] != Long.MIN_VALUE) {
 						pressed = true;
 						if(laneProperty.getLaneScratchAssign()[lane] != -1
 								&& scratchKey[laneProperty.getLaneScratchAssign()[lane]] != key) {
@@ -96,9 +95,9 @@ class KeyInputProccessor {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
 				final int key0 = laneProperty.getScratchKeyAssign()[s][1];
 				final int key1 = laneProperty.getScratchKeyAssign()[s][0];
-				if (keystate[key0] || auto_presstime[key0] != Long.MIN_VALUE) {
+				if (input.getKeyState(key0) || auto_presstime[key0] != Long.MIN_VALUE) {
 					scratch[s] += deltatime * 2;
-				} else if (keystate[key1] || auto_presstime[key1] != Long.MIN_VALUE) {
+				} else if (input.getKeyState(key1) || auto_presstime[key1] != Long.MIN_VALUE) {
 					scratch[s] += 2160 - deltatime * 2;
 				}
 				scratch[s] %= 2160;
@@ -149,10 +148,12 @@ class KeyInputProccessor {
 		 * 自動入力するキー入力ログ
 		 */
 		private final KeyInputLog[] keylog;
+		private final long microMarginTime;
 
-		public JudgeThread(TimeLine[] timelines, KeyInputLog[] keylog) {
+		public JudgeThread(TimeLine[] timelines, KeyInputLog[] keylog, long milliMarginTime) {
 			this.timelines = timelines;
 			this.keylog = keylog;
+			this.microMarginTime = milliMarginTime * 1000;
 		}
 
 		@Override
@@ -167,10 +168,11 @@ class KeyInputProccessor {
 			long prevtime = -1;
 			while (!stop) {
 				final long time = player.main.getNowTime(TIMER_PLAY);
+				final long mtime = player.main.getNowMicroTime(TIMER_PLAY);
 				if (time != prevtime) {
 					// リプレイデータ再生
 					if (keylog != null) {
-						while (index < keylog.length && keylog[index].time <= time) {
+						while (index < keylog.length && keylog[index].getTime() + microMarginTime <= mtime) {
 							final KeyInputLog key = keylog[index];
 							// if(input.getKeystate()[key.keycode] ==
 							// key.pressed) {
@@ -178,13 +180,12 @@ class KeyInputProccessor {
 							// key.keycode + " pressed - " + key.pressed +
 							// " time - " + key.time);
 							// }
-							input.getKeystate()[key.keycode] = key.pressed;
-							input.getTime()[key.keycode] = key.time;
+							input.setKeyState(key.getKeycode(), key.isPressed(), key.getTime() + microMarginTime);
 							index++;
 						}
 					}
 
-					judge.update(time);
+					judge.update(mtime);
 
 					if (prevtime != -1) {
 						final long nowtime = time - prevtime;
@@ -205,8 +206,7 @@ class KeyInputProccessor {
 			}
 
 			if (keylog != null) {
-				Arrays.fill(input.getKeystate(), false);
-				Arrays.fill(input.getTime(), 0);
+				input.resetAllKeyState();
 			}
 
 			Logger.getGlobal().info("入力パフォーマンス(max ms) : " + frametime);

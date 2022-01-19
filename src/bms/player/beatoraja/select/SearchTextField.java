@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.select.bar.SearchWordBar;
 
 import java.util.logging.Logger;
@@ -67,7 +68,6 @@ public class SearchTextField extends Stage {
 
 				public void keyTyped(TextField textField, char key) {
 					if (key == '\n' || key == 13) {
-						boolean searched = false;
 						if (textField.getText().length() > 0) {
 							SearchWordBar swb = new SearchWordBar(selector, textField.getText());
 							int count = swb.getChildren().length;
@@ -78,17 +78,14 @@ public class SearchTextField extends Stage {
 								textField.setText("");
 								textField.setMessageText(count + " song(s) found");
 								textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
-								searched = true;
 							} else {
 								textField.setText("");
 								textField.setMessageText("no song found");
 								textFieldStyle.messageFontColor = Color.DARK_GRAY;
+								selector.main.getInputProcessor().isControlKeyPressed(ControlKeys.ENTER);
 							}
 						}
-						if (!searched) {
-							// Enter入力がTextFieldとInputProcessorで2回発生するので、後者のEnter入力を一時的にロックする
-							selector.main.getInputProcessor().lockEnterPress();
-						}
+						
 						textField.getOnscreenKeyboard().show(false);
 						setKeyboardFocus(null);
 					}
@@ -117,7 +114,7 @@ public class SearchTextField extends Stage {
 				public boolean handle(Event e) {
 					if (e.isHandled()) {
 						selector.main.getInputProcessor().getKeyBoardInputProcesseor()
-								.setEnable(getKeyboardFocus() == null);
+								.setTextInputMode(getKeyboardFocus() != null);
 					}
 					return false;
 				}
@@ -146,7 +143,7 @@ public class SearchTextField extends Stage {
 		search.getStyle().messageFontColor = Color.GRAY;
 		search.getOnscreenKeyboard().show(false);
 		setKeyboardFocus(null);
-		selector.main.getInputProcessor().getKeyBoardInputProcesseor().setEnable(true);
+		selector.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
 	}
 
 	public void dispose() {

@@ -770,6 +770,17 @@ public class IntegerPropertyFactory {
 		ranking_exscore9(388, createRankingexscore(8)),
 		ranking_exscore10(389, createRankingexscore(9)),
 
+		ranking_index1(390, createRankingindex(0)),
+		ranking_index2(391, createRankingindex(1)),
+		ranking_index3(392, createRankingindex(2)),
+		ranking_index4(393, createRankingindex(3)),
+		ranking_index5(394, createRankingindex(4)),
+		ranking_index6(395, createRankingindex(5)),
+		ranking_index7(396, createRankingindex(6)),
+		ranking_index8(397, createRankingindex(7)),
+		ranking_index9(398, createRankingindex(8)),
+		ranking_index10(399, createRankingindex(9)),
+
 		judge_duration1(525, createJudgeduration(0)),
 		judge_duration2(526, createJudgeduration(1)),
 		judge_duration3(527, createJudgeduration(2)),
@@ -885,11 +896,24 @@ public class IntegerPropertyFactory {
 					irc = ((AbstractResult) state).getRankingData();
 					rankingOffset = ((AbstractResult) state).getRankingOffset();
 				}
-				IRScoreData[] scores = irc != null ? irc.getScores() : null;
-				if(scores != null && scores.length > index + rankingOffset) {
-					return scores[index + rankingOffset].getExscore();							
+				IRScoreData score = irc != null ? irc.getScore(index + rankingOffset) : null;
+				return score != null ? score.getExscore() : Integer.MIN_VALUE;
+			};
+		}
+		
+		private static IntegerProperty createRankingindex(int index) {
+			return (state) -> {
+				RankingData irc = null;
+				int rankingOffset = 0;
+				if (state instanceof MusicSelector) {
+					irc = ((MusicSelector) state).getCurrentRankingData();
+					rankingOffset = ((MusicSelector) state).getRankingOffset();
 				}
-				return Integer.MIN_VALUE;
+				if (state instanceof AbstractResult) {
+					irc = ((AbstractResult) state).getRankingData();
+					rankingOffset = ((AbstractResult) state).getRankingOffset();
+				}
+				return irc != null ? irc.getScoreRanking(index + rankingOffset) : Integer.MIN_VALUE;
 			};
 		}
 		
@@ -1181,11 +1205,8 @@ public class IntegerPropertyFactory {
 					irc = ((AbstractResult) state).getRankingData();
 					rankingOffset = ((AbstractResult) state).getRankingOffset();
 				}
-				IRScoreData[] scores = irc != null ? irc.getScores() : null;
-				if(scores != null && scores.length > index + rankingOffset) {
-					return scores[index + rankingOffset].clear.id;
-				}
-				return Integer.MIN_VALUE;
+				IRScoreData score = irc != null ? irc.getScore(index + rankingOffset) : null;
+				return score != null ? score.clear.id : Integer.MIN_VALUE;
 			};
 		}
 	}

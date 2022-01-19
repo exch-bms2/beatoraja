@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.ir.IRCourseData.IRTrophyData;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
@@ -128,22 +129,22 @@ public class BarRenderer {
 				sortedtables.add(td);
 			}
 		}
-		
+
 		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(main.getConfig().getTablepath());
 
 		Array<TableBar> table = new Array<TableBar>();
-		TableBar bmssearch = null;
 
 		durationlow = main.getConfig().getScrollDurationLow();
 		durationhigh = main.getConfig().getScrollDurationHigh();
 		analogTicksPerScroll = main.getConfig().getAnalogTicksPerScroll();
 
 		for (TableData td : sortedtables) {
-			if(td.getName().equals("BMS Search")) {
-				bmssearch = new TableBar(select, td, bmssearcha);
+			if (td.getName().equals("BMS Search")) {
+				TableBar bmssearch = new TableBar(select, td, bmssearcha);
 				table.add(bmssearch);
 			} else {
-				table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
+				table.add(new TableBar(select, td,
+						new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
 			}
 		}
 
@@ -224,7 +225,7 @@ public class BarRenderer {
 
 		new Thread(() -> {
 			TableData td = bmssearcha.read();
-			if(td != null) {
+			if (td != null) {
 				tdaccessor.write(td);
 			}
 		}).start();
@@ -727,9 +728,6 @@ public class BarRenderer {
 
 	public void input() {
 		BMSPlayerInputProcessor input = select.main.getInputProcessor();
-		boolean[] keystate = input.getKeystate();
-		long[] keytime = input.getTime();
-		boolean[] cursor = input.getCursorState();
 
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.main.getPlayerResource().getPlayerConfig().getMusicselectinput()];
 
@@ -756,7 +754,7 @@ public class BarRenderer {
 		}
 
 		// song bar scroll
-		if (property.isNonAnalogPressed(input, keystate, keytime, MusicSelectKey.UP, false) || cursor[1]) {
+		if (property.isNonAnalogPressed(input, MusicSelectKey.UP, false) || input.getControlKeyState(ControlKeys.DOWN)) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
@@ -769,7 +767,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (property.isNonAnalogPressed(input, keystate, keytime, MusicSelectKey.DOWN, false) || cursor[0]) {
+		} else if (property.isNonAnalogPressed(input, MusicSelectKey.DOWN, false) || input.getControlKeyState(ControlKeys.UP)) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;

@@ -13,6 +13,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -141,7 +142,8 @@ public class CourseResult extends AbstractResult {
 
                         IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
 						if(response.isSucceeded()) {
-                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);                    		
+                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
+                    		rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
 							Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
 						} else {
 							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
@@ -194,29 +196,18 @@ public class CourseResult extends AbstractResult {
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
 		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
-			boolean[] keystate = inputProcessor.getKeystate();
-			long[] keytime = inputProcessor.getTime();
-
 			boolean ok = false;
 			for (int i = 0; i < property.getAssignLength(); i++) {
-				if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && keystate[i] && keytime[i] != 0) {
+				if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 					gaugeType = (gaugeType - 5) % 3 + 6;
-					keytime[i] = 0;
-				} else if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
-					keytime[i] = 0;
+				} else if (property.getAssign(i) != null && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 					ok = true;
 				}
 			}
 
-			if (inputProcessor.isEnterPressed()) {
+			if (inputProcessor.isControlKeyPressed(ControlKeys.ESCAPE) || inputProcessor.isControlKeyPressed(ControlKeys.ENTER)) {
 				ok = true;
-				inputProcessor.setEnterPressed(false);
-			}
-
-			if (inputProcessor.isExitPressed()) {
-				ok = true;
-				inputProcessor.setExitPressed(false);
-			}
+			} 
 
 			if (resource.getScoreData() == null || ok) {
 				if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !main.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
@@ -231,11 +222,14 @@ public class CourseResult extends AbstractResult {
 				}
 			}
 
-			for (int i = 0; i < MusicSelector.REPLAY; i++) {
-				if (inputProcessor.getNumberState()[i + 1]) {
-					saveReplayData(i);
-					break;
-				}
+			if(inputProcessor.isControlKeyPressed(ControlKeys.NUM1)) {
+				saveReplayData(0);				
+			} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM2)) {
+				saveReplayData(1);				
+			} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM3)) {
+				saveReplayData(2);				
+			} else if(inputProcessor.isControlKeyPressed(ControlKeys.NUM4)) {
+				saveReplayData(3);				
 			}
 
 			if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {

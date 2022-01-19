@@ -289,7 +289,13 @@ public class EventFactory {
 				state.play(SOUND_OPTIONCHANGE);				
 			}
 		}),
-		judgetiming(74, (state, arg1) -> {
+		bgaexpand(73, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				state.main.getConfig().setBgaExpand((state.main.getConfig().getBgaExpand() + (arg1 >= 0 ? 1 : 2)) % 3);
+				state.play(SOUND_OPTIONCHANGE);				
+			}
+		}),
+		notesdisplaytiming(74, (state, arg1) -> {
 	        final PlayerConfig config = state.main.getPlayerConfig();
 
 	        int inc = arg1 >= 0 ? (config.getJudgetiming() < PlayerConfig.JUDGETIMING_MAX ? 1 : 0)

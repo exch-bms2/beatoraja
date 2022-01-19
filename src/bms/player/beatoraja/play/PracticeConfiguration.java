@@ -8,7 +8,7 @@ import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
@@ -116,17 +116,13 @@ public class PracticeConfiguration {
 
 	public void processInput(BMSPlayerInputProcessor input) {
 		final int values = model.getMode().player == 2 ? 12 : 10;
-		boolean[] cursor = input.getCursorState();
-		long[] cursortime = input.getCursorTime();
-		if (cursor[0] && cursortime[0] != 0) {
-			cursortime[0] = 0;
+		if (input.isControlKeyPressed(ControlKeys.UP)) {
 			cursorpos = (cursorpos + values - 1) % values;
 		}
-		if (cursor[1] && cursortime[1] != 0) {
-			cursortime[1] = 0;
+		if (input.isControlKeyPressed(ControlKeys.DOWN)) {
 			cursorpos = (cursorpos + 1) % values;
 		}
-		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
+		if (input.getControlKeyState(ControlKeys.LEFT) && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
@@ -194,7 +190,7 @@ public class PracticeConfiguration {
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 			}
-		} else if (cursor[3] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
+		} else if (input.getControlKeyState(ControlKeys.RIGHT) && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
@@ -265,7 +261,7 @@ public class PracticeConfiguration {
 				break;
 
 			}
-		} else if (!(cursor[2] || cursor[3])) {
+		} else if (!(input.getControlKeyState(ControlKeys.LEFT) || input.getControlKeyState(ControlKeys.RIGHT))) {
 			presscount = 0;
 		}
 	}

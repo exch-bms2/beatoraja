@@ -1,8 +1,8 @@
 package bms.player.beatoraja.decide;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.skin.*;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -52,11 +52,10 @@ public class MusicDecide extends MainState {
 	public void input() {
 		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
 			BMSPlayerInputProcessor input = main.getInputProcessor();
-			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6] || input.isEnterPressed()) {
-				input.setEnterPressed(false);
+			if (input.getKeyState(0) || input.getKeyState(2) || input.getKeyState(4) || input.getKeyState(6) || input.isControlKeyPressed(ControlKeys.ENTER)) {
 				main.setTimerOn(TIMER_FADEOUT);
 			}
-			if (input.isExitPressed() || (input.startPressed() && input.isSelectPressed())) {
+			if (input.isControlKeyPressed(ControlKeys.ESCAPE) || (input.startPressed() && input.isSelectPressed())) {
 				cancel = true;
 				main.setTimerOn(TIMER_FADEOUT);
 			}
