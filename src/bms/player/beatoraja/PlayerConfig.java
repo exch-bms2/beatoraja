@@ -212,6 +212,7 @@ public class PlayerConfig {
 
 	// -- Stream
 	private boolean enableRequest = false;
+	private boolean notifyRequest = false;
 	private int maxRequestCount = 30;
 
 	public PlayerConfig() {
@@ -708,10 +709,18 @@ public class PlayerConfig {
         return enableRequest;
     }
 
+	public boolean getRequestNotify() {
+        return notifyRequest;
+    }
+
     public void setRequestEnable(boolean requestEnable) {
         this.enableRequest = requestEnable;
     }
-    
+
+    public void setRequestNotify(boolean notifyEnable) {
+        this.notifyRequest = notifyEnable;
+    }
+
     public int getMaxRequestCount() {
         return maxRequestCount;
     }
