@@ -152,7 +152,7 @@ public enum MusicSelectCommand {
 			Queue<DirectoryBar> dir = selector.getBarRender().getDirectory();
 			String[] acceptdomain = {"lnt.softether.net","www.ribbit.xyz","rattoto10.jounin.jp","flowermaster.web.fc2.com",
 					"stellawingroad.web.fc2.com","pmsdifficulty.xxxxxxxx.jp","walkure.net","stellabms.xyz","dpbmsdelta.web.fc2.com",
-					"cgi.geocities.jp/asahi3jpn","nekokan.dyndns.info"};
+					"cgi.geocities.jp/asahi3jpn","nekokan.dyndns.info","localhost","127.0.0.1"};
 			boolean startdownload = false;
 			for (DirectoryBar d : dir) {
 				if (d instanceof TableBar) {
