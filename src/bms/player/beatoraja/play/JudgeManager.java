@@ -666,7 +666,7 @@ public class JudgeManager {
 			main.setPastNotes(pastNotes);
 			return;
 		}
-		n.setMicroPlayTime(mfast);
+
 		score.addJudgeCount(judge, mfast >= 0, 1);
 
 		if (judge < 4) {
