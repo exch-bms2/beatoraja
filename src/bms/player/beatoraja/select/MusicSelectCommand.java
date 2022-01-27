@@ -149,37 +149,29 @@ public enum MusicSelectCommand {
     DOWNLOAD_IPFS {
         @Override
         public void execute(MusicSelector selector) {
-			Queue<DirectoryBar> dir = selector.getBarRender().getDirectory();
-			String[] acceptdomain = {"lnt.softether.net","www.ribbit.xyz","rattoto10.jounin.jp","flowermaster.web.fc2.com",
-					"stellawingroad.web.fc2.com","pmsdifficulty.xxxxxxxx.jp","walkure.net","stellabms.xyz","dpbmsdelta.web.fc2.com",
-					"cgi.geocities.jp/asahi3jpn","nekokan.dyndns.info","localhost","127.0.0.1","ipfs.io"};
-			boolean startdownload = false;
-			for (DirectoryBar d : dir) {
-				if (d instanceof TableBar) {
-					String selecturl = ((TableBar) d).getUrl();
-					if (selecturl == null)
-						break;
-					for (String url : acceptdomain) {
-						if (selecturl.startsWith("http://" + url) || selecturl.startsWith("https://" + url)) {
-							Bar current = selector.getBarRender().getSelected();
-							if (current instanceof SongBar) {
-								final SongData song = ((SongBar) current).getSongData();
-								if (song != null && song.getIpfs() != null) {
-									selector.main.getMusicDownloadProcessor().start(song);
-									startdownload = true;
-								}
-							}
-							break;
-						}
-					}
-					if (!startdownload) {
-						Logger.getGlobal().info("ダウンロードは開始されませんでした。");
-					}
-					break;
-				}
+            Queue<DirectoryBar> dir = selector.getBarRender().getDirectory();
+            boolean startdownload = false;
+            for (DirectoryBar d : dir) {
+                if (d instanceof TableBar) {
+                    String selecturl = ((TableBar) d).getUrl();
+                    if (selecturl == null)
+                        break;
 
-			}
+                    Bar current = selector.getBarRender().getSelected();
+                    if (current instanceof SongBar) {
+                        final SongData song = ((SongBar) current).getSongData();
+                        if (song != null && song.getIpfs() != null) {
+                            selector.main.getMusicDownloadProcessor().start(song);
+                            startdownload = true;
+                        }
+                    }
 
+                    if (!startdownload) {
+                        Logger.getGlobal().info("ダウンロードは開始されませんでした。");
+                    }
+                    break;
+                }
+            }
         }
     },
     /**
