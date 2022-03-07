@@ -361,7 +361,6 @@ public class MusicSelector extends MainState {
 
 		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
 		preview.setDefault(getSound(SOUND_BGM));
-		preview.start(null);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayModeConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
@@ -383,6 +382,10 @@ public class MusicSelector extends MainState {
 			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());
 			setStage(search);
 		}
+	}
+
+	public void prepare() {
+		preview.start(null);
 	}
 
 	public void render() {
@@ -555,9 +558,12 @@ public class MusicSelector extends MainState {
 
 		musicinput.input();
 	}
+
+	public void shutdown() {
+		preview.stop();
+	}
 	
 	public void changeState(MainStateType type) {
-		preview.stop();
 		main.changeState(type);
 		if (search != null) {
 			search.unfocus(this);

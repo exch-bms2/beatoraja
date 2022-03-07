@@ -25,12 +25,15 @@ public class MusicDecide extends MainState {
 	public void create() {
 		cancel = false;
 		
-		setSound(SOUND_DECIDE, "decide.wav", SoundType.BGM, false);
-		play(SOUND_DECIDE);
-
 		loadSkin(SkinType.DECIDE);
 
 		main.getPlayerResource().setOrgGaugeOption(main.getPlayerResource().getPlayerConfig().getGauge());
+	}
+
+	public void prepare() {
+		super.prepare();
+		setSound(SOUND_DECIDE, "decide.wav", SoundType.BGM, false);
+		play(SOUND_DECIDE);
 	}
 
 	public void render() {

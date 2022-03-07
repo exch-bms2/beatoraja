@@ -161,6 +161,12 @@ public class CourseResult extends AbstractResult {
 		play(newscore.getClear() != Failed.id ? SOUND_CLEAR : SOUND_FAIL);
 	}
 
+	public void shutdown() {
+		stop(SOUND_CLEAR);
+		stop(SOUND_FAIL);
+		stop(SOUND_CLOSE);
+	}
+
 	public void render() {
 		long time = main.getNowTime();
 		main.switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
@@ -174,9 +180,6 @@ public class CourseResult extends AbstractResult {
 		if (main.isTimerOn(TIMER_FADEOUT)) {
 			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
-				stop(SOUND_CLEAR);
-				stop(SOUND_FAIL);
-				stop(SOUND_CLOSE);
 				main.changeState(MainStateType.MUSICSELECT);
 			}
 		} else if (time > getSkin().getScene()) {
