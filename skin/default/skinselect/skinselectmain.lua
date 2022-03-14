@@ -112,9 +112,9 @@ local function main()
 		{id = "type-13" , images = {"type-off-13", "type-on-13"}, act = 183, ref = 183},
 		{id = "type-14" , images = {"type-off-14", "type-on-14"}, act = 184, ref = 184},
 		{id = "type-15" , images = {"type-off-15", "type-on-15"}, act = 185, ref = 185},
-		{id = "type-16" , images = {"type-off-16", "type-on-16"}, act = 186, ref = 186},
-		{id = "type-17" , images = {"type-off-17", "type-on-17"}, act = 187, ref = 187},
-		{id = "type-18" , images = {"type-off-18", "type-on-18"}, act = 188, ref = 188},
+		{id = "type-16" , images = {"type-off-16", "type-on-16"}, act = 386, ref = 386},
+		{id = "type-17" , images = {"type-off-17", "type-on-17"}, act = 387, ref = 387},
+		{id = "type-18" , images = {"type-off-18", "type-on-18"}, act = 388, ref = 388},
 	}
 	skin.value = {}
 	skin.text = {
