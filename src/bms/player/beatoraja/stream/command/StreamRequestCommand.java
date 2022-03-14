@@ -1,8 +1,11 @@
 package bms.player.beatoraja.stream.command;
 
+import com.badlogic.gdx.graphics.Color;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import bms.player.beatoraja.MessageRenderer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.HashBar;
 import bms.player.beatoraja.song.SongData;
@@ -12,13 +15,15 @@ import bms.player.beatoraja.song.SongData;
  */
 public class StreamRequestCommand extends StreamCommand {
     MusicSelector selector;
+    MessageRenderer notifier;
     int maxLength = 30;
     Thread updaterThread;
     UpdateBar updater;
 
-    public StreamRequestCommand(MusicSelector selector) {
+    public StreamRequestCommand(MusicSelector selector, MessageRenderer notifier) {
         COMMAND_STRING = "!!req";
         this.selector = selector;
+        this.notifier = notifier;
         maxLength = this.selector.main.getPlayerConfig().getMaxRequestCount();
         updater = new UpdateBar();
         updaterThread = new Thread(updater);
@@ -43,6 +48,8 @@ public class StreamRequestCommand extends StreamCommand {
     }
 
     class UpdateBar implements Runnable {
+		final int MESSAGE_TIME = 3000;
+
         HashBar bar;
         List<SongData> songDatas = new ArrayList<SongData>();
 
@@ -59,8 +66,26 @@ public class StreamRequestCommand extends StreamCommand {
         void set(String sha256) {
             synchronized (lock) {
                 stack.add(sha256);
+                addMessage(sha256);
             }
         }
+		
+        void addMessage(String sha256) {
+            if (notifier != null) {
+                SongData[] _songDatas = selector.getSongDatabase().getSongDatas(new String[] { escape(sha256) });
+                if (_songDatas.length > 0) {
+                    SongData data = _songDatas[0];
+                    if (songDatas.stream().filter(song -> song.getSha256() == sha256).count() > 0 ||
+                        stack.stream().filter(hash -> hash == sha256).count() > 1) { // stackの中身には自身を含めるため、1個の場合は通す
+                        // すでに追加済みならスキップ
+                        notifier.addMessage(data.getFullTitle() + " はリクエスト済です" , MESSAGE_TIME, Color.ORANGE, 0);
+                    }
+                    notifier.addMessage("リクエスト追加: " + data.getFullTitle() , MESSAGE_TIME, Color.LIME, 0);
+                } else {
+                    notifier.addMessage("リクエストされた譜面を所持していません" , MESSAGE_TIME, Color.ORANGE, 0);
+                }
+            }
+		}
 
         void update() {
             synchronized (lock) {

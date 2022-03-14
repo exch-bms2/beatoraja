@@ -329,7 +329,7 @@ public class MainController extends ApplicationAdapter {
 		resource = new PlayerResource(audio, config, player);
 		selector = new MusicSelector(this, songUpdated);
 		if(player.getRequestEnable()) {
-		    streamController = new StreamController(selector);
+		    streamController = new StreamController(selector, (player.getRequestNotify() ? messageRenderer : null));
 	        streamController.run();
 		}
 		decide = new MusicDecide(this);

@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.MessageRenderer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.stream.command.StreamCommand;
 import bms.player.beatoraja.stream.command.StreamRequestCommand;
@@ -18,10 +19,12 @@ public class StreamController {
     Thread polling;
     boolean isActive = false;
     MusicSelector selector;
+    MessageRenderer notifier;
 
-    public StreamController(MusicSelector selector) {
+    public StreamController(MusicSelector selector, MessageRenderer notifier) {
         this.selector = selector;
-        commands = new StreamCommand[] { new StreamRequestCommand(this.selector) };
+        this.notifier = notifier;
+        commands = new StreamCommand[] { new StreamRequestCommand(this.selector, this.notifier) };
         try {
             pipeBuffer = new BufferedReader(new FileReader("\\\\.\\pipe\\beatoraja"));
             isActive = true;
