@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.config.Discord;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -913,6 +912,26 @@ public class BMSPlayer extends MainState {
 
 		score.setPassnotes(notes);
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
+		
+		long count = 0;
+		long avgduration = 0;
+		final int lanes = model.getMode().key;
+		for (TimeLine tl : model.getAllTimeLines()) {
+			for (int i = 0; i < lanes; i++) {
+				Note n = tl.getNote(i);
+				if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE
+						&& n instanceof LongNote && ((LongNote) n).isEnd())) {
+					int state = n.getState();
+					long time = n.getMicroPlayTime();
+					avgduration += state >= 1 && state <= 4 ? Math.abs(time) : 1000000;
+					count++;
+//					System.out.println(time);
+				}
+			}
+		}
+		score.setAvgjudge(avgduration / count);
+//		System.out.println(avgduration + " / " + count + " = " + score.getAvgjudge());
+
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		return score;
 	}
