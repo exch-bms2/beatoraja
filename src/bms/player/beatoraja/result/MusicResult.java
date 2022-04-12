@@ -336,7 +336,7 @@ public class MusicResult extends AbstractResult {
 		getScoreDataProperty().update(newscore);
 		// duration average
 		int count = 0;
-		avgduration = 0;
+		avgduration = newscore.getAvgjudge();
 		timingDistribution.init();
 		final int lanes = resource.getBMSModel().getMode().key;
 		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
@@ -348,13 +348,11 @@ public class MusicResult extends AbstractResult {
 					int time = n.getPlayTime();
 					if (state >= 1) {
 						count++;
-						avgduration += Math.abs(time);
 						timingDistribution.add(time);
 					}
 				}
 			}
 		}
-		avgduration /= count;
 		timingDistribution.statisticValueCalcuate();
 
 		// コースモードの場合はコーススコアに加算・累積する

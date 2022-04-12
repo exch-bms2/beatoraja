@@ -719,13 +719,13 @@ public class IntegerPropertyFactory {
 
 		duration_average(372, (state) -> {
 			if (state instanceof AbstractResult) {
-				return (int) ((AbstractResult) state).getAverageDuration();
+				return (int) (((AbstractResult) state).getAverageDuration() / 1000);
 			}
 			return Integer.MIN_VALUE;
 		}),
 		duration_average_afterdot(373, (state) -> {
 			if (state instanceof AbstractResult) {
-				return (int) (((AbstractResult) state).getAverageDuration() * 100) % 100;
+				return (int) ((((AbstractResult) state).getAverageDuration() / 10) % 100);
 			}
 			return Integer.MIN_VALUE;
 		}),
@@ -932,25 +932,6 @@ public class IntegerPropertyFactory {
 	public static IntegerProperty getImageIndexProperty(int optionid) {
 		IntegerProperty result = null;
 
-		if (optionid == BUTTON_ASSIST_CONSTANT) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getScrollMode() == 1 ? 1 : 0);
-		}
-		if (optionid == BUTTON_ASSIST_JUDGEAREA) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0);
-		}
-		if (optionid == BUTTON_ASSIST_LEGACY) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLongnoteMode() == 1 ? 1 : 0);
-		}
-		if (optionid == BUTTON_ASSIST_MARKNOTE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0);
-		}
-		if (optionid == BUTTON_ASSIST_BPMGUIDE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0);
-		}
-		if (optionid == BUTTON_ASSIST_NOMINE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getMineMode() == 1 ? 1 : 0);
-		}
-
 		if ((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
 				|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
 			result = (state) -> {
@@ -981,6 +962,10 @@ public class IntegerPropertyFactory {
 
 	public enum IndexType {
 		
+		showjudgearea(BUTTON_ASSIST_JUDGEAREA, (state) -> (state.main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0)),
+		markprocessednote(BUTTON_ASSIST_MARKNOTE, (state) -> (state.main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0)),
+		bpmguide(BUTTON_ASSIST_BPMGUIDE, (state) -> (state.main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0)),
+
 		customjudge(BUTTON_ASSIST_EXJUDGE, (state) -> (state.main.getPlayerResource().getPlayerConfig().isCustomJudge() ? 1 : 0)),
 		lnmode(BUTTON_LNMODE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode())),
 		notesdisplaytimingautoadjust(75, (state) -> (state.main.getPlayerResource().getPlayerConfig().isNotesDisplayTimingAutoAdjust() ? 1 : 0)),
@@ -1177,6 +1162,11 @@ public class IntegerPropertyFactory {
 		cleartype_ranking8(397, createRankinCleartypeProperty(7)),
 		cleartype_ranking9(398, createRankinCleartypeProperty(8)),
 		cleartype_ranking10(399, createRankinCleartypeProperty(9)),
+		
+		// 旧仕様
+		assist_constant(BUTTON_ASSIST_CONSTANT, (state) -> (state.main.getPlayerResource().getPlayerConfig().getScrollMode() == 1 ? 1 : 0)),
+		assist_legacy(BUTTON_ASSIST_LEGACY, (state) -> (state.main.getPlayerResource().getPlayerConfig().getLongnoteMode() == 1 ? 1 : 0)),
+		assist_nomine(BUTTON_ASSIST_NOMINE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getMineMode() == 1 ? 1 : 0)),
 		
 		;
 		/**

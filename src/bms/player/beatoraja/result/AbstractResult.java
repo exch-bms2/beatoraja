@@ -38,9 +38,9 @@ public abstract class AbstractResult extends MainState {
 	 */
 	protected int rankingOffset = 0;
 	/**
-	 * 全ノーツの平均ズレ
+	 * 全ノーツの平均ズレ(us)
 	 */
-	protected float avgduration;
+	protected long avgduration;
 	/**
 	 * タイミング分布
 	 */
@@ -234,7 +234,7 @@ public abstract class AbstractResult extends MainState {
 		return ranking != null ? ranking.getTotalPlayer() : 0;
 	}
 	
-	public float getAverageDuration() {
+	public long getAverageDuration() {
 		return avgduration;
 	}
 	
