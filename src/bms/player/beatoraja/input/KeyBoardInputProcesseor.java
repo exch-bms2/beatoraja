@@ -45,7 +45,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 */
 	private final long[] keytime = new long[256];
 	/**
-	 * キーの最少入力感覚
+	 * キーの最少入力間隔(ms)
 	 */
 	private int duration;
 
@@ -89,16 +89,15 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void poll(final long microtime) {
-		final long presstime = microtime / 1000;
 		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
 				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
-				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
+				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
-					keytime[keys[i]] = presstime;
+					keytime[keys[i]] = microtime;
 					this.bmsPlayerInputProcessor.keyChanged(this, microtime, i, pressed);
 					this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
 				}
@@ -120,7 +119,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
 			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
 				keystate[key.keycode] = pressed;
-				keytime[key.keycode] = presstime;
+				keytime[key.keycode] = microtime;
 			}
 		}
 		
