@@ -42,6 +42,8 @@ public class ScoreDataProperty {
     private int[] rivalGhost;
     private boolean useBestGhost = false;
     private boolean useRivalGhost = false;
+    
+    private int totalnotes;
 
     public void update(ScoreData score) {
         this.update(score, score != null ? score.getNotes() : 0);
@@ -137,6 +139,11 @@ public class ScoreDataProperty {
         }
         return 0;
     }
+    
+    public void updateTargetScore(int rivalscore) {
+    	this.rivalscore = rivalscore;
+        rivalscorerate= ((float)rivalscore)  / (totalnotes * 2);
+    }
 
     public void setTargetScore(int bestscore, int rivalscore, int totalnotes) {
         setTargetScore(bestscore, null, rivalscore, null, totalnotes);
@@ -147,6 +154,7 @@ public class ScoreDataProperty {
         this.bestGhost = bestGhost;
         this.rivalscore = rivalscore;
         this.rivalGhost = rivalGhost;
+        this.totalnotes = totalnotes;
         bestscorerate= ((float)bestscore)  / (totalnotes * 2);
         bestrateInt = (int)(bestscorerate * 100);
         bestrateAfterDot = ((int)(bestscorerate * 10000)) % 100;

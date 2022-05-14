@@ -112,13 +112,6 @@ public class BMSPlayer extends MainState {
 
 		// TODO ターゲットスコアはPlayerResourceで受け渡す
 		if(resource.getRivalScoreData() == null) {
-			int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
-					.getTarget(main);
-			ScoreData rivalScore = new ScoreData();
-			rivalScore.setPlayer(TargetProperty.getAllTargetProperties()[config.getTarget()].getName());
-			rivalScore.setEpg(rivalscore / 2);
-			rivalScore.setEgr(rivalscore % 2);
-			resource.setRivalScoreData(rivalScore);
 		} else {
 			ScoreData rival = resource.getRivalScoreData();
 			if(rival.getSeed() != -1) {
@@ -482,6 +475,16 @@ public class BMSPlayer extends MainState {
 			practice.create(model);
 			state = STATE_PRACTICE;
 		} else {
+			
+			if(resource.getRivalScoreData() == null) {
+				int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
+						.getTarget(main);
+				ScoreData rivalScore = new ScoreData();
+				rivalScore.setPlayer(TargetProperty.getAllTargetProperties()[config.getTarget()].getName());
+				rivalScore.setEpg(rivalscore / 2);
+				rivalScore.setEgr(rivalscore % 2);
+				resource.setRivalScoreData(rivalScore);
+			}
 			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0 , null, model.getTotalNotes());
 		}
 	}
