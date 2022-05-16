@@ -40,9 +40,13 @@ public abstract class TargetProperty {
             targets.add(new StaticTargetProperty("RANK_AAA+", "RANK AAA+", 100.0f * 26.0f / 27.0f));
             targets.add(new StaticTargetProperty("MAX", "MAX", 100.0f));
             targets.add(new NextRankTargetProperty());
-            targets.add(new InternetRankingTargetProperty(InternetRankingTargetProperty.Target.NEXT));
-            targets.add(new InternetRankingTargetProperty(InternetRankingTargetProperty.Target.TOP));
-            targets.add(new InternetRankingTargetProperty(InternetRankingTargetProperty.Target.CENTER));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_1"));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_5"));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANK_1"));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANK_10"));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_10"));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_25"));
+            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_50"));
             available = targets.toArray(new TargetProperty[targets.size()]);
         }
         return available;
@@ -116,9 +120,12 @@ class InternetRankingTargetProperty extends TargetProperty{
 
     private Target target;
     
-    public InternetRankingTargetProperty(Target target) {
-    	super("IR_" + target.name(), "IR " + target.name());
+    private int value;
+    
+    private InternetRankingTargetProperty(Target target, int value) {
+    	super("IR_" + target.name(), "IR " + target.name() + " " + value);
         this.target = target;
+        this.value = value;
     }
 
     @Override
@@ -152,20 +159,54 @@ class InternetRankingTargetProperty extends TargetProperty{
 		case NEXT:
 			for(int i = 0;i  < ranking.getTotalPlayer(); i++) {
 				if(ranking.getScore(i).getExscore() > nowscore) { 
-					return ranking.getScore(i).getExscore();
+					return ranking.getScore(Math.max(i - (value - 1) , 0)).getExscore();
 				}
 			}
 			return nowscore;
-		case TOP:
-			return ranking.getTotalPlayer() > 0 ? ranking.getScore(0).getExscore() : 0;
-		case CENTER:
-			return ranking.getTotalPlayer() > 0 ? ranking.getScore(ranking.getTotalPlayer() / 2).getExscore() : 0;
+		case RANK:
+			return ranking.getTotalPlayer() > (value - 1) ? ranking.getScore(value - 1).getExscore() : 0;
+		case RANKRATE:
+			return ranking.getTotalPlayer() > 0 ? ranking.getScore(ranking.getTotalPlayer() * value / 100).getExscore() : 0;
 		}
     	return 0;
     }
     
+    public static TargetProperty getTargetProperty(String name) {
+    	if(name.startsWith("IR_NEXT_")) {
+    		try {
+        		int index = Integer.parseInt(name.substring(8));
+        		if(index > 0) {
+        			return new InternetRankingTargetProperty(Target.NEXT, index);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	}
+    	if(name.startsWith("IR_RANK_")) {
+    		try {
+        		int index = Integer.parseInt(name.substring(8));
+        		if(index > 0) {
+        			return new InternetRankingTargetProperty(Target.RANK, index);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	}
+    	if(name.startsWith("IR_RANKRATE_")) {
+    		try {
+        		int index = Integer.parseInt(name.substring(12));
+        		if(index > 0 && index < 100) {
+        			return new InternetRankingTargetProperty(Target.RANKRATE, index);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	}
+    	return null;
+    }
+    
     enum Target {
-    	NEXT, TOP, CENTER
+    	NEXT, RANK, RANKRATE
     }
 }
 
