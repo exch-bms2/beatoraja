@@ -477,10 +477,9 @@ public class BMSPlayer extends MainState {
 		} else {
 			
 			if(resource.getRivalScoreData() == null) {
-				int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
-						.getTarget(main);
+				int rivalscore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);
 				ScoreData rivalScore = new ScoreData();
-				rivalScore.setPlayer(TargetProperty.getAllTargetProperties()[config.getTarget()].getName());
+				rivalScore.setPlayer(TargetProperty.getTargetProperty(config.getTargetid()).getName());
 				rivalScore.setEpg(rivalscore / 2);
 				rivalScore.setEgr(rivalscore % 2);
 				resource.setRivalScoreData(rivalScore);

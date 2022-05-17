@@ -11,12 +11,17 @@ import java.util.*;
  */
 public abstract class TargetProperty {
 
-	private final String id;
+	public final String id;
 	
     private String name;
 
+    /**
+     * 旧属性値
+     */
     private static TargetProperty[] available;
 
+    private static final Map<String, TargetProperty> properties = new HashMap();
+    
     public TargetProperty(String id) {
     	this.id = id;
     }
@@ -26,6 +31,9 @@ public abstract class TargetProperty {
     	this.name = name;
     }
     
+    /**
+     * 旧メソッド
+     */
     public static TargetProperty[] getAllTargetProperties() {
         if(available == null) {
             List<TargetProperty> targets = new ArrayList<TargetProperty>();
@@ -40,16 +48,48 @@ public abstract class TargetProperty {
             targets.add(new StaticTargetProperty("RANK_AAA+", "RANK AAA+", 100.0f * 26.0f / 27.0f));
             targets.add(new StaticTargetProperty("MAX", "MAX", 100.0f));
             targets.add(new NextRankTargetProperty());
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_1"));
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_5"));
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANK_1"));
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANK_10"));
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_10"));
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_25"));
-            targets.add(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_50"));
             available = targets.toArray(new TargetProperty[targets.size()]);
         }
         return available;
+    }
+
+    public static TargetProperty[] getTargetProperties() {
+    	putTargetProperty(new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 18.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_A", "RANK A",    100.0f * 19.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 20.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_AA-", "RANK AA-",  100.0f * 21.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 22.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_AA+", "RANK AA+",  100.0f * 23.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_AAA-", "RANK AAA-", 100.0f * 24.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_AAA", "RANK AAA",  100.0f * 25.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("RATE_AAA+", "RANK AAA+", 100.0f * 26.0f / 27.0f));
+    	putTargetProperty(new StaticTargetProperty("MAX", "MAX", 100.0f));
+    	putTargetProperty(new NextRankTargetProperty());
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_1"));
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_5"));
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANK_1"));
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANK_10"));
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_10"));
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_25"));
+    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_50"));
+        return properties.values().toArray(new TargetProperty[properties.size()]);
+    }
+    
+    private static void putTargetProperty(TargetProperty target) {
+    	if(!properties.containsKey(target.id)) {
+    		properties.put(target.id, target);
+    	}
+    }
+    
+    public static TargetProperty getTargetProperty(String id) {
+    	TargetProperty target = properties.get(id);
+    	if(target == null) {
+    		target = InternetRankingTargetProperty.getTargetProperty(id);
+    	}
+    	if(target == null) {
+    		target = getTargetProperty("MAX");
+    	}
+    	return target;
     }
 
     public String getName() {
@@ -171,10 +211,10 @@ class InternetRankingTargetProperty extends TargetProperty{
     	return 0;
     }
     
-    public static TargetProperty getTargetProperty(String name) {
-    	if(name.startsWith("IR_NEXT_")) {
+    public static TargetProperty getTargetProperty(String id) {
+    	if(id.startsWith("IR_NEXT_")) {
     		try {
-        		int index = Integer.parseInt(name.substring(8));
+        		int index = Integer.parseInt(id.substring(8));
         		if(index > 0) {
         			return new InternetRankingTargetProperty(Target.NEXT, index);
         		}
@@ -182,9 +222,9 @@ class InternetRankingTargetProperty extends TargetProperty{
     			
     		}
     	}
-    	if(name.startsWith("IR_RANK_")) {
+    	if(id.startsWith("IR_RANK_")) {
     		try {
-        		int index = Integer.parseInt(name.substring(8));
+        		int index = Integer.parseInt(id.substring(8));
         		if(index > 0) {
         			return new InternetRankingTargetProperty(Target.RANK, index);
         		}
@@ -192,9 +232,9 @@ class InternetRankingTargetProperty extends TargetProperty{
     			
     		}
     	}
-    	if(name.startsWith("IR_RANKRATE_")) {
+    	if(id.startsWith("IR_RANKRATE_")) {
     		try {
-        		int index = Integer.parseInt(name.substring(12));
+        		int index = Integer.parseInt(id.substring(12));
         		if(index > 0 && index < 100) {
         			return new InternetRankingTargetProperty(Target.RANKRATE, index);
         		}
