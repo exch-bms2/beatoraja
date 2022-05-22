@@ -359,10 +359,10 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				// 楽曲のタグ,FAVORITEの保持
 				for (SongData record : qr.query(conn, "SELECT md5, tag, favorite FROM song", songhandler)) {
 					if (record.getTag().length() > 0) {
-						property.tags.put(record.getMd5(), record.getTag());
+						property.tags.put(record.getSha256(), record.getTag());
 					}
 					if (record.getFavorite() > 0) {
-						property.favorites.put(record.getMd5(), record.getFavorite());
+						property.favorites.put(record.getSha256(), record.getFavorite());
 					}
 				}
 				
@@ -570,8 +570,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					if((sd.getPreview() == null || sd.getPreview().length() == 0) && previewpath != null) {
 						sd.setPreview(previewpath);
 					}
-					final String tag = property.tags.get(sd.getMd5());
-					final Integer favorite = property.favorites.get(sd.getMd5());
+					final String tag = property.tags.get(sd.getSha256());
+					final Integer favorite = property.favorites.get(sd.getSha256());
 					
 					for(SongDatabaseAccessorPlugin plugin : plugins) {
 						plugin.update(model, sd);
