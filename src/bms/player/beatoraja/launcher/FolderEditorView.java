@@ -14,6 +14,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.GridPane;
 
+import java.util.regex.Pattern;
+
 public class FolderEditorView implements Initializable {
 
 	@FXML
@@ -41,6 +43,12 @@ public class FolderEditorView implements Initializable {
 	private SongDatabaseAccessor songdb;
 	
 	private CourseData[] courses;
+
+    private static final Pattern hexadecimalPattern = Pattern.compile("[0-9a-fA-F]*");
+    
+    private static boolean isMd5Hash(String text) {
+        return text.length() == 32 && hexadecimalPattern.matcher(text).matches();
+    }
 	
 	public void initialize(URL arg0, ResourceBundle arg1) {		
 		folders.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
@@ -73,7 +81,9 @@ public class FolderEditorView implements Initializable {
 		if(songdb == null) {
 			return;
 		}
-		if(search.getText().length() > 1) {
+		if(isMd5Hash(search.getText())) {
+			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));			
+		} else if(search.getText().length() > 1) {
 			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
 		}
 	}
