@@ -10,8 +10,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
+import java.util.regex.Pattern;
+
 public class TableEditorView implements Initializable {
 
+    private static final Pattern hexadecimalPattern = Pattern.compile("[0-9a-fA-F]*");
 
 	private Path filepath;
 
@@ -53,4 +56,8 @@ public class TableEditorView implements Initializable {
 		
 		TableData.write(filepath, td);
 	}
+    
+    public static boolean isMd5Hash(String text) {
+        return text.length() == 32 && hexadecimalPattern.matcher(text).matches();
+    }
 }
