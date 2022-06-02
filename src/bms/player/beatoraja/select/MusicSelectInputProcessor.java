@@ -366,6 +366,10 @@ public class MusicSelectInputProcessor {
 		if(input.isActivated(KeyCommand.OPEN_EXPLORER)) {
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
+        // copy song hash
+        if(input.isActivated(KeyCommand.COPY_SONG_HASH)) {
+            select.execute(MusicSelectCommand.COPY_HASH);
+        }
 
         if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
             select.main.exit();
