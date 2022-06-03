@@ -57,7 +57,7 @@ public class TableEditorView implements Initializable {
 		TableData.write(filepath, td);
 	}
     
-    public static boolean isMd5Hash(String text) {
-        return text.length() == 32 && hexadecimalPattern.matcher(text).matches();
+    public static boolean isMd5OrSha256Hash(String text) {
+        return (text.length() == 32 || text.length() == 64) && hexadecimalPattern.matcher(text).matches();
     }
 }

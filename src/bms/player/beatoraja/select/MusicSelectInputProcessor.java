@@ -366,9 +366,13 @@ public class MusicSelectInputProcessor {
 		if(input.isActivated(KeyCommand.OPEN_EXPLORER)) {
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
-        // copy song hash
-        if(input.isActivated(KeyCommand.COPY_SONG_HASH)) {
-            select.execute(MusicSelectCommand.COPY_HASH);
+        // copy song MD5 hash
+        if(input.isActivated(KeyCommand.COPY_SONG_MD5_HASH)) {
+            select.execute(MusicSelectCommand.COPY_MD5_HASH);
+        }
+        // copy song SHA256 hash
+        if(input.isActivated(KeyCommand.COPY_SONG_SHA256_HASH)) {
+            select.execute(MusicSelectCommand.COPY_SHA256_HASH);
         }
 
         if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {

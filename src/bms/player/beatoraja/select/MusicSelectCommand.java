@@ -124,7 +124,7 @@ public enum MusicSelectCommand {
     /**
      * 譜面のMD5ハッシュをクリップボードにコピーする
      */
-    COPY_HASH {
+    COPY_MD5_HASH {
         @Override
         public void execute(MusicSelector selector) {
             Bar current = selector.getBarRender().getSelected();
@@ -132,11 +132,32 @@ public enum MusicSelectCommand {
                 final SongData song = ((SongBar) current).getSongData();
                 if (song != null) {
                     String hash = song.getMd5();
-                    if (hash != null) {
+                    if (hash != null && hash.length() > 0) {
                         StringSelection stringSelection = new StringSelection(hash);
                         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                         clipboard.setContents(stringSelection, null);
                         selector.main.getMessageRenderer().addMessage("MD5 hash copied : " + hash, 2000, Color.GOLD, 0);
+                    }
+                }
+            }
+        }
+    },
+    /**
+     * 譜面のMD5ハッシュをクリップボードにコピーする
+     */
+    COPY_SHA256_HASH {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            if (current instanceof SongBar) {
+                final SongData song = ((SongBar) current).getSongData();
+                if (song != null) {
+                    String hash = song.getSha256();
+                    if (hash != null && hash.length() > 0) {
+                        StringSelection stringSelection = new StringSelection(hash);
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        clipboard.setContents(stringSelection, null);
+                        selector.main.getMessageRenderer().addMessage("SHA256 hash copied : " + hash, 2000, Color.GOLD, 0);
                     }
                 }
             }
