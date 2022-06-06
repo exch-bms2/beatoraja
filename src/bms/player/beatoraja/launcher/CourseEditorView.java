@@ -91,6 +91,17 @@ public class CourseEditorView implements Initializable {
 
 		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
+		searchSongs.setOnMouseClicked((click) -> {
+			if (click.getClickCount() == 2) {
+				TableEditorView.displayChartDetailsDialog(songdb, searchSongs.getSelectionModel().getSelectedItem());
+			}
+		});
+		courseSongs.setOnMouseClicked((click) -> {
+			if (click.getClickCount() == 2) {
+				TableEditorView.displayChartDetailsDialog(songdb, courseSongs.getSelectionModel().getSelectedItem());
+			}
+		});
+
 		updateCourse(null);
 	}
 	
