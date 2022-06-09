@@ -47,6 +47,10 @@ public abstract class MainState {
 
 	}
 
+	public void shutdown() {
+
+	}
+
 	public abstract void render();
 
 	public void input() {

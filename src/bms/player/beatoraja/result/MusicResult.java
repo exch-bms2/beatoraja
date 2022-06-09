@@ -150,6 +150,12 @@ public class MusicResult extends AbstractResult {
 		play(newscore.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id) ? SOUND_CLEAR : SOUND_FAIL);
 	}
 
+	public void shutdown() {
+		stop(SOUND_CLEAR);
+		stop(SOUND_FAIL);
+		stop(SOUND_CLOSE);
+	}
+
 	public void render() {
 		long time = main.getNowTime();
 		main.switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
@@ -166,9 +172,6 @@ public class MusicResult extends AbstractResult {
 
 		if (main.isTimerOn(TIMER_FADEOUT)) {
 			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
-				stop(SOUND_CLEAR);
-				stop(SOUND_FAIL);
-				stop(SOUND_CLOSE);
 				main.getAudioProcessor().stop((Note) null);
 
 				final BMSPlayerInputProcessor input = main.getInputProcessor();
