@@ -54,7 +54,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 		}
 		DeviceInfo deviceInfo = devices[ deviceId ];
-		setSampleRate((int)deviceInfo.defaultSampleRate);
+		
+		setSampleRate(config.getAudioConfig().getSampleRate() <= 0 ? (int)deviceInfo.defaultSampleRate : config.getAudioConfig().getSampleRate());
 		channels = 2;
 //		System.out.println( "  deviceId    = " + deviceId );
 //		System.out.println( "  sampleRate  = " + sampleRate );

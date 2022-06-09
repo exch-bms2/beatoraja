@@ -26,6 +26,10 @@ public class AudioConfig implements Validatable {
 	 * オーディオ同時発音数
 	 */
 	private int deviceSimultaneousSources = 128;
+	/**
+	 * オーディオサンプリングレート(0:指定なし)
+	 */
+	private int sampleRate = 0;
 
 	/**
 	 * PracticeモードのFREQUENCYオプションに対する音声処理方法
@@ -79,6 +83,14 @@ public class AudioConfig implements Validatable {
 
 	public void setDeviceSimultaneousSources(int deviceSimultaneousSources) {
 		this.deviceSimultaneousSources = deviceSimultaneousSources;
+	}
+
+	public int getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(int sampleRate) {
+		this.sampleRate = sampleRate;
 	}
 
 	public FrequencyType getFreqOption() {
