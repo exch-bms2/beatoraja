@@ -54,7 +54,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 		}
 		DeviceInfo deviceInfo = devices[ deviceId ];
-		sampleRate = (int)deviceInfo.defaultSampleRate;
+		setSampleRate((int)deviceInfo.defaultSampleRate);
 		channels = 2;
 //		System.out.println( "  deviceId    = " + deviceId );
 //		System.out.println( "  sampleRate  = " + sampleRate );
@@ -64,13 +64,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		streamParameters.channelCount = channels;
 		streamParameters.device = deviceId;
 		int framesPerBuffer = config.getAudioConfig().getDeviceBufferSize();
-		streamParameters.suggestedLatency = ((double)framesPerBuffer) / sampleRate;
+		streamParameters.suggestedLatency = ((double)framesPerBuffer) / getSampleRate();
 //		System.out.println( "  suggestedLatency = " + streamParameters.suggestedLatency );
 
 		int flags = 0;
 		
 		// Open a stream for output.
-		stream = PortAudio.openStream( null, streamParameters, sampleRate, framesPerBuffer, flags );
+		stream = PortAudio.openStream( null, streamParameters, getSampleRate(), framesPerBuffer, flags );
 
 		stream.start();
 

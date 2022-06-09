@@ -85,8 +85,8 @@ public abstract class PCM<T> {
 			if(pcm != null && ((AbstractAudioDriver)driver).channels != 0 && pcm.channels != ((AbstractAudioDriver)driver).channels) {
 				pcm = pcm.changeChannels(((AbstractAudioDriver)driver).channels);
 			}
-			if(pcm != null && ((AbstractAudioDriver)driver).sampleRate != 0 && pcm.sampleRate != ((AbstractAudioDriver)driver).sampleRate) {
-				pcm = pcm.changeSampleRate(((AbstractAudioDriver)driver).sampleRate);
+			if(pcm != null && ((AbstractAudioDriver)driver).getSampleRate() != 0 && pcm.sampleRate != ((AbstractAudioDriver)driver).getSampleRate()) {
+				pcm = pcm.changeSampleRate(((AbstractAudioDriver)driver).getSampleRate());
 			}
 			return pcm;
 		} catch (IOException e) {
