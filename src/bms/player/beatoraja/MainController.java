@@ -279,6 +279,9 @@ public class MainController extends ApplicationAdapter {
 			if(newState.getSkin() != null) {
 				newState.getSkin().prepare(newState);
 			}
+			if (current != null) {
+				current.shutdown();
+			}
 			current = newState;
 			starttime = System.nanoTime();
 			nowmicrotime = ((System.nanoTime() - starttime) / 1000);
