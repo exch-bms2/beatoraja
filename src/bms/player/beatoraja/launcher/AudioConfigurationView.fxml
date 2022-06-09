@@ -57,6 +57,13 @@
 					amountToStepBy="1" initialValue="64" max="1024" min="8" />
 			</valueFactory>
 		</NumericSpinner>
+		<Label prefHeight="23.0" prefWidth="150.0"
+			text="%AUDIO_SAMPLE_RATE">
+			<HBox.margin>
+				<Insets left="10.0" />
+			</HBox.margin>
+		</Label>
+		<ComboBox fx:id="audiosamplerate" prefWidth="150.0" />
 	</HBox>
 	<HBox prefHeight="30.0" prefWidth="730.0">
 		<Label prefHeight="25.0" prefWidth="150.0" text="%SYSTEM_VOLUME" />

@@ -31,6 +31,8 @@ public class AudioConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> audiosim;
 	@FXML
+	private ComboBox<Integer> audiosamplerate;
+	@FXML
 	private Slider systemvolume;
 	@FXML
 	private Slider keyvolume;
@@ -45,6 +47,7 @@ public class AudioConfigurationView implements Initializable {
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		audio.getItems().setAll(DriverType.OpenAL , DriverType.PortAudio);
+		audiosamplerate.getItems().setAll(null, 44100, 48000);
 
 		audioFreqOption.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
 		audioFastForward.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
@@ -57,6 +60,7 @@ public class AudioConfigurationView implements Initializable {
 		audio.setValue(config.getDriver());
 		audiobuffer.getValueFactory().setValue(config.getDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getDeviceSimultaneousSources());
+		audiosamplerate.setValue(config.getSampleRate() > 0 ? config.getSampleRate() : null);
 		audioFreqOption.setValue(config.getFreqOption());
 		audioFastForward.setValue(config.getFastForward());
 		systemvolume.setValue((double)config.getSystemvolume());
@@ -71,6 +75,7 @@ public class AudioConfigurationView implements Initializable {
 		config.setDriverName(audioname.getValue());
 		config.setDeviceBufferSize(audiobuffer.getValue());
 		config.setDeviceSimultaneousSources(audiosim.getValue());
+		config.setSampleRate(audiosamplerate.getValue() != null ? audiosamplerate.getValue() : 0);
 		config.setFreqOption(audioFreqOption.getValue());
 		config.setFastForward(audioFastForward.getValue());
 		config.setSystemvolume((float) systemvolume.getValue());
