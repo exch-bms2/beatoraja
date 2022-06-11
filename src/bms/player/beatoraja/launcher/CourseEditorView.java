@@ -113,7 +113,9 @@ public class CourseEditorView implements Initializable {
 		if(songdb == null) {
 			return;
 		}
-		if(search.getText().length() > 1) {
+		if(TableEditorView.isMd5OrSha256Hash(search.getText())) {
+			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));			
+		} else if(search.getText().length() > 1) {
 			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
 		}
 	}

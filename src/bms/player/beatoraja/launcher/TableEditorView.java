@@ -25,8 +25,11 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
 
+import java.util.regex.Pattern;
+
 public class TableEditorView implements Initializable {
 
+	private static final Pattern hexadecimalPattern = Pattern.compile("[0-9a-fA-F]*");
 
 	private Path filepath;
 
@@ -67,6 +70,10 @@ public class TableEditorView implements Initializable {
 		td.setFolder(folderController.getTableFolder());
 		
 		TableData.write(filepath, td);
+	}
+
+	public static boolean isMd5OrSha256Hash(String text) {
+		return (text.length() == 32 || text.length() == 64) && hexadecimalPattern.matcher(text).matches();
 	}
 
 	private static void dialogAddCopiableRow(GridPane gridPane, int row, String labelText, String dataText) {
