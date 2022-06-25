@@ -1,9 +1,6 @@
 package bms.player.beatoraja.skin.property;
 
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.BMSPlayerMode;
-import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
@@ -29,6 +26,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.*;
 
 /**
@@ -339,18 +337,23 @@ public class EventFactory {
 			}
 		}),
 		rival(79, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
+			if (state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
-	            int index = -1;
-	            for(int i = 0;i < selector.getRivals().length;i++) {
-	            	if(selector.getRival() == selector.getRivals()[i]) {
-	            		index = i;
-	            		break;
-	            	}
-	            }
-	            index = (index + (arg1 >= 0 ? 2 : 0)) % (selector.getRivals().length + 1) - 1;
-	            selector.setRival(index != -1 ? selector.getRivals()[index] : null);
-	            selector.play(SOUND_OPTIONCHANGE);
+				List<PlayerInformation> rivals = selector.getRivals();
+				int index = rivals.indexOf(selector.getRival());
+
+				if (index == -1) {
+					index = arg1 >= 0 ? 0 : rivals.size() - 1;
+				} else {
+					index = arg1 >= 0 ? index + 1 : index - 1;
+				}
+
+				if (index < 0 || index >= rivals.size()) {
+					selector.setRival(null);
+				} else {
+					selector.setRival(rivals.get(index));
+				}
+				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
 		favorite_chart(90, (state, arg1) -> {

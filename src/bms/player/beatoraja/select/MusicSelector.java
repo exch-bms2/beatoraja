@@ -8,6 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.io.File;
 import java.lang.StringBuilder;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.ir.IRPlayerData;
@@ -15,7 +17,6 @@ import bms.player.beatoraja.ir.IRPlayerData;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.utils.ObjectMap.Keys;
 
 import bms.model.BMSDecoder;
 import bms.model.Mode;
@@ -98,7 +99,7 @@ public class MusicSelector extends MainState {
 	protected int rankingOffset = 0;
 
 	private PlayerInformation rival;
-	private PlayerInformation[] rivals = new PlayerInformation[0];
+	private List<PlayerInformation> rivals = new ArrayList<>();
 	private ScoreDataCache[] rivalcaches = new ScoreDataCache[0];
 
 	private int panelstate;
@@ -169,10 +170,10 @@ public class MusicSelector extends MainState {
 					}
 
 					// ライバルキャッシュ作成
-					Array<PlayerInformation> rivals = new Array();
+					List<PlayerInformation> rivals = new ArrayList<>();
 					Array<ScoreDataCache> rivalcaches = new Array();
 
-					if(main.getIRStatus()[0].config.isImportrival()) {
+					if (main.getIRStatus()[0].config.isImportrival()) {
 						for(IRPlayerData irplayer : response.getData()) {
 							final PlayerInformation rival = new PlayerInformation();
 							rival.setId(irplayer.id);
@@ -247,7 +248,7 @@ public class MusicSelector extends MainState {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
-					this.rivals = rivals.toArray(PlayerInformation.class);
+					this.rivals = rivals;
 					this.rivalcaches = rivalcaches.toArray(ScoreDataCache.class);
 
 				} catch (Throwable e) {
@@ -306,14 +307,8 @@ public class MusicSelector extends MainState {
 	}
 
 	public void setRival(PlayerInformation rival) {
-		int index = -1;
-		for(int i = 0;i < rivals.length;i++) {
-			if(rival == rivals[i]) {
-				index = i;
-				break;
-			}
-		}
-		this.rival = index != -1 ? rivals[index] : null;
+		int index = rivals.indexOf(rival);
+		this.rival = index != -1 ? rivals.get(index) : null;
 		rivalcache = index != -1 ? rivalcaches[index] : null;
 		bar.updateBar();
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
@@ -323,7 +318,7 @@ public class MusicSelector extends MainState {
 		return rival;
 	}
 
-	public PlayerInformation[] getRivals() {
+	public List<PlayerInformation> getRivals() {
 		return rivals;
 	}
 
