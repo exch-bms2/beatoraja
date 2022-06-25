@@ -123,6 +123,12 @@ public class BMSPlayerInputProcessor {
 
 	private Type type = Type.KEYBOARD;
 
+	public void setAllInputConfigs(PlayModeConfig playModeConfig) {
+		setKeyboardConfig(playModeConfig.getKeyboardConfig());
+		setControllerConfig(playModeConfig.getController());
+		setMidiConfig(playModeConfig.getMidiConfig());
+	}
+
 	public void setKeyboardConfig(KeyboardConfig config) {
 		kbinput.setConfig(config);
 	}

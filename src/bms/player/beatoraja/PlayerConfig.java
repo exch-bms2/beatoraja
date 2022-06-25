@@ -211,7 +211,7 @@ public class PlayerConfig {
 	/**
 	 * 選曲時でのキー入力方式
 	 */
-	private int musicselectinput = 0;
+	private MusicSelectKeyProperty musicSelectInputOption = MusicSelectKeyProperty.BEAT_7K;
 
 	private IRConfig[] irconfig;
 
@@ -486,12 +486,12 @@ public class PlayerConfig {
 		this.sort = sort;
 	}
 
-	public int getMusicselectinput() {
-		return musicselectinput;
+	public MusicSelectKeyProperty getMusicSelectInputOption() {
+		return musicSelectInputOption;
 	}
 
-	public void setMusicselectinput(int musicselectinput) {
-		this.musicselectinput = musicselectinput;
+	public void nextMusicSelectInputOption() {
+		this.musicSelectInputOption = this.musicSelectInputOption.nextValue();
 	}
 
 	public SkinConfig[] getSkin() {

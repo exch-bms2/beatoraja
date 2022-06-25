@@ -760,7 +760,7 @@ public class BarRenderer {
 	public void input() {
 		BMSPlayerInputProcessor input = select.main.getInputProcessor();
 
-        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.main.getPlayerResource().getPlayerConfig().getMusicselectinput()];
+		final MusicSelectKeyProperty property = select.main.getPlayerResource().getPlayerConfig().getMusicSelectInputOption();
 
 		// song bar scroll on mouse wheel
 		int mov = -input.getScroll();

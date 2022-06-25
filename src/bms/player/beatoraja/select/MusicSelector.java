@@ -173,11 +173,11 @@ public class MusicSelector extends MainState {
 		main.getSoundManager().shuffle();
 		setSound(SOUND_BGM, "select.wav", SoundType.BGM, true);
 		setSound(SOUND_SCRATCH, "scratch.wav", SoundType.SOUND, false);
-		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND,false);
-		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONCHANGE, "o-change.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONOPEN, "o-open.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONCLOSE, "o-close.wav", SoundType.SOUND,false);
+		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND, false);
+		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND, false);
+		setSound(SOUND_OPTIONCHANGE, "o-change.wav", SoundType.SOUND, false);
+		setSound(SOUND_OPTIONOPEN, "o-open.wav", SoundType.SOUND, false);
+		setSound(SOUND_OPTIONCLOSE, "o-close.wav", SoundType.SOUND, false);
 
 		play = null;
 		showNoteGraph = false;
@@ -195,13 +195,6 @@ public class MusicSelector extends MainState {
 
 		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
 		preview.setDefault(getSound(SOUND_BGM));
-
-		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		PlayModeConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
-				: (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
-		input.setKeyboardConfig(pc.getKeyboardConfig());
-		input.setControllerConfig(pc.getController());
-		input.setMidiConfig(pc.getMidiConfig());
 		bar.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
@@ -209,8 +202,8 @@ public class MusicSelector extends MainState {
 		// search text field
 		Rectangle searchRegion = ((MusicSelectSkin) getSkin()).getSearchTextRegion();
 		if (searchRegion != null && (getStage() == null ||
-				(search != null && !searchRegion.equals(search.getSearchBounds())))) {
-			if(search != null) {
+			(search != null && !searchRegion.equals(search.getSearchBounds())))) {
+			if (search != null) {
 				search.dispose();
 			}
 			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());

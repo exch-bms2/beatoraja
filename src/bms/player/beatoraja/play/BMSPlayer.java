@@ -448,8 +448,10 @@ public class BMSPlayer extends MainState {
 		}
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
-			input.setPlayConfig(config.getPlayConfig(model.getMode()));
+		if (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
+			PlayModeConfig playModeConfig = config.getPlayConfig(model.getMode());
+			input.setAllInputConfigs(playModeConfig);
+			input.setPlayConfig(playModeConfig);
 		} else if (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 			input.setEnable(false);
 		}
@@ -479,7 +481,7 @@ public class BMSPlayer extends MainState {
 			practice.create(model);
 			state = STATE_PRACTICE;
 		} else {
-			
+
 			if(resource.getRivalScoreData() == null || resource.getCourseBMSModels() != null) {
 				ScoreData rivalScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);
 				resource.setRivalScoreData(rivalScore);

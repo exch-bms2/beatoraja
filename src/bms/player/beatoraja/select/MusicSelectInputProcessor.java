@@ -102,12 +102,12 @@ public class MusicSelectInputProcessor {
             select.executeEvent(EventType.lnmode);
         }
 
-        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
+        final MusicSelectKeyProperty property = config.getMusicSelectInputOption();
 
-        if(!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)){
+        if (!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)) {
             //オプションキー入力なし
             isOptionKeyReleased = true;
-            if(isOptionKeyPressed) {
+            if (isOptionKeyPressed) {
                 isOptionKeyPressed = false;
                 select.play(SOUND_OPTIONCLOSE);
             }
