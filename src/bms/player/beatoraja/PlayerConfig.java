@@ -28,7 +28,7 @@ import com.badlogic.gdx.utils.SerializationException;
 public class PlayerConfig {
 
 	static final Path configpath_old = Paths.get("config.json");
-	static final Path configpath = Paths.get("config_player.json");	
+	static final Path configpath = Paths.get("config_player.json");
 
 	private String id;
     /**
@@ -57,7 +57,7 @@ public class PlayerConfig {
 	 * スコアターゲット
 	 */
 	private String targetid = "MAX";
-	
+
 	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
 			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3", "IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10"
 			, "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANK_20", "IR_RANK_30", "IR_RANK_40", "IR_RANK_50"
@@ -66,10 +66,10 @@ public class PlayerConfig {
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
-	
+
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
-	
+
 	private boolean notesDisplayTimingAutoAdjust = false;
 
     /**
@@ -172,7 +172,7 @@ public class PlayerConfig {
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
-	
+
 	/**
 	 * Enable folder random select bar
 	 */
@@ -202,7 +202,7 @@ public class PlayerConfig {
 	 * 通過ノートを表示するかどうか
 	 */
 	private boolean showpastnote = false;
-	
+
 	/**
 	 * 選択中の選曲時ソート
 	 */
@@ -214,7 +214,7 @@ public class PlayerConfig {
 	private int musicselectinput = 0;
 
 	private IRConfig[] irconfig;
-	
+
 	private String twitterConsumerKey;
 
 	private String twitterConsumerSecret;
@@ -477,7 +477,7 @@ public class PlayerConfig {
 	public Mode getMode()  {
 		return mode;
 	}
-	
+
 	public int getSort() {
 		return this.sort ;
 	}
@@ -652,11 +652,11 @@ public class PlayerConfig {
 	public void setWindowHold(boolean isWindowHold) {
 		this.isWindowHold = isWindowHold;
 	}
-	
+
 	public boolean isRandomSelect() {
 		return isRandomSelect;
 	}
-	
+
 	public void setRandomSelect(boolean isRandomSelect) {
 		this.isRandomSelect = isRandomSelect;
 	}
@@ -724,7 +724,7 @@ public class PlayerConfig {
 	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
 		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
 	}
-	
+
 	// --Stream
 	public boolean getRequestEnable() {
         return enableRequest;
@@ -796,7 +796,7 @@ public class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
+
 		sort = MathUtils.clamp(sort, 0 , BarSorter.values().length - 1);
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
@@ -815,7 +815,7 @@ public class PlayerConfig {
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
-		
+
 		if(autosavereplay == null) {
 			autosavereplay = config.autosavereplay != null ? config.autosavereplay.clone() : new int[4];
 		}
@@ -842,7 +842,7 @@ public class PlayerConfig {
 				irconfig[i].setIrname(irnames[i]);
 			}
 		}
-		
+
 		for(int i = 0;i < irconfig.length;i++) {
 			if(irconfig[i] == null || irconfig[i].getIrname() == null) {
 				continue;
@@ -850,7 +850,7 @@ public class PlayerConfig {
 			for(int j = i + 1;j < irconfig.length;j++) {
 				if(irconfig[j] != null && irconfig[i].getIrname().equals(irconfig[j].getIrname())) {
 					irconfig[j].setIrname(null);
-				}				
+				}
 			}
 		}
 		irconfig = Validatable.removeInvalidElements(irconfig);
@@ -940,7 +940,7 @@ public class PlayerConfig {
 				}
 			} catch(Throwable e) {
 				e.printStackTrace();
-			}			
+			}
 		} else if(Files.exists(path_old)) {
 			try (FileReader reader = new FileReader(path_old.toFile())) {
 				Json json = new Json();
@@ -983,7 +983,7 @@ public class PlayerConfig {
     public void setScrollMode(int scrollMode) {
         this.scrollMode = scrollMode;
     }
-    
+
 	public int getScrollSection() {
 		return scrollSection;
 	}

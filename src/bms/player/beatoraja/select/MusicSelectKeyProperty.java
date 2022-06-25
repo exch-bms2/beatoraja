@@ -68,12 +68,12 @@ public enum MusicSelectKeyProperty {
     }
 
     public boolean isNonAnalogPressed(BMSPlayerInputProcessor input, MusicSelectKey code, boolean resetState) {
-    	for (int i = 0; i < assign.length; i++) {
+        for (int i = 0; i < assign.length; i++) {
             for (MusicSelectKey index : assign[i]) {
                 if (code == index && input.getKeyState(i)) {
                     if (input.isAnalogInput(i)) continue;
                     if (resetState) {
-						return input.resetKeyChangedTime(i);
+                        return input.resetKeyChangedTime(i);
                     } else {
                         return true;
                     }
@@ -84,24 +84,24 @@ public enum MusicSelectKeyProperty {
         return false;
     }
 
-	public boolean isPressed(BMSPlayerInputProcessor input, MusicSelectKey code, boolean resetState) {
-		for (int i = 0; i < assign.length; i++) {
-			for (MusicSelectKey index : assign[i]) {
-				if (code == index && input.getKeyState(i)) {
-					if (resetState) {
-						return input.resetKeyChangedTime(i);
-					} else {
-						return true;
-					}
+    public boolean isPressed(BMSPlayerInputProcessor input, MusicSelectKey code, boolean resetState) {
+        for (int i = 0; i < assign.length; i++) {
+            for (MusicSelectKey index : assign[i]) {
+                if (code == index && input.getKeyState(i)) {
+                    if (resetState) {
+                        return input.resetKeyChangedTime(i);
+                    } else {
+                        return true;
+                    }
 
-				}
-			}
-		}
-		return false;
-	}
+                }
+            }
+        }
+        return false;
+    }
 
     public enum MusicSelectKey {
-        PLAY,AUTO,REPLAY,UP,DOWN,FOLDER_OPEN,FOLDER_CLOSE,PRACTICE,
+        PLAY, AUTO, REPLAY, UP, DOWN, FOLDER_OPEN, FOLDER_CLOSE, PRACTICE,
         OPTION1_UP, OPTION1_DOWN, GAUGE_UP, GAUGE_DOWN, OPTIONDP_UP, OPTIONDP_DOWN, HSFIX_UP, HSFIX_DOWN, OPTION2_UP, OPTION2_DOWN, TARGET_UP, TARGET_DOWN,
         JUDGEAREA, NOMINE, BPMGUIDE, LEGACYNOTE, CONSTANT, JUDGEWINDOW_UP, JUDGEWINDOW_DOWN, MARKNOTE,
         BGA_UP, BGA_DOWN, GAUGEAUTOSHIFT_UP, GAUGEAUTOSHIFT_DOWN, DURATION_UP, DURATION_DOWN, NOTESDISPLAYTIMING_UP, NOTESDISPLAYTIMING_DOWN, NOTESDISPLAYTIMING_AUTOADJUST, NEXT_REPLAY
