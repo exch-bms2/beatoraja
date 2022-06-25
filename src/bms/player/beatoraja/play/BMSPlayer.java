@@ -914,7 +914,7 @@ public class BMSPlayer extends MainState {
 
 		score.setPassnotes(notes);
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		
+
 		long count = 0;
 		long avgduration = 0;
 		final int lanes = model.getMode().key;

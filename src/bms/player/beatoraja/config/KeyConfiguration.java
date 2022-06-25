@@ -173,7 +173,7 @@ public class KeyConfiguration extends MainState {
 			if (input.isControlKeyPressed(ControlKeys.NUM1)) {
 				config.setMusicselectinput((config.getMusicselectinput() + 1) % 3);
 			}
-			// change contronnler device 1
+			// change controller device 1
 			if (input.isControlKeyPressed(ControlKeys.NUM2)) {
 				if (controllers.length > 0) {
 					int index = 0;
@@ -187,7 +187,7 @@ public class KeyConfiguration extends MainState {
 					pc.setController(pc.getController());
 				}
 			}
-			// change contronnler device 2
+			// change controller device 2
 			if (input.isControlKeyPressed(ControlKeys.NUM3)) {
 				if (controllers.length > 0 && pc.getController().length > 1) {
 					int index = 0;
@@ -292,7 +292,7 @@ public class KeyConfiguration extends MainState {
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ? 
+			titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ?
 				Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
 			titlefont.draw(sprite, getControllerKeyAssign(0, keysa[i]) != -1
 					? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, keysa[i])) : "----",
