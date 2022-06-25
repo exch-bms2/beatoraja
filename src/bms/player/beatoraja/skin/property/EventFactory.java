@@ -33,14 +33,14 @@ import java.util.function.*;
 
 /**
  * EventのFactoryクラス
- * 
+ *
  * @author excln
  */
 public class EventFactory {
 
 	/**
 	 * ID指定によるイベント取得(組み込みまたはカスタムイベントとして登録したもの)
-	 * 
+	 *
 	 * @param eventId イベントID
 	 * @return イベントオブジェクト
 	 */
@@ -57,7 +57,7 @@ public class EventFactory {
 
 	/**
 	 * name指定によるイベント取得(組み込みまたはカスタムイベントとして登録したもの)
-	 * 
+	 *
 	 * @param eventName イベント名称
 	 * @return イベントオブジェクト
 	 */
@@ -112,22 +112,22 @@ public class EventFactory {
 		skinconfig(14, (state) -> {
 			if(state instanceof MusicSelector) {
 				((MusicSelector) state).changeState(MainStateType.SKINCONFIG);
-			}			
+			}
 		}),
 		play(15, (state) -> {
 			if(state instanceof MusicSelector) {
 				((MusicSelector) state).selectSong(BMSPlayerMode.PLAY);
-			}						
+			}
 		}),
 		autoplay(16, (state) -> {
 			if(state instanceof MusicSelector) {
 				((MusicSelector) state).selectSong(BMSPlayerMode.AUTOPLAY);
-			}						
+			}
 		}),
 		practice(315, (state) -> {
 			if(state instanceof MusicSelector) {
 				((MusicSelector) state).selectSong(BMSPlayerMode.PRACTICE);
-			}						
+			}
 		}),
 		/**
 		 * 楽曲ファイルのドキュメントをOS既定のドキュメントビューアーで開く
@@ -155,7 +155,7 @@ public class EventFactory {
 				}
 			}
 		}),
-		
+
 	    /**
 	     * ゲージオプションの変更
 	     */
@@ -163,7 +163,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 	            PlayerConfig config = state.main.getPlayerConfig();
 	            config.setGauge((config.getGauge() + (arg1 >= 0 ? 1 : 5)) % 6);
-	            state.play(SOUND_OPTIONCHANGE);				
+	            state.play(SOUND_OPTIONCHANGE);
 			}
 		}),
 	    /**
@@ -173,7 +173,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 	            PlayerConfig config = state.main.getPlayerConfig();
 	            config.setRandom((config.getRandom() + (arg1 >= 0 ? 1 : 9)) % 10);
-	            state.play(SOUND_OPTIONCHANGE);				
+	            state.play(SOUND_OPTIONCHANGE);
 			}
 		}),
 	    /**
@@ -205,7 +205,7 @@ public class EventFactory {
 	            if (pc != null) {
 	                pc.setFixhispeed((pc.getFixhispeed() + (arg1 >= 0 ? 1 : 4)) % 5);
 	                state.play(SOUND_OPTIONCHANGE);
-	            }				
+	            }
 			}
 		}),
 	    /**
@@ -214,12 +214,12 @@ public class EventFactory {
 		hispeed1p(57, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
-	            PlayConfig pc = selector.getSelectedBarPlayConfig();	            
+	            PlayConfig pc = selector.getSelectedBarPlayConfig();
             	float hispeed = pc.getHispeed() + (arg1 >= 0 ? pc.getHispeedMargin() : -pc.getHispeedMargin());
             	hispeed = MathUtils.clamp(hispeed, PlayConfig.HISPEED_MIN, PlayConfig.HISPEED_MAX);
             	if(hispeed != pc.getHispeed()) {
             		pc.setHispeed(hispeed);
-	                state.play(SOUND_OPTIONCHANGE);		        	
+	                state.play(SOUND_OPTIONCHANGE);
             	}
 			}
 		}),
@@ -229,14 +229,14 @@ public class EventFactory {
 		duration1p(59, (state, arg1, arg2) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
-	            PlayConfig pc = selector.getSelectedBarPlayConfig();	            
+	            PlayConfig pc = selector.getSelectedBarPlayConfig();
             	final int inc = arg2 > 0 ? arg2 : 1;
             	int duration = pc.getDuration() + (arg1 >= 0 ? inc : -inc);
         		duration = MathUtils.clamp(duration, PlayConfig.DURATION_MIN, PlayConfig.DURATION_MAX);
 		        if(duration != pc.getDuration()) {
 		        	pc.setDuration(duration);
-	                state.play(SOUND_OPTIONCHANGE);		        	
-		        }	            	
+	                state.play(SOUND_OPTIONCHANGE);
+		        }
 			}
 		}),
 		hispeedautoadjust(342, (state) -> {
@@ -286,13 +286,13 @@ public class EventFactory {
 		bga(72, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				state.main.getConfig().setBga((state.main.getConfig().getBga() + (arg1 >= 0 ? 1 : 2)) % 3);
-				state.play(SOUND_OPTIONCHANGE);				
+				state.play(SOUND_OPTIONCHANGE);
 			}
 		}),
 		bgaexpand(73, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				state.main.getConfig().setBgaExpand((state.main.getConfig().getBgaExpand() + (arg1 >= 0 ? 1 : 2)) % 3);
-				state.play(SOUND_OPTIONCHANGE);				
+				state.play(SOUND_OPTIONCHANGE);
 			}
 		}),
 		notesdisplaytiming(74, (state, arg1) -> {
@@ -300,11 +300,11 @@ public class EventFactory {
 
 	        int inc = arg1 >= 0 ? (config.getJudgetiming() < PlayerConfig.JUDGETIMING_MAX ? 1 : 0)
 	        		: (config.getJudgetiming() > PlayerConfig.JUDGETIMING_MIN ? -1 : 0);
-	        
+
 	        if(inc != 0) {
                 config.setJudgetiming(config.getJudgetiming() + inc);
     			if(state instanceof MusicSelector) {
-                    state.play(SOUND_OPTIONCHANGE);		        	
+                    state.play(SOUND_OPTIONCHANGE);
     			}
 	        }
 		}),
@@ -312,7 +312,7 @@ public class EventFactory {
 	        final PlayerConfig config = state.main.getPlayerConfig();
             config.setNotesDisplayTimingAutoAdjust(!config.isNotesDisplayTimingAutoAdjust());
 			if(state instanceof MusicSelector) {
-                state.play(SOUND_OPTIONCHANGE);		        	
+                state.play(SOUND_OPTIONCHANGE);
 			}
 		}),
 		target(77, (state, arg1) -> {
@@ -347,7 +347,7 @@ public class EventFactory {
 	            		index = i;
 	            		break;
 	            	}
-	            }	            
+	            }
 	            index = (index + (arg1 >= 0 ? 2 : 0)) % (selector.getRivals().length + 1) - 1;
 	            selector.setRival(index != -1 ? selector.getRivals()[index] : null);
 	            selector.play(SOUND_OPTIONCHANGE);
@@ -361,7 +361,7 @@ public class EventFactory {
 					type = 2;
 				} else if((sd.getFavorite() & SongData.FAVORITE_CHART) != 0) {
 					type = 1;
-				}				
+				}
 				type = (type + (next ? 1 : 2)) % 3;
 				int favorite = sd.getFavorite();
 				switch (type) {
@@ -392,7 +392,7 @@ public class EventFactory {
 						} else if ((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
 							message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
 						}
-						
+
 						changeFav.accept(sd);
 
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
@@ -404,7 +404,7 @@ public class EventFactory {
 			if(state instanceof MusicResult) {
 				final SongData sd = state.main.getPlayerResource().getSongdata();
 				if(sd != null) {
-					changeFav.accept(sd);					
+					changeFav.accept(sd);
 				}
 			}
 		}),
@@ -416,7 +416,7 @@ public class EventFactory {
 					type = 2;
 				} else if((sd.getFavorite() & SongData.FAVORITE_SONG) != 0) {
 					type = 1;
-				}				
+				}
 				type = (type + (next ? 1 : 2)) % 3;
 				SongData[] songs = state.main.getSongDatabase().getSongDatas("folder", sd.getFolder());
 				for(SongData song : songs) {
@@ -450,7 +450,7 @@ public class EventFactory {
 						} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
 							message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
 						}
-						changeFav.accept(sd);					
+						changeFav.accept(sd);
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
 						selector.getBarRender().updateBar();
 						selector.play(SOUND_OPTIONCHANGE);
@@ -460,7 +460,7 @@ public class EventFactory {
 			if(state instanceof MusicResult) {
 				final SongData sd = state.main.getPlayerResource().getSongdata();
 				if(sd != null) {
-					changeFav.accept(sd);					
+					changeFav.accept(sd);
 				}
 			}
 		}),
@@ -598,12 +598,12 @@ public class EventFactory {
 			this.id = id;
 			this.event = createOneArgEvent(action, id);
 		}
-		
+
 		private EventType(int id, TriConsumer<MainState, Integer, Integer> action) {
 			this.id = id;
 			this.event = createTwoArgEvent(action, id);
 		}
-		
+
 	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(int index) {
 	    	return (state, arg1) -> {
 	    		if(state instanceof MusicSelector) {
@@ -616,7 +616,7 @@ public class EventFactory {
 	    		}
 	    	};
 	    }
-	    
+
 		private static Consumer<MainState> getReplayEventConsumer(int index) {
 			return (state) -> {
 				if(state instanceof MusicSelector) {
@@ -631,7 +631,7 @@ public class EventFactory {
 			};
 		}
 	}
-	
+
 	@FunctionalInterface
 	public interface TriConsumer<T, U, V> {
 		void accept(T t, U u, V v);
