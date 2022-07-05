@@ -13,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
-import javafx.scene.control.skin.TableColumnHeader;
 import javafx.scene.layout.GridPane;
 
 public class CourseEditorView implements Initializable {
@@ -93,13 +92,13 @@ public class CourseEditorView implements Initializable {
 		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		searchSongs.setOnMouseClicked((click) -> {
-			boolean isHeader = JavaFXUtils.findParentByClass(click.getPickResult().getIntersectedNode(), TableColumnHeader.class).isPresent();
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
 			if (click.getClickCount() == 2 && !isHeader) {
 				TableEditorView.displayChartDetailsDialog(songdb, searchSongs.getSelectionModel().getSelectedItem());
 			}
 		});
 		courseSongs.setOnMouseClicked((click) -> {
-			boolean isHeader = JavaFXUtils.findParentByClass(click.getPickResult().getIntersectedNode(), TableColumnHeader.class).isPresent();
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
 			if (click.getClickCount() == 2 && !isHeader) {
 				TableEditorView.displayChartDetailsDialog(songdb, courseSongs.getSelectionModel().getSelectedItem());
 			}
