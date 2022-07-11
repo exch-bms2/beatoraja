@@ -92,12 +92,14 @@ public class CourseEditorView implements Initializable {
 		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		searchSongs.setOnMouseClicked((click) -> {
-			if (click.getClickCount() == 2) {
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
+			if (click.getClickCount() == 2 && !isHeader) {
 				TableEditorView.displayChartDetailsDialog(songdb, searchSongs.getSelectionModel().getSelectedItem());
 			}
 		});
 		courseSongs.setOnMouseClicked((click) -> {
-			if (click.getClickCount() == 2) {
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
+			if (click.getClickCount() == 2 && !isHeader) {
 				TableEditorView.displayChartDetailsDialog(songdb, courseSongs.getSelectionModel().getSelectedItem());
 			}
 		});
