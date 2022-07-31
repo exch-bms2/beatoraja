@@ -338,6 +338,9 @@ public class EventFactory {
 				selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),
+		/**
+		 * 選択ライバル変更
+		 */
 		rival(79, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
@@ -347,8 +350,8 @@ public class EventFactory {
 	            		index = i;
 	            		break;
 	            	}
-	            }	            
-	            index = (index + (arg1 >= 0 ? 2 : 0)) % (selector.getRivals().length + 1) - 1;
+	            }
+	            index = (index + (arg1 >= 0 ? 2 : selector.getRivals().length + 1)) % (selector.getRivals().length + 1) - 1;
 	            selector.setRival(index != -1 ? selector.getRivals()[index] : null);
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
