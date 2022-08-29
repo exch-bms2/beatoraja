@@ -223,6 +223,8 @@ public class PlayerConfig {
 	private boolean notifyRequest = false;
 	private int maxRequestCount = 30;
 
+	private boolean enableAutoScratch = false;
+
 	public PlayerConfig() {
 		validate();
 	}
@@ -998,4 +1000,8 @@ public class PlayerConfig {
     public void setLongnoteRate(double longnoteRate) {
         this.longnoteRate = longnoteRate;
     }
+
+	public boolean isEnableAutoScratch() {
+		return enableAutoScratch;
+	}
 }
