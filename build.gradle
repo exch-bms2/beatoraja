@@ -1,0 +1,73 @@
+buildscript {
+    ext.gdxVersion = '1.10.0'
+    ext.gdxControllersVersion = '2.2.1'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        google()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
+    }
+}
+
+allprojects {
+    apply plugin: "idea"
+
+    version = '1.0'
+    ext {
+        appName = "beatoraja"
+        gdxVersion = '1.10.0'
+        jacksonVersion = '2.13.4'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://jitpack.io' }
+        google()
+
+        flatDir {
+            dirs 'lib'
+        }
+    }
+}
+
+project(":core") {
+    apply plugin: "java"
+
+    dependencies {
+        implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        implementation "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
+        implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+
+        implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+        implementation "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
+        implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        implementation 'commons-codec:commons-codec:1.15'
+        implementation 'org.jflac:jflac-codec:1.5.2'
+
+        implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+        implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+        implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+
+        implementation "org.bytedeco:javacv-platform:1.5.7"
+        implementation "org.bytedeco:javacpp-presets:1.5.7"
+        implementation "org.xerial:sqlite-jdbc:3.23.1"
+
+        implementation 'org.apache.commons:commons-compress:1.16.1'
+        implementation 'commons-dbutils:commons-dbutils:1.6'
+
+        implementation 'club.minnced:java-discord-rpc:2.0.1'
+        implementation 'org.twitter4j:twitter4j-core:4.0.4'
+
+        implementation files('../lib/jportaudio.jar')
+    }
+}

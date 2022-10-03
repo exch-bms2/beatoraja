@@ -1,0 +1,6 @@
+[submodule "dependencies/jbms-parser"]
+	path = core/dependencies/jbms-parser
+	url = https://github.com/exch-bms2/jbms-parser
+[submodule "dependencies/jbmstable-parser"]
+	path = core/dependencies/jbmstable-parser
+	url = https://github.com/exch-bms2/jbmstable-parser
