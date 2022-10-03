@@ -52,7 +52,22 @@ project(":core") {
         implementation "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         implementation 'commons-codec:commons-codec:1.15'
+        implementation 'org.jflac:jflac-codec:1.5.2'
 
-        implementation fileTree(dir: '../lib', include: ['*.jar'])
+        implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+        implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+        implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+
+        implementation "org.bytedeco:javacv-platform:1.5.7"
+        implementation "org.bytedeco:javacpp-presets:1.5.7"
+        implementation "org.xerial:sqlite-jdbc:3.23.1"
+
+        implementation 'org.apache.commons:commons-compress:1.16.1'
+        implementation 'commons-dbutils:commons-dbutils:1.6'
+
+        implementation 'club.minnced:java-discord-rpc:2.0.1'
+        implementation 'org.twitter4j:twitter4j-core:4.0.4'
+
+        implementation files('../lib/jportaudio.jar')
     }
 }
