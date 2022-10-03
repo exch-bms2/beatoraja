@@ -82,6 +82,11 @@ public abstract class TargetProperty {
     }
     
     public static TargetProperty getTargetProperty(String id) {
+		// Fix infinite recursion error
+		if (properties.isEmpty()) {
+			getTargetProperties();
+		}
+
     	TargetProperty target = properties.get(id);
     	if(target == null) {
     		target = InternetRankingTargetProperty.getTargetProperty(id);
