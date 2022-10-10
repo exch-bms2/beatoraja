@@ -190,33 +190,45 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					float wav_l = 0;
 					float wav_r = 0;
 					for (MixerInput input : inputs) {
-						if (input.pos != -1) {
-							if(input.pcm instanceof FloatPCM) {
-								final float[] sample = (float[]) input.pcm.sample;
-								wav_l += sample[input.pos + input.pcm.start] * input.volume;
-								wav_r += sample[input.pos+1 + input.pcm.start] * input.volume;																
-							} else if(input.pcm instanceof ShortDirectPCM) {
-								final ByteBuffer sample = (ByteBuffer) input.pcm.sample;
-								wav_l += ((float) sample.getShort((input.pos + input.pcm.start) * 2)) * input.volume / Short.MAX_VALUE;
-								wav_r += ((float) sample.getShort((input.pos+1 + input.pcm.start) * 2)) * input.volume / Short.MAX_VALUE;																
-							} else if(input.pcm instanceof ShortPCM) {
-								final short[] sample = (short[]) input.pcm.sample;
-								wav_l += ((float) sample[input.pos + input.pcm.start]) * input.volume / Short.MAX_VALUE;
-								wav_r += ((float) sample[input.pos+1 + input.pcm.start]) * input.volume / Short.MAX_VALUE;																
-							} else if(input.pcm instanceof BytePCM) {
-								final byte[] sample = (byte[]) input.pcm.sample;
-								wav_l += ((float) (sample[input.pos + input.pcm.start] - 128)) * input.volume / Byte.MAX_VALUE;
-								wav_r += ((float) (sample[input.pos+1 + input.pcm.start] - 128)) * input.volume / Byte.MAX_VALUE;																
+						try {
+							if (input.pos != -1) {
+								if(input.pcm instanceof FloatPCM) {
+									final float[] sample = (float[]) input.pcm.sample;
+									if(sample.length > 0) {
+										wav_l += sample[input.pos + input.pcm.start] * input.volume;
+										wav_r += sample[input.pos+1 + input.pcm.start] * input.volume;
+									}
+								} else if(input.pcm instanceof ShortDirectPCM) {
+									final ByteBuffer sample = (ByteBuffer) input.pcm.sample;
+									if(sample.limit() > 0) {
+										wav_l += ((float) sample.getShort((input.pos + input.pcm.start) * 2)) * input.volume / Short.MAX_VALUE;
+										wav_r += ((float) sample.getShort((input.pos+1 + input.pcm.start) * 2)) * input.volume / Short.MAX_VALUE;
+									}
+								} else if(input.pcm instanceof ShortPCM) {
+									final short[] sample = (short[]) input.pcm.sample;
+									if(sample.length > 0) {
+										wav_l += ((float) sample[input.pos + input.pcm.start]) * input.volume / Short.MAX_VALUE;
+										wav_r += ((float) sample[input.pos+1 + input.pcm.start]) * input.volume / Short.MAX_VALUE;
+									}
+								} else if(input.pcm instanceof BytePCM) {
+									final byte[] sample = (byte[]) input.pcm.sample;
+									if(sample.length > 0) {
+										wav_l += ((float) (sample[input.pos + input.pcm.start] - 128)) * input.volume / Byte.MAX_VALUE;
+										wav_r += ((float) (sample[input.pos+1 + input.pcm.start] - 128)) * input.volume / Byte.MAX_VALUE;
+									}
+								}
+								input.posf += gpitch * input.pitch;
+								int inc = (int)input.posf;
+								if (inc > 0) {
+									input.pos += 2 * inc;
+									input.posf -= (float)inc;
+								}
+								if (input.pos >= input.pcm.len) {
+									input.pos = input.loop ? 0 : -1;
+								}
 							}
-							input.posf += gpitch * input.pitch;
-							int inc = (int)input.posf;
-							if (inc > 0) {
-								input.pos += 2 * inc;
-								input.posf -= (float)inc;
-							}
-							if (input.pos >= input.pcm.len) {
-								input.pos = input.loop ? 0 : -1;
-							}
+						} catch(Throwable e) {
+							e.printStackTrace();
 						}
 					}
 					buffer[i] = wav_l;
