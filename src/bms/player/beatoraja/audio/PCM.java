@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import org.jflac.FLACDecoder;
@@ -88,7 +87,13 @@ public abstract class PCM<T> {
 			if(pcm != null && ((AbstractAudioDriver)driver).getSampleRate() != 0 && pcm.sampleRate != ((AbstractAudioDriver)driver).getSampleRate()) {
 				pcm = pcm.changeSampleRate(((AbstractAudioDriver)driver).getSampleRate());
 			}
-			return pcm;
+			
+			if(pcm.validate()) {
+				return pcm;
+			} else {
+				Logger.getGlobal().warning("音源の読み込みに失敗しました - file : " + p);
+				return null;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -142,6 +147,8 @@ public abstract class PCM<T> {
 	 * @return トリミングしたPCM
 	 */
 	public abstract PCM<T> slice(long starttime, long duration);
+	
+	public abstract boolean validate();
 	
 	protected static ByteBuffer getDirectByteBuffer(int capacity) {
 		ByteBuffer result = USE_UNSAFE ? BufferUtils.newUnsafeByteBuffer(capacity) : ByteBuffer.allocateDirect(capacity);
