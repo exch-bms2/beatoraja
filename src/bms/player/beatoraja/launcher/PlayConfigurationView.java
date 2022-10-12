@@ -194,7 +194,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox showhiddennote;
 	@FXML
-	private ComboBox<Integer> target;
+	private ComboBox<String> target;
 
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
@@ -297,12 +297,11 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
 
-		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
-		String[] targetString = new String[targets.length];
+		String[] targets = TargetProperty.getTargets();
 		for(int i  =0;i < targets.length;i++) {
-			targetString[i] = targets[i].getName();
+			target.getItems().addAll(targets[i]);
 		}
-		initComboBox(target, targetString);
+		
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
 				,arg1.getString("BETTER_OR_SAME_MISSCOUNT"),arg1.getString("BETTER_COMBO"),arg1.getString("BETTER_OR_SAME_COMBO"),
@@ -462,7 +461,7 @@ public class PlayConfigurationView implements Initializable {
 		autosavereplay3.getSelectionModel().select(player.getAutoSaveReplay()[2]);
 		autosavereplay4.getSelectionModel().select(player.getAutoSaveReplay()[3]);
 
-		target.setValue(player.getTarget());
+		target.setValue(player.getTargetid());
 		showhiddennote.setSelected(player.isShowhiddennote());
 
 		irController.update(player);
@@ -561,7 +560,7 @@ public class PlayConfigurationView implements Initializable {
 				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
 		player.setShowjudgearea(judgeregion.isSelected());
-		player.setTarget(target.getValue());
+		player.setTargetid(target.getValue());
 
 		player.setShowhiddennote(showhiddennote.isSelected());
 
