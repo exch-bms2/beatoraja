@@ -60,9 +60,8 @@ public class RankingData {
 		if(!(song instanceof SongData || song instanceof CourseData)) {
 			return;
 		}		
-		state = NONE;
+		state = ACCESS;
 		Thread irprocess = new Thread(() -> {
-			state = ACCESS;
 			final IRStatus[] ir = mainstate.main.getIRStatus();
 	        IRResponse<IRScoreData[]> response = null;
 	        if(song instanceof SongData) {
