@@ -63,6 +63,8 @@ public class IRScoreData {
 	 */
 	public final int ems;
 	public final int lms;
+	
+	public final long avgjudge;
 	/**
 	 * 最大コンボ数
 	 */
@@ -124,6 +126,7 @@ public class IRScoreData {
 		this.lpr = score.getLpr();
 		this.ems = score.getEms();
 		this.lms = score.getLms();
+		this.avgjudge = score.getAvgjudge();
 		this.maxcombo = score.getCombo();
 		this.notes = score.getNotes();
 		this.passnotes = score.getPassnotes();
