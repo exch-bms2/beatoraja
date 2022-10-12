@@ -7,20 +7,33 @@ import bms.player.beatoraja.ir.RankingData;
 import java.util.*;
 
 /**
- * Created by exch on 2017/02/28.
+ * スコアターゲット
+ * 
+ * @author exch
  */
 public abstract class TargetProperty {
 
+	/**
+	 * Target ID
+	 */
 	public final String id;
 	
+	/**
+	 * Target名称
+	 */
     private String name;
 
+    /**
+     * ターゲットスコア
+     */
+    protected int targetscore;
+    
     /**
      * 旧属性値
      */
     private static TargetProperty[] available;
 
-    private static final Map<String, TargetProperty> properties = new HashMap();
+    private static String[] targets;
     
     public TargetProperty(String id) {
     	this.id = id;
@@ -53,41 +66,26 @@ public abstract class TargetProperty {
         return available;
     }
 
-    public static TargetProperty[] getTargetProperties() {
-    	putTargetProperty(new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 18.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_A", "RANK A",    100.0f * 19.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 20.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_AA-", "RANK AA-",  100.0f * 21.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 22.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_AA+", "RANK AA+",  100.0f * 23.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_AAA-", "RANK AAA-", 100.0f * 24.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_AAA", "RANK AAA",  100.0f * 25.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("RATE_AAA+", "RANK AAA+", 100.0f * 26.0f / 27.0f));
-    	putTargetProperty(new StaticTargetProperty("MAX", "MAX", 100.0f));
-    	putTargetProperty(new NextRankTargetProperty());
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_1"));
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_NEXT_5"));
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANK_1"));
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANK_10"));
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_10"));
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_25"));
-    	putTargetProperty(InternetRankingTargetProperty.getTargetProperty("IR_RANKRATE_50"));
-        return properties.values().toArray(new TargetProperty[properties.size()]);
-    }
-    
-    private static void putTargetProperty(TargetProperty target) {
-    	if(!properties.containsKey(target.id)) {
-    		properties.put(target.id, target);
-    	}
+    public static String[] getTargets() {
+        if(targets == null) {
+        	// TODO targetsはPlayerConfig上で定義したものを持ってくる
+        	targets = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
+        			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_5", "IR_NEXT_10", "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANKRATE_10", "IR_RANKRATE_25","IR_RANKRATE_50"};
+        }
+
+        return targets;
     }
     
     public static TargetProperty getTargetProperty(String id) {
-    	TargetProperty target = properties.get(id);
+    	TargetProperty target = StaticTargetProperty.getTargetProperty(id);
     	if(target == null) {
     		target = InternetRankingTargetProperty.getTargetProperty(id);
     	}
+    	if(target == null && "RANK_NEXT".equals(id)) {
+    		target = new NextRankTargetProperty();
+    	}
     	if(target == null) {
-    		target = getTargetProperty("MAX");
+    		target = StaticTargetProperty.getTargetProperty("MAX");
     	}
     	return target;
     }
@@ -101,6 +99,10 @@ public abstract class TargetProperty {
     }
 
     public abstract int getTarget(MainController main);
+    
+    public int getTargetScore() {
+    	return targetscore;
+    }    
 }
 
 class StaticTargetProperty extends TargetProperty{
@@ -114,7 +116,35 @@ class StaticTargetProperty extends TargetProperty{
 
     @Override
     public int getTarget(MainController main) {
-        return (int) (main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
+    	targetscore = (int) (main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
+        return targetscore;
+    }
+    
+    public static TargetProperty getTargetProperty(String id) {
+    	switch(id) {
+    	case "RATE_A-":
+    		return new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 18.0f / 27.0f);
+    	case "RATE_A":
+    		return new StaticTargetProperty("RATE_A", "RANK A",   100.0f * 19.0f / 27.0f);
+    	case "RATE_A+":
+    		return new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 20.0f / 27.0f);
+    	case "RATE_AA-":
+    		return new StaticTargetProperty("RATE_AA-", "RANK AA-",   100.0f * 21.0f / 27.0f);
+    	case "RATE_AA":
+    		return new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 22.0f / 27.0f);
+    	case "RATE_AA+":
+    		return new StaticTargetProperty("RATE_AA+", "RANK AA+",   100.0f * 23.0f / 27.0f);
+    	case "RATE_AAA-":
+    		return new StaticTargetProperty("RATE_AAA-", "RANK AAA-",   100.0f * 24.0f / 27.0f);
+    	case "RATE_AAA":
+    		return new StaticTargetProperty("RATE_AAA", "RANK AAA",   100.0f * 25.0f / 27.0f);
+    	case "RATE_AAA+":
+    		return new StaticTargetProperty("RATE_AAA+", "RANK AAA+",   100.0f * 26.0f / 27.0f);
+    	case "MAX":
+    		return new StaticTargetProperty(id, "MAX", 100.0f);
+    	default:
+    		return null;
+    	}
     }
 }
 
@@ -131,7 +161,7 @@ class RivalTargetProperty extends TargetProperty{
     public int getTarget(MainController main) {
         // TODO 指定プレイヤーのスコアデータ取得
         return 0;
-    }
+    }    
 }
 
 class NextRankTargetProperty extends TargetProperty{
@@ -149,9 +179,11 @@ class NextRankTargetProperty extends TargetProperty{
         for(int i = 15;i < 27;i++) {
             int target = max * i / 27;
             if(nowscore < target) {
+            	targetscore = target;
                 return target;
             }
         }
+        targetscore = max;
         return max;
     }
 }
@@ -163,7 +195,7 @@ class InternetRankingTargetProperty extends TargetProperty{
     private int value;
     
     private InternetRankingTargetProperty(Target target, int value) {
-    	super("IR_" + target.name(), "IR " + target.name() + " " + value);
+    	super("IR_" + target.name() + "_" + value, "IR " + target.name() + " " + value);
         this.target = target;
         this.value = value;
     }
@@ -172,7 +204,7 @@ class InternetRankingTargetProperty extends TargetProperty{
     public int getTarget(MainController main) {
     	final RankingData ranking = main.getPlayerResource().getRankingData();
     	if(ranking.getState() == RankingData.FINISH) {
-    		return getTargetScore(main, ranking);
+    		return targetscore;
     	}
 		Thread irprocess = new Thread(() -> {
     		ranking.load(main.getCurrentState(), main.getPlayerResource().getSongdata());
@@ -183,30 +215,39 @@ class InternetRankingTargetProperty extends TargetProperty{
 				}
 			}
 	    	if(ranking.getState() == RankingData.FINISH) {
-	    		System.out.println(getTargetScore(main, ranking));
-				main.getCurrentState().getScoreDataProperty().updateTargetScore(getTargetScore(main, ranking));	    		
+	    		if(ranking.getTotalPlayer() > 0) {
+	    			int index = getTargetRank(main, ranking);
+	    			targetscore = ranking.getScore(index).getExscore();
+	    			setName(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+	    		}
+	    		
+				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetscore);	    		
 	    	}			
 		});
 		irprocess.start();
         return 0;
     }
     
-    private int getTargetScore(MainController main, RankingData ranking) {
+    private int getTargetRank(MainController main, RankingData ranking) {
         ScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
                 , main.getPlayerConfig().getLnmode());
         final int nowscore = now != null ? now.getExscore() : 0;
 		switch(target) {
 		case NEXT:
+			// n位上のプレイヤー
 			for(int i = 0;i  < ranking.getTotalPlayer(); i++) {
 				if(ranking.getScore(i).getExscore() > nowscore) { 
-					return ranking.getScore(Math.max(i - (value - 1) , 0)).getExscore();
+					return Math.max(i - (value - 1) , 0);
 				}
 			}
-			return nowscore;
+			return 0;
+			
 		case RANK:
-			return ranking.getTotalPlayer() > (value - 1) ? ranking.getScore(value - 1).getExscore() : 0;
+			// n位のプレイヤー
+			return Math.min(ranking.getTotalPlayer(), value) - 1;
 		case RANKRATE:
-			return ranking.getTotalPlayer() > 0 ? ranking.getScore(ranking.getTotalPlayer() * value / 100).getExscore() : 0;
+			// 上位n％のプレイヤー
+			return ranking.getTotalPlayer() * value / 100;
 		}
     	return 0;
     }
