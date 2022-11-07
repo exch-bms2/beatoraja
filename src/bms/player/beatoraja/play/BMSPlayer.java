@@ -931,6 +931,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 		}
+		score.setTotalDuration(avgduration);
 		score.setAvgjudge(avgduration / count);
 //		System.out.println(avgduration + " / " + count + " = " + score.getAvgjudge());
 

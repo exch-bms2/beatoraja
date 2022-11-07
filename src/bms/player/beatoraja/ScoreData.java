@@ -83,6 +83,8 @@ public class ScoreData implements Validatable {
 	private int minbp = Integer.MAX_VALUE;
 	
 	private long avgjudge = Long.MAX_VALUE;
+	
+	private long totalDuration = 0;
 	/**
 	 * 各譜面オプションのクリア履歴
 	 */
@@ -343,6 +345,14 @@ public class ScoreData implements Validatable {
 
 	public void setAvgjudge(long avgjudge) {
 		this.avgjudge = avgjudge;
+	}
+
+	public long getTotalDuration() {
+		return totalDuration;
+	}
+
+	public void setTotalDuration(long ttoalDuration) {
+		this.totalDuration = ttoalDuration;
 	}
 
 	public String getTrophy() {

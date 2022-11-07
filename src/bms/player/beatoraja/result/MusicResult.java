@@ -188,6 +188,8 @@ public class MusicResult extends AbstractResult {
 								if (coursegauge.size <= i) {
 									resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp()
 											+ resource.getCourseBMSModels()[i].getTotalNotes());
+									resource.getCourseScoreData().setTotalDuration(resource.getCourseScoreData().getTotalDuration()
+											+ 1000000L * resource.getCourseBMSModels()[i].getTotalNotes());
 								}
 							}
 							// 不合格リザルト
@@ -392,6 +394,7 @@ public class MusicResult extends AbstractResult {
 			cscore.setEms(cscore.getEms() + newscore.getEms());
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
+			cscore.setTotalDuration(cscore.getTotalDuration() + newscore.getTotalDuration());
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
 				if (resource.getAssist() > 0) {
 					if(resource.getAssist() == 1 && cscore.getClear() != ClearType.AssistEasy.id) cscore.setClear(ClearType.LightAssistEasy.id);

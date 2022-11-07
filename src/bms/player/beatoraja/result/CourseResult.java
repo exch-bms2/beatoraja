@@ -254,6 +254,7 @@ public class CourseResult extends AbstractResult {
 			dp |= model.getMode().player == 2;
 		}
 		newscore.setCombo(resource.getMaxcombo());
+		newscore.setAvgjudge(newscore.getTotalDuration() / newscore.getNotes());
 		int random = 0;
 		if (config.getRandom() > 0
 				|| (dp && (config.getRandom2() > 0 || config.getDoubleoption() > 0))) {
