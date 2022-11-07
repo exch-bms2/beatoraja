@@ -181,7 +181,7 @@ public class Skin {
 			obj.load();
 		}
 		
-		prepareduration = 1000000 / state.main.getConfig().getPrepareFramePerSecond();
+		prepareduration = state.main.getConfig().getPrepareFramePerSecond() > 0 ? 1000000 / state.main.getConfig().getPrepareFramePerSecond() : 1;
 		nextpreparetime = -1;
 	}
 	

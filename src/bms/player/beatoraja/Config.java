@@ -55,7 +55,7 @@ public class Config implements Validatable {
 	 */
 	private int maxFramePerSecond = 240;
 
-	private int prepareFramePerSecond = 10000;
+	private int prepareFramePerSecond = 0;
 	/**
 	 * 検索バー同時表示上限数
 	 */
@@ -509,8 +509,8 @@ public class Config implements Validatable {
 			audio.setBgvolume(bgvolume);
 		}
 		audio.validate();
-		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
-		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 1, 10000);
+		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 50000);
+		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 0, 100000);
         maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
         songPreview = (songPreview != null) ? songPreview : SongPreview.LOOP;
 
