@@ -819,6 +819,7 @@ public class PlayerConfig {
 		target = MathUtils.clamp(target, 0, TargetProperty.getAllTargetProperties().length);
 		targetid = targetid!= null ? targetid : "MAX";
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
+		soundJudgetiming = MathUtils.clamp(soundJudgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		keyJudgeWindowRatePerfectGreat = MathUtils.clamp(keyJudgeWindowRatePerfectGreat, 25, 400);

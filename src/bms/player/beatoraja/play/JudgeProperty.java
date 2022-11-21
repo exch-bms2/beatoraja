@@ -213,7 +213,7 @@ public enum JudgeProperty {
     		// 判定タイミング設定による補正
     		for (int i = 0; i < judge.length; i++) {
     			for(int j = 0;j < 2;j++) {
-					judge[i][j] -= soundJudgeTiming * 1000;
+					judge[i][j] += soundJudgeTiming;
     			}
     		}
 

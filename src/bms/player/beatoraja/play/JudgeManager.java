@@ -234,7 +234,7 @@ public class JudgeManager {
 			}
 		}
 
-		final int soundJudgetiming = main.main.getPlayerConfig().getSoundJudgetiming();
+		final int soundJudgetiming = main.main.getPlayerConfig().getSoundJudgetiming() * 1000;
 		nmjudge = rule.getJudge(NoteType.NOTE, judgerank, keyJudgeWindowRate, soundJudgetiming);
 		cnendmjudge = rule.getJudge(NoteType.LONGNOTE_END, judgerank, keyJudgeWindowRate, soundJudgetiming);
 		smjudge = rule.getJudge(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate, soundJudgetiming);
@@ -266,6 +266,7 @@ public class JudgeManager {
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
 		final Config config = mc.getPlayerResource().getConfig();
 		final long now = mc.getNowTime();
+		final int soundJudgetiming = main.main.getPlayerConfig().getSoundJudgetiming() * 1000;
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
 
@@ -422,7 +423,7 @@ public class JudgeManager {
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) && sc >= 0
 							&& key != sckey[sc]) {
 						final long[][] mjudge = scnendmjudge;
-						final long dmtime = processing[lane].getMicroTime() - pmtime;
+						final long dmtime = processing[lane].getMicroTime() - pmtime - soundJudgetiming;
 						int j = 0;
 						for (; j < mjudge.length && !(dmtime >= mjudge[j][0] && dmtime <= mjudge[j][1]); j++)
 							;
@@ -483,7 +484,7 @@ public class JudgeManager {
 						if (tnote instanceof LongNote) {
 							// ロングノート処理
 							final LongNote ln = (LongNote) tnote;
-							final long dmtime = tnote.getMicroTime() - pmtime;
+							final long dmtime = tnote.getMicroTime() - pmtime - soundJudgetiming;
 							keysound.play(tnote, config.getAudioConfig().getKeyvolume(), 0);
 							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
@@ -505,7 +506,7 @@ public class JudgeManager {
 						} else {
 							keysound.play(tnote, config.getAudioConfig().getKeyvolume(), 0);
 							// 通常ノート処理
-							final long dmtime = tnote.getMicroTime() - pmtime;
+							final long dmtime = tnote.getMicroTime() - pmtime - soundJudgetiming;
 							this.updateMicro(lane, tnote, mtime, j, dmtime);
 						}
 					} else {
@@ -542,7 +543,7 @@ public class JudgeManager {
 				// キーが離されたときの処理
 				if (processing[lane] != null) {
 					final long[][] mjudge = sc >= 0 ? scnendmjudge : cnendmjudge;
-					long dmtime = processing[lane].getMicroTime() - pmtime;
+					long dmtime = processing[lane].getMicroTime() - pmtime - soundJudgetiming;
 					int j = 0;
 					for (; j < mjudge.length && !(dmtime >= mjudge[j][0] && dmtime <= mjudge[j][1]); j++)
 						;
