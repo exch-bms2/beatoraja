@@ -164,6 +164,12 @@
                                              </valueFactory>
                                          </NumericSpinner>
                                          <CheckBox fx:id="notesdisplaytimingautoadjust" mnemonicParsing="false" text="%NOTESDISPLAYTIMING_AUTOADJUST" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.columnSpan="2" />
+                                         <Label text="%NOTEJUDGETIMING" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+                                         <NumericSpinner fx:id="notesjudgetiming" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="4">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory />
+                                             </valueFactory>
+                                         </NumericSpinner>
                                          <Label text="%HISPEED_FIX" GridPane.columnIndex="0" GridPane.rowIndex="5" />
                                          <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                          <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="5" />

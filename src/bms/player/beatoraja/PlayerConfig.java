@@ -1,23 +1,31 @@
 package bms.player.beatoraja;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
-
-import bms.player.beatoraja.ir.IRConnectionManager;
-import bms.player.beatoraja.pattern.*;
-import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.select.BarSorter;
-import bms.player.beatoraja.skin.SkinType;
-
-import bms.model.Mode;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.SerializationException;
+
+import bms.model.Mode;
+import bms.player.beatoraja.ir.IRConnectionManager;
+import bms.player.beatoraja.pattern.LongNoteModifier;
+import bms.player.beatoraja.pattern.MineNoteModifier;
+import bms.player.beatoraja.pattern.ScrollSpeedModifier;
+import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.select.BarSorter;
+import bms.player.beatoraja.skin.SkinType;
 
 /**
  * プレイヤー毎の設定項目
@@ -61,11 +69,13 @@ public class PlayerConfig {
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
-	
+
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
-	
+
 	private boolean notesDisplayTimingAutoAdjust = false;
+
+	private int soundJudgetiming = 0;
 
     /**
      * 選曲時のモードフィルター
@@ -167,7 +177,7 @@ public class PlayerConfig {
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
-	
+
 	/**
 	 * Enable folder random select bar
 	 */
@@ -197,7 +207,7 @@ public class PlayerConfig {
 	 * 通過ノートを表示するかどうか
 	 */
 	private boolean showpastnote = false;
-	
+
 	/**
 	 * 選択中の選曲時ソート
 	 */
@@ -209,7 +219,7 @@ public class PlayerConfig {
 	private int musicselectinput = 0;
 
 	private IRConfig[] irconfig;
-	
+
 	private String twitterConsumerKey;
 
 	private String twitterConsumerSecret;
@@ -257,6 +267,14 @@ public class PlayerConfig {
 
 	public void setJudgetiming(int judgetiming) {
 		this.judgetiming = judgetiming;
+	}
+
+	public int getSoundJudgetiming() {
+		return soundJudgetiming;
+	}
+
+	public void setSoundJudgetiming(int soundJudgetiming) {
+		this.soundJudgetiming = soundJudgetiming;
 	}
 
 	public boolean isNotesDisplayTimingAutoAdjust() {
@@ -472,7 +490,7 @@ public class PlayerConfig {
 	public Mode getMode()  {
 		return mode;
 	}
-	
+
 	public int getSort() {
 		return this.sort ;
 	}
@@ -647,11 +665,11 @@ public class PlayerConfig {
 	public void setWindowHold(boolean isWindowHold) {
 		this.isWindowHold = isWindowHold;
 	}
-	
+
 	public boolean isRandomSelect() {
 		return isRandomSelect;
 	}
-	
+
 	public void setRandomSelect(boolean isRandomSelect) {
 		this.isRandomSelect = isRandomSelect;
 	}
@@ -719,7 +737,7 @@ public class PlayerConfig {
 	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
 		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
 	}
-	
+
 	// --Stream
 	public boolean getRequestEnable() {
         return enableRequest;
@@ -791,7 +809,7 @@ public class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
+
 		sort = MathUtils.clamp(sort, 0 , BarSorter.values().length - 1);
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
@@ -810,7 +828,7 @@ public class PlayerConfig {
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
-		
+
 		if(autosavereplay == null) {
 			autosavereplay = config.autosavereplay != null ? config.autosavereplay.clone() : new int[4];
 		}
@@ -837,7 +855,7 @@ public class PlayerConfig {
 				irconfig[i].setIrname(irnames[i]);
 			}
 		}
-		
+
 		for(int i = 0;i < irconfig.length;i++) {
 			if(irconfig[i] == null || irconfig[i].getIrname() == null) {
 				continue;
@@ -845,7 +863,7 @@ public class PlayerConfig {
 			for(int j = i + 1;j < irconfig.length;j++) {
 				if(irconfig[j] != null && irconfig[i].getIrname().equals(irconfig[j].getIrname())) {
 					irconfig[j].setIrname(null);
-				}				
+				}
 			}
 		}
 		irconfig = Validatable.removeInvalidElements(irconfig);
@@ -966,7 +984,7 @@ public class PlayerConfig {
     public void setScrollMode(int scrollMode) {
         this.scrollMode = scrollMode;
     }
-    
+
 	public int getScrollSection() {
 		return scrollSection;
 	}
