@@ -73,7 +73,7 @@ public enum JudgeProperty {
      * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
      */
     public final boolean[] judgeVanish;
-
+    
     public final JudgeWindowRule windowrule;
 
     private JudgeProperty(long[][] note, long[][] scratch, long[][] longnote, long[][] longscratch, boolean[] combo, MissCondition miss, boolean[] judgeVanish, JudgeWindowRule windowrule) {
@@ -102,7 +102,7 @@ public enum JudgeProperty {
     public int[][] getLongScratchEndJudge(int judgerank, int[] judgeWindowRate) {
     	return convertMilli(windowrule.create(longscratch, judgerank, judgeWindowRate, 0));
     }
-
+    
     private int[][] convertMilli(long[][] judge) {
     	int[][] mjudge = new int[judge.length][];
     	for(int i = 0;i < mjudge.length;i++) {
@@ -136,7 +136,7 @@ public enum JudgeProperty {
     public enum MissCondition {
     	ONE, ALWAYS
     }
-    
+        
     public enum NoteType {
     	NOTE, LONGNOTE_END, SCRATCH, LONGSCRATCH_END
     }

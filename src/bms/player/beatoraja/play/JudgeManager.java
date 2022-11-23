@@ -65,7 +65,7 @@ public class JudgeManager {
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
 	private long[] judgefast;
-
+	
 	private long[] mjudgefast;
 	/**
 	 * 処理中のLN
@@ -178,7 +178,7 @@ public class JudgeManager {
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
 		score.setJudgeAlgorithm(algorithm);
 		score.setRule(BMSPlayerRule.getBMSPlayerRule(orgmode));
-
+		
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
@@ -454,7 +454,7 @@ public class JudgeManager {
 									}
 									j = (j >= 4 ? j + 1 : j);
 								}
-
+								
 								if(j < 6) {
 									if (j < 6 && (j < 4 || tnote == null
 											|| Math.abs(tnote.getMicroTime() - pmtime) > Math.abs(judgenote.getMicroTime() - pmtime))) {
@@ -731,7 +731,7 @@ public class JudgeManager {
 	public long[] getRecentJudges() {
 		return recentJudges;
 	}
-
+	
 	public long[] getMicroRecentJudges() {
 		return microrecentJudges;
 	}	

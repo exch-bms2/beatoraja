@@ -61,10 +61,10 @@ public class PlayerConfig {
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
-
+	
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
-
+	
 	private boolean notesDisplayTimingAutoAdjust = false;
 
 	private int soundOffset = 0;
@@ -169,7 +169,7 @@ public class PlayerConfig {
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
-
+	
 	/**
 	 * Enable folder random select bar
 	 */
@@ -199,7 +199,7 @@ public class PlayerConfig {
 	 * 通過ノートを表示するかどうか
 	 */
 	private boolean showpastnote = false;
-
+	
 	/**
 	 * 選択中の選曲時ソート
 	 */
@@ -211,7 +211,7 @@ public class PlayerConfig {
 	private int musicselectinput = 0;
 
 	private IRConfig[] irconfig;
-
+	
 	private String twitterConsumerKey;
 
 	private String twitterConsumerSecret;
@@ -486,7 +486,7 @@ public class PlayerConfig {
 	public Mode getMode()  {
 		return mode;
 	}
-
+	
 	public int getSort() {
 		return this.sort ;
 	}
@@ -661,11 +661,11 @@ public class PlayerConfig {
 	public void setWindowHold(boolean isWindowHold) {
 		this.isWindowHold = isWindowHold;
 	}
-
+	
 	public boolean isRandomSelect() {
 		return isRandomSelect;
 	}
-
+	
 	public void setRandomSelect(boolean isRandomSelect) {
 		this.isRandomSelect = isRandomSelect;
 	}
@@ -733,7 +733,7 @@ public class PlayerConfig {
 	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
 		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
 	}
-
+	
 	// --Stream
 	public boolean getRequestEnable() {
         return enableRequest;
@@ -977,7 +977,7 @@ public class PlayerConfig {
     public int getScrollMode() {
         return scrollMode;
     }
-
+    
     public void setScrollMode(int scrollMode) {
         this.scrollMode = scrollMode;
     }
@@ -989,7 +989,7 @@ public class PlayerConfig {
 	public void setScrollSection(int scrollSection) {
 		this.scrollSection = scrollSection;
 	}
-	
+
 	public double getScrollRate() {
 		return scrollRate;
 	}
