@@ -6,20 +6,8 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.utils.FloatArray;
 
-import bms.model.BMSModel;
-import bms.model.Lane;
-import bms.model.LongNote;
-import bms.model.MineNote;
-import bms.model.Mode;
-import bms.model.NormalNote;
-import bms.model.Note;
-import bms.player.beatoraja.BMSPlayerMode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ScoreData;
+import bms.model.*;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.JudgeProperty.MissCondition;
@@ -234,11 +222,11 @@ public class JudgeManager {
 			}
 		}
 
-		final int soundJudgetiming = main.main.getPlayerConfig().getSoundJudgetiming() * 1000;
-		nmjudge = rule.getJudge(NoteType.NOTE, judgerank, keyJudgeWindowRate, soundJudgetiming);
-		cnendmjudge = rule.getJudge(NoteType.LONGNOTE_END, judgerank, keyJudgeWindowRate, soundJudgetiming);
-		smjudge = rule.getJudge(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate, soundJudgetiming);
-		scnendmjudge = rule.getJudge(NoteType.LONGSCRATCH_END, judgerank, scratchJudgeWindowRate, soundJudgetiming);
+		final int soundOffset = main.main.getPlayerConfig().getSoundOffsetMicro();
+		nmjudge = rule.getJudge(NoteType.NOTE, judgerank, keyJudgeWindowRate, soundOffset);
+		cnendmjudge = rule.getJudge(NoteType.LONGNOTE_END, judgerank, keyJudgeWindowRate, soundOffset);
+		smjudge = rule.getJudge(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate, soundOffset);
+		scnendmjudge = rule.getJudge(NoteType.LONGSCRATCH_END, judgerank, scratchJudgeWindowRate, soundOffset);
 		mjudgestart = mjudgeend = 0;
 		for (long[] l : nmjudge) {
 			mjudgestart = Math.min(mjudgestart, l[0]);
@@ -266,7 +254,7 @@ public class JudgeManager {
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
 		final Config config = mc.getPlayerResource().getConfig();
 		final long now = mc.getNowTime();
-		final int soundJudgetiming = main.main.getPlayerConfig().getSoundJudgetiming() * 1000;
+		final int soundOffset = main.main.getPlayerConfig().getSoundOffsetMicro();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
 
@@ -423,7 +411,7 @@ public class JudgeManager {
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) && sc >= 0
 							&& key != sckey[sc]) {
 						final long[][] mjudge = scnendmjudge;
-						final long dmtime = processing[lane].getMicroTime() - pmtime - soundJudgetiming;
+						final long dmtime = processing[lane].getMicroTime() - pmtime - soundOffset;
 						int j = 0;
 						for (; j < mjudge.length && !(dmtime >= mjudge[j][0] && dmtime <= mjudge[j][1]); j++)
 							;
@@ -471,7 +459,7 @@ public class JudgeManager {
 									if (j < 6 && (j < 4 || tnote == null
 											|| Math.abs(tnote.getMicroTime() - pmtime) > Math.abs(judgenote.getMicroTime() - pmtime))) {
 										tnote = judgenote;
-									}
+									}									
 								} else {
 									tnote = null;
 								}
@@ -484,7 +472,7 @@ public class JudgeManager {
 						if (tnote instanceof LongNote) {
 							// ロングノート処理
 							final LongNote ln = (LongNote) tnote;
-							final long dmtime = tnote.getMicroTime() - pmtime - soundJudgetiming;
+							final long dmtime = tnote.getMicroTime() - pmtime - soundOffset;
 							keysound.play(tnote, config.getAudioConfig().getKeyvolume(), 0);
 							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
@@ -506,7 +494,7 @@ public class JudgeManager {
 						} else {
 							keysound.play(tnote, config.getAudioConfig().getKeyvolume(), 0);
 							// 通常ノート処理
-							final long dmtime = tnote.getMicroTime() - pmtime - soundJudgetiming;
+							final long dmtime = tnote.getMicroTime() - pmtime - soundOffset;
 							this.updateMicro(lane, tnote, mtime, j, dmtime);
 						}
 					} else {
@@ -543,7 +531,7 @@ public class JudgeManager {
 				// キーが離されたときの処理
 				if (processing[lane] != null) {
 					final long[][] mjudge = sc >= 0 ? scnendmjudge : cnendmjudge;
-					long dmtime = processing[lane].getMicroTime() - pmtime - soundJudgetiming;
+					long dmtime = processing[lane].getMicroTime() - pmtime - soundOffset;
 					int j = 0;
 					for (; j < mjudge.length && !(dmtime >= mjudge[j][0] && dmtime <= mjudge[j][1]); j++)
 						;
@@ -593,7 +581,7 @@ public class JudgeManager {
 							this.updateMicro(lane, processing[lane].getPair(), mtime, j, dmtime);
 							keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);
 							processing[lane] = null;
-//							System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+//							System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);	
 						}
 					}
 				}
@@ -735,8 +723,8 @@ public class JudgeManager {
 			if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 				if (judge <= 2 && mfast >= -150000 && mfast <= 150000) {
 					player.setJudgetiming(player.getJudgetiming() - (int)((mfast >= 0 ? mfast + 15000 : mfast - 15000) / 30000));
-				}
-			}
+				}			
+			}			
 		}
 	}
 
@@ -746,7 +734,7 @@ public class JudgeManager {
 
 	public long[] getMicroRecentJudges() {
 		return microrecentJudges;
-	}
+	}	
 
 	public int getRecentJudgesIndex() {
 		return recentJudgesIndex;

@@ -5,41 +5,26 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ResourceBundle;
+import java.nio.file.*;
+import java.util.*;
 import java.util.logging.Logger;
 
-import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainLoader;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.ScoreDatabaseAccessor;
-import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.external.ScoreDataImporter;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import bms.model.Mode;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.player.beatoraja.song.SongInformationAccessor;
+import bms.player.beatoraja.song.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -318,7 +303,7 @@ public class PlayConfigurationView implements Initializable {
 		for(int i  =0;i < targets.length;i++) {
 			target.getItems().addAll(targets[i]);
 		}
-
+		
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
 				,arg1.getString("BETTER_OR_SAME_MISSCOUNT"),arg1.getString("BETTER_COMBO"),arg1.getString("BETTER_OR_SAME_COMBO"),
@@ -452,7 +437,7 @@ public class PlayConfigurationView implements Initializable {
 		lntype.getSelectionModel().select(player.getLnmode());
 
 		notesdisplaytiming.getValueFactory().setValue(player.getJudgetiming());
-		notesjudgetiming.getValueFactory().setValue(player.getSoundJudgetiming());
+		notesjudgetiming.getValueFactory().setValue(player.getSoundOffset());
 		notesdisplaytimingautoadjust.setSelected(player.isNotesDisplayTimingAutoAdjust());
 
 		bpmguide.setSelected(player.isBpmguide());
@@ -555,7 +540,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setJudgetiming(getValue(notesdisplaytiming));
-		player.setSoundJudgetiming(getValue(notesjudgetiming));
+		player.setSoundOffset(getValue(notesjudgetiming));
 		player.setNotesDisplayTimingAutoAdjust(notesdisplaytimingautoadjust.isSelected());
 
 		player.setBpmguide(bpmguide.isSelected());

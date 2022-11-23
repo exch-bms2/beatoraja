@@ -108,35 +108,35 @@ public enum JudgeProperty {
     	for(int i = 0;i < mjudge.length;i++) {
     		mjudge[i] = new int[judge[i].length];
     		for(int j = 0;j < mjudge[i].length;j++) {
-        		mjudge[i][j] = (int) (judge[i][j] / 1000);
+        		mjudge[i][j] = (int) (judge[i][j] / 1000);    			
     		}
     	}
     	return mjudge;
     }
-
-    public long[][] getJudge(NoteType notetype, int judgerank, int[] judgeWindowRate, int soundJudgeTiming) {
+    
+    public long[][] getJudge(NoteType notetype, int judgerank, int[] judgeWindowRate, int soundOffset) {
     	switch(notetype) {
     	case NOTE:
-        	return windowrule.create(note, judgerank, judgeWindowRate, soundJudgeTiming);
+        	return windowrule.create(note, judgerank, judgeWindowRate, soundOffset);
     	case LONGNOTE_END:
-        	return windowrule.create(longnote, judgerank, judgeWindowRate, soundJudgeTiming);
+        	return windowrule.create(longnote, judgerank, judgeWindowRate, soundOffset);
     	case SCRATCH:
-        	return windowrule.create(scratch, judgerank, judgeWindowRate, soundJudgeTiming);
+        	return windowrule.create(scratch, judgerank, judgeWindowRate, soundOffset);
     	case LONGSCRATCH_END:
-        	return windowrule.create(longscratch, judgerank, judgeWindowRate, soundJudgeTiming);
+        	return windowrule.create(longscratch, judgerank, judgeWindowRate, soundOffset);
     	default:
-        	return windowrule.create(note, judgerank, judgeWindowRate, soundJudgeTiming);
+        	return windowrule.create(note, judgerank, judgeWindowRate, soundOffset);
     	}
     }
 
     public long[][] getJudge(NoteType notetype, int judgerank, int[] judgeWindowRate) {
     	return getJudge(notetype, judgerank, judgeWindowRate, 0);
     }
-
+    
     public enum MissCondition {
     	ONE, ALWAYS
     }
-
+    
     public enum NoteType {
     	NOTE, LONGNOTE_END, SCRATCH, LONGSCRATCH_END
     }
@@ -145,26 +145,26 @@ public enum JudgeProperty {
     	NORMAL (new int[]{25, 50, 75, 100, 125}){
 
 			@Override
-			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, int soundJudgeTiming) {
-				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, false, soundJudgeTiming);
+			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, int soundOffset) {
+				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, false, soundOffset);
 			}
-
+    		
     	},
     	PMS (new int[]{33, 50, 70, 100, 133}) {
 
 			@Override
-			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, int soundJudgeTiming) {
-				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, true, soundJudgeTiming);
+			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, int soundOffset) {
+				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, true, soundOffset);
 			}
-
+    		
     	};
-
+    	
     	/**
     	 * JUDGERANKの倍率(VERYHARD, HARD, NORMAL, EASY, VERYEASY)
     	 */
     	public final int[] judgerank;
-
-        private static long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, boolean pms, int soundJudgeTiming) {
+    	
+        private static long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, boolean pms, int soundOffset) {
     		final long[][] judge = new long[org.length][2];
     		final boolean[] fix = pms ? new boolean[]{true, false, false, true, true} : new boolean[]{false, false, false, false, true};
     		for (int i = 0; i < judge.length; i++) {
@@ -186,7 +186,7 @@ public enum JudgeProperty {
         				break;
         			}
     			}
-
+        		
     			for(int j = 0;j < 2;j++) {
 					if(fixmin != -1 && Math.abs(judge[i][j]) < Math.abs(judge[fixmin][j])) {
 						judge[i][j] = judge[fixmin][j];
@@ -213,17 +213,17 @@ public enum JudgeProperty {
     		// 判定タイミング設定による補正
     		for (int i = 0; i < judge.length; i++) {
     			for(int j = 0;j < 2;j++) {
-					judge[i][j] += soundJudgeTiming;
+					judge[i][j] += soundOffset;
     			}
     		}
 
     		return judge;
         }
-
+        
         private JudgeWindowRule(int[] judgerank) {
         	this.judgerank = judgerank;
         }
-
-    	public abstract long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, int soundJudgeTiming);
+        
+    	public abstract long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, int soundOffset);
     }
 }
