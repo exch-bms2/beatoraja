@@ -136,11 +136,11 @@ public enum JudgeProperty {
     public enum MissCondition {
     	ONE, ALWAYS
     }
-        
+    
     public enum NoteType {
     	NOTE, LONGNOTE_END, SCRATCH, LONGSCRATCH_END
     }
-
+    
     public enum JudgeWindowRule {
     	NORMAL (new int[]{25, 50, 75, 100, 125}){
 

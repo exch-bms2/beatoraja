@@ -977,11 +977,11 @@ public class PlayerConfig {
     public int getScrollMode() {
         return scrollMode;
     }
-    
+
     public void setScrollMode(int scrollMode) {
         this.scrollMode = scrollMode;
     }
-
+    
 	public int getScrollSection() {
 		return scrollSection;
 	}
