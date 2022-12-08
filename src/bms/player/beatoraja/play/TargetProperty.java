@@ -26,7 +26,7 @@ public abstract class TargetProperty {
     /**
      * ターゲットスコア
      */
-    protected int targetscore;
+    protected final ScoreData targetScore = new ScoreData();
     
     /**
      * 旧属性値
@@ -98,11 +98,7 @@ public abstract class TargetProperty {
         this.name = name;
     }
 
-    public abstract int getTarget(MainController main);
-    
-    public int getTargetScore() {
-    	return targetscore;
-    }    
+    public abstract ScoreData getTarget(MainController main);    
 }
 
 class StaticTargetProperty extends TargetProperty{
@@ -115,9 +111,12 @@ class StaticTargetProperty extends TargetProperty{
     }
 
     @Override
-    public int getTarget(MainController main) {
-    	targetscore = (int) (main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
-        return targetscore;
+    public ScoreData getTarget(MainController main) {
+    	int rivalscore = (int) (main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
+		targetScore.setPlayer(getName());
+		targetScore.setEpg(rivalscore / 2);
+		targetScore.setEgr(rivalscore % 2);
+        return targetScore;
     }
     
     public static TargetProperty getTargetProperty(String id) {
@@ -158,9 +157,9 @@ class RivalTargetProperty extends TargetProperty{
     }
 
     @Override
-    public int getTarget(MainController main) {
+    public ScoreData getTarget(MainController main) {
         // TODO 指定プレイヤーのスコアデータ取得
-        return 0;
+        return targetScore;
     }    
 }
 
@@ -171,20 +170,24 @@ class NextRankTargetProperty extends TargetProperty{
     }
 
     @Override
-    public int getTarget(MainController main) {
+    public ScoreData getTarget(MainController main) {
         ScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
                 , main.getPlayerConfig().getLnmode());
         final int nowscore = now != null ? now.getExscore() : 0;
         final int max = main.getPlayerResource().getBMSModel().getTotalNotes() * 2;
+        int targetscore = max;
         for(int i = 15;i < 27;i++) {
             int target = max * i / 27;
             if(nowscore < target) {
             	targetscore = target;
-                return target;
+            	break;
             }
         }
-        targetscore = max;
-        return max;
+		targetScore.setPlayer(getName());
+		targetScore.setEpg(targetscore / 2);
+		targetScore.setEgr(targetscore % 2);
+        return targetScore;
+
     }
 }
 
@@ -201,10 +204,19 @@ class InternetRankingTargetProperty extends TargetProperty{
     }
 
     @Override
-    public int getTarget(MainController main) {
+    public ScoreData getTarget(MainController main) {
     	final RankingData ranking = main.getPlayerResource().getRankingData();
     	if(ranking.getState() == RankingData.FINISH) {
-    		return targetscore;
+    		if(ranking.getTotalPlayer() > 0) {
+    			int index = getTargetRank(main, ranking);
+    			int targetscore = ranking.getScore(index).getExscore();
+    			targetScore.setPlayer(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+        		targetScore.setEpg(targetscore / 2);
+        		targetScore.setEgr(targetscore % 2);
+    		} else {
+    			targetScore.setPlayer("NO DATA");    			
+    		}
+    		return targetScore;
     	}
 		Thread irprocess = new Thread(() -> {
     		ranking.load(main.getCurrentState(), main.getPlayerResource().getSongdata());
@@ -217,15 +229,19 @@ class InternetRankingTargetProperty extends TargetProperty{
 	    	if(ranking.getState() == RankingData.FINISH) {
 	    		if(ranking.getTotalPlayer() > 0) {
 	    			int index = getTargetRank(main, ranking);
-	    			targetscore = ranking.getScore(index).getExscore();
-	    			setName(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+	    			int targetscore = ranking.getScore(index).getExscore();
+	    			targetScore.setPlayer(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+	        		targetScore.setEpg(targetscore / 2);
+	        		targetScore.setEgr(targetscore % 2);
+	    		} else {
+	    			targetScore.setPlayer("NO DATA");    			
 	    		}
 	    		
-				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetscore);	    		
+				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
 	    	}			
 		});
 		irprocess.start();
-        return 0;
+        return targetScore;
     }
     
     private int getTargetRank(MainController main, RankingData ranking) {
