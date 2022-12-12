@@ -1,8 +1,10 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.ir.RankingData;
+import bms.player.beatoraja.select.ScoreDataCache;
 
 import java.util.*;
 
@@ -149,16 +151,32 @@ class StaticTargetProperty extends TargetProperty{
 
 class RivalTargetProperty extends TargetProperty{
 
-    private String rivalid;
+    private int index;
 
-    public RivalTargetProperty(String rivalid) {
-    	super("RIVAL_" + rivalid);
-        this.rivalid = rivalid;
+    public RivalTargetProperty(int index) {
+    	super("RIVAL_" + (index + 1), "RIVAL No." + (index + 1));
+        this.index = index;
     }
 
     @Override
     public ScoreData getTarget(MainController main) {
-        // TODO 指定プレイヤーのスコアデータ取得
+    	PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
+    	ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+    	if(index < info.length) {
+    		targetScore.setPlayer(info[index].getName());
+    		ScoreData score = cache[index].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
+    		if(score != null) {
+        		targetScore.setPlayer(info[index].getName());    			
+        		targetScore.setEpg(score.getEpg());
+        		targetScore.setLpg(score.getLpg());
+        		targetScore.setEgr(score.getEgr());
+        		targetScore.setLgr(score.getLgr());
+    		} else {
+        		targetScore.setPlayer("NO DATA");    			
+    		}
+    	} else {
+    		targetScore.setPlayer("NO RIVAL");    		
+    	}
         return targetScore;
     }    
 }
@@ -269,6 +287,16 @@ class InternetRankingTargetProperty extends TargetProperty{
     }
     
     public static TargetProperty getTargetProperty(String id) {
+    	if(id.startsWith("RIVAL_")) {
+    		try {
+        		int index = Integer.parseInt(id.substring(6));
+        		if(index > 0) {
+        			return new RivalTargetProperty(index - 1);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	}
     	if(id.startsWith("IR_NEXT_")) {
     		try {
         		int index = Integer.parseInt(id.substring(8));
