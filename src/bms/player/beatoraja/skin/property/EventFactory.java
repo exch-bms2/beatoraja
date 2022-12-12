@@ -4,6 +4,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
@@ -350,15 +351,16 @@ public class EventFactory {
 		rival(79, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
+				PlayerInformation[] rivals = state.main.getRivalDataAccessor().getRivals();
 	            int index = -1;
-	            for(int i = 0;i < selector.getRivals().length;i++) {
-	            	if(selector.getRival() == selector.getRivals()[i]) {
+	            for(int i = 0;i < rivals.length;i++) {
+	            	if(selector.getRival() == rivals[i]) {
 	            		index = i;
 	            		break;
 	            	}
 	            }
-	            index = (index + (arg1 >= 0 ? 2 : selector.getRivals().length + 1)) % (selector.getRivals().length + 1) - 1;
-	            selector.setRival(index != -1 ? selector.getRivals()[index] : null);
+	            index = (index + (arg1 >= 0 ? 2 : rivals.length + 1)) % (rivals.length + 1) - 1;
+	            selector.setRival(index != -1 ? rivals[index] : null);
 	            selector.play(SOUND_OPTIONCHANGE);
 			}
 		}),

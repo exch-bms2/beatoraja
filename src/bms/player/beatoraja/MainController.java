@@ -94,6 +94,8 @@ public class MainController extends ApplicationAdapter {
 
 	private IRStatus[] ir;
 
+	private RivalDataAccessor rivals = new RivalDataAccessor();
+
 	private SpriteBatch sprite;
 	/**
 	 * 1曲プレイで指定したBMSファイル
@@ -185,6 +187,8 @@ public class MainController extends ApplicationAdapter {
 
 		}
 		ir = irarray.toArray(IRStatus.class);
+		
+		rivals.update(this);
 
 		switch(config.getAudioConfig().getDriver()) {
 		case PortAudio:
@@ -214,6 +218,10 @@ public class MainController extends ApplicationAdapter {
 
 	public PlayDataAccessor getPlayDataAccessor() {
 		return playdata;
+	}
+	
+	public RivalDataAccessor getRivalDataAccessor() {
+		return rivals;
 	}
 
 	public SpriteBatch getSpriteBatch() {
