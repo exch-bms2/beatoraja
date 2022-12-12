@@ -297,11 +297,6 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
 
-		String[] targets = TargetProperty.getTargets();
-		for(int i  =0;i < targets.length;i++) {
-			target.getItems().addAll(targets[i]);
-		}
-		
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
 				,arg1.getString("BETTER_OR_SAME_MISSCOUNT"),arg1.getString("BETTER_COMBO"),arg1.getString("BETTER_OR_SAME_COMBO"),
@@ -461,6 +456,8 @@ public class PlayConfigurationView implements Initializable {
 		autosavereplay3.getSelectionModel().select(player.getAutoSaveReplay()[2]);
 		autosavereplay4.getSelectionModel().select(player.getAutoSaveReplay()[3]);
 
+		String[] targets = player.getTargetlist();
+		target.getItems().setAll(targets);
 		target.setValue(player.getTargetid());
 		showhiddennote.setSelected(player.isShowhiddennote());
 

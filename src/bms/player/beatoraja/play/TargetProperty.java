@@ -33,7 +33,7 @@ public abstract class TargetProperty {
      */
     private static TargetProperty[] available;
 
-    private static String[] targets;
+    private static String[] targets = new String[0];
     
     public TargetProperty(String id) {
     	this.id = id;
@@ -67,13 +67,13 @@ public abstract class TargetProperty {
     }
 
     public static String[] getTargets() {
-        if(targets == null) {
-        	// TODO targetsはPlayerConfig上で定義したものを持ってくる
-        	targets = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
-        			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_5", "IR_NEXT_10", "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANKRATE_10", "IR_RANKRATE_25","IR_RANKRATE_50"};
-        }
-
         return targets;
+    }
+    
+    public static void setTargets(String[] s) {
+    	if(s != null) {
+    		targets = s;
+    	}
     }
     
     public static TargetProperty getTargetProperty(String id) {

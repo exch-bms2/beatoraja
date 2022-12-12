@@ -51,7 +51,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	private static final String VERSION = "beatoraja 0.8.3";
+	private static final String VERSION = "beatoraja 0.8.5";
 
 	public static final boolean debug = false;
 
@@ -371,9 +371,7 @@ public class MainController extends ApplicationAdapter {
 		});
 		polling.start();
 
-		if(player.getTarget() >= TargetProperty.getAllTargetProperties().length) {
-			player.setTarget(0);
-		}
+		TargetProperty.setTargets(player.getTargetlist());
 
 		Pixmap plainPixmap = new Pixmap(2,1, Pixmap.Format.RGBA8888);
 		plainPixmap.drawPixel(0,0, Color.toIntBits(255,0,0,0));
@@ -430,7 +428,7 @@ public class MainController extends ApplicationAdapter {
 		// show fps
 		if (showfps && systemfont != null) {
 			sprite.begin();
-			systemfont.setColor(Color.PURPLE);
+			systemfont.setColor(Color.CYAN);
 			message.setLength(0);
 			systemfont.draw(sprite, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), 10,
 					config.getResolution().height - 2);
@@ -456,6 +454,9 @@ public class MainController extends ApplicationAdapter {
 				message.setLength(0);
 				systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), 10,
 						config.getResolution().height - 170);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Current Target ").append(player.getTargetid()), 10,
+						config.getResolution().height - 194);
 			}
 
 			sprite.end();
