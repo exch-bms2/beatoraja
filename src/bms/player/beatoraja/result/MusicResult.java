@@ -438,7 +438,7 @@ public class MusicResult extends AbstractResult {
 		}
 
 		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
-			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+			main.getPlayDataAccessor().writeScoreData(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
 		} else {
 			Logger.getGlobal().info("プレイモードが" + resource.getPlayMode().mode.name() + "のため、スコア登録はされません");
