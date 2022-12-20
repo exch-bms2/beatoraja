@@ -64,6 +64,14 @@ public class StringPropertyFactory {
 			}
 		}),
 		player(2, (state) -> (state.main.getPlayerConfig().getName())),
+		target(3, (state) -> {
+			if (state instanceof MusicSelector) {
+				return TargetProperty.getTargetName(state.main.getPlayerConfig().getTargetid());					
+			} else {
+				final ScoreData rival = state.main.getPlayerResource().getRivalScoreData();
+				return rival != null ? rival.getPlayer() : "";
+			}
+		}),
 		title(10, (state) -> {
 			if (state instanceof MusicSelector) {
 				if (((MusicSelector) state).getSelectedBar() instanceof DirectoryBar) {
@@ -162,6 +170,27 @@ public class StringPropertyFactory {
 		coursetitle8(157, createCoursetitle(7)),
 		coursetitle9(158, createCoursetitle(8)),
 		coursetitle10(159, createCoursetitle(9)),
+		targetnamep10(200, createTargetname(-10)),
+		targetnamep9(201, createTargetname(-9)),
+		targetnamep8(202, createTargetname(-8)),
+		targetnamep7(203, createTargetname(-7)),
+		targetnamep6(204, createTargetname(-6)),
+		targetnamep5(205, createTargetname(-5)),
+		targetnamep4(206, createTargetname(-4)),
+		targetnamep3(207, createTargetname(-3)),
+		targetnamep2(208, createTargetname(-2)),
+		targetnamep1(209, createTargetname(-1)),
+		targetnamen1(210, createTargetname(1)),
+		targetnamen2(211, createTargetname(2)),
+		targetnamen3(212, createTargetname(3)),
+		targetnamen4(213, createTargetname(4)),
+		targetnamen5(214, createTargetname(5)),
+		targetnamen6(215, createTargetname(6)),
+		targetnamen7(216, createTargetname(7)),
+		targetnamen8(217, createTargetname(8)),
+		targetnamen9(218, createTargetname(9)),
+		targetnamen10(219, createTargetname(10)),
+
 		directory(1000, (state) -> {
 			if (state instanceof MusicSelector) {
 				return ((MusicSelector) state).getBarRender().getDirectoryString();
@@ -229,6 +258,21 @@ public class StringPropertyFactory {
 				return score != null ? (score.player.length() > 0 ? score.player : "YOU") : "";
 			};
 
+		}
+		
+		private static StringProperty createTargetname(final int index) {
+			return (state) -> {
+				String[] targets = TargetProperty.getTargets();
+				int id = -1;
+				for(int i = 0;i < targets.length;i++) {
+					if(targets[i].equals(state.main.getPlayerConfig().getTargetid())) {
+						id = i;
+						break;
+					}
+				}
+				int offset = index >= 0 ? index : (targets.length + index);
+				return id >= 0 ? TargetProperty.getTargetName(targets[(id + offset) % targets.length]) : "";
+			};
 		}
 		
 		private static StringProperty createCoursetitle(final int index) {
