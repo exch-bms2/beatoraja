@@ -270,8 +270,8 @@ class InternetRankingTargetProperty extends TargetProperty{
 		case NEXT:
 			// n位上のプレイヤー
 			for(int i = 0;i  < ranking.getTotalPlayer(); i++) {
-				if(ranking.getScore(i).getExscore() > nowscore) { 
-					return Math.max(i - (value - 1) , 0);
+				if(ranking.getScore(i).getExscore() <= nowscore) { 
+					return Math.max(i - value , 0);
 				}
 			}
 			return 0;
