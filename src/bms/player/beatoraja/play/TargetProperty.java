@@ -36,6 +36,7 @@ public abstract class TargetProperty {
     private static TargetProperty[] available;
 
     private static String[] targets = new String[0];
+    private static String[] targetNames =  new String[0];
     
     public TargetProperty(String id) {
     	this.id = id;
@@ -72,14 +73,31 @@ public abstract class TargetProperty {
         return targets;
     }
     
+    public static String getTargetName(String target) {
+    	for(int i = 0;i <targets.length;i++) {
+    		if(targets[i].equals(target)) {
+    			return targetNames[i];
+    		}
+    	}
+        return "";
+    }
+    
     public static void setTargets(String[] s) {
     	if(s != null) {
     		targets = s;
+    	}
+    	targetNames = new String[targets.length];
+    	for(int i = 0;i < targets.length;i++) {
+    		TargetProperty target = getTargetProperty(targets[i]);
+    		targetNames[i] = target != null ? target.getName() : "";
     	}
     }
     
     public static TargetProperty getTargetProperty(String id) {
     	TargetProperty target = StaticTargetProperty.getTargetProperty(id);
+    	if(target == null) {
+    		target = RivalTargetProperty.getTargetProperty(id);
+    	}
     	if(target == null) {
     		target = InternetRankingTargetProperty.getTargetProperty(id);
     	}
@@ -178,7 +196,21 @@ class RivalTargetProperty extends TargetProperty{
     		targetScore.setPlayer("NO RIVAL");    		
     	}
         return targetScore;
-    }    
+    }
+    
+    public static TargetProperty getTargetProperty(String id) {
+    	if(id.startsWith("RIVAL_")) {
+    		try {
+        		int index = Integer.parseInt(id.substring(6));
+        		if(index > 0) {
+        			return new RivalTargetProperty(index - 1);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	}
+    	return null;
+    }
 }
 
 class NextRankTargetProperty extends TargetProperty{
@@ -216,7 +248,7 @@ class InternetRankingTargetProperty extends TargetProperty{
     private int value;
     
     private InternetRankingTargetProperty(Target target, int value) {
-    	super("IR_" + target.name() + "_" + value, "IR " + target.name() + " " + value);
+    	super("IR_" + target.name() + "_" + value, getTargetName(target, value));
         this.target = target;
         this.value = value;
     }
@@ -287,16 +319,6 @@ class InternetRankingTargetProperty extends TargetProperty{
     }
     
     public static TargetProperty getTargetProperty(String id) {
-    	if(id.startsWith("RIVAL_")) {
-    		try {
-        		int index = Integer.parseInt(id.substring(6));
-        		if(index > 0) {
-        			return new RivalTargetProperty(index - 1);
-        		}
-    		} catch (NumberFormatException e) {
-    			
-    		}
-    	}
     	if(id.startsWith("IR_NEXT_")) {
     		try {
         		int index = Integer.parseInt(id.substring(8));
@@ -328,6 +350,18 @@ class InternetRankingTargetProperty extends TargetProperty{
     		}
     	}
     	return null;
+    }
+    
+    public static String getTargetName(Target target, int value) {
+    	switch(target) {
+    	case NEXT:
+    		return "IR NEXT " + value + "RANK";
+    	case RANK:
+    		return "IR RANK " + value;
+    	case RANKRATE:
+    		return "IR RANK TOP " + value + "%";
+    	}
+    	return "";
     }
     
     enum Target {
