@@ -96,6 +96,8 @@ public class MainController extends ApplicationAdapter {
 
 	private RivalDataAccessor rivals = new RivalDataAccessor();
 
+	private RankingDataCache ircache = new RankingDataCache();
+
 	private SpriteBatch sprite;
 	/**
 	 * 1曲プレイで指定したBMSファイル
@@ -222,6 +224,10 @@ public class MainController extends ApplicationAdapter {
 	
 	public RivalDataAccessor getRivalDataAccessor() {
 		return rivals;
+	}
+	
+	public RankingDataCache getRankingDataCache() {
+		return ircache;
 	}
 
 	public SpriteBatch getSpriteBatch() {

@@ -86,7 +86,6 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache rivalcache;
 	
 	private RankingData currentir;
-	private RankingDataCache ircache = new RankingDataCache();
 	/**
 	 * ランキング表示位置
 	 */
@@ -261,20 +260,20 @@ public class MusicSelector extends MainState {
 			currentRankingDuration = -1;
 			if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
 				SongData song = ((SongBar) current).getSongData();
-				RankingData irc = ircache.get(song, config.getLnmode());
+				RankingData irc = main.getRankingDataCache().get(song, config.getLnmode());
 				if(irc == null) {
 					irc = new RankingData();
-		            ircache.put(song, config.getLnmode(), irc);
+					main.getRankingDataCache().put(song, config.getLnmode(), irc);
 				}
 				irc.load(this, song);
 	            currentir = irc;
 			}				
 			if (current instanceof GradeBar && ((GradeBar) current).existsAllSongs() && play == null) {
 				CourseData course = ((GradeBar) current).getCourseData();
-				RankingData irc = ircache.get(course, config.getLnmode());
+				RankingData irc = main.getRankingDataCache().get(course, config.getLnmode());
 				if(irc == null) {
 					irc = new RankingData();
-		            ircache.put(course, config.getLnmode(), irc);
+					main.getRankingDataCache().put(course, config.getLnmode(), irc);
 				}
 				irc.load(this, course);
 	            currentir = irc;
@@ -312,7 +311,7 @@ public class MusicSelector extends MainState {
 						}
 						if(main.getIRStatus().length > 0 && currentir == null) {
 							currentir = new RankingData();
-				            ircache.put(song, config.getLnmode(), currentir);
+							main.getRankingDataCache().put(song, config.getLnmode(), currentir);
 						}
 						resource.setRankingData(currentir);
 						resource.setRivalScoreData(current.getRivalScore());
@@ -531,7 +530,7 @@ public class MusicSelector extends MainState {
 
 			if(main.getIRStatus().length > 0 && currentir == null) {
 				currentir = new RankingData();
-				ircache.put(gradeBar.getCourseData(), config.getLnmode(), currentir);
+				main.getRankingDataCache().put(gradeBar.getCourseData(), config.getLnmode(), currentir);
 			}
 			resource.setRankingData(currentir);
 
@@ -628,10 +627,10 @@ public class MusicSelector extends MainState {
 		final Bar current = bar.getSelected();
 		if(main.getIRStatus().length > 0) {
 			if(current instanceof SongBar && ((SongBar) current).existsSong()) {
-				currentir = ircache.get(((SongBar) current).getSongData(), config.getLnmode());
+				currentir = main.getRankingDataCache().get(((SongBar) current).getSongData(), config.getLnmode());
 				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
 			} else if(current instanceof GradeBar && ((GradeBar) current).existsAllSongs()) {
-				currentir = ircache.get(((GradeBar) current).getCourseData(), config.getLnmode());
+				currentir = main.getRankingDataCache().get(((GradeBar) current).getCourseData(), config.getLnmode());
 				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
 			} else {
 				currentir = null;
