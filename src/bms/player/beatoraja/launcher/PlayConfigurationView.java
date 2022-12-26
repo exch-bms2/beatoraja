@@ -493,7 +493,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
 
-		resourceController.commit(config);
+		resourceController.commit();
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
 
@@ -701,30 +701,6 @@ public class PlayConfigurationView implements Initializable {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-	}
-
-    @FXML
-	public void loadTable() {
-		commit();
-		try {
-			Files.createDirectories(Paths.get(config.getTablepath()));
-		} catch (IOException e) {
-		}
-
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(config.getTablepath()))) {
-			paths.forEach((p) -> {
-				if(p.toString().toLowerCase().endsWith(".bmt")) {
-					try {
-						Files.deleteIfExists(p);
-					} catch (IOException e) {
-					}
-				}
-			});
-		} catch (IOException e) {
-		}
-
-		TableDataAccessor tda = new TableDataAccessor(config.getTablepath());
-		tda.updateTableData(config.getTableURL());
 	}
 
     @FXML

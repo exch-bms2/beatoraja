@@ -460,11 +460,6 @@
                 <Insets left="10.0" />
             </HBox.margin>
         </Button>
-        <Button mnemonicParsing="false" onAction="#loadTable" prefHeight="25.0" prefWidth="190.0" text="%LOAD_TABLE">
-            <HBox.margin>
-                <Insets left="10.0" />
-            </HBox.margin>
-        </Button>
         <Button alignment="CENTER" mnemonicParsing="false" onAction="#loadAllBMS" prefHeight="25.0" prefWidth="230.0" text="%REBUILD_DATABASE">
             <HBox.margin>
                 <Insets left="10.0" />
