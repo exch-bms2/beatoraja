@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
-<?import bms.player.beatoraja.launcher.EditableListView?>
+<?import bms.player.beatoraja.launcher.EditableTableView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
@@ -74,12 +74,12 @@
 				</Button>
 			</HBox>
 			<HBox VBox.vgrow="ALWAYS">
-				<EditableListView fx:id="tableurl" prefHeight="167.0"
+				<EditableTableView fx:id="tableurl" prefHeight="167.0"
 					prefWidth="500.0" HBox.hgrow="ALWAYS">
 					<HBox.margin>
 						<Insets top="5.0" />
 					</HBox.margin>
-				</EditableListView>
+				</EditableTableView>
 				<VBox prefHeight="185.0" prefWidth="100.0">
 					<Button mnemonicParsing="false" onAction="#removeTableURL"
 						prefHeight="31.0" prefWidth="80.0" text="%-">

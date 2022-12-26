@@ -4,13 +4,13 @@ import java.util.Arrays;
 import javafx.scene.control.TableView;
 
 /**
- * ListViewの拡張クラス
+ * TableViewの拡張クラス
  * 
  * @author exch
  *
  * @param <T>
  */
-public class EditableListView<T> extends TableView<T>{
+public class EditableTableView<T> extends TableView<T>{
 
 	public void addItem(T item) {
 		getItems().add(item);

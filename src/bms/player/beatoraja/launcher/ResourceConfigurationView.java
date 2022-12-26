@@ -35,7 +35,7 @@ public class ResourceConfigurationView implements Initializable {
 	@FXML
 	private TextField url;
 	@FXML
-	private EditableListView<TableInfo> tableurl;
+	private EditableTableView<TableInfo> tableurl;
 	@FXML
 	private CheckBox updatesong;
 
