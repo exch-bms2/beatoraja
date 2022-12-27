@@ -256,6 +256,11 @@ class InternetRankingTargetProperty extends TargetProperty{
     @Override
     public ScoreData getTarget(MainController main) {
     	final RankingData ranking = main.getPlayerResource().getRankingData();
+    	if(ranking == null) {
+			targetScore.setPlayer("NO DATA");
+			return targetScore;    		
+    	}
+    	
     	if(ranking.getState() == RankingData.FINISH) {
     		if(ranking.getTotalPlayer() > 0) {
     			int index = getTargetRank(main, ranking);
