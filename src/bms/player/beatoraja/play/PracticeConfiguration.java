@@ -162,8 +162,8 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 5:
-				if (property.judgerank > 10) {
-					property.judgerank -= 10;
+				if (property.judgerank > 1) {
+					property.judgerank--;
 				}
 				break;
 				case 6:
@@ -234,7 +234,7 @@ public class PracticeConfiguration {
 				break;
 			case 5:
 				if (property.judgerank < 400) {
-					property.judgerank += 10;
+					property.judgerank++;
 				}
 				break;
 				case 6:
