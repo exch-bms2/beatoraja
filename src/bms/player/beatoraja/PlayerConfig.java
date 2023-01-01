@@ -50,10 +50,6 @@ public class PlayerConfig {
 	private int doubleoption;
 
 	/**
-	 * スコアターゲット(旧仕様)
-	 */
-	private int target;
-	/**
 	 * スコアターゲット
 	 */
 	private String targetid = "MAX";
@@ -522,14 +518,6 @@ public class PlayerConfig {
 		this.irconfig = irconfig;
 	}
 
-	public int getTarget() {
-		return target;
-	}
-
-	public void setTarget(int target) {
-		this.target = target;
-	}
-
 	public String getTargetid() {
 		return targetid;
 	}
@@ -811,7 +799,6 @@ public class PlayerConfig {
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
-		target = MathUtils.clamp(target, 0, TargetProperty.getAllTargetProperties().length);
 		targetid = targetid!= null ? targetid : "MAX";
 		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);

@@ -969,7 +969,6 @@ public class IntegerPropertyFactory {
 		customjudge(BUTTON_ASSIST_EXJUDGE, (state) -> (state.main.getPlayerResource().getPlayerConfig().isCustomJudge() ? 1 : 0)),
 		lnmode(BUTTON_LNMODE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode())),
 		notesdisplaytimingautoadjust(75, (state) -> (state.main.getPlayerResource().getPlayerConfig().isNotesDisplayTimingAutoAdjust() ? 1 : 0)),
-		target(BUTTON_TARGET, (state) -> (state.main.getPlayerResource().getPlayerConfig().getTarget())),
 		gaugeautoshift(78, (state) -> (state.main.getPlayerResource().getPlayerConfig().getGaugeAutoShift())),
 		bottomshiftablegauge(BUTTON_BOTTOMSIFTABLEFGAUGE, (state) -> (state.main.getPlayerResource().getPlayerConfig().getBottomShiftableGauge())),
 		bga(72, (state) -> (state.main.getPlayerResource().getConfig().getBga())),
