@@ -272,7 +272,7 @@ public class CourseResult extends AbstractResult {
 				Arrays.asList(resource.getCourseData().getSong()).stream().mapToInt(sd -> sd.getNotes()).sum());
 		getScoreDataProperty().update(newscore);
 
-		main.getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
+		main.getPlayDataAccessor().writeScoreData(newscore, models, config.getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateCourseScore());
 
 
