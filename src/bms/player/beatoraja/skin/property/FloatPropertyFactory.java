@@ -9,6 +9,7 @@ import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.result.AbstractResult;
@@ -197,6 +198,15 @@ public class FloatPropertyFactory {
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEpg() + score.getLpg())) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -209,6 +219,15 @@ public class FloatPropertyFactory {
 							? ((float) (score.getEgr() + score.getLgr()))
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEgr() + score.getLgr())) / notes;
 				}
 			}
 			return 0;
@@ -223,6 +242,15 @@ public class FloatPropertyFactory {
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEgd() + score.getLgd())) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -235,6 +263,15 @@ public class FloatPropertyFactory {
 							? ((float) (score.getEbd() + score.getLbd()))
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEbd() + score.getLbd())) / notes;
 				}
 			}
 			return 0;
@@ -249,6 +286,15 @@ public class FloatPropertyFactory {
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEpr() + score.getLpr())) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -261,6 +307,15 @@ public class FloatPropertyFactory {
 							? ((float) score.getCombo()) / ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) score.getCombo()) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -272,6 +327,15 @@ public class FloatPropertyFactory {
 					return score != null
 							? ((float) score.getExscore()) / ((SongBar) selected).getSongData().getNotes() / 2
 							: 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) score.getExscore()) / notes;
 				}
 			}
 			return 0;
