@@ -118,7 +118,7 @@ public class MainLoader extends Application {
 		}
 
 		if(config.isUseDiscordRPC()) {
-			discord = new Discord("");
+			discord = new Discord("", "");
 			discord.startup();
 		}
 

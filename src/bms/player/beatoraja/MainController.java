@@ -250,7 +250,7 @@ public class MainController extends ApplicationAdapter {
 		MainState newState = null;
 		switch (state) {
 		case MUSICSELECT:
-			discord = new Discord("MUSIC SELECT");
+			discord = new Discord("In Music Select Menu", "");
 			discord.update();
 			if (this.bmsfile != null) {
 				exit();
@@ -269,11 +269,13 @@ public class MainController extends ApplicationAdapter {
 			newState = bmsplayer;
 			break;
 		case RESULT:
-			discord = new Discord("RESULT");
+			discord = new Discord("Result Screen", "");
 			discord.update();
 			newState = result;
 			break;
 		case COURSERESULT:
+			discord = new Discord("Result Screen", "");
+			discord.update();
 			newState = gresult;
 			break;
 		case CONFIG:

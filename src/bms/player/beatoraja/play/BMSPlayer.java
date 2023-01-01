@@ -401,7 +401,7 @@ public class BMSPlayer extends MainState {
 		resource.getSongdata().setBMSModel(model);
 		resource.getSongdata().setDifficulty(difficulty);
 
-		discord = new Discord("[" + resource.getSongdata().getMode() + " Key] " + resource.getSongdata().getTitle());
+		discord = Discord.playingSong(resource.getSongdata().getFullTitle(), resource.getSongdata().getArtist(), resource.getSongdata().getMode());
 		discord.update();
 	}
 
