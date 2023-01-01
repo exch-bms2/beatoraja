@@ -30,11 +30,6 @@ public abstract class TargetProperty {
      */
     protected final ScoreData targetScore = new ScoreData();
     
-    /**
-     * 旧属性値
-     */
-    private static TargetProperty[] available;
-
     private static String[] targets = new String[0];
     private static String[] targetNames =  new String[0];
     
@@ -47,28 +42,6 @@ public abstract class TargetProperty {
     	this.name = name;
     }
     
-    /**
-     * 旧メソッド
-     */
-    public static TargetProperty[] getAllTargetProperties() {
-        if(available == null) {
-            List<TargetProperty> targets = new ArrayList<TargetProperty>();
-            targets.add(new StaticTargetProperty("RANK_A-", "RANK A-",   100.0f * 18.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_A", "RANK A",    100.0f * 19.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_A+", "RANK A+",   100.0f * 20.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_AA-", "RANK AA-",  100.0f * 21.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_AA", "RANK AA",   100.0f * 22.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_AA+", "RANK AA+",  100.0f * 23.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_AAA-", "RANK AAA-", 100.0f * 24.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_AAA", "RANK AAA",  100.0f * 25.0f / 27.0f));
-            targets.add(new StaticTargetProperty("RANK_AAA+", "RANK AAA+", 100.0f * 26.0f / 27.0f));
-            targets.add(new StaticTargetProperty("MAX", "MAX", 100.0f));
-            targets.add(new NextRankTargetProperty());
-            available = targets.toArray(new TargetProperty[targets.size()]);
-        }
-        return available;
-    }
-
     public static String[] getTargets() {
         return targets;
     }
@@ -121,8 +94,16 @@ public abstract class TargetProperty {
     public abstract ScoreData getTarget(MainController main);    
 }
 
-class StaticTargetProperty extends TargetProperty{
+/**
+ * ターゲット:固定レート
+ *
+ * @author exch
+ */
+class StaticTargetProperty extends TargetProperty {
 
+	/**
+	 * スコアレート(0%-100%)
+	 */
     private float rate;
 
     public StaticTargetProperty(String id, String name, float rate) {
@@ -161,13 +142,28 @@ class StaticTargetProperty extends TargetProperty{
     		return new StaticTargetProperty("RATE_AAA+", "RANK AAA+",   100.0f * 26.0f / 27.0f);
     	case "MAX":
     		return new StaticTargetProperty(id, "MAX", 100.0f);
-    	default:
-    		return null;
     	}
-    }
+
+		if(id.startsWith("RATE_")) {
+			try {
+				float index = Float.parseFloat(id.substring(5));
+				if(index >= 0f && index <= 100f) {
+					return new StaticTargetProperty("RATE_" + index, "SCORE RATE " + index + "%",   index);
+				}
+			} catch (NumberFormatException e) {
+
+			}
+		}
+		return null;
+	}
 }
 
-class RivalTargetProperty extends TargetProperty{
+/**
+ * ターゲット:ライバル
+ *
+ * @author exch
+ */
+class RivalTargetProperty extends TargetProperty {
 
     private int index;
 
@@ -213,7 +209,7 @@ class RivalTargetProperty extends TargetProperty{
     }
 }
 
-class NextRankTargetProperty extends TargetProperty{
+class NextRankTargetProperty extends TargetProperty {
 
     public NextRankTargetProperty() {
         super("RANK_NEXT", "NEXT RANK");
@@ -241,7 +237,12 @@ class NextRankTargetProperty extends TargetProperty{
     }
 }
 
-class InternetRankingTargetProperty extends TargetProperty{
+/**
+ * ターゲット:IR
+ *
+ * @author exch
+ */
+class InternetRankingTargetProperty extends TargetProperty {
 
     private Target target;
     
@@ -293,7 +294,7 @@ class InternetRankingTargetProperty extends TargetProperty{
 	    		}
 	    		
 				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
-	    	}			
+	    	}
 		});
 		irprocess.start();
         return targetScore;
