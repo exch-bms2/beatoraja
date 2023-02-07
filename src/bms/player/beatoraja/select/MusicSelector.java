@@ -532,7 +532,13 @@ public class MusicSelector extends MainState {
 				currentir = new RankingData();
 				main.getRankingDataCache().put(gradeBar.getCourseData(), config.getLnmode(), currentir);
 			}
-			resource.setRankingData(currentir);
+			
+			RankingData songrank = main.getRankingDataCache().get(songs[0], config.getLnmode());
+			if(main.getIRStatus().length > 0 && songrank == null) {
+				songrank = new RankingData();
+				main.getRankingDataCache().put(songs[0], config.getLnmode(), songrank);
+			}
+			resource.setRankingData(songrank);
 
 			changeState(MainStateType.DECIDE);
 			return true;

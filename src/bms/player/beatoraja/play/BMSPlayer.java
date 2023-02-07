@@ -476,7 +476,7 @@ public class BMSPlayer extends MainState {
 			state = STATE_PRACTICE;
 		} else {
 			
-			if(resource.getRivalScoreData() == null) {
+			if(resource.getRivalScoreData() == null || resource.getCourseBMSModels() != null) {
 				ScoreData rivalScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);
 				resource.setRivalScoreData(rivalScore);
 			}

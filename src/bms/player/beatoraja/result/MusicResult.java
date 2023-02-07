@@ -18,7 +18,6 @@ import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
@@ -199,6 +198,13 @@ public class MusicResult extends AbstractResult {
 							main.changeState(MainStateType.MUSICSELECT);
 						}
 					} else if (resource.nextCourse()) {
+						RankingData songrank = main.getRankingDataCache().get(resource.getSongdata(), main.getPlayerConfig().getLnmode());
+						if(main.getIRStatus().length > 0 && songrank == null) {
+							songrank = new RankingData();
+							main.getRankingDataCache().put(resource.getSongdata(), main.getPlayerConfig().getLnmode(), songrank);
+						}
+						resource.setRankingData(songrank);
+
 						main.changeState(MainStateType.PLAY);
 					} else {
 						// 合格リザルト
