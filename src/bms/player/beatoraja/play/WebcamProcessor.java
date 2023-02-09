@@ -11,6 +11,8 @@ import com.github.sarxos.webcam.Webcam;
 
 import java.awt.Dimension;
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class WebcamProcessor {
     private Webcam webcam;
@@ -22,8 +24,21 @@ public class WebcamProcessor {
     private Rectangle tempRect;
 
     public void start(int deviceIndex, int resolutionIndex) {
-        webcam = Webcam.getWebcams().get(deviceIndex);
-        Dimension size = webcam.getViewSizes()[resolutionIndex];
+        List<Webcam> cams = Webcam.getWebcams();
+        if (cams.isEmpty() || deviceIndex >= cams.size()) {
+            Logger.getGlobal().warning("invalid webcam setting - device no longer connected?");
+            return;
+        }
+
+        webcam = cams.get(deviceIndex);
+
+        Dimension[] sizes = webcam.getViewSizes();
+        if (resolutionIndex >= sizes.length) {
+            Logger.getGlobal().warning("invalid webcam resolution - defaulting to first");
+            resolutionIndex = 0;
+        }
+
+        Dimension size = sizes[resolutionIndex];
         webcam.setViewSize(size);
         webcam.open();
         webcam.getLock().disable();
