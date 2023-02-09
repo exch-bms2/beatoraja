@@ -65,11 +65,10 @@ public class VideoConfigurationView implements Initializable {
 		bgaExpand.getSelectionModel().select(config.getBgaExpand());
 		maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
 
-		int deviceIndex = valueOrFirst(config.getCameraDeviceIndex(), cameraDevice.getItems().size());
-		int resolutionIndex = valueOrFirst(config.getCameraResolutionIndex(), cameraResolution.getItems().size());
-
 		cameraEnabled.getSelectionModel().select(config.isCameraEnabled() ? 1 : 0);
+		int deviceIndex = valueOrFirst(config.getCameraDeviceIndex(), cameraDevice.getItems().size());
 		cameraDevice.getSelectionModel().select(deviceIndex);
+		int resolutionIndex = valueOrFirst(config.getCameraResolutionIndex(), cameraResolution.getItems().size());
 		cameraResolution.getSelectionModel().select(resolutionIndex);
 	}
 
@@ -142,7 +141,6 @@ public class VideoConfigurationView implements Initializable {
 							.map(d -> String.format("%d x %d", d.width, d.height))
 							.collect(toCollection(FXCollections::observableArrayList))
 					);
-					cameraResolution.getSelectionModel().select(0);
 				}
 			);
 		} catch (Exception e) {
