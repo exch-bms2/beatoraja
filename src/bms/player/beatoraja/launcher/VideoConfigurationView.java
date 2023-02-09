@@ -5,17 +5,26 @@ import bms.player.beatoraja.MainLoader;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Graphics;
+import com.github.eduramiba.webcamcapture.drivers.NativeDriver;
+import com.github.sarxos.webcam.Webcam;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 
+import java.awt.Dimension;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toCollection;
 
 public class VideoConfigurationView implements Initializable {
-	@FXML
+    @FXML
 	private ComboBox<Resolution> resolution;
 	@FXML
 	private ComboBox<Config.DisplayMode> displayMode;
@@ -32,9 +41,19 @@ public class VideoConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> missLayerTime;
 
+	@FXML
+	private ComboBox<String> cameraEnabled;
+
+	@FXML
+	private ComboBox<String> cameraDevice;
+
+	@FXML
+	private ComboBox<String> cameraResolution;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 		updateResolutions();
+		updateCameraInfo();
 
 		displayMode.getItems().setAll(Config.DisplayMode.values());
     }
@@ -90,5 +109,27 @@ public class VideoConfigurationView implements Initializable {
 		}
 		resolution.setValue(resolution.getItems().contains(oldValue)
 				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
+	}
+
+	private void updateCameraInfo() {
+		cameraEnabled.getSelectionModel().select(0);
+
+		try {
+			Webcam.setDriver(new NativeDriver());
+			List<Webcam> cameras = Webcam.getWebcams(1000);
+			cameraDevice.setItems(cameras.stream().map(Webcam::getName).collect(toCollection(FXCollections::observableArrayList)));
+
+			cameraDevice.getSelectionModel().selectedIndexProperty().addListener(
+					(observableValue, oldValue, newValue) -> {
+				Dimension[] dims = cameras.get(newValue.intValue()).getViewSizes();
+				cameraResolution.setItems(
+					Arrays.stream(dims)
+							.map(d -> String.format("%dx%d", d.width, d.height))
+							.collect(toCollection(FXCollections::observableArrayList))
+				);
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
