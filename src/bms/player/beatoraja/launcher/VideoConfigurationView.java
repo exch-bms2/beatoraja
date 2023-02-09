@@ -19,7 +19,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -53,7 +52,7 @@ public class VideoConfigurationView implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 		updateResolutions();
-		updateCameraInfo();
+		populateCameras();
 
 		displayMode.getItems().setAll(Config.DisplayMode.values());
     }
@@ -65,6 +64,13 @@ public class VideoConfigurationView implements Initializable {
 		bgaOp.getSelectionModel().select(config.getBga());
 		bgaExpand.getSelectionModel().select(config.getBgaExpand());
 		maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
+
+		int deviceIndex = valueOrFirst(config.getCameraDeviceIndex(), cameraDevice.getItems().size());
+		int resolutionIndex = valueOrFirst(config.getCameraResolutionIndex(), cameraResolution.getItems().size());
+
+		cameraEnabled.getSelectionModel().select(config.isCameraEnabled() ? 1 : 0);
+		cameraDevice.getSelectionModel().select(deviceIndex);
+		cameraResolution.getSelectionModel().select(resolutionIndex);
 	}
 
 	public void updatePlayer(PlayerConfig player) {
@@ -78,6 +84,10 @@ public class VideoConfigurationView implements Initializable {
 		config.setBga(bgaOp.getSelectionModel().getSelectedIndex());
 		config.setBgaExpand(bgaExpand.getSelectionModel().getSelectedIndex());
 		config.setMaxFramePerSecond(maxFps.getValue());
+
+		config.setCameraEnabled(cameraEnabled.getSelectionModel().getSelectedIndex() == 1);
+		config.setCameraDeviceIndex(cameraDevice.getSelectionModel().getSelectedIndex());
+		config.setCameraResolutionIndex(cameraResolution.getSelectionModel().getSelectedIndex());
 	}
 
 	public void commitPlayer(PlayerConfig player) {
@@ -111,25 +121,39 @@ public class VideoConfigurationView implements Initializable {
 				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
 	}
 
-	private void updateCameraInfo() {
-		cameraEnabled.getSelectionModel().select(0);
+	private void populateCameras() {
+		cameraDevice.getItems().clear();
+		cameraResolution.getItems().clear();
 
 		try {
 			Webcam.setDriver(new NativeDriver());
-			List<Webcam> cameras = Webcam.getWebcams(1000);
+			List<Webcam> cameras = Webcam.getWebcams();
+			if (cameras.isEmpty()) {
+				return;
+			}
+
 			cameraDevice.setItems(cameras.stream().map(Webcam::getName).collect(toCollection(FXCollections::observableArrayList)));
 
 			cameraDevice.getSelectionModel().selectedIndexProperty().addListener(
-					(observableValue, oldValue, newValue) -> {
-				Dimension[] dims = cameras.get(newValue.intValue()).getViewSizes();
-				cameraResolution.setItems(
-					Arrays.stream(dims)
-							.map(d -> String.format("%dx%d", d.width, d.height))
+				(observableValue, oldValue, newValue) -> {
+					Dimension[] dims = cameras.get(newValue.intValue()).getViewSizes();
+					cameraResolution.setItems(
+						Arrays.stream(dims)
+							.map(d -> String.format("%d x %d", d.width, d.height))
 							.collect(toCollection(FXCollections::observableArrayList))
-				);
-			});
+					);
+					cameraResolution.getSelectionModel().select(0);
+				}
+			);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private int valueOrFirst(int val, int size) {
+		if (val >= size) {
+			return 0;
+		}
+		return val;
 	}
 }

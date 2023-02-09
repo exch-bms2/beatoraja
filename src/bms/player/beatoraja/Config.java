@@ -136,6 +136,10 @@ public class Config implements Validatable {
 	public static final int BGAEXPAND_KEEP_ASPECT_RATIO = 1;
 	public static final int BGAEXPAND_OFF = 2;
 
+	private boolean cameraEnabled;
+	private int cameraDeviceIndex;
+	private int cameraResolutionIndex;
+
 	private int frameskip = 1;
 
 	private boolean updatesong = false;
@@ -487,6 +491,30 @@ public class Config implements Validatable {
 
 	public void setSkinpath(String skinpath) {
 		this.skinpath = skinpath;
+	}
+
+	public boolean isCameraEnabled() {
+		return cameraEnabled;
+	}
+
+	public void setCameraEnabled(boolean cameraEnabled) {
+		this.cameraEnabled = cameraEnabled;
+	}
+
+	public int getCameraDeviceIndex() {
+		return cameraDeviceIndex;
+	}
+
+	public void setCameraDeviceIndex(int cameraDeviceIndex) {
+		this.cameraDeviceIndex = cameraDeviceIndex;
+	}
+
+	public int getCameraResolutionIndex() {
+		return cameraResolutionIndex;
+	}
+
+	public void setCameraResolutionIndex(int cameraResolutionIndex) {
+		this.cameraResolutionIndex = cameraResolutionIndex;
 	}
 
 	public boolean validate() {
