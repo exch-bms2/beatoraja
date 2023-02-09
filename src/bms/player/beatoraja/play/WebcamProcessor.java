@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.nio.ByteBuffer;
 
 public class WebcamProcessor {
+    private Webcam webcam;
     private Pixmap pixmap;
     private ByteBuffer pixels;
     private Texture texture;
@@ -20,8 +21,14 @@ public class WebcamProcessor {
     private WebcamImageUpdater updateThread;
     private Rectangle tempRect;
 
-    public void start() {
-        pixmap = new Pixmap(640, 480, Pixmap.Format.RGB888);
+    public void start(int deviceIndex, int resolutionIndex) {
+        webcam = Webcam.getWebcams().get(deviceIndex);
+        Dimension size = webcam.getViewSizes()[resolutionIndex];
+        webcam.setViewSize(size);
+        webcam.open();
+        webcam.getLock().disable();
+
+        pixmap = new Pixmap(size.width, size.height, Pixmap.Format.RGB888);
         pixels = pixmap.getPixels();
         texture = new Texture(pixmap);
         textureRegion = new TextureRegion(texture);
@@ -34,11 +41,13 @@ public class WebcamProcessor {
     public void render(Skin.SkinObjectRenderer renderer, Rectangle destRect, StretchType stretchType) {
         tempRect.set(destRect);
         stretchType.stretchRect(tempRect, textureRegion, textureRegion);
-        renderer.draw(textureRegion, tempRect.x + tempRect.width, tempRect.y, -tempRect.width, tempRect.height);
+        renderer.draw(textureRegion, tempRect.x, tempRect.y, tempRect.width, tempRect.height);
     }
 
     public void stop() {
-        updateThread.stop();
+        if (updateThread != null) {
+            updateThread.stop();
+        }
     }
 
     private class WebcamImageUpdater implements Runnable {
@@ -56,11 +65,6 @@ public class WebcamProcessor {
 
         @Override
         public void run() {
-            Webcam webcam = Webcam.getDefault();
-            webcam.setViewSize(new Dimension(640, 480));
-            webcam.open();
-            webcam.getLock().disable();
-
             running = true;
 
             while (running) {

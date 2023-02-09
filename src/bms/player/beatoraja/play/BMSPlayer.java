@@ -466,7 +466,9 @@ public class BMSPlayer extends MainState {
 		bga = resource.getBGAManager();
 
 		camera = new WebcamProcessor();
-		camera.start();
+		if (main.getConfig().isCameraEnabled()) {
+			camera.start(main.getConfig().getCameraDeviceIndex(), main.getConfig().getCameraResolutionIndex());
+		}
 
 		ScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
