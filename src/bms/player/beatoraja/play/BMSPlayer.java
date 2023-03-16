@@ -252,29 +252,33 @@ public class BMSPlayer extends MainState {
 				}
 			}
 
-			if (playinfo.doubleoption >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
-				// SPでなければBATTLEは未適用
-				switch (model.getMode()) {
-				case BEAT_5K:
-					model.setMode(Mode.BEAT_10K);
-					break;
-				case BEAT_7K:
-					model.setMode(Mode.BEAT_14K);
-					break;
-				case KEYBOARD_24K:
-					model.setMode(Mode.KEYBOARD_24K_DOUBLE);
-					break;
+			if (playinfo.doubleoption >= 2) {
+				if(model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K) {
+					switch (model.getMode()) {
+					case BEAT_5K:
+						model.setMode(Mode.BEAT_10K);
+						break;
+					case BEAT_7K:
+						model.setMode(Mode.BEAT_14K);
+						break;
+					case KEYBOARD_24K:
+						model.setMode(Mode.KEYBOARD_24K_DOUBLE);
+						break;
+					}
+					LaneShuffleModifier mod = new LaneShuffleModifier(Random.BATTLE);
+					mod.setModifyTarget(PatternModifier.SIDE_1P);
+					mod.modify(model);
+					if(playinfo.doubleoption == 3) {
+						PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
+						as.modify(model);
+					}
+					assist = Math.max(assist, 1);
+					score = false;
+					Logger.getGlobal().info("譜面オプション : BATTLE (L-ASSIST)");
+				} else {
+					// SPでなければBATTLEは未適用
+					playinfo.doubleoption = 0;
 				}
-				LaneShuffleModifier mod = new LaneShuffleModifier(Random.BATTLE);
-				mod.setModifyTarget(PatternModifier.SIDE_1P);
-				mod.modify(model);
-				if(playinfo.doubleoption == 3) {
-					PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
-					as.modify(model);
-				}
-				assist = Math.max(assist, 1);
-				score = false;
-				Logger.getGlobal().info("譜面オプション : BATTLE (L-ASSIST)");
 			}
 		}
 
