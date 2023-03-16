@@ -429,7 +429,7 @@ public class LaneRenderer {
 				if (note != null) {
 					//4分のタイミングでノートを拡大する
 					float dstx = lanes[lane].region.x + offsetX;
-					float dsty = (float) y + offsetY;
+					float dsty = (float) y + offsetY - offsetH / 2;
 					float dstw = lanes[lane].region.width + offsetW;
 					float dsth = scale + offsetH;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
@@ -496,7 +496,7 @@ public class LaneRenderer {
 					} else if (note instanceof MineNote) {
 						// draw mine note
 						if (tl.getMicroTime() >= microtime) {
-							sprite.draw(lanes[lane].mineImage, lanes[lane].region.x, (float) y, lanes[lane].region.width, scale);								
+							sprite.draw(lanes[lane].mineImage, dstx, dsty, dstw, dsth);
 						}
 					}
 				}
