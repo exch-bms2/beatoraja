@@ -2,7 +2,6 @@ package bms.player.beatoraja.launcher;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
@@ -11,13 +10,9 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.external.ScoreDataImporter;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.JudgeAlgorithm;
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.song.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -662,7 +657,7 @@ public class PlayConfigurationView implements Initializable {
 		streamTab.setDisable(true);
 		controlPanel.setDisable(true);
 
-		MainLoader.play(null, bms.player.beatoraja.BMSPlayerMode.PLAY, true, config, player, songUpdated);
+		MainLoader.play(null, bms.player.beatoraja.BMSPlayerMode.PLAY, config, player, songUpdated);
 	}
 
     @FXML

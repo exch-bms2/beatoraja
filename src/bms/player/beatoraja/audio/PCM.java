@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import org.jflac.FLACDecoder;
 import org.jflac.metadata.StreamInfo;
 
-import com.badlogic.gdx.backends.lwjgl.audio.OggInputStream;
+import com.badlogic.gdx.backends.lwjgl3.audio.OggInputStream;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.StreamUtils;
 import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;
