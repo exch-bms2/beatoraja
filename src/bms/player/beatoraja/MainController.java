@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.config.Discord;
+import org.lwjgl.input.Mouse;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
@@ -511,7 +512,7 @@ public class MainController extends ApplicationAdapter {
             	input.setMouseMoved(false);
             	mouseMovedTime = time;
 			}
-			Gdx.input.setCursorCatched(current == bmsplayer && time > mouseMovedTime + 5000);
+			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000 && Mouse.isInsideWindow());
 
 			// FPS表示切替
             if (input.isActivated(KeyCommand.SHOW_FPS)) {
