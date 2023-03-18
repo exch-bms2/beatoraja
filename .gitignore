@@ -17,6 +17,3 @@ b.bat
 /*.dll
 *.cim
 .idea/
-.DS_Store
-out
-*.iml
