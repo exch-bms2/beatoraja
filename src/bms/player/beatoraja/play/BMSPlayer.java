@@ -252,6 +252,11 @@ public class BMSPlayer extends MainState {
 				}
 			}
 
+			// auto-scratch feature
+			if(config.isEnableAutoScratch() && autoplay.mode == BMSPlayerMode.Mode.PLAY) {
+				assist = Math.max(assist, 2);
+			}
+
 			if (playinfo.doubleoption >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
 				// SPでなければBATTLEは未適用
 				switch (model.getMode()) {
