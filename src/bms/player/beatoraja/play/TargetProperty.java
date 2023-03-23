@@ -6,8 +6,6 @@ import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.select.ScoreDataCache;
 
-import java.util.*;
-
 /**
  * スコアターゲット
  * 
@@ -20,11 +18,6 @@ public abstract class TargetProperty {
 	 */
 	public final String id;
 	
-	/**
-	 * Target名称
-	 */
-    private String name;
-
     /**
      * ターゲットスコア
      */
@@ -35,11 +28,6 @@ public abstract class TargetProperty {
     
     public TargetProperty(String id) {
     	this.id = id;
-    }
-    
-    public TargetProperty(String id, String name) {
-    	this.id = id;
-    	this.name = name;
     }
     
     public static String[] getTargets() {
@@ -55,14 +43,14 @@ public abstract class TargetProperty {
         return "";
     }
     
-    public static void setTargets(String[] s) {
+    public static void setTargets(String[] s, MainController main) {
     	if(s != null) {
     		targets = s;
     	}
     	targetNames = new String[targets.length];
     	for(int i = 0;i < targets.length;i++) {
     		TargetProperty target = getTargetProperty(targets[i]);
-    		targetNames[i] = target != null ? target.getName() : "";
+    		targetNames[i] = target != null ? target.getName(main) : "";
     	}
     }
     
@@ -83,14 +71,7 @@ public abstract class TargetProperty {
     	return target;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    public abstract String getName(MainController main);
     public abstract ScoreData getTarget(MainController main);    
 }
 
@@ -105,16 +86,24 @@ class StaticTargetProperty extends TargetProperty {
 	 * スコアレート(0%-100%)
 	 */
     private float rate;
+    
+    private String name;
 
     public StaticTargetProperty(String id, String name, float rate) {
-    	super(id, name);
+    	super(id);
+    	this.name = name;
         this.rate = rate;
     }
+
+	@Override
+	public String getName(MainController main) {
+		return name;
+	}
 
     @Override
     public ScoreData getTarget(MainController main) {
     	int rivalscore = (int) (main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
-		targetScore.setPlayer(getName());
+		targetScore.setPlayer(getName(main));
 		targetScore.setEpg(rivalscore / 2);
 		targetScore.setEgr(rivalscore % 2);
         return targetScore;
@@ -168,9 +157,18 @@ class RivalTargetProperty extends TargetProperty {
     private int index;
 
     public RivalTargetProperty(int index) {
-    	super("RIVAL_" + (index + 1), "RIVAL No." + (index + 1));
+    	super("RIVAL_" + (index + 1));
         this.index = index;
     }
+
+	@Override
+	public String getName(MainController main) {
+    	PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
+    	if(index < info.length) {
+    		return "RIVAL " + info[index].getName();
+    	}
+		return "NO RIVAL";
+	}
 
     @Override
     public ScoreData getTarget(MainController main) {
@@ -212,8 +210,13 @@ class RivalTargetProperty extends TargetProperty {
 class NextRankTargetProperty extends TargetProperty {
 
     public NextRankTargetProperty() {
-        super("RANK_NEXT", "NEXT RANK");
+        super("RANK_NEXT");
     }
+
+	@Override
+	public String getName(MainController main) {
+		return "NEXT RANK";
+	}
 
     @Override
     public ScoreData getTarget(MainController main) {
@@ -229,7 +232,7 @@ class NextRankTargetProperty extends TargetProperty {
             	break;
             }
         }
-		targetScore.setPlayer(getName());
+		targetScore.setPlayer(getName(main));
 		targetScore.setEpg(targetscore / 2);
 		targetScore.setEgr(targetscore % 2);
         return targetScore;
@@ -249,10 +252,23 @@ class InternetRankingTargetProperty extends TargetProperty {
     private int value;
     
     private InternetRankingTargetProperty(Target target, int value) {
-    	super("IR_" + target.name() + "_" + value, getTargetName(target, value));
+    	super("IR_" + target.name() + "_" + value);
         this.target = target;
         this.value = value;
     }
+
+	@Override
+	public String getName(MainController main) {
+    	switch(target) {
+    	case NEXT:
+    		return "IR NEXT " + value + "RANK";
+    	case RANK:
+    		return "IR RANK " + value;
+    	case RANKRATE:
+    		return "IR RANK TOP " + value + "%";
+    	}
+    	return "";
+	}
 
     @Override
     public ScoreData getTarget(MainController main) {
@@ -358,20 +374,9 @@ class InternetRankingTargetProperty extends TargetProperty {
     	return null;
     }
     
-    public static String getTargetName(Target target, int value) {
-    	switch(target) {
-    	case NEXT:
-    		return "IR NEXT " + value + "RANK";
-    	case RANK:
-    		return "IR RANK " + value;
-    	case RANKRATE:
-    		return "IR RANK TOP " + value + "%";
-    	}
-    	return "";
-    }
-    
     enum Target {
     	NEXT, RANK, RANKRATE
     }
+
 }
 

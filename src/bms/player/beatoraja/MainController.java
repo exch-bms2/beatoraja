@@ -391,7 +391,7 @@ public class MainController extends ApplicationAdapter {
 		for(int i = 0;i < rivals.getRivals().length;i++) {
 			targetlist.add("RIVAL_" + (i + 1));
 		}
-		TargetProperty.setTargets(targetlist.toArray(String.class));
+		TargetProperty.setTargets(targetlist.toArray(String.class), this);
 
 		Pixmap plainPixmap = new Pixmap(2,1, Pixmap.Format.RGBA8888);
 		plainPixmap.drawPixel(0,0, Color.toIntBits(255,0,0,0));
