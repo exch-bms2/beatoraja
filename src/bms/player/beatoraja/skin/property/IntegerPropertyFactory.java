@@ -24,7 +24,17 @@ import bms.player.beatoraja.song.SongData;
 
 public class IntegerPropertyFactory {
 
+	private static final int ID_LENGTH = 65536;
+	private static final IntegerProperty[] vcache = new IntegerProperty[ID_LENGTH];
+	private static final IntegerProperty[] icache = new IntegerProperty[ID_LENGTH];
+	
 	public static IntegerProperty getIntegerProperty(int optionid) {
+		if(optionid < 0 || optionid >= ID_LENGTH) {
+			return null;
+		}
+		if(vcache[optionid] != null) {
+			return vcache[optionid];
+		}
 		IntegerProperty result = null;
 		if (optionid >= NUMBER_DURATION_LANECOVER_ON && optionid <= NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_OFF) {
 			final boolean green = (optionid - NUMBER_DURATION_LANECOVER_ON) % 2 == 1;
@@ -110,7 +120,8 @@ public class IntegerPropertyFactory {
 		if(result == null) {
 			for(ValueType t : ValueType.values()) {
 				if(t.id == optionid) {
-					return t.property;
+					result = t.property;
+					break;
 				}
 			}
 		}
@@ -118,6 +129,8 @@ public class IntegerPropertyFactory {
 		if (result == null) {
 			result = getIntegerProperty0(optionid);
 		}
+		
+		vcache[optionid] = result;
 		return result;
 	}
 	
@@ -930,6 +943,12 @@ public class IntegerPropertyFactory {
 	}
 
 	public static IntegerProperty getImageIndexProperty(int optionid) {
+		if(optionid < 0 || optionid >= icache.length) {
+			return null;
+		}
+		if(icache[optionid] != null) {
+			return icache[optionid];
+		}
 		IntegerProperty result = null;
 
 		if ((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
@@ -952,11 +971,13 @@ public class IntegerPropertyFactory {
 		if (result == null) {
 			for(IndexType t : IndexType.values()) {
 				if(t.id == optionid) {
-					return t.property;
+					result = t.property;
+					break;
 				}
 			}
 		}
 
+		icache[optionid] = result;
 		return result;
 	}
 
