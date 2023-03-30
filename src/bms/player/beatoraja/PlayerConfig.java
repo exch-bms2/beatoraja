@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -25,6 +26,9 @@ import com.badlogic.gdx.utils.SerializationException;
  * @author exch
  */
 public class PlayerConfig {
+
+	static final Path configpath_old = Paths.get("config.json");
+	static final Path configpath = Paths.get("config_player.json");	
 
 	private String id;
     /**
@@ -920,20 +924,31 @@ public class PlayerConfig {
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
 		PlayerConfig player = new PlayerConfig();
-		final Path path = Paths.get(playerpath + "/" + playerid + "/config.json");
-		try (FileReader reader = new FileReader(path.toFile())) {
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, reader);
-		} catch (SerializationException e) {
-			Logger.getGlobal().warning("PlayerConfigの読み込み失敗 - Path : " + path.toString() + " , Log : " + e.getMessage());
-			try {
-				Files.copy(path, Paths.get(playerpath + "/" + playerid + "/config_backup.json"));
-			} catch (IOException e1) {
-//				e1.printStackTrace();
+		final Path path = Paths.get(playerpath + "/" + playerid + "/" + configpath);
+		final Path path_old = Paths.get(playerpath + "/" + playerid + "/" + configpath_old);
+		if (Files.exists(path)) {
+			try (Reader reader = new InputStreamReader(new FileInputStream(path.toFile()), StandardCharsets.UTF_8)) {
+				Json json = new Json();
+				json.setIgnoreUnknownFields(true);
+				player = json.fromJson(PlayerConfig.class, reader);
+			} catch (SerializationException e) {
+				Logger.getGlobal().warning("PlayerConfigの読み込み失敗 - Path : " + path.toString() + " , Log : " + e.getMessage());
+				try {
+					Files.copy(path, Paths.get(playerpath + "/" + playerid + "/config_backup.json"));
+				} catch (IOException e1) {
+//					e1.printStackTrace();
+				}
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}			
+		} else if(Files.exists(path_old)) {
+			try (FileReader reader = new FileReader(path_old.toFile())) {
+				Json json = new Json();
+				json.setIgnoreUnknownFields(true);
+				player = json.fromJson(PlayerConfig.class, reader);
+			} catch(Throwable e) {
+				e.printStackTrace();
 			}
-		} catch(Throwable e) {
-			e.printStackTrace();
 		}
 		player.setId(playerid);
 		player.validate();
@@ -941,7 +956,8 @@ public class PlayerConfig {
 	}
 
 	public static void write(String playerpath, PlayerConfig player) {
-		try (FileWriter writer = new FileWriter(Paths.get(playerpath + "/" + player.getId() + "/config.json").toFile())) {
+		try (Writer writer = new OutputStreamWriter(
+				new FileOutputStream(Paths.get(playerpath + "/" + player.getId() + "/" + configpath).toFile()), StandardCharsets.UTF_8)) {
 			Json json = new Json();
 			json.setOutputType(JsonWriter.OutputType.json);
 			json.setUsePrototypes(false);
