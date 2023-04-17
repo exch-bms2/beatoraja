@@ -101,5 +101,6 @@
 		</Label>
 		<ComboBox fx:id="audioFastForward" prefWidth="150.0" />
 	</HBox>
+	<CheckBox fx:id="loopResultSound" prefHeight="24.0" prefWidth="200.0" text="%LOOP_RESULT_SOUND"/>
 </VBox>
 
