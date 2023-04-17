@@ -44,8 +44,9 @@ public class MusicResult extends AbstractResult {
 					resource.getPlayerConfig().getLnmode(), i) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
 		}
 
-		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND, false);
-		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND, false);
+		final boolean isLoopSound = resource.getConfig().getAudioConfig().isLoopResultSound();
+		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND, isLoopSound);
+		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND, isLoopSound);
 		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND, false);
 
 		property = ResultKeyProperty.get(resource.getBMSModel().getMode());
