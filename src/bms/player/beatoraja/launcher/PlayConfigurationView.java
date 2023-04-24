@@ -45,7 +45,6 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class PlayConfigurationView implements Initializable {
 
-
 	// TODO スキンプレビュー機能
 
 	@FXML
@@ -76,7 +75,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Tab courseTab;
 	@FXML
-    private Tab streamTab;
+	private Tab streamTab;
 	@FXML
 	private HBox controlPanel;
 
@@ -153,6 +152,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox customjudge;
 	@FXML
+	private ComboBox<Integer> customjudgekind;
+	@FXML
 	private Spinner<Integer> njudgepg;
 	@FXML
 	private Spinner<Integer> njudgegr;
@@ -164,6 +165,54 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Integer> sjudgegr;
 	@FXML
 	private Spinner<Integer> sjudgegd;
+	@FXML
+	private Spinner<Integer> nejudgepg;
+	@FXML
+	private Spinner<Integer> nejudgegr;
+	@FXML
+	private Spinner<Integer> nejudgegd;
+	@FXML
+	private Spinner<Integer> sejudgepg;
+	@FXML
+	private Spinner<Integer> sejudgegr;
+	@FXML
+	private Spinner<Integer> sejudgegd;
+	@FXML
+	private Spinner<Integer> nnjudgepg;
+	@FXML
+	private Spinner<Integer> nnjudgegr;
+	@FXML
+	private Spinner<Integer> nnjudgegd;
+	@FXML
+	private Spinner<Integer> snjudgepg;
+	@FXML
+	private Spinner<Integer> snjudgegr;
+	@FXML
+	private Spinner<Integer> snjudgegd;
+	@FXML
+	private Spinner<Integer> nhjudgepg;
+	@FXML
+	private Spinner<Integer> nhjudgegr;
+	@FXML
+	private Spinner<Integer> nhjudgegd;
+	@FXML
+	private Spinner<Integer> shjudgepg;
+	@FXML
+	private Spinner<Integer> shjudgegr;
+	@FXML
+	private Spinner<Integer> shjudgegd;
+	@FXML
+	private Spinner<Integer> nvjudgepg;
+	@FXML
+	private Spinner<Integer> nvjudgegr;
+	@FXML
+	private Spinner<Integer> nvjudgegd;
+	@FXML
+	private Spinner<Integer> svjudgepg;
+	@FXML
+	private Spinner<Integer> svjudgegr;
+	@FXML
+	private Spinner<Integer> svjudgegd;
 	@FXML
 	private ComboBox<Integer> minemode;
 	@FXML
@@ -199,7 +248,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
-    @FXML
+	@FXML
 	private ComboBox<Integer> autosavereplay1;
 	@FXML
 	private ComboBox<Integer> autosavereplay2;
@@ -208,22 +257,22 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> autosavereplay4;
 
-    @FXML
-    private CheckBox usecim;
+	@FXML
+	private CheckBox usecim;
 
-    @FXML
+	@FXML
 	private TextField txtTwitterConsumerKey;
-    @FXML
+	@FXML
 	private PasswordField txtTwitterConsumerSecret;
 
-    @FXML
-    private Button twitterAuthButton;
-    @FXML
-    private Label txtTwitterAuthenticated;
-    @FXML
-    private TextField txtTwitterPIN;
-    @FXML
-    private Button twitterPINButton;
+	@FXML
+	private Button twitterAuthButton;
+	@FXML
+	private Label txtTwitterAuthenticated;
+	@FXML
+	private TextField txtTwitterPIN;
+	@FXML
+	private Button twitterPINButton;
 
 	@FXML
 	private CheckBox enableIpfs;
@@ -249,7 +298,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private TableEditorView tableController;
 	@FXML
-    private StreamEditorView streamController;
+	private StreamEditorView streamController;
 
 	private Config config;
 	private PlayerConfig player;
@@ -278,29 +327,36 @@ public class PlayConfigurationView implements Initializable {
 		lr2configurationassist.setHgap(25);
 		lr2configurationassist.setVgap(4);
 
-
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 		initComboBox(scoreop, scoreOptions);
 		initComboBox(scoreop2, scoreOptions);
 		initComboBox(doubleop, new String[] { "OFF", "FLIP", "BATTLE", "BATTLE AS" });
-		initComboBox(seventoninepattern, new String[] { "OFF", "SC1KEY2~8", "SC1KEY3~9", "SC2KEY3~9", "SC8KEY1~7", "SC9KEY1~7", "SC9KEY2~8" });
-		String[] seventoninestring = new String[]{arg1.getString("SEVEN_TO_NINE_OFF"),arg1.getString("SEVEN_TO_NINE_NO_MASHING"),arg1.getString("SEVEN_TO_NINE_ALTERNATION")};
+		initComboBox(seventoninepattern,
+				new String[] { "OFF", "SC1KEY2~8", "SC1KEY3~9", "SC2KEY3~9", "SC8KEY1~7", "SC9KEY1~7", "SC9KEY2~8" });
+		String[] seventoninestring = new String[] { arg1.getString("SEVEN_TO_NINE_OFF"),
+				arg1.getString("SEVEN_TO_NINE_NO_MASHING"), arg1.getString("SEVEN_TO_NINE_ALTERNATION") };
 		initComboBox(seventoninetype, seventoninestring);
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		playconfig.getItems().setAll(PlayMode.values());
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
-		initComboBox(gaugeautoshift, new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE","BEST CLEAR","SELECT TO UNDER" });
+		initComboBox(gaugeautoshift,
+				new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE", "BEST CLEAR", "SELECT TO UNDER" });
 		initComboBox(bottomshiftablegauge, new String[] { "ASSIST EASY", "EASY", "NORMAL" });
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
+		initComboBox(customjudgekind, new String[] { "%(all)", "%(each)" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
 
-		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
-		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
-				,arg1.getString("BETTER_OR_SAME_MISSCOUNT"),arg1.getString("BETTER_COMBO"),arg1.getString("BETTER_OR_SAME_COMBO"),
-				arg1.getString("BETTER_LAMP"),arg1.getString("BETTER_OR_SAME_LAMP"),arg1.getString("BETTER_ALL"),arg1.getString("ALWAYS")};
+		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"),
+				arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
+		String[] autosaves = new String[] { arg1.getString("NONE"), arg1.getString("BETTER_SCORE"),
+				arg1.getString("BETTER_OR_SAME_SCORE"), arg1.getString("BETTER_MISSCOUNT"),
+				arg1.getString("BETTER_OR_SAME_MISSCOUNT"), arg1.getString("BETTER_COMBO"),
+				arg1.getString("BETTER_OR_SAME_COMBO"),
+				arg1.getString("BETTER_LAMP"), arg1.getString("BETTER_OR_SAME_LAMP"), arg1.getString("BETTER_ALL"),
+				arg1.getString("ALWAYS") };
 		initComboBox(autosavereplay1, autosaves);
 		initComboBox(autosavereplay2, autosaves);
 		initComboBox(autosavereplay3, autosaves);
@@ -319,7 +375,7 @@ public class PlayConfigurationView implements Initializable {
 			final String downloadURL = MainLoader.getVersionChecker().getDownloadURL();
 			Platform.runLater(() -> {
 				newversion.setText(message);
-				if(downloadURL != null) {
+				if (downloadURL != null) {
 					newversion.setOnAction(new EventHandler<ActionEvent>() {
 
 						@Override
@@ -362,15 +418,15 @@ public class PlayConfigurationView implements Initializable {
 		resourceController.update(config);
 
 		skinController.update(config);
-        // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
+		// int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
-        usecim.setSelected(config.isCacheSkinImage());
-        discord.setSelected(config.isUseDiscordRPC());
+		usecim.setSelected(config.isCacheSkinImage());
+		discord.setSelected(config.isUseDiscordRPC());
 
 		enableIpfs.setSelected(config.isEnableIpfs());
 		ipfsurl.setText(config.getIpfsUrl());
 
-		if(players.getItems().contains(config.getPlayername())) {
+		if (players.getItems().contains(config.getPlayername())) {
 			players.setValue(config.getPlayername());
 		} else {
 			players.getSelectionModel().select(0);
@@ -393,16 +449,16 @@ public class PlayConfigurationView implements Initializable {
 
 	public void addPlayer() {
 		String[] ids = PlayerConfig.readAllPlayerID(config.getPlayerpath());
-		for(int i = 1;i < 1000;i++) {
+		for (int i = 1; i < 1000; i++) {
 			String playerid = "player" + i;
 			boolean b = true;
-			for(String id : ids) {
-				if(playerid.equals(id)) {
-					b =false;
+			for (String id : ids) {
+				if (playerid.equals(id)) {
+					b = false;
 					break;
 				}
 			}
-			if(b) {
+			if (b) {
 				PlayerConfig.create(config.getPlayerpath(), playerid);
 				players.getItems().add(playerid);
 				break;
@@ -436,12 +492,37 @@ public class PlayConfigurationView implements Initializable {
 		bottomshiftablegauge.setValue(player.getBottomShiftableGauge());
 
 		customjudge.setSelected(player.isCustomJudge());
+		customjudgekind.getSelectionModel().select(player.getCustomJudgeKind());
 		njudgepg.getValueFactory().setValue(player.getKeyJudgeWindowRatePerfectGreat());
 		njudgegr.getValueFactory().setValue(player.getKeyJudgeWindowRateGreat());
 		njudgegd.getValueFactory().setValue(player.getKeyJudgeWindowRateGood());
 		sjudgepg.getValueFactory().setValue(player.getScratchJudgeWindowRatePerfectGreat());
 		sjudgegr.getValueFactory().setValue(player.getScratchJudgeWindowRateGreat());
 		sjudgegd.getValueFactory().setValue(player.getScratchJudgeWindowRateGood());
+		nejudgepg.getValueFactory().setValue(player.getKeyEasyJudgeWindowRatePerfectGreat());
+		nejudgegr.getValueFactory().setValue(player.getKeyEasyJudgeWindowRateGreat());
+		nejudgegd.getValueFactory().setValue(player.getKeyEasyJudgeWindowRateGood());
+		sejudgepg.getValueFactory().setValue(player.getScratchEasyJudgeWindowRatePerfectGreat());
+		sejudgegr.getValueFactory().setValue(player.getScratchEasyJudgeWindowRateGreat());
+		sejudgegd.getValueFactory().setValue(player.getScratchEasyJudgeWindowRateGood());
+		nnjudgepg.getValueFactory().setValue(player.getKeyNormalJudgeWindowRatePerfectGreat());
+		nnjudgegr.getValueFactory().setValue(player.getKeyNormalJudgeWindowRateGreat());
+		nnjudgegd.getValueFactory().setValue(player.getKeyNormalJudgeWindowRateGood());
+		snjudgepg.getValueFactory().setValue(player.getScratchNormalJudgeWindowRatePerfectGreat());
+		snjudgegr.getValueFactory().setValue(player.getScratchNormalJudgeWindowRateGreat());
+		snjudgegd.getValueFactory().setValue(player.getScratchNormalJudgeWindowRateGood());
+		nhjudgepg.getValueFactory().setValue(player.getKeyHardJudgeWindowRatePerfectGreat());
+		nhjudgegr.getValueFactory().setValue(player.getKeyHardJudgeWindowRateGreat());
+		nhjudgegd.getValueFactory().setValue(player.getKeyHardJudgeWindowRateGood());
+		shjudgepg.getValueFactory().setValue(player.getScratchHardJudgeWindowRatePerfectGreat());
+		shjudgegr.getValueFactory().setValue(player.getScratchHardJudgeWindowRateGreat());
+		shjudgegd.getValueFactory().setValue(player.getScratchHardJudgeWindowRateGood());
+		nvjudgepg.getValueFactory().setValue(player.getKeyVeryHardJudgeWindowRatePerfectGreat());
+		nvjudgegr.getValueFactory().setValue(player.getKeyVeryHardJudgeWindowRateGreat());
+		nvjudgegd.getValueFactory().setValue(player.getKeyVeryHardJudgeWindowRateGood());
+		svjudgepg.getValueFactory().setValue(player.getScratchVeryHardJudgeWindowRatePerfectGreat());
+		svjudgegr.getValueFactory().setValue(player.getScratchVeryHardJudgeWindowRateGreat());
+		svjudgegd.getValueFactory().setValue(player.getScratchVeryHardJudgeWindowRateGood());
 		minemode.getSelectionModel().select(player.getMineMode());
 		scrollmode.getSelectionModel().select(player.getScrollMode());
 		longnotemode.getSelectionModel().select(player.getLongnoteMode());
@@ -466,7 +547,7 @@ public class PlayConfigurationView implements Initializable {
 
 		txtTwitterPIN.setDisable(true);
 		twitterPINButton.setDisable(true);
-		if(player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
+		if (player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
 			txtTwitterAuthenticated.setVisible(true);
 		} else {
 			txtTwitterAuthenticated.setVisible(false);
@@ -484,7 +565,7 @@ public class PlayConfigurationView implements Initializable {
 	 * ダイアログの項目をconfig.xmlに反映する
 	 */
 	public void commit() {
-	    videoController.commit(config);
+		videoController.commit(config);
 		audioController.commit();
 		musicselectController.commit();
 
@@ -495,9 +576,9 @@ public class PlayConfigurationView implements Initializable {
 
 		resourceController.commit();
 
-        // jkoc_hack is integer but *.setJKOC needs boolean type
+		// jkoc_hack is integer but *.setJKOC needs boolean type
 
-        config.setCacheSkinImage(usecim.isSelected());
+		config.setCacheSkinImage(usecim.isSelected());
 
 		config.setEnableIpfs(enableIpfs.isSelected());
 		config.setIpfsUrl(ipfsurl.getText());
@@ -512,10 +593,10 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void commitPlayer() {
-		if(player == null) {
+		if (player == null) {
 			return;
 		}
-		if(playername.getText().length() > 0) {
+		if (playername.getText().length() > 0) {
 			player.setName(playername.getText());
 		}
 
@@ -539,12 +620,37 @@ public class PlayConfigurationView implements Initializable {
 		player.setGaugeAutoShift(gaugeautoshift.getValue());
 		player.setBottomShiftableGauge(bottomshiftablegauge.getValue());
 		player.setCustomJudge(customjudge.isSelected());
+		player.setCustomJudgeKind(customjudgekind.getValue());
 		player.setKeyJudgeWindowRatePerfectGreat(getValue(njudgepg));
 		player.setKeyJudgeWindowRateGreat(getValue(njudgegr));
 		player.setKeyJudgeWindowRateGood(getValue(njudgegd));
 		player.setScratchJudgeWindowRatePerfectGreat(getValue(sjudgepg));
 		player.setScratchJudgeWindowRateGreat(getValue(sjudgegr));
 		player.setScratchJudgeWindowRateGood(getValue(sjudgegd));
+		player.setKeyEasyJudgeWindowRatePerfectGreat(getValue(nejudgepg));
+		player.setKeyEasyJudgeWindowRateGreat(getValue(nejudgegr));
+		player.setKeyEasyJudgeWindowRateGood(getValue(nejudgegd));
+		player.setScratchEasyJudgeWindowRatePerfectGreat(getValue(sejudgepg));
+		player.setScratchEasyJudgeWindowRateGreat(getValue(sejudgegr));
+		player.setScratchEasyJudgeWindowRateGood(getValue(sejudgegd));
+		player.setKeyNormalJudgeWindowRatePerfectGreat(getValue(nnjudgepg));
+		player.setKeyNormalJudgeWindowRateGreat(getValue(nnjudgegr));
+		player.setKeyNormalJudgeWindowRateGood(getValue(nnjudgegd));
+		player.setScratchNormalJudgeWindowRatePerfectGreat(getValue(snjudgepg));
+		player.setScratchNormalJudgeWindowRateGreat(getValue(snjudgegr));
+		player.setScratchNormalJudgeWindowRateGood(getValue(snjudgegd));
+		player.setKeyHardJudgeWindowRatePerfectGreat(getValue(nhjudgepg));
+		player.setKeyHardJudgeWindowRateGreat(getValue(nhjudgegr));
+		player.setKeyHardJudgeWindowRateGood(getValue(nhjudgegd));
+		player.setScratchHardJudgeWindowRatePerfectGreat(getValue(shjudgepg));
+		player.setScratchHardJudgeWindowRateGreat(getValue(shjudgegr));
+		player.setScratchHardJudgeWindowRateGood(getValue(shjudgegd));
+		player.setKeyVeryHardJudgeWindowRatePerfectGreat(getValue(nvjudgepg));
+		player.setKeyVeryHardJudgeWindowRateGreat(getValue(nvjudgegr));
+		player.setKeyVeryHardJudgeWindowRateGood(getValue(nvjudgegd));
+		player.setScratchVeryHardJudgeWindowRatePerfectGreat(getValue(svjudgepg));
+		player.setScratchVeryHardJudgeWindowRateGreat(getValue(svjudgegr));
+		player.setScratchVeryHardJudgeWindowRateGood(getValue(svjudgegd));
 		player.setMineMode(minemode.getValue());
 		player.setScrollMode(scrollmode.getValue());
 		player.setLongnoteMode(longnotemode.getValue());
@@ -553,8 +659,8 @@ public class PlayConfigurationView implements Initializable {
 		player.setMarkprocessednote(markprocessednote.isSelected());
 		player.setExtranoteDepth(extranotedepth.getValue());
 
-		player.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
-				autosavereplay3.getValue(),autosavereplay4.getValue()});
+		player.setAutoSaveReplay(new int[] { autosavereplay1.getValue(), autosavereplay2.getValue(),
+				autosavereplay3.getValue(), autosavereplay4.getValue() });
 
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTargetid(target.getValue());
@@ -571,39 +677,39 @@ public class PlayConfigurationView implements Initializable {
 		PlayerConfig.write(config.getPlayerpath(), player);
 	}
 
-    @FXML
+	@FXML
 	public void addBGMPath() {
-    	String s = showDirectoryChooser("BGMのルートフォルダを選択してください");
-    	if(s != null) {
-        	bgmpath.setText(s);
-    	}
+		String s = showDirectoryChooser("BGMのルートフォルダを選択してください");
+		if (s != null) {
+			bgmpath.setText(s);
+		}
 	}
 
-    @FXML
+	@FXML
 	public void addSoundPath() {
-    	String s = showDirectoryChooser("効果音のルートフォルダを選択してください");
-    	if(s != null) {
-    		soundpath.setText(s);
-    	}
+		String s = showDirectoryChooser("効果音のルートフォルダを選択してください");
+		if (s != null) {
+			soundpath.setText(s);
+		}
 	}
 
-    private String showFileChooser(String title) {
-    	FileChooser chooser = new FileChooser();
+	private String showFileChooser(String title) {
+		FileChooser chooser = new FileChooser();
 		chooser.setTitle(title);
 		File f = chooser.showOpenDialog(null);
 		return f != null ? f.getPath() : null;
-    }
+	}
 
-    private String showDirectoryChooser(String title) {
+	private String showDirectoryChooser(String title) {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle(title);
 		File f = chooser.showDialog(null);
 		return f != null ? f.getPath() : null;
-    }
+	}
 
 	private PlayMode pc = null;
 
-    @FXML
+	@FXML
 	public void updatePlayConfig() {
 		if (pc != null) {
 			PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
@@ -648,7 +754,7 @@ public class PlayConfigurationView implements Initializable {
 		return spinner.getValue();
 	}
 
-    @FXML
+	@FXML
 	public void start() {
 		commit();
 		playerPanel.setDisable(true);
@@ -665,35 +771,36 @@ public class PlayConfigurationView implements Initializable {
 		MainLoader.play(null, bms.player.beatoraja.BMSPlayerMode.PLAY, true, config, player, songUpdated);
 	}
 
-    @FXML
+	@FXML
 	public void loadAllBMS() {
 		commit();
 		loadBMS(null, true);
 	}
 
-    @FXML
+	@FXML
 	public void loadDiffBMS() {
 		commit();
 		loadBMS(null, false);
 	}
 
-	public void loadBMSPath(String updatepath){
+	public void loadBMSPath(String updatepath) {
 		commit();
-    	loadBMS(updatepath, false);
+		loadBMS(updatepath, false);
 	}
 
 	/**
 	 * BMSを読み込み、楽曲データベースを更新する
 	 *
 	 * @param updateAll
-	 *            falseの場合は追加削除分のみを更新する
+	 *                  falseの場合は追加削除分のみを更新する
 	 */
 	public void loadBMS(String updatepath, boolean updateAll) {
 		commit();
 		try {
 			SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
-			SongInformationAccessor infodb = config.isUseSongInfo() ?
-					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
+			SongInformationAccessor infodb = config.isUseSongInfo()
+					? new SongInformationAccessor(Paths.get("songinfo.db").toString())
+					: null;
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(updatepath, config.getBmsroot(), updateAll, infodb);
 			Logger.getGlobal().info("song.db更新完了");
@@ -703,7 +810,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-    @FXML
+	@FXML
 	public void importScoreDataFromLR2() {
 		FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(new ExtensionFilter("Lunatic Rave 2 Score Database File", "*.db"));
@@ -717,7 +824,8 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
 			String player = players.getValue();
-			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + File.separatorChar + player + File.separatorChar + "score.db");
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(
+					config.getPlayerpath() + File.separatorChar + player + File.separatorChar + "score.db");
 			scoredb.createTable();
 
 			ScoreDataImporter scoreimporter = new ScoreDataImporter(scoredb);
@@ -774,7 +882,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-    @FXML
+	@FXML
 	public void exit() {
 		commit();
 		Platform.exit();
@@ -818,4 +926,3 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 }
-
