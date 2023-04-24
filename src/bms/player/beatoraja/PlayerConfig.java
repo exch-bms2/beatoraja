@@ -28,13 +28,13 @@ import com.badlogic.gdx.utils.SerializationException;
 public class PlayerConfig {
 
 	static final Path configpath_old = Paths.get("config.json");
-	static final Path configpath = Paths.get("config_player.json");	
+	static final Path configpath = Paths.get("config_player.json");
 
 	private String id;
-    /**
-     * プレイヤーネーム
-     */
-    private String name = "NO NAME";
+	/**
+	 * プレイヤーネーム
+	 */
+	private String name = "NO NAME";
 
 	/**
 	 * ゲージの種類
@@ -57,24 +57,26 @@ public class PlayerConfig {
 	 * スコアターゲット
 	 */
 	private String targetid = "MAX";
-	
-	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
-			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3", "IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10"
-			, "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANK_20", "IR_RANK_30", "IR_RANK_40", "IR_RANK_50"
-			, "IR_RANKRATE_5", "IR_RANKRATE_10", "IR_RANKRATE_15", "IR_RANKRATE_20", "IR_RANKRATE_25", "IR_RANKRATE_30", "IR_RANKRATE_35", "IR_RANKRATE_40", "IR_RANKRATE_45","IR_RANKRATE_50"};
+
+	private String[] targetlist = new String[] { "RATE_A-", "RATE_A", "RATE_A+", "RATE_AA-", "RATE_AA", "RATE_AA+",
+			"RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX", "RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3",
+			"IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10", "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANK_20", "IR_RANK_30",
+			"IR_RANK_40", "IR_RANK_50", "IR_RANKRATE_5", "IR_RANKRATE_10", "IR_RANKRATE_15", "IR_RANKRATE_20",
+			"IR_RANKRATE_25", "IR_RANKRATE_30", "IR_RANKRATE_35", "IR_RANKRATE_40", "IR_RANKRATE_45",
+			"IR_RANKRATE_50" };
 	/**
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
-	
+
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
-	
+
 	private boolean notesDisplayTimingAutoAdjust = false;
 
-    /**
-     * 選曲時のモードフィルター
-     */
+	/**
+	 * 選曲時のモードフィルター
+	 */
 	private Mode mode = null;
 	/**
 	 * 指定がない場合のミスレイヤー表示時間(ms)
@@ -88,25 +90,49 @@ public class PlayerConfig {
 	/**
 	 * スクロール追加/削除モード
 	 */
-    private int scrollMode = 0;
-    private int scrollSection = 4;
-    private double scrollRate = 0.5;
+	private int scrollMode = 0;
+	private int scrollSection = 4;
+	private double scrollRate = 0.5;
 	/**
 	 * ロングノート追加/削除モード
 	 */
-    private int longnoteMode = 0;
-    private double longnoteRate = 1.0;
+	private int longnoteMode = 0;
+	private double longnoteRate = 1.0;
 	/**
 	 * アシストオプション:判定拡大
 	 */
 	private boolean customJudge = false;
+	private int customJudgeKind;
 	private int keyJudgeWindowRatePerfectGreat = 400;
 	private int keyJudgeWindowRateGreat = 400;
 	private int keyJudgeWindowRateGood = 100;
 	private int scratchJudgeWindowRatePerfectGreat = 400;
 	private int scratchJudgeWindowRateGreat = 400;
 	private int scratchJudgeWindowRateGood = 100;
-
+	private int keyEasyJudgeWindowRatePerfectGreat = 400;
+	private int keyEasyJudgeWindowRateGreat = 400;
+	private int keyEasyJudgeWindowRateGood = 100;
+	private int scratchEasyJudgeWindowRatePerfectGreat = 400;
+	private int scratchEasyJudgeWindowRateGreat = 400;
+	private int scratchEasyJudgeWindowRateGood = 100;
+	private int keyNormalJudgeWindowRatePerfectGreat = 400;
+	private int keyNormalJudgeWindowRateGreat = 400;
+	private int keyNormalJudgeWindowRateGood = 100;
+	private int scratchNormalJudgeWindowRatePerfectGreat = 400;
+	private int scratchNormalJudgeWindowRateGreat = 400;
+	private int scratchNormalJudgeWindowRateGood = 100;
+	private int keyHardJudgeWindowRatePerfectGreat = 400;
+	private int keyHardJudgeWindowRateGreat = 400;
+	private int keyHardJudgeWindowRateGood = 100;
+	private int scratchHardJudgeWindowRatePerfectGreat = 400;
+	private int scratchHardJudgeWindowRateGreat = 400;
+	private int scratchHardJudgeWindowRateGood = 100;
+	private int keyVeryHardJudgeWindowRatePerfectGreat = 400;
+	private int keyVeryHardJudgeWindowRateGreat = 400;
+	private int keyVeryHardJudgeWindowRateGood = 100;
+	private int scratchVeryHardJudgeWindowRatePerfectGreat = 400;
+	private int scratchVeryHardJudgeWindowRateGreat = 400;
+	private int scratchVeryHardJudgeWindowRateGood = 100;
 	/**
 	 * 地雷モード
 	 */
@@ -133,7 +159,7 @@ public class PlayerConfig {
 	 */
 	private int gaugeAutoShift = GAUGEAUTOSHIFT_NONE;
 	/**
-	 * GASで遷移可能なゲージの下限  ASSIST EASY, EASY, NORMALから選択
+	 * GASで遷移可能なゲージの下限 ASSIST EASY, EASY, NORMALから選択
 	 */
 	private int bottomShiftableGauge = GrooveGauge.ASSISTEASY;
 
@@ -149,7 +175,8 @@ public class PlayerConfig {
 	private static Config config;
 
 	/**
-	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
+	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7
+	 * 5:SC9KEY1~7 6:SC9KEY2~8
 	 */
 	private int sevenToNinePattern = 0;
 
@@ -172,7 +199,7 @@ public class PlayerConfig {
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
-	
+
 	/**
 	 * Enable folder random select bar
 	 */
@@ -202,7 +229,7 @@ public class PlayerConfig {
 	 * 通過ノートを表示するかどうか
 	 */
 	private boolean showpastnote = false;
-	
+
 	/**
 	 * 選択中の選曲時ソート
 	 */
@@ -214,7 +241,7 @@ public class PlayerConfig {
 	private int musicselectinput = 0;
 
 	private IRConfig[] irconfig;
-	
+
 	private String twitterConsumerKey;
 
 	private String twitterConsumerSecret;
@@ -232,13 +259,13 @@ public class PlayerConfig {
 		validate();
 	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public int getGauge() {
 		return gauge;
@@ -362,43 +389,43 @@ public class PlayerConfig {
 
 	public PlayModeConfig getPlayConfig(Mode modeId) {
 		switch (modeId != null ? modeId : Mode.BEAT_7K) {
-		case BEAT_5K:
-			return getMode5();
-		case BEAT_7K:
-			return getMode7();
-		case BEAT_10K:
-			return getMode10();
-		case BEAT_14K:
-			return getMode14();
-		case POPN_9K:
-			return getMode9();
-		case KEYBOARD_24K:
-			return getMode24();
-		case KEYBOARD_24K_DOUBLE:
-			return getMode24double();
-		default:
-			return getMode7();
+			case BEAT_5K:
+				return getMode5();
+			case BEAT_7K:
+				return getMode7();
+			case BEAT_10K:
+				return getMode10();
+			case BEAT_14K:
+				return getMode14();
+			case POPN_9K:
+				return getMode9();
+			case KEYBOARD_24K:
+				return getMode24();
+			case KEYBOARD_24K_DOUBLE:
+				return getMode24double();
+			default:
+				return getMode7();
 		}
 	}
 
 	public PlayModeConfig getPlayConfig(int modeId) {
 		switch (modeId) {
-		case 7:
-			return getMode7();
-		case 5:
-			return getMode5();
-		case 14:
-			return getMode14();
-		case 10:
-			return getMode10();
-		case 9:
-			return getMode9();
-		case 25:
-			return getMode24();
-		case 50:
-			return getMode24double();
-		default:
-			return getMode7();
+			case 7:
+				return getMode7();
+			case 5:
+				return getMode5();
+			case 14:
+				return getMode14();
+			case 10:
+				return getMode10();
+			case 9:
+				return getMode9();
+			case 25:
+				return getMode24();
+			case 50:
+				return getMode24double();
+			default:
+				return getMode7();
 		}
 	}
 
@@ -419,7 +446,7 @@ public class PlayerConfig {
 	}
 
 	public PlayModeConfig getMode10() {
-		if(mode10 == null || mode10.getController().length < 2) {
+		if (mode10 == null || mode10.getController().length < 2) {
 			mode10 = new PlayModeConfig(Mode.BEAT_10K);
 			Logger.getGlobal().warning("mode10のPlayConfigを再構成");
 		}
@@ -431,7 +458,7 @@ public class PlayerConfig {
 	}
 
 	public PlayModeConfig getMode14() {
-		if(mode14 == null || mode14.getController().length < 2) {
+		if (mode14 == null || mode14.getController().length < 2) {
 			mode14 = new PlayModeConfig(Mode.BEAT_14K);
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
@@ -459,7 +486,7 @@ public class PlayerConfig {
 	}
 
 	public PlayModeConfig getMode24double() {
-		if(mode24double == null || mode24double.getController().length < 2) {
+		if (mode24double == null || mode24double.getController().length < 2) {
 			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
 		}
@@ -470,16 +497,16 @@ public class PlayerConfig {
 		this.mode24double = mode24double;
 	}
 
-	public void setMode(Mode m)  {
+	public void setMode(Mode m) {
 		this.mode = m;
 	}
 
-	public Mode getMode()  {
+	public Mode getMode() {
 		return mode;
 	}
-	
+
 	public int getSort() {
-		return this.sort ;
+		return this.sort;
 	}
 
 	public void setSort(int sort) {
@@ -495,7 +522,7 @@ public class PlayerConfig {
 	}
 
 	public SkinConfig[] getSkin() {
-		if(skin.length <= SkinType.getMaxSkinTypeID()) {
+		if (skin.length <= SkinType.getMaxSkinTypeID()) {
 			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
 			Logger.getGlobal().warning("skinを再構成");
 		}
@@ -539,7 +566,7 @@ public class PlayerConfig {
 	}
 
 	public int getMisslayerDuration() {
-		if(misslayerDuration < 0) {
+		if (misslayerDuration < 0) {
 			misslayerDuration = 0;
 		}
 		return misslayerDuration;
@@ -555,6 +582,14 @@ public class PlayerConfig {
 
 	public void setCustomJudge(boolean customJudge) {
 		this.customJudge = customJudge;
+	}
+
+	public int getCustomJudgeKind() {
+		return customJudgeKind;
+	}
+
+	public void setCustomJudgeKind(int customJudgeKind) {
+		this.customJudgeKind = customJudgeKind;
 	}
 
 	public int getKeyJudgeWindowRatePerfectGreat() {
@@ -605,6 +640,198 @@ public class PlayerConfig {
 		this.scratchJudgeWindowRateGood = judgeWindowRateGood;
 	}
 
+	public int getKeyEasyJudgeWindowRatePerfectGreat() {
+		return keyEasyJudgeWindowRatePerfectGreat;
+	}
+
+	public void setKeyEasyJudgeWindowRatePerfectGreat(int keyEasyJudgeWindowRatePerfectGreat) {
+		this.keyEasyJudgeWindowRatePerfectGreat = keyEasyJudgeWindowRatePerfectGreat;
+	}
+
+	public int getKeyEasyJudgeWindowRateGreat() {
+		return keyEasyJudgeWindowRateGreat;
+	}
+
+	public void setKeyEasyJudgeWindowRateGreat(int keyEasyJudgeWindowRateGreat) {
+		this.keyEasyJudgeWindowRateGreat = keyEasyJudgeWindowRateGreat;
+	}
+
+	public int getKeyEasyJudgeWindowRateGood() {
+		return keyEasyJudgeWindowRateGood;
+	}
+
+	public void setKeyEasyJudgeWindowRateGood(int keyEasyJudgeWindowRateGood) {
+		this.keyEasyJudgeWindowRateGood = keyEasyJudgeWindowRateGood;
+	}
+
+	public int getScratchEasyJudgeWindowRatePerfectGreat() {
+		return scratchEasyJudgeWindowRatePerfectGreat;
+	}
+
+	public void setScratchEasyJudgeWindowRatePerfectGreat(int scratchEasyJudgeWindowRatePerfectGreat) {
+		this.scratchEasyJudgeWindowRatePerfectGreat = scratchEasyJudgeWindowRatePerfectGreat;
+	}
+
+	public int getScratchEasyJudgeWindowRateGreat() {
+		return scratchEasyJudgeWindowRateGreat;
+	}
+
+	public void setScratchEasyJudgeWindowRateGreat(int scratchEasyJudgeWindowRateGreat) {
+		this.scratchEasyJudgeWindowRateGreat = scratchEasyJudgeWindowRateGreat;
+	}
+
+	public int getScratchEasyJudgeWindowRateGood() {
+		return scratchEasyJudgeWindowRateGood;
+	}
+
+	public void setScratchEasyJudgeWindowRateGood(int scratchEasyJudgeWindowRateGood) {
+		this.scratchEasyJudgeWindowRateGood = scratchEasyJudgeWindowRateGood;
+	}
+
+	public int getKeyNormalJudgeWindowRatePerfectGreat() {
+		return keyNormalJudgeWindowRatePerfectGreat;
+	}
+
+	public void setKeyNormalJudgeWindowRatePerfectGreat(int keyNormalJudgeWindowRatePerfectGreat) {
+		this.keyNormalJudgeWindowRatePerfectGreat = keyNormalJudgeWindowRatePerfectGreat;
+	}
+
+	public int getKeyNormalJudgeWindowRateGreat() {
+		return keyNormalJudgeWindowRateGreat;
+	}
+
+	public void setKeyNormalJudgeWindowRateGreat(int keyNormalJudgeWindowRateGreat) {
+		this.keyNormalJudgeWindowRateGreat = keyNormalJudgeWindowRateGreat;
+	}
+
+	public int getKeyNormalJudgeWindowRateGood() {
+		return keyNormalJudgeWindowRateGood;
+	}
+
+	public void setKeyNormalJudgeWindowRateGood(int keyNormalJudgeWindowRateGood) {
+		this.keyNormalJudgeWindowRateGood = keyNormalJudgeWindowRateGood;
+	}
+
+	public int getScratchNormalJudgeWindowRatePerfectGreat() {
+		return scratchNormalJudgeWindowRatePerfectGreat;
+	}
+
+	public void setScratchNormalJudgeWindowRatePerfectGreat(int scratchNormalJudgeWindowRatePerfectGreat) {
+		this.scratchNormalJudgeWindowRatePerfectGreat = scratchNormalJudgeWindowRatePerfectGreat;
+	}
+
+	public int getScratchNormalJudgeWindowRateGreat() {
+		return scratchNormalJudgeWindowRateGreat;
+	}
+
+	public void setScratchNormalJudgeWindowRateGreat(int scratchNormalJudgeWindowRateGreat) {
+		this.scratchNormalJudgeWindowRateGreat = scratchNormalJudgeWindowRateGreat;
+	}
+
+	public int getScratchNormalJudgeWindowRateGood() {
+		return scratchNormalJudgeWindowRateGood;
+	}
+
+	public void setScratchNormalJudgeWindowRateGood(int scratchNormalJudgeWindowRateGood) {
+		this.scratchNormalJudgeWindowRateGood = scratchNormalJudgeWindowRateGood;
+	}
+
+	public int getKeyHardJudgeWindowRatePerfectGreat() {
+		return keyHardJudgeWindowRatePerfectGreat;
+	}
+
+	public void setKeyHardJudgeWindowRatePerfectGreat(int keyHardJudgeWindowRatePerfectGreat) {
+		this.keyHardJudgeWindowRatePerfectGreat = keyHardJudgeWindowRatePerfectGreat;
+	}
+
+	public int getKeyHardJudgeWindowRateGreat() {
+		return keyHardJudgeWindowRateGreat;
+	}
+
+	public void setKeyHardJudgeWindowRateGreat(int keyHardJudgeWindowRateGreat) {
+		this.keyHardJudgeWindowRateGreat = keyHardJudgeWindowRateGreat;
+	}
+
+	public int getKeyHardJudgeWindowRateGood() {
+		return keyHardJudgeWindowRateGood;
+	}
+
+	public void setKeyHardJudgeWindowRateGood(int keyHardJudgeWindowRateGood) {
+		this.keyHardJudgeWindowRateGood = keyHardJudgeWindowRateGood;
+	}
+
+	public int getScratchHardJudgeWindowRatePerfectGreat() {
+		return scratchHardJudgeWindowRatePerfectGreat;
+	}
+
+	public void setScratchHardJudgeWindowRatePerfectGreat(int scratchHardJudgeWindowRatePerfectGreat) {
+		this.scratchHardJudgeWindowRatePerfectGreat = scratchHardJudgeWindowRatePerfectGreat;
+	}
+
+	public int getScratchHardJudgeWindowRateGreat() {
+		return scratchHardJudgeWindowRateGreat;
+	}
+
+	public void setScratchHardJudgeWindowRateGreat(int scratchHardJudgeWindowRateGreat) {
+		this.scratchHardJudgeWindowRateGreat = scratchHardJudgeWindowRateGreat;
+	}
+
+	public int getScratchHardJudgeWindowRateGood() {
+		return scratchHardJudgeWindowRateGood;
+	}
+
+	public void setScratchHardJudgeWindowRateGood(int scratchHardJudgeWindowRateGood) {
+		this.scratchHardJudgeWindowRateGood = scratchHardJudgeWindowRateGood;
+	}
+
+	public int getKeyVeryHardJudgeWindowRatePerfectGreat() {
+		return keyVeryHardJudgeWindowRatePerfectGreat;
+	}
+
+	public void setKeyVeryHardJudgeWindowRatePerfectGreat(int keyVeryHardJudgeWindowRatePerfectGreat) {
+		this.keyVeryHardJudgeWindowRatePerfectGreat = keyVeryHardJudgeWindowRatePerfectGreat;
+	}
+
+	public int getKeyVeryHardJudgeWindowRateGreat() {
+		return keyVeryHardJudgeWindowRateGreat;
+	}
+
+	public void setKeyVeryHardJudgeWindowRateGreat(int keyVeryHardJudgeWindowRateGreat) {
+		this.keyVeryHardJudgeWindowRateGreat = keyVeryHardJudgeWindowRateGreat;
+	}
+
+	public int getKeyVeryHardJudgeWindowRateGood() {
+		return keyVeryHardJudgeWindowRateGood;
+	}
+
+	public void setKeyVeryHardJudgeWindowRateGood(int keyVeryHardJudgeWindowRateGood) {
+		this.keyVeryHardJudgeWindowRateGood = keyVeryHardJudgeWindowRateGood;
+	}
+
+	public int getScratchVeryHardJudgeWindowRatePerfectGreat() {
+		return scratchVeryHardJudgeWindowRatePerfectGreat;
+	}
+
+	public void setScratchVeryHardJudgeWindowRatePerfectGreat(int scratchVeryHardJudgeWindowRatePerfectGreat) {
+		this.scratchVeryHardJudgeWindowRatePerfectGreat = scratchVeryHardJudgeWindowRatePerfectGreat;
+	}
+
+	public int getScratchVeryHardJudgeWindowRateGreat() {
+		return scratchVeryHardJudgeWindowRateGreat;
+	}
+
+	public void setScratchVeryHardJudgeWindowRateGreat(int scratchVeryHardJudgeWindowRateGreat) {
+		this.scratchVeryHardJudgeWindowRateGreat = scratchVeryHardJudgeWindowRateGreat;
+	}
+
+	public int getScratchVeryHardJudgeWindowRateGood() {
+		return scratchVeryHardJudgeWindowRateGood;
+	}
+
+	public void setScratchVeryHardJudgeWindowRateGood(int scratchVeryHardJudgeWindowRateGood) {
+		this.scratchVeryHardJudgeWindowRateGood = scratchVeryHardJudgeWindowRateGood;
+	}
+
 	public int getHranThresholdBPM() {
 		return hranThresholdBPM;
 	}
@@ -652,11 +879,11 @@ public class PlayerConfig {
 	public void setWindowHold(boolean isWindowHold) {
 		this.isWindowHold = isWindowHold;
 	}
-	
+
 	public boolean isRandomSelect() {
 		return isRandomSelect;
 	}
-	
+
 	public void setRandomSelect(boolean isRandomSelect) {
 		this.isRandomSelect = isRandomSelect;
 	}
@@ -669,11 +896,11 @@ public class PlayerConfig {
 		this.id = id;
 	}
 
-	public void setAutoSaveReplay(int autoSaveReplay[]){
+	public void setAutoSaveReplay(int autoSaveReplay[]) {
 		this.autosavereplay = autoSaveReplay;
 	}
 
-	public int[] getAutoSaveReplay(){
+	public int[] getAutoSaveReplay() {
 		return autosavereplay;
 	}
 
@@ -724,69 +951,69 @@ public class PlayerConfig {
 	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
 		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
 	}
-	
+
 	// --Stream
 	public boolean getRequestEnable() {
-        return enableRequest;
-    }
+		return enableRequest;
+	}
 
 	public boolean getRequestNotify() {
-        return notifyRequest;
-    }
+		return notifyRequest;
+	}
 
-    public void setRequestEnable(boolean requestEnable) {
-        this.enableRequest = requestEnable;
-    }
+	public void setRequestEnable(boolean requestEnable) {
+		this.enableRequest = requestEnable;
+	}
 
-    public void setRequestNotify(boolean notifyEnable) {
-        this.notifyRequest = notifyEnable;
-    }
+	public void setRequestNotify(boolean notifyEnable) {
+		this.notifyRequest = notifyEnable;
+	}
 
-    public int getMaxRequestCount() {
-        return maxRequestCount;
-    }
+	public int getMaxRequestCount() {
+		return maxRequestCount;
+	}
 
-    public void setMaxRequestCount(int maxRequestCount) {
-        this.maxRequestCount = maxRequestCount;
-    }
+	public void setMaxRequestCount(int maxRequestCount) {
+		this.maxRequestCount = maxRequestCount;
+	}
 
 	public void validate() {
-		if(skin == null) {
+		if (skin == null) {
 			skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 		}
-		if(skinHistory == null) {
+		if (skinHistory == null) {
 			skinHistory = new SkinConfig[0];
 		}
-		if(skin.length != SkinType.getMaxSkinTypeID() + 1) {
+		if (skin.length != SkinType.getMaxSkinTypeID() + 1) {
 			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
 		}
-		for(int i = 0;i < skin.length;i++) {
-			if(skin[i] == null) {
+		for (int i = 0; i < skin.length; i++) {
+			if (skin[i] == null) {
 				skin[i] = SkinConfig.getDefault(i);
 			}
 			skin[i].validate();
 		}
 
-		if(mode5 == null) {
+		if (mode5 == null) {
 			mode5 = new PlayModeConfig(Mode.BEAT_5K);
 		}
 
-		if(mode7 == null) {
+		if (mode7 == null) {
 			mode7 = new PlayModeConfig(Mode.BEAT_7K);
 		}
-		if(mode14 == null) {
+		if (mode14 == null) {
 			mode14 = new PlayModeConfig(Mode.BEAT_14K);
 		}
-		if(mode10 == null) {
+		if (mode10 == null) {
 			mode10 = new PlayModeConfig(Mode.BEAT_10K);
 		}
-		if(mode9 == null) {
+		if (mode9 == null) {
 			mode9 = new PlayModeConfig(Mode.POPN_9K);
 		}
-		if(mode24 == null) {
+		if (mode24 == null) {
 			mode24 = new PlayModeConfig(Mode.KEYBOARD_24K);
 		}
-		if(mode24double == null) {
+		if (mode24double == null) {
 			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 		}
 		mode5.validate(7);
@@ -796,14 +1023,14 @@ public class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
-		sort = MathUtils.clamp(sort, 0 , BarSorter.values().length - 1);
+
+		sort = MathUtils.clamp(sort, 0, BarSorter.values().length - 1);
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
-		targetid = targetid!= null ? targetid : "MAX";
+		targetid = targetid != null ? targetid : "MAX";
 		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
@@ -815,11 +1042,11 @@ public class PlayerConfig {
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
-		
-		if(autosavereplay == null) {
+
+		if (autosavereplay == null) {
 			autosavereplay = config.autosavereplay != null ? config.autosavereplay.clone() : new int[4];
 		}
-		if(autosavereplay.length != 4) {
+		if (autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
 		}
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
@@ -834,23 +1061,23 @@ public class PlayerConfig {
 		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
 		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
 
-		if(irconfig == null || irconfig.length == 0) {
+		if (irconfig == null || irconfig.length == 0) {
 			String[] irnames = IRConnectionManager.getAllAvailableIRConnectionName();
 			irconfig = new IRConfig[irnames.length];
-			for(int i = 0;i < irnames.length;i++) {
+			for (int i = 0; i < irnames.length; i++) {
 				irconfig[i] = new IRConfig();
 				irconfig[i].setIrname(irnames[i]);
 			}
 		}
-		
-		for(int i = 0;i < irconfig.length;i++) {
-			if(irconfig[i] == null || irconfig[i].getIrname() == null) {
+
+		for (int i = 0; i < irconfig.length; i++) {
+			if (irconfig[i] == null || irconfig[i].getIrname() == null) {
 				continue;
 			}
-			for(int j = i + 1;j < irconfig.length;j++) {
-				if(irconfig[j] != null && irconfig[i].getIrname().equals(irconfig[j].getIrname())) {
+			for (int j = i + 1; j < irconfig.length; j++) {
+				if (irconfig[j] != null && irconfig[i].getIrname().equals(irconfig[j].getIrname())) {
 					irconfig[j].setIrname(null);
-				}				
+				}
 			}
 		}
 		irconfig = Validatable.removeInvalidElements(irconfig);
@@ -863,24 +1090,26 @@ public class PlayerConfig {
 		PlayerConfig.config = config;
 		// TODO プレイヤーアカウント検証
 		try {
-			if(!Files.exists(Paths.get(config.getPlayerpath()))) {
+			if (!Files.exists(Paths.get(config.getPlayerpath()))) {
 				Files.createDirectory(Paths.get(config.getPlayerpath()));
 			}
-			if(readAllPlayerID(config.getPlayerpath()).length == 0 || readPlayerConfig(config.getPlayerpath(), config.getPlayername()) == null) {
+			if (readAllPlayerID(config.getPlayerpath()).length == 0
+					|| readPlayerConfig(config.getPlayerpath(), config.getPlayername()) == null) {
 				PlayerConfig pc = new PlayerConfig();
 				create(config.getPlayerpath(), "player1");
 				// スコアデータコピー
-				if(Files.exists(Paths.get("playerscore.db"))) {
+				if (Files.exists(Paths.get("playerscore.db"))) {
 					Files.copy(Paths.get("playerscore.db"), Paths.get(config.getPlayerpath() + "/player1/score.db"));
 				}
 				// リプレイデータコピー
 				Files.createDirectory(Paths.get(config.getPlayerpath() + "/player1/replay"));
-				if(Files.exists(Paths.get("replay"))) {
+				if (Files.exists(Paths.get("replay"))) {
 					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("replay"))) {
 						for (Path p : paths) {
-							Files.copy(p, Paths.get(config.getPlayerpath() + "/player1/replay").resolve(p.getFileName()));
+							Files.copy(p,
+									Paths.get(config.getPlayerpath() + "/player1/replay").resolve(p.getFileName()));
 						}
-					} catch(Throwable e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -896,7 +1125,7 @@ public class PlayerConfig {
 	public static void create(String playerpath, String playerid) {
 		try {
 			Path p = Paths.get(playerpath + "/" + playerid);
-			if(Files.exists(p)) {
+			if (Files.exists(p)) {
 				return;
 			}
 			Files.createDirectory(p);
@@ -912,11 +1141,11 @@ public class PlayerConfig {
 		List<String> l = new ArrayList<>();
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(playerpath))) {
 			for (Path p : paths) {
-				if(Files.isDirectory(p)) {
+				if (Files.isDirectory(p)) {
 					l.add(p.getFileName().toString());
 				}
 			}
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return l.toArray(new String[l.size()]);
@@ -932,21 +1161,22 @@ public class PlayerConfig {
 				json.setIgnoreUnknownFields(true);
 				player = json.fromJson(PlayerConfig.class, reader);
 			} catch (SerializationException e) {
-				Logger.getGlobal().warning("PlayerConfigの読み込み失敗 - Path : " + path.toString() + " , Log : " + e.getMessage());
+				Logger.getGlobal()
+						.warning("PlayerConfigの読み込み失敗 - Path : " + path.toString() + " , Log : " + e.getMessage());
 				try {
 					Files.copy(path, Paths.get(playerpath + "/" + playerid + "/config_backup.json"));
 				} catch (IOException e1) {
-//					e1.printStackTrace();
+					// e1.printStackTrace();
 				}
-			} catch(Throwable e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
-			}			
-		} else if(Files.exists(path_old)) {
+			}
+		} else if (Files.exists(path_old)) {
 			try (FileReader reader = new FileReader(path_old.toFile())) {
 				Json json = new Json();
 				json.setIgnoreUnknownFields(true);
 				player = json.fromJson(PlayerConfig.class, reader);
-			} catch(Throwable e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}
@@ -957,7 +1187,8 @@ public class PlayerConfig {
 
 	public static void write(String playerpath, PlayerConfig player) {
 		try (Writer writer = new OutputStreamWriter(
-				new FileOutputStream(Paths.get(playerpath + "/" + player.getId() + "/" + configpath).toFile()), StandardCharsets.UTF_8)) {
+				new FileOutputStream(Paths.get(playerpath + "/" + player.getId() + "/" + configpath).toFile()),
+				StandardCharsets.UTF_8)) {
 			Json json = new Json();
 			json.setOutputType(JsonWriter.OutputType.json);
 			json.setUsePrototypes(false);
@@ -976,14 +1207,14 @@ public class PlayerConfig {
 		this.mineMode = mineMode;
 	}
 
-    public int getScrollMode() {
-        return scrollMode;
-    }
+	public int getScrollMode() {
+		return scrollMode;
+	}
 
-    public void setScrollMode(int scrollMode) {
-        this.scrollMode = scrollMode;
-    }
-    
+	public void setScrollMode(int scrollMode) {
+		this.scrollMode = scrollMode;
+	}
+
 	public int getScrollSection() {
 		return scrollSection;
 	}
@@ -1000,19 +1231,19 @@ public class PlayerConfig {
 		this.scrollRate = scrollRate;
 	}
 
-    public int getLongnoteMode() {
-        return longnoteMode;
-    }
+	public int getLongnoteMode() {
+		return longnoteMode;
+	}
 
-    public void setLongnoteMode(int longnoteMode) {
-        this.longnoteMode = longnoteMode;
-    }
+	public void setLongnoteMode(int longnoteMode) {
+		this.longnoteMode = longnoteMode;
+	}
 
-    public double getLongnoteRate() {
-        return longnoteRate;
-    }
+	public double getLongnoteRate() {
+		return longnoteRate;
+	}
 
-    public void setLongnoteRate(double longnoteRate) {
-        this.longnoteRate = longnoteRate;
-    }
+	public void setLongnoteRate(double longnoteRate) {
+		this.longnoteRate = longnoteRate;
+	}
 }
