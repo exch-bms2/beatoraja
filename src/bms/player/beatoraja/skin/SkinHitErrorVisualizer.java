@@ -54,9 +54,9 @@ public class SkinHitErrorVisualizer extends SkinObject {
 	private float alpha;
 
 	public SkinHitErrorVisualizer(int width, int judgeWidthMillis, int lineWidth, int colorMode,
-								  int hiterrorMode, int emaMode, String lineColor, String centerColor,
-								  String PGColor, String GRColor, String GDColor, String BDColor, String PRColor,
-								  String emaColor, float alpha, int windowLength, int transparent, int drawDecay) {
+			int hiterrorMode, int emaMode, String lineColor, String centerColor,
+			String PGColor, String GRColor, String GDColor, String BDColor, String PRColor,
+			String emaColor, float alpha, int windowLength, int transparent, int drawDecay) {
 
 		this.lineWidth = MathUtils.clamp(lineWidth, 1, 4);
 		this.width = width;
@@ -77,30 +77,30 @@ public class SkinHitErrorVisualizer extends SkinObject {
 				transparent == 1 ? Color.CLEAR : Color.valueOf(PRColor)
 		};
 		this.hiterrorMode = hiterrorMode == 1 ? true : false;
-		this.colorMode    = colorMode == 1 ? true : false;
-		this.drawDecay    = drawDecay == 1 ? true : false;
+		this.colorMode = colorMode == 1 ? true : false;
+		this.drawDecay = drawDecay == 1 ? true : false;
 	}
 
 	public void prepare(long time, MainState state) {
-		if(!(state instanceof BMSPlayer)) {
+		if (!(state instanceof BMSPlayer)) {
 			draw = false;
 			return;
 		}
 		super.prepare(time, state);
 		final PlayerResource resource = state.main.getPlayerResource();
-		if(resource.getBMSModel() != model) {
+		if (resource.getBMSModel() != model) {
 			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);			
+			judgeArea = getJudgeArea(resource);
 		}
-		
-		index = ((BMSPlayer)state).getJudgeManager().getRecentJudgesIndex();
-		recent = ((BMSPlayer)state).getJudgeManager().getRecentJudges();
+
+		index = ((BMSPlayer) state).getJudgeManager().getRecentJudgesIndex();
+		recent = ((BMSPlayer) state).getJudgeManager().getRecentJudges();
 	}
 
-	private void updateEMA (long value) {
+	private void updateEMA(long value) {
 		ema = ema + (long) (alpha * (value - ema));
 	}
-	
+
 	public void draw(SkinObjectRenderer sprite) {
 		if (shape == null) {
 			shape = new Pixmap(width, windowLength * 2, Pixmap.Format.RGBA8888);
@@ -130,12 +130,13 @@ public class SkinHitErrorVisualizer extends SkinObject {
 						shape.setColor(JColor[2]);
 					} else if (judge > judgeArea[3][0] && judge < judgeArea[3][1]) {
 						shape.setColor(JColor[3]);
-					} else {//(judge > judgeArea[4][0] && judge < judgeArea[4][1]) {
+					} else {// (judge > judgeArea[4][0] && judge < judgeArea[4][1]) {
 						shape.setColor(JColor[4]);
 					}
 				} else {
 					shape.setColor(
-							Color.rgba8888(lineColor.r, lineColor.g, lineColor.b, (lineColor.a * i / (1.0f * windowLength / 2))));
+							Color.rgba8888(lineColor.r, lineColor.g, lineColor.b,
+									(lineColor.a * i / (1.0f * windowLength / 2))));
 				}
 				int x = (width - lineWidth) / 2
 						+ (int) (MathUtils.clamp(recent[cycle], -center, center) * -judgeWidthRate);
@@ -168,8 +169,8 @@ public class SkinHitErrorVisualizer extends SkinObject {
 				shape.fillRectangle(x, 0, lineWidth, windowLength * 2);
 			}
 			if (emaMode == 2 || emaMode == 3) {
-				x = x+(lineWidth/2);
-				if(w%2!=0) {
+				x = x + (lineWidth / 2);
+				if (w % 2 != 0) {
 					w++;
 				}
 				shape.fillTriangle(x, (windowLength * 2) / 3, x + w, 0, x - w, 0);
@@ -191,15 +192,39 @@ public class SkinHitErrorVisualizer extends SkinObject {
 
 		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] judgeWindowRate = config.isCustomJudge()
-				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
-				: new int[]{100, 100, 100};
-				
+		int[][] judgeWindowRate = null;
+		if (config.isCustomJudge() && config.getCustomJudgeKind() == 0) {
+			judgeWindowRate = new int[][] {
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() } };
+		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
+			judgeWindowRate = new int[][] {
+					{ config.getKeyEasyJudgeWindowRatePerfectGreat(), config.getKeyEasyJudgeWindowRateGreat(),
+							config.getKeyEasyJudgeWindowRateGood() },
+					{ config.getKeyNormalJudgeWindowRatePerfectGreat(), config.getKeyNormalJudgeWindowRateGreat(),
+							config.getKeyNormalJudgeWindowRateGood() },
+					{ config.getKeyHardJudgeWindowRatePerfectGreat(), config.getKeyHardJudgeWindowRateGreat(),
+							config.getKeyHardJudgeWindowRateGood() },
+					{ config.getKeyVeryHardJudgeWindowRatePerfectGreat(), config.getKeyVeryHardJudgeWindowRateGreat(),
+							config.getKeyVeryHardJudgeWindowRateGood() } };
+		} else {
+			judgeWindowRate = new int[][] { { 100, 100, 100 }, { 100, 100, 100 }, { 100, 100, 100 },
+					{ 100, 100, 100 } };
+		}
+
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
-			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-				judgeWindowRate[1] = judgeWindowRate[2] = 0;
-			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-				judgeWindowRate[2] = 0;
+			for (int i = 0; i < judgeWindowRate.length; i++) {
+				if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
+					judgeWindowRate[i][1] = judgeWindowRate[i][2] = 0;
+				} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
+					judgeWindowRate[i][2] = 0;
+				}
 			}
 		}
 
