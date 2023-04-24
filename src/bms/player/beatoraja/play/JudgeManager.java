@@ -65,7 +65,7 @@ public class JudgeManager {
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
 	private long[] judgefast;
-	
+
 	private long[] mjudgefast;
 	/**
 	 * 処理中のLN
@@ -158,7 +158,7 @@ public class JudgeManager {
 	public void init(BMSModel model, PlayerResource resource) {
 		final Mode orgmode = resource.getOriginalMode();
 		prevmtime = 0;
-		final int  judgeregion = main.getSkin() instanceof PlaySkin ? ((PlaySkin) main.getSkin()).getJudgeregion() : 0;
+		final int judgeregion = main.getSkin() instanceof PlaySkin ? ((PlaySkin) main.getSkin()).getJudgeregion() : 0;
 		judgenow = new int[judgeregion];
 		judgecombo = new int[judgeregion];
 		judgefast = new long[judgeregion];
@@ -167,18 +167,19 @@ public class JudgeManager {
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
 		ghost = new int[model.getTotalNotes()];
-		for (int i=0; i<ghost.length; i++) {
+		for (int i = 0; i < ghost.length; i++) {
 			ghost[i] = 4;
 		}
 
 		this.lntype = model.getLntype();
 		lanes = model.getLanes();
 
-		algorithm = JudgeAlgorithm.valueOf(resource.getPlayerConfig().getPlayConfig(orgmode).getPlayconfig().getJudgetype());
+		algorithm = JudgeAlgorithm
+				.valueOf(resource.getPlayerConfig().getPlayConfig(orgmode).getPlayconfig().getJudgetype());
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
 		score.setJudgeAlgorithm(algorithm);
 		score.setRule(BMSPlayerRule.getBMSPlayerRule(orgmode));
-		
+
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
@@ -206,22 +207,72 @@ public class JudgeManager {
 
 		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] keyJudgeWindowRate = config.isCustomJudge()
-				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
-				: new int[]{100, 100, 100};
-		final int[] scratchJudgeWindowRate = config.isCustomJudge()
-				? new int[]{config.getScratchJudgeWindowRatePerfectGreat(), config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood()}
-				: new int[]{100, 100, 100};
+
+		int[][] keyJudgeWindowRate = null;
+		int[][] scratchJudgeWindowRate = null;
+		if (config.isCustomJudge() && config.getCustomJudgeKind() == 0) {
+			keyJudgeWindowRate = new int[][] {
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() } };
+			scratchJudgeWindowRate = new int[][] { { config.getScratchJudgeWindowRatePerfectGreat(),
+					config.getScratchJudgeWindowRateGreat(),
+					config.getScratchJudgeWindowRateGood() },
+					{ config.getScratchJudgeWindowRatePerfectGreat(),
+							config.getScratchJudgeWindowRateGreat(),
+							config.getScratchJudgeWindowRateGood() },
+					{ config.getScratchJudgeWindowRatePerfectGreat(),
+							config.getScratchJudgeWindowRateGreat(),
+							config.getScratchJudgeWindowRateGood() },
+					{ config.getScratchJudgeWindowRatePerfectGreat(),
+							config.getScratchJudgeWindowRateGreat(),
+							config.getScratchJudgeWindowRateGood() } };
+		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
+			keyJudgeWindowRate = new int[][] {
+					{ config.getKeyEasyJudgeWindowRatePerfectGreat(), config.getKeyEasyJudgeWindowRateGreat(),
+							config.getKeyEasyJudgeWindowRateGood() },
+					{ config.getKeyNormalJudgeWindowRatePerfectGreat(), config.getKeyNormalJudgeWindowRateGreat(),
+							config.getKeyNormalJudgeWindowRateGood() },
+					{ config.getKeyHardJudgeWindowRatePerfectGreat(), config.getKeyHardJudgeWindowRateGreat(),
+							config.getKeyHardJudgeWindowRateGood() },
+					{ config.getKeyVeryHardJudgeWindowRatePerfectGreat(), config.getKeyVeryHardJudgeWindowRateGreat(),
+							config.getKeyVeryHardJudgeWindowRateGood() } };
+			scratchJudgeWindowRate = new int[][] { { config.getScratchEasyJudgeWindowRatePerfectGreat(),
+					config.getScratchEasyJudgeWindowRateGreat(),
+					config.getScratchEasyJudgeWindowRateGood() },
+					{ config.getScratchNormalJudgeWindowRatePerfectGreat(),
+							config.getScratchNormalJudgeWindowRateGreat(),
+							config.getScratchNormalJudgeWindowRateGood() },
+					{ config.getScratchHardJudgeWindowRatePerfectGreat(),
+							config.getScratchHardJudgeWindowRateGreat(),
+							config.getScratchHardJudgeWindowRateGood() },
+					{ config.getScratchVeryHardJudgeWindowRatePerfectGreat(),
+							config.getScratchVeryHardJudgeWindowRateGreat(),
+							config.getScratchVeryHardJudgeWindowRateGood() } };
+		} else {
+			keyJudgeWindowRate = new int[][] { { 100, 100, 100 }, { 100, 100, 100 }, { 100, 100, 100 },
+					{ 100, 100, 100 } };
+			scratchJudgeWindowRate = new int[][] { { 100, 100, 100 }, { 100, 100, 100 }, { 100, 100, 100 },
+					{ 100, 100, 100 } };
+		}
+
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
-			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-				keyJudgeWindowRate[1] = keyJudgeWindowRate[2] = 0;
-				scratchJudgeWindowRate[1] = scratchJudgeWindowRate[2] = 0;
-			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-				keyJudgeWindowRate[2] = 0;
-				scratchJudgeWindowRate[2] = 0;
+			for (int i = 0; i < keyJudgeWindowRate.length; i++) {
+				if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
+					keyJudgeWindowRate[i][1] = keyJudgeWindowRate[i][2] = 0;
+					scratchJudgeWindowRate[i][1] = scratchJudgeWindowRate[i][2] = 0;
+				} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
+					keyJudgeWindowRate[i][2] = 0;
+					scratchJudgeWindowRate[i][2] = 0;
+				}
 			}
 		}
-		
+
 		nmjudge = rule.getJudge(NoteType.NOTE, judgerank, keyJudgeWindowRate);
 		cnendmjudge = rule.getJudge(NoteType.LONGNOTE_END, judgerank, keyJudgeWindowRate);
 		smjudge = rule.getJudge(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate);
@@ -266,7 +317,8 @@ public class JudgeManager {
 					break;
 				}
 			}
-			for (Note note = lanemodel.getNote(); note != null && note.getMicroTime() <= mtime; note = lanemodel.getNote()) {
+			for (Note note = lanemodel.getNote(); note != null
+					&& note.getMicroTime() <= mtime; note = lanemodel.getNote()) {
 				if (note.getMicroTime() <= prevmtime) {
 					continue;
 				}
@@ -286,7 +338,7 @@ public class JudgeManager {
 					final MineNote mnote = (MineNote) note;
 					// 地雷ノート判定
 					main.getGauge().addValue((float) -mnote.getDamage());
-//					System.out.println("Mine Damage : " + (float) mnote.getDamage());
+					// System.out.println("Mine Damage : " + (float) mnote.getDamage());
 					keysound.play(note, config.getAudioConfig().getKeyvolume(), 0);
 				}
 
@@ -305,7 +357,7 @@ public class JudgeManager {
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								mpassingcount[lane] = 0;
-								//LN時のレーザー色変更処理
+								// LN時のレーザー色変更処理
 								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								this.updateMicro(lane, ln, mtime, 0, 0);
@@ -371,7 +423,7 @@ public class JudgeManager {
 				}
 				mc.switchTimer(timerActive, true);
 				mc.setTimerOff(timerDamage);
-				if(passing[lane].getPair().getState() > 3) {
+				if (passing[lane].getPair().getState() > 3) {
 					keysound.setVolume(passing[lane], config.getAudioConfig().getKeyvolume());
 				}
 			} else {
@@ -416,7 +468,8 @@ public class JudgeManager {
 
 						keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);
 						this.updateMicro(lane, processing[lane], mtime, j, dmtime);
-//						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
+						// System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " +
+						// processing[lane].hashCode());
 						processing[lane] = null;
 						sckey[sc] = 0;
 					} else {
@@ -440,7 +493,8 @@ public class JudgeManager {
 								&& ((LongNote) judgenote).isEnd())) {
 							continue;
 						}
-						if (tnote == null || tnote.getState() != 0 || algorithm.compare(tnote, judgenote, pmtime, mjudge)) {
+						if (tnote == null || tnote.getState() != 0
+								|| algorithm.compare(tnote, judgenote, pmtime, mjudge)) {
 							if (!(miss == MissCondition.ONE && (judgenote.getState() != 0
 									|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0
 											&& (dmtime > mjudge[2][1] || dmtime < mjudge[2][0]))))) {
@@ -452,12 +506,13 @@ public class JudgeManager {
 									}
 									j = (j >= 4 ? j + 1 : j);
 								}
-								
-								if(j < 6) {
+
+								if (j < 6) {
 									if (j < 6 && (j < 4 || tnote == null
-											|| Math.abs(tnote.getMicroTime() - pmtime) > Math.abs(judgenote.getMicroTime() - pmtime))) {
+											|| Math.abs(tnote.getMicroTime() - pmtime) > Math
+													.abs(judgenote.getMicroTime() - pmtime))) {
 										tnote = judgenote;
-									}									
+									}
 								} else {
 									tnote = null;
 								}
@@ -476,7 +531,7 @@ public class JudgeManager {
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
 								mpassingcount[lane] = dmtime;
-								//LN時のレーザー色変更処理
+								// LN時のレーザー色変更処理
 								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								this.updateMicro(lane, ln, mtime, j, dmtime);
@@ -485,7 +540,8 @@ public class JudgeManager {
 								processing[lane] = ln.getPair();
 								if (sc >= 0) {
 									// BSS処理開始
-//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
+									// System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : "
+									// + key + " LN : " + ln.getPair().hashCode());
 									sckey[sc] = key;
 								}
 							}
@@ -544,7 +600,8 @@ public class JudgeManager {
 							if (j != 4 || key != sckey[sc]) {
 								release = false;
 							} else {
-//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+								// System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : "
+								// + processing[lane]);
 								sckey[sc] = 0;
 							}
 						}
@@ -562,7 +619,8 @@ public class JudgeManager {
 							if (key != sckey[sc]) {
 								release = false;
 							} else {
-//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+								// System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : "
+								// + processing[lane]);
 								sckey[sc] = 0;
 							}
 						}
@@ -579,7 +637,8 @@ public class JudgeManager {
 							this.updateMicro(lane, processing[lane].getPair(), mtime, j, dmtime);
 							keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);
 							processing[lane] = null;
-//							System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);	
+							// System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : "
+							// + processing[lane]);
 						}
 					}
 				}
@@ -716,23 +775,24 @@ public class JudgeManager {
 		keysound.play(judge, mfast >= 0);
 
 		final PlayerConfig player = main.main.getPlayerConfig();
-		if(player.isNotesDisplayTimingAutoAdjust()) {
+		if (player.isNotesDisplayTimingAutoAdjust()) {
 			final BMSPlayerMode autoplay = main.main.getPlayerResource().getPlayMode();
-			if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
+			if (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 				if (judge <= 2 && mfast >= -150000 && mfast <= 150000) {
-					player.setJudgetiming(player.getJudgetiming() - (int)((mfast >= 0 ? mfast + 15000 : mfast - 15000) / 30000));
-				}			
-			}			
+					player.setJudgetiming(
+							player.getJudgetiming() - (int) ((mfast >= 0 ? mfast + 15000 : mfast - 15000) / 30000));
+				}
+			}
 		}
 	}
 
 	public long[] getRecentJudges() {
 		return recentJudges;
 	}
-	
+
 	public long[] getMicroRecentJudges() {
 		return microrecentJudges;
-	}	
+	}
 
 	public int getRecentJudgesIndex() {
 		return recentJudgesIndex;
@@ -804,7 +864,7 @@ public class JudgeManager {
 	 * 指定の判定のカウント数を返す
 	 *
 	 * @param judge
-	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
+	 *              0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
 	 * @return 判定のカウント数
 	 */
 	public int getJudgeCount(int judge) {
@@ -815,9 +875,9 @@ public class JudgeManager {
 	 * 指定の判定のカウント数を返す
 	 *
 	 * @param judge
-	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
+	 *              0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
 	 * @param fast
-	 *            true:FAST, flase:SLOW
+	 *              true:FAST, flase:SLOW
 	 * @return 判定のカウント数
 	 */
 	public int getJudgeCount(int judge, boolean fast) {
