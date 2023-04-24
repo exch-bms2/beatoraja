@@ -41,21 +41,22 @@ public class SkinTimingVisualizer extends SkinObject {
 	private final int center;
 	private final float judgeWidthRate;
 	private final boolean drawDecay;
-	
+
 	private BMSModel model;
 	private int[][] judgeArea;
 
 	private int currentindex = -1;
-	
+
 	private int index;
 	private long[] recent;
+
 	/**
 	 *
-	 * @param width スキン描画幅
+	 * @param width            スキン描画幅
 	 * @param judgeWidthMillis 判定描画幅
-	 * @param lineWidth 入力線の幅
-	 * @param transparent 1:POOR判定を透過する
-	 * @param drawDecay 1:線を減衰させる
+	 * @param lineWidth        入力線の幅
+	 * @param transparent      1:POOR判定を透過する
+	 * @param drawDecay        1:線を減衰させる
 	 */
 	public SkinTimingVisualizer(int width, int judgeWidthMillis, int lineWidth,
 			String lineColor, String centerColor, String PGColor, String GRColor, String GDColor, String BDColor,
@@ -79,21 +80,21 @@ public class SkinTimingVisualizer extends SkinObject {
 	}
 
 	public void prepare(long time, MainState state) {
-		if(!(state instanceof BMSPlayer)) {
+		if (!(state instanceof BMSPlayer)) {
 			draw = false;
 			return;
 		}
 		super.prepare(time, state);
 		final PlayerResource resource = state.main.getPlayerResource();
-		if(resource.getBMSModel() != model) {
+		if (resource.getBMSModel() != model) {
 			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);			
+			judgeArea = getJudgeArea(resource);
 		}
-		
-		index = ((BMSPlayer)state).getJudgeManager().getRecentJudgesIndex();
-		recent = ((BMSPlayer)state).getJudgeManager().getRecentJudges();
+
+		index = ((BMSPlayer) state).getJudgeManager().getRecentJudgesIndex();
+		recent = ((BMSPlayer) state).getJudgeManager().getRecentJudges();
 	}
-	
+
 	public void draw(SkinObjectRenderer sprite) {
 		// 背景テクスチャ生成
 		if (backtex == null) {
@@ -119,9 +120,9 @@ public class SkinTimingVisualizer extends SkinObject {
 					beforex2 = x2;
 				}
 			}
-			
+
 			shape.setColor(0f, 0f, 0f, 0.25f);
-			for(int x = center % 10;x < pwidth;x += 10) {
+			for (int x = center % 10; x < pwidth; x += 10) {
 				shape.drawLine(x, 0, x, 1);
 			}
 
@@ -134,7 +135,7 @@ public class SkinTimingVisualizer extends SkinObject {
 			shape = new Pixmap(width, recent.length * 2, Pixmap.Format.RGBA8888);
 		}
 
-		if(currentindex != index) {
+		if (currentindex != index) {
 			currentindex = index;
 			// 前景テクスチャ 透明色でフィルして初期化
 			shape.setColor(Color.CLEAR);
@@ -147,7 +148,8 @@ public class SkinTimingVisualizer extends SkinObject {
 				}
 
 				shape.setColor(
-						Color.rgba8888(lineColor.r, lineColor.g, lineColor.b, (lineColor.a * i / (1.0f * recent.length))));
+						Color.rgba8888(lineColor.r, lineColor.g, lineColor.b,
+								(lineColor.a * i / (1.0f * recent.length))));
 				int x = (width - lineWidth) / 2
 						+ (int) (MathUtils.clamp(recent[j % recent.length], -center, center) * judgeWidthRate);
 				if (drawDecay) {
@@ -174,15 +176,39 @@ public class SkinTimingVisualizer extends SkinObject {
 
 		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] judgeWindowRate = config.isCustomJudge()
-				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
-				: new int[]{100, 100, 100};
-				
+		int[][] judgeWindowRate = null;
+		if (config.isCustomJudge() && config.getCustomJudgeKind() == 0) {
+			judgeWindowRate = new int[][] {
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() },
+					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
+							config.getKeyJudgeWindowRateGood() } };
+		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
+			judgeWindowRate = new int[][] {
+					{ config.getKeyEasyJudgeWindowRatePerfectGreat(), config.getKeyEasyJudgeWindowRateGreat(),
+							config.getKeyEasyJudgeWindowRateGood() },
+					{ config.getKeyNormalJudgeWindowRatePerfectGreat(), config.getKeyNormalJudgeWindowRateGreat(),
+							config.getKeyNormalJudgeWindowRateGood() },
+					{ config.getKeyHardJudgeWindowRatePerfectGreat(), config.getKeyHardJudgeWindowRateGreat(),
+							config.getKeyHardJudgeWindowRateGood() },
+					{ config.getKeyVeryHardJudgeWindowRatePerfectGreat(), config.getKeyVeryHardJudgeWindowRateGreat(),
+							config.getKeyVeryHardJudgeWindowRateGood() } };
+		} else {
+			judgeWindowRate = new int[][] { { 100, 100, 100 }, { 100, 100, 100 }, { 100, 100, 100 },
+					{ 100, 100, 100 } };
+		}
+
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
-			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-				judgeWindowRate[1] = judgeWindowRate[2] = 0;
-			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-				judgeWindowRate[2] = 0;
+			for (int i = 0; i < judgeWindowRate.length; i++) {
+				if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
+					judgeWindowRate[i][1] = judgeWindowRate[i][2] = 0;
+				} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
+					judgeWindowRate[i][2] = 0;
+				}
 			}
 		}
 
