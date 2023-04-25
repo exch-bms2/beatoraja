@@ -346,7 +346,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(bottomshiftablegauge, new String[] { "ASSIST EASY", "EASY", "NORMAL" });
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
-		initComboBox(customjudgekind, new String[] { "%(all)", "%(each)" });
+		initComboBox(customjudgekind, new String[] { "% for all judge", "% for each judge" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
 
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"),
