@@ -215,7 +215,7 @@ public class JudgeManager {
 			scratchJudgeWindowRate = new int[] { config.getScratchJudgeWindowRatePerfectGreat(),
 					config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood() };
 		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
-			if (judgerank <= 25) {
+			if (model.getMode().key != 9 && judgerank <= 25 || model.getMode().key == 9 && judgerank <= 33) {
 				keyJudgeWindowRate = new int[] { config.getKeyVeryHardJudgeWindowRatePerfectGreat(),
 						config.getKeyVeryHardJudgeWindowRateGreat(), config.getKeyVeryHardJudgeWindowRateGood() };
 				scratchJudgeWindowRate = new int[] { config.getScratchVeryHardJudgeWindowRatePerfectGreat(),
@@ -226,7 +226,7 @@ public class JudgeManager {
 						config.getKeyHardJudgeWindowRateGreat(), config.getKeyHardJudgeWindowRateGood() };
 				scratchJudgeWindowRate = new int[] { config.getScratchHardJudgeWindowRatePerfectGreat(),
 						config.getScratchHardJudgeWindowRateGreat(), config.getScratchHardJudgeWindowRateGood() };
-			} else if (judgerank <= 75) {
+			} else if (model.getMode().key != 9 && judgerank <= 75 || model.getMode().key == 9 && judgerank <= 70) {
 				keyJudgeWindowRate = new int[] { config.getKeyNormalJudgeWindowRatePerfectGreat(),
 						config.getKeyNormalJudgeWindowRateGreat(), config.getKeyNormalJudgeWindowRateGood() };
 				scratchJudgeWindowRate = new int[] { config.getScratchNormalJudgeWindowRatePerfectGreat(),

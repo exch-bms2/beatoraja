@@ -197,13 +197,13 @@ public class SkinHitErrorVisualizer extends SkinObject {
 			judgeWindowRate = new int[] { config.getKeyJudgeWindowRatePerfectGreat(),
 					config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood() };
 		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
-			if (judgerank <= 25) {
+			if (model.getMode().key != 9 && judgerank <= 25 || model.getMode().key == 9 && judgerank <= 33) {
 				judgeWindowRate = new int[] { config.getKeyVeryHardJudgeWindowRatePerfectGreat(),
 						config.getKeyVeryHardJudgeWindowRateGreat(), config.getKeyVeryHardJudgeWindowRateGood() };
 			} else if (judgerank <= 50) {
 				judgeWindowRate = new int[] { config.getKeyHardJudgeWindowRatePerfectGreat(),
 						config.getKeyHardJudgeWindowRateGreat(), config.getKeyHardJudgeWindowRateGood() };
-			} else if (judgerank <= 75) {
+			} else if (model.getMode().key != 9 && judgerank <= 75 || model.getMode().key == 9 && judgerank <= 70) {
 				judgeWindowRate = new int[] { config.getKeyNormalJudgeWindowRatePerfectGreat(),
 						config.getKeyNormalJudgeWindowRateGreat(), config.getKeyNormalJudgeWindowRateGood() };
 			} else if (judgerank <= 100) {
