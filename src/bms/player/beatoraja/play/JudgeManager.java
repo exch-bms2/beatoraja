@@ -207,7 +207,6 @@ public class JudgeManager {
 
 		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-
 		int[] keyJudgeWindowRate = null;
 		int[] scratchJudgeWindowRate = null;
 		if (config.isCustomJudge() && config.getCustomJudgeKind() == 0) {
@@ -216,66 +215,32 @@ public class JudgeManager {
 			scratchJudgeWindowRate = new int[] { config.getScratchJudgeWindowRatePerfectGreat(),
 					config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood() };
 		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
-			switch (model.getJudgerank()) {
-				case 0:
-					keyJudgeWindowRate = new int[] { config.getKeyVeryHardJudgeWindowRatePerfectGreat(),
-							config.getKeyVeryHardJudgeWindowRateGreat(), config.getKeyVeryHardJudgeWindowRateGood() };
-					scratchJudgeWindowRate = new int[] { config.getScratchVeryHardJudgeWindowRatePerfectGreat(),
-							config.getScratchVeryHardJudgeWindowRateGreat(),
-							config.getScratchVeryHardJudgeWindowRateGood() };
-					break;
-				case 1:
-					keyJudgeWindowRate = new int[] { config.getKeyHardJudgeWindowRatePerfectGreat(),
-							config.getKeyHardJudgeWindowRateGreat(), config.getKeyHardJudgeWindowRateGood() };
-					scratchJudgeWindowRate = new int[] { config.getScratchHardJudgeWindowRatePerfectGreat(),
-							config.getScratchHardJudgeWindowRateGreat(), config.getScratchHardJudgeWindowRateGood() };
-					break;
-				case 2:
-					keyJudgeWindowRate = new int[] { config.getKeyNormalJudgeWindowRatePerfectGreat(),
-							config.getKeyNormalJudgeWindowRateGreat(), config.getKeyNormalJudgeWindowRateGood() };
-					scratchJudgeWindowRate = new int[] { config.getScratchNormalJudgeWindowRatePerfectGreat(),
-							config.getScratchNormalJudgeWindowRateGreat(),
-							config.getScratchNormalJudgeWindowRateGood() };
-					break;
-				case 3:
-					keyJudgeWindowRate = new int[] { config.getKeyEasyJudgeWindowRatePerfectGreat(),
-							config.getKeyEasyJudgeWindowRateGreat(), config.getKeyEasyJudgeWindowRateGood() };
-					scratchJudgeWindowRate = new int[] { config.getScratchEasyJudgeWindowRatePerfectGreat(),
-							config.getScratchEasyJudgeWindowRateGreat(), config.getScratchEasyJudgeWindowRateGood() };
-					break;
-				default:
-					keyJudgeWindowRate = new int[] { 100, 100, 100 };
-					scratchJudgeWindowRate = new int[] { 100, 100, 100 };
+			if (judgerank <= 25) {
+				keyJudgeWindowRate = new int[] { config.getKeyVeryHardJudgeWindowRatePerfectGreat(),
+						config.getKeyVeryHardJudgeWindowRateGreat(), config.getKeyVeryHardJudgeWindowRateGood() };
+				scratchJudgeWindowRate = new int[] { config.getScratchVeryHardJudgeWindowRatePerfectGreat(),
+						config.getScratchVeryHardJudgeWindowRateGreat(),
+						config.getScratchVeryHardJudgeWindowRateGood() };
+			} else if (judgerank <= 50) {
+				keyJudgeWindowRate = new int[] { config.getKeyHardJudgeWindowRatePerfectGreat(),
+						config.getKeyHardJudgeWindowRateGreat(), config.getKeyHardJudgeWindowRateGood() };
+				scratchJudgeWindowRate = new int[] { config.getScratchHardJudgeWindowRatePerfectGreat(),
+						config.getScratchHardJudgeWindowRateGreat(), config.getScratchHardJudgeWindowRateGood() };
+			} else if (judgerank <= 75) {
+				keyJudgeWindowRate = new int[] { config.getKeyNormalJudgeWindowRatePerfectGreat(),
+						config.getKeyNormalJudgeWindowRateGreat(), config.getKeyNormalJudgeWindowRateGood() };
+				scratchJudgeWindowRate = new int[] { config.getScratchNormalJudgeWindowRatePerfectGreat(),
+						config.getScratchNormalJudgeWindowRateGreat(),
+						config.getScratchNormalJudgeWindowRateGood() };
+			} else if (judgerank <= 100) {
+				keyJudgeWindowRate = new int[] { config.getKeyEasyJudgeWindowRatePerfectGreat(),
+						config.getKeyEasyJudgeWindowRateGreat(), config.getKeyEasyJudgeWindowRateGood() };
+				scratchJudgeWindowRate = new int[] { config.getScratchEasyJudgeWindowRatePerfectGreat(),
+						config.getScratchEasyJudgeWindowRateGreat(), config.getScratchEasyJudgeWindowRateGood() };
+			} else {
+				keyJudgeWindowRate = new int[] { 100, 100, 100 };
+				scratchJudgeWindowRate = new int[] { 100, 100, 100 };
 			}
-
-			/*
-			 * keyJudgeWindowRate = new int[][] {
-			 * { config.getKeyEasyJudgeWindowRatePerfectGreat(),
-			 * config.getKeyEasyJudgeWindowRateGreat(),
-			 * config.getKeyEasyJudgeWindowRateGood() },
-			 * { config.getKeyNormalJudgeWindowRatePerfectGreat(),
-			 * config.getKeyNormalJudgeWindowRateGreat(),
-			 * config.getKeyNormalJudgeWindowRateGood() },
-			 * { config.getKeyHardJudgeWindowRatePerfectGreat(),
-			 * config.getKeyHardJudgeWindowRateGreat(),
-			 * config.getKeyHardJudgeWindowRateGood() },
-			 * { config.getKeyVeryHardJudgeWindowRatePerfectGreat(),
-			 * config.getKeyVeryHardJudgeWindowRateGreat(),
-			 * config.getKeyVeryHardJudgeWindowRateGood() } };
-			 * scratchJudgeWindowRate = new int[][] { {
-			 * config.getScratchEasyJudgeWindowRatePerfectGreat(),
-			 * config.getScratchEasyJudgeWindowRateGreat(),
-			 * config.getScratchEasyJudgeWindowRateGood() },
-			 * { config.getScratchNormalJudgeWindowRatePerfectGreat(),
-			 * config.getScratchNormalJudgeWindowRateGreat(),
-			 * config.getScratchNormalJudgeWindowRateGood() },
-			 * { config.getScratchHardJudgeWindowRatePerfectGreat(),
-			 * config.getScratchHardJudgeWindowRateGreat(),
-			 * config.getScratchHardJudgeWindowRateGood() },
-			 * { config.getScratchVeryHardJudgeWindowRatePerfectGreat(),
-			 * config.getScratchVeryHardJudgeWindowRateGreat(),
-			 * config.getScratchVeryHardJudgeWindowRateGood() } };
-			 */
 		} else {
 			keyJudgeWindowRate = new int[] { 100, 100, 100 };
 			scratchJudgeWindowRate = new int[] { 100, 100, 100 };

@@ -176,39 +176,35 @@ public class SkinTimingVisualizer extends SkinObject {
 
 		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		int[][] judgeWindowRate = null;
+		int[] judgeWindowRate = null;
 		if (config.isCustomJudge() && config.getCustomJudgeKind() == 0) {
-			judgeWindowRate = new int[][] {
-					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
-							config.getKeyJudgeWindowRateGood() },
-					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
-							config.getKeyJudgeWindowRateGood() },
-					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
-							config.getKeyJudgeWindowRateGood() },
-					{ config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(),
-							config.getKeyJudgeWindowRateGood() } };
+			judgeWindowRate = new int[] { config.getKeyJudgeWindowRatePerfectGreat(),
+					config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood() };
 		} else if (config.isCustomJudge() && config.getCustomJudgeKind() == 1) {
-			judgeWindowRate = new int[][] {
-					{ config.getKeyEasyJudgeWindowRatePerfectGreat(), config.getKeyEasyJudgeWindowRateGreat(),
-							config.getKeyEasyJudgeWindowRateGood() },
-					{ config.getKeyNormalJudgeWindowRatePerfectGreat(), config.getKeyNormalJudgeWindowRateGreat(),
-							config.getKeyNormalJudgeWindowRateGood() },
-					{ config.getKeyHardJudgeWindowRatePerfectGreat(), config.getKeyHardJudgeWindowRateGreat(),
-							config.getKeyHardJudgeWindowRateGood() },
-					{ config.getKeyVeryHardJudgeWindowRatePerfectGreat(), config.getKeyVeryHardJudgeWindowRateGreat(),
-							config.getKeyVeryHardJudgeWindowRateGood() } };
+			if (judgerank <= 25) {
+				judgeWindowRate = new int[] { config.getKeyVeryHardJudgeWindowRatePerfectGreat(),
+						config.getKeyVeryHardJudgeWindowRateGreat(), config.getKeyVeryHardJudgeWindowRateGood() };
+			} else if (judgerank <= 50) {
+				judgeWindowRate = new int[] { config.getKeyHardJudgeWindowRatePerfectGreat(),
+						config.getKeyHardJudgeWindowRateGreat(), config.getKeyHardJudgeWindowRateGood() };
+			} else if (judgerank <= 75) {
+				judgeWindowRate = new int[] { config.getKeyNormalJudgeWindowRatePerfectGreat(),
+						config.getKeyNormalJudgeWindowRateGreat(), config.getKeyNormalJudgeWindowRateGood() };
+			} else if (judgerank <= 100) {
+				judgeWindowRate = new int[] { config.getKeyEasyJudgeWindowRatePerfectGreat(),
+						config.getKeyEasyJudgeWindowRateGreat(), config.getKeyEasyJudgeWindowRateGood() };
+			} else {
+				judgeWindowRate = new int[] { 100, 100, 100 };
+			}
 		} else {
-			judgeWindowRate = new int[][] { { 100, 100, 100 }, { 100, 100, 100 }, { 100, 100, 100 },
-					{ 100, 100, 100 } };
+			judgeWindowRate = new int[] { 100, 100, 100 };
 		}
 
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
-			for (int i = 0; i < judgeWindowRate.length; i++) {
-				if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-					judgeWindowRate[i][1] = judgeWindowRate[i][2] = 0;
-				} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-					judgeWindowRate[i][2] = 0;
-				}
+			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
+				judgeWindowRate[1] = judgeWindowRate[2] = 0;
+			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
+				judgeWindowRate[2] = 0;
 			}
 		}
 
