@@ -241,20 +241,20 @@ public class BMSPlayer extends MainState {
 									|| config.getKeyEasyJudgeWindowRateGood() > 100
 									|| config.getScratchEasyJudgeWindowRatePerfectGreat() > 100
 									|| config.getScratchEasyJudgeWindowRateGreat() > 100
-									|| config.getScratchEasyJudgeWindowRateGood() > 100)
-							&& (config.getKeyNormalJudgeWindowRatePerfectGreat() > 100
+									|| config.getScratchEasyJudgeWindowRateGood() > 100
+									|| config.getKeyNormalJudgeWindowRatePerfectGreat() > 100
 									|| config.getKeyNormalJudgeWindowRateGreat() > 100
 									|| config.getKeyNormalJudgeWindowRateGood() > 100
 									|| config.getScratchNormalJudgeWindowRatePerfectGreat() > 100
 									|| config.getScratchNormalJudgeWindowRateGreat() > 100
-									|| config.getScratchNormalJudgeWindowRateGood() > 100)
-							&& (config.getKeyHardJudgeWindowRatePerfectGreat() > 100
+									|| config.getScratchNormalJudgeWindowRateGood() > 100
+									|| config.getKeyHardJudgeWindowRatePerfectGreat() > 100
 									|| config.getKeyHardJudgeWindowRateGreat() > 100
 									|| config.getKeyHardJudgeWindowRateGood() > 100
 									|| config.getScratchHardJudgeWindowRatePerfectGreat() > 100
 									|| config.getScratchHardJudgeWindowRateGreat() > 100
-									|| config.getScratchHardJudgeWindowRateGood() > 100)
-							&& (config.getKeyVeryHardJudgeWindowRatePerfectGreat() > 100
+									|| config.getScratchHardJudgeWindowRateGood() > 100
+									|| config.getKeyVeryHardJudgeWindowRatePerfectGreat() > 100
 									|| config.getKeyVeryHardJudgeWindowRateGreat() > 100
 									|| config.getKeyVeryHardJudgeWindowRateGood() > 100
 									|| config.getScratchVeryHardJudgeWindowRatePerfectGreat() > 100
