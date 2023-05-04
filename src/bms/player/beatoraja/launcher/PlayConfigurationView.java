@@ -151,6 +151,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> bottomshiftablegauge;
 	@FXML
+	private CheckBox enableLeastJudgerankType;
+	@FXML
+	private ComboBox<Integer> leastJudgerankType;
+	@FXML
 	private CheckBox customjudge;
 	@FXML
 	private Spinner<Integer> njudgepg;
@@ -293,6 +297,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(gaugeautoshift, new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE","BEST CLEAR","SELECT TO UNDER" });
 		initComboBox(bottomshiftablegauge, new String[] { "ASSIST EASY", "EASY", "NORMAL" });
+		initComboBox(leastJudgerankType, new String[] { "VeryHard", "Hard", "Normal", "Easy", "VeryEasy" });
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
@@ -435,6 +440,9 @@ public class PlayConfigurationView implements Initializable {
 		gaugeautoshift.setValue(player.getGaugeAutoShift());
 		bottomshiftablegauge.setValue(player.getBottomShiftableGauge());
 
+		enableLeastJudgerankType.setSelected(player.isEnableLeastJudgerankType());
+		leastJudgerankType.getSelectionModel().select(player.getLeastJudgerankType());
+
 		customjudge.setSelected(player.isCustomJudge());
 		njudgepg.getValueFactory().setValue(player.getKeyJudgeWindowRatePerfectGreat());
 		njudgegr.getValueFactory().setValue(player.getKeyJudgeWindowRateGreat());
@@ -538,6 +546,8 @@ public class PlayConfigurationView implements Initializable {
 		player.setBpmguide(bpmguide.isSelected());
 		player.setGaugeAutoShift(gaugeautoshift.getValue());
 		player.setBottomShiftableGauge(bottomshiftablegauge.getValue());
+		player.setEnableLeastJudgerankType(enableLeastJudgerankType.isSelected());
+		player.setLeastJudgerankType(leastJudgerankType.getValue());
 		player.setCustomJudge(customjudge.isSelected());
 		player.setKeyJudgeWindowRatePerfectGreat(getValue(njudgepg));
 		player.setKeyJudgeWindowRateGreat(getValue(njudgegr));
@@ -818,4 +828,3 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 }
-

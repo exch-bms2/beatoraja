@@ -73,7 +73,7 @@ public enum JudgeProperty {
      * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
      */
     public final boolean[] judgeVanish;
-    
+
     public final JudgeWindowRule windowrule;
 
     private JudgeProperty(long[][] note, long[][] scratch, long[][] longnote, long[][] longscratch, boolean[] combo, MissCondition miss, boolean[] judgeVanish, JudgeWindowRule windowrule) {
@@ -102,18 +102,23 @@ public enum JudgeProperty {
     public int[][] getLongScratchEndJudge(int judgerank, int[] judgeWindowRate) {
     	return convertMilli(windowrule.create(longscratch, judgerank, judgeWindowRate));
     }
-    
+
     private int[][] convertMilli(long[][] judge) {
     	int[][] mjudge = new int[judge.length][];
     	for(int i = 0;i < mjudge.length;i++) {
     		mjudge[i] = new int[judge[i].length];
     		for(int j = 0;j < mjudge[i].length;j++) {
-        		mjudge[i][j] = (int) (judge[i][j] / 1000);    			
+                mjudge[i][j] = (int) (judge[i][j] / 1000);
     		}
     	}
     	return mjudge;
     }
-    
+
+    public int getLeastJudgerank(int judgerank, int leastJudgerankType) {
+        int leastJudgerank = windowrule.judgerank[leastJudgerankType];
+        return leastJudgerank < judgerank ? leastJudgerank : judgerank;
+    }
+
     public long[][] getJudge(NoteType notetype, int judgerank, int[] judgeWindowRate) {
     	switch(notetype) {
     	case NOTE:
@@ -128,15 +133,15 @@ public enum JudgeProperty {
         	return windowrule.create(note, judgerank, judgeWindowRate);
     	}
     }
-    
+
     public enum MissCondition {
     	ONE, ALWAYS
     }
-    
+
     public enum NoteType {
     	NOTE, LONGNOTE_END, SCRATCH, LONGSCRATCH_END
     }
-    
+
     public enum JudgeWindowRule {
     	NORMAL (new int[]{25, 50, 75, 100, 125}){
 
@@ -144,7 +149,7 @@ public enum JudgeProperty {
 			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate) {
 				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, false);
 			}
-    		
+
     	},
     	PMS (new int[]{33, 50, 70, 100, 133}) {
 
@@ -152,14 +157,14 @@ public enum JudgeProperty {
 			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate) {
 				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, true);
 			}
-    		
+
     	};
-    	
+
     	/**
     	 * JUDGERANKの倍率(VERYHARD, HARD, NORMAL, EASY, VERYEASY)
     	 */
-    	public final int[] judgerank;
-    	
+        public final int[] judgerank;
+
         private static long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, boolean pms) {
     		final long[][] judge = new long[org.length][2];
     		final boolean[] fix = pms ? new boolean[]{true, false, false, true, true} : new boolean[]{false, false, false, false, true};
@@ -182,7 +187,7 @@ public enum JudgeProperty {
         				break;
         			}
     			}
-        		
+
     			for(int j = 0;j < 2;j++) {
 					if(fixmin != -1 && Math.abs(judge[i][j]) < Math.abs(judge[fixmin][j])) {
 						judge[i][j] = judge[fixmin][j];
@@ -205,14 +210,21 @@ public enum JudgeProperty {
 					}
     			}
     		}
-    		
+
     		return judge;
         }
-        
+
         private JudgeWindowRule(int[] judgerank) {
-        	this.judgerank = judgerank;
+            this.judgerank = judgerank;
         }
-        
+
+        public void setLeastJudgerank(int leastJudgerankType) {
+            int leastJudgerank = judgerank[leastJudgerankType];
+            for (int i = leastJudgerankType; i < judgerank.length; i++) {
+                judgerank[i] = leastJudgerank;
+            }
+        }
+
     	public abstract long[][] create(long[][] org, int judgerank, int[] judgeWindowRate);
     }
 }

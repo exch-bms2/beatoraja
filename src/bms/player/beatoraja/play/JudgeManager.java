@@ -65,7 +65,7 @@ public class JudgeManager {
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
 	private long[] judgefast;
-	
+
 	private long[] mjudgefast;
 	/**
 	 * 処理中のLN
@@ -178,7 +178,7 @@ public class JudgeManager {
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
 		score.setJudgeAlgorithm(algorithm);
 		score.setRule(BMSPlayerRule.getBMSPlayerRule(orgmode));
-		
+
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
@@ -203,9 +203,10 @@ public class JudgeManager {
 		for (int key = 0; key < keyassign.length; key++) {
 			auto_presstime[key] = Long.MIN_VALUE;
 		}
-
-		final int judgerank = model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
+		final int judgerank = config.isEnableLeastJudgerankType()
+				? rule.getLeastJudgerank(model.getJudgerank(), config.getLeastJudgerankType())
+				: model.getJudgerank();
 		final int[] keyJudgeWindowRate = config.isCustomJudge()
 				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
@@ -220,8 +221,10 @@ public class JudgeManager {
 				keyJudgeWindowRate[2] = 0;
 				scratchJudgeWindowRate[2] = 0;
 			}
+
 		}
-		
+
+
 		nmjudge = rule.getJudge(NoteType.NOTE, judgerank, keyJudgeWindowRate);
 		cnendmjudge = rule.getJudge(NoteType.LONGNOTE_END, judgerank, keyJudgeWindowRate);
 		smjudge = rule.getJudge(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate);
@@ -452,12 +455,12 @@ public class JudgeManager {
 									}
 									j = (j >= 4 ? j + 1 : j);
 								}
-								
+
 								if(j < 6) {
 									if (j < 6 && (j < 4 || tnote == null
 											|| Math.abs(tnote.getMicroTime() - pmtime) > Math.abs(judgenote.getMicroTime() - pmtime))) {
 										tnote = judgenote;
-									}									
+									}
 								} else {
 									tnote = null;
 								}
@@ -579,7 +582,8 @@ public class JudgeManager {
 							this.updateMicro(lane, processing[lane].getPair(), mtime, j, dmtime);
 							keysound.play(processing[lane], config.getAudioConfig().getKeyvolume(), 0);
 							processing[lane] = null;
-//							System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);	
+							// System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : "
+							// + processing[lane]);
 						}
 					}
 				}
@@ -721,18 +725,18 @@ public class JudgeManager {
 			if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 				if (judge <= 2 && mfast >= -150000 && mfast <= 150000) {
 					player.setJudgetiming(player.getJudgetiming() - (int)((mfast >= 0 ? mfast + 15000 : mfast - 15000) / 30000));
-				}			
-			}			
+				}
+			}
 		}
 	}
 
 	public long[] getRecentJudges() {
 		return recentJudges;
 	}
-	
+
 	public long[] getMicroRecentJudges() {
 		return microrecentJudges;
-	}	
+	}
 
 	public int getRecentJudgesIndex() {
 		return recentJudgesIndex;
