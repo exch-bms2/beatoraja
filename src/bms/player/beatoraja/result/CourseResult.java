@@ -46,8 +46,6 @@ public class CourseResult extends AbstractResult {
 		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, false);
 		setSound(SOUND_CLOSE, "course_close.wav", SoundType.SOUND, false);
 
-		loadSkin(SkinType.COURSE_RESULT);
-
 		for(int i = resource.getCourseGauge().size;i < resource.getCourseBMSModels().length;i++) {
 			FloatArray[] list = new FloatArray[resource.getGrooveGauge().getGaugeTypeLength()];
 			for(int type = 0; type < list.length; type++) {
@@ -76,6 +74,8 @@ public class CourseResult extends AbstractResult {
 		}
 
 		gaugeType = resource.getGrooveGauge().getType();
+
+		loadSkin(SkinType.COURSE_RESULT);
 	}
 	
 	public void prepare() {
