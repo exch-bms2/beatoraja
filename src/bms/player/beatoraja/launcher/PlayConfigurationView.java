@@ -145,6 +145,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox notesdisplaytimingautoadjust;
 	@FXML
+	private NumericSpinner<Integer> notesjudgetiming;
+	@FXML
 	private CheckBox bpmguide;
 	@FXML
 	private ComboBox<Integer> gaugeautoshift;
@@ -307,6 +309,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay4, autosaves);
 
 		notesdisplaytiming.setValueFactoryValues(PlayerConfig.JUDGETIMING_MIN, PlayerConfig.JUDGETIMING_MAX, 0, 1);
+		notesjudgetiming.setValueFactoryValues(PlayerConfig.JUDGETIMING_MIN, PlayerConfig.JUDGETIMING_MAX, 0, 1);
 		resourceController.init(this);
 
 		checkNewVersion();
@@ -429,6 +432,7 @@ public class PlayConfigurationView implements Initializable {
 		lntype.getSelectionModel().select(player.getLnmode());
 
 		notesdisplaytiming.getValueFactory().setValue(player.getJudgetiming());
+		notesjudgetiming.getValueFactory().setValue(player.getSoundOffset());
 		notesdisplaytimingautoadjust.setSelected(player.isNotesDisplayTimingAutoAdjust());
 
 		bpmguide.setSelected(player.isBpmguide());
@@ -533,6 +537,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setJudgetiming(getValue(notesdisplaytiming));
+		player.setSoundOffset(getValue(notesjudgetiming));
 		player.setNotesDisplayTimingAutoAdjust(notesdisplaytimingautoadjust.isSelected());
 
 		player.setBpmguide(bpmguide.isSelected());

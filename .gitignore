@@ -7,6 +7,9 @@
 /table/*
 /course/*
 /favorite/*
+/release/*
+/ipfs/*
+/.settings/*
 songdata.db
 songinfo.db
 config.json
@@ -17,3 +20,5 @@ b.bat
 /*.dll
 *.cim
 .idea/
+.classpath
+.project

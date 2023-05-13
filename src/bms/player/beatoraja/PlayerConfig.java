@@ -72,6 +72,8 @@ public class PlayerConfig {
 	
 	private boolean notesDisplayTimingAutoAdjust = false;
 
+	private int soundOffset = 0;
+
     /**
      * 選曲時のモードフィルター
      */
@@ -262,6 +264,18 @@ public class PlayerConfig {
 
 	public void setJudgetiming(int judgetiming) {
 		this.judgetiming = judgetiming;
+	}
+
+	public int getSoundOffset() {
+		return soundOffset;
+	}
+
+	public int getSoundOffsetMicro() {
+		return soundOffset * 1000;
+	}
+
+	public void setSoundOffset(int soundOffset) {
+		this.soundOffset = soundOffset;
 	}
 
 	public boolean isNotesDisplayTimingAutoAdjust() {
@@ -806,6 +820,7 @@ public class PlayerConfig {
 		targetid = targetid!= null ? targetid : "MAX";
 		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
+		soundOffset = MathUtils.clamp(soundOffset, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		keyJudgeWindowRatePerfectGreat = MathUtils.clamp(keyJudgeWindowRatePerfectGreat, 25, 400);
