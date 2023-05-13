@@ -72,7 +72,7 @@ public class TableBar extends DirectoryBar {
 				hashset.add(hash.getSha256().length() > 0 ? hash.getSha256() : hash.getMd5());
 			}
 		}
-		SongData[] songs = selector.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
+		SongData[] songs = selector.getSongDatabase().getSongDatas(hashset.toArray(new String[0]));
 
 		grades = new GradeBar[courses.length];
 		for (int i = 0;i < courses.length;i++) {

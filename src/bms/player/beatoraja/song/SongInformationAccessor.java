@@ -20,7 +20,7 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
 
 /**
  * 楽曲情報データベースへのアクセスクラス
- * 
+ *
  * @author exch
  */
 public class SongInformationAccessor extends SQLiteDatabaseAccessor {
@@ -35,7 +35,7 @@ public class SongInformationAccessor extends SQLiteDatabaseAccessor {
 	private Connection conn;
 
 	public SongInformationAccessor(String filepath) throws ClassNotFoundException {
-		super(new Table("information", 
+		super(new Table("information",
 				new Column("sha256", "TEXT",1,1),
 				new Column("n", "INTEGER"),
 				new Column("ln", "INTEGER"),
@@ -68,11 +68,11 @@ public class SongInformationAccessor extends SQLiteDatabaseAccessor {
 	public SongInformation[] getInformations(String sql) {
 		try {
 			List<SongInformation> m = Validatable.removeInvalidElements(qr.query("SELECT * FROM information WHERE " + sql, songhandler));
-			return m.toArray(new SongInformation[m.size()]);
+			return m.toArray(new SongInformation[0]);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return new SongInformation[0];		
+		return new SongInformation[0];
 	}
 
 	public SongInformation getInformation(String sha256) {

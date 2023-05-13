@@ -158,7 +158,7 @@ public class MainController extends ApplicationAdapter {
 			List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
 			if (ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())) {
 				roots.add(ipfspath.toString());
-				getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+				getConfig().setBmsroot(roots.toArray(new String[0]));
 			}
 		}
 		try {

@@ -42,13 +42,13 @@ public class RhythmTimerProcessor {
 						}
 					}
 					for(double j = 0.25; j <= nextSectionLineSection; j += 0.25) {
-						if((!last && j != nextSectionLineSection) || last) {
+						if (last || j != nextSectionLineSection) {
 							int prevIndex;
 							for(prevIndex = i; timelines[prevIndex].getSection() - sectionLineSection < j; prevIndex++) {}
 							prevIndex--;
 							quarterNoteTimes.add((long) (timelines[prevIndex].getMicroTime() + timelines[prevIndex].getMicroStop() + (j+sectionLineSection-timelines[prevIndex].getSection()) * 240000000 / timelines[prevIndex].getBPM()));
 						}
-					}					
+					}
 				}
 			}
 		}
@@ -56,7 +56,7 @@ public class RhythmTimerProcessor {
 		this.quarterNoteTimes = quarterNoteTimes.toArray();
 
 	}
-	
+
 	public void update(BMSPlayer player, long deltatime, double nowbpm, int freq) {
 		final long now = player.main.getNowTime();
 		final long micronow = player.main.getNowMicroTime();
@@ -78,7 +78,7 @@ public class RhythmTimerProcessor {
 			}
 		}
 	}
-	
+
 	public long getNowQuarterNoteTime() {
 		return nowQuarterNoteTime;
 	}

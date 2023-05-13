@@ -35,9 +35,9 @@ public class CourseDataAccessor {
         for(String name : readAllNames()) {
         	result.addAll(Arrays.asList(read(name)));
         }
-        return result.toArray(new CourseData[result.size()]) ;
+        return result.toArray(new CourseData[0]) ;
     }
-    
+
     public String[] readAllNames() {
         List<String> result = new ArrayList<>();
         try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(coursedir))) {
@@ -50,7 +50,7 @@ public class CourseDataAccessor {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result.toArray(new String[result.size()]) ;    	
+        return result.toArray(new String[0]) ;
     }
 
     public CourseData[] read(String name) {
@@ -61,13 +61,13 @@ public class CourseDataAccessor {
 			json.setIgnoreUnknownFields(true);
             CourseData[] courses =  json.fromJson(CourseData[].class,
                     new BufferedInputStream(Files.newInputStream(p)));
-            List<CourseData> result = new ArrayList<CourseData>();            
+            List<CourseData> result = new ArrayList<CourseData>();
             for(CourseData course : courses) {
             	if(course.validate()) {
                 	result.add(course);
             	}
             }
-            return result.toArray(new CourseData[result.size()]);
+            return result.toArray(new CourseData[0]);
         } catch(Throwable e) {
 
         }

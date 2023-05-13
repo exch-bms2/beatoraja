@@ -127,7 +127,7 @@ public class MusicDownloadProcessor {
         				List<String> orgmd5 = song.getOrg_md5();
 						orgbms = null;
         				if(orgmd5 != null && orgmd5.size() != 0){
-							String[] s = main.getMusicPaths(orgmd5.toArray(new String[orgmd5.size()]));
+							String[] s = main.getMusicPaths(orgmd5.toArray(new String[0]));
 							if (s.length != 0) {
 								for (String bms : s) {
 									Path bmspath = Paths.get(bms);
