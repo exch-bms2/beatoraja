@@ -74,17 +74,17 @@ public class MusicSelector extends MainState {
 	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
 	 */
 	private final int previewDuration = 400;
-	
+
 	private final int rankingDuration = 5000;
 	private final int rankingReloadDuration = 10 * 60 * 1000;
-	
+
 	private long currentRankingDuration = -1;
 
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
-	
+
 	private RankingData currentir;
 	/**
 	 * ランキング表示位置
@@ -92,7 +92,7 @@ public class MusicSelector extends MainState {
 	protected int rankingOffset = 0;
 
 	private PlayerInformation rival;
-	
+
 	private int panelstate;
 
 	public static final int SOUND_BGM = 0;
@@ -131,7 +131,7 @@ public class MusicSelector extends MainState {
 				pda.readScoreDatas(collector, songs, lnmode);
 			}
 		};
-		
+
 		bar = new BarRenderer(this);
 		banners = new PixmapResourcePool(main.getConfig().getBannerPixmapGen());
 		stagefiles = new PixmapResourcePool(main.getConfig().getStagefilePixmapGen());
@@ -141,7 +141,7 @@ public class MusicSelector extends MainState {
 			main.updateSong(null);
 		}
 	}
-	
+
 	public void setRival(PlayerInformation rival) {
 		final RivalDataAccessor rivals = main.getRivalDataAccessor();
 		int index = -1;
@@ -173,11 +173,11 @@ public class MusicSelector extends MainState {
 		main.getSoundManager().shuffle();
 		setSound(SOUND_BGM, "select.wav", SoundType.BGM, true);
 		setSound(SOUND_SCRATCH, "scratch.wav", SoundType.SOUND, false);
-		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND,false);
-		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONCHANGE, "o-change.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONOPEN, "o-open.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONCLOSE, "o-close.wav", SoundType.SOUND,false);
+		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND, false);
+		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND, false);
+		setSound(SOUND_OPTIONCHANGE, "o-change.wav", SoundType.SOUND, false);
+		setSound(SOUND_OPTIONOPEN, "o-open.wav", SoundType.SOUND, false);
+		setSound(SOUND_OPTIONCLOSE, "o-close.wav", SoundType.SOUND, false);
 
 		play = null;
 		showNoteGraph = false;
@@ -195,13 +195,6 @@ public class MusicSelector extends MainState {
 
 		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
 		preview.setDefault(getSound(SOUND_BGM));
-
-		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		PlayModeConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
-				: (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
-		input.setKeyboardConfig(pc.getKeyboardConfig());
-		input.setControllerConfig(pc.getController());
-		input.setMidiConfig(pc.getMidiConfig());
 		bar.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
@@ -209,8 +202,8 @@ public class MusicSelector extends MainState {
 		// search text field
 		Rectangle searchRegion = ((MusicSelectSkin) getSkin()).getSearchTextRegion();
 		if (searchRegion != null && (getStage() == null ||
-				(search != null && !searchRegion.equals(search.getSearchBounds())))) {
-			if(search != null) {
+			(search != null && !searchRegion.equals(search.getSearchBounds())))) {
+			if (search != null) {
 				search.dispose();
 			}
 			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());
@@ -267,7 +260,7 @@ public class MusicSelector extends MainState {
 				}
 				irc.load(this, song);
 	            currentir = irc;
-			}				
+			}
 			if (current instanceof GradeBar && ((GradeBar) current).existsAllSongs() && play == null) {
 				CourseData course = ((GradeBar) current).getCourseData();
 				RankingData irc = main.getRankingDataCache().get(course, config.getLnmode());
@@ -277,7 +270,7 @@ public class MusicSelector extends MainState {
 				}
 				irc.load(this, course);
 	            currentir = irc;
-			}				
+			}
 		}
 		final int irstate = currentir != null ? currentir.getState() : -1;
 		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == RankingData.ACCESS);
@@ -315,7 +308,7 @@ public class MusicSelector extends MainState {
 						}
 						resource.setRankingData(currentir);
 						resource.setRivalScoreData(current.getRivalScore());
-						
+
 						playedsong = song;
 						changeState(MainStateType.DECIDE);
 					} else {
@@ -401,7 +394,7 @@ public class MusicSelector extends MainState {
 	public void shutdown() {
 		preview.stop();
 	}
-	
+
 	public void changeState(MainStateType type) {
 		main.changeState(type);
 		if (search != null) {
@@ -532,7 +525,7 @@ public class MusicSelector extends MainState {
 				currentir = new RankingData();
 				main.getRankingDataCache().put(gradeBar.getCourseData(), config.getLnmode(), currentir);
 			}
-			
+
 			RankingData songrank = main.getRankingDataCache().get(songs[0], config.getLnmode());
 			if(main.getIRStatus().length > 0 && songrank == null) {
 				songrank = new RankingData();
@@ -640,11 +633,11 @@ public class MusicSelector extends MainState {
 				currentRankingDuration = (currentir != null ? Math.max(rankingReloadDuration - (System.currentTimeMillis() - currentir.getLastUpdateTime()) ,0) : 0) + rankingDuration;
 			} else {
 				currentir = null;
-				currentRankingDuration = -1;			
+				currentRankingDuration = -1;
 			}
 		} else {
 			currentir = null;
-			currentRankingDuration = -1;			
+			currentRankingDuration = -1;
 		}
 	}
 
@@ -685,24 +678,24 @@ public class MusicSelector extends MainState {
 		}
 		return pc;
 	}
-	
+
 	public RankingData getCurrentRankingData() {
 		return currentir;
 	}
-	
+
 	public long getCurrentRankingDuration() {
 		return currentRankingDuration;
 	}
-	
+
 	public int getRankingOffset() {
 		return rankingOffset;
 	}
-	
+
 	public float getRankingPosition() {
 		final int rankingMax = currentir != null ? Math.max(1, currentir.getTotalPlayer()) : 1;
-		return (float)rankingOffset / rankingMax;		
+		return (float)rankingOffset / rankingMax;
 	}
-	
+
 	public void setRankingPosition(float value) {
 		if (value >= 0 && value < 1) {
 			final int rankingMax = currentir != null ? Math.max(1, currentir.getTotalPlayer()) : 1;

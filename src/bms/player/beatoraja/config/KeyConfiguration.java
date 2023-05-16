@@ -47,7 +47,7 @@ public class KeyConfiguration extends MainState {
 			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "F-SCR", "R-SCR", "START", "SELECT" },
 			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "8 KEY", "9 KEY", "START", "SELECT" },
 			{ "1P-1 KEY", "1P-2 KEY", "1P-3 KEY", "1P-4 KEY", "1P-5 KEY", "1P-F-SCR",
-				"1P-R-SCR", "2P-1 KEY", "2P-2 KEY", "2P-3 KEY", "2P-4 KEY", "2P-5 KEY", 
+				"1P-R-SCR", "2P-1 KEY", "2P-2 KEY", "2P-3 KEY", "2P-4 KEY", "2P-5 KEY",
 				"2P-F-SCR", "2P-R-SCR", "START", "SELECT" },
 			{ "1P-1 KEY", "1P-2 KEY", "1P-3 KEY", "1P-4 KEY", "1P-5 KEY", "1P-6 KEY", "1P-7 KEY", "1P-F-SCR",
 					"1P-R-SCR", "2P-1 KEY", "2P-2 KEY", "2P-3 KEY", "2P-4 KEY", "2P-5 KEY", "2P-6 KEY", "2P-7 KEY",
@@ -70,8 +70,6 @@ public class KeyConfiguration extends MainState {
 					29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1,
 					-2 } };
 	private static final int playerOffset = 100;
-
-	private static final String[] SELECTKEY = { "2dx sp", "popn", "2dx dp" };
 
 	private int cursorpos = 0;
 	private int scrollpos = 0;
@@ -112,6 +110,8 @@ public class KeyConfiguration extends MainState {
 		titlefont = generator.generateFont(parameter);
 		shape = new ShapeRenderer();
 
+		config = main.getPlayerResource().getPlayerConfig();
+		reinitializeInputConfigs();
 		input = main.getInputProcessor();
 		keyboard = input.getKeyBoardInputProcesseor();
 		controllers = input.getBMInputProcessor();
@@ -171,9 +171,10 @@ public class KeyConfiguration extends MainState {
 				cursorpos = (cursorpos + 1) % keys.length;
 			}
 			if (input.isControlKeyPressed(ControlKeys.NUM1)) {
-				config.setMusicselectinput((config.getMusicselectinput() + 1) % 3);
+				config.nextMusicSelectInputOption();
+				reinitializeInputConfigs();
 			}
-			// change contronnler device 1
+			// change controller device 1
 			if (input.isControlKeyPressed(ControlKeys.NUM2)) {
 				if (controllers.length > 0) {
 					int index = 0;
@@ -183,11 +184,11 @@ public class KeyConfiguration extends MainState {
 						}
 					}
 					pc.getController()[0]
-							.setName(controllers[(index + 1) % controllers.length].getName());
+						.setName(controllers[(index + 1) % controllers.length].getName());
 					pc.setController(pc.getController());
 				}
 			}
-			// change contronnler device 2
+			// change controller device 2
 			if (input.isControlKeyPressed(ControlKeys.NUM3)) {
 				if (controllers.length > 0 && pc.getController().length > 1) {
 					int index = 0;
@@ -257,7 +258,7 @@ public class KeyConfiguration extends MainState {
 		titlefont.draw(sprite, "MIDI", 630 * scaleX, 620 * scaleY);
 		titlefont.setColor(Color.ORANGE);
 		titlefont.draw(sprite, "Music Select (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
-		titlefont.draw(sprite, SELECTKEY[config.getMusicselectinput()], 780 * scaleX, 590 * scaleY);
+		titlefont.draw(sprite, config.getMusicSelectInputOption().toString(), 780 * scaleX, 590 * scaleY);
 
 		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   ", 750 * scaleX, 500 * scaleY);
 		titlefont.draw(sprite, pc.getController()[0].getName(), 780 * scaleX, 470 * scaleY);
@@ -292,7 +293,7 @@ public class KeyConfiguration extends MainState {
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ? 
+			titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ?
 				Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
 			titlefont.draw(sprite, getControllerKeyAssign(0, keysa[i]) != -1
 					? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, keysa[i])) : "----",
@@ -309,9 +310,26 @@ public class KeyConfiguration extends MainState {
 		}
 	}
 
+	private void reinitializeInputConfigs() {
+		BMSPlayerInputProcessor input = main.getInputProcessor();
+		PlayModeConfig playModeConfig;
+		switch (config.getMusicSelectInputOption()) {
+			case POPN_9K:
+				playModeConfig = config.getMode9();
+				break;
+			case BEAT_14K:
+				playModeConfig = config.getMode14();
+				break;
+			case BEAT_7K:
+			default:
+				playModeConfig = config.getMode7();
+				break;
+		}
+		input.setAllInputConfigs(playModeConfig);
+	}
+
 	private void setMode(int mode) {
 		this.mode = mode;
-		config = main.getPlayerResource().getPlayerConfig();
 		pc = config.getPlayConfig(MODE_HINT[mode]);
 		keyboardConfig = pc.getKeyboardConfig();
 		controllerConfigs = pc.getController();

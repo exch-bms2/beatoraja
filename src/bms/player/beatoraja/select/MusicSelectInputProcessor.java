@@ -1,25 +1,25 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.BMSPlayerMode;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
-import bms.player.beatoraja.select.bar.*;
-import bms.player.beatoraja.skin.property.EventFactory;
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.DirectoryBar;
+import bms.player.beatoraja.select.bar.SearchWordBar;
+import bms.player.beatoraja.select.bar.SelectableBar;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
-import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static bms.player.beatoraja.select.MusicSelector.*;
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
+import static bms.player.beatoraja.select.MusicSelector.*;
+import static bms.player.beatoraja.skin.SkinProperty.TIMER_SONGBAR_CHANGE;
 
 /**
  * 選曲の入力処理用クラス
@@ -102,12 +102,12 @@ public class MusicSelectInputProcessor {
             select.executeEvent(EventType.lnmode);
         }
 
-        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
+        final MusicSelectKeyProperty property = config.getMusicSelectInputOption();
 
-        if(!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)){
+        if (!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)) {
             //オプションキー入力なし
             isOptionKeyReleased = true;
-            if(isOptionKeyPressed) {
+            if (isOptionKeyPressed) {
                 isOptionKeyPressed = false;
                 select.play(SOUND_OPTIONCLOSE);
             }
