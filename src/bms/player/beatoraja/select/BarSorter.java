@@ -5,7 +5,6 @@ import bms.player.beatoraja.select.bar.FolderBar;
 import bms.player.beatoraja.select.bar.SongBar;
 
 import java.util.Comparator;
-import java.util.logging.Logger;
 
 /**
  * バーのソートアルゴリズム
