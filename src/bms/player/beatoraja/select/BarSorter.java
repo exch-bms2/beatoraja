@@ -5,6 +5,7 @@ import bms.player.beatoraja.select.bar.FolderBar;
 import bms.player.beatoraja.select.bar.SongBar;
 
 import java.util.Comparator;
+import java.util.logging.Logger;
 
 /**
  * バーのソートアルゴリズム
@@ -170,7 +171,8 @@ public enum BarSorter implements Comparator<Bar> {
 			if (n2 == 0) {
 				return -1;
 			}
-			return o1.getScore().getExscore() * 1000 / n1 - o2.getScore().getExscore() * 1000 / n2;
+			final float diff = (float) o1.getScore().getExscore() / n1 - (float) o2.getScore().getExscore() / n2;
+			return diff > 0 ? 1 : diff < 0 ? -1 : 0;
 		}
 	},
 	/**
