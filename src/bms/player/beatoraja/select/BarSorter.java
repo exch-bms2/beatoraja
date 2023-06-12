@@ -170,8 +170,10 @@ public enum BarSorter implements Comparator<Bar> {
 			if (n2 == 0) {
 				return -1;
 			}
-			final float diff = (float) o1.getScore().getExscore() / n1 - (float) o2.getScore().getExscore() / n2;
-			return diff > 0 ? 1 : diff < 0 ? -1 : 0;
+			return Float.compare(
+					(float) o1.getScore().getExscore() / n1,
+					(float) o2.getScore().getExscore() / n2
+			);
 		}
 	},
 	/**
