@@ -57,7 +57,8 @@ public class ScoreDataProperty {
 
         rivalscore = exscore;
         rivalscorerate = totalnotes == 0 ? 1.0f : ((float)exscore) / (totalnotes * 2);
-
+        rivalrateInt = (int)(rivalscorerate * 100);
+        rivalrateAfterDot = ((int)(rivalscorerate * 10000)) % 100;
     }
 
     public void update(ScoreData score, int notes) {
@@ -142,7 +143,9 @@ public class ScoreDataProperty {
     
     public void updateTargetScore(int rivalscore) {
     	this.rivalscore = rivalscore;
-        rivalscorerate= ((float)rivalscore)  / (totalnotes * 2);
+        rivalscorerate = ((float)rivalscore)  / (totalnotes * 2);
+        rivalrateInt = (int)(rivalscorerate * 100);
+        rivalrateAfterDot = ((int)(rivalscorerate * 10000)) % 100;
     }
 
     public void setTargetScore(int bestscore, int rivalscore, int totalnotes) {
