@@ -42,51 +42,19 @@ public class BooleanPropertyFactory {
 			}
 		}
 		
-		if (id == OPTION_REPLAYDATA) {
-			result = new ReplayDrawCondition(0, 0);
-		} else if (id == OPTION_REPLAYDATA2) {
-			result = new ReplayDrawCondition(1, 0);
-		} else if (id == OPTION_REPLAYDATA3) {
-			result = new ReplayDrawCondition(2, 0);
-		} else if (id == OPTION_REPLAYDATA4) {
-			result = new ReplayDrawCondition(3, 0);
-		} else if (id == OPTION_NO_REPLAYDATA) {
-			result = new ReplayDrawCondition(0, 1);
-		} else if (id == OPTION_NO_REPLAYDATA2) {
-			result = new ReplayDrawCondition(1, 1);
-		} else if (id == OPTION_NO_REPLAYDATA3) {
-			result = new ReplayDrawCondition(2, 1);
-		} else if (id == OPTION_NO_REPLAYDATA4) {
-			result = new ReplayDrawCondition(3, 1);
-		} else if (id == OPTION_REPLAYDATA_SAVED) {
-			result = new ReplayDrawCondition(0, 2);
-		} else if (id == OPTION_REPLAYDATA2_SAVED) {
-			result = new ReplayDrawCondition(1, 2);
-		} else if (id == OPTION_REPLAYDATA3_SAVED) {
-			result = new ReplayDrawCondition(2, 2);
-		} else if (id == OPTION_REPLAYDATA4_SAVED) {
-			result = new ReplayDrawCondition(3, 2);
-		}
-
 		if (id >= OPTION_COURSE_STAGE1 && id <= OPTION_COURSE_STAGE4) {
 			int index = id - OPTION_COURSE_STAGE1;
-			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
-				@Override
-				public boolean get(MainState state) {
-					final CourseData course = state.main.getPlayerResource().getCourseData();
-					final int courseIndex = state.main.getPlayerResource().getCourseIndex();
-					return course != null && index == courseIndex && index != course.getSong().length - 1;
-				}
-			};
+			result = new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
+				final CourseData course = state.main.getPlayerResource().getCourseData();
+				final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+				return course != null && index == courseIndex && index != course.getSong().length - 1;
+			});
 		} else if (id == OPTION_COURSE_STAGE_FINAL) {
-			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
-				@Override
-				public boolean get(MainState state) {
-					final CourseData course = state.main.getPlayerResource().getCourseData();
-					final int courseIndex = state.main.getPlayerResource().getCourseIndex();
-					return course != null && courseIndex == course.getSong().length - 1;
-				}
-			};
+			result = new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
+				final CourseData course = state.main.getPlayerResource().getCourseData();
+				final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+				return course != null && courseIndex == course.getSong().length - 1;				
+			});
 		}
 
 		if (result == null) {
@@ -114,7 +82,7 @@ public class BooleanPropertyFactory {
 		
 		return result;
 	}
-
+	
 	private static BooleanProperty getBooleanProperty0(int optionid) {
 		switch (optionid) {
 		case OPTION_TABLE_SONG:
@@ -138,48 +106,6 @@ public class BooleanPropertyFactory {
 						}
 						return false;
 					});
-		case OPTION_GRADEBAR_CLASS:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.CLASS) : false));
-		case OPTION_GRADEBAR_MIRROR:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.MIRROR) : false));
-		case OPTION_GRADEBAR_RANDOM:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.RANDOM) : false));
-		case OPTION_GRADEBAR_NOSPEED:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_SPEED) : false));
-		case OPTION_GRADEBAR_NOGOOD:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_GOOD) : false));
-		case OPTION_GRADEBAR_NOGREAT:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_GREAT) : false));
-		case OPTION_GRADEBAR_GAUGE_LR2:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_LR2) : false));
-		case OPTION_GRADEBAR_GAUGE_5KEYS:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_5KEYS) : false));
-		case OPTION_GRADEBAR_GAUGE_7KEYS:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_7KEYS) : false));
-		case OPTION_GRADEBAR_GAUGE_9KEYS:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_9KEYS) : false));
-		case OPTION_GRADEBAR_GAUGE_24KEYS:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.GAUGE_24KEYS) : false));
-		case OPTION_GRADEBAR_LN:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.LN) : false));
-		case OPTION_GRADEBAR_CN:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.CN) : false));
-		case OPTION_GRADEBAR_HCN:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.HCN) : false));
 		case OPTION_NOT_COMPARE_RIVAL:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() == null : false));
@@ -209,28 +135,14 @@ public class BooleanPropertyFactory {
 		case OPTION_NO_SAVE_CLEAR:
 			// TODO 未実装
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.main.getPlayerResource().isUpdateScore()));
-		case OPTION_RESULT_CLEAR:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
-				final ScoreData score = state.main.getPlayerResource().getScoreData();
-				final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
-				return score.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id);
-			});
-		case OPTION_RESULT_FAIL:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
-				final ScoreData score = state.main.getPlayerResource().getScoreData();
-				final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
-				return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
-			});
-		case OPTION_1PWIN:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore()));
-		case OPTION_2PWIN:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore()));
-		case OPTION_DRAW:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore()));
 
 		}
 		
 		return null;
+	}
+	
+	private static DrawProperty createCourseDataConstraintProperty(CourseData.CourseDataConstraint constraint) {
+		return new DrawProperty(DrawProperty.TYPE_NO_STATIC,(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(constraint) : false));
 	}
 
 	private static class DrawProperty extends DrawConditionProperty {
@@ -272,34 +184,25 @@ public class BooleanPropertyFactory {
 
 	}
 	
-	private static class NowJudgeDrawCondition extends DrawConditionProperty {
+	private static class NowJudgeDrawCondition extends DrawProperty {
 
-		private final int player;
-		private final int type;
-
-		public NowJudgeDrawCondition(int player, int type) {
-			super(TYPE_NO_STATIC);
-			this.player = player;
-			this.type = type;
-		}
-
-		@Override
-		public boolean get(MainState state) {
-			if (state instanceof BMSPlayer) {
-				JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
-				if (type == 0) {
-					return judge.getNowJudge().length > player && judge.getNowJudge()[player] == 1;
-				} else if (type == 1) {
-					return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
-							&& judge.getRecentJudgeTiming()[player] > 0;
-				} else {
-					return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
-							&& judge.getRecentJudgeTiming()[player] < 0;
+		public NowJudgeDrawCondition(final int player, final int type) {
+			super(TYPE_NO_STATIC, (state) -> {
+				if (state instanceof BMSPlayer) {
+					JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+					if (type == 0) {
+						return judge.getNowJudge().length > player && judge.getNowJudge()[player] == 1;
+					} else if (type == 1) {
+						return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
+								&& judge.getRecentJudgeTiming()[player] > 0;
+					} else {
+						return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
+								&& judge.getRecentJudgeTiming()[player] < 0;
+					}
 				}
-			}
-			return false;
+				return false;				
+			});
 		}
-
 	}
 
 	private static class SongDataBooleanProperty extends DrawConditionProperty {
@@ -323,22 +226,16 @@ public class BooleanPropertyFactory {
 		public boolean isTrue(SongData model);
 	}
 
-	private static class SelectedBarClearDrawCondition extends DrawConditionProperty {
+	private static class SelectedBarClearDrawCondition extends DrawProperty {
 
-		private final ClearType type;
-
-		public SelectedBarClearDrawCondition(ClearType type) {
-			super(TYPE_NO_STATIC);
-			this.type = type;
-		}
-
-		@Override
-		public boolean get(MainState state) {
-			if(state instanceof MusicSelector) {
-				ScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
-				return score != null ? score.getClear() == type.id : false; 
-			}
-			return false;
+		public SelectedBarClearDrawCondition(final ClearType type) {
+			super(TYPE_NO_STATIC, (state) -> {
+				if(state instanceof MusicSelector) {
+					ScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+					return score != null ? score.getClear() == type.id : false; 
+				}
+				return false;				
+			});
 		}
 	}
 
@@ -405,36 +302,18 @@ public class BooleanPropertyFactory {
 
 	}
 
-	private static class TrophyDrawCondition extends DrawConditionProperty {
+	private static class TrophyDrawCondition extends DrawProperty {
 
-		private final SongTrophy trophy;
-
-		public TrophyDrawCondition(SongTrophy trophy) {
-			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
-			this.trophy = trophy;
+		public TrophyDrawCondition(final SongTrophy trophy) {
+			super(TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
+				final ScoreData score = state.getScoreDataProperty().getScoreData();
+				return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;				
+			});
 		}
-
-		@Override
-		public boolean get(MainState state) {
-			final ScoreData score = state.getScoreDataProperty().getScoreData();
-			return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;
-		}
-
 	}
 
-	private static class ReplayDrawCondition extends DrawConditionProperty {
-
-		private final int index;
-		private final int type;
-
-		public ReplayDrawCondition(int index, int type) {
-			super(TYPE_NO_STATIC);
-			this.index = index;
-			this.type = type;
-		}
-
-		@Override
-		public boolean get(MainState state) {
+	private static DrawProperty createReplayProperty(final int index, final int type) {
+		return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
 			if (state instanceof MusicSelector) {
 				final Bar current = ((MusicSelector) state).getSelectedBar();
 				return (current instanceof SelectableBar)
@@ -445,53 +324,36 @@ public class BooleanPropertyFactory {
 				return ((AbstractResult) state).getReplayStatus(index) == (type == 0 ? AbstractResult.ReplayStatus.EXIST
 						: (type == 1 ? AbstractResult.ReplayStatus.NOT_EXIST : AbstractResult.ReplayStatus.SAVED));
 			}
-			return false;
-		}
+			return false;				
+		});
 	}
 	
 	public enum BooleanType {
 		
-		bgaoff(40, new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
-			@Override
-			public boolean get(MainState state) {
-				return !state.main.getPlayerResource().getBMSResource().isBGAOn();
+		bgaoff(40, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (!state.main.getPlayerResource().getBMSResource().isBGAOn()))),
+		bgaon(41, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (state.main.getPlayerResource().getBMSResource().isBGAOn()))),
+		gauge_groove(42, new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+			int type = Integer.MIN_VALUE;
+			if (state instanceof BMSPlayer) {
+				type = ((BMSPlayer) state).getGauge().getType();
+			} else if (state instanceof AbstractResult) {
+				type = ((AbstractResult) state).getGaugeType();
 			}
-		}),
-		bgaon(41, new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
-			@Override
-			public boolean get(MainState state) {
-				return state.main.getPlayerResource().getBMSResource().isBGAOn();
+			if (type != Integer.MIN_VALUE)
+				return type <= 2;
+			return false;
+		})),
+		gauge_hard(43, new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+			int type = Integer.MIN_VALUE;
+			if (state instanceof BMSPlayer) {
+				type = ((BMSPlayer) state).getGauge().getType();
+			} else if (state instanceof AbstractResult) {
+				type = ((AbstractResult) state).getGaugeType();
 			}
-		}),
-		gauge_groove(42, new DrawConditionProperty(DrawConditionProperty.TYPE_NO_STATIC) {
-			@Override
-			public boolean get(MainState state) {
-				int type = Integer.MIN_VALUE;
-				if (state instanceof BMSPlayer) {
-					type = ((BMSPlayer) state).getGauge().getType();
-				} else if (state instanceof AbstractResult) {
-					type = ((AbstractResult) state).getGaugeType();
-				}
-				if (type != Integer.MIN_VALUE)
-					return type <= 2;
-				return false;
-			}
-		}),
-		gauge_hard(43, new DrawConditionProperty(DrawConditionProperty.TYPE_NO_STATIC) {
-			@Override
-			public boolean get(MainState state) {
-				int type = Integer.MIN_VALUE;
-				if (state instanceof BMSPlayer) {
-					type = ((BMSPlayer) state).getGauge().getType();
-				} else if (state instanceof AbstractResult) {
-					type = ((AbstractResult) state).getGaugeType();
-				}
-				if (type != Integer.MIN_VALUE)
-					return type >= 3;
-				return false;
-			}
-		}),
-		
+			if (type != Integer.MIN_VALUE)
+				return type >= 3;
+			return false;			
+		})),
 		autoplay_on(OPTION_AUTOPLAYON, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY : false))),
 		autoplay_off(OPTION_AUTOPLAYOFF, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
@@ -547,6 +409,19 @@ public class BooleanPropertyFactory {
 		select_bar_perfect(OPTION_SELECT_BAR_PERFECT_CLEARED, new SelectedBarClearDrawCondition(Perfect)),
 		select_bar_max(OPTION_SELECT_BAR_MAX_CLEARED, new SelectedBarClearDrawCondition(Max)),
 
+		replaydata_exist_1(OPTION_REPLAYDATA, createReplayProperty(0, 0)),
+		replaydata_exist_2(OPTION_REPLAYDATA2, createReplayProperty(1, 0)),
+		replaydata_exist_3(OPTION_REPLAYDATA3, createReplayProperty(2, 0)),
+		replaydata_exist_4(OPTION_REPLAYDATA4, createReplayProperty(3, 0)),
+		replaydata_no_1(OPTION_NO_REPLAYDATA, createReplayProperty(0, 1)),
+		replaydata_no_2(OPTION_NO_REPLAYDATA2, createReplayProperty(1, 1)),
+		replaydata_no_3(OPTION_NO_REPLAYDATA3, createReplayProperty(2, 1)),
+		replaydata_no_4(OPTION_NO_REPLAYDATA4, createReplayProperty(3, 1)),
+		replaydata_saved_1(OPTION_REPLAYDATA_SAVED, createReplayProperty(0, 2)),
+		replaydata_saved_2(OPTION_REPLAYDATA2_SAVED, createReplayProperty(1, 2)),
+		replaydata_saved_3(OPTION_REPLAYDATA3_SAVED, createReplayProperty(2, 2)),
+		replaydata_saved_4(OPTION_REPLAYDATA4_SAVED, createReplayProperty(3, 2)),
+		
 		select_replaydata_1(OPTION_SELECT_REPLAYDATA, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 0 : false))),
 		select_replaydata_2(OPTION_SELECT_REPLAYDATA2, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
@@ -569,6 +444,21 @@ public class BooleanPropertyFactory {
 				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof DirectoryBar : false))),
 		select_coursebar(OPTION_GRADEBAR, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof GradeBar : false))),
+
+		course_class(OPTION_GRADEBAR_CLASS,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.CLASS)),
+		course_mirror(OPTION_GRADEBAR_MIRROR,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.MIRROR)),
+		course_random(OPTION_GRADEBAR_RANDOM,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.RANDOM)),
+		course_nospeed(OPTION_GRADEBAR_NOSPEED,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.NO_SPEED)),
+		course_nogood(OPTION_GRADEBAR_NOGOOD,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.NO_GOOD)),
+		course_nogreat(OPTION_GRADEBAR_NOGREAT,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.NO_GREAT)),
+		course_gauge_lr2(OPTION_GRADEBAR_GAUGE_LR2,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.GAUGE_LR2)),
+		course_gauge_5keys(OPTION_GRADEBAR_GAUGE_5KEYS,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.GAUGE_5KEYS)),
+		course_gauge_7keys(OPTION_GRADEBAR_GAUGE_7KEYS,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.GAUGE_7KEYS)),
+		course_gauge_9keys(OPTION_GRADEBAR_GAUGE_9KEYS,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.GAUGE_9KEYS)),
+		course_gauge_24keys(OPTION_GRADEBAR_GAUGE_24KEYS, createCourseDataConstraintProperty(CourseData.CourseDataConstraint.GAUGE_24KEYS)),
+		course_ln(OPTION_GRADEBAR_LN,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.LN)),
+		course_cn(OPTION_GRADEBAR_CN,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.CN)),
+		course_hcn(OPTION_GRADEBAR_HCN,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.HCN)),
 
 		stagefile(OPTION_STAGEFILE, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, 
 				(state) -> (state.main.getPlayerResource().getBMSResource().getStagefile() != null))),
@@ -688,6 +578,23 @@ public class BooleanPropertyFactory {
 				(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() > state.getScoreDataProperty().getRivalScore() : false))),
 		draw_target(OPTION_DRAW_TARGET, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() == state.getScoreDataProperty().getRivalScore() : false))),
+
+		result_clear(OPTION_RESULT_CLEAR,new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+			final ScoreData score = state.main.getPlayerResource().getScoreData();
+			final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
+			return score.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id);
+		})),
+		result_fail(OPTION_RESULT_FAIL,new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+			final ScoreData score = state.main.getPlayerResource().getScoreData();
+			final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
+			return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
+		})),
+		result_1pwin(OPTION_1PWIN,new DrawProperty(DrawProperty.TYPE_NO_STATIC, 
+				(state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore()))),
+		result_2pwin(OPTION_2PWIN,new DrawProperty(DrawProperty.TYPE_NO_STATIC, 
+				(state) -> (state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore()))),
+		result_draw(OPTION_DRAW,new DrawProperty(DrawProperty.TYPE_NO_STATIC, 
+				(state) -> (state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore()))),
 
 		ir_offline(OPTION_OFFLINE, new DrawProperty(DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length == 0))),
 		ir_online(OPTION_ONLINE, new DrawProperty(DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length > 0))),
