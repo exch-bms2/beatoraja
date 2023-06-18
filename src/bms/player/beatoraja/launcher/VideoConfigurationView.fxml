@@ -67,6 +67,24 @@
             </items>
         </ComboBox>
 
+        <Label text="%CAMERA" GridPane.rowIndex="9" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+
+        <Label text="%CAMERA" GridPane.rowIndex="10" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="cameraEnabled" GridPane.rowIndex="10" GridPane.columnIndex="1">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Off"/>
+                    <String fx:value="On"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
+
+        <Label text="%CAMERA_DEVICE" GridPane.rowIndex="11" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="cameraDevice" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
+
+        <Label text="%CAMERA_RESOLUTION" GridPane.rowIndex="12" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="cameraResolution" GridPane.rowIndex="12" GridPane.columnIndex="1"/>
+
         <stylesheets>
             <URL value="@LauncherStyle.css"/>
         </stylesheets>

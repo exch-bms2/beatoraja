@@ -53,9 +53,11 @@ public class SkinBGA extends SkinObject {
 		final PlayerResource resource = player.main.getPlayerResource();
 		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE) {
 			player.getPracticeConfiguration().draw(region, sprite, time, player);
+		} else if (player.main.getConfig().isCameraEnabled()) {
+			player.getWebcamProcessor().render(sprite, region, getStretch());
 		} else if (resource.getBGAManager() != null) {
 			resource.getBGAManager().drawBGA(this,sprite,region);
-		}		
+		}
 	}
 
 	@Override

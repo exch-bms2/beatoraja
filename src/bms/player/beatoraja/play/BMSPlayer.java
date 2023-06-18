@@ -35,6 +35,7 @@ public class BMSPlayer extends MainState {
 	private JudgeManager judge;
 
 	private BGAProcessor bga;
+	private WebcamProcessor camera;
 
 	private GrooveGauge gauge;
 
@@ -468,6 +469,11 @@ public class BMSPlayer extends MainState {
 
 		bga = resource.getBGAManager();
 
+		camera = new WebcamProcessor();
+		if (main.getConfig().isCameraEnabled()) {
+			camera.start(main.getConfig().getCameraDeviceIndex(), main.getConfig().getCameraResolutionIndex());
+		}
+
 		ScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
 		if (score == null) {
@@ -717,6 +723,7 @@ public class BMSPlayer extends MainState {
 		case STATE_FAILED:
 			keyinput.stopJudge();
 			keysound.stopBGPlay();
+			camera.stop();
 			if ((input.startPressed() ^ input.isSelectPressed()) && resource.getCourseBMSModels() == null
 					&& autoplay.mode == BMSPlayerMode.Mode.PLAY) {
 				if (!resource.isUpdateScore()) {
@@ -768,6 +775,7 @@ public class BMSPlayer extends MainState {
 		case STATE_FINISHED:
 			keyinput.stopJudge();
 			keysound.stopBGPlay();
+			camera.stop();
 			if (main.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
 				main.switchTimer(TIMER_FADEOUT, true);
 			}
@@ -988,6 +996,10 @@ public class BMSPlayer extends MainState {
 
 	public JudgeManager getJudgeManager() {
 		return judge;
+	}
+
+	public WebcamProcessor getWebcamProcessor() {
+		return camera;
 	}
 
 	public void update(int judge, long time) {

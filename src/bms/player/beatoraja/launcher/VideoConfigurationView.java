@@ -5,17 +5,25 @@ import bms.player.beatoraja.MainLoader;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Graphics;
+import com.github.eduramiba.webcamcapture.drivers.NativeDriver;
+import com.github.sarxos.webcam.Webcam;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 
+import java.awt.Dimension;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import static java.util.stream.Collectors.toCollection;
+
 public class VideoConfigurationView implements Initializable {
-	@FXML
+    @FXML
 	private ComboBox<Resolution> resolution;
 	@FXML
 	private ComboBox<Config.DisplayMode> displayMode;
@@ -32,9 +40,19 @@ public class VideoConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> missLayerTime;
 
+	@FXML
+	private ComboBox<String> cameraEnabled;
+
+	@FXML
+	private ComboBox<String> cameraDevice;
+
+	@FXML
+	private ComboBox<String> cameraResolution;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 		updateResolutions();
+		populateCameras();
 
 		displayMode.getItems().setAll(Config.DisplayMode.values());
     }
@@ -46,6 +64,12 @@ public class VideoConfigurationView implements Initializable {
 		bgaOp.getSelectionModel().select(config.getBga());
 		bgaExpand.getSelectionModel().select(config.getBgaExpand());
 		maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
+
+		cameraEnabled.getSelectionModel().select(config.isCameraEnabled() ? 1 : 0);
+		int deviceIndex = valueOrFirst(config.getCameraDeviceIndex(), cameraDevice.getItems().size());
+		cameraDevice.getSelectionModel().select(deviceIndex);
+		int resolutionIndex = valueOrFirst(config.getCameraResolutionIndex(), cameraResolution.getItems().size());
+		cameraResolution.getSelectionModel().select(resolutionIndex);
 	}
 
 	public void updatePlayer(PlayerConfig player) {
@@ -59,6 +83,10 @@ public class VideoConfigurationView implements Initializable {
 		config.setBga(bgaOp.getSelectionModel().getSelectedIndex());
 		config.setBgaExpand(bgaExpand.getSelectionModel().getSelectedIndex());
 		config.setMaxFramePerSecond(maxFps.getValue());
+
+		config.setCameraEnabled(cameraEnabled.getSelectionModel().getSelectedIndex() == 1);
+		config.setCameraDeviceIndex(cameraDevice.getSelectionModel().getSelectedIndex());
+		config.setCameraResolutionIndex(cameraResolution.getSelectionModel().getSelectedIndex());
 	}
 
 	public void commitPlayer(PlayerConfig player) {
@@ -90,5 +118,40 @@ public class VideoConfigurationView implements Initializable {
 		}
 		resolution.setValue(resolution.getItems().contains(oldValue)
 				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
+	}
+
+	private void populateCameras() {
+		cameraDevice.getItems().clear();
+		cameraResolution.getItems().clear();
+
+		try {
+			Webcam.setDriver(new NativeDriver());
+			List<Webcam> cameras = Webcam.getWebcams();
+			if (cameras.isEmpty()) {
+				return;
+			}
+
+			cameraDevice.setItems(cameras.stream().map(Webcam::getName).collect(toCollection(FXCollections::observableArrayList)));
+
+			cameraDevice.getSelectionModel().selectedIndexProperty().addListener(
+				(observableValue, oldValue, newValue) -> {
+					Dimension[] dims = cameras.get(newValue.intValue()).getViewSizes();
+					cameraResolution.setItems(
+						Arrays.stream(dims)
+							.map(d -> String.format("%d x %d", d.width, d.height))
+							.collect(toCollection(FXCollections::observableArrayList))
+					);
+				}
+			);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private int valueOrFirst(int val, int size) {
+		if (val >= size) {
+			return 0;
+		}
+		return val;
 	}
 }
