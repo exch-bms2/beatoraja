@@ -1,8 +1,13 @@
 package bms.player.beatoraja.select;
 
 import java.io.BufferedInputStream;
+import java.lang.reflect.Method;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -26,6 +31,9 @@ import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.external.BMSSearchAccessor;
 import bms.player.beatoraja.song.*;
 import com.badlogic.gdx.utils.StringBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 楽曲バー描画用クラス
@@ -118,6 +126,9 @@ public class BarRenderer {
 		public int value = -1;
 		public int text;
 	}
+
+	// jsonで定義したrandom bar (folder)
+	private List<RandomFolder> randomFolderList;
 
 	public BarRenderer(MusicSelector select) {
 		final MainController main = select.main;
@@ -295,6 +306,17 @@ public class BarRenderer {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			randomFolderList = objectMapper.readValue(
+					new BufferedInputStream(Files.newInputStream(Paths.get("random/default.json"))),
+					new TypeReference<List<RandomFolder>>() {
+					});
+		} catch (Throwable e) {
+			randomFolderList = new ArrayList<RandomFolder>();
+			e.printStackTrace();
+		}
 
 		commands = l.toArray(Bar.class);
 
@@ -360,6 +382,27 @@ public class BarRenderer {
 
 		public void setShowall(boolean showall) {
 			this.showall = showall;
+		}
+	}
+	
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class RandomFolder {
+		private String name;
+		private Map<String, Object> filter;
+		public String getName() {
+			return "[RANDOM] " + name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Map<String, Object> getFilter() {
+			return filter;
+		}
+
+		public void setFilter(Map<String, Object> filter) {
+			this.filter = filter;
 		}
 	}
 
@@ -963,12 +1006,52 @@ public class BarRenderer {
 
 			Array<Bar> bars = new Array<Bar>();
 			if (select.main.getPlayerConfig().isRandomSelect()) {
-				SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
-						songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
-						.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
-				if (randomTargets.length >= 2) {
-					Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState());
-					bars.add(randomBar);
+				try {
+					for (RandomFolder randomFolder : randomFolderList) {
+						SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
+								songBar -> songBar instanceof SongBar
+										&& ((SongBar) songBar).getSongData().getPath() != null)
+								.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
+						if (randomFolder.filter != null) {
+							Set<String> filterKey = randomFolder.getFilter().keySet();
+							randomTargets = Stream.of(randomTargets).filter(r -> {
+								ScoreData scoreData = select.getScoreDataCache().readScoreData(r, config.getLnmode());
+								for (String key : filterKey) {
+									String getterMethodName = "get" + key.substring(0, 1).toUpperCase()
+											+ key.substring(1);
+									try {
+										Object value = randomFolder.getFilter().get(key);
+										if (scoreData == null) {
+											if (value instanceof String && "" != (String) value) {
+												return false;
+											}
+											if (value instanceof Integer && 0 != (Integer) value) {
+												return false;
+											}
+										} else {
+											Method getterMethod = ScoreData.class.getMethod(getterMethodName);
+											Object propertyValue = getterMethod.invoke(scoreData);
+											if (!propertyValue.equals(value)) {
+												return false;
+											}
+										}
+									} catch (Throwable e) {
+										e.printStackTrace();
+										return false;
+									}
+								}
+								return true;
+							}).toArray(SongData[]::new);
+						}
+						if ((randomFolder.filter != null && randomTargets.length >= 1)
+								|| (randomFolder.filter == null && randomTargets.length >= 2)) {
+							Bar randomBar = new ExecutableBar(randomTargets, select.main.getCurrentState(),
+									randomFolder.name);
+							bars.add(randomBar);
+						}
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
 				}
 			}
 
