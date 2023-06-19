@@ -1,5 +1,9 @@
 package bms.player.beatoraja.play;
 
+import java.util.Arrays;
+
+import com.badlogic.gdx.utils.Array;
+
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.ScoreData;
@@ -154,56 +158,141 @@ class StaticTargetProperty extends TargetProperty {
  */
 class RivalTargetProperty extends TargetProperty {
 
-    private int index;
+	private final Target target;
+   
+    private final int index;
 
-    public RivalTargetProperty(int index) {
+    public RivalTargetProperty(Target target, int index) {
     	super("RIVAL_" + (index + 1));
+    	this.target = target;
         this.index = index;
     }
 
 	@Override
 	public String getName(MainController main) {
     	PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
-    	if(index < info.length) {
-    		return "RIVAL " + info[index].getName();
+    	switch(target) {
+    	case INDEX:
+    		return index < info.length ? "RIVAL " + info[index].getName() : "NO RIVAL";
+    	case RANK:
+    		return index > 0 ? "RIVAL RANK " + (index + 1) : "RIVAL TOP";
+    	case NEXT:
+    		return "RIVAL NEXT " + (index + 1);
     	}
 		return "NO RIVAL";
 	}
 
     @Override
     public ScoreData getTarget(MainController main) {
-    	PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
-    	ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
-    	if(index < info.length) {
-    		targetScore.setPlayer(info[index].getName());
-    		ScoreData score = cache[index].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
-    		if(score != null) {
-        		targetScore.setPlayer(info[index].getName());    			
-        		targetScore.setEpg(score.getEpg());
-        		targetScore.setLpg(score.getLpg());
-        		targetScore.setEgr(score.getEgr());
-        		targetScore.setLgr(score.getLgr());
-    		} else {
-        		targetScore.setPlayer("NO DATA");    			
+    	final PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
+    	final ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+    	
+    	String name = null;
+    	ScoreData score = null;
+    	ScoreData[] scores = null;
+    	switch(target) {
+    	case INDEX:
+        	if(index < info.length) {
+        		name = info[index].getName();
+        		score = cache[index].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
+        	}
+        	break;
+    	case RANK:
+    		scores = createScoreArray(main);
+    		if(scores.length > 0) {
+        		Arrays.sort(scores, (s1, s2) -> (s2.getExscore() - s1.getExscore()));
+        		score = scores[index < scores.length ? index : scores.length - 1];
+        		name = score.getPlayer();
     		}
+    		
+    		break;
+    	case NEXT:
+    		scores = createScoreArray(main);
+    		if(scores.length > 0) {
+        		Arrays.sort(scores, (s1, s2) -> (s2.getExscore() - s1.getExscore()));
+        		
+        		int rank = Math.max(scores.length -1 - index , 0);
+    			for(int i = 0;i  < scores.length; i++) {
+    				if(scores[i].getPlayer().length() == 0) {
+    					rank = Math.max(i - index , 0);
+    				}
+    			}
+        		score = scores[rank];
+        		name = score.getPlayer();
+    		}
+    		break;
+    		
+    	}
+    	
+    	if(score != null) {
+    		targetScore.setPlayer(name);
+    		targetScore.setEpg(score.getEpg());
+    		targetScore.setLpg(score.getLpg());
+    		targetScore.setEgr(score.getEgr());
+    		targetScore.setLgr(score.getLgr());    		
+    	} else if(name != null) {
+    		targetScore.setPlayer("NO DATA");    		
     	} else {
     		targetScore.setPlayer("NO RIVAL");    		
     	}
+    	
         return targetScore;
     }
     
+    private ScoreData[] createScoreArray(MainController main) {
+    	final PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
+    	final ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+		Array<ScoreData> scorearray = new Array<ScoreData>();
+		for(int i = 0;i < info.length;i++) {
+			ScoreData sd = cache[i].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
+			if(sd != null) {
+				sd.setPlayer(info[i].getName());
+				scorearray.add(sd);
+			}
+		}
+		
+		ScoreData myscore = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getSongdata().getBMSModel(), main.getPlayerConfig().getLnmode());
+		if(myscore != null) {
+			myscore.setPlayer("");
+			scorearray.add(myscore);
+		}
+		return scorearray.toArray(ScoreData.class);
+    }
+    
     public static TargetProperty getTargetProperty(String id) {
-    	if(id.startsWith("RIVAL_")) {
+    	if(id.startsWith("RIVAL_NEXT_")) {
+    		try {
+        		int index = Integer.parseInt(id.substring(11));
+        		if(index > 0) {
+        			return new RivalTargetProperty(Target.NEXT, index - 1);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	} else if(id.startsWith("RIVAL_RANK_")) {
+    		try {
+        		int index = Integer.parseInt(id.substring(11));
+        		if(index > 0) {
+        			return new RivalTargetProperty(Target.RANK, index - 1);
+        		}
+    		} catch (NumberFormatException e) {
+    			
+    		}
+    	} else if(id.startsWith("RIVAL_")) {
     		try {
         		int index = Integer.parseInt(id.substring(6));
         		if(index > 0) {
-        			return new RivalTargetProperty(index - 1);
+        			return new RivalTargetProperty(Target.INDEX, index - 1);
         		}
     		} catch (NumberFormatException e) {
     			
     		}
     	}
     	return null;
+    }
+    
+    enum Target {
+    	INDEX, NEXT, RANK
     }
 }
 
@@ -247,9 +336,9 @@ class NextRankTargetProperty extends TargetProperty {
  */
 class InternetRankingTargetProperty extends TargetProperty {
 
-    private Target target;
+    private final Target target;
     
-    private int value;
+    private final int value;
     
     private InternetRankingTargetProperty(Target target, int value) {
     	super("IR_" + target.name() + "_" + value);
