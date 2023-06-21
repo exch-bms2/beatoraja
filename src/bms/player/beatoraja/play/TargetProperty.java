@@ -106,7 +106,7 @@ class StaticTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
-    	int rivalscore = (int) (main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
+    	int rivalscore = (int)Math.ceil(main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
 		targetScore.setPlayer(getName(main));
 		targetScore.setEpg(rivalscore / 2);
 		targetScore.setEgr(rivalscore % 2);
@@ -315,7 +315,7 @@ class NextRankTargetProperty extends TargetProperty {
         final int max = main.getPlayerResource().getBMSModel().getTotalNotes() * 2;
         int targetscore = max;
         for(int i = 15;i < 27;i++) {
-            int target = max * i / 27;
+            int target = (int)Math.ceil(max * i / 27f);
             if(nowscore < target) {
             	targetscore = target;
             	break;

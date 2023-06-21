@@ -101,11 +101,11 @@ public class ScoreDataProperty {
         for(int i = 0;i < rank.length;i++) {
             rank[i] = totalnotes != 0 && rate >= 1f * i / rank.length;
             if(i % 3 == 0 && !rank[i] && nextrank == Integer.MIN_VALUE) {
-                nextrank = Math.round((i * (notes * 2) / rank.length) - rate * (notes * 2));
+                nextrank = (int)Math.ceil((i * (notes * 2) / (double)rank.length) - rate * (notes * 2));
             }
         }
         if(nextrank == Integer.MIN_VALUE) {
-            nextrank = Math.round((notes * 2) - rate * (notes * 2));
+            nextrank = (notes * 2) - exscore;
         }
         for(int i = 0;i < nowrank.length;i++) {
             nowrank[i] = totalnotes != 0 && nowrate >= 1f * i / nowrank.length;
