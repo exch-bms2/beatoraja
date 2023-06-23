@@ -921,8 +921,12 @@ public class BMSPlayer extends MainState {
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
-				if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE
-						&& n instanceof LongNote && ((LongNote) n).isEnd())) {
+				if (n != null && (
+						n instanceof NormalNote ||
+						(n instanceof LongNote && 
+						!(((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ((LongNote) n).getType() == LongNote.TYPE_UNDEFINED)
+								|| ((LongNote) n).getType() == LongNote.TYPE_LONGNOTE)
+								&& ((LongNote) n).isEnd())))) {
 					int state = n.getState();
 					long time = n.getMicroPlayTime();
 					avgduration += state >= 1 && state <= 4 ? Math.abs(time) : 1000000;
