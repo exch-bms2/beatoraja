@@ -127,7 +127,7 @@ public class CourseResult extends AbstractResult {
                 	
                 	for(IRSendStatus irc : irSendStatus) {
         				if(irsend == 0) {
-        					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);                					
+        					timer.switchTimer(TIMER_IR_CONNECT_BEGIN, true);                					
         				}
         				irsend++;
                         succeed &= irc.send();
@@ -138,7 +138,7 @@ public class CourseResult extends AbstractResult {
                 	irSendStatus.removeAll(removeIrSendStatus);
                 	
                 	if(irsend > 0) {
-                        main.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
+                		timer.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 
                         IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
 						if(response.isSucceeded()) {
@@ -168,22 +168,22 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public void render() {
-		long time = main.getNowTime();
-		main.switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
-		main.switchTimer(TIMER_RESULTGRAPH_END, true);
-		main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
+		long time = timer.getNowTime();
+		timer.switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		timer.switchTimer(TIMER_RESULTGRAPH_END, true);
+		timer.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 
 		if(time > getSkin().getInput()){
-			main.switchTimer(TIMER_STARTINPUT, true);
+			timer.switchTimer(TIMER_STARTINPUT, true);
 		}
 
-		if (main.isTimerOn(TIMER_FADEOUT)) {
-			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
+		if (timer.isTimerOn(TIMER_FADEOUT)) {
+			if (timer.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
 				main.changeState(MainStateType.MUSICSELECT);
 			}
 		} else if (time > getSkin().getScene()) {
-			main.switchTimer(TIMER_FADEOUT, true);
+			timer.switchTimer(TIMER_FADEOUT, true);
 			if(getSound(SOUND_CLOSE) != null) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
@@ -198,7 +198,7 @@ public class CourseResult extends AbstractResult {
 		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
-		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
+		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
 			boolean ok = false;
 			for (int i = 0; i < property.getAssignLength(); i++) {
 				if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
@@ -213,10 +213,10 @@ public class CourseResult extends AbstractResult {
 			} 
 
 			if (resource.getScoreData() == null || ok) {
-				if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !main.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
-					main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
+				if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !timer.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
+					timer.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 				} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-					main.switchTimer(TIMER_FADEOUT, true);
+					timer.switchTimer(TIMER_FADEOUT, true);
 					if(getSound(SOUND_CLOSE) != null) {
 						stop(SOUND_CLEAR);
 						stop(SOUND_FAIL);
