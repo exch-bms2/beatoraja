@@ -83,8 +83,8 @@ public class FloatPropertyFactory {
 
 	private static final FloatProperty PROPERTY_MUSIC_PROGRESS = (state) -> {
 		if (state instanceof BMSPlayer) {
-			if (state.main.isTimerOn(TIMER_PLAY)) {
-				return Math.min((float) state.main.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
+			if (state.timer.isTimerOn(TIMER_PLAY)) {
+				return Math.min((float) state.timer.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
 						1);
 			}
 		}
