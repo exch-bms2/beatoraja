@@ -254,7 +254,7 @@ public class LaneRenderer {
 			offsetH += offset.h;
 		}
 		
-		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
+		time = (main.timer.isTimerOn(TIMER_PLAY) ? time - main.timer.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;
@@ -405,7 +405,7 @@ public class LaneRenderer {
 		sprite.setBlend(0);
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		y = orgy;
-		final long now = main.main.getNowTime();
+		final long now = main.timer.getNowTime();
 		
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];

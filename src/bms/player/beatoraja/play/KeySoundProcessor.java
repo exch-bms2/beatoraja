@@ -74,7 +74,7 @@ public class KeySoundProcessor {
 				;
 
 			while (!stop) {
-				final long time = player.main.getNowMicroTime(TIMER_PLAY);
+				final long time = player.timer.getNowMicroTime(TIMER_PLAY);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
