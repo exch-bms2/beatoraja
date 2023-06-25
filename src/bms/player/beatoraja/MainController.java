@@ -51,7 +51,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  */
 public class MainController extends ApplicationAdapter {
 
-	private static final String VERSION = "beatoraja 0.8.5";
+	private static final String VERSION = "beatoraja 0.8.6";
 
 	public static final boolean debug = false;
 
@@ -79,11 +79,8 @@ public class MainController extends ApplicationAdapter {
 	private MessageRenderer messageRenderer;
 
 	private MainState current;
-	/**
-	 * 状態の開始時間
-	 */
-	private long starttime;
-	private long nowmicrotime;
+	
+	private TimerManager timer;
 
 	private Config config;
 	private PlayerConfig player;
@@ -124,8 +121,6 @@ public class MainController extends ApplicationAdapter {
 	
 	private StreamController streamController;
 
-	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
-	private final long[] timer = new long[timerCount];
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
 
@@ -203,6 +198,7 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
+		timer = new TimerManager();
 		sound = new SystemSoundManager(config);
 	}
 
@@ -287,7 +283,6 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		if (newState != null && current != newState) {
-			Arrays.fill(timer, Long.MIN_VALUE);
 			if(current != null) {
 				current.setSkin(null);
 			}
@@ -299,8 +294,7 @@ public class MainController extends ApplicationAdapter {
 				current.shutdown();
 			}
 			current = newState;
-			starttime = System.nanoTime();
-			nowmicrotime = ((System.nanoTime() - starttime) / 1000);
+			timer.setMainState(newState);
 			current.prepare();
 		}
 		if (current.getStage() != null) {
@@ -427,7 +421,7 @@ public class MainController extends ApplicationAdapter {
 	@Override
 	public void render() {
 //		input.poll();
-		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
+		timer.update();
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -474,9 +468,6 @@ public class MainController extends ApplicationAdapter {
 				message.setLength(0);
 				systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), 10,
 						config.getResolution().height - 170);
-				message.setLength(0);
-				systemfont.draw(sprite, message.append("Current Target ").append(player.getTargetid()), 10,
-						config.getResolution().height - 194);
 			}
 
 			sprite.end();
@@ -684,34 +675,32 @@ public class MainController extends ApplicationAdapter {
 		return cl;
 	}
 
+	public TimerManager getTimer() {
+		return timer;
+	}
+
 	public long getStartTime() {
-		return starttime / 1000000;
+		return timer.getStartTime();
 	}
 
 	public long getStartMicroTime() {
-		return starttime / 1000;
+		return timer.getStartMicroTime();
 	}
 
 	public long getNowTime() {
-		return nowmicrotime / 1000;
+		return timer.getNowTime();
 	}
 
 	public long getNowTime(int id) {
-		if(isTimerOn(id)) {
-			return (nowmicrotime - getMicroTimer(id)) / 1000;
-		}
-		return 0;
+		return timer.getNowTime(id);
 	}
 
 	public long getNowMicroTime() {
-		return nowmicrotime;
+		return timer.getNowMicroTime();
 	}
 
 	public long getNowMicroTime(int id) {
-		if(isTimerOn(id)) {
-			return nowmicrotime - getMicroTimer(id);
-		}
-		return 0;
+		return timer.getNowMicroTime(id);
 	}
 
 	public long getTimer(int id) {
@@ -719,11 +708,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public long getMicroTimer(int id) {
-		if (id >= 0 && id < timerCount) {
-			return timer[id];
-		} else {
-			return current.getSkin().getMicroCustomTimer(id);
-		}
+		return timer.getMicroTimer(id);
 	}
 
 	public boolean isTimerOn(int id) {
@@ -731,7 +716,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public void setTimerOn(int id) {
-		setMicroTimer(id, nowmicrotime);
+		timer.setTimerOn(id);
 	}
 
 	public void setTimerOff(int id) {
@@ -739,21 +724,11 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public void setMicroTimer(int id, long microtime) {
-		if (id >= 0 && id < timerCount) {
-			timer[id] = microtime;
-		} else {
-			current.getSkin().setMicroCustomTimer(id, microtime);
-		}
+		timer.setMicroTimer(id, microtime);
 	}
 
 	public void switchTimer(int id, boolean on) {
-		if(on) {
-			if(getMicroTimer(id) == Long.MIN_VALUE) {
-				setMicroTimer(id, nowmicrotime);
-			}
-		} else {
-			setMicroTimer(id, Long.MIN_VALUE);
-		}
+		timer.switchTimer(id, on);
 	}
 
 	private UpdateThread updateSong;
