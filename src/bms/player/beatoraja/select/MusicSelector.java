@@ -2,23 +2,17 @@ package bms.player.beatoraja.select;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.nio.file.DirectoryStream;
-import java.io.File;
 import java.nio.file.*;
 import java.util.logging.Logger;
-
-import bms.player.beatoraja.play.TargetProperty;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.utils.ObjectMap.Keys;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
-import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
@@ -225,11 +219,11 @@ public class MusicSelector extends MainState {
 	public void render() {
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-        if(main.getNowTime() > getSkin().getInput()){
-        	main.switchTimer(TIMER_STARTINPUT, true);
+        if(timer.getNowTime() > getSkin().getInput()){
+        	timer.switchTimer(TIMER_STARTINPUT, true);
         }
-		if(main.getNowTime(TIMER_SONGBAR_CHANGE) < 0) {
-			main.setTimerOn(TIMER_SONGBAR_CHANGE);
+		if(timer.getNowTime(TIMER_SONGBAR_CHANGE) < 0) {
+			timer.setTimerOn(TIMER_SONGBAR_CHANGE);
 		}
 		// draw song information
 		resource.setSongdata(current instanceof SongBar ? ((SongBar) current).getSongData() : null);
@@ -238,14 +232,14 @@ public class MusicSelector extends MainState {
 		// preview music
 		if (current instanceof SongBar && main.getConfig().getSongPreview() != SongPreview.NONE) {
 			final SongData song = main.getPlayerResource().getSongdata();
-			if (song != preview.getSongData() && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
+			if (song != preview.getSongData() && timer.getNowTime() > timer.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
 					&& play == null) {
 				this.preview.start(song);
 			}
 		}
 
 		// read bms information
-		if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play == null) {
+		if (timer.getNowTime() > timer.getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play == null) {
 			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
 				SongData song = main.getPlayerResource().getSongdata();
 				new Thread(() ->  {
@@ -256,7 +250,7 @@ public class MusicSelector extends MainState {
 			showNoteGraph = true;
 		}
 		// get ir ranking
-		if (currentRankingDuration != -1 && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
+		if (currentRankingDuration != -1 && timer.getNowTime() > timer.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
 			currentRankingDuration = -1;
 			if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
 				SongData song = ((SongBar) current).getSongData();
@@ -280,9 +274,9 @@ public class MusicSelector extends MainState {
 			}				
 		}
 		final int irstate = currentir != null ? currentir.getState() : -1;
-		main.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == RankingData.ACCESS);
-		main.switchTimer(TIMER_IR_CONNECT_SUCCESS, irstate == RankingData.FINISH);
-		main.switchTimer(TIMER_IR_CONNECT_FAIL, irstate == RankingData.FAIL);
+		timer.switchTimer(TIMER_IR_CONNECT_BEGIN, irstate == RankingData.ACCESS);
+		timer.switchTimer(TIMER_IR_CONNECT_SUCCESS, irstate == RankingData.FINISH);
+		timer.switchTimer(TIMER_IR_CONNECT_FAIL, irstate == RankingData.FAIL);
 
 		if (play != null) {
 			if (current instanceof SongBar) {
@@ -572,12 +566,12 @@ public class MusicSelector extends MainState {
 	public void setPanelState(int panelstate) {
 		if (this.panelstate != panelstate) {
 			if (this.panelstate != 0) {
-				main.setTimerOn(TIMER_PANEL1_OFF + this.panelstate - 1);
-				main.setTimerOff(TIMER_PANEL1_ON + this.panelstate - 1);
+				timer.setTimerOn(TIMER_PANEL1_OFF + this.panelstate - 1);
+				timer.setTimerOff(TIMER_PANEL1_ON + this.panelstate - 1);
 			}
 			if (panelstate != 0) {
-				main.setTimerOn(TIMER_PANEL1_ON + panelstate - 1);
-				main.setTimerOff(TIMER_PANEL1_OFF + panelstate - 1);
+				timer.setTimerOn(TIMER_PANEL1_ON + panelstate - 1);
+				timer.setTimerOff(TIMER_PANEL1_OFF + panelstate - 1);
 			}
 		}
 		this.panelstate = panelstate;
@@ -624,7 +618,7 @@ public class MusicSelector extends MainState {
 		execute(MusicSelectCommand.RESET_REPLAY);
 		loadSelectedSongImages();
 
-		main.setTimerOn(TIMER_SONGBAR_CHANGE);
+		timer.setTimerOn(TIMER_SONGBAR_CHANGE);
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);

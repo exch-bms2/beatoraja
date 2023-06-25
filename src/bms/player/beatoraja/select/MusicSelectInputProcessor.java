@@ -7,14 +7,9 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
-import bms.player.beatoraja.skin.property.EventFactory;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
-import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static bms.player.beatoraja.select.MusicSelector.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -357,7 +352,7 @@ public class MusicSelectInputProcessor {
         if (bar.getSelected() != current) {
             select.selectedBarMoved();
         }
-        main.switchTimer(TIMER_SONGBAR_CHANGE, true);
+        select.timer.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
 		if(input.isActivated(KeyCommand.UPDATE_FOLDER)) {
             select.execute(MusicSelectCommand.UPDATE_FOLDER);
