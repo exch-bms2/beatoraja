@@ -6,7 +6,6 @@ import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
-import bms.player.beatoraja.skin.property.Event;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -31,6 +30,8 @@ public abstract class MainState {
 	private Skin skin;
 
 	private Stage stage;
+	
+	public final TimerManager timer;
 
 	private final IntMap<String> soundmap = new IntMap<String>();
 	private final IntMap<Boolean> soundloop = new IntMap<Boolean>();
@@ -39,6 +40,7 @@ public abstract class MainState {
 
 	public MainState(MainController main) {
 		this.main = main;
+		timer = main.getTimer();
 	}
 
 	public abstract void create();
@@ -137,6 +139,10 @@ public abstract class MainState {
 
 	public void loadSkin(SkinType skinType) {
 		setSkin(SkinLoader.load(this, skinType));
+	}
+
+	public TimerManager getTimer() {
+		return timer;
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {

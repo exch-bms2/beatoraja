@@ -37,30 +37,30 @@ public class MusicDecide extends MainState {
 	}
 
 	public void render() {
-		long nowtime = main.getNowTime();
+		long nowtime = timer.getNowTime();
         if(nowtime >getSkin().getInput()){
-        	main.switchTimer(TIMER_STARTINPUT, true);
+        	timer.switchTimer(TIMER_STARTINPUT, true);
         }
-		if (main.isTimerOn(TIMER_FADEOUT)) {
-			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
+		if (timer.isTimerOn(TIMER_FADEOUT)) {
+			if (timer.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				main.changeState(cancel ? MainStateType.MUSICSELECT : MainStateType.PLAY);
 			}
 		} else {
 			if (nowtime > getSkin().getScene()) {
-				main.setTimerOn(TIMER_FADEOUT);
+				timer.setTimerOn(TIMER_FADEOUT);
 			}
 		}
 	}
 
 	public void input() {
-		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
+		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
 			BMSPlayerInputProcessor input = main.getInputProcessor();
 			if (input.getKeyState(0) || input.getKeyState(2) || input.getKeyState(4) || input.getKeyState(6) || input.isControlKeyPressed(ControlKeys.ENTER)) {
-				main.setTimerOn(TIMER_FADEOUT);
+				timer.setTimerOn(TIMER_FADEOUT);
 			}
 			if (input.isControlKeyPressed(ControlKeys.ESCAPE) || (input.startPressed() && input.isSelectPressed())) {
 				cancel = true;
-				main.setTimerOn(TIMER_FADEOUT);
+				timer.setTimerOn(TIMER_FADEOUT);
 			}
 		}
 	}
