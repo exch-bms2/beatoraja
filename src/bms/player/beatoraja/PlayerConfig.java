@@ -56,7 +56,7 @@ public class PlayerConfig {
 	/**
 	 * スコアターゲット
 	 */
-	private String targetid = "MAX";
+	private int targetIndex = 9;
 	
 	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
 			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3", "IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10"
@@ -524,19 +524,29 @@ public class PlayerConfig {
 	}
 
 	public String getTargetid() {
-		return targetid;
+		if (targetIndex >= targetlist.length) {
+			targetIndex = 0;
+		}
+		return targetlist[targetIndex];
+	}
+
+	public int getTargetIndex() {
+		return targetIndex;
 	}
 
 	public void setTargetid(String targetid) {
-		this.targetid = targetid;
+		for(int index = 0; index < targetlist.length; index++) {
+			if(targetlist[index].equals(targetid)) {
+				this.targetIndex = index;
+				return;
+			}
+		}
+		Logger.getGlobal().warning("無効なtargetid: " + targetid);
+		this.targetIndex = 0;
 	}
 
 	public String[] getTargetlist() {
 		return targetlist;
-	}
-
-	public void setTargetlist(String[] targetlist) {
-		this.targetlist = targetlist;
 	}
 
 	public int getMisslayerDuration() {
@@ -804,8 +814,8 @@ public class PlayerConfig {
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
-		targetid = targetid!= null ? targetid : "MAX";
 		targetlist = targetlist != null ? targetlist : new String[0];
+		targetIndex = MathUtils.clamp(targetIndex, 0, targetlist.length);
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);

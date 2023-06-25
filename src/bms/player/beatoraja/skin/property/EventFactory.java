@@ -318,15 +318,9 @@ public class EventFactory {
 		}),
 		target(77, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
-		        final PlayerConfig config = state.main.getPlayerResource().getPlayerConfig();
-	            final String[] targets = TargetProperty.getTargets();
-	            int index = 0;
-	            for(;index < targets.length;index++) {
-	            	if(targets[index].equals(config.getTargetid())) {
-	            		break;
-	            	}
-	            }
-	            config.setTargetid(targets[(index + (arg1 >= 0 ? 1 : targets.length - 1)) % targets.length]);
+				final PlayerConfig config = state.main.getPlayerResource().getPlayerConfig();
+				final String[] targets = TargetProperty.getTargets();
+				config.setTargetid(targets[((config.getTargetIndex() + arg1) % targets.length + targets.length) % targets.length]);
 			}
 		}),
 		gaugeautoshift(78, (state, arg1) -> {
