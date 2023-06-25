@@ -59,7 +59,7 @@ public class IntegerPropertyFactory {
 						break;
 					}
 					return (int) Math.round((240000 / bpm / lanerender.getHispeed())
-							* (cover ? 1 - lanerender.getLanecover() : 1) * (green ? 1 : 0.6));
+							* (cover ? 1 - lanerender.getLanecover() : 1) * (green ? 0.6 : 1));
 				}
 				return 0;
 			};
