@@ -194,8 +194,8 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			sprite.draw(endcursor, region.x + dx, region.y, 1, region.height);
 		}
 		// 現在カーソル描画
-		if (state instanceof BMSPlayer && state.main.isTimerOn(SkinProperty.TIMER_PLAY)) {
-			float currenttime = state.main.getNowTime(SkinProperty.TIMER_PLAY);
+		if (state instanceof BMSPlayer && state.timer.isTimerOn(SkinProperty.TIMER_PLAY)) {
+			float currenttime = state.timer.getNowTime(SkinProperty.TIMER_PLAY);
 			if (freq > 0) {
 				currenttime *= freq;
 			}

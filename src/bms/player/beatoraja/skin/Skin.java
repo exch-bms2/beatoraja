@@ -142,7 +142,7 @@ public class Skin {
 			if(!obj.validate()) {
 				removes.add(obj);
 			} else {
-				Array<BooleanProperty> bp = new Array();
+				Array<BooleanProperty> bp = new Array<BooleanProperty>();
 				for(BooleanProperty op : obj.getDrawCondition()) {
 					if(op.isStatic(state)) {
 						if(!op.get(state)) {
@@ -203,9 +203,9 @@ public class Skin {
 			renderer = new SkinObjectRenderer(sprite);
 		}
 		
-		final long microtime = state.main.getNowMicroTime();
+		final long microtime = state.timer.getNowMicroTime();
 		if(nextpreparetime <= microtime) {
-			final long time = state.main.getNowTime();
+			final long time = state.timer.getNowTime();
 			for (SkinObject obj : objectarray) {
 				obj.prepare(time, state);
 			}
