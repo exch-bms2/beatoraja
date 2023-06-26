@@ -210,7 +210,7 @@ public class MainStateAccessor {
 	private class timer extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue value) {
-			return LuaNumber.valueOf(state.main.getMicroTimer(value.toint()));
+			return LuaNumber.valueOf(state.timer.getMicroTimer(value.toint()));
 		}
 	}
 
@@ -226,7 +226,7 @@ public class MainStateAccessor {
 	private class time extends ZeroArgFunction {
 		@Override
 		public LuaValue call() {
-			return LuaNumber.valueOf(state.main.getNowMicroTime());
+			return LuaNumber.valueOf(state.timer.getNowMicroTime());
 		}
 	}
 
@@ -241,7 +241,7 @@ public class MainStateAccessor {
 			int id = timerId.toint();
 			if (!SkinPropertyMapper.isTimerWritableBySkin(id))
 				throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
-			state.main.setMicroTimer(id, timerValue.tolong());
+			state.timer.setMicroTimer(id, timerValue.tolong());
 			return LuaBoolean.TRUE;
 		}
 	}
