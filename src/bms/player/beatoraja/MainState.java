@@ -32,6 +32,8 @@ public abstract class MainState {
 	private Stage stage;
 	
 	public final TimerManager timer;
+	
+	public final PlayerResource resource;
 
 	private final IntMap<String> soundmap = new IntMap<String>();
 	private final IntMap<Boolean> soundloop = new IntMap<Boolean>();
@@ -41,6 +43,7 @@ public abstract class MainState {
 	public MainState(MainController main) {
 		this.main = main;
 		timer = main.getTimer();
+		resource = main.getPlayerResource();
 	}
 
 	public abstract void create();
@@ -141,10 +144,6 @@ public abstract class MainState {
 		setSkin(SkinLoader.load(this, skinType));
 	}
 
-	public TimerManager getTimer() {
-		return timer;
-	}
-
 	public int getJudgeCount(int judge, boolean fast) {
 		ScoreData sd = score.getScoreData();
 		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
@@ -157,11 +156,11 @@ public abstract class MainState {
 	public TextureRegion getImage(int imageid) {
 		switch (imageid) {
 		case IMAGE_BACKBMP:
-			return main.getPlayerResource().getBMSResource().getBackbmp();
+			return resource.getBMSResource().getBackbmp();
 		case IMAGE_STAGEFILE:
-			return main.getPlayerResource().getBMSResource().getStagefile();
+			return resource.getBMSResource().getStagefile();
 		case IMAGE_BANNER:
-			return main.getPlayerResource().getBMSResource().getBanner();
+			return resource.getBMSResource().getBanner();
 		case IMAGE_BLACK:
 			return main.black;
 		case IMAGE_WHITE:
@@ -198,24 +197,6 @@ public abstract class MainState {
 		}
 	}
 	
-	public boolean setSoundFile(int id, String path, SoundType type, boolean loop) {		
-		for(Path p : AudioDriver.getPaths(path)) {
-			String newpath = p.toString();
-			String oldpath = soundmap.get(id);
-			if (newpath.equals(oldpath)) {
-				return true;
-			}
-			if (oldpath != null) {
-				main.getAudioProcessor().dispose(oldpath);
-			}
-			soundmap.put(id, newpath);
-			soundloop.put(id, loop);
-			return true;
-			
-		}
-		return false;
-	}
-	
 	public Path[] getSoundPaths(String filename, SoundType type) {
 		Path p = null;
 		switch (type) {
@@ -242,7 +223,7 @@ public abstract class MainState {
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if (path != null) {
-			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getAudioConfig().getSystemvolume(),
+			main.getAudioProcessor().play(path, resource.getConfig().getAudioConfig().getSystemvolume(),
 					soundloop.get(id));
 		}
 	}
