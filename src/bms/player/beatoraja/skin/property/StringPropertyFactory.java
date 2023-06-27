@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.ir.IRScoreData;
@@ -118,6 +119,61 @@ public class StringPropertyFactory {
 			final SongData song = state.main.getPlayerResource().getSongdata();
 			return song != null ? song.getFullArtist() : "";
 		}),
+		key1(40, createKeyname(0)),
+		key2(41, createKeyname(1)),
+		key3(42, createKeyname(2)),
+		key4(43, createKeyname(3)),
+		key5(44, createKeyname(4)),
+		key6(45, createKeyname(5)),
+		key7(46, createKeyname(6)),
+		key8(47, createKeyname(7)),
+		key9(48, createKeyname(8)),
+		key10(49, createKeyname(9)),
+		key11(240, createKeyname(10)),
+		key12(241, createKeyname(11)),
+		key13(242, createKeyname(12)),
+		key14(243, createKeyname(13)),
+		key15(244, createKeyname(14)),
+		key16(245, createKeyname(15)),
+		key17(246, createKeyname(16)),
+		key18(247, createKeyname(17)),
+		key19(248, createKeyname(18)),
+		key20(249, createKeyname(19)),
+		key21(250, createKeyname(20)),
+		key22(251, createKeyname(21)),
+		key23(252, createKeyname(22)),
+		key24(253, createKeyname(23)),
+		key25(254, createKeyname(24)),
+		key26(255, createKeyname(25)),
+		key27(256, createKeyname(26)),
+		key28(257, createKeyname(27)),
+		key29(258, createKeyname(28)),
+		key30(259, createKeyname(29)),
+		key31(260, createKeyname(30)),
+		key32(261, createKeyname(31)),
+		key33(262, createKeyname(32)),
+		key34(263, createKeyname(33)),
+		key35(264, createKeyname(34)),
+		key36(265, createKeyname(35)),
+		key37(266, createKeyname(36)),
+		key38(267, createKeyname(37)),
+		key39(268, createKeyname(38)),
+		key40(269, createKeyname(39)),
+		key41(270, createKeyname(40)),
+		key42(271, createKeyname(41)),
+		key43(272, createKeyname(42)),
+		key44(273, createKeyname(43)),
+		key45(274, createKeyname(44)),
+		key46(275, createKeyname(45)),
+		key47(276, createKeyname(46)),
+		key48(277, createKeyname(47)),
+		key49(278, createKeyname(48)),
+		key50(279, createKeyname(49)),
+		key51(280, createKeyname(50)),
+		key52(281, createKeyname(51)),
+		key53(282, createKeyname(52)),
+		key54(283, createKeyname(53)),
+
 		skinname(50, (state) -> {
 			if (state instanceof SkinConfiguration) {
 				return ((SkinConfiguration)state).getSelectedSkinHeader() != null ? ((SkinConfiguration)state).getSelectedSkinHeader().getName() : "";
@@ -303,5 +359,14 @@ public class StringPropertyFactory {
 				return "";
 			};
 		}
+		
+		private static StringProperty createKeyname(final int index) {
+			return (state) -> {
+				if (state instanceof KeyConfiguration) {
+					return ((KeyConfiguration)state).getKeyAssign(index);
+				}
+				return "";
+			};
+		}		
 	}
 }

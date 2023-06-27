@@ -5,6 +5,7 @@ import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.ir.IRChartData;
 import bms.player.beatoraja.ir.IRConnection;
@@ -38,7 +39,7 @@ import java.util.function.*;
  * @author excln
  */
 public class EventFactory {
-
+	
 	/**
 	 * ID指定によるイベント取得(組み込みまたはカスタムイベントとして登録したもの)
 	 * 
@@ -475,6 +476,61 @@ public class EventFactory {
 				}
 			}
 		}),
+		keyassign1(101, changeKeyAssign(0)),
+		keyassign2(102, changeKeyAssign(1)),
+		keyassign3(103, changeKeyAssign(2)),
+		keyassign4(104, changeKeyAssign(3)),
+		keyassign5(105, changeKeyAssign(4)),
+		keyassign6(106, changeKeyAssign(5)),
+		keyassign7(107, changeKeyAssign(6)),
+		keyassign8(108, changeKeyAssign(7)),
+		keyassign9(109, changeKeyAssign(8)),
+		keyassign10(110, changeKeyAssign(9)),
+		keyassign11(111, changeKeyAssign(10)),
+		keyassign12(112, changeKeyAssign(11)),
+		keyassign13(113, changeKeyAssign(12)),
+		keyassign14(114, changeKeyAssign(13)),
+		keyassign15(115, changeKeyAssign(14)),
+		keyassign16(116, changeKeyAssign(15)),
+		keyassign17(117, changeKeyAssign(16)),
+		keyassign18(118, changeKeyAssign(17)),
+		keyassign19(119, changeKeyAssign(18)),
+		keyassign20(120, changeKeyAssign(19)),
+		keyassign21(121, changeKeyAssign(20)),
+		keyassign22(122, changeKeyAssign(21)),
+		keyassign23(123, changeKeyAssign(22)),
+		keyassign24(124, changeKeyAssign(23)),
+		keyassign25(125, changeKeyAssign(24)),
+		keyassign26(126, changeKeyAssign(25)),
+		keyassign27(127, changeKeyAssign(26)),
+		keyassign28(128, changeKeyAssign(27)),
+		keyassign29(129, changeKeyAssign(28)),
+		keyassign30(130, changeKeyAssign(29)),
+		keyassign31(131, changeKeyAssign(30)),
+		keyassign32(132, changeKeyAssign(31)),
+		keyassign33(133, changeKeyAssign(32)),
+		keyassign34(134, changeKeyAssign(33)),
+		keyassign35(135, changeKeyAssign(34)),
+		keyassign36(136, changeKeyAssign(35)),
+		keyassign37(137, changeKeyAssign(36)),
+		keyassign38(138, changeKeyAssign(37)),
+		keyassign39(139, changeKeyAssign(38)),
+		keyassign40(150, changeKeyAssign(39)),
+		keyassign41(151, changeKeyAssign(40)),
+		keyassign42(152, changeKeyAssign(41)),
+		keyassign43(153, changeKeyAssign(42)),
+		keyassign44(154, changeKeyAssign(43)),
+		keyassign45(155, changeKeyAssign(44)),
+		keyassign46(156, changeKeyAssign(45)),
+		keyassign47(157, changeKeyAssign(46)),
+		keyassign48(158, changeKeyAssign(47)),
+		keyassign49(159, changeKeyAssign(48)),
+		keyassign50(160, changeKeyAssign(49)),
+		keyassign51(161, changeKeyAssign(50)),
+		keyassign52(162, changeKeyAssign(51)),
+		keyassign53(163, changeKeyAssign(52)),
+		keyassign54(164, changeKeyAssign(53)),
+
 	    /**
 	     * LNモードの変更
 	     */
@@ -615,7 +671,7 @@ public class EventFactory {
 			this.event = createTwoArgEvent(action, id);
 		}
 		
-	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(int index) {
+	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(final int index) {
 	    	return (state, arg1) -> {
 	    		if(state instanceof MusicSelector) {
 					final MusicSelector selector = (MusicSelector) state;
@@ -624,6 +680,14 @@ public class EventFactory {
 	    	        asr[index] = (asr[index] + (arg1 >= 0 ? 1 : length - 1)) % length;
 	    	        selector.main.getPlayerConfig().setAutoSaveReplay(asr);
 	    	        selector.play(SOUND_OPTIONCHANGE);
+	    		}
+	    	};
+	    }
+	    
+	    private static Consumer<MainState> changeKeyAssign(final int index) {
+	    	return (state) -> {
+	    		if(state instanceof KeyConfiguration) {
+					final KeyConfiguration keyconfig = (KeyConfiguration) state;
 	    		}
 	    	};
 	    }
