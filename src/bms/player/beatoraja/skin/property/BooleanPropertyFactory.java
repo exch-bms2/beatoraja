@@ -45,14 +45,14 @@ public class BooleanPropertyFactory {
 		if (id >= OPTION_COURSE_STAGE1 && id <= OPTION_COURSE_STAGE4) {
 			int index = id - OPTION_COURSE_STAGE1;
 			result = new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
-				final CourseData course = state.main.getPlayerResource().getCourseData();
-				final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+				final CourseData course = state.resource.getCourseData();
+				final int courseIndex = state.resource.getCourseIndex();
 				return course != null && index == courseIndex && index != course.getSong().length - 1;
 			});
 		} else if (id == OPTION_COURSE_STAGE_FINAL) {
 			result = new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
-				final CourseData course = state.main.getPlayerResource().getCourseData();
-				final int courseIndex = state.main.getPlayerResource().getCourseIndex();
+				final CourseData course = state.resource.getCourseData();
+				final int courseIndex = state.resource.getCourseIndex();
 				return course != null && courseIndex == course.getSong().length - 1;				
 			});
 		}
@@ -87,7 +87,7 @@ public class BooleanPropertyFactory {
 		switch (optionid) {
 		case OPTION_TABLE_SONG:
 			return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-					(state) -> (state.main.getPlayerResource().getTablename().length() != 0));
+					(state) -> (state.resource.getTablename().length() != 0));
 		case OPTION_RANDOMSELECTBAR:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof ExecutableBar : false));
@@ -216,7 +216,7 @@ public class BooleanPropertyFactory {
 
 		@Override
 		public boolean get(MainState state) {
-			final SongData model = state.main.getPlayerResource().getSongdata();
+			final SongData model = state.resource.getSongdata();
 			return model != null && bool.isTrue(model);
 		}
 
@@ -330,8 +330,8 @@ public class BooleanPropertyFactory {
 	
 	public enum BooleanType {
 		
-		bgaoff(40, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (!state.main.getPlayerResource().getBMSResource().isBGAOn()))),
-		bgaon(41, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (state.main.getPlayerResource().getBMSResource().isBGAOn()))),
+		bgaoff(40, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (!state.resource.getBMSResource().isBGAOn()))),
+		bgaon(41, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (state.resource.getBMSResource().isBGAOn()))),
 		gauge_groove(42, new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
 			int type = Integer.MIN_VALUE;
 			if (state instanceof BMSPlayer) {
@@ -355,13 +355,13 @@ public class BooleanPropertyFactory {
 			return false;			
 		})),
 		autoplay_on(OPTION_AUTOPLAYON, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY : false))),
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY : false))),
 		autoplay_off(OPTION_AUTOPLAYOFF, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode != BMSPlayerMode.Mode.AUTOPLAY : false))),
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode != BMSPlayerMode.Mode.AUTOPLAY : false))),
 		replay_off(OPTION_REPLAY_OFF, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.PLAY || ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE : false))),
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY || ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE : false))),
 		replay_playing(OPTION_REPLAY_PLAYING, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.REPLAY : false))),
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.REPLAY : false))),
 		state_practice(OPTION_STATE_PRACTICE, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRACTICE : false))),
 		now_loading(OPTION_NOW_LOADING, new DrawProperty(DrawProperty.TYPE_NO_STATIC,

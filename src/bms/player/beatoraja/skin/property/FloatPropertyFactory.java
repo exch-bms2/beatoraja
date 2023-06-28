@@ -155,23 +155,23 @@ public class FloatPropertyFactory {
 					}
 				}),
 		mastervolume(17,
-				(state) -> (state.main.getConfig().getAudioConfig().getSystemvolume()),
+				(state) -> (state.resource.getConfig().getAudioConfig().getSystemvolume()),
 				(state, value) -> {
-					state.main.getConfig().getAudioConfig().setSystemvolume(value);					
+					state.resource.getConfig().getAudioConfig().setSystemvolume(value);					
 				}),
 		keyvolume(18,
-				(state) -> (state.main.getConfig().getAudioConfig().getKeyvolume()),
+				(state) -> (state.resource.getConfig().getAudioConfig().getKeyvolume()),
 				(state, value) -> {
-					state.main.getConfig().getAudioConfig().setKeyvolume(value);					
+					state.resource.getConfig().getAudioConfig().setKeyvolume(value);					
 				}),
 		bgmvolume(19,
-				(state) -> (state.main.getConfig().getAudioConfig().getBgvolume()),
+				(state) -> (state.resource.getConfig().getAudioConfig().getBgvolume()),
 				(state, value) -> {
-					state.main.getConfig().getAudioConfig().setBgvolume(value);					
+					state.resource.getConfig().getAudioConfig().setBgvolume(value);					
 				}),
 		music_progress_bar(101, PROPERTY_MUSIC_PROGRESS),
 		load_progress(102, (state) -> {
-			final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+			final BMSResource resource = state.resource.getBMSResource();
 			return resource.isBGAOn()
 					? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2
 					: resource.getAudioDriver().getProgress();

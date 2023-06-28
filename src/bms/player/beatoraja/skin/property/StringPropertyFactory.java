@@ -60,16 +60,16 @@ public class StringPropertyFactory {
 				final PlayerInformation rival = ((MusicSelector) state).getRival();
 				return rival != null ? rival.getName() : "";
 			} else {
-				final ScoreData rival = state.main.getPlayerResource().getRivalScoreData();
+				final ScoreData rival = state.resource.getRivalScoreData();
 				return rival != null ? rival.getPlayer() : "";
 			}
 		}),
-		player(2, (state) -> (state.main.getPlayerConfig().getName())),
+		player(2, (state) -> (state.resource.getPlayerConfig().getName())),
 		target(3, (state) -> {
 			if (state instanceof MusicSelector) {
-				return TargetProperty.getTargetName(state.main.getPlayerConfig().getTargetid());					
+				return TargetProperty.getTargetName(state.resource.getPlayerConfig().getTargetid());					
 			} else {
-				final ScoreData rival = state.main.getPlayerResource().getRivalScoreData();
+				final ScoreData rival = state.resource.getRivalScoreData();
 				return rival != null ? rival.getPlayer() : "";
 			}
 		}),
@@ -79,15 +79,15 @@ public class StringPropertyFactory {
 					return ((MusicSelector) state).getSelectedBar().getTitle();
 				}
 			} else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-				if(state.main.getPlayerResource().getCoursetitle() != null) {
-					return state.main.getPlayerResource().getCoursetitle();						
+				if(state.resource.getCoursetitle() != null) {
+					return state.resource.getCoursetitle();						
 				}
 			}
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getTitle() : "";
 		}),
 		subtitle(11, (state) -> {
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getSubtitle() : "";
 		}),
 		fulltitle(12, (state) -> {
@@ -96,27 +96,27 @@ public class StringPropertyFactory {
 					return ((MusicSelector) state).getSelectedBar().getTitle();
 				}
 			} else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-				if(state.main.getPlayerResource().getCoursetitle() != null) {
-					return state.main.getPlayerResource().getCoursetitle();
+				if(state.resource.getCoursetitle() != null) {
+					return state.resource.getCoursetitle();
 				}
 			}
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getFullTitle() : "";
 		}),
 		genre(13, (state) -> {
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getGenre() : "";
 		}),
 		artist(14, (state) -> {
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getArtist() : "";
 		}),
 		subartist(15, (state) -> {
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getSubartist() : "";
 		}),
 		fullartist(16, (state) -> {
-			final SongData song = state.main.getPlayerResource().getSongdata();
+			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getFullArtist() : "";
 		}),
 		key1(40, createKeyname(0)),
@@ -253,12 +253,12 @@ public class StringPropertyFactory {
 			}
 			return "";
 		}),
-		tablename(1001, (state) -> (state.main.getPlayerResource().getTablename())),
-		tablelevel(1002, (state) -> (state.main.getPlayerResource().getTablelevel())),
-		tablefull(1003, (state) -> (state.main.getPlayerResource().getTableFullname())),
+		tablename(1001, (state) -> (state.resource.getTablename())),
+		tablelevel(1002, (state) -> (state.resource.getTablelevel())),
+		tablefull(1003, (state) -> (state.resource.getTableFullname())),
 		version(1010, (state) -> (state.main.getVersion())),
 		irname(1020, (state) -> {
-			final IRConfig[] irconfig = state.main.getPlayerResource().getPlayerConfig().getIrconfig();
+			final IRConfig[] irconfig = state.resource.getPlayerConfig().getIrconfig();
 			if (irconfig.length > 0) {
 				return irconfig[0].getIrname();
 			}
@@ -321,7 +321,7 @@ public class StringPropertyFactory {
 				String[] targets = TargetProperty.getTargets();
 				int id = -1;
 				for(int i = 0;i < targets.length;i++) {
-					if(targets[i].equals(state.main.getPlayerConfig().getTargetid())) {
+					if(targets[i].equals(state.resource.getPlayerConfig().getTargetid())) {
 						id = i;
 						break;
 					}
@@ -351,7 +351,7 @@ public class StringPropertyFactory {
 						}
 					}
 				} else {
-					CourseData course = state.main.getPlayerResource().getCourseData();
+					CourseData course = state.resource.getCourseData();
 					if (course != null && course.getSong().length > index && course.getSong()[index] != null) {
 						return course.getSong()[index].getTitle();
 					}
