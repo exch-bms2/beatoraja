@@ -397,7 +397,7 @@ public class EventFactory {
 				if (selector.getSelectedBar() instanceof SongBar) {
 					final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
 
-					if (sd != null) {
+					if (sd != null && sd.getPath() != null) {
 						String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
 						if ((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
 							message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
@@ -455,7 +455,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				if(selector.getSelectedBar() instanceof SongBar) {
 					final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-					if(sd != null) {
+					if(sd != null && sd.getPath() != null) {
 						String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
 						if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
 							message = next ? "Added to Favorite Song" : "Added to Invisible Song";
