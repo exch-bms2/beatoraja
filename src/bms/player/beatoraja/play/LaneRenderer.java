@@ -78,12 +78,12 @@ public class LaneRenderer {
 		generator.dispose();
 
 		this.skin = (PlaySkin) main.getSkin();
-		this.config = main.main.getPlayerResource().getPlayerConfig();
+		this.config = main.resource.getPlayerConfig();
 		this.playconfig = config.getPlayConfig(model.getMode()).getPlayconfig().clone();
 
 		init(model);
 
-		for (CourseData.CourseDataConstraint i : main.main.getPlayerResource().getConstraint()) {
+		for (CourseData.CourseDataConstraint i : main.resource.getConstraint()) {
 			if (i == NO_SPEED) {
 				playconfig.setHispeed(1.0f);
 				playconfig.setLanecover(0);

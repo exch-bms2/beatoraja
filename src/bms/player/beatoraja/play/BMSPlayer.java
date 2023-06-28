@@ -419,7 +419,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void create() {
-		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerMode autoplay = resource.getPlayMode();
 		laneProperty = new LaneProperty(model.getMode());
 		keysound = new KeySoundProcessor(this);
@@ -495,7 +494,6 @@ public class BMSPlayer extends MainState {
 			main.changeState(MainStateType.MUSICSELECT);
 			return;
 		}
-		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerMode autoplay = resource.getPlayMode();
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final PlayerConfig config = resource.getPlayerConfig();
@@ -534,7 +532,7 @@ public class BMSPlayer extends MainState {
 			if (timer.isTimerOn(TIMER_PLAY)) {
 				resource.reloadBMSFile();
 				model = resource.getBMSModel();
-				main.getPlayerResource().getSongdata().setBMSModel(model);
+				resource.getSongdata().setBMSModel(model);
 				lanerender.init(model);
 				keyinput.setKeyBeamStop(false);
 				timer.setTimerOff(TIMER_PLAY);
@@ -843,7 +841,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void saveConfig() {
-		final PlayerResource resource = main.getPlayerResource();
 		for (CourseData.CourseDataConstraint c : resource.getConstraint()) {
 			if (c == NO_SPEED) {
 				return;
@@ -861,7 +858,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	public ScoreData createScoreData() {
-		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		ScoreData score = judge.getScoreData();
 		if (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0) {
@@ -958,7 +954,7 @@ public class BMSPlayer extends MainState {
 		if (timer.isTimerOn(TIMER_FAILED) || timer.isTimerOn(TIMER_FADEOUT)) {
 			return;
 		}
-		if (state != STATE_FINISHED && notes == main.getPlayerResource().getSongdata().getNotes()) {
+		if (state != STATE_FINISHED && notes == resource.getSongdata().getNotes()) {
 			state = STATE_FINISHED;
 			timer.setTimerOn(TIMER_FADEOUT);
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
@@ -967,7 +963,7 @@ public class BMSPlayer extends MainState {
 		} else if(state != STATE_FINISHED) {
 			state = STATE_FAILED;
 			timer.setTimerOn(TIMER_FAILED);
-			if (main.getPlayerResource().mediaLoadFinished()) {
+			if (resource.mediaLoadFinished()) {
 				main.getAudioProcessor().stop((Note) null);
 			}
 			play(SOUND_PLAYSTOP);
@@ -1004,7 +1000,7 @@ public class BMSPlayer extends MainState {
 		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
 		//フルコン判定
-		timer.switchTimer(TIMER_FULLCOMBO_1P, notes == main.getPlayerResource().getSongdata().getNotes()
+		timer.switchTimer(TIMER_FULLCOMBO_1P, notes == resource.getSongdata().getNotes()
 				&& notes == this.judge.getCombo());
 
 		getScoreDataProperty().update(this.judge.getScoreData(), notes);
@@ -1021,7 +1017,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public boolean isNoteEnd() {
-		return notes == main.getPlayerResource().getSongdata().getNotes();
+		return notes == resource.getSongdata().getNotes();
 	}
 
 	public int getPastNotes() {

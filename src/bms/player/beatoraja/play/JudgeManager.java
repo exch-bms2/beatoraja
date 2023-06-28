@@ -252,7 +252,7 @@ public class JudgeManager {
 		final MainController mc = main.main;
 		final TimerManager timer = main.timer;
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
-		final Config config = mc.getPlayerResource().getConfig();
+		final Config config = main.resource.getConfig();
 		final long now = timer.getNowTime();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
@@ -718,7 +718,7 @@ public class JudgeManager {
 
 		final PlayerConfig player = main.main.getPlayerConfig();
 		if(player.isNotesDisplayTimingAutoAdjust()) {
-			final BMSPlayerMode autoplay = main.main.getPlayerResource().getPlayMode();
+			final BMSPlayerMode autoplay = main.resource.getPlayMode();
 			if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 				if (judge <= 2 && mfast >= -150000 && mfast <= 150000) {
 					player.setJudgetiming(player.getJudgetiming() - (int)((mfast >= 0 ? mfast + 15000 : mfast - 15000) / 30000));

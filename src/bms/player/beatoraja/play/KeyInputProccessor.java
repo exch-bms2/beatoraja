@@ -75,7 +75,7 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if(!isJudgeStarted || main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY) {
+				if(!isJudgeStarted || player.resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY) {
 					if (!player.timer.isTimerOn(timerOn) || scratch) {
 						player.timer.setTimerOn(timerOn);
 						player.timer.setTimerOff(timerOff);
@@ -110,7 +110,6 @@ class KeyInputProccessor {
 
 	// キービームフラグON 判定同期用
 	public void inputKeyOn(int lane) {
-		final MainController main = player.main;
 		final int offset = laneProperty.getLaneSkinOffset()[lane];
 		if(!keyBeamStop) {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
