@@ -137,7 +137,7 @@ public class BarRenderer {
 
 		TableData[] unsortedtables = tdaccessor.readAll();
 		Array<TableData> sortedtables = new Array<TableData>(unsortedtables.length);
-		
+
 		for(String url : select.main.getConfig().getTableURL()) {
 			for(int i = 0;i < unsortedtables.length;i++) {
 				final TableData td = unsortedtables[i];
@@ -148,7 +148,7 @@ public class BarRenderer {
 				}
 			}
 		}
-		
+
 		for(TableData td : unsortedtables) {
 			if(td != null) {
 				sortedtables.add(td);
@@ -195,7 +195,7 @@ public class BarRenderer {
 							song.setUrl(chart.url);
 							song.setAppendurl(chart.appendurl);
 							if(chart.mode != null) {
-								song.setMode(chart.mode.id);								
+								song.setMode(chart.mode.id);
 							}
 							songs[j] = song;
 						}
@@ -219,7 +219,7 @@ public class BarRenderer {
 							song.setUrl(chart.url);
 							song.setAppendurl(chart.appendurl);
 							if(chart.mode != null) {
-								song.setMode(chart.mode.id);								
+								song.setMode(chart.mode.id);
 							}
 							songs[j] = song;
 						}
@@ -240,7 +240,7 @@ public class BarRenderer {
 					}
 					td.setCourse(course);
 					if(td.validate()) {
-						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));						
+						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
 					}
 				}
 			} else {
@@ -507,17 +507,15 @@ public class BarRenderer {
 	}
 
 	private long time;
-	
+
 	public void prepare(MusicSelectSkin skin, SkinBar baro, long time) {
-		this.time = time;		
-		final long timeMillis = System.currentTimeMillis();
+		this.time = time;final long timeMillis = System.currentTimeMillis();
 		boolean applyMovement = duration != 0 && duration > timeMillis;
 		float angleLerp = 0;
 		if (applyMovement) {
 			angleLerp = angle < 0 ? ((float) (timeMillis - duration)) / angle
 				: ((float) (duration - timeMillis)) / angle;
 		}
-
 		for (int i = 0; i < barlength; i++) {
 			// calcurate song bar position
 			final BarArea ba = bararea[i];
@@ -622,11 +620,11 @@ public class BarRenderer {
 			for (char c : charset) {
 				chars[i++] = c;
 			}
-			
+
 			for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
 				if(baro.getText(index) != null) {
-					baro.getText(index).prepareFont(String.valueOf(chars));				
-				}				
+					baro.getText(index).prepareFont(String.valueOf(chars));
+				}
 			}
 		}
 
@@ -678,7 +676,7 @@ public class BarRenderer {
 			final SkinText text = baro.getText(ba.text);
 			if(text != null) {
 				text.setText(ba.sd.getTitle());
-				text.draw(sprite, ba.x, ba.y);				
+				text.draw(sprite, ba.x, ba.y);
 			}
 		}
 
@@ -695,7 +693,7 @@ public class BarRenderer {
 						if (TROPHY[j].equals(trophy.getName())) {
 							final SkinImage trophyImage = baro.getTrophy(j);
 							if(trophyImage != null) {
-								trophyImage.draw(sprite, ba.x, ba.y);								
+								trophyImage.draw(sprite, ba.x, ba.y);
 							}
 							break;
 						}
@@ -905,9 +903,7 @@ public class BarRenderer {
 		boolean showInvisibleCharts = false;
 		boolean isSortable = true;
 
-		if (MainLoader.getIllegalSongCount() > 0) {
-			l.addAll(SongBar.toSongBarArray(select.getSongDatabase().getSongDatas(MainLoader.getIllegalSongs())));
-		} else if (bar == null) {
+		if (bar == null) {
 			if (dir.size > 0) {
 				prevbar = dir.first();
 			}

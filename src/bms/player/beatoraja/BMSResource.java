@@ -1,15 +1,15 @@
 package bms.player.beatoraja;
 
-import java.nio.file.Path;
-import java.util.ArrayDeque;
-import java.util.logging.Logger;
-
 import bms.model.BMSModel;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.logging.Logger;
 
 /**
  * BMSの音源、BGAリソースを管理するクラス
@@ -99,17 +99,15 @@ public class BMSResource {
 		while(!bgaloaders.isEmpty() && !bgaloaders.getFirst().isAlive()) {
 			bgaloaders.removeFirst();
 		}
-		
-		if(MainLoader.getIllegalSongCount() == 0) {
-			// Audio, BGAともキャッシュがあるため、何があっても全リロードする
-			BGALoaderThread bgaloader = new BGALoaderThread(
-					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode.mode == BMSPlayerMode.Mode.AUTOPLAY || mode.mode == BMSPlayerMode.Mode.REPLAY)) ? model : null);
-			bgaloaders.addLast(bgaloader);
-			bgaloader.start();
-			AudioLoaderThread audioloader = new AudioLoaderThread(model);
-			audioloaders.addLast(audioloader);
-			audioloader.start();			
-		}
+
+		// Audio, BGAともキャッシュがあるため、何があっても全リロードする
+		BGALoaderThread bgaloader = new BGALoaderThread(
+				config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode.mode == BMSPlayerMode.Mode.AUTOPLAY || mode.mode == BMSPlayerMode.Mode.REPLAY)) ? model : null);
+		bgaloaders.addLast(bgaloader);
+		bgaloader.start();
+		AudioLoaderThread audioloader = new AudioLoaderThread(model);
+		audioloaders.addLast(audioloader);
+		audioloader.start();
 		return true;
 	}
 
