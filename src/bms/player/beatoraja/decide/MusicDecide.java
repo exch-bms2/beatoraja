@@ -27,7 +27,7 @@ public class MusicDecide extends MainState {
 		
 		loadSkin(SkinType.DECIDE);
 
-		main.getPlayerResource().setOrgGaugeOption(main.getPlayerResource().getPlayerConfig().getGauge());
+		resource.setOrgGaugeOption(resource.getPlayerConfig().getGauge());
 	}
 
 	public void prepare() {
