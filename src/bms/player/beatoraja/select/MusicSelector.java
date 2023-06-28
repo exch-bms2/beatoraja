@@ -127,8 +127,8 @@ public class MusicSelector extends MainState {
 		};
 		
 		bar = new BarRenderer(this);
-		banners = new PixmapResourcePool(main.getConfig().getBannerPixmapGen());
-		stagefiles = new PixmapResourcePool(main.getConfig().getStagefilePixmapGen());
+		banners = new PixmapResourcePool(resource.getConfig().getBannerPixmapGen());
+		stagefiles = new PixmapResourcePool(resource.getConfig().getStagefilePixmapGen());
 		musicinput = new MusicSelectInputProcessor(this);
 
 		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
@@ -175,7 +175,7 @@ public class MusicSelector extends MainState {
 
 		play = null;
 		showNoteGraph = false;
-		main.getPlayerResource().setPlayerData(main.getPlayDataAccessor().readPlayerData());
+		resource.setPlayerData(main.getPlayDataAccessor().readPlayerData());
 		if (playedsong != null) {
 			scorecache.update(playedsong, config.getLnmode());
 			playedsong = null;
@@ -187,7 +187,7 @@ public class MusicSelector extends MainState {
 			playedcourse = null;
 		}
 
-		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
+		preview = new PreviewMusicProcessor(main.getAudioProcessor(), resource.getConfig());
 		preview.setDefault(getSound(SOUND_BGM));
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
@@ -207,7 +207,7 @@ public class MusicSelector extends MainState {
 			if(search != null) {
 				search.dispose();
 			}
-			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());
+			search = new SearchTextField(this, resource.getConfig().getResolution());
 			setStage(search);
 		}
 	}
@@ -217,7 +217,6 @@ public class MusicSelector extends MainState {
 	}
 
 	public void render() {
-		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
         if(timer.getNowTime() > getSkin().getInput()){
         	timer.switchTimer(TIMER_STARTINPUT, true);
@@ -230,8 +229,8 @@ public class MusicSelector extends MainState {
 		resource.setCourseData(current instanceof GradeBar ? ((GradeBar) current).getCourseData() : null);
 
 		// preview music
-		if (current instanceof SongBar && main.getConfig().getSongPreview() != SongPreview.NONE) {
-			final SongData song = main.getPlayerResource().getSongdata();
+		if (current instanceof SongBar && resource.getConfig().getSongPreview() != SongPreview.NONE) {
+			final SongData song = resource.getSongdata();
 			if (song != preview.getSongData() && timer.getNowTime() > timer.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
 					&& play == null) {
 				this.preview.start(song);
@@ -241,7 +240,7 @@ public class MusicSelector extends MainState {
 		// read bms information
 		if (timer.getNowTime() > timer.getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play == null) {
 			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
-				SongData song = main.getPlayerResource().getSongdata();
+				SongData song = resource.getSongdata();
 				new Thread(() ->  {
 					song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()),
 							config.getLnmode()));
@@ -286,7 +285,7 @@ public class MusicSelector extends MainState {
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
 						if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
-							Array<String> urls = new Array<String>(main.getConfig().getTableURL());
+							Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
 
 							boolean isdtable = false;
 							for (DirectoryBar bar : dir) {
@@ -327,7 +326,7 @@ public class MusicSelector extends MainState {
 				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
 					if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
-						Array<String> urls = new Array<String>(main.getConfig().getTableURL());
+						Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
 
 						boolean isdtable = false;
 						for (DirectoryBar bar : dir) {
@@ -467,8 +466,6 @@ public class MusicSelector extends MainState {
 	}
 
 	private boolean _readCourse(BMSPlayerMode mode, GradeBar gradeBar) {
-		final PlayerResource resource = main.getPlayerResource();
-
 		resource.clear();
 		final SongData[] songs = gradeBar.getSongDatas();
 		Path[] files = new Path[songs.length];
@@ -646,9 +643,9 @@ public class MusicSelector extends MainState {
 		// banner
 		// stagefile
 		final Bar current = bar.getSelected();
-		main.getPlayerResource().getBMSResource().setBanner(
+		resource.getBMSResource().setBanner(
 				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
-		main.getPlayerResource().getBMSResource().setStagefile(
+		resource.getBMSResource().setStagefile(
 				current instanceof SongBar ? ((SongBar) current).getStagefile() : null);
 	}
 

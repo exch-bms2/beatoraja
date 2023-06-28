@@ -112,7 +112,7 @@ public class SkinDistributionGraph extends SkinObject {
 	public void prepare(long time, MainState state) {
     	final Bar bar = ((MusicSelector)state).getSelectedBar();
         this.currentBar = (bar instanceof DirectoryBar) ? (DirectoryBar)bar : null;
-        if (!state.main.getPlayerResource().getConfig().isFolderlamp()) {
+        if (!state.resource.getConfig().isFolderlamp()) {
             draw = false;
             return;
         }

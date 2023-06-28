@@ -133,12 +133,12 @@ public class BarRenderer {
 	public BarRenderer(MusicSelector select) {
 		final MainController main = select.main;
 		this.select = select;
-		TableDataAccessor tdaccessor = new TableDataAccessor(main.getConfig().getTablepath());
+		TableDataAccessor tdaccessor = new TableDataAccessor(select.resource.getConfig().getTablepath());
 
 		TableData[] unsortedtables = tdaccessor.readAll();
 		Array<TableData> sortedtables = new Array<TableData>(unsortedtables.length);
 		
-		for(String url : select.main.getConfig().getTableURL()) {
+		for(String url : select.resource.getConfig().getTableURL()) {
 			for(int i = 0;i < unsortedtables.length;i++) {
 				final TableData td = unsortedtables[i];
 				if(td != null && url.equals(td.getUrl())) {
@@ -155,13 +155,13 @@ public class BarRenderer {
 			}
 		}
 
-		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(main.getConfig().getTablepath());
+		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(select.resource.getConfig().getTablepath());
 
 		Array<TableBar> table = new Array<TableBar>();
 
-		durationlow = main.getConfig().getScrollDurationLow();
-		durationhigh = main.getConfig().getScrollDurationHigh();
-		analogTicksPerScroll = main.getConfig().getAnalogTicksPerScroll();
+		durationlow = select.resource.getConfig().getScrollDurationLow();
+		durationhigh = select.resource.getConfig().getScrollDurationHigh();
+		analogTicksPerScroll = select.resource.getConfig().getAnalogTicksPerScroll();
 
 		for (TableData td : sortedtables) {
 			if (td.getName().equals("BMS Search")) {
@@ -169,7 +169,7 @@ public class BarRenderer {
 				table.add(bmssearch);
 			} else {
 				table.add(new TableBar(select, td,
-						new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
+						new TableDataAccessor.DifficultyTableAccessor(select.resource.getConfig().getTablepath(), td.getUrl())));
 			}
 		}
 
@@ -240,7 +240,7 @@ public class BarRenderer {
 					}
 					td.setCourse(course);
 					if(td.validate()) {
-						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));						
+						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(select.resource.getConfig().getTablepath(), td.getUrl())));						
 					}
 				}
 			} else {
@@ -468,7 +468,7 @@ public class BarRenderer {
 				break;
 			}
 		}
-		if (search.size >= select.main.getConfig().getMaxSearchBarCount()) {
+		if (search.size >= select.resource.getConfig().getMaxSearchBarCount()) {
 			search.removeIndex(0);
 		}
 		search.add(bar);
@@ -803,7 +803,7 @@ public class BarRenderer {
 	public void input() {
 		BMSPlayerInputProcessor input = select.main.getInputProcessor();
 
-        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.main.getPlayerResource().getPlayerConfig().getMusicselectinput()];
+        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.resource.getPlayerConfig().getMusicselectinput()];
 
 		// song bar scroll on mouse wheel
 		int mov = -input.getScroll();
@@ -949,7 +949,7 @@ public class BarRenderer {
 			}
 		}
 
-		if(!select.main.getConfig().isShowNoSongExistingBar()) {
+		if(!select.resource.getConfig().isShowNoSongExistingBar()) {
 			Array<Bar> remove = new Array<Bar>();
 			for (Bar b : l) {
 				if ((b instanceof SongBar && !((SongBar) b).existsSong())
@@ -961,7 +961,7 @@ public class BarRenderer {
 		}
 
 		if (l.size > 0) {
-			final PlayerConfig config = select.main.getPlayerResource().getPlayerConfig();
+			final PlayerConfig config = select.resource.getPlayerConfig();
 			int modeIndex = 0;
 			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getMode();modeIndex++);
 			for(int trialCount = 0; trialCount < MusicSelector.MODE.length; trialCount++, modeIndex++) {
@@ -1157,7 +1157,7 @@ public class BarRenderer {
 		@Override
 		public void run() {
 			final MainController main = select.main;
-			PlayerConfig config = main.getPlayerResource().getPlayerConfig();
+			final PlayerConfig config = select.resource.getPlayerConfig();
 			final ScoreDataCache rival = select.getRivalScoreDataCache();
 
 			final Array<SongData> songarray = new Array<>(bars.length);
@@ -1206,7 +1206,7 @@ public class BarRenderer {
 					}
 				}
 
-				if (main.getPlayerResource().getConfig().isFolderlamp()) {
+				if (select.resource.getConfig().isFolderlamp()) {
 					if (bar instanceof DirectoryBar) {
 						((DirectoryBar) bar).updateFolderStatus();
 					}
