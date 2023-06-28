@@ -74,7 +74,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			TimingDistribution td = state.getTimingDistribution();
 			int[] dist = td.getTimingDistribution();
 			final int center = td.getArrayCenter();
-			int[][] judgeArea = SkinTimingVisualizer.getJudgeArea(state.main.getPlayerResource());
+			int[][] judgeArea = SkinTimingVisualizer.getJudgeArea(state.resource);
 
 			for (int d : dist) {
 				if (max < d) {

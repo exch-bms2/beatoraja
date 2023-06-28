@@ -142,7 +142,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	public void draw(SkinObjectRenderer sprite) {	
 		
-		final SongData song = state.main.getPlayerResource().getSongdata();
+		final SongData song = state.resource.getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 		
 		// TODO スキン定義側で分岐できないか？

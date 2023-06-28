@@ -39,7 +39,7 @@ public abstract class SkinLoader {
      * @return
      */
     public static Skin load(MainState state, SkinType skinType) {
-        Skin skin = load(state, skinType, state.main.getPlayerResource().getPlayerConfig().getSkin()[skinType.getId()]);
+        Skin skin = load(state, skinType, state.resource.getPlayerConfig().getSkin()[skinType.getId()]);
         if(skin == null) {
             SkinConfig skinConfig = new SkinConfig();
             skinConfig.setPath(SkinConfig.Default.get(skinType).path);
@@ -50,7 +50,7 @@ public abstract class SkinLoader {
     }
 
     public static Skin load(MainState state, SkinType skinType, SkinConfig sc) {
-        final PlayerResource resource = state.main.getPlayerResource();
+        final PlayerResource resource = state.resource;
         try {
             if (sc.getPath().endsWith(".json")) {
                 JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
