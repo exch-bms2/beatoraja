@@ -35,8 +35,6 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public void create() {
-		final PlayerResource resource = main.getPlayerResource();
-
 		for(int i = 0;i < REPLAY_SIZE;i++) {
 			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 					resource.getPlayerConfig().getLnmode(), i ,resource.getConstraint()) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;
@@ -80,7 +78,6 @@ public class CourseResult extends AbstractResult {
 	
 	public void prepare() {
 		state = STATE_OFFLINE;
-		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		final ScoreData newscore = getNewScore();
 
@@ -179,7 +176,7 @@ public class CourseResult extends AbstractResult {
 
 		if (timer.isTimerOn(TIMER_FADEOUT)) {
 			if (timer.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
-				main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
+				resource.getPlayerConfig().setGauge(resource.getOrgGaugeOption());
 				main.changeState(MainStateType.MUSICSELECT);
 			}
 		} else if (time > getSkin().getScene()) {
@@ -195,7 +192,6 @@ public class CourseResult extends AbstractResult {
 
 	public void input() {
 		super.input();
-		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
 		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
@@ -242,7 +238,6 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public void updateScoreDatabase() {
-		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
 		final ScoreData newscore = getNewScore();
@@ -280,7 +275,6 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		final PlayerResource resource = main.getPlayerResource();
 		ScoreData score = resource.getCourseScoreData();
 		if (score != null) {
 			switch (judge) {
@@ -307,7 +301,6 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public void saveReplayData(int index) {
-		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY && resource.getCourseScoreData() != null) {
 			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateCourseScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
@@ -323,7 +316,7 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public ScoreData getNewScore() {
-		return main.getPlayerResource().getCourseScoreData();
+		return resource.getCourseScoreData();
 	}
 
 	static class IRSendStatus {

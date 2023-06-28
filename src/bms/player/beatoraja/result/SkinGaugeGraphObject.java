@@ -113,7 +113,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	public void prepare(long time, MainState state) {
 		render = time >= delay ? 1.0f : (float) time / delay;
 
-		final PlayerResource resource = state.main.getPlayerResource();
+		final PlayerResource resource = state.resource;
 		int type = resource.getGrooveGauge().getType();
 		if(state instanceof AbstractResult) {
 			type = ((AbstractResult) state).gaugeType;

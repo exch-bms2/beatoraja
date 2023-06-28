@@ -38,7 +38,6 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void create() {
-		final PlayerResource resource = main.getPlayerResource();
 		for(int i = 0;i < REPLAY_SIZE;i++) {
 			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), i) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
@@ -77,7 +76,6 @@ public class MusicResult extends AbstractResult {
 	
 	public void prepare() {
 		state = STATE_OFFLINE;
-		final PlayerResource resource = main.getPlayerResource();
 		final ScoreData newscore = getNewScore();
 
 		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
@@ -168,8 +166,6 @@ public class MusicResult extends AbstractResult {
 			timer.switchTimer(TIMER_STARTINPUT, true);
 		}
 
-		final PlayerResource resource = main.getPlayerResource();
-
 		if (timer.isTimerOn(TIMER_FADEOUT)) {
 			if (timer.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				main.getAudioProcessor().stop((Note) null);
@@ -212,7 +208,7 @@ public class MusicResult extends AbstractResult {
 						main.changeState(MainStateType.COURSERESULT);
 					}
 				} else {
-					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
+					resource.getPlayerConfig().setGauge(resource.getOrgGaugeOption());
 					ResultKeyProperty.ResultKey key = null;
 					for (int i = 0; i < property.getAssignLength(); i++) {
 						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && input.getKeyState(i)) {
@@ -263,7 +259,6 @@ public class MusicResult extends AbstractResult {
 	public void input() {
 		super.input();
 		long time = timer.getNowTime();
-		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
 		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
@@ -317,7 +312,6 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void saveReplayData(int index) {
-		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY && resource.getCourseBMSModels() == null
 				&& resource.getScoreData() != null) {
 			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
@@ -330,7 +324,6 @@ public class MusicResult extends AbstractResult {
 	}
 
 	private void updateScoreDatabase() {
-		final PlayerResource resource = main.getPlayerResource();
 		ScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
@@ -454,7 +447,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		ScoreData score = main.getPlayerResource().getScoreData();
+		ScoreData score = resource.getScoreData();
 		if (score != null) {
 			switch (judge) {
 			case 0:
@@ -480,12 +473,11 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public int getTotalNotes() {
-		final PlayerResource resource = main.getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
 	}
 
 	public ScoreData getNewScore() {
-		return main.getPlayerResource().getScoreData();
+		return resource.getScoreData();
 	}
 
 	static class IRSendStatus {
