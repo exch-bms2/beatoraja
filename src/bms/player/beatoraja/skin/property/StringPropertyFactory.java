@@ -15,6 +15,9 @@ import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.RandomCourseBar;
 import bms.player.beatoraja.song.SongData;
+import com.badlogic.gdx.utils.IntMap;
+
+import java.util.*;
 
 /**
  * StringPropertyのFactoryクラス
@@ -30,12 +33,8 @@ public class StringPropertyFactory {
 	 * @return 対応するStringProperty
 	 */
 	public static StringProperty getStringProperty(final int id) {
-		for(StringType t : StringType.values()) {
-			if(t.id == id) {
-				return t.property;
-			}
-		}
-		return null;
+		StringType type = StringType.get(id);
+		return type != null ? type.property : null;
 	}
 	
 	/**
@@ -45,7 +44,7 @@ public class StringPropertyFactory {
 	 * @return 対応するStringProperty
 	 */
 	public static StringProperty getStringProperty(final String name) {
-		for(StringType t : StringType.values()) {
+		for(StringType t : StringType.VALUES) {
 			if(t.name().equals(name)) {
 				return t.property;
 			}
@@ -274,6 +273,21 @@ public class StringPropertyFactory {
 		 * StringProperty
 		 */
 		private final StringProperty property;
+
+		public static final List<StringType> VALUES = Collections.unmodifiableList(Arrays.asList(StringType.values()));
+
+		private static final IntMap<StringType> ID_MAP;
+
+		static {
+			ID_MAP = new IntMap<>(VALUES.size());
+			for (StringType type : VALUES) {
+				ID_MAP.put(type.id, type);
+			}
+		}
+
+		public static StringType get(int id) {
+			return ID_MAP.get(id);
+		}
 		
 		private StringType(int id, StringProperty property) {
 			this.id = id;
