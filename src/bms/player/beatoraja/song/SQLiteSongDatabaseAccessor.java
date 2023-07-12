@@ -333,7 +333,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		 */
 		public void updateSongDatas(Path[] paths) {
 			long time = System.currentTimeMillis();
-			SongDatabaseUpdaterProperty property = new SongDatabaseUpdaterProperty(Calendar.getInstance().getTimeInMillis() / 1000, updateAll, info);
+			SongDatabaseUpdaterProperty property = new SongDatabaseUpdaterProperty(Calendar.getInstance().getTimeInMillis() / 1000, info);
 			property.count.set(0);
 			if(info != null) {
 				info.startUpdate();
@@ -341,29 +341,34 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			try (Connection conn = ds.getConnection()) {
 				property.conn = conn;
 				conn.setAutoCommit(false);
-				// ルートディレクトリに含まれないフォルダの削除
-				StringBuilder dsql = new StringBuilder();
-				Object[] param = new String[bmsroot.length];
-				for (int i = 0; i < bmsroot.length; i++) {
-					dsql.append("path NOT LIKE ?");
-					param[i] = bmsroot[i] + "%";
-					if (i < bmsroot.length - 1) {
-						dsql.append(" AND ");
-					}
-				}
-				
-				qr.update(conn,
-						"DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND "
-								+ dsql.toString(), param);
-				qr.update(conn, "DELETE FROM song WHERE " + dsql.toString(), param);
 				// 楽曲のタグ,FAVORITEの保持
-				for (SongData record : qr.query(conn, "SELECT md5, tag, favorite FROM song", songhandler)) {
+				for (SongData record : qr.query(conn, "SELECT sha256, tag, favorite FROM song", songhandler)) {
 					if (record.getTag().length() > 0) {
 						property.tags.put(record.getSha256(), record.getTag());
 					}
 					if (record.getFavorite() > 0) {
 						property.favorites.put(record.getSha256(), record.getFavorite());
 					}
+				}
+				if(updateAll) {
+					qr.update(conn, "DELETE FROM folder");					
+					qr.update(conn, "DELETE FROM song");
+				} else {
+					// ルートディレクトリに含まれないフォルダの削除
+					StringBuilder dsql = new StringBuilder();
+					Object[] param = new String[bmsroot.length];
+					for (int i = 0; i < bmsroot.length; i++) {
+						dsql.append("path NOT LIKE ?");
+						param[i] = bmsroot[i] + "%";
+						if (i < bmsroot.length - 1) {
+							dsql.append(" AND ");
+						}
+					}
+					
+					qr.update(conn,
+							"DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND "
+									+ dsql.toString(), param);
+					qr.update(conn, "DELETE FROM song WHERE " + dsql.toString(), param);					
 				}
 				
 				Arrays.stream(paths).parallel().forEach((p) -> {
@@ -451,7 +456,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 //						long t = System.nanoTime();
 						folders.set(i, null);
 //						System.out.println(System.nanoTime() - t);
-						if (!property.updateAll && record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
+						if (record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
 							bf.updateFolder = false;
 						}
 						break;
@@ -511,7 +516,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					if (record != null && record.getPath().equals(pathname)) {
 						records.set(i, null);
 						try {
-							if (!property.updateAll && record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
+							if (record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
 								update = false;
 							}
 						} catch (IOException e) {
@@ -622,13 +627,11 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		private final Map<String, Integer> favorites = new HashMap<String, Integer>();
 		private final SongInformationAccessor info;
 		private final long updatetime;
-		private final boolean updateAll;
 		private final AtomicInteger count = new AtomicInteger();
 		private Connection conn;
 		
-		public SongDatabaseUpdaterProperty(long updatetime, boolean updateAll, SongInformationAccessor info) {
+		public SongDatabaseUpdaterProperty(long updatetime, SongInformationAccessor info) {
 			this.updatetime = updatetime;
-			this.updateAll = updateAll;
 			this.info = info;
 		}
 
