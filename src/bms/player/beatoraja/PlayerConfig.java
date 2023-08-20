@@ -831,7 +831,7 @@ public class PlayerConfig {
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 		
 		if(autosavereplay == null) {
-			autosavereplay = config.autosavereplay != null ? config.autosavereplay.clone() : new int[4];
+			autosavereplay = new int[4];
 		}
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
