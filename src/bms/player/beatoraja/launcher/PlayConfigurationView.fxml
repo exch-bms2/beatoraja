@@ -310,6 +310,7 @@
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="1000" max="2000" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
+                                         <CheckBox fx:id="chartpreview"  GridPane.columnIndex="2" GridPane.rowIndex="5" mnemonicParsing="false" text="%CHART_PREVIEW" />
                                      </GridPane>
                                  </VBox>
                            </content>

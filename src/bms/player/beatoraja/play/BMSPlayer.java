@@ -506,11 +506,21 @@ public class BMSPlayer extends MainState {
 		if(input.startPressed() || input.isSelectPressed()){
 			startpressedtime = micronow;
 		}
+		
+
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
+			if(config.isChartPreview() && !timer.isTimerOn(TIMER_PLAY)) {
+				timer.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);				
+			}
+			
 			if (resource.mediaLoadFinished() && micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
 					&& micronow - startpressedtime > 1000000) {
+				if(config.isChartPreview()) {
+					timer.setTimerOff(TIMER_PLAY);
+					lanerender.init(model);					
+				}
 				bga.prepare(this);
 				final long mem = Runtime.getRuntime().freeMemory();
 				System.gc();

@@ -205,6 +205,11 @@ public class PlayerConfig {
 	private boolean showpastnote = false;
 	
 	/**
+	 * チャートプレビューを使用するかどうか
+	 */
+	private boolean chartPreview = false;
+	
+	/**
 	 * 選択中の選曲時ソート
 	 */
 	private int sort;
@@ -660,6 +665,14 @@ public class PlayerConfig {
 	
 	public void setRandomSelect(boolean isRandomSelect) {
 		this.isRandomSelect = isRandomSelect;
+	}
+
+	public boolean isChartPreview() {
+		return chartPreview;
+	}
+
+	public void setChartPreview(boolean chartPreview) {
+		this.chartPreview = chartPreview;
 	}
 
 	public String getId() {

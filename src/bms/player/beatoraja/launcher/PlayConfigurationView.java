@@ -181,6 +181,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> exitpressduration;
 	@FXML
+	private CheckBox chartpreview;
+	@FXML
 	private CheckBox guidese;
 	@FXML
 	private CheckBox windowhold;
@@ -423,6 +425,7 @@ public class PlayConfigurationView implements Initializable {
 		seventoninepattern.getSelectionModel().select(player.getSevenToNinePattern());
 		seventoninetype.getSelectionModel().select(player.getSevenToNineType());
 		exitpressduration.getValueFactory().setValue(player.getExitPressDuration());
+		chartpreview.setSelected(player.isChartPreview());
 		guidese.setSelected(player.isGuideSE());
 		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
@@ -528,6 +531,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setSevenToNinePattern(seventoninepattern.getValue());
 		player.setSevenToNineType(seventoninetype.getValue());
 		player.setExitPressDuration(getValue(exitpressduration));
+		player.setChartPreview(chartpreview.isSelected());
 		player.setGuideSE(guidese.isSelected());
 		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
