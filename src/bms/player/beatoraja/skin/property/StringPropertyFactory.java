@@ -263,6 +263,14 @@ public class StringPropertyFactory {
 			}
 			return "";
 		}),
+		songhashmd5(1030, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			return song != null ? song.getMd5() : "";
+		}),
+		songhashsha256(1031, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			return song != null ? song.getSha256() : "";
+		}),
 		;
 		
 		/**
