@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -71,6 +70,9 @@ public class PlayerConfig {
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
 	
+	/**
+	 * ディスプレイ表示タイミング自動調整
+	 */
 	private boolean notesDisplayTimingAutoAdjust = false;
 
     /**
@@ -98,7 +100,7 @@ public class PlayerConfig {
     private int longnoteMode = 0;
     private double longnoteRate = 1.0;
 	/**
-	 * アシストオプション:判定拡大
+	 * アシストオプション:カスタムジャッジ
 	 */
 	private boolean customJudge = false;
 	private int keyJudgeWindowRatePerfectGreat = 400;
@@ -145,9 +147,6 @@ public class PlayerConfig {
 	public static final int GAUGEAUTOSHIFT_SELECT_TO_UNDER = 4;
 
 	private int autosavereplay[];
-
-	// TODO Configから移行(0.8.2)。ある程度バージョンが進んだら消す
-	private static Config config;
 
 	/**
 	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
@@ -874,7 +873,6 @@ public class PlayerConfig {
 	}
 
 	public static void init(Config config) {
-		PlayerConfig.config = config;
 		// TODO プレイヤーアカウント検証
 		try {
 			if(!Files.exists(Paths.get(config.getPlayerpath()))) {
@@ -902,7 +900,6 @@ public class PlayerConfig {
 				config.setPlayername("player1");
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
