@@ -10,25 +10,20 @@ public interface IRConnection {
 	/**
 	 * IRに新規ユーザー登録する。
 	 * 
-	 * @param id
-	 *            ユーザーID
-	 * @param pass
-	 *            パスワード
-	 * @param name
-	 *            ユーザー名
+	 * @param accout
+	 *            アカウント情報
 	 * @return
 	 */
-	public IRResponse<IRPlayerData> register(String id, String pass, String name);
+	public IRResponse<IRPlayerData> register(IRAccount account);
 
 	/**
 	 * IRにログインする。起動時に呼び出される
 	 * 
-	 * @param id
-	 *            ユーザーID
-	 * @param pass
-	 *            パスワード
+	 * @param accout
+	 *            アカウント情報
+	 * @return
 	 */
-	public IRResponse<IRPlayerData> login(String id, String pass);
+	public IRResponse<IRPlayerData> login(IRAccount account);
 
 	/**
 	 * ライバルデータを収録する
