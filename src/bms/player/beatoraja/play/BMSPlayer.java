@@ -511,8 +511,13 @@ public class BMSPlayer extends MainState {
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
-			if(config.isChartPreview() && !timer.isTimerOn(TIMER_PLAY)) {
-				timer.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);				
+			if(config.isChartPreview()) {
+				if(timer.isTimerOn(TIMER_PLAY) && micronow > startpressedtime) {
+					timer.setTimerOff(TIMER_PLAY);
+					lanerender.init(model);					
+				} else if(!timer.isTimerOn(TIMER_PLAY) && micronow == startpressedtime){
+					timer.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);				
+				}				
 			}
 			
 			if (resource.mediaLoadFinished() && micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
