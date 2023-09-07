@@ -384,7 +384,9 @@ public class JudgeManager {
 				}
 				timer.setTimerOff(timerActive);
 				timer.switchTimer(timerDamage, true);
-				keysound.setVolume(passing[lane], 0);
+				if(passing[lane].getPair().getState() > 3) {
+					keysound.setVolume(passing[lane], 0.0f);
+				}
 			}
 		}
 		prevmtime = mtime;
