@@ -90,7 +90,7 @@ public abstract class SkinText extends SkinObject {
     }
 
     public void draw(SkinObjectRenderer sprite) {
-        if(currentText != text) {
+        if(!currentText.equals(text)) {
             setText(currentText);
         }
         draw(sprite, 0,0);

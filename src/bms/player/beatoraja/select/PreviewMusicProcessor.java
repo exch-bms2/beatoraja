@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
 
@@ -85,14 +86,14 @@ public class PreviewMusicProcessor {
                     }
                     if(!path.equals(playing)) {
                         stopPreview(true);
-                        if(path != defaultMusic) {
+                        if(!path.equals(defaultMusic)) {
                             audio.play(path, config.getAudioConfig().getSystemvolume(), config.getSongPreview() == SongPreview.LOOP);
                         } else {
                             audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
                         }
                         playing = path;
                     }
-                } else if(playing != defaultMusic && !audio.isPlaying(playing)){
+                } else if(!Objects.equals(playing, defaultMusic) && !audio.isPlaying(playing)){
                 	// プレビュー演奏終了後に選曲BGMに戻す
                     stopPreview(true);
                     audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
