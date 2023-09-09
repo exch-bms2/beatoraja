@@ -21,6 +21,7 @@ import javafx.util.converter.IntegerStringConverter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -122,7 +123,7 @@ public class InputConfigurationView implements Initializable {
 	    
 	    @Override
 	    public Integer fromString(String arg0) {
-		if (arg0 == v2String) {
+		if (Objects.equals(arg0, v2String)) {
 		    return PlayModeConfig.ControllerConfig.ANALOG_SCRATCH_VER_2;
 		} else {
 		    return PlayModeConfig.ControllerConfig.ANALOG_SCRATCH_VER_1;

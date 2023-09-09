@@ -75,8 +75,8 @@ public class StreamRequestCommand extends StreamCommand {
                 SongData[] _songDatas = selector.getSongDatabase().getSongDatas(new String[] { escape(sha256) });
                 if (_songDatas.length > 0) {
                     SongData data = _songDatas[0];
-                    if (songDatas.stream().filter(song -> song.getSha256() == sha256).count() > 0 ||
-                        stack.stream().filter(hash -> hash == sha256).count() > 1) { // stackの中身には自身を含めるため、1個の場合は通す
+                    if (songDatas.stream().filter(song -> song.getSha256().equals(sha256)).count() > 0 ||
+                        stack.stream().filter(hash -> hash.equals(sha256)).count() > 1) { // stackの中身には自身を含めるため、1個の場合は通す
                         // すでに追加済みならスキップ
                         notifier.addMessage(data.getFullTitle() + " はリクエスト済です" , MESSAGE_TIME, Color.ORANGE, 0);
                     }
@@ -94,7 +94,7 @@ public class StreamRequestCommand extends StreamCommand {
                     // 溜まってるぶんを順に取得
                     while (stack.size() != 0) {
                         String sha256 = stack.pop();
-                        if (songDatas.stream().filter(song -> song.getSha256() == sha256).count() > 0) {
+                        if (songDatas.stream().filter(song -> song.getSha256().equals(sha256)).count() > 0) {
                             // すでに追加済みならスキップ
                             continue;
                         }

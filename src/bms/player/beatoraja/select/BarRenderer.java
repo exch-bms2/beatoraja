@@ -1022,7 +1022,7 @@ public class BarRenderer {
 									try {
 										Object value = randomFolder.getFilter().get(key);
 										if (scoreData == null) {
-											if (value instanceof String && "" != (String) value) {
+											if (value instanceof String && !"".equals((String) value)) {
 												return false;
 											}
 											if (value instanceof Integer && 0 != (Integer) value) {
