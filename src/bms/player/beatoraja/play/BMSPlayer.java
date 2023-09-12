@@ -951,6 +951,7 @@ public class BMSPlayer extends MainState {
 //		System.out.println(avgduration + " / " + count + " = " + score.getAvgjudge());
 
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
+		score.setSkin(getSkin().header.getName());
 		return score;
 	}
 

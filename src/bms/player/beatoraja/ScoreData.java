@@ -130,6 +130,8 @@ public class ScoreData implements Validatable {
 	
 	private BMSPlayerRule rule;
 	
+	private String skin;
+
 	public ScoreData() {
 		this(Mode.BEAT_7K);
 	}
@@ -451,6 +453,14 @@ public class ScoreData implements Validatable {
 
 	public void setRule(BMSPlayerRule rule) {
 		this.rule = rule;
+	}
+
+	public String getSkin() {
+		return skin;
+	}
+
+	public void setSkin(String skin) {
+		this.skin = skin;
 	}
 
 	public String getGhost() {

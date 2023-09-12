@@ -108,6 +108,8 @@ public class IRScoreData {
 	 */
 	public final BMSPlayerRule rule;
 	
+	public final String skin;
+	
 	public IRScoreData(ScoreData score) {
 		this.sha256 = score.getSha256();
 		this.lntype = score.getMode();
@@ -138,6 +140,7 @@ public class IRScoreData {
 		this.deviceType = score.getDeviceType();
 		this.judgeAlgorithm = score.getJudgeAlgorithm();
 		this.rule = score.getRule();
+		this.skin = score.getSkin();
 	}
 	
 	public int getExscore() {
