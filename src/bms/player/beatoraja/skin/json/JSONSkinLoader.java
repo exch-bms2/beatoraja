@@ -105,7 +105,8 @@ public class JSONSkinLoader extends SkinLoader {
 			if (sk.type != -1) {
 				header = new SkinHeader();
 				header.setSkinType(SkinType.getSkinTypeById(sk.type));
-				header.setName(sk.name);
+				header.setName(sk.name != null ? sk.name : "");
+				header.setAuthor(sk.author != null ? sk.author : "");
 				header.setPath(p);
 				header.setType(SkinHeader.TYPE_BEATORJASKIN);
 

@@ -8,6 +8,7 @@ public class JsonSkin {
 
 		public int type = -1;
 		public String name;
+		public String author;
 		public int w = 1280;
 		public int h = 720;
 		public int fadeout;
