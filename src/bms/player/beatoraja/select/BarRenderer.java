@@ -315,6 +315,9 @@ public class BarRenderer {
 					});
 		} catch (Throwable e) {
 			randomFolderList = new ArrayList<RandomFolder>();
+			RandomFolder randomFolder = new RandomFolder();
+			randomFolder.setName("RANDOM SELECT");
+			randomFolderList.add(randomFolder);
 			e.printStackTrace();
 		}
 
