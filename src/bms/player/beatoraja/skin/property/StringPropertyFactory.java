@@ -176,12 +176,16 @@ public class StringPropertyFactory {
 		skinname(50, (state) -> {
 			if (state instanceof SkinConfiguration) {
 				return ((SkinConfiguration)state).getSelectedSkinHeader() != null ? ((SkinConfiguration)state).getSelectedSkinHeader().getName() : "";
+			} else if(state.getSkin() != null && state.getSkin().header != null) {
+				return state.getSkin().header.getName();
 			}
 			return "";
 		}),
 		skinauthor(51, (state) -> {
 			if (state instanceof SkinConfiguration) {
-				return ((SkinConfiguration)state).getSelectedSkinHeader() != null ? "" : "";
+				return ((SkinConfiguration)state).getSelectedSkinHeader() != null ? ((SkinConfiguration)state).getSelectedSkinHeader().getAuthor() : "";
+			} else if(state.getSkin() != null && state.getSkin().header != null) {
+				return state.getSkin().header.getAuthor();
 			}
 			return "";
 		}),
