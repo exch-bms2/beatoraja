@@ -1,5 +1,6 @@
 package bms.player.beatoraja.config;
 
+import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -93,7 +94,10 @@ public class KeyConfiguration extends MainState {
 	public void create() {
 		loadSkin(SkinType.KEY_CONFIG);
 		if(getSkin() == null) {
-			this.setSkin(new KeyConfigurationSkin(Resolution.HD, main.getConfig().getResolution()));
+			SkinHeader header = new SkinHeader();
+			header.setSourceResolution(Resolution.HD);
+			header.setDestinationResolution(main.getConfig().getResolution());
+			this.setSkin(new KeyConfigurationSkin(header));
 		}
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(

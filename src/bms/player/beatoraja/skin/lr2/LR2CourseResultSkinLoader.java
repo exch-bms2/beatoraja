@@ -1,11 +1,8 @@
 package bms.player.beatoraja.skin.lr2;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.result.CourseResultSkin;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.IntIntMap;
@@ -30,8 +27,8 @@ public class LR2CourseResultSkinLoader extends LR2SkinCSVLoader<CourseResultSkin
         addCommandWord(CourseCommand.values());
     }
 
-    public CourseResultSkin loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException {
-        return this.loadSkin(new CourseResultSkin(src, dst), f, state, header, option);
+    public CourseResultSkin loadSkin(MainState state, SkinHeader header, IntIntMap option) throws IOException {
+        return this.loadSkin(new CourseResultSkin(header), state, option);
     }
 
 }

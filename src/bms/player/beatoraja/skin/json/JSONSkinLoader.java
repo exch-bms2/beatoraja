@@ -300,7 +300,9 @@ public class JSONSkinLoader extends SkinLoader {
 				break;				
 			}
 			
-			skin = objectLoader.getSkin(src, dstr);
+			header.setSourceResolution(src);
+			header.setDestinationResolution(dstr);
+			skin = objectLoader.getSkin(header);
 			
 			IntIntMap op = new IntIntMap();
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {

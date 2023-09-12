@@ -836,18 +836,18 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	private ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
-	protected S loadSkin(S skin, Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException {
+	protected S loadSkin(S skin, MainState state, IntIntMap option) throws IOException {
 		this.skin = skin;
 		this.state = state;
-		mode = header.getSkinType().getMode();
+		mode = skin.header.getSkinType().getMode();
 
-		for (CustomOption opt : header.getCustomOptions()) {
+		for (CustomOption opt : skin.header.getCustomOptions()) {
 			int value = opt.getSelectedOption();
 			if(value != OPTION_RANDOM_VALUE) {
 				op.put((Integer) value, 1);
 			}
 		}
-		for (CustomFile cf : header.getCustomFiles()) {
+		for (CustomFile cf : skin.header.getCustomFiles()) {
 			String filename = cf.getSelectedFilename();
 			if(filename != null) {
 				filemap.put(cf.path, filename);
@@ -855,13 +855,13 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		}
 		
 		IntMap<SkinConfig.Offset> offset = new IntMap<>();
-		for (SkinHeader.CustomOffset of : header.getCustomOffsets()) {
+		for (SkinHeader.CustomOffset of : skin.header.getCustomOffsets()) {
 			offset.put(of.id, of.getOffset());
 		}
 		skin.setOffset(offset);
 
 		op.putAll(option);
-		this.loadSkin0(skin, f, state, op);
+		this.loadSkin0(skin, skin.header.getPath(), state, op);
 
 		return skin;
 	}
@@ -969,7 +969,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return images;
 	}
 
-	public abstract S loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException;
+	public abstract S loadSkin(MainState state, SkinHeader header, IntIntMap option) throws IOException;
 
 	/**
 	 * SkinTypeに対応したLR2SkinCSVLoaderを返す

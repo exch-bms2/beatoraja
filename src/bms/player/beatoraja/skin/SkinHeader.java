@@ -61,6 +61,10 @@ public class SkinHeader {
 	 */
 	private Resolution resolution = Resolution.SD;
 
+	private Resolution sourceResolution;
+	
+	private Resolution destinationResolution;
+	
 	public SkinType getSkinType() {
 		return mode;
 	}
@@ -202,6 +206,22 @@ public class SkinHeader {
 			}
 			of.offset = off;
 		}
+	}
+
+	public Resolution getSourceResolution() {
+		return sourceResolution;
+	}
+
+	public void setSourceResolution(Resolution sourceResolution) {
+		this.sourceResolution = sourceResolution;
+	}
+
+	public Resolution getDestinationResolution() {
+		return destinationResolution;
+	}
+
+	public void setDestinationResolution(Resolution destinationResolution) {
+		this.destinationResolution = destinationResolution;
 	}
 
 	/**

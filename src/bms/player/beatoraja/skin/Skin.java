@@ -32,6 +32,7 @@ import org.lwjgl.opengl.GL11;
  */
 public class Skin {
 	
+	public final SkinHeader header;
 	/**
 	 * 幅
 	 */
@@ -78,7 +79,10 @@ public class Skin {
 	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
 	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
 
-	public Skin(Resolution org, Resolution dst) {
+	public Skin(SkinHeader header) {
+		this.header = header;
+		Resolution org = header.getSourceResolution();
+		Resolution dst = header.getDestinationResolution();
 		width = dst.width;
 		height = dst.height;
 		dw = ((float)dst.width) / org.width;
@@ -286,7 +290,7 @@ public class Skin {
 	public void setOffset(IntMap<Offset> offset) {
 		this.offset = offset;
 	}
-
+	
 	public float getWidth() {
 		return width;
 	}
