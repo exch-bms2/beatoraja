@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
@@ -264,6 +265,13 @@ public class StringPropertyFactory {
 			final IRConfig[] irconfig = state.resource.getPlayerConfig().getIrconfig();
 			if (irconfig.length > 0) {
 				return irconfig[0].getIrname();
+			}
+			return "";
+		}),
+		irUserName(1021, (state) -> {
+			final IRStatus[] ir = state.main.getIRStatus();
+			if (ir.length > 0) {
+				return ir[0].player.name;
 			}
 			return "";
 		}),

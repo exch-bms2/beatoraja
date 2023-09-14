@@ -245,6 +245,7 @@ public class SkinProperty {
 	public static final int STRING_TABLE_FULL = 1003;
 	public static final int STRING_VERSION = 1010;
 	public static final int STRING_IR_NAME = 1020;
+	public static final int STRING_IR_USER_NAME = 1021;
 	public static final int STRING_SONG_HASH_MD5 = 1030;
 	public static final int STRING_SONG_HASH_SHA256 = 1031;
 
