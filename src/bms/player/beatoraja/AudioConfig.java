@@ -58,6 +58,11 @@ public class AudioConfig implements Validatable {
 	 */
 	private boolean isLoopResultSound = false;
 
+	/**
+	 * コースリザルト画面のサウンドをループ再生するか
+	 */
+	private boolean isLoopCourseResultSound = false;
+
 	public DriverType getDriver() {
 		return driver;
 	}
@@ -144,6 +149,14 @@ public class AudioConfig implements Validatable {
 
 	public void setLoopResultSound(boolean loopResultSound) {
 		isLoopResultSound = loopResultSound;
+	}
+
+	public boolean isLoopCourseResultSound() {
+		return isLoopCourseResultSound;
+	}
+
+	public void setLoopCourseResultSound(boolean loopCourseResultSound) {
+		isLoopCourseResultSound = loopCourseResultSound;
 	}
 	
 	public boolean validate() {
