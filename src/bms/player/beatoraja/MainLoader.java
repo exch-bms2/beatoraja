@@ -56,57 +56,18 @@ public class MainLoader extends Application {
 
 	public static Discord discord;
 
+	private static BMSPlayerMode mode = null;
+
 	public static void main(String[] args) {
+		check64BitArchitecture();
 
-		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
-			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Java.", "Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
+		configLogger();
 
-		Logger logger = Logger.getGlobal();
-		try {
-			logger.addHandler(new FileHandler("beatoraja_log.xml"));
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		parseArgsIntoConfig(args);
 
-		BMSPlayerMode auto = null;
-		for (String s : args) {
-			if (s.startsWith("-")) {
-				if (s.equals("-a")) {
-					auto = BMSPlayerMode.AUTOPLAY;
-				}
-				if (s.equals("-p")) {
-					auto = BMSPlayerMode.PRACTICE;
-				}
-				if (s.equals("-r") || s.equals("-r1")) {
-					auto = BMSPlayerMode.REPLAY_1;
-				}
-				if (s.equals("-r2")) {
-					auto = BMSPlayerMode.REPLAY_2;
-				}
-				if (s.equals("-r3")) {
-					auto = BMSPlayerMode.REPLAY_3;
-				}
-				if (s.equals("-r4")) {
-					auto = BMSPlayerMode.REPLAY_4;
-				}
-				if (s.equals("-s")) {
-					auto = BMSPlayerMode.PLAY;
-				}
-			} else {
-				bmsPath = Paths.get(s);
-				if(auto == null) {
-					auto = BMSPlayerMode.PLAY;
-				}
-			}
-		}
-
-
-
-		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
+		if (isModeConfigured()) {
 			IRConnectionManager.getAllAvailableIRConnectionName();
-			play(bmsPath, auto, true, null, null, bmsPath != null);
+			play(bmsPath, mode, true, null, null, bmsPath != null);
 		} else {
 			launch(args);
 		}
@@ -329,4 +290,55 @@ public class MainLoader extends Application {
 		public String name;
 	}
 
+	private static void check64BitArchitecture() {
+		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
+			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Java.", "Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
+	}
+
+	private static void configLogger() {
+		try {
+			Logger.getGlobal().addHandler(new FileHandler("beatoraja_log.xml"));
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void parseArgsIntoConfig(String[] args) {
+		for (String s : args) {
+			if (s.startsWith("-")) {
+				if (s.equals("-a")) {
+					mode = BMSPlayerMode.AUTOPLAY;
+				}
+				if (s.equals("-p")) {
+					mode = BMSPlayerMode.PRACTICE;
+				}
+				if (s.equals("-r") || s.equals("-r1")) {
+					mode = BMSPlayerMode.REPLAY_1;
+				}
+				if (s.equals("-r2")) {
+					mode = BMSPlayerMode.REPLAY_2;
+				}
+				if (s.equals("-r3")) {
+					mode = BMSPlayerMode.REPLAY_3;
+				}
+				if (s.equals("-r4")) {
+					mode = BMSPlayerMode.REPLAY_4;
+				}
+				if (s.equals("-s")) {
+					mode = BMSPlayerMode.PLAY;
+				}
+			} else {
+				bmsPath = Paths.get(s);
+				if(mode == null) {
+					mode = BMSPlayerMode.PLAY;
+				}
+			}
+		}
+	}
+
+	private static boolean isModeConfigured() {
+		return Files.exists(MainController.configpath) && (bmsPath != null || mode != null);
+	}
 }
