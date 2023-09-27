@@ -4,7 +4,6 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
@@ -193,7 +192,6 @@ public class MusicSelectInputProcessor {
                 }
             }
 
-            String[] targets = TargetProperty.getTargets();
             while(mov > 0) {
             	select.executeEvent(EventType.target, -1);
                 select.play(SOUND_SCRATCH);
@@ -299,13 +297,13 @@ public class MusicSelectInputProcessor {
                     select.selectSong(BMSPlayerMode.PLAY);
                 } else if (property.isPressed(input, PRACTICE, true)) {
                     // practice mode
-                    select.selectSong(BMSPlayerMode.PRACTICE);
+                    select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : BMSPlayerMode.PRACTICE);
                 } else if (property.isPressed(input, AUTO, true)) {
                     // auto play
-                    select.selectSong(BMSPlayerMode.AUTOPLAY);
+                    select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : BMSPlayerMode.AUTOPLAY);
                 } else if (property.isPressed(input, MusicSelectKey.REPLAY, true)) {
                     // replay
-                    select.selectSong((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY);
+                    select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : ((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY));
                 }
             } else {
                 if (property.isPressed(input, FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {

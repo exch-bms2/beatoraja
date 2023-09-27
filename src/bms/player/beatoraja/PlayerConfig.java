@@ -1026,4 +1026,14 @@ public class PlayerConfig {
     public void setLongnoteRate(double longnoteRate) {
         this.longnoteRate = longnoteRate;
     }
+
+    private boolean eventMode = false;
+
+	public boolean isEventMode() {
+		return eventMode;
+	}
+
+	public void setEventMode(boolean eventMode) {
+		this.eventMode = eventMode;
+	}
 }
