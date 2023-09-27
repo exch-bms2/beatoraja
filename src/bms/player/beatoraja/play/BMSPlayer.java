@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.config.Discord;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -95,8 +94,6 @@ public class BMSPlayer extends MainState {
 
 	private RhythmTimerProcessor rhythm;
 	private long startpressedtime;
-
-	public static Discord discord;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -404,9 +401,6 @@ public class BMSPlayer extends MainState {
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.getSongdata().setBMSModel(model);
 		resource.getSongdata().setDifficulty(difficulty);
-
-		discord = Discord.playingSong(resource.getSongdata().getFullTitle(), resource.getSongdata().getArtist(), resource.getSongdata().getMode());
-		discord.update();
 	}
 
 	public SkinType getSkinType() {

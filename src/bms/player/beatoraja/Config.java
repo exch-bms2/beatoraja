@@ -12,9 +12,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
-import bms.player.beatoraja.AudioConfig.DriverType;
-import bms.player.beatoraja.AudioConfig.FrequencyType;
-
 /**
  * 各種設定項目。config.jsonで保持される
  *
@@ -156,7 +153,7 @@ public class Config implements Validatable {
 
 	private int irSendCount = 5;
 
-	private boolean useDiscordRPC = true;
+	private boolean useDiscordRPC = false;
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",

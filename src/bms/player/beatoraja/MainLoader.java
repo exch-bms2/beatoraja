@@ -1,8 +1,6 @@
 package bms.player.beatoraja;
 
-import java.awt.*;
 import java.io.*;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
@@ -11,22 +9,16 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-import bms.player.beatoraja.config.Discord;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.AudioConfig.DriverType;
 import bms.player.beatoraja.ir.IRConnectionManager;
@@ -34,7 +26,6 @@ import bms.player.beatoraja.launcher.PlayConfigurationView;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.player.beatoraja.song.SongInformationAccessor;
 import bms.player.beatoraja.song.SongUtils;
 
 /**
@@ -53,8 +44,6 @@ public class MainLoader extends Application {
 	private static Path bmsPath;
 
 	private static VersionChecker version;
-
-	public static Discord discord;
 
 	public static void main(String[] args) {
 
@@ -115,11 +104,6 @@ public class MainLoader extends Application {
 	public static void play(Path f, BMSPlayerMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
 		if(config == null) {
 			config = Config.read();
-		}
-
-		if(config.isUseDiscordRPC()) {
-			discord = new Discord("", "");
-			discord.startup();
 		}
 
 		for(SongData song : getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs)) {
