@@ -40,8 +40,9 @@ public class CourseResult extends AbstractResult {
 					resource.getPlayerConfig().getLnmode(), i ,resource.getConstraint()) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;
 		}
 
-		setSound(SOUND_CLEAR, "course_clear.wav", SoundType.SOUND,false);
-		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, false);
+		final boolean isLoopSound = resource.getConfig().getAudioConfig().isLoopCourseResultSound();
+		setSound(SOUND_CLEAR, "course_clear.wav", SoundType.SOUND, isLoopSound);
+		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, isLoopSound);
 		setSound(SOUND_CLOSE, "course_close.wav", SoundType.SOUND, false);
 
 		for(int i = resource.getCourseGauge().size;i < resource.getCourseBMSModels().length;i++) {

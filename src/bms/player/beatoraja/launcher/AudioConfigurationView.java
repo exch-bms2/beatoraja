@@ -45,6 +45,8 @@ public class AudioConfigurationView implements Initializable {
 	private ComboBox<FrequencyType> audioFastForward;
 	@FXML
 	private CheckBox loopResultSound;
+	@FXML
+	private CheckBox loopCourseResultSound;
 	
 	private AudioConfig config;
 
@@ -69,6 +71,7 @@ public class AudioConfigurationView implements Initializable {
 		keyvolume.setValue((double)config.getKeyvolume());
 		bgvolume.setValue((double)config.getBgvolume());
 		loopResultSound.setSelected(config.isLoopResultSound());
+		loopCourseResultSound.setSelected(config.isLoopCourseResultSound());
 
 		updateAudioDriver();
 	}
@@ -85,6 +88,7 @@ public class AudioConfigurationView implements Initializable {
 		config.setKeyvolume((float) keyvolume.getValue());
 		config.setBgvolume((float) bgvolume.getValue());
 		config.setLoopResultSound(loopResultSound.isSelected());
+		config.setLoopCourseResultSound(loopCourseResultSound.isSelected());
 	}
 
     @FXML
