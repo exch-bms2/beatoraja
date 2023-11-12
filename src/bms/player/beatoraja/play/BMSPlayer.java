@@ -506,18 +506,18 @@ public class BMSPlayer extends MainState {
 		// 楽曲ロード
 		case STATE_PRELOAD:
 			if(config.isChartPreview()) {
-				if(timer.isTimerOn(TIMER_PLAY) && micronow > startpressedtime) {
-					timer.setTimerOff(TIMER_PLAY);
+				if(timer.isTimerOn(141) && micronow > startpressedtime) {
+					timer.setTimerOff(141);
 					lanerender.init(model);					
-				} else if(!timer.isTimerOn(TIMER_PLAY) && micronow == startpressedtime){
-					timer.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);				
+				} else if(!timer.isTimerOn(141) && micronow == startpressedtime){
+					timer.setMicroTimer(141, micronow - starttimeoffset * 1000);				
 				}				
 			}
 			
 			if (resource.mediaLoadFinished() && micronow > (skin.getLoadstart() + skin.getLoadend()) * 1000
 					&& micronow - startpressedtime > 1000000) {
 				if(config.isChartPreview()) {
-					timer.setTimerOff(TIMER_PLAY);
+					timer.setTimerOff(141);
 					lanerender.init(model);					
 				}
 				bga.prepare(this);
