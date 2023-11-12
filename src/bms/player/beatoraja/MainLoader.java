@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Graphics;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,7 +94,7 @@ public class MainLoader extends Application {
 
 
 
-		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
+		if (Files.exists(Config.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();
 			play(bmsPath, auto, true, null, null, bmsPath != null);
 		} else {
@@ -115,7 +116,7 @@ public class MainLoader extends Application {
 		}
 
 		try {
-			MainController main = new MainController(f, config, player, auto, songUpdated);
+			final MainController main = new MainController(f, config, player, auto, songUpdated);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;
@@ -148,7 +149,32 @@ public class MainLoader extends Application {
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
-			new LwjglApplication(main, cfg);
+			new LwjglApplication(new ApplicationListener() {
+				
+				public void resume() {
+					main.resume();
+				}
+				
+				public void resize(int width, int height) {
+					main.resize(width, height);
+				}
+				
+				public void render() {
+					main.render();
+				}
+				
+				public void pause() {
+					main.pause();
+				}
+				
+				public void dispose() {
+					main.dispose();
+				}
+				
+				public void create() {
+					main.create();
+				}
+			}, cfg);
 
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //

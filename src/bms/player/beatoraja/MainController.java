@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,7 +40,6 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
-import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
@@ -49,9 +49,9 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  *
  * @author exch
  */
-public class MainController extends ApplicationAdapter {
+public class MainController {
 
-	private static final String VERSION = "beatoraja 0.8.6";
+	private static final String VERSION = "beatoraja 0.8.7";
 
 	public static final boolean debug = false;
 
@@ -110,8 +110,6 @@ public class MainController extends ApplicationAdapter {
 	 * プレイデータアクセサ
 	 */
 	private PlayDataAccessor playdata;
-
-	static final Path configpath = Paths.get("config.json");
 
 	private SystemSoundManager sound;
 
@@ -311,7 +309,6 @@ public class MainController extends ApplicationAdapter {
 
 	}
 
-	@Override
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
@@ -416,7 +413,6 @@ public class MainController extends ApplicationAdapter {
 
 	private final StringBuilder message = new StringBuilder();
 
-	@Override
 	public void render() {
 //		input.poll();
 		timer.update();
@@ -576,7 +572,6 @@ public class MainController extends ApplicationAdapter {
         }
 	}
 
-	@Override
 	public void dispose() {
 		saveConfig();
 
@@ -615,17 +610,14 @@ public class MainController extends ApplicationAdapter {
 		Logger.getGlobal().info("全リソース破棄完了");
 	}
 
-	@Override
 	public void pause() {
 		current.pause();
 	}
 
-	@Override
 	public void resize(int width, int height) {
 		current.resize(width, height);
 	}
 
-	@Override
 	public void resume() {
 		current.resume();
 	}
