@@ -135,6 +135,27 @@ public class MainStateAccessor {
 				return LuaInteger.ZERO;
 			}
 		});
+		table.set("audio_play", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue path) {
+				state.main.getAudioProcessor().play(path.tojstring(), state.main.getConfig().getAudioConfig().getSystemvolume(), false);
+				return LuaBoolean.TRUE;
+			}
+		});
+		table.set("audio_loop", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue path) {
+				state.main.getAudioProcessor().play(path.tojstring(), state.main.getConfig().getAudioConfig().getSystemvolume(), true);
+				return LuaBoolean.TRUE;
+			}
+		});
+		table.set("audio_stop", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue path) {
+				state.main.getAudioProcessor().stop(path.tojstring());
+				return LuaBoolean.TRUE;
+			}
+		});
 	}
 
 	/**
