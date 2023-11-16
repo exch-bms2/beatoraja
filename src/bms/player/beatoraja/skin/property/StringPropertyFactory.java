@@ -60,7 +60,7 @@ public class StringPropertyFactory {
 				final PlayerInformation rival = ((MusicSelector) state).getRival();
 				return rival != null ? rival.getName() : "";
 			} else {
-				final ScoreData rival = state.resource.getRivalScoreData();
+				final ScoreData rival = state.resource.getTargetScoreData();
 				return rival != null ? rival.getPlayer() : "";
 			}
 		}),
@@ -69,8 +69,8 @@ public class StringPropertyFactory {
 			if (state instanceof MusicSelector) {
 				return TargetProperty.getTargetName(state.resource.getPlayerConfig().getTargetid());					
 			} else {
-				final ScoreData rival = state.resource.getRivalScoreData();
-				return rival != null ? rival.getPlayer() : "";
+				final ScoreData target = state.resource.getTargetScoreData();
+				return target != null ? target.getPlayer() : "";
 			}
 		}),
 		title(10, (state) -> {

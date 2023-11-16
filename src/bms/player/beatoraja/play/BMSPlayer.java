@@ -474,10 +474,12 @@ public class BMSPlayer extends MainState {
 		} else {
 			
 			if(resource.getRivalScoreData() == null || resource.getCourseBMSModels() != null) {
-				ScoreData rivalScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);
-				resource.setRivalScoreData(rivalScore);
+				ScoreData targetScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);
+				resource.setTargetScoreData(targetScore);
+			} else {
+				resource.setTargetScoreData(resource.getRivalScoreData());
 			}
-			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0 , null, model.getTotalNotes());
+			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getTargetScoreData() != null ? resource.getTargetScoreData().getExscore() : 0 , null, model.getTotalNotes());
 		}
 	}
 
