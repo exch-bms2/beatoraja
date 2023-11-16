@@ -1162,6 +1162,7 @@ public class BarRenderer {
 			final MainController main = select.main;
 			final PlayerConfig config = select.resource.getPlayerConfig();
 			final ScoreDataCache rival = select.getRivalScoreDataCache();
+			final String rivalName = rival != null ? select.getRival().getName() : null;
 
 			final Array<SongData> songarray = new Array<>(bars.length);
 			for (Bar bar : bars) {
@@ -1179,7 +1180,11 @@ public class BarRenderer {
 						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
 					if (rival != null && bar.getRivalScore() == null) {
-						bar.setRivalScore(rival.readScoreData(sd, config.getLnmode()));
+						final ScoreData rivalScore = rival.readScoreData(sd, config.getLnmode());
+						if(rivalScore != null) {
+							rivalScore.setPlayer(rivalName);							
+						}
+						bar.setRivalScore(rivalScore);
 					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {
