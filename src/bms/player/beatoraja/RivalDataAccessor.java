@@ -17,17 +17,59 @@ import bms.player.beatoraja.ir.IRScoreData;
 import bms.player.beatoraja.select.ScoreDataCache;
 import bms.player.beatoraja.song.SongData;
 
+/**
+ * ライバルデータ管理用
+ * 
+ * @author exch
+ */
 public class RivalDataAccessor {
 
+	/**
+	 * ライバル情報
+	 */
 	private PlayerInformation[] rivals = new PlayerInformation[0];
+	/**
+	 * ライバルスコアデータキャッシュ
+	 */
 	private ScoreDataCache[] rivalcaches = new ScoreDataCache[0];
 
+	/**
+	 * ライバル情報を取得する
+	 * 
+	 * @param index インデックス
+	 * @return ライバル情報
+	 */
+	public PlayerInformation getRivalInformation(int index) {
+		return index >= 0 && index < rivals.length ? rivals[index] : null;
+	}
+	
+	@Deprecated
 	public PlayerInformation[] getRivals() {
 		return rivals;
 	}
 	
+	/**
+	 * ライバルスコアデータキャッシュを取得する
+	 * 
+	 * @param index インデックス
+	 * @return ライバルスコアデータキャッシュ
+	 */
+	public ScoreDataCache getRivalScoreDataCache(int index) {
+		return index >= 0 && index < rivalcaches.length ? rivalcaches[index] : null;
+	}
+	
+	@Deprecated
 	public ScoreDataCache[] getRivalScoreDataCaches() {
 		return rivalcaches;
+	}
+	
+	/**
+	 * ライバル数を取得する
+	 * 
+	 * @return ライバル数
+	 */
+	public int getRivalCount() {
+		return rivals.length;
 	}
 
 	public void update(MainController main) {
@@ -60,8 +102,8 @@ public class RivalDataAccessor {
 					}
 
 					// ライバルキャッシュ作成
-					Array<PlayerInformation> rivals = new Array();
-					Array<ScoreDataCache> rivalcaches = new Array();
+					Array<PlayerInformation> rivals = new Array<PlayerInformation>();
+					Array<ScoreDataCache> rivalcaches = new Array<ScoreDataCache>();
 					
 					if(main.getIRStatus()[0].config.isImportrival()) {
 						for(IRPlayerData irplayer : response.getData()) {
