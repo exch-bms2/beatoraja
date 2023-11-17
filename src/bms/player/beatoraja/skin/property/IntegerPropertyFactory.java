@@ -1287,7 +1287,7 @@ public class IntegerPropertyFactory {
 				if(key >= keyNum) {
 					return 0;
 				} else if(key == -1){ // scratch
-					if (mode.scratchKey.length == 0){ // no scratch
+					if (mode.scratchKey.length == 0 || type != Random.RANDOM_EX){ // no scratch
 						return 0;
 					}
 					index = mode.scratchKey[0];
