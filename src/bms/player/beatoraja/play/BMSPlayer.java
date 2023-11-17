@@ -358,6 +358,8 @@ public class BMSPlayer extends MainState {
 				mods.add(mod);
 			}
 
+			int[][] patternArray = new int[model.getMode().player][];
+
 			List<PatternModifyLog> pattern = new ArrayList<PatternModifyLog>();
 			for(PatternModifier mod : mods) {
 				pattern = PatternModifier.merge(pattern,mod.modify(model));
@@ -366,8 +368,16 @@ public class BMSPlayer extends MainState {
 					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
 					score = false;
 				}
+
+				if (mod instanceof LaneShuffleModifier){
+					LaneShuffleModifier lmod = (LaneShuffleModifier)mod;
+					if(lmod.isToDisplay()){
+						patternArray[lmod.getModifyTarget()] = lmod.getRandomPattern(model.getMode());
+					}
+				}
 			}
 //			playinfo.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
+			playinfo.laneShufflePattern = patternArray;
 
 		}
 
@@ -909,6 +919,7 @@ public class BMSPlayer extends MainState {
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = main.getInputProcessor().getKeyInputLog();
 //		replay.pattern = playinfo.pattern;
+		replay.laneShufflePattern = playinfo.laneShufflePattern;
 		replay.rand = playinfo.rand;
 		replay.gauge = config.getGauge();
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
