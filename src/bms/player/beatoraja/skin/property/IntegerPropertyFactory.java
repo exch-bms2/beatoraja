@@ -7,6 +7,7 @@ import java.util.Calendar;
 
 import bms.model.Mode;
 import bms.player.beatoraja.pattern.Random;
+import bms.player.beatoraja.result.MusicResult;
 import com.badlogic.gdx.Gdx;
 
 import bms.model.BMSModel;
@@ -1264,6 +1265,9 @@ public class IntegerPropertyFactory {
 		 */
 		private static IntegerProperty getAssignedLane(int key, boolean is2PSide){
 			return (state) -> {
+				if (!(state instanceof MusicResult)){
+					return 0;
+				}
 				PlayerConfig pc = state.resource.getPlayerConfig();
 				Random type = Random.getRandom(is2PSide? pc.getRandom2(): pc.getRandom());
 
