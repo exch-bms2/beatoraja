@@ -1288,7 +1288,7 @@ public class IntegerPropertyFactory {
 				int keyNum = mode.key / mode.player;
 
 				int index;
-				if(key >= keyNum) {
+				if(key >= keyNum || (mode.scratchKey.length != 0 && key == mode.scratchKey[0])) {
 					return 0;
 				} else if(key == -1){ // scratch
 					if (mode.scratchKey.length == 0 || type != Random.RANDOM_EX){ // no scratch
