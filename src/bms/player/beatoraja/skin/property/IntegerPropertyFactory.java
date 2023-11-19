@@ -1268,8 +1268,9 @@ public class IntegerPropertyFactory {
 				if (!(state instanceof MusicResult)){
 					return 0;
 				}
-				PlayerConfig pc = state.resource.getPlayerConfig();
-				Random type = Random.getRandom(is2PSide? pc.getRandom2(): pc.getRandom());
+
+				ReplayData rd = state.resource.getReplayData();
+				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption);
 
 				switch (type){
 					case RANDOM:
@@ -1279,6 +1280,10 @@ public class IntegerPropertyFactory {
 						break;
 					default:
 						return 0;
+				}
+
+				if(rd.laneShufflePattern == null){ // patternModifyLogで再現されたリプレイの場合が該当
+					return 0;
 				}
 
 				Mode mode = state.resource.getBMSModel().getMode();
@@ -1298,7 +1303,8 @@ public class IntegerPropertyFactory {
 				} else {
 					index = key;
 				}
-				int[] pattern = state.resource.getReplayData().laneShufflePattern[is2PSide? 1 : 0];
+
+				int[] pattern = rd.laneShufflePattern[is2PSide? 1 : 0];
 				if (pattern == null){
 					return 0;
 				}
