@@ -139,14 +139,14 @@ public class MusicSelector extends MainState {
 	public void setRival(PlayerInformation rival) {
 		final RivalDataAccessor rivals = main.getRivalDataAccessor();
 		int index = -1;
-		for(int i = 0;i < rivals.getRivals().length;i++) {
-			if(rival == rivals.getRivals()[i]) {
+		for(int i = 0;i < rivals.getRivalCount();i++) {
+			if(rival == rivals.getRivalInformation(i)) {
 				index = i;
 				break;
 			}
 		}
-		this.rival = index != -1 ? rivals.getRivals()[index] : null;
-		rivalcache = index != -1 ? rivals.getRivalScoreDataCaches()[index] : null;
+		this.rival = index != -1 ? rivals.getRivalInformation(index) : null;
+		rivalcache = index != -1 ? rivals.getRivalScoreDataCache(index) : null;
 		bar.updateBar();
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
 	}
@@ -283,6 +283,7 @@ public class MusicSelector extends MainState {
 				if (((SongBar) current).existsSong()) {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
+						// TODO 重複コード
 						final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
 						if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
 							Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
@@ -302,6 +303,7 @@ public class MusicSelector extends MainState {
 								}
 							}
 						}
+						
 						if(main.getIRStatus().length > 0 && currentir == null) {
 							currentir = new RankingData();
 							main.getRankingDataCache().put(song, config.getLnmode(), currentir);
@@ -324,6 +326,7 @@ public class MusicSelector extends MainState {
 				SongData song = ((ExecutableBar) current).getSongData();
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
+					// TODO 重複コード
 					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
 					if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
 						Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
@@ -343,6 +346,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 					}
+					
 					playedsong = song;
 					changeState(MainStateType.DECIDE);
 				} else {
@@ -530,6 +534,7 @@ public class MusicSelector extends MainState {
 				main.getRankingDataCache().put(songs[0], config.getLnmode(), songrank);
 			}
 			resource.setRankingData(songrank);
+			resource.setRivalScoreData(null);
 
 			changeState(MainStateType.DECIDE);
 			return true;
