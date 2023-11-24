@@ -1,13 +1,9 @@
 package bms.player.beatoraja;
 
-import java.io.*;
-import java.lang.reflect.Field;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import org.lwjgl.input.Mouse;
 
@@ -376,8 +372,8 @@ public class MainController {
 		});
 		polling.start();
 
-		Array<String> targetlist = new Array(player.getTargetlist());
-		for(int i = 0;i < rivals.getRivals().length;i++) {
+		Array<String> targetlist = new Array<String>(player.getTargetlist());
+		for(int i = 0;i < rivals.getRivalCount();i++) {
 			targetlist.add("RIVAL_" + (i + 1));
 		}
 		TargetProperty.setTargets(targetlist.toArray(String.class), this);
@@ -831,72 +827,6 @@ public class MainController {
 				}
 			}
 			message.stop();
-		}
-	}
-
-	/**
-	 * BGM、効果音セット管理用クラス
-	 *
-	 * @author exch
-	 */
-	public static class SystemSoundManager {
-		/**
-		 * 検出されたBGMセットのディレクトリパス
-		 */
-		private Array<Path> bgms = new Array<Path>();
-		/**
-		 * 現在のBGMセットのディレクトリパス
-		 */
-		private Path currentBGMPath;
-		/**
-		 * 検出された効果音セットのディレクトリパス
-		 */
-		private Array<Path> sounds = new Array<Path>();
-		/**
-		 * 現在の効果音セットのディレクトリパス
-		 */
-		private Path currentSoundPath;
-
-		public SystemSoundManager(Config config) {
-			if(config.getBgmpath() != null && config.getBgmpath().length() > 0) {
-				scan(Paths.get(config.getBgmpath()).toAbsolutePath(), bgms, "select.wav");
-			}
-			if(config.getSoundpath() != null && config.getSoundpath().length() > 0) {
-				scan(Paths.get(config.getSoundpath()).toAbsolutePath(), sounds, "clear.wav");
-			}
-			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
-		}
-
-		public void shuffle() {
-			if(bgms.size > 0) {
-				currentBGMPath = bgms.get((int) (Math.random() * bgms.size));
-			}
-			if(sounds.size > 0) {
-				currentSoundPath = sounds.get((int) (Math.random() * sounds.size));
-			}
-			Logger.getGlobal().info("BGM Set : " + currentBGMPath + " Sound Set : " + currentSoundPath);
-		}
-
-		public Path getBGMPath() {
-			return currentBGMPath;
-		}
-
-		public Path getSoundPath() {
-			return currentSoundPath;
-		}
-
-		private void scan(Path p, Array<Path> paths, String name) {
-			if (Files.isDirectory(p)) {
-				try (Stream<Path> sub = Files.list(p)) {
-					sub.forEach((t) -> {
-						scan(t, paths, name);
-					});
-					if (AudioDriver.getPaths(p.resolve(name).toString()).length > 0) {
-						paths.add(p);
-					}
-				} catch (IOException e) {
-				}
-			}
 		}
 	}
 
