@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import bms.player.beatoraja.audio.AudioDriver;
 
@@ -17,6 +18,8 @@ import bms.player.beatoraja.audio.AudioDriver;
  * @author exch
  */
 public class SystemSoundManager {
+	
+	private final MainController main;
 	/**
 	 * 検出されたBGMセットのディレクトリパス
 	 */
@@ -33,8 +36,12 @@ public class SystemSoundManager {
 	 * 現在の効果音セットのディレクトリパス
 	 */
 	private Path currentSoundPath;
+	
+	private ObjectMap<SoundType, String> soundmap = new ObjectMap<>();
 
-	public SystemSoundManager(Config config) {
+	public SystemSoundManager(MainController main) {
+		this.main = main;
+		Config config = main.getConfig();
 		if(config.getBgmpath() != null && config.getBgmpath().length() > 0) {
 			scan(Paths.get(config.getBgmpath()).toAbsolutePath(), bgms, "select.wav");
 		}
@@ -52,6 +59,22 @@ public class SystemSoundManager {
 			currentSoundPath = sounds.get((int) (Math.random() * sounds.size));
 		}
 		Logger.getGlobal().info("BGM Set : " + currentBGMPath + " Sound Set : " + currentSoundPath);
+		
+		for(SoundType sound : SoundType.values()) {
+			for(Path p :getSoundPaths(sound)) {
+				String newpath = p.toString();
+				String oldpath = soundmap.get(sound);
+				if (newpath.equals(oldpath)) {
+					break;
+				}
+				if (oldpath != null) {
+					main.getAudioProcessor().dispose(oldpath);
+				}
+				soundmap.put(sound, newpath);
+				return;
+			}
+
+		}
 	}
 
 	public Path getBGMPath() {
@@ -65,9 +88,7 @@ public class SystemSoundManager {
 	private void scan(Path p, Array<Path> paths, String name) {
 		if (Files.isDirectory(p)) {
 			try (Stream<Path> sub = Files.list(p)) {
-				sub.forEach((t) -> {
-					scan(t, paths, name);
-				});
+				sub.forEach((t) -> scan(t, paths, name));
 				if (AudioDriver.getPaths(p.resolve(name).toString()).length > 0) {
 					paths.add(p);
 				}
@@ -76,35 +97,62 @@ public class SystemSoundManager {
 		}
 	}
 	
-	public enum SoundType {
-		SCRATCH("scratch.wav"), 
-		FOLDER_OPEN("f-open.wav"), 
-		FOLDER_CLOSE("f-close.wav"), 
-		OPTION_CHANGE("o-change.wav"), 
-		OPTION_OPEN("o-open.wav"), 
-		OPTION_CLOSE("o-close.wav"), 
-		PLAY_READY("playready.wav"), 
-		PLAY_STOP("playstop.wav"), 
-		RESULT_CLEAR("clear.wav"), 
-		RESULT_FAIL("fail.wav"), 
-		RESULT_CLOSE("resultclose.wav");
+	public Path[] getSoundPaths(SoundType type) {
+		Path p = type.isBGM ? currentBGMPath : currentSoundPath;
 		
-		public final String path; 
-		
-		private SoundType(String path) {
-			this.path = path;
+		Array<Path> paths = new Array<Path>();
+		if(p != null) {
+			paths.addAll(AudioDriver.getPaths(p.resolve(type.path).toString()));			
 		}
+		paths.addAll(AudioDriver.getPaths(Paths.get("defaultsound").resolve(type.path).toString()));
+		return paths.toArray(Path.class);
 	}
 	
-	public enum BGMType {
-		SELECT("select.wav"), 
-		DECIDE("decide.wav");
+	public String getSound(SoundType sound) {
+		return soundmap.get(sound);
+	}
+
+	public void play(SoundType sound, boolean loop) {
+		final String path = soundmap.get(sound);
+		if (path != null) {
+			main.getAudioProcessor().play(path, main.getConfig().getAudioConfig().getSystemvolume(), loop);
+		}
+	}
+
+	public void stop(SoundType sound) {
+		final String path = soundmap.get(sound);
+		if (path != null) {
+			main.getAudioProcessor().stop(path);
+		}
+	}
+
+	public enum SoundType {
+		SCRATCH("scratch.wav",false), 
+		FOLDER_OPEN("f-open.wav",false), 
+		FOLDER_CLOSE("f-close.wav",false), 
+		OPTION_CHANGE("o-change.wav",false), 
+		OPTION_OPEN("o-open.wav",false), 
+		OPTION_CLOSE("o-close.wav",false), 
+		PLAY_READY("playready.wav",false), 
+		PLAY_STOP("playstop.wav",false), 
+		RESULT_CLEAR("clear.wav",false), 
+		RESULT_FAIL("fail.wav",false), 
+		RESULT_CLOSE("resultclose.wav",false),
+		GUIDESE_PG("guide-pg.wav",false),
+		GUIDESE_GR("guide-gr.wav",false),
+		GUIDESE_GD("guide-gd.wav",false),
+		GUIDESE_BD("guide-bd.wav",false),
+		GUIDESE_PR("guide-pr.wav",false),
+		GUIDESE_MS("guide-ms.wav",false),
+		SELECT("select.wav",true), 
+		DECIDE("decide.wav",true);
 		
+		public final boolean isBGM;
 		public final String path; 
 		
-		private BGMType(String path) {
+		private SoundType(String path, boolean isBGM) {
 			this.path = path;
+			this.isBGM = isBGM;
 		}
-
-	}
+	}	
 }

@@ -181,6 +181,7 @@ public abstract class MainState {
 		BGM, SOUND
 	}
 
+	@Deprecated
 	public void setSound(int id, String path, SoundType type, boolean loop) {
 		for(Path p :getSoundPaths(path, type)) {
 			String newpath = p.toString();
@@ -197,6 +198,7 @@ public abstract class MainState {
 		}
 	}
 	
+	@Deprecated
 	public Path[] getSoundPaths(String filename, SoundType type) {
 		Path p = null;
 		switch (type) {
@@ -216,10 +218,12 @@ public abstract class MainState {
 		return paths.toArray(Path.class);
 	}
 
+	@Deprecated
 	public String getSound(int id) {
 		return soundmap.get(id);
 	}
 
+	@Deprecated
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if (path != null) {
@@ -228,11 +232,24 @@ public abstract class MainState {
 		}
 	}
 
+	@Deprecated
 	public void stop(int id) {
 		final String path = soundmap.get(id);
 		if (path != null) {
 			main.getAudioProcessor().stop(path);
 		}
+	}
+	
+	public void play(SystemSoundManager.SoundType sound) {
+		play(sound, false);
+	}
+	
+	public void play(SystemSoundManager.SoundType sound, boolean loop) {
+		main.getSoundManager().play(sound, loop);
+	}
+	
+	public void stop(SystemSoundManager.SoundType sound) {
+		main.getSoundManager().stop(sound);
 	}
 	
 	public enum MainStateType {
