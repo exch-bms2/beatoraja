@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -423,13 +424,10 @@ public class BMSPlayer extends MainState {
 
 		loadSkin(getSkinType());
 
-		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
-		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
-
-		final String[] guideses = {"guide-pg.wav","guide-gr.wav","guide-gd.wav","guide-bd.wav","guide-pr.wav","guide-ms.wav"};
+		final SystemSoundManager.SoundType[] guideses = {GUIDESE_PG,GUIDESE_GR,GUIDESE_GD,GUIDESE_BD,GUIDESE_PR,GUIDESE_MS};
 		for(int i = 0;i < 6;i++) {
 			if(config.isGuideSE()) {
-				Path[] paths = getSoundPaths(guideses[i], SoundType.SOUND);
+				Path[] paths = main.getSoundManager().getSoundPaths(guideses[i]);
 				if(paths.length > 0) {
 					main.getAudioProcessor().setAdditionalKeySound(i, true, paths[0].toString());
 					main.getAudioProcessor().setAdditionalKeySound(i, false, paths[0].toString());
@@ -530,7 +528,7 @@ public class BMSPlayer extends MainState {
 						+ ((cmem - mem) / (1024 * 1024)) + "MB");
 				state = STATE_READY;
 				timer.setTimerOn(TIMER_READY);
-				play(SOUND_READY);
+				play(PLAY_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			if(!timer.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) || !timer.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL)){
@@ -597,7 +595,7 @@ public class BMSPlayer extends MainState {
 				bga.prepare(this);
 				state = STATE_READY;
 				timer.setTimerOn(TIMER_READY);
-				play(SOUND_READY);
+				play(PLAY_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
@@ -708,7 +706,7 @@ public class BMSPlayer extends MainState {
 					if (resource.mediaLoadFinished()) {
 						main.getAudioProcessor().stop((Note) null);
 					}
-					play(SOUND_PLAYSTOP);
+					play(PLAY_STOP);
 					Logger.getGlobal().info("STATE_FAILEDに移行");
 					break;
 				case PlayerConfig.GAUGEAUTOSHIFT_CONTINUE:
@@ -978,7 +976,7 @@ public class BMSPlayer extends MainState {
 			if (resource.mediaLoadFinished()) {
 				main.getAudioProcessor().stop((Note) null);
 			}
-			play(SOUND_PLAYSTOP);
+			play(PLAY_STOP);
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
 	}
