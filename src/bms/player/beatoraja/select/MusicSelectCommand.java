@@ -1,6 +1,6 @@
 package bms.player.beatoraja.select;
 
-import static bms.player.beatoraja.select.MusicSelector.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -13,9 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 
@@ -53,7 +50,7 @@ public enum MusicSelectCommand {
                     final int selectedreplay = selector.getSelectedReplay();
                     if (replays[(i + selectedreplay) % replays.length]) {
                         selector.setSelectedReplay((i + selectedreplay) % replays.length);
-                        selector.play(SOUND_OPTIONCHANGE);
+                        selector.play(OPTION_CHANGE);
                         break;
                     }
                 }
@@ -70,7 +67,7 @@ public enum MusicSelectCommand {
                     final int selectedreplay = selector.getSelectedReplay();
                     if (replays[(selectedreplay + replays.length - i) % replays.length]) {
                         selector.setSelectedReplay((selectedreplay + replays.length - i) % replays.length);
-                        selector.play(SOUND_OPTIONCHANGE);
+                        selector.play(OPTION_CHANGE);
                         break;
                     }
                 }
@@ -261,14 +258,14 @@ public enum MusicSelectCommand {
                     (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
                 SongData sd = ((SongBar) current).getSongData();
                 bar.updateBar(new SameFolderBar(selector, sd.getFullTitle(), sd.getFolder()));
-                selector.play(SOUND_FOLDEROPEN);
+                selector.play(FOLDER_OPEN);
             } else if (current instanceof GradeBar) {
                 List<Bar> songbars = Arrays.asList(((GradeBar) current).getSongDatas()).stream()
                         .distinct()
                         .map(SongBar::new)
                         .collect(Collectors.toList());
                 bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
-                selector.play(SOUND_FOLDEROPEN);
+                selector.play(FOLDER_OPEN);
             }
         }    	
     }

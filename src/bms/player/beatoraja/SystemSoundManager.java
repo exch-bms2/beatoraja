@@ -71,7 +71,7 @@ public class SystemSoundManager {
 					main.getAudioProcessor().dispose(oldpath);
 				}
 				soundmap.put(sound, newpath);
-				return;
+				break;
 			}
 
 		}
@@ -138,6 +138,9 @@ public class SystemSoundManager {
 		RESULT_CLEAR("clear.wav",false), 
 		RESULT_FAIL("fail.wav",false), 
 		RESULT_CLOSE("resultclose.wav",false),
+		COURSE_CLEAR("course_clear.wav",false), 
+		COURSE_FAIL("course_fail.wav",false), 
+		COURSE_CLOSE("course_close.wav",false),
 		GUIDESE_PG("guide-pg.wav",false),
 		GUIDESE_GR("guide-gr.wav",false),
 		GUIDESE_GD("guide-gd.wav",false),

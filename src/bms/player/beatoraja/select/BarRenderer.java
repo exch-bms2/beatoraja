@@ -1,5 +1,7 @@
 package bms.player.beatoraja.select;
 
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
+
 import java.io.BufferedInputStream;
 import java.lang.reflect.Method;
 import java.nio.file.*;
@@ -461,7 +463,7 @@ public class BarRenderer {
 		final DirectoryBar parent = dir.size > 0 ? dir.last() : null;
 		dir.addLast(current);
 		updateBar(parent);
-		select.play(MusicSelector.SOUND_FOLDERCLOSE);
+		select.play(FOLDER_CLOSE);
 	}
 
 	public void addSearch(SearchWordBar bar) {
@@ -866,12 +868,12 @@ public class BarRenderer {
 		}
 		while(mov > 0) {
 			move(true);
-			select.play(MusicSelector.SOUND_SCRATCH);
+			select.play(SCRATCH);
 			mov--;
 		}
 		while(mov < 0) {
 			move(false);
-			select.play(MusicSelector.SOUND_SCRATCH);
+			select.play(SCRATCH);
 			mov++;
 		}
 	}

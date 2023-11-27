@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.nio.file.*;
 import java.util.logging.Logger;
@@ -165,13 +166,6 @@ public class MusicSelector extends MainState {
 
 	public void create() {
 		main.getSoundManager().shuffle();
-		setSound(SOUND_BGM, "select.wav", SoundType.BGM, true);
-		setSound(SOUND_SCRATCH, "scratch.wav", SoundType.SOUND, false);
-		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND,false);
-		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONCHANGE, "o-change.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONOPEN, "o-open.wav", SoundType.SOUND,false);
-		setSound(SOUND_OPTIONCLOSE, "o-close.wav", SoundType.SOUND,false);
 
 		play = null;
 		showNoteGraph = false;
@@ -188,7 +182,7 @@ public class MusicSelector extends MainState {
 		}
 
 		preview = new PreviewMusicProcessor(main.getAudioProcessor(), resource.getConfig());
-		preview.setDefault(getSound(SOUND_BGM));
+		preview.setDefault(getSound(SELECT));
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayModeConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
@@ -411,7 +405,7 @@ public class MusicSelector extends MainState {
 	public void select(Bar current) {
 		if (current instanceof DirectoryBar) {
 			if (bar.updateBar(current)) {
-				play(SOUND_FOLDEROPEN);
+				play(FOLDER_OPEN);
 			}
 			execute(MusicSelectCommand.RESET_REPLAY);
 		} else {

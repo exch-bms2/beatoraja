@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.SystemSoundManager.SoundType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
@@ -10,7 +11,7 @@ import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
-import static bms.player.beatoraja.select.MusicSelector.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
@@ -103,7 +104,7 @@ public class MusicSelectInputProcessor {
             isOptionKeyReleased = true;
             if(isOptionKeyPressed) {
                 isOptionKeyPressed = false;
-                select.play(SOUND_OPTIONCLOSE);
+                select.play(OPTION_CLOSE);
             }
         }
 
@@ -119,7 +120,7 @@ public class MusicSelectInputProcessor {
             if(isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
-                select.play(SOUND_OPTIONOPEN);
+                select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, OPTION1_DOWN, true)) {
                 select.executeEvent(EventType.option1p, 1);
@@ -194,12 +195,12 @@ public class MusicSelectInputProcessor {
 
             while(mov > 0) {
             	select.executeEvent(EventType.target, -1);
-                select.play(SOUND_SCRATCH);
+                select.play(SCRATCH);
                 mov--;
             }
             while(mov < 0) {
             	select.executeEvent(EventType.target, 1);
-                select.play(SOUND_SCRATCH);
+                select.play(SCRATCH);
                 mov++;
             }
         } else if (input.isSelectPressed() && !input.startPressed()) {
@@ -209,35 +210,35 @@ public class MusicSelectInputProcessor {
             if(isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
-                select.play(SOUND_OPTIONOPEN);
+                select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, JUDGEWINDOW_UP, true)) {
                 config.setCustomJudge(!config.isCustomJudge());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, CONSTANT, true)) {
                 config.setScrollMode(config.getScrollMode() == 1 ? 0 : 1);
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, JUDGEAREA, true)) {
                 config.setShowjudgearea(!config.isShowjudgearea());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, LEGACYNOTE, true)) {
                 config.setLongnoteMode(config.getLongnoteMode() == 1 ? 0 : 1);
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, MARKNOTE, true)) {
                 config.setMarkprocessednote(!config.isMarkprocessednote());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, BPMGUIDE, true)) {
                 config.setBpmguide(!config.isBpmguide());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, NOMINE, true)) {
                 config.setMineMode(config.getMineMode() == 1 ? 0 : 1);
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
         } else if (input.getControlKeyState(ControlKeys.NUM5) || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
@@ -246,7 +247,7 @@ public class MusicSelectInputProcessor {
             if(isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
-                select.play(SOUND_OPTIONOPEN);
+                select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, BGA_DOWN, true)) {
             	select.executeEvent(EventType.bga);
@@ -306,10 +307,10 @@ public class MusicSelectInputProcessor {
                     select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : ((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY));
                 }
             } else {
-                if (property.isPressed(input, FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
+                if (property.isPressed(input, MusicSelectKey.FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
                     // open folder
                     if (bar.updateBar(current)) {
-                        select.play(SOUND_FOLDEROPEN);
+                        select.play(SoundType.FOLDER_OPEN);
                     }
                 }
             }
@@ -324,7 +325,7 @@ public class MusicSelectInputProcessor {
                 select.executeEvent(EventType.open_document);
             }
             // close folder
-            if (property.isPressed(input, FOLDER_CLOSE, true) || input.isControlKeyPressed(ControlKeys.LEFT)) {
+            if (property.isPressed(input, MusicSelectKey.FOLDER_CLOSE, true) || input.isControlKeyPressed(ControlKeys.LEFT)) {
                 input.resetKeyChangedTime(1);
                 bar.close();
             }
