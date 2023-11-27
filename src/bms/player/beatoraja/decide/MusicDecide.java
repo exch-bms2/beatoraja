@@ -6,6 +6,7 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.skin.*;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 /**
  * 曲決定部分。
@@ -16,8 +17,6 @@ public class MusicDecide extends MainState {
 
 	private boolean cancel;
 
-	public static final int SOUND_DECIDE = 0;
-	
 	public MusicDecide(MainController main) {
 		super(main);
 	}
@@ -32,8 +31,7 @@ public class MusicDecide extends MainState {
 
 	public void prepare() {
 		super.prepare();
-		setSound(SOUND_DECIDE, "decide.wav", SoundType.BGM, false);
-		play(SOUND_DECIDE);
+		play(DECIDE);
 	}
 
 	public void render() {
