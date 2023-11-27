@@ -1,28 +1,20 @@
 package bms.player.beatoraja.skin.property;
 
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.BMSPlayerMode;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.MainState.MainStateType;
-import bms.player.beatoraja.ir.IRChartData;
-import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.ir.IRCourseData;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.select.bar.Bar;
-import bms.player.beatoraja.select.bar.GradeBar;
-import bms.player.beatoraja.select.bar.SongBar;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 
-import static bms.player.beatoraja.select.MusicSelector.SOUND_OPTIONCHANGE;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.OPTION_CHANGE;
 
 import java.awt.*;
 import java.io.IOException;
@@ -86,7 +78,7 @@ public class EventFactory {
 				for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
 				config.setMode(MusicSelector.MODE[(mode + (arg1 >= 0 ? 1 : MusicSelector.MODE.length - 1)) % MusicSelector.MODE.length]);
 				selector.getBarRender().updateBar();
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		/**
@@ -97,7 +89,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				selector.setSort((selector.getSort() + (arg1 >= 0 ? 1 : BarSorter.values().length - 1)) % BarSorter.values().length);
 				selector.getBarRender().updateBar();
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		/**
@@ -165,7 +157,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 	            PlayerConfig config = state.resource.getPlayerConfig();
 	            config.setGauge((config.getGauge() + (arg1 >= 0 ? 1 : 5)) % 6);
-	            state.play(SOUND_OPTIONCHANGE);				
+	            state.play(OPTION_CHANGE);				
 			}
 		}),
 	    /**
@@ -175,7 +167,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 	            PlayerConfig config = state.resource.getPlayerConfig();
 	            config.setRandom((config.getRandom() + (arg1 >= 0 ? 1 : 9)) % 10);
-	            state.play(SOUND_OPTIONCHANGE);				
+	            state.play(OPTION_CHANGE);				
 			}
 		}),
 	    /**
@@ -185,7 +177,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 	            PlayerConfig config = state.resource.getPlayerConfig();
 	            config.setRandom2((config.getRandom2() + (arg1 >= 0 ? 1 : 9)) % 10);
-	            state.play(SOUND_OPTIONCHANGE);
+	            state.play(OPTION_CHANGE);
 			}
 		}),
 	    /**
@@ -195,7 +187,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 	            PlayerConfig config = state.resource.getPlayerConfig();
 	            config.setDoubleoption((config.getDoubleoption() + (arg1 >= 0 ? 1 : 3)) % 4);
-	            state.play(SOUND_OPTIONCHANGE);
+	            state.play(OPTION_CHANGE);
 			}
 		}),
 	    /**
@@ -206,7 +198,7 @@ public class EventFactory {
 	            PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 	            if (pc != null) {
 	                pc.setFixhispeed((pc.getFixhispeed() + (arg1 >= 0 ? 1 : 4)) % 5);
-	                state.play(SOUND_OPTIONCHANGE);
+	                state.play(OPTION_CHANGE);
 	            }				
 			}
 		}),
@@ -221,7 +213,7 @@ public class EventFactory {
             	hispeed = MathUtils.clamp(hispeed, PlayConfig.HISPEED_MIN, PlayConfig.HISPEED_MAX);
             	if(hispeed != pc.getHispeed()) {
             		pc.setHispeed(hispeed);
-	                state.play(SOUND_OPTIONCHANGE);		        	
+	                state.play(OPTION_CHANGE);		        	
             	}
 			}
 		}),
@@ -237,7 +229,7 @@ public class EventFactory {
         		duration = MathUtils.clamp(duration, PlayConfig.DURATION_MIN, PlayConfig.DURATION_MAX);
 		        if(duration != pc.getDuration()) {
 		        	pc.setDuration(duration);
-	                state.play(SOUND_OPTIONCHANGE);		        	
+	                state.play(OPTION_CHANGE);		        	
 		        }	            	
 			}
 		}),
@@ -246,7 +238,7 @@ public class EventFactory {
 				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setHispeedAutoAdjust(!pc.isEnableHispeedAutoAdjust());
-					state.play(SOUND_OPTIONCHANGE);
+					state.play(OPTION_CHANGE);
 				}
 			}
 		}),
@@ -288,13 +280,13 @@ public class EventFactory {
 		bga(72, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				state.main.getConfig().setBga((state.resource.getConfig().getBga() + (arg1 >= 0 ? 1 : 2)) % 3);
-				state.play(SOUND_OPTIONCHANGE);				
+				state.play(OPTION_CHANGE);				
 			}
 		}),
 		bgaexpand(73, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				state.main.getConfig().setBgaExpand((state.resource.getConfig().getBgaExpand() + (arg1 >= 0 ? 1 : 2)) % 3);
-				state.play(SOUND_OPTIONCHANGE);				
+				state.play(OPTION_CHANGE);				
 			}
 		}),
 		notesdisplaytiming(74, (state, arg1) -> {
@@ -306,7 +298,7 @@ public class EventFactory {
 	        if(inc != 0) {
                 config.setJudgetiming(config.getJudgetiming() + inc);
     			if(state instanceof MusicSelector) {
-                    state.play(SOUND_OPTIONCHANGE);		        	
+                    state.play(OPTION_CHANGE);		        	
     			}
 	        }
 		}),
@@ -314,7 +306,7 @@ public class EventFactory {
 	        final PlayerConfig config = state.resource.getPlayerConfig();
             config.setNotesDisplayTimingAutoAdjust(!config.isNotesDisplayTimingAutoAdjust());
 			if(state instanceof MusicSelector) {
-                state.play(SOUND_OPTIONCHANGE);		        	
+                state.play(OPTION_CHANGE);		        	
 			}
 		}),
 		target(77, (state, arg1) -> {
@@ -335,7 +327,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				final int gaslength = 5;
 	            selector.resource.getPlayerConfig().setGaugeAutoShift((selector.resource.getPlayerConfig().getGaugeAutoShift() + (arg1 >= 0 ?1 : gaslength - 1)) % gaslength);
-	            selector.play(SOUND_OPTIONCHANGE);
+	            selector.play(OPTION_CHANGE);
 			}
 		}),
 		bottomshiftablegauge(341, (state, arg1) -> {
@@ -343,7 +335,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				final int gaugelength = 3;
 				selector.resource.getPlayerConfig().setBottomShiftableGauge((selector.resource.getPlayerConfig().getBottomShiftableGauge() + (arg1 >= 0 ? 1 : gaugelength - 1)) % gaugelength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		/**
@@ -352,17 +344,17 @@ public class EventFactory {
 		rival(79, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
-				PlayerInformation[] rivals = state.main.getRivalDataAccessor().getRivals();
+				final RivalDataAccessor rivals = state.main.getRivalDataAccessor();
 	            int index = -1;
-	            for(int i = 0;i < rivals.length;i++) {
-	            	if(selector.getRival() == rivals[i]) {
+	            for(int i = 0;i < rivals.getRivalCount();i++) {
+	            	if(selector.getRival() == rivals.getRivalInformation(i)) {
 	            		index = i;
 	            		break;
 	            	}
 	            }
-	            index = (index + (arg1 >= 0 ? 2 : rivals.length + 1)) % (rivals.length + 1) - 1;
-	            selector.setRival(index != -1 ? rivals[index] : null);
-	            selector.play(SOUND_OPTIONCHANGE);
+	            index = (index + (arg1 >= 0 ? 2 : rivals.getRivalCount() + 1)) % (rivals.getRivalCount() + 1) - 1;
+	            selector.setRival(index != -1 ? rivals.getRivalInformation(index) : null);
+	            selector.play(OPTION_CHANGE);
 			}
 		}),
 		favorite_chart(90, (state, arg1) -> {
@@ -409,7 +401,7 @@ public class EventFactory {
 
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
 						selector.getBarRender().updateBar();
-						selector.play(SOUND_OPTIONCHANGE);
+						selector.play(OPTION_CHANGE);
 					}
 				}
 			}
@@ -465,7 +457,7 @@ public class EventFactory {
 						changeFav.accept(sd);					
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
 						selector.getBarRender().updateBar();
-						selector.play(SOUND_OPTIONCHANGE);
+						selector.play(OPTION_CHANGE);
 					}
 				}
 			}
@@ -541,7 +533,7 @@ public class EventFactory {
 	            PlayerConfig config = selector.resource.getPlayerConfig();
 	            config.setLnmode((config.getLnmode() + (arg1 >= 0 ? 1 : lnmodelength - 1)) % lnmodelength);
 	            selector.getBarRender().updateBar();
-	            selector.play(SOUND_OPTIONCHANGE);
+	            selector.play(OPTION_CHANGE);
 			}
 		}),
 		autosavereplay1(321, changeAutoSaveReplay(0)),
@@ -553,7 +545,7 @@ public class EventFactory {
 				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setEnablelanecover(!pc.isEnablelanecover());
-					state.play(SOUND_OPTIONCHANGE);
+					state.play(OPTION_CHANGE);
 				}
 			}
 		}),
@@ -562,7 +554,7 @@ public class EventFactory {
 				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setEnablelift(!pc.isEnablelift());
-					state.play(SOUND_OPTIONCHANGE);
+					state.play(OPTION_CHANGE);
 				}
 			}
 		}),
@@ -571,7 +563,7 @@ public class EventFactory {
 				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setEnablehidden(!pc.isEnablehidden());
-					state.play(SOUND_OPTIONCHANGE);
+					state.play(OPTION_CHANGE);
 				}
 			}
 		}),
@@ -586,7 +578,7 @@ public class EventFactory {
 				for (int i = 0; i < algorithms.length; i++) {
 					if (jt.equals(algorithms[i])) {
 						pc.setJudgetype(algorithms[(arg1 >= 0 ? i + 1 : i + algorithms.length - 1) % algorithms.length]);
-						state.play(SOUND_OPTIONCHANGE);
+						state.play(OPTION_CHANGE);
 					}
 				}
 			}
@@ -597,7 +589,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				config.setExtranoteDepth((config.getExtranoteDepth() + (arg1 >= 0 ? 1 : depthlength - 1)) % depthlength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		minemode(351, (state, arg1) -> {
@@ -606,7 +598,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				config.setMineMode((config.getMineMode() + (arg1 >= 0 ? 1 : modelength - 1)) % modelength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		scrollmode(352, (state, arg1) -> {
@@ -615,7 +607,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				config.setScrollMode((config.getScrollMode() + (arg1 >= 0 ? 1 : modelength - 1)) % modelength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		longnotemode(353, (state, arg1) -> {
@@ -624,7 +616,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				config.setLongnoteMode((config.getLongnoteMode() + (arg1 >= 0 ? 1 : modelength - 1)) % modelength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		seventonine_pattern(360, (state, arg1) -> {
@@ -633,7 +625,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				config.setSevenToNinePattern((config.getSevenToNinePattern() + (arg1 >= 0 ? 1 : patternlength - 1)) % patternlength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		seventonine_type(361, (state, arg1) -> {
@@ -642,7 +634,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				config.setSevenToNineType((config.getSevenToNineType() + (arg1 >= 0 ? 1 : typelength - 1)) % typelength);
-				selector.play(SOUND_OPTIONCHANGE);
+				selector.play(OPTION_CHANGE);
 			}
 		}),
 		;
@@ -679,7 +671,7 @@ public class EventFactory {
 	    	        final int length = AbstractResult.ReplayAutoSaveConstraint.values().length;
 	    	        asr[index] = (asr[index] + (arg1 >= 0 ? 1 : length - 1)) % length;
 	    	        selector.resource.getPlayerConfig().setAutoSaveReplay(asr);
-	    	        selector.play(SOUND_OPTIONCHANGE);
+	    	        selector.play(OPTION_CHANGE);
 	    		}
 	    	};
 	    }
