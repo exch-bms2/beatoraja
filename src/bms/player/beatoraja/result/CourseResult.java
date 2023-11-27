@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -15,7 +16,6 @@ import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
-import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
@@ -39,11 +39,6 @@ public class CourseResult extends AbstractResult {
 			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 					resource.getPlayerConfig().getLnmode(), i ,resource.getConstraint()) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;
 		}
-
-		final boolean isLoopSound = resource.getConfig().getAudioConfig().isLoopCourseResultSound();
-		setSound(SOUND_CLEAR, "course_clear.wav", SoundType.SOUND, isLoopSound);
-		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, isLoopSound);
-		setSound(SOUND_CLOSE, "course_close.wav", SoundType.SOUND, false);
 
 		for(int i = resource.getCourseGauge().size;i < resource.getCourseBMSModels().length;i++) {
 			FloatArray[] list = new FloatArray[resource.getGrooveGauge().getGaugeTypeLength()];
@@ -156,13 +151,14 @@ public class CourseResult extends AbstractResult {
 			irprocess.start();
 		}
 
-		play(newscore.getClear() != Failed.id ? SOUND_CLEAR : SOUND_FAIL);
+		play(newscore.getClear() != Failed.id ? (getSound(COURSE_CLEAR) != null ? COURSE_CLEAR : RESULT_CLEAR)
+				: (getSound(COURSE_FAIL) != null ? COURSE_FAIL : RESULT_FAIL), resource.getConfig().getAudioConfig().isLoopCourseResultSound());
 	}
 
 	public void shutdown() {
-		stop(SOUND_CLEAR);
-		stop(SOUND_FAIL);
-		stop(SOUND_CLOSE);
+		stop(getSound(COURSE_CLEAR) != null ? COURSE_CLEAR : RESULT_CLEAR);
+		stop(getSound(COURSE_FAIL) != null ? COURSE_FAIL : RESULT_FAIL);
+		stop(getSound(COURSE_CLOSE) != null ? COURSE_CLOSE : RESULT_CLOSE);
 	}
 
 	public void render() {
@@ -182,10 +178,10 @@ public class CourseResult extends AbstractResult {
 			}
 		} else if (time > getSkin().getScene()) {
 			timer.switchTimer(TIMER_FADEOUT, true);
-			if(getSound(SOUND_CLOSE) != null) {
-				stop(SOUND_CLEAR);
-				stop(SOUND_FAIL);
-				play(SOUND_CLOSE);
+			if(getSound(COURSE_CLOSE) != null || getSound(RESULT_CLOSE) != null) {
+				stop(getSound(COURSE_CLEAR) != null ? COURSE_CLEAR : RESULT_CLEAR);
+				stop(getSound(COURSE_FAIL) != null ? COURSE_FAIL : RESULT_FAIL);
+				play(getSound(COURSE_CLOSE) != null ? COURSE_CLOSE : RESULT_CLOSE);
 			}
 		}
 
@@ -214,10 +210,10 @@ public class CourseResult extends AbstractResult {
 					timer.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 				} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED){
 					timer.switchTimer(TIMER_FADEOUT, true);
-					if(getSound(SOUND_CLOSE) != null) {
-						stop(SOUND_CLEAR);
-						stop(SOUND_FAIL);
-						play(SOUND_CLOSE);
+					if(getSound(COURSE_CLOSE) != null || getSound(RESULT_CLOSE) != null) {
+						stop(getSound(COURSE_CLEAR) != null ? COURSE_CLEAR : RESULT_CLEAR);
+						stop(getSound(COURSE_FAIL) != null ? COURSE_FAIL : RESULT_FAIL);
+						play(getSound(COURSE_CLOSE) != null ? COURSE_CLOSE : RESULT_CLOSE);
 					}
 				}
 			}
@@ -264,7 +260,7 @@ public class CourseResult extends AbstractResult {
 				config.getLnmode(), random, resource.getConstraint());
 		oldscore = score != null ? score : new ScoreData();
 
-		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0,
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getTargetScoreData() != null ? resource.getTargetScoreData().getExscore() : 0,
 				Arrays.asList(resource.getCourseData().getSong()).stream().mapToInt(sd -> sd.getNotes()).sum());
 		getScoreDataProperty().update(newscore);
 
