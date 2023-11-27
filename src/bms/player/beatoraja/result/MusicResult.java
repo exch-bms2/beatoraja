@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -42,11 +43,6 @@ public class MusicResult extends AbstractResult {
 			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), i) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
 		}
-
-		final boolean isLoopSound = resource.getConfig().getAudioConfig().isLoopResultSound();
-		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND, isLoopSound);
-		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND, isLoopSound);
-		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND, false);
 
 		property = ResultKeyProperty.get(resource.getBMSModel().getMode());
 		if (property == null) {
@@ -145,13 +141,14 @@ public class MusicResult extends AbstractResult {
 		}
 
 		final ScoreData cscore = resource.getCourseScoreData();
-		play(newscore.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id) ? SOUND_CLEAR : SOUND_FAIL);
+		play(newscore.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id) ? RESULT_CLEAR : RESULT_FAIL
+				,resource.getConfig().getAudioConfig().isLoopResultSound());
 	}
 
 	public void shutdown() {
-		stop(SOUND_CLEAR);
-		stop(SOUND_FAIL);
-		stop(SOUND_CLOSE);
+		stop(RESULT_CLEAR);
+		stop(RESULT_FAIL);
+		stop(RESULT_CLOSE);
 	}
 
 	public void render() {
@@ -246,10 +243,10 @@ public class MusicResult extends AbstractResult {
 		} else {
 			if (time > getSkin().getScene()) {
 				timer.switchTimer(TIMER_FADEOUT, true);
-				if (getSound(SOUND_CLOSE) != null) {
-					stop(SOUND_CLEAR);
-					stop(SOUND_FAIL);
-					play(SOUND_CLOSE);
+				if (getSound(RESULT_CLOSE) != null) {
+					stop(RESULT_CLEAR);
+					stop(RESULT_FAIL);
+					play(RESULT_CLOSE);
 				}
 			}
 		}
@@ -286,10 +283,10 @@ public class MusicResult extends AbstractResult {
 						timer.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 					} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED) {
 						timer.switchTimer(TIMER_FADEOUT, true);
-						if (getSound(SOUND_CLOSE) != null) {
-							stop(SOUND_CLEAR);
-							stop(SOUND_FAIL);
-							play(SOUND_CLOSE);
+						if (getSound(RESULT_CLOSE) != null) {
+							stop(RESULT_CLEAR);
+							stop(RESULT_FAIL);
+							play(RESULT_CLOSE);
 						}
 					}
 				}
@@ -337,7 +334,7 @@ public class MusicResult extends AbstractResult {
 				resource.getPlayerConfig().getLnmode());
 		oldscore = oldsc != null ? oldsc : new ScoreData();
 
-		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData() != null ? resource.getRivalScoreData().getExscore() : 0, resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getTargetScoreData() != null ? resource.getTargetScoreData().getExscore() : 0, resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
 		// duration average
 		int count = 0;

@@ -240,6 +240,10 @@ public abstract class MainState {
 		}
 	}
 	
+	public String getSound(SystemSoundManager.SoundType sound) {
+		return main.getSoundManager().getSound(sound);
+	}
+	
 	public void play(SystemSoundManager.SoundType sound) {
 		play(sound, false);
 	}
