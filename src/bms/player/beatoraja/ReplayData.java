@@ -34,6 +34,7 @@ public class ReplayData implements Validatable {
 	 * 譜面オプションによる変更ログ
 	 */
 	public PatternModifyLog[] pattern;
+	public int[][] laneShufflePattern;
 	/**
 	 * ランダムシーケンスを含むbmsの場合、選択されたRANDOM番号
 	 */

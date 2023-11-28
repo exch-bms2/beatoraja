@@ -5,6 +5,9 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 import java.util.Calendar;
 
+import bms.model.Mode;
+import bms.player.beatoraja.pattern.Random;
+import bms.player.beatoraja.result.MusicResult;
 import com.badlogic.gdx.Gdx;
 
 import bms.model.BMSModel;
@@ -1200,6 +1203,25 @@ public class IntegerPropertyFactory {
 		cleartype_ranking8(397, createRankinCleartypeProperty(7)),
 		cleartype_ranking9(398, createRankinCleartypeProperty(8)),
 		cleartype_ranking10(399, createRankinCleartypeProperty(9)),
+		pattern_1p_1(450, getAssignedLane(0, false)),
+		pattern_1p_2(451, getAssignedLane(1, false)),
+		pattern_1p_3(452, getAssignedLane(2, false)),
+		pattern_1p_4(453, getAssignedLane(3, false)),
+		pattern_1p_5(454, getAssignedLane(4, false)),
+		pattern_1p_6(455, getAssignedLane(5, false)),
+		pattern_1p_7(456, getAssignedLane(6, false)),
+		pattern_1p_8(457, getAssignedLane(7, false)),
+		pattern_1p_9(458, getAssignedLane(8, false)),
+		pattern_1p_SCR(459, getAssignedLane(-1, false)),
+		pattern_2p_1(460, getAssignedLane(0, true)),
+		pattern_2p_2(461, getAssignedLane(1, true)),
+		pattern_2p_3(462, getAssignedLane(2, true)),
+		pattern_2p_4(463, getAssignedLane(3, true)),
+		pattern_2p_5(464, getAssignedLane(4, true)),
+		pattern_2p_6(465, getAssignedLane(5, true)),
+		pattern_2p_7(466, getAssignedLane(6, true)),
+		pattern_2p_SCR(469, getAssignedLane(-1, true)),
+
 		
 		// 旧仕様
 		assist_constant(BUTTON_ASSIST_CONSTANT, (state) -> (state.resource.getPlayerConfig().getScrollMode() == 1 ? 1 : 0)),
@@ -1235,6 +1257,58 @@ public class IntegerPropertyFactory {
 				}
 				IRScoreData score = irc != null ? irc.getScore(index + rankingOffset) : null;
 				return score != null ? score.clear.id : Integer.MIN_VALUE;
+			};
+		}
+
+		/**
+		 * ランダムオプションで割り当てられたレーンを返す
+		 */
+		private static IntegerProperty getAssignedLane(int key, boolean is2PSide){
+			return (state) -> {
+				if (!(state instanceof MusicResult)){
+					return 0;
+				}
+
+				ReplayData rd = state.resource.getReplayData();
+				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption);
+
+				switch (type){
+					case RANDOM:
+					case R_RANDOM:
+					case CROSS:
+					case RANDOM_EX:
+						break;
+					default:
+						return 0;
+				}
+
+				if(rd.laneShufflePattern == null){ // patternModifyLogで再現されたリプレイの場合が該当
+					return 0;
+				}
+
+				Mode mode = state.resource.getBMSModel().getMode();
+				if(mode.player == 1 && is2PSide){
+					return 0;
+				}
+				int keyNum = mode.key / mode.player;
+
+				int index;
+				if(key >= keyNum || (mode.scratchKey.length != 0 && key == mode.scratchKey[0])) {
+					return 0;
+				} else if(key == -1){ // scratch
+					if (mode.scratchKey.length == 0 || type != Random.RANDOM_EX){ // no scratch
+						return 0;
+					}
+					index = mode.scratchKey[0];
+				} else {
+					index = key;
+				}
+
+				int[] pattern = rd.laneShufflePattern[is2PSide? 1 : 0];
+				if (pattern == null){
+					return 0;
+				}
+				return pattern[index] + 1 - (is2PSide? keyNum: 0);
 			};
 		}
 	}
