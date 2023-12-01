@@ -1030,9 +1030,30 @@ public class IntegerPropertyFactory {
 		}),
 		sort(12, (state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSort() : Integer.MIN_VALUE)),
 		gaugetype_1p(40, (state) -> (state.resource.getPlayerConfig().getGauge())),
-		option_1p(42, (state) -> (state.resource.getPlayerConfig().getRandom())),
-		option_2p(43, (state) -> (state.resource.getPlayerConfig().getRandom2())),
-		option_dp(54, (state) -> (state.resource.getPlayerConfig().getDoubleoption())),
+		option_1p(42, (state) -> {
+			if(state instanceof BMSPlayer) {
+				return ((BMSPlayer)state).getOptionInformation().randomoption;
+			} else if(state instanceof AbstractResult) {
+				return state.resource.getReplayData().randomoption;
+			}
+			return state.resource.getPlayerConfig().getRandom();
+		}),
+		option_2p(43, (state) -> {
+			if(state instanceof BMSPlayer) {
+				return ((BMSPlayer)state).getOptionInformation().randomoption2;
+			} else if(state instanceof AbstractResult) {
+				return state.resource.getReplayData().randomoption2;
+			}
+			return state.resource.getPlayerConfig().getRandom2();
+		}),
+		option_dp(54, (state) -> {
+			if(state instanceof BMSPlayer) {
+				return ((BMSPlayer)state).getOptionInformation().doubleoption;
+			} else if(state instanceof AbstractResult) {
+				return state.resource.getReplayData().doubleoption;
+			}
+			return state.resource.getPlayerConfig().getDoubleoption();
+		}),
 
 		hsfix(55, (state) -> {
 			if (state.resource.getSongdata() != null) {

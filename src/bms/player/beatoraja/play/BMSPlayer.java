@@ -1010,6 +1010,10 @@ public class BMSPlayer extends MainState {
 	public JudgeManager getJudgeManager() {
 		return judge;
 	}
+	
+	public ReplayData getOptionInformation() {
+		return playinfo;
+	}
 
 	public void update(int judge, long time) {
 		notes = this.judge.getPastNotes();
