@@ -1083,6 +1083,33 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
+		
+		option_target1_1p(61, (state) -> {
+			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult) 
+					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
+			if(rival != null && rival.getOption() >= 0) {
+				return rival.getOption() % 10;
+			}
+			return Integer.MIN_VALUE;
+		}),
+		option_target1_2p(62, (state) -> {
+			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult) 
+					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
+			if(rival != null && rival.getOption() >= 0) {
+				return (rival.getOption() / 10) % 10;
+			}
+			return Integer.MIN_VALUE;
+		}),
+		option_target1_dp(63, (state) -> {
+			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult) 
+					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
+			if(rival != null && rival.getOption() >= 0) {
+				return (rival.getOption() / 100) % 10;
+			}
+			return Integer.MIN_VALUE;
+		}),
+		// TODO 64-69はtarget2, target3に割り当てたい
+
 		hispeedautoadjust(342, (state) -> {
 			PlayConfig pc = null;
 			if(state instanceof MusicSelector) {
