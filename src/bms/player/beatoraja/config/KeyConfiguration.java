@@ -1,5 +1,6 @@
 package bms.player.beatoraja.config;
 
+import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -13,19 +14,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import bms.model.Mode;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayModeConfig;
-import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
-import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayModeConfig.MidiConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.input.BMControllerInputProcessor;
-import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayModeConfig.*;
+import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
-import bms.player.beatoraja.input.MidiInputProcessor;
 
 /**
  * キーコンフィグ画面
@@ -102,7 +94,10 @@ public class KeyConfiguration extends MainState {
 	public void create() {
 		loadSkin(SkinType.KEY_CONFIG);
 		if(getSkin() == null) {
-			this.setSkin(new KeyConfigurationSkin(Resolution.HD, main.getConfig().getResolution()));
+			SkinHeader header = new SkinHeader();
+			header.setSourceResolution(Resolution.HD);
+			header.setDestinationResolution(main.getConfig().getResolution());
+			this.setSkin(new KeyConfigurationSkin(header));
 		}
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
@@ -228,13 +223,7 @@ public class KeyConfiguration extends MainState {
 			}
 
 			if (input.isControlKeyPressed(ControlKeys.ENTER)) {
-				input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
-				input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
-				for (BMControllerInputProcessor bmc : controllers) {
-					bmc.setLastPressedButton(-1);
-				}
-				midiinput.clearLastPressedKey();
-				keyinput = true;
+				setKeyAssignMode(cursorpos);
 			}
 
 			if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
@@ -307,6 +296,57 @@ public class KeyConfiguration extends MainState {
 					652 * scaleX, (y + 22) * scaleY);
 			sprite.end();
 		}
+	}
+	
+	public void setKeyAssignMode(final int index) {
+		input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
+		input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
+		for (BMControllerInputProcessor bmc : controllers) {
+			bmc.setLastPressedButton(-1);
+		}
+		midiinput.clearLastPressedKey();
+		cursorpos = index;
+		keyinput = true;
+	}
+	/**
+	 * キーインデックスに対応するキーの文字列を返す
+	 * 
+	 * @param index 
+	 * @return
+	 */
+	public String getKeyAssign(final int index) {
+		if(index < 0 || index >= KEYSA[mode].length) {
+			return "!!!";
+		}
+		int keyindex = KEYSA[mode][index];
+		
+		
+		final int kbinput = getKeyboardKeyAssign(keyindex);
+		if(kbinput != -1) {
+			return Keys.toString(getKeyboardKeyAssign(keyindex));
+		}
+
+		final String mouseinput = getMouseScratchKeyString(keyindex, null);
+		if(mouseinput != null) {
+			return mouseinput;
+		}
+		
+		final int controllerinput = getControllerKeyAssign(0, keyindex);
+		if(controllerinput != -1) {
+			return BMControllerInputProcessor.BMKeys.toString(controllerinput);
+		}
+		if (pc.getController().length > 1) {
+			final int controllerinput2 = getControllerKeyAssign(1, keyindex);
+			if(controllerinput2 != -1) {
+				return BMControllerInputProcessor.BMKeys.toString(controllerinput2);
+			}
+		}
+		
+		final PlayModeConfig.MidiConfig.Input midiinput = getMidiKeyAssign(keyindex);
+		if(midiinput != null) {
+			return midiinput.toString();
+		}
+		return "---";
 	}
 
 	private void setMode(int mode) {

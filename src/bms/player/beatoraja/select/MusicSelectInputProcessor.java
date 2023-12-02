@@ -1,22 +1,17 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.SystemSoundManager.SoundType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
-import bms.player.beatoraja.skin.property.EventFactory;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
-import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static bms.player.beatoraja.select.MusicSelector.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
@@ -109,7 +104,7 @@ public class MusicSelectInputProcessor {
             isOptionKeyReleased = true;
             if(isOptionKeyPressed) {
                 isOptionKeyPressed = false;
-                select.play(SOUND_OPTIONCLOSE);
+                select.play(OPTION_CLOSE);
             }
         }
 
@@ -125,7 +120,7 @@ public class MusicSelectInputProcessor {
             if(isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
-                select.play(SOUND_OPTIONOPEN);
+                select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, OPTION1_DOWN, true)) {
                 select.executeEvent(EventType.option1p, 1);
@@ -198,15 +193,14 @@ public class MusicSelectInputProcessor {
                 }
             }
 
-            TargetProperty[] targets = TargetProperty.getAllTargetProperties();
             while(mov > 0) {
-                config.setTarget((config.getTarget() + targets.length - 1) % targets.length);
-                select.play(SOUND_SCRATCH);
+            	select.executeEvent(EventType.target, -1);
+                select.play(SCRATCH);
                 mov--;
             }
             while(mov < 0) {
-                config.setTarget((config.getTarget() + 1) % targets.length);
-                select.play(SOUND_SCRATCH);
+            	select.executeEvent(EventType.target, 1);
+                select.play(SCRATCH);
                 mov++;
             }
         } else if (input.isSelectPressed() && !input.startPressed()) {
@@ -216,35 +210,35 @@ public class MusicSelectInputProcessor {
             if(isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
-                select.play(SOUND_OPTIONOPEN);
+                select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, JUDGEWINDOW_UP, true)) {
                 config.setCustomJudge(!config.isCustomJudge());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, CONSTANT, true)) {
                 config.setScrollMode(config.getScrollMode() == 1 ? 0 : 1);
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, JUDGEAREA, true)) {
                 config.setShowjudgearea(!config.isShowjudgearea());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, LEGACYNOTE, true)) {
                 config.setLongnoteMode(config.getLongnoteMode() == 1 ? 0 : 1);
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, MARKNOTE, true)) {
                 config.setMarkprocessednote(!config.isMarkprocessednote());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, BPMGUIDE, true)) {
                 config.setBpmguide(!config.isBpmguide());
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
             if (property.isPressed(input, NOMINE, true)) {
                 config.setMineMode(config.getMineMode() == 1 ? 0 : 1);
-                select.play(SOUND_OPTIONCHANGE);
+                select.play(OPTION_CHANGE);
             }
         } else if (input.getControlKeyState(ControlKeys.NUM5) || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
@@ -253,7 +247,7 @@ public class MusicSelectInputProcessor {
             if(isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
-                select.play(SOUND_OPTIONOPEN);
+                select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, BGA_DOWN, true)) {
             	select.executeEvent(EventType.bga);
@@ -304,19 +298,19 @@ public class MusicSelectInputProcessor {
                     select.selectSong(BMSPlayerMode.PLAY);
                 } else if (property.isPressed(input, PRACTICE, true)) {
                     // practice mode
-                    select.selectSong(BMSPlayerMode.PRACTICE);
+                    select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : BMSPlayerMode.PRACTICE);
                 } else if (property.isPressed(input, AUTO, true)) {
                     // auto play
-                    select.selectSong(BMSPlayerMode.AUTOPLAY);
+                    select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : BMSPlayerMode.AUTOPLAY);
                 } else if (property.isPressed(input, MusicSelectKey.REPLAY, true)) {
                     // replay
-                    select.selectSong((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY);
+                    select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : ((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY));
                 }
             } else {
-                if (property.isPressed(input, FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
+                if (property.isPressed(input, MusicSelectKey.FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
                     // open folder
                     if (bar.updateBar(current)) {
-                        select.play(SOUND_FOLDEROPEN);
+                        select.play(SoundType.FOLDER_OPEN);
                     }
                 }
             }
@@ -331,7 +325,7 @@ public class MusicSelectInputProcessor {
                 select.executeEvent(EventType.open_document);
             }
             // close folder
-            if (property.isPressed(input, FOLDER_CLOSE, true) || input.isControlKeyPressed(ControlKeys.LEFT)) {
+            if (property.isPressed(input, MusicSelectKey.FOLDER_CLOSE, true) || input.isControlKeyPressed(ControlKeys.LEFT)) {
                 input.resetKeyChangedTime(1);
                 bar.close();
             }
@@ -357,7 +351,7 @@ public class MusicSelectInputProcessor {
         if (bar.getSelected() != current) {
             select.selectedBarMoved();
         }
-        main.switchTimer(TIMER_SONGBAR_CHANGE, true);
+        select.timer.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
 		if(input.isActivated(KeyCommand.UPDATE_FOLDER)) {
             select.execute(MusicSelectCommand.UPDATE_FOLDER);
@@ -365,6 +359,14 @@ public class MusicSelectInputProcessor {
         // open explorer with selected song
 		if(input.isActivated(KeyCommand.OPEN_EXPLORER)) {
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
+        }
+        // copy song MD5 hash
+        if(input.isActivated(KeyCommand.COPY_SONG_MD5_HASH)) {
+            select.execute(MusicSelectCommand.COPY_MD5_HASH);
+        }
+        // copy song SHA256 hash
+        if(input.isActivated(KeyCommand.COPY_SONG_SHA256_HASH)) {
+            select.execute(MusicSelectCommand.COPY_SHA256_HASH);
         }
 
         if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {

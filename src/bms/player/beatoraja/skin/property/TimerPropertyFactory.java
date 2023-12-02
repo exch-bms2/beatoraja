@@ -1,6 +1,5 @@
 package bms.player.beatoraja.skin.property;
 
-import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 
 public class TimerPropertyFactory {
@@ -11,27 +10,27 @@ public class TimerPropertyFactory {
 		return new TimerProperty() {
 			@Override
 			public long getMicro(MainState state) {
-				return state.main.getMicroTimer(timerId);
+				return state.timer.getMicroTimer(timerId);
 			}
 
 			@Override
 			public long get(MainState state) {
-				return state.main.getTimer(timerId);
+				return state.timer.getTimer(timerId);
 			}
 
 			@Override
 			public long getNowTime(MainState state) {
-				return state.main.getNowTime(timerId);
+				return state.timer.getNowTime(timerId);
 			}
 
 			@Override
 			public boolean isOn(MainState state) {
-				return state.main.isTimerOn(timerId);
+				return state.timer.isTimerOn(timerId);
 			}
 
 			@Override
 			public boolean isOff(MainState state) {
-				return !state.main.isTimerOn(timerId);
+				return !state.timer.isTimerOn(timerId);
 			}
 
 			@Override

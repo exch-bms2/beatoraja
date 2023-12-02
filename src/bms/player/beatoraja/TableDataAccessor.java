@@ -36,6 +36,55 @@ public class TableDataAccessor {
             }
 		});		
 	}
+
+	public void loadNewTableData(String[] urls) {
+		HashSet<String> localTables = getLocalTableFilenames();
+		Arrays.stream(urls).parallel().forEach(url -> {
+			if (localTables.contains(getFileName(url) + ".bmt")) {
+				return;
+			}
+            TableAccessor tr = new DifficultyTableAccessor(tabledir, url);
+            TableData td = tr.read();
+            if(td != null) {
+                write(td);
+            }
+		});		
+	}
+
+	private HashSet<String> getLocalTableFilenames() {
+		HashSet<String> set = new HashSet<>();
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
+			for (Path p : paths) {
+				String fileName = p.getFileName().toString();
+				if (fileName.endsWith(".bmt")) {
+					set.add(fileName);
+				}
+			}
+		} catch (IOException e) {
+			return null;
+		}
+		return set;
+	}
+
+	public HashMap<String,String> readLocalTableNames(String[] urls) {
+		HashMap<String,String> fileNameToTableNameMap = new HashMap<>();
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
+			for (Path p : paths) {
+				String fileName = p.getFileName().toString();
+				if (!fileName.endsWith(".bmt")) continue;
+				TableData td = TableData.read(p);
+				if (td == null) continue;
+				fileNameToTableNameMap.put(fileName, td.getName());
+			}
+		} catch (IOException e) {
+			return null;
+		}
+		HashMap<String,String> urlToTableNameMap = new HashMap<>();
+		for (String url : urls) {
+			urlToTableNameMap.put(url, fileNameToTableNameMap.get(getFileName(url) + ".bmt"));
+		}
+		return urlToTableNameMap;
+	}
 	
 	/**
 	 * 難易度表データをキャッシュする

@@ -153,4 +153,11 @@ public class ShortPCM extends PCM<short[]> {
 //		}
 		return length > 0 ? new ShortPCM(channels, sampleRate, this.start + start, length, this.sample) : null;
 	}
+	
+	public boolean validate() {
+		if(sample.length == 0) {
+			return false;
+		}
+		return true;
+	}
 }

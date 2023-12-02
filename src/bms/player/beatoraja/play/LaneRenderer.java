@@ -78,12 +78,12 @@ public class LaneRenderer {
 		generator.dispose();
 
 		this.skin = (PlaySkin) main.getSkin();
-		this.config = main.main.getPlayerResource().getPlayerConfig();
+		this.config = main.resource.getPlayerConfig();
 		this.playconfig = config.getPlayConfig(model.getMode()).getPlayconfig().clone();
 
 		init(model);
 
-		for (CourseData.CourseDataConstraint i : main.main.getPlayerResource().getConstraint()) {
+		for (CourseData.CourseDataConstraint i : main.resource.getConstraint()) {
 			if (i == NO_SPEED) {
 				playconfig.setHispeed(1.0f);
 				playconfig.setLanecover(0);
@@ -254,8 +254,8 @@ public class LaneRenderer {
 			offsetH += offset.h;
 		}
 		
-		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
-				+ config.getJudgetiming();
+		time = (main.timer.isTimerOn(TIMER_PLAY) ? time - main.timer.getTimer(TIMER_PLAY) : 
+			(main.timer.isTimerOn(141) ? time - main.timer.getTimer(141) : 0)) + config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;
 			pos = 0;
@@ -405,7 +405,7 @@ public class LaneRenderer {
 		sprite.setBlend(0);
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		y = orgy;
-		final long now = main.main.getNowTime();
+		final long now = main.timer.getNowTime();
 		
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
@@ -429,7 +429,7 @@ public class LaneRenderer {
 				if (note != null) {
 					//4分のタイミングでノートを拡大する
 					float dstx = lanes[lane].region.x + offsetX;
-					float dsty = (float) y + offsetY;
+					float dsty = (float) y + offsetY - offsetH / 2;
 					float dstw = lanes[lane].region.width + offsetW;
 					float dsth = scale + offsetH;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
@@ -496,7 +496,7 @@ public class LaneRenderer {
 					} else if (note instanceof MineNote) {
 						// draw mine note
 						if (tl.getMicroTime() >= microtime) {
-							sprite.draw(lanes[lane].mineImage, lanes[lane].region.x, (float) y, lanes[lane].region.width, scale);								
+							sprite.draw(lanes[lane].mineImage, dstx, dsty, dstw, dsth);
 						}
 					}
 				}

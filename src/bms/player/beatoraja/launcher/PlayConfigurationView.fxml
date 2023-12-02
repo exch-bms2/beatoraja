@@ -310,6 +310,7 @@
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="1000" max="2000" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
+                                         <CheckBox fx:id="chartpreview"  GridPane.columnIndex="2" GridPane.rowIndex="5" mnemonicParsing="false" text="%CHART_PREVIEW" />
                                      </GridPane>
                                  </VBox>
                            </content>
@@ -456,11 +457,6 @@
          </HBox.margin>
         </Button>
         <Button mnemonicParsing="false" onAction="#loadDiffBMS" prefHeight="25.0" prefWidth="200.0" text="%UPDATE_DATABASE">
-            <HBox.margin>
-                <Insets left="10.0" />
-            </HBox.margin>
-        </Button>
-        <Button mnemonicParsing="false" onAction="#loadTable" prefHeight="25.0" prefWidth="190.0" text="%LOAD_TABLE">
             <HBox.margin>
                 <Insets left="10.0" />
             </HBox.margin>

@@ -90,7 +90,7 @@ public class SkinBPMGraph extends SkinObject {
 	}
 
 	public void draw(SkinObjectRenderer sprite) {
-		final SongData song = state.main.getPlayerResource().getSongdata();
+		final SongData song = state.resource.getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 		
 		if(shapetex == null || song != current || (this.model == null && model != null)) {

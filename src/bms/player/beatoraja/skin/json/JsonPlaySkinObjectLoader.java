@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
@@ -22,8 +21,8 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 	}
 
 	@Override
-	public PlaySkin getSkin(Resolution src, Resolution dst) {
-		return new PlaySkin(src, dst);
+	public PlaySkin getSkin(SkinHeader header) {
+		return new PlaySkin(header);
 	}
 
 	@Override

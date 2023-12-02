@@ -162,8 +162,8 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 5:
-				if (property.judgerank > 10) {
-					property.judgerank -= 10;
+				if (property.judgerank > 1) {
+					property.judgerank--;
 				}
 				break;
 				case 6:
@@ -234,7 +234,7 @@ public class PracticeConfiguration {
 				break;
 			case 5:
 				if (property.judgerank < 400) {
-					property.judgerank += 10;
+					property.judgerank++;
 				}
 				break;
 				case 6:
@@ -286,7 +286,7 @@ public class PracticeConfiguration {
 			sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 242, cursorpos == 11 ? Color.YELLOW : Color.CYAN);
 		}
 
-		if (state.main.getPlayerResource().mediaLoadFinished()) {
+		if (state.resource.mediaLoadFinished()) {
 			sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 276, Color.ORANGE);
 		}
 		

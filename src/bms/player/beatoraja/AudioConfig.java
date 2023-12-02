@@ -26,6 +26,10 @@ public class AudioConfig implements Validatable {
 	 * オーディオ同時発音数
 	 */
 	private int deviceSimultaneousSources = 128;
+	/**
+	 * オーディオサンプリングレート(0:指定なし)
+	 */
+	private int sampleRate = 0;
 
 	/**
 	 * PracticeモードのFREQUENCYオプションに対する音声処理方法
@@ -48,6 +52,16 @@ public class AudioConfig implements Validatable {
 	 * BGノート音のボリューム
 	 */
 	private float bgvolume = 0.5f;
+
+	/**
+	 * リザルト画面のサウンドをループ再生するか
+	 */
+	private boolean isLoopResultSound = false;
+
+	/**
+	 * コースリザルト画面のサウンドをループ再生するか
+	 */
+	private boolean isLoopCourseResultSound = false;
 
 	public DriverType getDriver() {
 		return driver;
@@ -79,6 +93,14 @@ public class AudioConfig implements Validatable {
 
 	public void setDeviceSimultaneousSources(int deviceSimultaneousSources) {
 		this.deviceSimultaneousSources = deviceSimultaneousSources;
+	}
+
+	public int getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(int sampleRate) {
+		this.sampleRate = sampleRate;
 	}
 
 	public FrequencyType getFreqOption() {
@@ -119,6 +141,22 @@ public class AudioConfig implements Validatable {
 
 	public void setBgvolume(float bgvolume) {
 		this.bgvolume = bgvolume;
+	}
+
+	public boolean isLoopResultSound() {
+		return isLoopResultSound;
+	}
+
+	public void setLoopResultSound(boolean loopResultSound) {
+		isLoopResultSound = loopResultSound;
+	}
+
+	public boolean isLoopCourseResultSound() {
+		return isLoopCourseResultSound;
+	}
+
+	public void setLoopCourseResultSound(boolean loopCourseResultSound) {
+		isLoopCourseResultSound = loopCourseResultSound;
 	}
 	
 	public boolean validate() {

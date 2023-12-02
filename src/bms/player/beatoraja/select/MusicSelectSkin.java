@@ -1,6 +1,5 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -23,8 +22,8 @@ public class MusicSelectSkin extends Skin {
 	public SkinText searchText;
 	private Rectangle search;
 
-	public MusicSelectSkin(Resolution src, Resolution dst) {
-		super(src, dst);
+	public MusicSelectSkin(SkinHeader header) {
+		super(header);
 	}
 
 	public int[] getClickableBar() {

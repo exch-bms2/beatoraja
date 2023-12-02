@@ -50,7 +50,7 @@ class KeyInputProccessor {
 
 	public void input() {
 		final MainController main = player.main;
-		final long now = main.getNowTime();
+		final long now = player.timer.getNowTime();
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		final long[] auto_presstime = player.getJudgeManager().getAutoPresstime();
 
@@ -75,16 +75,16 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if(!isJudgeStarted || main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY) {
-					if (!main.isTimerOn(timerOn) || scratch) {
-						main.setTimerOn(timerOn);
-						main.setTimerOff(timerOff);
+				if(!isJudgeStarted || player.resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY) {
+					if (!player.timer.isTimerOn(timerOn) || scratch) {
+						player.timer.setTimerOn(timerOn);
+						player.timer.setTimerOff(timerOff);
 					}
 				}
 			} else {
-				if (main.isTimerOn(timerOn)) {
-					main.setTimerOn(timerOff);
-					main.setTimerOff(timerOn);
+				if (player.timer.isTimerOn(timerOn)) {
+					player.timer.setTimerOn(timerOff);
+					player.timer.setTimerOff(timerOn);
 				}
 			}
 		}
@@ -110,14 +110,13 @@ class KeyInputProccessor {
 
 	// キービームフラグON 判定同期用
 	public void inputKeyOn(int lane) {
-		final MainController main = player.main;
 		final int offset = laneProperty.getLaneSkinOffset()[lane];
 		if(!keyBeamStop) {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
-			if (!main.isTimerOn(timerOn) || laneProperty.getLaneScratchAssign()[lane] != -1) {
-				main.setTimerOn(timerOn);
-				main.setTimerOff(timerOff);
+			if (!player.timer.isTimerOn(timerOn) || laneProperty.getLaneScratchAssign()[lane] != -1) {
+				player.timer.setTimerOn(timerOn);
+				player.timer.setTimerOff(timerOff);
 			}
 		}
 	}
@@ -163,13 +162,13 @@ class KeyInputProccessor {
 			long frametime = 1;
 			final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 			final JudgeManager judge = player.getJudgeManager();
-			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
+			final long lasttime = timelines[timelines.length - 1].getMicroTime() + BMSPlayer.TIME_MARGIN * 1000;
 
 			long prevtime = -1;
 			while (!stop) {
-				final long time = player.main.getNowTime(TIMER_PLAY);
-				final long mtime = player.main.getNowMicroTime(TIMER_PLAY);
-				if (time != prevtime) {
+//				final long time = player.main.getNowTime(TIMER_PLAY);
+				final long mtime = player.timer.getNowMicroTime(TIMER_PLAY);
+				if (mtime != prevtime) {
 					// リプレイデータ再生
 					if (keylog != null) {
 						while (index < keylog.length && keylog[index].getTime() + microMarginTime <= mtime) {
@@ -188,11 +187,11 @@ class KeyInputProccessor {
 					judge.update(mtime);
 
 					if (prevtime != -1) {
-						final long nowtime = time - prevtime;
+						final long nowtime = mtime - prevtime;
 						frametime = nowtime < frametime ? frametime : nowtime;
 					}
 
-					prevtime = time;
+					prevtime = mtime;
 				} else {
 					try {
 						sleep(0, 500000);
@@ -200,7 +199,7 @@ class KeyInputProccessor {
 					}
 				}
 
-				if (time >= lasttime) {
+				if (mtime >= lasttime) {
 					break;
 				}
 			}

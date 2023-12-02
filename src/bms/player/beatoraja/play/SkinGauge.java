@@ -101,7 +101,7 @@ public class SkinGauge extends SkinObject {
 		if(state instanceof BMSPlayer) {
 			gauge = ((BMSPlayer) state).getGauge();
 		} else if(state instanceof AbstractResult) {
-			gauge = ((AbstractResult) state).main.getPlayerResource().getGrooveGauge();
+			gauge = state.resource.getGrooveGauge();
 		}
 		if (gauge == null) {
 			draw = false;
@@ -134,8 +134,8 @@ public class SkinGauge extends SkinObject {
 
 		// TODO 9key固有実装の汎用化
 		if(!isCheckedSevenToNine) {
-			if(state.main.getPlayerResource().getOriginalMode() == Mode.BEAT_7K 
-					&& state.main.getPlayerResource().getBMSModel().getMode() == Mode.POPN_9K) {
+			if(state.resource.getOriginalMode() == Mode.BEAT_7K 
+					&& state.resource.getBMSModel().getMode() == Mode.POPN_9K) {
 				//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
 				int setParts = parts;
 				for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
@@ -158,7 +158,7 @@ public class SkinGauge extends SkinObject {
 		border = gauge.getGauge(type).getProperty().border;
 		
 		if(state instanceof AbstractResult) {
-			PlayerResource resource = ((AbstractResult) state).main.getPlayerResource();
+			PlayerResource resource = state.resource;
 			FloatArray gaugeTransition;
 			if(state instanceof MusicResult) {
 				gaugeTransition = resource.getGauge()[type];

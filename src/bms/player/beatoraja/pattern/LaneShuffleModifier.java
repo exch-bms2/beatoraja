@@ -288,4 +288,37 @@ public class LaneShuffleModifier extends PatternModifier {
 		return log;
 	}
 
+	public boolean isToDisplay() {
+		switch (type) {
+			case RANDOM:
+			case R_RANDOM:
+			case CROSS:
+			case RANDOM_EX:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public int[] getRandomPattern(Mode mode) {
+		int targetSide = getModifyTarget();
+		int keys = mode.key / mode.player;
+		int[] repr = new int[keys];
+		switch (type) {
+			case RANDOM:
+			case R_RANDOM:
+			case CROSS:
+			case RANDOM_EX:
+				if (mode.scratchKey.length > 0 && type != Random.RANDOM_EX) { // BEAT-*K
+					System.arraycopy(random, keys * targetSide, repr, 0, keys - 1);
+					repr[keys - 1] = mode.scratchKey[targetSide];
+				} else {
+					System.arraycopy(random, keys * targetSide, repr, 0, keys);
+				}
+				break;
+			default:
+				break;
+		}
+		return repr;
+	}
 }

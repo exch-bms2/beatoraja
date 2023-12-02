@@ -84,7 +84,7 @@ public class SkinTimingVisualizer extends SkinObject {
 			return;
 		}
 		super.prepare(time, state);
-		final PlayerResource resource = state.main.getPlayerResource();
+		final PlayerResource resource = state.resource;
 		if(resource.getBMSModel() != model) {
 			model = resource.getBMSModel();
 			judgeArea = getJudgeArea(resource);			

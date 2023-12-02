@@ -53,6 +53,10 @@ public class PlayDataAccessor {
 	 * スコアログアクセサ
 	 */
 	private ScoreLogDatabaseAccessor scorelogdb;
+	/**
+	 * スコアデータログアクセサ
+	 */
+	private ScoreDataLogDatabaseAccessor scoredatalogdb;
 
 
 	private static final String[] replay = { "", "C", "H" };
@@ -66,6 +70,7 @@ public class PlayDataAccessor {
 			scoredb = new ScoreDatabaseAccessor(playerpath + File.separatorChar + player + File.separatorChar + "score.db");
 			scoredb.createTable();
 			scorelogdb = new ScoreLogDatabaseAccessor(playerpath + File.separatorChar + player + File.separatorChar + "scorelog.db");
+			scoredatalogdb = new ScoreDataLogDatabaseAccessor(playerpath + File.separatorChar + player + File.separatorChar + "scoredatalog.db");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -187,7 +192,7 @@ public class PlayDataAccessor {
 	 * @param updateScore
 	 *            プレイ回数のみ反映する場合はfalse
 	 */
-	public void writeScoreDara(ScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
+	public void writeScoreData(ScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
 		String hash = model.getSHA256();
 		if (newscore == null) {
 			return;
@@ -216,19 +221,21 @@ public class PlayDataAccessor {
 				l.add(trophy);
 			}
 		}
+
+		Set<SongTrophy> newTrophies = new HashSet<SongTrophy>();
 		// クリアトロフィー
 		int clear = newscore.getClear();
 		if(newscore.getGauge() != -1) {			
 			if(clear >= Hard.id){
 				if(clear == ExHard.id) {
-					l.add(SongTrophy.EXHARD);
+					newTrophies.add(SongTrophy.EXHARD);
 				}
-				l.add(SongTrophy.HARD);
+				newTrophies.add(SongTrophy.HARD);
 			} else {
 				if(clear >= Normal.id) {
-					l.add(SongTrophy.GROOVE);
+					newTrophies.add(SongTrophy.GROOVE);
 				}
-				l.add(SongTrophy.EASY);
+				newTrophies.add(SongTrophy.EASY);
 			}
 		}
 			
@@ -239,8 +246,11 @@ public class PlayDataAccessor {
 				,SongTrophy.EX_S_RANDOM};
 			
 		if(clear >= Easy.id) {
-			l.add(optionTrophy[Math.max(newscore.getOption() % 10, (newscore.getOption() / 10) % 10)]);
+			newTrophies.add(optionTrophy[Math.max(newscore.getOption() % 10, (newscore.getOption() / 10) % 10)]);
 		}
+
+		// newscore のトロフィーをマージ
+		l.addAll(newTrophies);
 		
 		StringBuilder sb = new StringBuilder();
 		for(SongTrophy trophy : l) {
@@ -256,6 +266,21 @@ public class PlayDataAccessor {
 			log.setMode(score.getMode());
 			log.setDate(score.getDate());
 			scorelogdb.setScoreLog(log);
+		}
+
+		if (scoredatalogdb != null) {
+			StringBuilder newScoresb = new StringBuilder();
+			for(SongTrophy trophy : newTrophies) {
+				newScoresb.append(trophy.character);
+			}
+			newscore.setTrophy(newScoresb.toString());
+			newscore.setMode(score.getMode());
+			newscore.setDate(score.getDate());
+			newscore.setPlaycount(score.getPlaycount());
+			newscore.setClearcount(score.getClearcount());
+			newscore.setScorehash(getScoreHash(newscore));
+
+			scoredatalogdb.setScoreDataLog(newscore);
 		}
 
 		// 楽曲のプレイ時間算出(秒)
@@ -329,7 +354,10 @@ public class PlayDataAccessor {
 		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
 
-	public void writeScoreDara(ScoreData newscore, BMSModel[] models, int lnmode, int option,
+	/**
+	 * コーススコアデータを書き込む
+	 */
+	public void writeScoreData(ScoreData newscore, BMSModel[] models, int lnmode, int option,
 			CourseData.CourseDataConstraint[] constraint, boolean updateScore) {
 		String hash = "";
 		int totalnotes = 0;

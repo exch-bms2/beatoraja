@@ -135,6 +135,27 @@ public class MainStateAccessor {
 				return LuaInteger.ZERO;
 			}
 		});
+		table.set("audio_play", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue path) {
+				state.main.getAudioProcessor().play(path.tojstring(), state.main.getConfig().getAudioConfig().getSystemvolume(), false);
+				return LuaBoolean.TRUE;
+			}
+		});
+		table.set("audio_loop", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue path) {
+				state.main.getAudioProcessor().play(path.tojstring(), state.main.getConfig().getAudioConfig().getSystemvolume(), true);
+				return LuaBoolean.TRUE;
+			}
+		});
+		table.set("audio_stop", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue path) {
+				state.main.getAudioProcessor().stop(path.tojstring());
+				return LuaBoolean.TRUE;
+			}
+		});
 	}
 
 	/**
@@ -210,7 +231,7 @@ public class MainStateAccessor {
 	private class timer extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue value) {
-			return LuaNumber.valueOf(state.main.getMicroTimer(value.toint()));
+			return LuaNumber.valueOf(state.timer.getMicroTimer(value.toint()));
 		}
 	}
 
@@ -226,7 +247,7 @@ public class MainStateAccessor {
 	private class time extends ZeroArgFunction {
 		@Override
 		public LuaValue call() {
-			return LuaNumber.valueOf(state.main.getNowMicroTime());
+			return LuaNumber.valueOf(state.timer.getNowMicroTime());
 		}
 	}
 
@@ -241,7 +262,7 @@ public class MainStateAccessor {
 			int id = timerId.toint();
 			if (!SkinPropertyMapper.isTimerWritableBySkin(id))
 				throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
-			state.main.setMicroTimer(id, timerValue.tolong());
+			state.timer.setMicroTimer(id, timerValue.tolong());
 			return LuaBoolean.TRUE;
 		}
 	}

@@ -245,6 +245,9 @@ public class SkinProperty {
 	public static final int STRING_TABLE_FULL = 1003;
 	public static final int STRING_VERSION = 1010;
 	public static final int STRING_IR_NAME = 1020;
+	public static final int STRING_IR_USER_NAME = 1021;
+	public static final int STRING_SONG_HASH_MD5 = 1030;
+	public static final int STRING_SONG_HASH_SHA256 = 1031;
 
 	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_HISPEED = 310;
@@ -504,6 +507,25 @@ public class SkinProperty {
 	public static final int NUMBER_RANKING1_CLEAR = 390;
 	public static final int NUMBER_RANKING10_CLEAR = 399;
 
+	public static final int NUMBER_RANDOM_1P_1KEY = 450;
+	public static final int NUMBER_RANDOM_1P_2KEY = 451;
+	public static final int NUMBER_RANDOM_1P_3KEY = 452;
+	public static final int NUMBER_RANDOM_1P_4KEY = 453;
+	public static final int NUMBER_RANDOM_1P_5KEY = 454;
+	public static final int NUMBER_RANDOM_1P_6KEY = 455;
+	public static final int NUMBER_RANDOM_1P_7KEY = 456;
+	public static final int NUMBER_RANDOM_1P_8KEY = 457;
+	public static final int NUMBER_RANDOM_1P_9KEY = 458;
+	public static final int NUMBER_RANDOM_1P_SCR = 459;
+	public static final int NUMBER_RANDOM_2P_1KEY = 460;
+	public static final int NUMBER_RANDOM_2P_2KEY = 461;
+	public static final int NUMBER_RANDOM_2P_3KEY = 462;
+	public static final int NUMBER_RANDOM_2P_4KEY = 463;
+	public static final int NUMBER_RANDOM_2P_5KEY = 464;
+	public static final int NUMBER_RANDOM_2P_6KEY = 465;
+	public static final int NUMBER_RANDOM_2P_7KEY = 466;
+	public static final int NUMBER_RANDOM_2P_SCR = 469;
+
 	
 	public static final int VALUE_JUDGE_1P_DURATION = 525;
 	public static final int VALUE_JUDGE_2P_DURATION = 526;
@@ -529,6 +551,7 @@ public class SkinProperty {
 	public static final int OPTION_GRADEBAR_CN = 1016;
 	public static final int OPTION_GRADEBAR_HCN = 1017;
 	public static final int OPTION_RANDOMSELECTBAR = 1030;
+	public static final int OPTION_RANDOMCOURSEBAR = 1031;
 
 	public static final int OPTION_PLAYABLEBAR = 5;
 

@@ -325,6 +325,10 @@ public class BMSPlayerInputProcessor {
 	public boolean isControlKeyPressed(ControlKeys key) {
 		return kbinput.isKeyPressed(key.keycode);
 	}
+
+	public boolean isControlKeyPressed(ControlKeys key, int heldModifiers, int... notHeldModifiers) {
+		return kbinput.isKeyPressed(key.keycode, heldModifiers, notHeldModifiers);
+	}
 	
 	protected void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
 		if (!enable) {
@@ -392,13 +396,20 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public boolean isActivated(KeyCommand key) {
+		final int MASK_CTRL = KeyBoardInputProcesseor.MASK_CTRL;
+		final int MASK_CTRL_SHIFT = KeyBoardInputProcesseor.MASK_CTRL|KeyBoardInputProcesseor.MASK_SHIFT;
+
 		switch(key) {
 		case SHOW_FPS:
 			return isControlKeyPressed(ControlKeys.F1);
 		case UPDATE_FOLDER:
 			return isControlKeyPressed(ControlKeys.F2);
 		case OPEN_EXPLORER:
-			return isControlKeyPressed(ControlKeys.F3);
+			return isControlKeyPressed(ControlKeys.F3, 0, MASK_CTRL, MASK_CTRL_SHIFT);
+		case COPY_SONG_MD5_HASH:
+			return isControlKeyPressed(ControlKeys.F3, MASK_CTRL, MASK_CTRL_SHIFT);
+		case COPY_SONG_SHA256_HASH:
+			return isControlKeyPressed(ControlKeys.F3, MASK_CTRL_SHIFT);
 		case SWITCH_SCREEN_MODE:
 			return isControlKeyPressed(ControlKeys.F4);
 		case SAVE_SCREENSHOT:

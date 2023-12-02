@@ -57,7 +57,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	private final AudioCache cache;
 	
-	int sampleRate;
+	private int sampleRate;
 	int channels;
 
 	public AbstractAudioDriver(int maxgen) {
@@ -207,6 +207,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		return false;
 	}
 
+	public int getSampleRate() {
+		return sampleRate;
+	}
+	
+	protected void setSampleRate(int sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+	
 	public void stop(String p) {
 		if (p == null || p.length() == 0) {
 			return;

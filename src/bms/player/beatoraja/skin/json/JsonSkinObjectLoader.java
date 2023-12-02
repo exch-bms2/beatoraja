@@ -1,6 +1,5 @@
 package bms.player.beatoraja.skin.json;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
 import bms.player.beatoraja.select.MusicSelectSkin;
@@ -34,7 +33,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		this.loader = loader;
 	}
 	
-	public abstract S getSkin(Resolution src, Resolution dst);
+	public abstract S getSkin(SkinHeader header);
 	
 	public SkinObject loadSkinObject(S skin, JsonSkin.Skin sk, JsonSkin.Destination dst, Path p) {
 		SkinObject obj = null;

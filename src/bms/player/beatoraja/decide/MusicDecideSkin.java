@@ -1,6 +1,5 @@
 package bms.player.beatoraja.decide;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.*;
 
 /**
@@ -10,7 +9,7 @@ import bms.player.beatoraja.skin.*;
  */
 public class MusicDecideSkin extends Skin {
 
-    public MusicDecideSkin(Resolution src, Resolution dst) {
-        super(src, dst);
+    public MusicDecideSkin(SkinHeader header) {
+        super(header);
     }
 }

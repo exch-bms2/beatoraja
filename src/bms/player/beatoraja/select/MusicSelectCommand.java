@@ -1,6 +1,6 @@
 package bms.player.beatoraja.select;
 
-import static bms.player.beatoraja.select.MusicSelector.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -13,13 +13,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+
 import com.badlogic.gdx.utils.Queue;
+import com.badlogic.gdx.graphics.Color;
 
 public enum MusicSelectCommand {
 
@@ -48,7 +50,7 @@ public enum MusicSelectCommand {
                     final int selectedreplay = selector.getSelectedReplay();
                     if (replays[(i + selectedreplay) % replays.length]) {
                         selector.setSelectedReplay((i + selectedreplay) % replays.length);
-                        selector.play(SOUND_OPTIONCHANGE);
+                        selector.play(OPTION_CHANGE);
                         break;
                     }
                 }
@@ -65,7 +67,7 @@ public enum MusicSelectCommand {
                     final int selectedreplay = selector.getSelectedReplay();
                     if (replays[(selectedreplay + replays.length - i) % replays.length]) {
                         selector.setSelectedReplay((selectedreplay + replays.length - i) % replays.length);
-                        selector.play(SOUND_OPTIONCHANGE);
+                        selector.play(OPTION_CHANGE);
                         break;
                     }
                 }
@@ -113,6 +115,48 @@ public enum MusicSelectCommand {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    },
+    /**
+     * 譜面のMD5ハッシュをクリップボードにコピーする
+     */
+    COPY_MD5_HASH {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            if (current instanceof SongBar) {
+                final SongData song = ((SongBar) current).getSongData();
+                if (song != null) {
+                    String hash = song.getMd5();
+                    if (hash != null && hash.length() > 0) {
+                        StringSelection stringSelection = new StringSelection(hash);
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        clipboard.setContents(stringSelection, null);
+                        selector.main.getMessageRenderer().addMessage("MD5 hash copied : " + hash, 2000, Color.GOLD, 0);
+                    }
+                }
+            }
+        }
+    },
+    /**
+     * 譜面のMD5ハッシュをクリップボードにコピーする
+     */
+    COPY_SHA256_HASH {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            if (current instanceof SongBar) {
+                final SongData song = ((SongBar) current).getSongData();
+                if (song != null) {
+                    String hash = song.getSha256();
+                    if (hash != null && hash.length() > 0) {
+                        StringSelection stringSelection = new StringSelection(hash);
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        clipboard.setContents(stringSelection, null);
+                        selector.main.getMessageRenderer().addMessage("SHA256 hash copied : " + hash, 2000, Color.GOLD, 0);
+                    }
+                }
             }
         }
     },
@@ -206,14 +250,14 @@ public enum MusicSelectCommand {
                     (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
                 SongData sd = ((SongBar) current).getSongData();
                 bar.updateBar(new SameFolderBar(selector, sd.getFullTitle(), sd.getFolder()));
-                selector.play(SOUND_FOLDEROPEN);
+                selector.play(FOLDER_OPEN);
             } else if (current instanceof GradeBar) {
                 List<Bar> songbars = Arrays.asList(((GradeBar) current).getSongDatas()).stream()
                         .distinct()
                         .map(SongBar::new)
                         .collect(Collectors.toList());
                 bar.updateBar(new ContainerBar(current.getTitle(), songbars.toArray(new Bar[songbars.size()])));
-                selector.play(SOUND_FOLDEROPEN);
+                selector.play(FOLDER_OPEN);
             }
         }    	
     }

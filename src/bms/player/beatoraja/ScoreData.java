@@ -81,6 +81,10 @@ public class ScoreData implements Validatable {
 	private int passnotes = 0;
 	
 	private int minbp = Integer.MAX_VALUE;
+	
+	private long avgjudge = Long.MAX_VALUE;
+	
+	private long totalDuration = 0;
 	/**
 	 * 各譜面オプションのクリア履歴
 	 */
@@ -126,6 +130,8 @@ public class ScoreData implements Validatable {
 	
 	private BMSPlayerRule rule;
 	
+	private String skin;
+
 	public ScoreData() {
 		this(Mode.BEAT_7K);
 	}
@@ -333,6 +339,24 @@ public class ScoreData implements Validatable {
 	public void setMinbp(int minbp) {
 		this.minbp = minbp;
 	}
+	
+
+	public long getAvgjudge() {
+		return avgjudge;
+	}
+
+	public void setAvgjudge(long avgjudge) {
+		this.avgjudge = avgjudge;
+	}
+
+	public long getTotalDuration() {
+		return totalDuration;
+	}
+
+	public void setTotalDuration(long ttoalDuration) {
+		this.totalDuration = ttoalDuration;
+	}
+
 	public String getTrophy() {
 		return trophy;
 	}
@@ -431,6 +455,14 @@ public class ScoreData implements Validatable {
 		this.rule = rule;
 	}
 
+	public String getSkin() {
+		return skin;
+	}
+
+	public void setSkin(String skin) {
+		this.skin = skin;
+	}
+
 	public String getGhost() {
 		return ghost;
 	}
@@ -522,6 +554,12 @@ public class ScoreData implements Validatable {
 			setGhost(newscore.getGhost());
 			update = true;
 		}
+		if (getAvgjudge() > newscore.getAvgjudge() && updateScore) {
+			setAvgjudge(newscore.getAvgjudge());
+			setOption(newscore.getOption());
+			setSeed(newscore.getSeed());
+			update = true;
+		}
 		if (getMinbp() > newscore.getMinbp() && updateScore) {
 			setMinbp(newscore.getMinbp());
 			setOption(newscore.getOption());
@@ -543,7 +581,7 @@ public class ScoreData implements Validatable {
 				epg >= 0 && lpg >= 0 && egr >= 0 && lgr >= 0 && egd >= 0 && lgd >= 0 &&
 				ebd >= 0 && lbd >= 0 && epr >= 0 && lpr >= 0 && ems >= 0 && lms >= 0 &&
 				clearcount >= 0 && playcount >= clearcount && maxcombo >= 0 && notes > 0 && passnotes >= 0 && passnotes <= notes &&minbp >= 0 &&
-				random >= 0 && option >= 0 && assist >= 0 && gauge >= 0;
+				avgjudge >= 0 && random >= 0 && option >= 0 && assist >= 0 && gauge >= 0;
 	}
 
 	public int getPassnotes() {
@@ -613,6 +651,7 @@ public class ScoreData implements Validatable {
 		sb.append("\"Notes\": ").append(getNotes()).append(", ");
 		sb.append("\"Clearcount\": ").append(getClearcount()).append(", ");
 		sb.append("\"Minbp\": ").append(getMinbp()).append(", ");
+		sb.append("\"Avgjudge\": ").append(getAvgjudge()).append(", ");
 		sb.append("\"Trophy\": \"").append(getTrophy()).append("\", ");
 		sb.append("\"Option\": ").append(getOption()).append(", ");
 		sb.append("\"State\": ").append(getState()).append(", ");

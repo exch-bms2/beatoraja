@@ -156,4 +156,11 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 //		}
 		return length > 0 ? new ShortDirectPCM(channels, sampleRate, this.start + start, length, this.sample) : null;
 	}
+	
+	public boolean validate() {
+		if(sample.limit() == 0) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -38,9 +38,9 @@ public abstract class AbstractResult extends MainState {
 	 */
 	protected int rankingOffset = 0;
 	/**
-	 * 全ノーツの平均ズレ
+	 * 全ノーツの平均ズレ(us)
 	 */
-	protected float avgduration;
+	protected long avgduration;
 	/**
 	 * タイミング分布
 	 */
@@ -55,10 +55,6 @@ public abstract class AbstractResult extends MainState {
 	 */
 	protected ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
 	protected static final int REPLAY_SIZE = 4;
-	
-	public static final int SOUND_CLEAR = 0;
-	public static final int SOUND_FAIL = 1;
-	public static final int SOUND_CLOSE = 2;
 	
 	protected int gaugeType;
 
@@ -234,7 +230,7 @@ public abstract class AbstractResult extends MainState {
 		return ranking != null ? ranking.getTotalPlayer() : 0;
 	}
 	
-	public float getAverageDuration() {
+	public long getAverageDuration() {
 		return avgduration;
 	}
 	

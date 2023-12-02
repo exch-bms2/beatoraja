@@ -91,6 +91,19 @@ public class CourseEditorView implements Initializable {
 
 		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
+		searchSongs.setOnMouseClicked((click) -> {
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
+			if (click.getClickCount() == 2 && !isHeader) {
+				TableEditorView.displayChartDetailsDialog(songdb, searchSongs.getSelectionModel().getSelectedItem());
+			}
+		});
+		courseSongs.setOnMouseClicked((click) -> {
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
+			if (click.getClickCount() == 2 && !isHeader) {
+				TableEditorView.displayChartDetailsDialog(songdb, courseSongs.getSelectionModel().getSelectedItem());
+			}
+		});
+
 		updateCourse(null);
 	}
 	
@@ -102,7 +115,9 @@ public class CourseEditorView implements Initializable {
 		if(songdb == null) {
 			return;
 		}
-		if(search.getText().length() > 1) {
+		if(TableEditorView.isMd5OrSha256Hash(search.getText())) {
+			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));			
+		} else if(search.getText().length() > 1) {
 			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
 		}
 	}

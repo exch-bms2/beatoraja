@@ -16,6 +16,10 @@ import com.badlogic.gdx.Input.Keys;
  */
 public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements InputProcessor {
 
+	public static final int MASK_SHIFT = 1 << 0;
+	public static final int MASK_CTRL = 1 << 1;
+	public static final int MASK_ALT = 1 << 2;
+
 	private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
 			Keys.BACKSLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
@@ -45,7 +49,11 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 */
 	private final long[] keytime = new long[256];
 	/**
-	 * キーの最少入力感覚
+	 * 各キーが最後に押されたときで押されてる修飾キー
+	 */
+	private final int[] keymodifiers = new int[256];
+	/**
+	 * キーの最少入力間隔(ms)
 	 */
 	private int duration;
 
@@ -89,16 +97,15 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void poll(final long microtime) {
-		final long presstime = microtime / 1000;
 		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
 				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
-				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
+				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
-					keytime[keys[i]] = presstime;
+					keytime[keys[i]] = microtime;
 					this.bmsPlayerInputProcessor.keyChanged(this, microtime, i, pressed);
 					this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
 				}
@@ -120,12 +127,21 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
 			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
 				keystate[key.keycode] = pressed;
-				keytime[key.keycode] = presstime;
+				keytime[key.keycode] = microtime;
+				keymodifiers[key.keycode] = pressed ? currentlyHeldModifiers() : 0;
 			}
 		}
 		
 		mouseScratchInput.poll(microtime);
 	}
+
+	private int currentlyHeldModifiers() {
+		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
+		boolean ctrl = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
+		boolean alt = Gdx.input.isKeyPressed(Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Keys.ALT_RIGHT);
+		return (shift ? MASK_SHIFT : 0) | (ctrl ? MASK_CTRL : 0) | (alt ? MASK_ALT : 0);
+	}
+
 
 	public boolean getKeyState(int keycode) {
 		return keystate[keycode];
@@ -137,6 +153,19 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public boolean isKeyPressed(int keycode) {
 		if(keystate[keycode] && keytime[keycode] != Long.MIN_VALUE) {
+			keytime[keycode] = Long.MIN_VALUE;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isKeyPressed(int keycode, int heldModifiers, int... notHeldModifiers) {
+		if(keystate[keycode] && keytime[keycode] != Long.MIN_VALUE) {
+			int modifiers = keymodifiers[keycode];
+			if ((modifiers & heldModifiers) != heldModifiers) return false;
+			for (int i = 0; i < notHeldModifiers.length; i++) {
+				if ((modifiers & notHeldModifiers[i]) == notHeldModifiers[i]) return false;
+			}
 			keytime[keycode] = Long.MIN_VALUE;
 			return true;
 		}

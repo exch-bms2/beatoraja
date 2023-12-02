@@ -51,7 +51,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 */
 	private final boolean[] buttonchanged = new boolean[BMKeys.MAXID];
 	/**
-	 * 各ボタン状態の変更時間(ms)
+	 * 各ボタン状態の変更時間(us)
 	 */
 	private final long[] buttontime = new long[BMKeys.MAXID];
 	/**
@@ -125,16 +125,14 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 	public void poll(final long microtime) {
 		if (!enabled) return;
-		
-		final long presstime = microtime / 1000;
-
+	
 		// AXISの更新
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
 			axis[i] = controller.getAxis(i);
 		}
 
 		for (int button = 0; button < buttonstate.length; button++) {
-			if (presstime >= buttontime[button] + duration) {
+			if (microtime >= buttontime[button] + duration * 1000) {
 				final boolean prev = buttonstate[button];
 				if (button <= BMKeys.BUTTON_32) {
 					buttonstate[button] = controller.getButton(button);
@@ -153,7 +151,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
                 }
 
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
-					buttontime[button] = presstime;
+					buttontime[button] = microtime;
 				}
 
 				if (!prev && buttonstate[button]) {

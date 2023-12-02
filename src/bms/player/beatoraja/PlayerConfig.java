@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -8,7 +9,6 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -17,6 +17,7 @@ import bms.model.Mode;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.badlogic.gdx.utils.SerializationException;
 
 /**
  * プレイヤー毎の設定項目
@@ -24,6 +25,9 @@ import com.badlogic.gdx.utils.JsonWriter;
  * @author exch
  */
 public class PlayerConfig {
+
+	static final Path configpath_old = Paths.get("config.json");
+	static final Path configpath = Paths.get("config_player.json");	
 
 	private String id;
     /**
@@ -48,7 +52,16 @@ public class PlayerConfig {
 	 */
 	private int doubleoption;
 
-	private int target;
+	/**
+	 * スコアターゲット
+	 */
+	private String targetid = "MAX";
+	
+	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
+			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3", "IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10"
+			, "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANK_20", "IR_RANK_30", "IR_RANK_40", "IR_RANK_50"
+			, "IR_RANKRATE_5", "IR_RANKRATE_10", "IR_RANKRATE_15", "IR_RANKRATE_20", "IR_RANKRATE_25", "IR_RANKRATE_30", "IR_RANKRATE_35", "IR_RANKRATE_40", "IR_RANKRATE_45","IR_RANKRATE_50"
+			,"RIVAL_RANK_1","RIVAL_RANK_2","RIVAL_RANK_3","RIVAL_NEXT_1","RIVAL_NEXT_2","RIVAL_NEXT_3"};
 	/**
 	 * 判定タイミング
 	 */
@@ -57,6 +70,9 @@ public class PlayerConfig {
 	public static final int JUDGETIMING_MAX = 500;
 	public static final int JUDGETIMING_MIN = -500;
 	
+	/**
+	 * ディスプレイ表示タイミング自動調整
+	 */
 	private boolean notesDisplayTimingAutoAdjust = false;
 
     /**
@@ -84,7 +100,7 @@ public class PlayerConfig {
     private int longnoteMode = 0;
     private double longnoteRate = 1.0;
 	/**
-	 * アシストオプション:判定拡大
+	 * アシストオプション:カスタムジャッジ
 	 */
 	private boolean customJudge = false;
 	private int keyJudgeWindowRatePerfectGreat = 400;
@@ -131,9 +147,6 @@ public class PlayerConfig {
 	public static final int GAUGEAUTOSHIFT_SELECT_TO_UNDER = 4;
 
 	private int autosavereplay[];
-
-	// TODO Configから移行(0.8.2)。ある程度バージョンが進んだら消す
-	private static Config config;
 
 	/**
 	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
@@ -191,6 +204,11 @@ public class PlayerConfig {
 	private boolean showpastnote = false;
 	
 	/**
+	 * チャートプレビューを使用するかどうか
+	 */
+	private boolean chartPreview = false;
+	
+	/**
 	 * 選択中の選曲時ソート
 	 */
 	private int sort;
@@ -212,6 +230,7 @@ public class PlayerConfig {
 
 	// -- Stream
 	private boolean enableRequest = false;
+	private boolean notifyRequest = false;
 	private int maxRequestCount = 30;
 
 	public PlayerConfig() {
@@ -508,12 +527,20 @@ public class PlayerConfig {
 		this.irconfig = irconfig;
 	}
 
-	public int getTarget() {
-		return target;
+	public String getTargetid() {
+		return targetid;
 	}
 
-	public void setTarget(int target) {
-		this.target = target;
+	public void setTargetid(String targetid) {
+		this.targetid = targetid;
+	}
+
+	public String[] getTargetlist() {
+		return targetlist;
+	}
+
+	public void setTargetlist(String[] targetlist) {
+		this.targetlist = targetlist;
 	}
 
 	public int getMisslayerDuration() {
@@ -639,6 +666,14 @@ public class PlayerConfig {
 		this.isRandomSelect = isRandomSelect;
 	}
 
+	public boolean isChartPreview() {
+		return chartPreview;
+	}
+
+	public void setChartPreview(boolean chartPreview) {
+		this.chartPreview = chartPreview;
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -708,10 +743,18 @@ public class PlayerConfig {
         return enableRequest;
     }
 
+	public boolean getRequestNotify() {
+        return notifyRequest;
+    }
+
     public void setRequestEnable(boolean requestEnable) {
         this.enableRequest = requestEnable;
     }
-    
+
+    public void setRequestNotify(boolean notifyEnable) {
+        this.notifyRequest = notifyEnable;
+    }
+
     public int getMaxRequestCount() {
         return maxRequestCount;
     }
@@ -773,7 +816,8 @@ public class PlayerConfig {
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
-		target = MathUtils.clamp(target, 0, TargetProperty.getAllTargetProperties().length);
+		targetid = targetid!= null ? targetid : "MAX";
+		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
@@ -786,7 +830,7 @@ public class PlayerConfig {
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 		
 		if(autosavereplay == null) {
-			autosavereplay = config.autosavereplay != null ? config.autosavereplay.clone() : new int[4];
+			autosavereplay = new int[4];
 		}
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
@@ -829,7 +873,6 @@ public class PlayerConfig {
 	}
 
 	public static void init(Config config) {
-		PlayerConfig.config = config;
 		// TODO プレイヤーアカウント検証
 		try {
 			if(!Files.exists(Paths.get(config.getPlayerpath()))) {
@@ -857,7 +900,6 @@ public class PlayerConfig {
 				config.setPlayername("player1");
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -893,20 +935,40 @@ public class PlayerConfig {
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
 		PlayerConfig player = new PlayerConfig();
-		try (FileReader reader = new FileReader(Paths.get(playerpath + "/" + playerid + "/config.json").toFile())) {
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, reader);
-			player.setId(playerid);
-			player.validate();
-		} catch(Throwable e) {
-			e.printStackTrace();
+		final Path path = Paths.get(playerpath + "/" + playerid + "/" + configpath);
+		final Path path_old = Paths.get(playerpath + "/" + playerid + "/" + configpath_old);
+		if (Files.exists(path)) {
+			try (Reader reader = new InputStreamReader(new FileInputStream(path.toFile()), StandardCharsets.UTF_8)) {
+				Json json = new Json();
+				json.setIgnoreUnknownFields(true);
+				player = json.fromJson(PlayerConfig.class, reader);
+			} catch (SerializationException e) {
+				Logger.getGlobal().warning("PlayerConfigの読み込み失敗 - Path : " + path.toString() + " , Log : " + e.getMessage());
+				try {
+					Files.copy(path, Paths.get(playerpath + "/" + playerid + "/config_backup.json"));
+				} catch (IOException e1) {
+//					e1.printStackTrace();
+				}
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}			
+		} else if(Files.exists(path_old)) {
+			try (FileReader reader = new FileReader(path_old.toFile())) {
+				Json json = new Json();
+				json.setIgnoreUnknownFields(true);
+				player = json.fromJson(PlayerConfig.class, reader);
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}
 		}
+		player.setId(playerid);
+		player.validate();
 		return player;
 	}
 
 	public static void write(String playerpath, PlayerConfig player) {
-		try (FileWriter writer = new FileWriter(Paths.get(playerpath + "/" + player.getId() + "/config.json").toFile())) {
+		try (Writer writer = new OutputStreamWriter(
+				new FileOutputStream(Paths.get(playerpath + "/" + player.getId() + "/" + configpath).toFile()), StandardCharsets.UTF_8)) {
 			Json json = new Json();
 			json.setOutputType(JsonWriter.OutputType.json);
 			json.setUsePrototypes(false);
@@ -964,4 +1026,14 @@ public class PlayerConfig {
     public void setLongnoteRate(double longnoteRate) {
         this.longnoteRate = longnoteRate;
     }
+
+    private boolean eventMode = false;
+
+	public boolean isEventMode() {
+		return eventMode;
+	}
+
+	public void setEventMode(boolean eventMode) {
+		this.eventMode = eventMode;
+	}
 }

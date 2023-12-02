@@ -113,7 +113,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	public void prepare(long time, MainState state) {
 		render = time >= delay ? 1.0f : (float) time / delay;
 
-		final PlayerResource resource = state.main.getPlayerResource();
+		final PlayerResource resource = state.resource;
 		int type = resource.getGrooveGauge().getType();
 		if(state instanceof AbstractResult) {
 			type = ((AbstractResult) state).gaugeType;
@@ -168,6 +168,9 @@ public class SkinGaugeGraphObject extends SkinObject {
 
 			shape = new Pixmap((int) region.width, (int) region.height, Pixmap.Format.RGBA8888);
 			Float f1 = null;
+			float lastGauge = -1;
+			int lastX = -1;
+			int lastY = -1;
 
 			for (int i = 0; i < gaugehistory.size; i++) {
 				if (section.contains(i)) {
@@ -182,6 +185,9 @@ public class SkinGaugeGraphObject extends SkinObject {
 					final int x2 = (int) (region.width * i / gaugehistory.size);
 					final int y2 = (int) ((f2 / max) * (region.height - lineWidth));
 					final int yb = (int) ((border / max) * (region.height - lineWidth));
+					lastGauge = f2;
+					lastX = x2;
+					lastY = y2;
 					if (f1 < border) {
 						if (f2 < border) {
 							shape.setColor(graphline[color]);
@@ -210,6 +216,12 @@ public class SkinGaugeGraphObject extends SkinObject {
 				}
 				f1 = f2;
 			}
+
+			if (lastGauge != -1) {
+				shape.setColor(lastGauge < border ? graphline[color] : borderline[color]);
+				shape.fillRectangle(lastX, lastY, (int) (region.width - lastX), lineWidth);
+			}
+
 			shapetex = new TextureRegion(new Texture(shape));
 			shape.dispose();
 		}

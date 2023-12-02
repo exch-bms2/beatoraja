@@ -1,7 +1,5 @@
 package bms.player.beatoraja.config;
 
-import bms.player.beatoraja.Resolution;
-
 import bms.player.beatoraja.skin.*;
 
 public class SkinConfigurationSkin extends Skin {
@@ -11,8 +9,8 @@ public class SkinConfigurationSkin extends Skin {
 	private int customPropertyCount = -1;
 	private int customOffsetStyle = 0;
 
-	public SkinConfigurationSkin(Resolution src, Resolution dst) {
-		super(src, dst);
+	public SkinConfigurationSkin(SkinHeader header) {
+		super(header);
 	}
 
 	public void setSampleBMS(String[] sampleBMS) {

@@ -18,6 +18,12 @@ public class ExecutableBar extends SelectableBar {
 	 */
 	private final static int QueueLength = 1000;
 
+	
+	/**
+	 * bar title
+	 */
+	private String title = "RANDOM SELECT";
+	
 	/**
 	 * source songs
 	 */
@@ -44,8 +50,9 @@ public class ExecutableBar extends SelectableBar {
 	 * @param songs SongData array that is the source of SongData returned according to the conditions.
 	 * @param state MainState pointer.
 	 */
-	public ExecutableBar(SongData[] songs, MainState state) {
+	public ExecutableBar(SongData[] songs, MainState state, String title) {
 		super();
+		this.title = title;
 		this.songs = songs;
 		this.state = state;
 		createIndexQueue();
@@ -89,8 +96,9 @@ public class ExecutableBar extends SelectableBar {
 
 	@Override
 	public String getTitle() {
-		return "RANDOM SELECT";
+		return this.title;
 	}
+
 
 	@Override
 	public String getArtist() {

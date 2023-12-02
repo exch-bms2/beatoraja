@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
@@ -24,8 +23,8 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 	}
 
 	@Override
-	public MusicSelectSkin getSkin(Resolution src, Resolution dst) {
-		return new MusicSelectSkin(src, dst);
+	public MusicSelectSkin getSkin(SkinHeader header) {
+		return new MusicSelectSkin(header);
 	}
 
 	@Override
