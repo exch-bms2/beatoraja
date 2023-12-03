@@ -36,6 +36,7 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
+import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
@@ -311,14 +312,14 @@ public class MainController {
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 		try {
-			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+			generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 			systemfont = generator.generateFont(parameter);
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("System Font１読み込み失敗");
 		}
-		messageRenderer = new MessageRenderer();
+		messageRenderer = new MessageRenderer(config.getMessagefontpath());
 
 		input = new BMSPlayerInputProcessor(config, player);
 		switch(config.getAudioConfig().getDriver()) {

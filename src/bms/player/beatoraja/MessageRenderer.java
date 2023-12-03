@@ -25,9 +25,9 @@ public class MessageRenderer implements Disposable  {
 	private FreeTypeFontGenerator generator;
 	private final Array<Message> messages = new Array<Message>();
 
-	public MessageRenderer() {
+	public MessageRenderer(String fontpath) {
 		try {
-			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));				
+			generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));				
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("Message Font読み込み失敗");
 		}

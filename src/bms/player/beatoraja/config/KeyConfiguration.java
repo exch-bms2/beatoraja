@@ -2,6 +2,9 @@ package bms.player.beatoraja.config;
 
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
+
+import java.util.logging.Logger;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
@@ -12,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
@@ -100,11 +104,17 @@ public class KeyConfiguration extends MainState {
 			this.setSkin(new KeyConfigurationSkin(header));
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = (int) (20 * getSkin().getScaleY());
-		titlefont = generator.generateFont(parameter);
+		try {
+			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+					Gdx.files.internal(main.getConfig().getSystemfontpath()));
+			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+			parameter.size = (int) (20 * getSkin().getScaleY());
+			titlefont = generator.generateFont(parameter);
+			generator.dispose();
+		} catch (GdxRuntimeException e) {
+			Logger.getGlobal().severe("Font読み込み失敗");
+		}
+
 		shape = new ShapeRenderer();
 
 		input = main.getInputProcessor();
@@ -238,29 +248,31 @@ public class KeyConfiguration extends MainState {
 		}
 
 		sprite.begin();
-		titlefont.setColor(Color.CYAN);
-		titlefont.draw(sprite, "<-- " + MODE[mode] + " -->", 80 * scaleX, 650 * scaleY);
-		titlefont.setColor(Color.YELLOW);
-		titlefont.draw(sprite, "Key Board", 180 * scaleX, 620 * scaleY);
-		titlefont.draw(sprite, "Controller1", 330 * scaleX, 620 * scaleY);
-		titlefont.draw(sprite, "MIDI", 630 * scaleX, 620 * scaleY);
-		titlefont.setColor(Color.ORANGE);
-		titlefont.draw(sprite, "Music Select (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
-		titlefont.draw(sprite, SELECTKEY[config.getMusicselectinput()], 780 * scaleX, 590 * scaleY);
-
-		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   ", 750 * scaleX, 500 * scaleY);
-		titlefont.draw(sprite, pc.getController()[0].getName(), 780 * scaleX, 470 * scaleY);
-		if (pc.getController().length > 1) {
+		if(titlefont != null) {
+			titlefont.setColor(Color.CYAN);
+			titlefont.draw(sprite, "<-- " + MODE[mode] + " -->", 80 * scaleX, 650 * scaleY);
 			titlefont.setColor(Color.YELLOW);
-			titlefont.draw(sprite, "Controller2", 480 * scaleX, 620 * scaleY);
+			titlefont.draw(sprite, "Key Board", 180 * scaleX, 620 * scaleY);
+			titlefont.draw(sprite, "Controller1", 330 * scaleX, 620 * scaleY);
+			titlefont.draw(sprite, "MIDI", 630 * scaleX, 620 * scaleY);
 			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   ", 750 * scaleX, 300 * scaleY);
-			titlefont.draw(sprite, pc.getController()[1].getName(), 780 * scaleX, 270 * scaleY);
-		}
+			titlefont.draw(sprite, "Music Select (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
+			titlefont.draw(sprite, SELECTKEY[config.getMusicselectinput()], 780 * scaleX, 590 * scaleY);
 
-		titlefont.draw(sprite, "[7] Restore to Default (Keyboard)", 750 * scaleX, 150 * scaleY);
-		titlefont.draw(sprite, "[8] Restore to Default (Controller)", 750 * scaleX, 120 * scaleY);
-		titlefont.draw(sprite, "[9] Restore to Default (MIDI)", 750 * scaleX, 90 * scaleY);
+			titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   ", 750 * scaleX, 500 * scaleY);
+			titlefont.draw(sprite, pc.getController()[0].getName(), 780 * scaleX, 470 * scaleY);
+			if (pc.getController().length > 1) {
+				titlefont.setColor(Color.YELLOW);
+				titlefont.draw(sprite, "Controller2", 480 * scaleX, 620 * scaleY);
+				titlefont.setColor(Color.ORANGE);
+				titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   ", 750 * scaleX, 300 * scaleY);
+				titlefont.draw(sprite, pc.getController()[1].getName(), 780 * scaleX, 270 * scaleY);
+			}
+
+			titlefont.draw(sprite, "[7] Restore to Default (Keyboard)", 750 * scaleX, 150 * scaleY);
+			titlefont.draw(sprite, "[8] Restore to Default (Controller)", 750 * scaleX, 120 * scaleY);
+			titlefont.draw(sprite, "[9] Restore to Default (MIDI)", 750 * scaleX, 90 * scaleY);			
+		}
 
 		sprite.end();
 		if (cursorpos < scrollpos) {
@@ -279,21 +291,23 @@ public class KeyConfiguration extends MainState {
 				shape.end();
 			}
 			sprite.begin();
-			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ? 
-				Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getControllerKeyAssign(0, keysa[i]) != -1
-					? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, keysa[i])) : "----",
-					352 * scaleX, (y + 22) * scaleY);
-			if (pc.getController().length > 1) {
-				titlefont.draw(sprite, getControllerKeyAssign(1, keysa[i]) != -1 ?
-						BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(1, keysa[i])) : "----", 502 * scaleX,
-						(y + 22) * scaleY);
+			if(titlefont != null) {
+				titlefont.setColor(Color.WHITE);
+				titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
+				titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ? 
+					Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
+				titlefont.draw(sprite, getControllerKeyAssign(0, keysa[i]) != -1
+						? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, keysa[i])) : "----",
+						352 * scaleX, (y + 22) * scaleY);
+				if (pc.getController().length > 1) {
+					titlefont.draw(sprite, getControllerKeyAssign(1, keysa[i]) != -1 ?
+							BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(1, keysa[i])) : "----", 502 * scaleX,
+							(y + 22) * scaleY);
+				}
+				titlefont.draw(sprite,
+						getMidiKeyAssign(keysa[i]) != null ? getMidiKeyAssign(keysa[i]).toString() : "----",
+						652 * scaleX, (y + 22) * scaleY);				
 			}
-			titlefont.draw(sprite,
-					getMidiKeyAssign(keysa[i]) != null ? getMidiKeyAssign(keysa[i]).toString() : "----",
-					652 * scaleX, (y + 22) * scaleY);
 			sprite.end();
 		}
 	}
