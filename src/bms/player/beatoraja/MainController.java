@@ -167,11 +167,21 @@ public class MainController {
 			if(ir != null) {
 				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
 				} else {
-					IRResponse<IRPlayerData> response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
-					if(response.isSucceeded()) {
-						irarray.add(new IRStatus(irconfig, ir, response.getData()));
-					} else {
-						Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+					try {
+						IRResponse<IRPlayerData> response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
+						if(response.isSucceeded()) {
+							irarray.add(new IRStatus(irconfig, ir, response.getData()));
+						} else {
+							Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+						}
+					} catch (IllegalArgumentException e) {
+						Logger.getGlobal().info("trying pre-0.8.6 IR login method");
+						IRResponse<IRPlayerData> response = ir.login(irconfig.getUserid(), irconfig.getPassword());
+						if(response.isSucceeded()) {
+							irarray.add(new IRStatus(irconfig, ir, response.getData()));
+						} else {
+							Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+						}
 					}
 				}
 			}
