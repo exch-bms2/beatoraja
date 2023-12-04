@@ -121,7 +121,6 @@ public class MainLoader extends Application {
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;
 			cfg.height = config.getResolution().height;
-			cfg.resizable = false;
 
 			// fullscreen
 			switch (config.getDisplaymode()) {
