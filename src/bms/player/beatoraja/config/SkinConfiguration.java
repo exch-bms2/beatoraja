@@ -7,6 +7,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
@@ -54,8 +55,7 @@ public class SkinConfiguration extends MainState {
 
 	public void render() {
 
-		if (main.getInputProcessor().isExitPressed()) {
-			main.getInputProcessor().setExitPressed(false);
+		if (main.getInputProcessor().isControlKeyPressed(ControlKeys.ESCAPE)) {
 			main.saveConfig();
 			main.changeState(MainStateType.MUSICSELECT);
 		}

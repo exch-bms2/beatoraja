@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
-<?import bms.player.beatoraja.launcher.EditableListView?>
+<?import bms.player.beatoraja.launcher.EditableTableView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
@@ -30,13 +30,13 @@
 				<Insets left="10.0" />
 			</HBox.margin>
 		</Label>
-		<EditableListView fx:id="bmsroot"
+		<ListView fx:id="bmsroot"
 			onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver"
 			prefHeight="100.0" prefWidth="500.0" HBox.hgrow="ALWAYS">
 			<HBox.margin>
 				<Insets top="10.0" />
 			</HBox.margin>
-		</EditableListView>
+		</ListView>
 		<VBox prefHeight="162.0" prefWidth="100.0">
 			<Button mnemonicParsing="false" onAction="#addSongPath"
 				prefHeight="31.0" prefWidth="80.0" text="%+">
@@ -74,12 +74,12 @@
 				</Button>
 			</HBox>
 			<HBox VBox.vgrow="ALWAYS">
-				<EditableListView fx:id="tableurl" prefHeight="167.0"
+				<EditableTableView fx:id="tableurl" prefHeight="167.0"
 					prefWidth="500.0" HBox.hgrow="ALWAYS">
 					<HBox.margin>
 						<Insets top="5.0" />
 					</HBox.margin>
-				</EditableListView>
+				</EditableTableView>
 				<VBox prefHeight="185.0" prefWidth="100.0">
 					<Button mnemonicParsing="false" onAction="#removeTableURL"
 						prefHeight="31.0" prefWidth="80.0" text="%-">
@@ -100,6 +100,28 @@
 						</VBox.margin>
 					</Button>
 				</VBox>
+			</HBox>
+			<HBox>
+			    <Button mnemonicParsing="false" onAction="#refreshLocalTableInfo" prefHeight="25.0" prefWidth="190.0" text="%TABLES_CHECK_STATUS">
+			        <HBox.margin>
+			            <Insets right="10.0" />
+			        </HBox.margin>
+			    </Button>
+			    <Button mnemonicParsing="false" onAction="#loadNewTables" prefHeight="25.0" prefWidth="190.0" text="%TABLES_LOAD_NEW">
+			        <HBox.margin>
+			            <Insets right="10.0" />
+			        </HBox.margin>
+			    </Button>
+			    <Button mnemonicParsing="false" onAction="#loadSelectedTables" prefHeight="25.0" prefWidth="190.0" text="%TABLES_LOAD_SELECTED">
+			        <HBox.margin>
+			            <Insets right="10.0" />
+			        </HBox.margin>
+			    </Button>
+			    <Button mnemonicParsing="false" onAction="#loadAllTables" prefHeight="25.0" prefWidth="190.0" text="%TABLES_LOAD_ALL">
+			        <HBox.margin>
+			            <Insets right="10.0" />
+			        </HBox.margin>
+			    </Button>
 			</HBox>
 		</VBox>
 	</HBox>

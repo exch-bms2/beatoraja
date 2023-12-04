@@ -181,6 +181,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> exitpressduration;
 	@FXML
+	private CheckBox chartpreview;
+	@FXML
 	private CheckBox guidese;
 	@FXML
 	private CheckBox windowhold;
@@ -194,7 +196,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox showhiddennote;
 	@FXML
-	private ComboBox<Integer> target;
+	private ComboBox<String> target;
 
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
@@ -263,6 +265,9 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	public CheckBox discord;
 
+	@FXML
+	public CheckBox clipboardScreenshot;
+
 	static void initComboBox(ComboBox<Integer> combo, final String[] values) {
 		combo.setCellFactory((param) -> new OptionListCell(values));
 		combo.setButtonCell(new OptionListCell(values));
@@ -297,12 +302,6 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
 
-		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
-		String[] targetString = new String[targets.length];
-		for(int i  =0;i < targets.length;i++) {
-			targetString[i] = targets[i].getName();
-		}
-		initComboBox(target, targetString);
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
 				,arg1.getString("BETTER_OR_SAME_MISSCOUNT"),arg1.getString("BETTER_COMBO"),arg1.getString("BETTER_OR_SAME_COMBO"),
@@ -372,6 +371,7 @@ public class PlayConfigurationView implements Initializable {
 
         usecim.setSelected(config.isCacheSkinImage());
         discord.setSelected(config.isUseDiscordRPC());
+        clipboardScreenshot.setSelected(config.isSetClipboardWhenScreenshot());
 
 		enableIpfs.setSelected(config.isEnableIpfs());
 		ipfsurl.setText(config.getIpfsUrl());
@@ -429,6 +429,7 @@ public class PlayConfigurationView implements Initializable {
 		seventoninepattern.getSelectionModel().select(player.getSevenToNinePattern());
 		seventoninetype.getSelectionModel().select(player.getSevenToNineType());
 		exitpressduration.getValueFactory().setValue(player.getExitPressDuration());
+		chartpreview.setSelected(player.isChartPreview());
 		guidese.setSelected(player.isGuideSE());
 		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
@@ -462,7 +463,9 @@ public class PlayConfigurationView implements Initializable {
 		autosavereplay3.getSelectionModel().select(player.getAutoSaveReplay()[2]);
 		autosavereplay4.getSelectionModel().select(player.getAutoSaveReplay()[3]);
 
-		target.setValue(player.getTarget());
+		String[] targets = player.getTargetlist();
+		target.getItems().setAll(targets);
+		target.setValue(player.getTargetid());
 		showhiddennote.setSelected(player.isShowhiddennote());
 
 		irController.update(player);
@@ -497,7 +500,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
 
-		resourceController.commit(config);
+		resourceController.commit();
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
 
@@ -507,6 +510,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setIpfsUrl(ipfsurl.getText());
 
 		config.setUseDiscordRPC(discord.isSelected());
+		config.setClipboardWhenScreenshot(clipboardScreenshot.isSelected());
 
 		commitPlayer();
 
@@ -532,6 +536,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setSevenToNinePattern(seventoninepattern.getValue());
 		player.setSevenToNineType(seventoninetype.getValue());
 		player.setExitPressDuration(getValue(exitpressduration));
+		player.setChartPreview(chartpreview.isSelected());
 		player.setGuideSE(guidese.isSelected());
 		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
@@ -561,7 +566,7 @@ public class PlayConfigurationView implements Initializable {
 				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
 		player.setShowjudgearea(judgeregion.isSelected());
-		player.setTarget(target.getValue());
+		player.setTargetid(target.getValue());
 
 		player.setShowhiddennote(showhiddennote.isSelected());
 
@@ -705,30 +710,6 @@ public class PlayConfigurationView implements Initializable {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-	}
-
-    @FXML
-	public void loadTable() {
-		commit();
-		try {
-			Files.createDirectories(Paths.get(config.getTablepath()));
-		} catch (IOException e) {
-		}
-
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(config.getTablepath()))) {
-			paths.forEach((p) -> {
-				if(p.toString().toLowerCase().endsWith(".bmt")) {
-					try {
-						Files.deleteIfExists(p);
-					} catch (IOException e) {
-					}
-				}
-			});
-		} catch (IOException e) {
-		}
-
-		TableDataAccessor tda = new TableDataAccessor(config.getTablepath());
-		tda.updateTableData(config.getTableURL());
 	}
 
     @FXML

@@ -51,8 +51,8 @@ public class PlaySkin extends Skin {
 
 	public SkinSlider laneCover;
 	
-	public PlaySkin(Resolution src, Resolution dst) {
-		super(src, dst);
+	public PlaySkin(SkinHeader header) {
+		super(header);
 	}
 	
 	public Rectangle[] getLaneGroupRegion() {

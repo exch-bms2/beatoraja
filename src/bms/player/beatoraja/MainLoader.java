@@ -1,8 +1,6 @@
 package bms.player.beatoraja;
 
-import java.awt.*;
 import java.io.*;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
@@ -11,22 +9,17 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-import bms.player.beatoraja.config.Discord;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Graphics;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.AudioConfig.DriverType;
 import bms.player.beatoraja.ir.IRConnectionManager;
@@ -34,7 +27,6 @@ import bms.player.beatoraja.launcher.PlayConfigurationView;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.player.beatoraja.song.SongInformationAccessor;
 import bms.player.beatoraja.song.SongUtils;
 
 /**
@@ -53,8 +45,6 @@ public class MainLoader extends Application {
 	private static Path bmsPath;
 
 	private static VersionChecker version;
-
-	public static Discord discord;
 
 	public static void main(String[] args) {
 
@@ -104,7 +94,7 @@ public class MainLoader extends Application {
 
 
 
-		if (Files.exists(MainController.configpath) && (bmsPath != null || auto != null)) {
+		if (Files.exists(Config.configpath) && (bmsPath != null || auto != null)) {
 			IRConnectionManager.getAllAvailableIRConnectionName();
 			play(bmsPath, auto, true, null, null, bmsPath != null);
 		} else {
@@ -117,11 +107,6 @@ public class MainLoader extends Application {
 			config = Config.read();
 		}
 
-		if(config.isUseDiscordRPC()) {
-			discord = new Discord("");
-			discord.startup();
-		}
-
 		for(SongData song : getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs)) {
 			MainLoader.putIllegalSong(song.getSha256());
 		}
@@ -131,7 +116,7 @@ public class MainLoader extends Application {
 		}
 
 		try {
-			MainController main = new MainController(f, config, player, auto, songUpdated);
+			final MainController main = new MainController(f, config, player, auto, songUpdated);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;
@@ -164,7 +149,32 @@ public class MainLoader extends Application {
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
-			new LwjglApplication(main, cfg);
+			new LwjglApplication(new ApplicationListener() {
+				
+				public void resume() {
+					main.resume();
+				}
+				
+				public void resize(int width, int height) {
+					main.resize(width, height);
+				}
+				
+				public void render() {
+					main.render();
+				}
+				
+				public void pause() {
+					main.pause();
+				}
+				
+				public void dispose() {
+					main.dispose();
+				}
+				
+				public void create() {
+					main.create();
+				}
+			}, cfg);
 
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //

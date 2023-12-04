@@ -17,7 +17,12 @@
 		<Insets left="10.0" top="10.0" />
 	</padding>
     <HBox prefHeight="37.0" prefWidth="723.0">
-        <CheckBox fx:id="enableRequest" contentDisplay="CENTER" prefHeight="24.0" prefWidth="150.0" text="%ENABLE_REQUEST" textAlignment="CENTER"/>
+        <CheckBox fx:id="enableRequest" contentDisplay="CENTER" prefHeight="24.0" prefWidth="240.0" text="%ENABLE_REQUEST" textAlignment="CENTER"/>
+    </HBox>
+    <HBox prefHeight="37.0" prefWidth="723.0">
+        <CheckBox fx:id="notifyRequest" contentDisplay="CENTER" prefHeight="24.0" prefWidth="240.0" text="%NOTIFY_REQUEST" textAlignment="CENTER"/>
+    </HBox>
+    <HBox prefHeight="37.0" prefWidth="723.0">
         <Label prefHeight="24.0" prefWidth="150.0" text="%MAX_REQUEST_COUNT"/>
         <NumericSpinner fx:id="maxRequestCount" editable="true" prefWidth="80.0">
             <valueFactory>

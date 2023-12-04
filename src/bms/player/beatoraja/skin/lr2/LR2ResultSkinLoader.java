@@ -1,7 +1,6 @@
 package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
-import java.nio.file.Path;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
@@ -28,8 +27,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 		addCommandWord(ResultCommand.values());
 	}
 
-	public MusicResultSkin loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option) throws IOException {
-		return this.loadSkin(new MusicResultSkin(src, dst), f, state, header, option);
+	public MusicResultSkin loadSkin(MainState state, SkinHeader header, IntIntMap option) throws IOException {
+		return this.loadSkin(new MusicResultSkin(header), state, option);
 	}
 
 }

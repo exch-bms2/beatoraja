@@ -24,16 +24,16 @@ public class CustomEvent {
 
 	public void execute(MainState state, int arg1, int arg2) {
 		action.exec(state, arg1, arg2);
-		lastExecuteTime = state.main.getNowMicroTime();
+		lastExecuteTime = state.timer.getNowMicroTime();
 	}
 
 	public void update(MainState state) {
 		if (condition == null)
 			return;
 
-		if (condition.get(state) && (lastExecuteTime == Long.MIN_VALUE || (state.main.getNowMicroTime() - lastExecuteTime) / 1000 >= minInterval)) {
+		if (condition.get(state) && (lastExecuteTime == Long.MIN_VALUE || (state.timer.getNowMicroTime() - lastExecuteTime) / 1000 >= minInterval)) {
 			action.exec(state);
-			lastExecuteTime = state.main.getNowMicroTime();
+			lastExecuteTime = state.timer.getNowMicroTime();
 		}
 	}
 }

@@ -142,7 +142,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	public void draw(SkinObjectRenderer sprite) {	
 		
-		final SongData song = state.main.getPlayerResource().getSongdata();
+		final SongData song = state.resource.getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 		
 		// TODO スキン定義側で分岐できないか？
@@ -194,8 +194,8 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			sprite.draw(endcursor, region.x + dx, region.y, 1, region.height);
 		}
 		// 現在カーソル描画
-		if (state instanceof BMSPlayer && state.main.isTimerOn(SkinProperty.TIMER_PLAY)) {
-			float currenttime = state.main.getNowTime(SkinProperty.TIMER_PLAY);
+		if (state instanceof BMSPlayer && state.timer.isTimerOn(SkinProperty.TIMER_PLAY)) {
+			float currenttime = state.timer.getNowTime(SkinProperty.TIMER_PLAY);
 			if (freq > 0) {
 				currenttime *= freq;
 			}

@@ -16,6 +16,7 @@ import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.launcher.PlayConfigurationView.OptionListCell;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
@@ -31,6 +32,8 @@ public class AudioConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> audiosim;
 	@FXML
+	private ComboBox<Integer> audiosamplerate;
+	@FXML
 	private Slider systemvolume;
 	@FXML
 	private Slider keyvolume;
@@ -40,15 +43,19 @@ public class AudioConfigurationView implements Initializable {
 	private ComboBox<FrequencyType> audioFreqOption;
 	@FXML
 	private ComboBox<FrequencyType> audioFastForward;
+	@FXML
+	private CheckBox loopResultSound;
+	@FXML
+	private CheckBox loopCourseResultSound;
 	
 	private AudioConfig config;
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		audio.getItems().setAll(DriverType.OpenAL , DriverType.PortAudio);
+		audiosamplerate.getItems().setAll(null, 44100, 48000);
 
 		audioFreqOption.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
 		audioFastForward.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
-
 	}
 
 	public void update(AudioConfig config) {
@@ -57,11 +64,14 @@ public class AudioConfigurationView implements Initializable {
 		audio.setValue(config.getDriver());
 		audiobuffer.getValueFactory().setValue(config.getDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getDeviceSimultaneousSources());
+		audiosamplerate.setValue(config.getSampleRate() > 0 ? config.getSampleRate() : null);
 		audioFreqOption.setValue(config.getFreqOption());
 		audioFastForward.setValue(config.getFastForward());
 		systemvolume.setValue((double)config.getSystemvolume());
 		keyvolume.setValue((double)config.getKeyvolume());
 		bgvolume.setValue((double)config.getBgvolume());
+		loopResultSound.setSelected(config.isLoopResultSound());
+		loopCourseResultSound.setSelected(config.isLoopCourseResultSound());
 
 		updateAudioDriver();
 	}
@@ -71,11 +81,14 @@ public class AudioConfigurationView implements Initializable {
 		config.setDriverName(audioname.getValue());
 		config.setDeviceBufferSize(audiobuffer.getValue());
 		config.setDeviceSimultaneousSources(audiosim.getValue());
+		config.setSampleRate(audiosamplerate.getValue() != null ? audiosamplerate.getValue() : 0);
 		config.setFreqOption(audioFreqOption.getValue());
 		config.setFastForward(audioFastForward.getValue());
 		config.setSystemvolume((float) systemvolume.getValue());
 		config.setKeyvolume((float) keyvolume.getValue());
 		config.setBgvolume((float) bgvolume.getValue());
+		config.setLoopResultSound(loopResultSound.isSelected());
+		config.setLoopCourseResultSound(loopCourseResultSound.isSelected());
 	}
 
     @FXML

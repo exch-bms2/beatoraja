@@ -6,7 +6,6 @@ import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
-import bms.player.beatoraja.skin.property.Event;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -31,6 +30,10 @@ public abstract class MainState {
 	private Skin skin;
 
 	private Stage stage;
+	
+	public final TimerManager timer;
+	
+	public final PlayerResource resource;
 
 	private final IntMap<String> soundmap = new IntMap<String>();
 	private final IntMap<Boolean> soundloop = new IntMap<Boolean>();
@@ -39,11 +42,17 @@ public abstract class MainState {
 
 	public MainState(MainController main) {
 		this.main = main;
+		timer = main.getTimer();
+		resource = main.getPlayerResource();
 	}
 
 	public abstract void create();
 
 	public void prepare() {
+
+	}
+
+	public void shutdown() {
 
 	}
 
@@ -147,11 +156,11 @@ public abstract class MainState {
 	public TextureRegion getImage(int imageid) {
 		switch (imageid) {
 		case IMAGE_BACKBMP:
-			return main.getPlayerResource().getBMSResource().getBackbmp();
+			return resource.getBMSResource().getBackbmp();
 		case IMAGE_STAGEFILE:
-			return main.getPlayerResource().getBMSResource().getStagefile();
+			return resource.getBMSResource().getStagefile();
 		case IMAGE_BANNER:
-			return main.getPlayerResource().getBMSResource().getBanner();
+			return resource.getBMSResource().getBanner();
 		case IMAGE_BLACK:
 			return main.black;
 		case IMAGE_WHITE:
@@ -172,76 +181,20 @@ public abstract class MainState {
 		BGM, SOUND
 	}
 
-	public void setSound(int id, String path, SoundType type, boolean loop) {
-		for(Path p :getSoundPaths(path, type)) {
-			String newpath = p.toString();
-			String oldpath = soundmap.get(id);
-			if (newpath.equals(oldpath)) {
-				return;
-			}
-			if (oldpath != null) {
-				main.getAudioProcessor().dispose(oldpath);
-			}
-			soundmap.put(id, newpath);
-			soundloop.put(id, loop);
-			return;
-		}
+	public String getSound(SystemSoundManager.SoundType sound) {
+		return main.getSoundManager().getSound(sound);
 	}
 	
-	public boolean setSoundFile(int id, String path, SoundType type, boolean loop) {		
-		for(Path p : AudioDriver.getPaths(path)) {
-			String newpath = p.toString();
-			String oldpath = soundmap.get(id);
-			if (newpath.equals(oldpath)) {
-				return true;
-			}
-			if (oldpath != null) {
-				main.getAudioProcessor().dispose(oldpath);
-			}
-			soundmap.put(id, newpath);
-			soundloop.put(id, loop);
-			return true;
-			
-		}
-		return false;
+	public void play(SystemSoundManager.SoundType sound) {
+		play(sound, false);
 	}
 	
-	public Path[] getSoundPaths(String filename, SoundType type) {
-		Path p = null;
-		switch (type) {
-		case BGM:
-			p = main.getSoundManager().getBGMPath();
-			break;
-		case SOUND:
-			p = main.getSoundManager().getSoundPath();
-			break;
-		}
-		
-		Array<Path> paths = new Array();
-		if(p != null) {
-			paths.addAll(AudioDriver.getPaths(p.resolve(filename).toString()));			
-		}
-		paths.addAll(AudioDriver.getPaths("defaultsound/" + filename.substring(filename.contains("/") || filename.contains("\\") ? Math.max(filename.lastIndexOf('/'),filename.lastIndexOf('\\')) + 1 : 0)));
-		return paths.toArray(Path.class);
+	public void play(SystemSoundManager.SoundType sound, boolean loop) {
+		main.getSoundManager().play(sound, loop);
 	}
-
-	public String getSound(int id) {
-		return soundmap.get(id);
-	}
-
-	public void play(int id) {
-		final String path = soundmap.get(id);
-		if (path != null) {
-			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getAudioConfig().getSystemvolume(),
-					soundloop.get(id));
-		}
-	}
-
-	public void stop(int id) {
-		final String path = soundmap.get(id);
-		if (path != null) {
-			main.getAudioProcessor().stop(path);
-		}
+	
+	public void stop(SystemSoundManager.SoundType sound) {
+		main.getSoundManager().stop(sound);
 	}
 	
 	public enum MainStateType {

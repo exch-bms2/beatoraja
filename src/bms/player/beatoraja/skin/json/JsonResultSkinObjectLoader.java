@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin.json;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.result.MusicResultSkin;
+import bms.player.beatoraja.skin.SkinHeader;
 
 public class JsonResultSkinObjectLoader extends JsonSkinObjectLoader<MusicResultSkin> {
 
@@ -10,7 +10,7 @@ public class JsonResultSkinObjectLoader extends JsonSkinObjectLoader<MusicResult
 	}
 
 	@Override
-	public MusicResultSkin getSkin(Resolution src, Resolution dst) {
-		return new MusicResultSkin(src, dst);
+	public MusicResultSkin getSkin(SkinHeader header) {
+		return new MusicResultSkin(header);
 	}
 }

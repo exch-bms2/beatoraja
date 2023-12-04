@@ -41,6 +41,10 @@ public class SkinHeader {
 	 */
 	private String name;
 	/**
+	 * スキン製作者名
+	 */
+	private String author;
+	/**
 	 * カスタムオプション
 	 */
 	private CustomOption[] options = CustomOption.EMPTY_ARRAY;
@@ -61,6 +65,10 @@ public class SkinHeader {
 	 */
 	private Resolution resolution = Resolution.SD;
 
+	private Resolution sourceResolution;
+	
+	private Resolution destinationResolution;
+	
 	public SkinType getSkinType() {
 		return mode;
 	}
@@ -76,7 +84,15 @@ public class SkinHeader {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
 	public CustomOption[] getCustomOptions() {
 		return options;
 	}
@@ -202,6 +218,22 @@ public class SkinHeader {
 			}
 			of.offset = off;
 		}
+	}
+
+	public Resolution getSourceResolution() {
+		return sourceResolution;
+	}
+
+	public void setSourceResolution(Resolution sourceResolution) {
+		this.sourceResolution = sourceResolution;
+	}
+
+	public Resolution getDestinationResolution() {
+		return destinationResolution;
+	}
+
+	public void setDestinationResolution(Resolution destinationResolution) {
+		this.destinationResolution = destinationResolution;
 	}
 
 	/**

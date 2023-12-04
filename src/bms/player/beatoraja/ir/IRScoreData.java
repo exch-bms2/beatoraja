@@ -63,6 +63,8 @@ public class IRScoreData {
 	 */
 	public final int ems;
 	public final int lms;
+	
+	public final long avgjudge;
 	/**
 	 * 最大コンボ数
 	 */
@@ -106,6 +108,8 @@ public class IRScoreData {
 	 */
 	public final BMSPlayerRule rule;
 	
+	public final String skin;
+	
 	public IRScoreData(ScoreData score) {
 		this.sha256 = score.getSha256();
 		this.lntype = score.getMode();
@@ -124,6 +128,7 @@ public class IRScoreData {
 		this.lpr = score.getLpr();
 		this.ems = score.getEms();
 		this.lms = score.getLms();
+		this.avgjudge = score.getAvgjudge();
 		this.maxcombo = score.getCombo();
 		this.notes = score.getNotes();
 		this.passnotes = score.getPassnotes();
@@ -135,6 +140,7 @@ public class IRScoreData {
 		this.deviceType = score.getDeviceType();
 		this.judgeAlgorithm = score.getJudgeAlgorithm();
 		this.rule = score.getRule();
+		this.skin = score.getSkin();
 	}
 	
 	public int getExscore() {

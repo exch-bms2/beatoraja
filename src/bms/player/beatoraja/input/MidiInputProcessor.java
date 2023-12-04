@@ -162,7 +162,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	long currentTime() {
-		return System.nanoTime() / 1000000 - starttime;
+		return System.nanoTime() / 1000 - starttime;
 	}
 
 	public boolean hasLastPressedKey() {

@@ -46,7 +46,7 @@ public abstract class SQLiteDatabaseAccessor {
 				boolean comma = false;
 				for (Column column : table.getColumn()) {
 					sql.append(comma ? "," : "").append('[').append(column.getName()).append("] ").append(column.getType())
-							.append(column.getNotnull() == 1 ? " NOT NULL" : "");
+							.append(column.getNotnull() == 1 ? " NOT NULL" : "").append(column.getDefaultval() != null && column.getDefaultval().length() > 0 ? " DEFAULT " + column.getDefaultval() : "");
 					comma = true;
 					if (column.getPk() == 1) {
 						pk.add(column);
@@ -79,7 +79,7 @@ public abstract class SQLiteDatabaseAccessor {
 			}
 			for (Column add : adds) {
 				qr.update("ALTER TABLE " + table.getName() + " ADD COLUMN [" + add.getName() + "] " + add.getType()
-						+ (add.getNotnull() == 1 ? " NOT NULL" : ""));
+						+ (add.getNotnull() == 1 ? " NOT NULL" : "") + (add.getDefaultval() != null && add.getDefaultval().length() > 0 ? " DEFAULT " + add.getDefaultval() : ""));
 			}			
 		}
 
@@ -200,6 +200,8 @@ public abstract class SQLiteDatabaseAccessor {
 		 */
 		private int pk;
 		
+		private String defaultval;
+		
 		public Column() {
 			
 		}
@@ -213,6 +215,14 @@ public abstract class SQLiteDatabaseAccessor {
 			this.type = type;
 			this.notnull = notnull;
 			this.pk = pk;
+		}
+		
+		public Column(String name, String type, int notnull, int pk, String defaultval) {
+			this.name = name;
+			this.type = type;
+			this.notnull = notnull;
+			this.pk = pk;
+			this.setDefaultval(defaultval);
 		}
 		
 		public String getName() {
@@ -245,6 +255,14 @@ public abstract class SQLiteDatabaseAccessor {
 		
 		public void setPk(int pk) {
 			this.pk = pk;
+		}
+
+		public String getDefaultval() {
+			return defaultval;
+		}
+
+		public void setDefaultval(String defaultval) {
+			this.defaultval = defaultval;
 		}
 	}	
 }

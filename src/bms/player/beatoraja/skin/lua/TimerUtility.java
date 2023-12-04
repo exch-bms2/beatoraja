@@ -33,7 +33,7 @@ public class TimerUtility {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
 			long time = luaValue.tolong();
-			return LuaNumber.valueOf(time != Long.MIN_VALUE ? state.main.getNowMicroTime() - time : 0);
+			return LuaNumber.valueOf(time != Long.MIN_VALUE ? state.timer.getNowMicroTime() - time : 0);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class TimerUtility {
 			return new OneArgFunction() {
 				@Override
 				public LuaValue call(LuaValue luaValue) {
-					return LuaNumber.valueOf(state.main.getMicroTimer(id));
+					return LuaNumber.valueOf(state.timer.getMicroTimer(id));
 				}
 			};
 		}
@@ -97,7 +97,7 @@ public class TimerUtility {
 				public LuaValue call() {
 					boolean on = f.call().toboolean();
 					if (on && observerState.timerValue == Long.MIN_VALUE) {
-						observerState.timerValue = state.main.getNowMicroTime();
+						observerState.timerValue = state.timer.getNowMicroTime();
 					} else if (!on && observerState.timerValue != Long.MIN_VALUE) {
 						observerState.timerValue = Long.MIN_VALUE;
 					}
@@ -136,7 +136,7 @@ public class TimerUtility {
 				@Override
 				public LuaValue call() {
 					if (s.timerValue == Long.MIN_VALUE) {
-						s.timerValue = state.main.getNowMicroTime();
+						s.timerValue = state.timer.getNowMicroTime();
 					}
 					return TRUE;
 				}
@@ -144,7 +144,7 @@ public class TimerUtility {
 			table.set("turn_on_reset", new ZeroArgFunction() {
 				@Override
 				public LuaValue call() {
-					s.timerValue = state.main.getNowMicroTime();
+					s.timerValue = state.timer.getNowMicroTime();
 					return TRUE;
 				}
 			});

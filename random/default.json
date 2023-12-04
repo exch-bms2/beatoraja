@@ -1,0 +1,17 @@
+[
+	{
+		"name":"RANDOM SELECT"
+	},
+	{
+		"name":"NO PLAY RANDOM SELECT",
+		"filter": {
+			"playcount": 0
+		}
+	},
+	{
+		"name":"FAILED RANDOM SELECT",
+		"filter": {
+			"clear": 1
+		}
+	}
+]

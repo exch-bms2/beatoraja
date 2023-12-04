@@ -71,6 +71,7 @@ public class ScoreDatabaseAccessor extends SQLiteDatabaseAccessor {
 						new Column("notes", "INTEGER"),
 						new Column("combo", "INTEGER"),
 						new Column("minbp", "INTEGER"),
+						new Column("avgjudge", "INTEGER", 1, 0, String.valueOf(Integer.MAX_VALUE)),
 						new Column("playcount", "INTEGER"),
 						new Column("clearcount", "INTEGER"),
 						new Column("trophy", "TEXT"),

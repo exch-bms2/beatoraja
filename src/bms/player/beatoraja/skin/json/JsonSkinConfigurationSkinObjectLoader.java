@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin.json;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
+import bms.player.beatoraja.skin.SkinHeader;
 
 public class JsonSkinConfigurationSkinObjectLoader extends JsonSkinObjectLoader<SkinConfigurationSkin> {
 
@@ -10,8 +10,8 @@ public class JsonSkinConfigurationSkinObjectLoader extends JsonSkinObjectLoader<
 	}
 
 	@Override
-	public SkinConfigurationSkin getSkin(Resolution src, Resolution dst) {
-		return new SkinConfigurationSkin(src, dst);
+	public SkinConfigurationSkin getSkin(SkinHeader header) {
+		return new SkinConfigurationSkin(header);
 	}
 
 }

@@ -192,8 +192,8 @@ public class EventUtility {
 				@Override
 				public LuaValue call() {
 					if (s.lastExecution == Long.MIN_VALUE
-							|| (state.main.getNowMicroTime() - s.lastExecution) / 1000 >= interval) {
-						s.lastExecution = state.main.getNowMicroTime();
+							|| (state.timer.getNowMicroTime() - s.lastExecution) / 1000 >= interval) {
+						s.lastExecution = state.timer.getNowMicroTime();
 						act.call();
 					}
 					return TRUE;

@@ -84,6 +84,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 		public void execute(LR2SkinHeaderLoader loader, String[] str) {
 			loader.header.setSkinType(SkinType.getSkinTypeById(Integer.parseInt(str[1])));
 			loader.header.setName(str[2]);
+			loader.header.setAuthor(str[3]);
 			switch (loader.header.getSkinType()) {
 				case PLAY_5KEYS:
 				case PLAY_7KEYS:

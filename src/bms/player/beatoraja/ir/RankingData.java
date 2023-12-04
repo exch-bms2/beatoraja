@@ -3,9 +3,7 @@ package bms.player.beatoraja.ir;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.ScoreData;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.song.SongData;
 
@@ -40,7 +38,10 @@ public class RankingData {
 	 * 全スコアデータ
 	 */
 	private IRScoreData[] scores;
-	
+	/**
+	 * 各スコアデータの順位
+	 */
+	private int[] scorerankings;
 	/**
 	 * IRアクセス状態
 	 */
@@ -59,9 +60,8 @@ public class RankingData {
 		if(!(song instanceof SongData || song instanceof CourseData)) {
 			return;
 		}		
-		state = NONE;
+		state = ACCESS;
 		Thread irprocess = new Thread(() -> {
-			state = ACCESS;
 			final IRStatus[] ir = mainstate.main.getIRStatus();
 	        IRResponse<IRScoreData[]> response = null;
 	        if(song instanceof SongData) {
@@ -71,13 +71,13 @@ public class RankingData {
 	        }
 	        if(response.isSucceeded()) {
 	        	updateScore(response.getData(), mainstate.getScoreDataProperty().getScoreData());
-	        	
-	            Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+	            Logger.getGlobal().fine("IRからのスコア取得成功 : " + response.getMessage());
+				state = FINISH;
 	        } else {
 	            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 				state = FAIL;
-		        lastUpdateTime = System.currentTimeMillis();
 	        }
+	        lastUpdateTime = System.currentTimeMillis();
 		});
 		irprocess.start();
 
@@ -89,20 +89,27 @@ public class RankingData {
 		}
 		boolean firstUpdate = this.scores == null;
 		
+		Arrays.sort(scores, (s1, s2) -> (s2.getExscore() - s1.getExscore()));
+		int[] scorerankings = new int[scores.length];
+		for(int i = 0;i < scorerankings.length;i++) {
+			scorerankings[i] = (i > 0 && scores[i].getExscore() == scores[i - 1].getExscore()) ? scorerankings[i - 1] : i + 1;
+		}
+		
 		if(!firstUpdate) {
 			prevrank = irrank;	
 		}
 		this.scores = scores;
+		this.scorerankings = scorerankings;
         irtotal = scores.length;
         Arrays.fill(lamps, 0);
         irrank = 0;
         localrank = 0;
         for(int i = 0;i < scores.length;i++) {
             if(irrank == 0 && scores[i].player.length() == 0) {
-            	irrank = i + 1;
+            	irrank = scorerankings[i];
             }
             if(localscore != null && localrank == 0 && scores[i].getExscore() <=  localscore.getExscore()) {
-            	localrank = i + 1;
+            	localrank = scorerankings[i];
             }
             lamps[scores[i].clear.id]++;
         }
@@ -115,24 +122,66 @@ public class RankingData {
         lastUpdateTime = System.currentTimeMillis();
 	}
 	
+	/**
+	 * 選択されている楽曲の現在のIR順位を返す
+	 * 
+	 * @return 現在のIR順位
+	 */
 	public int getRank() {
 		return irrank;
 	}
-	
+
+	/**
+	 * 選択されている楽曲の以前のIR順位を返す
+	 * 
+	 * @return 以前のIR順位
+	 */
 	public int getPreviousRank() {
 		return prevrank;
 	}
 	
+	/**
+	 * 選択されている楽曲のローカルスコアでの想定IR順位を返す
+	 * 
+	 * @return ローカルスコアでの想定IR順位
+	 */
 	public int getLocalRank() {
 		return localrank;
 	}
 	
+	/**
+	 * IR上の総プレイ人数を返す
+	 * 
+	 * @return 総プレイ人数
+	 */
 	public int getTotalPlayer() {
 		return irtotal;
 	}
 
-	public IRScoreData[] getScores() {
-		return scores;
+	/**
+	 * IR上のindexに対応したプレイヤーのスコアデータを返す
+
+	 * @param index インデックス
+	 * @return 対応するスコアデータ。indexに対応したスコアデータが存在しない場合はnull
+	 */
+	public IRScoreData getScore(int index) {
+		if(scores != null && index >= 0 && index < scores.length) {
+			return scores[index];			
+		}
+		return null;
+	}
+	
+	/**
+	 * IR上のindexに対応したプレイヤーの順位を返す
+
+	 * @param index インデックス
+	 * @return 対応するスコアデータの順位。indexに対応したスコアデータが存在しない場合はInteger.MIN_VALUEl
+	 */
+	public int getScoreRanking(int index) {
+		if(scorerankings != null && index >= 0 && index < scorerankings.length) {
+			return scorerankings[index];			
+		}
+		return Integer.MIN_VALUE;
 	}
 	
 	public int getClearCount(int clearType) {
@@ -143,6 +192,11 @@ public class RankingData {
 		return state;
 	}
 	
+	/**
+	 * RankingDataの最終更新時間を返す
+	 * 
+	 * @return RankingDataの最終更新時間(ms)
+	 */
 	public long getLastUpdateTime() {
 		return lastUpdateTime;
 	}

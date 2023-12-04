@@ -60,15 +60,15 @@ public class RhythmTimerProcessor {
 	}
 	
 	public void update(BMSPlayer player, long deltatime, double nowbpm, int freq) {
-		final long now = player.main.getNowTime();
-		final long micronow = player.main.getNowMicroTime();
+		final long now = player.timer.getNowTime();
+		final long micronow = player.timer.getNowMicroTime();
 
 		rhythmtimer += deltatime * (100 - nowbpm * player.getPlaySpeed() / 60) / 100;
-		player.main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
+		player.timer.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
 		if(sections < sectiontimes.length && (sectiontimes[sections] * 100 / freq) <= player.main.getNowMicroTime(TIMER_PLAY)) {
 			sections++;;
-			player.main.setTimerOn(TIMER_RHYTHM);
+			player.timer.setTimerOn(TIMER_RHYTHM);
 			rhythmtimer = micronow;
 		}
 		if(quarterNoteTimes.length > 0) {

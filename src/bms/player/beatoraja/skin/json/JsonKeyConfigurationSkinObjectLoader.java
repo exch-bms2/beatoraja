@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin.json;
 
-import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.config.KeyConfigurationSkin;
+import bms.player.beatoraja.skin.SkinHeader;
 
 public class JsonKeyConfigurationSkinObjectLoader extends JsonSkinObjectLoader<KeyConfigurationSkin> {
 
@@ -10,8 +10,8 @@ public class JsonKeyConfigurationSkinObjectLoader extends JsonSkinObjectLoader<K
 	}
 
 	@Override
-	public KeyConfigurationSkin getSkin(Resolution src, Resolution dst) {
-		return new KeyConfigurationSkin(src, dst);
+	public KeyConfigurationSkin getSkin(SkinHeader header) {
+		return new KeyConfigurationSkin(header);
 	}
 
 }

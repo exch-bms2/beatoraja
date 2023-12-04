@@ -1,11 +1,12 @@
 package bms.player.beatoraja.decide;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.skin.*;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 /**
  * 曲決定部分。
@@ -16,8 +17,6 @@ public class MusicDecide extends MainState {
 
 	private boolean cancel;
 
-	public static final int SOUND_DECIDE = 0;
-	
 	public MusicDecide(MainController main) {
 		super(main);
 	}
@@ -25,40 +24,41 @@ public class MusicDecide extends MainState {
 	public void create() {
 		cancel = false;
 		
-		setSound(SOUND_DECIDE, "decide.wav", SoundType.BGM, false);
-		play(SOUND_DECIDE);
-
 		loadSkin(SkinType.DECIDE);
 
-		main.getPlayerResource().setOrgGaugeOption(main.getPlayerResource().getPlayerConfig().getGauge());
+		resource.setOrgGaugeOption(resource.getPlayerConfig().getGauge());
+	}
+
+	public void prepare() {
+		super.prepare();
+		play(DECIDE);
 	}
 
 	public void render() {
-		long nowtime = main.getNowTime();
+		long nowtime = timer.getNowTime();
         if(nowtime >getSkin().getInput()){
-        	main.switchTimer(TIMER_STARTINPUT, true);
+        	timer.switchTimer(TIMER_STARTINPUT, true);
         }
-		if (main.isTimerOn(TIMER_FADEOUT)) {
-			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
+		if (timer.isTimerOn(TIMER_FADEOUT)) {
+			if (timer.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				main.changeState(cancel ? MainStateType.MUSICSELECT : MainStateType.PLAY);
 			}
 		} else {
 			if (nowtime > getSkin().getScene()) {
-				main.setTimerOn(TIMER_FADEOUT);
+				timer.setTimerOn(TIMER_FADEOUT);
 			}
 		}
 	}
 
 	public void input() {
-		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
+		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
 			BMSPlayerInputProcessor input = main.getInputProcessor();
-			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6] || input.isEnterPressed()) {
-				input.setEnterPressed(false);
-				main.setTimerOn(TIMER_FADEOUT);
+			if (input.getKeyState(0) || input.getKeyState(2) || input.getKeyState(4) || input.getKeyState(6) || input.isControlKeyPressed(ControlKeys.ENTER)) {
+				timer.setTimerOn(TIMER_FADEOUT);
 			}
-			if (input.isExitPressed() || (input.startPressed() && input.isSelectPressed())) {
+			if (input.isControlKeyPressed(ControlKeys.ESCAPE) || (input.startPressed() && input.isSelectPressed())) {
 				cancel = true;
-				main.setTimerOn(TIMER_FADEOUT);
+				timer.setTimerOn(TIMER_FADEOUT);
 			}
 		}
 	}

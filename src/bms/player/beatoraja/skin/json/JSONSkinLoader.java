@@ -105,7 +105,8 @@ public class JSONSkinLoader extends SkinLoader {
 			if (sk.type != -1) {
 				header = new SkinHeader();
 				header.setSkinType(SkinType.getSkinTypeById(sk.type));
-				header.setName(sk.name);
+				header.setName(sk.name != null ? sk.name : "");
+				header.setAuthor(sk.author != null ? sk.author : "");
 				header.setPath(p);
 				header.setType(SkinHeader.TYPE_BEATORJASKIN);
 
@@ -300,7 +301,9 @@ public class JSONSkinLoader extends SkinLoader {
 				break;				
 			}
 			
-			skin = objectLoader.getSkin(src, dstr);
+			header.setSourceResolution(src);
+			header.setDestinationResolution(dstr);
+			skin = objectLoader.getSkin(header);
 			
 			IntIntMap op = new IntIntMap();
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {

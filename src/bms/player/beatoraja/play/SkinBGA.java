@@ -43,14 +43,14 @@ public class SkinBGA extends SkinObject {
 		super.prepare(time, state);
 		if(draw) {
 			final int s = player.getState();
-			player.main.getPlayerResource().getBGAManager().prepareBGA(
+			player.resource.getBGAManager().prepareBGA(
 					s == BMSPlayer.STATE_PRELOAD || s == BMSPlayer.STATE_PRACTICE || s == BMSPlayer.STATE_READY ? -1
-							: player.main.getNowTime(TIMER_PLAY));
+							: player.timer.getNowTime(TIMER_PLAY));
 		}
 	}
 
 	public void draw(SkinObjectRenderer sprite) {
-		final PlayerResource resource = player.main.getPlayerResource();
+		final PlayerResource resource = player.resource;
 		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE) {
 			player.getPracticeConfiguration().draw(region, sprite, time, player);
 		} else if (resource.getBGAManager() != null) {

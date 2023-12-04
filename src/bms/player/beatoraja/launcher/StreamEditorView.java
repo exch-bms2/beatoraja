@@ -30,6 +30,8 @@ public class StreamEditorView implements Initializable {
     @FXML
     private CheckBox enableRequest;
     @FXML
+    private CheckBox notifyRequest;
+    @FXML
     private Spinner<Integer> maxRequestCount;
     
     private PlayerConfig player;
@@ -43,14 +45,16 @@ public class StreamEditorView implements Initializable {
             return;
         }
         enableRequest.setSelected(this.player.getRequestEnable());
+        notifyRequest.setSelected(this.player.getRequestNotify());
         maxRequestCount.getValueFactory().setValue(this.player.getMaxRequestCount());
     }
-    
+
     public void commit() {
         if(this.player == null) {
             return;
         }
         player.setRequestEnable(enableRequest.isSelected());
+        player.setRequestNotify(notifyRequest.isSelected());
         player.setMaxRequestCount(maxRequestCount.getValue());
     }
 }

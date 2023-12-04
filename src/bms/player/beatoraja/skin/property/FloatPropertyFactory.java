@@ -9,6 +9,7 @@ import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.result.AbstractResult;
@@ -82,8 +83,8 @@ public class FloatPropertyFactory {
 
 	private static final FloatProperty PROPERTY_MUSIC_PROGRESS = (state) -> {
 		if (state instanceof BMSPlayer) {
-			if (state.main.isTimerOn(TIMER_PLAY)) {
-				return Math.min((float) state.main.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
+			if (state.timer.isTimerOn(TIMER_PLAY)) {
+				return Math.min((float) state.timer.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
 						1);
 			}
 		}
@@ -154,23 +155,23 @@ public class FloatPropertyFactory {
 					}
 				}),
 		mastervolume(17,
-				(state) -> (state.main.getConfig().getAudioConfig().getSystemvolume()),
+				(state) -> (state.resource.getConfig().getAudioConfig().getSystemvolume()),
 				(state, value) -> {
-					state.main.getConfig().getAudioConfig().setSystemvolume(value);					
+					state.resource.getConfig().getAudioConfig().setSystemvolume(value);					
 				}),
 		keyvolume(18,
-				(state) -> (state.main.getConfig().getAudioConfig().getKeyvolume()),
+				(state) -> (state.resource.getConfig().getAudioConfig().getKeyvolume()),
 				(state, value) -> {
-					state.main.getConfig().getAudioConfig().setKeyvolume(value);					
+					state.resource.getConfig().getAudioConfig().setKeyvolume(value);					
 				}),
 		bgmvolume(19,
-				(state) -> (state.main.getConfig().getAudioConfig().getBgvolume()),
+				(state) -> (state.resource.getConfig().getAudioConfig().getBgvolume()),
 				(state, value) -> {
-					state.main.getConfig().getAudioConfig().setBgvolume(value);					
+					state.resource.getConfig().getAudioConfig().setBgvolume(value);					
 				}),
 		music_progress_bar(101, PROPERTY_MUSIC_PROGRESS),
 		load_progress(102, (state) -> {
-			final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+			final BMSResource resource = state.resource.getBMSResource();
 			return resource.isBGAOn()
 					? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2
 					: resource.getAudioDriver().getProgress();
@@ -197,6 +198,15 @@ public class FloatPropertyFactory {
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEpg() + score.getLpg())) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -209,6 +219,15 @@ public class FloatPropertyFactory {
 							? ((float) (score.getEgr() + score.getLgr()))
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEgr() + score.getLgr())) / notes;
 				}
 			}
 			return 0;
@@ -223,6 +242,15 @@ public class FloatPropertyFactory {
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEgd() + score.getLgd())) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -235,6 +263,15 @@ public class FloatPropertyFactory {
 							? ((float) (score.getEbd() + score.getLbd()))
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEbd() + score.getLbd())) / notes;
 				}
 			}
 			return 0;
@@ -249,6 +286,15 @@ public class FloatPropertyFactory {
 									/ ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) (score.getEpr() + score.getLpr())) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -261,6 +307,15 @@ public class FloatPropertyFactory {
 							? ((float) score.getCombo()) / ((SongBar) selected).getSongData().getNotes()
 							: 0;
 				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) score.getCombo()) / notes;
+				}
 			}
 			return 0;
 		}),
@@ -272,6 +327,15 @@ public class FloatPropertyFactory {
 					return score != null
 							? ((float) score.getExscore()) / ((SongBar) selected).getSongData().getNotes() / 2
 							: 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) score.getExscore()) / notes;
 				}
 			}
 			return 0;

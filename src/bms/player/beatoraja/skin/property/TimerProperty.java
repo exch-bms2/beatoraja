@@ -11,7 +11,7 @@ public interface TimerProperty {
 
 	default long getNowTime(MainState state) {
 		long time = getMicro(state);
-		return time == Long.MIN_VALUE ? 0 : state.main.getNowTime() - time / 1000;
+		return time == Long.MIN_VALUE ? 0 : state.timer.getNowTime() - time / 1000;
 	}
 
 	default boolean isOn(MainState state) {

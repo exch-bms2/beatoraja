@@ -10,6 +10,7 @@
 songdata.db
 songinfo.db
 config.json
+config_sys.json
 beatoraja.jar
 beatoraja_log.xml
 /bin/

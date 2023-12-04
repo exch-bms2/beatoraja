@@ -62,6 +62,19 @@ public class FolderEditorView implements Initializable {
 
 		searchSongs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
+		searchSongs.setOnMouseClicked((click) -> {
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
+			if (click.getClickCount() == 2 && !isHeader) {
+				displayChartDetailsDialog(searchSongs.getSelectionModel().getSelectedItem());
+			}
+		});
+		folderSongs.setOnMouseClicked((click) -> {
+			boolean isHeader = JavaFXUtils.findParentByClassSimpleName(click.getPickResult().getIntersectedNode(), "TableColumnHeader").isPresent();
+			if (click.getClickCount() == 2 && !isHeader) {
+				displayChartDetailsDialog(folderSongs.getSelectionModel().getSelectedItem());
+			}
+		});
+
 		updateFolder(null);
 	}
 	
@@ -73,7 +86,9 @@ public class FolderEditorView implements Initializable {
 		if(songdb == null) {
 			return;
 		}
-		if(search.getText().length() > 1) {
+		if(TableEditorView.isMd5OrSha256Hash(search.getText())) {
+			searchSongs.getItems().setAll(songdb.getSongDatas(new String[]{search.getText()}));			
+		} else if(search.getText().length() > 1) {
 			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
 		}
 	}
@@ -179,5 +194,34 @@ public class FolderEditorView implements Initializable {
 	
 	public void setTableFolder(TableFolder[] folder) {
 		folders.getItems().setAll(folder);
+	}
+
+	private static String getFoldersContainingSong(TableFolder[] folders, SongData song) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < folders.length; i++) {
+			SongData[] songs = folders[i].getSong();
+			for (int j = 0; j < songs.length; j++) {
+				SongData ts = songs[j];
+				if((ts.getMd5().length() != 0 && song.getMd5().length() != 0 && ts.getMd5().equals(song.getMd5())) ||
+						(ts.getMd5().length() != 0 && song.getMd5().length() != 0 && ts.getSha256().equals(song.getSha256()))) {
+					if (sb.length() > 0) {
+						sb.append(", ");
+					}
+					sb.append(folders[i].getName());
+					continue;
+				}
+			}
+		}
+		if (sb.length() == 0) {
+			return "None";
+		} else {
+			return sb.toString();
+		}
+	}
+
+	private void displayChartDetailsDialog(SongData song) {
+		if (song == null) return;
+		TableEditorView.displayChartDetailsDialog(songdb, song, "In custom folder(s):\n" + 
+				getFoldersContainingSong(folders.getItems().toArray(new TableFolder[0]), song));
 	}
 }

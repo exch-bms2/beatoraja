@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.SkinNote.SkinLane;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -70,20 +72,24 @@ public class LaneRenderer {
 		blank = new TextureRegion(new Texture(hp));
 		hp.dispose();
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 18;
-		font = generator.generateFont(parameter);
-		generator.dispose();
+		try {
+			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+					Gdx.files.internal(main.main.getConfig().getSystemfontpath()));
+			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+			parameter.size = 18;
+			font = generator.generateFont(parameter);
+			generator.dispose();
+		} catch (GdxRuntimeException e) {
+			Logger.getGlobal().severe("Practice Font読み込み失敗");
+		}
 
 		this.skin = (PlaySkin) main.getSkin();
-		this.config = main.main.getPlayerResource().getPlayerConfig();
+		this.config = main.resource.getPlayerConfig();
 		this.playconfig = config.getPlayConfig(model.getMode()).getPlayconfig().clone();
 
 		init(model);
 
-		for (CourseData.CourseDataConstraint i : main.main.getPlayerResource().getConstraint()) {
+		for (CourseData.CourseDataConstraint i : main.resource.getConstraint()) {
 			if (i == NO_SPEED) {
 				playconfig.setHispeed(1.0f);
 				playconfig.setLanecover(0);
@@ -254,8 +260,8 @@ public class LaneRenderer {
 			offsetH += offset.h;
 		}
 		
-		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
-				+ config.getJudgetiming();
+		time = (main.timer.isTimerOn(TIMER_PLAY) ? time - main.timer.getTimer(TIMER_PLAY) : 
+			(main.timer.isTimerOn(141) ? time - main.timer.getTimer(141) : 0)) + config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;
 			pos = 0;
@@ -305,16 +311,16 @@ public class LaneRenderer {
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
 			for (int lane = 0; lane < lanes.length; lane++) {
-				final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion(lane);
+				final long[][] judgetime = main.getJudgeManager().getJudgeTimeRegion(lane);
 				for (int i = pos; i < timelines.length; i++) {
 					final TimeLine tl = timelines[i];
 					if (tl.getMicroTime() >= microtime) {
-						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * (i > 0 ? timelines[i - 1].getScroll() : 1.0) * rxhs * 1000
+						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * (i > 0 ? timelines[i - 1].getScroll() : 1.0) * rxhs
 								/ (tl.getMicroTime() - (i > 0
 										? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
 						for (int j = color.length - 1; j >= 0; j--) {
 							sprite.setColor(color[j]);
-							int nj = j > 0 ? judgetime[j - 1][1] : 0;
+							long nj = j > 0 ? judgetime[j - 1][1] : 0;
 							sprite.draw(blank, lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
 									(float) ((judgetime[j][1] - nj) * rate));
 						}
@@ -346,9 +352,10 @@ public class LaneRenderer {
 					}
 					for (Rectangle r : playerr) {
 						// TODO 数値もスキンベースへ移行
-						sprite.draw(font, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
-								(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20),
-								Color.valueOf("40c0c0"));
+						if(font != null) {
+							sprite.draw(font, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
+									(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20), Color.valueOf("40c0c0"));							
+						}
 					}
 				}
 
@@ -359,8 +366,10 @@ public class LaneRenderer {
 						}
 						for (Rectangle r : playerr) {
 							// TODO 数値もスキンベースへ移行
-							sprite.draw(font, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20),
-									Color.valueOf("00c000"));
+							if(font != null) {
+								sprite.draw(font, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20), Color.valueOf("00c000"));
+							}
+							
 						}
 
 					}
@@ -370,8 +379,9 @@ public class LaneRenderer {
 						}
 						for (Rectangle r : playerr) {
 							// TODO 数値もスキンベースへ移行
-							sprite.draw(font, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2,
-									(float) (y + 20), Color.valueOf("c0c000"));
+							if(font != null) {
+								sprite.draw(font, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20), Color.valueOf("c0c000"));								
+							}
 						}
 					}
 
@@ -405,7 +415,7 @@ public class LaneRenderer {
 		sprite.setBlend(0);
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		y = orgy;
-		final long now = main.main.getNowTime();
+		final long now = main.timer.getNowTime();
 		
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
@@ -429,7 +439,7 @@ public class LaneRenderer {
 				if (note != null) {
 					//4分のタイミングでノートを拡大する
 					float dstx = lanes[lane].region.x + offsetX;
-					float dsty = (float) y + offsetY;
+					float dsty = (float) y + offsetY - offsetH / 2;
 					float dstw = lanes[lane].region.width + offsetW;
 					float dsth = scale + offsetH;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
@@ -486,8 +496,9 @@ public class LaneRenderer {
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
+								final float dscale = dsth > scale ? (dsth - scale) / 2 : 0;
 								this.drawLongNote(sprite, lanes[lane].longImage, dstx, (float) (dsty + dy), dstw,
-										(float) (dsty < (lanes[lane].region.y - (dsth - scale) / 2) ? dsty - (lanes[lane].region.y - (dsth - scale) / 2) : dy), dsth, lane,
+										(float) (dsty < (lanes[lane].region.y - dscale) ? dsty - (lanes[lane].region.y -dscale) : dy), dsth, lane,
 										ln);
 							}
 							// System.out.println(dy);
@@ -495,7 +506,7 @@ public class LaneRenderer {
 					} else if (note instanceof MineNote) {
 						// draw mine note
 						if (tl.getMicroTime() >= microtime) {
-							sprite.draw(lanes[lane].mineImage, lanes[lane].region.x, (float) y, lanes[lane].region.width, scale);								
+							sprite.draw(lanes[lane].mineImage, dstx, dsty, dstw, dsth);
 						}
 					}
 				}
@@ -515,7 +526,7 @@ public class LaneRenderer {
 		// TODO dstnote2をレーン毎に変更
 		if (lanes[0].dstnote2 != Integer.MIN_VALUE) {
 			//遅BADからノースピの速度で落下
-			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] ) * 1000;
+			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] );
 			double stopTime;
 			double orgy2 = lanes[0].dstnote2;
 			if(orgy2 < -lanes[0].region.height) orgy2 = -lanes[0].region.height;
