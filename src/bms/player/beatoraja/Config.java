@@ -162,6 +162,7 @@ public class Config implements Validatable {
 	private int irSendCount = 5;
 
 	private boolean useDiscordRPC = false;
+	private boolean setClipboardScreenshot = false;
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
@@ -384,6 +385,14 @@ public class Config implements Validatable {
 
 	public void setUseDiscordRPC(boolean useDiscordRPC) {
 		this.useDiscordRPC = useDiscordRPC;
+	}
+	
+	public boolean isSetClipboardWhenScreenshot() {
+		return setClipboardScreenshot;
+	}
+
+	public void setClipboardWhenScreenshot(boolean setClipboardScreenshot) {
+		this.setClipboardScreenshot = setClipboardScreenshot;
 	}
 
 	public boolean isUpdatesong() {

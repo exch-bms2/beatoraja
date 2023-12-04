@@ -383,6 +383,7 @@
                 <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" text="%CACHE_SKIN_IMAGE" />
                     <CheckBox fx:id="discord" mnemonicParsing="false" prefHeight="25.0" text="%DISCORD_RPC" />
+                    <CheckBox fx:id="clipboardScreenshot" mnemonicParsing="false" prefHeight="25.0" text="%CLIPBOARD_SCREENSHOT" />
                     <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%IMPORT_LR2_SCORE">
                         <VBox.margin>
                             <Insets top="10.0" />
