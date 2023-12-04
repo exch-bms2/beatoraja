@@ -371,7 +371,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					qr.update(conn, "DELETE FROM song WHERE " + dsql.toString(), param);					
 				}
 				
-				Arrays.stream(paths).parallel().forEach((p) -> {
+				Arrays.asList(paths).parallelStream().forEach((p) -> {
 					try {
 						BMSFolder folder = new BMSFolder(p, bmsroot);
 						folder.processDirectory(property);
@@ -465,7 +465,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			}
 			
 			if(!containsBMS) {
-				dirs.forEach((bf) -> {
+				dirs.parallelStream().forEach((bf) -> {
 					try {
 						bf.processDirectory(property);
 					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
