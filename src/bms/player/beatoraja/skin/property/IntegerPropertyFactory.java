@@ -1029,7 +1029,14 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 		sort(12, (state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSort() : Integer.MIN_VALUE)),
-		gaugetype_1p(40, (state) -> (state.resource.getPlayerConfig().getGauge())),
+		gaugetype_1p(40, (state) -> {
+			if(state instanceof BMSPlayer) {
+				return ((BMSPlayer)state).getGauge().getType();
+			} else if(state instanceof AbstractResult) {
+				return ((AbstractResult) state).getGaugeType();
+			}
+			return state.resource.getPlayerConfig().getGauge();
+		}),
 		option_1p(42, (state) -> {
 			if(state instanceof BMSPlayer) {
 				return ((BMSPlayer)state).getOptionInformation().randomoption;
