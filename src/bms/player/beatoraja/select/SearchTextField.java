@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -27,6 +28,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  * @author exch
  */
 public class SearchTextField extends Stage {
+	
+	// TOTO ユーザー定義のBitmapFontも使えるようにしたい
+	
 	/**
 	 * フォント生成用クラス
 	 */
@@ -48,7 +52,7 @@ public class SearchTextField extends Stage {
 		final Rectangle r = ((MusicSelectSkin) selector.getSkin()).getSearchTextRegion();
 
 		try {
-			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+			generator = new FreeTypeFontGenerator(Gdx.files.internal(selector.main.getConfig().getSystemfontpath()));
 			FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 			parameter.size = (int) r.height;
 			parameter.incremental = true;
@@ -57,8 +61,19 @@ public class SearchTextField extends Stage {
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(); // background
 			textFieldStyle.font = searchfont;
 			textFieldStyle.fontColor = Color.WHITE;
-			textFieldStyle.cursor = new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 8, 8));
-			textFieldStyle.selection = new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 2, 8));
+			
+			Pixmap cursorp = new Pixmap(8, 8, Pixmap.Format.RGBA8888);
+			cursorp.setColor(Color.toIntBits(255, 255, 255, 255));
+			cursorp.fill();
+			textFieldStyle.cursor = new TextureRegionDrawable(new TextureRegion(new Texture(cursorp)));
+			cursorp.dispose();
+
+			Pixmap selectionp = new Pixmap(2, 8, Pixmap.Format.RGBA8888);
+			selectionp.setColor(Color.toIntBits(255, 255, 255, 255));
+			selectionp.fill();
+			textFieldStyle.selection = new TextureRegionDrawable(new TextureRegion(new Texture(selectionp)));
+			selectionp.dispose();
+			
 			textFieldStyle.messageFont = searchfont;
 			textFieldStyle.messageFontColor = Color.GRAY;
 
@@ -138,10 +153,12 @@ public class SearchTextField extends Stage {
 	}
 
 	public void unfocus(MusicSelector selector) {
-		search.setText("");
-		search.setMessageText("search song");
-		search.getStyle().messageFontColor = Color.GRAY;
-		search.getOnscreenKeyboard().show(false);
+		if(search != null) {
+			search.setText("");
+			search.setMessageText("search song");
+			search.getStyle().messageFontColor = Color.GRAY;
+			search.getOnscreenKeyboard().show(false);			
+		}
 		setKeyboardFocus(null);
 		selector.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
 	}

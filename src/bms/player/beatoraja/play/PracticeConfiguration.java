@@ -6,6 +6,7 @@ import java.nio.file.*;
 import bms.model.BMSModel;
 import bms.model.Mode;
 import bms.model.TimeLine;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
@@ -51,7 +52,7 @@ public class PracticeConfiguration {
 	
 	private static final String[] GRAPHTYPE = {"NOTETYPE", "JUDGE", "EARLYLATE"};
 
-	public void create(BMSModel model) {
+	public void create(BMSModel model, Config config) {
 		property.judgerank = model.getJudgerank();
 		property.endtime = model.getLastTime() + 1000;
 		Path p = Paths.get("practice/" + model.getSHA256() + ".json");
@@ -72,7 +73,7 @@ public class PracticeConfiguration {
 			property.total = model.getTotal();
 		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+				Gdx.files.internal(config.getSystemfontpath()));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 18;
 		titlefont = generator.generateFont(parameter);
@@ -106,14 +107,6 @@ public class PracticeConfiguration {
 		return gauge;
 	}
 	
-	public void setModel(BMSModel model) {
-		if(this.model == null) {
-			create(model);
-		} else {
-			this.model = model;
-		}
-	}
-
 	public void processInput(BMSPlayerInputProcessor input) {
 		final int values = model.getMode().player == 2 ? 12 : 10;
 		if (input.isControlKeyPressed(ControlKeys.UP)) {
