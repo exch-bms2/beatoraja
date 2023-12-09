@@ -75,9 +75,6 @@ public class BMSPlayer extends MainState {
 
 	static final int TIME_MARGIN = 5000;
 
-	public static final int SOUND_READY = 0;
-	public static final int SOUND_PLAYSTOP = 1;
-
 	private int state = STATE_PRELOAD;
 
 	public static final int STATE_PRELOAD = 0;
@@ -477,7 +474,7 @@ public class BMSPlayer extends MainState {
 
 		if (autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
 			getScoreDataProperty().setTargetScore(0, null, 0, null, model.getTotalNotes());
-			practice.create(model);
+			practice.create(model, main.getConfig());
 			state = STATE_PRACTICE;
 		} else {
 			
