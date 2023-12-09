@@ -23,21 +23,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	private TextureRegion backtex;
 	private TextureRegion shapetex;
+	private TextureRegion cursortex;
+	
 	private Pixmap back = null;
 	private Pixmap shape = null;
-
-	/**
-	 * 開始位置のカーソル(プラクティス)
-	 */
-	private TextureRegion startcursor;
-	/**
-	 * 現在位置のカーソル(プレイ中)
-	 */
-	private TextureRegion nowcursor;
-	/**
-	 * 終了位置のカーソル(プラクティス)
-	 */
-	private TextureRegion endcursor;
+	private Pixmap cursor = null;
 
 	private BMSModel model;
 	private SongData current;
@@ -107,20 +97,6 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		this.isOrderReverse = orderReverse == 1;
 		this.isNoGap = noGap == 1;
 		pastNotes = 0;
-
-		Pixmap bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-		bp.drawPixel(0, 0, Color.toIntBits(255, 128, 255, 128));
-		startcursor = new TextureRegion(new Texture(bp));
-		bp.dispose();
-		bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-		bp.drawPixel(0, 0, Color.toIntBits(255, 128, 128, 255));
-		endcursor = new TextureRegion(new Texture(bp));
-		bp.dispose();
-		bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-		bp.drawPixel(0, 0, Color.toIntBits(255, 255, 255, 255));
-		nowcursor = new TextureRegion(new Texture(bp));
-		bp.dispose();
-
 	}
 	
 	public void prepare(long time, MainState state) {
@@ -183,15 +159,24 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
 		draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height);
-		// スタートカーソル描画
+		
+		final int oldw = cursor != null ? cursor.getWidth() : 0;
+		final int oldh = cursor != null ? cursor.getHeight() : 0;
+		final int w = data.length * 5;
+		final int h = max * 5;
+		cursor.setColor(TRANSPARENT_COLOR);
+		cursor.fill();
+		// スタートカーソル描画		
 		if (starttime >= 0) {
-			int dx = (int) (starttime * region.width / (data.length * 1000));
-			sprite.draw(startcursor, region.x + dx, region.y, 1, region.height);
+			int dx = (int) (starttime * w / (data.length * 1000));
+			cursor.setColor(Color.toIntBits(255, 128, 255, 128));
+			cursor.fillRectangle(dx, 0, 3, h);
 		}
 		// エンドカーソル描画
 		if (endtime >= 0) {
-			int dx = (int) (endtime * region.width / (data.length * 1000));
-			sprite.draw(endcursor, region.x + dx, region.y, 1, region.height);
+			int dx = (int) (endtime * w / (data.length * 1000));
+			cursor.setColor(Color.toIntBits(255, 128, 128, 255));
+			cursor.fillRectangle(dx, 0, 3, h);
 		}
 		// 現在カーソル描画
 		if (state instanceof BMSPlayer && state.timer.isTimerOn(SkinProperty.TIMER_PLAY)) {
@@ -199,9 +184,20 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			if (freq > 0) {
 				currenttime *= freq;
 			}
-			int dx = (int) (currenttime * region.width / (data.length * 1000));
-			sprite.draw(nowcursor, region.x + dx, region.y, 1, region.height);
+			int dx = (int) (currenttime * w / (data.length * 1000));
+			cursor.setColor(Color.toIntBits(255, 255, 255, 255));
+			cursor.fillRectangle(dx, 0, 3, h);
 		}
+		
+		if(cursortex == null) {
+			cursortex = new TextureRegion(new Texture(cursor));
+		} else if(oldw != w || oldh != h) {
+			cursortex.getTexture().dispose();
+			cursortex = new TextureRegion(new Texture(cursor));
+		} else {
+			cursortex.getTexture().draw(cursor, 0, 0);
+		}
+		draw(sprite, cursortex, region.x, region.y + region.height, region.width, -region.height);
 	}
 	
 	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
@@ -326,18 +322,23 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if(shape == null) {
 			back = new Pixmap(w, h, Pixmap.Format.RGBA8888);									
 			shape = new Pixmap(w, h, Pixmap.Format.RGBA8888);
+			cursor = new Pixmap(w, h, Pixmap.Format.RGBA8888);
 			refresh = true;
 		} else if(oldw != w || oldh != h) {
 			back.dispose();				
-			shape.dispose();				
+			shape.dispose();
+			cursor.dispose();
 			back = new Pixmap(w, h, Pixmap.Format.RGBA8888);									
 			shape = new Pixmap(w, h, Pixmap.Format.RGBA8888);						
+			cursor = new Pixmap(w, h, Pixmap.Format.RGBA8888);						
 			refresh = true;
 		} else if(updateall){
 			back.setColor(TRANSPARENT_COLOR);
 			back.fill();
 			shape.setColor(TRANSPARENT_COLOR);
-			shape.fill();			
+			shape.fill();
+			cursor.setColor(TRANSPARENT_COLOR);
+			cursor.fill();
 			refresh = true;
 		}
 
@@ -432,11 +433,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if (shapetex != null) {
 			backtex.getTexture().dispose();
 			shapetex.getTexture().dispose();
-			startcursor.getTexture().dispose();
-			endcursor.getTexture().dispose();
-			nowcursor.getTexture().dispose();
+			cursortex.getTexture().dispose();
 			back.dispose();
 			shape.dispose();
+			cursor.dispose();
 			shapetex = null;
 		}
 		if(chips != null) {
