@@ -77,6 +77,7 @@ public class PreviewMusicProcessor {
 
         public void run() {
             audio.play(defaultMusic, config.getAudioConfig().getSystemvolume(), true);
+            playing = defaultMusic;
             currentVolume = config.getAudioConfig().getSystemvolume();
             while(!stop) {
                 if(!commands.isEmpty()) {
