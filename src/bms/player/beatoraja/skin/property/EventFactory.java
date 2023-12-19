@@ -97,7 +97,7 @@ public class EventFactory {
 		 */
 		keyconfig(13, (state) -> {
 			if(state instanceof MusicSelector) {
-				((MusicSelector) state).changeState(MainStateType.CONFIG);
+				state.main.changeState(MainStateType.CONFIG);
 			}
 		}),
 		/**
@@ -105,7 +105,7 @@ public class EventFactory {
 		 */
 		skinconfig(14, (state) -> {
 			if(state instanceof MusicSelector) {
-				((MusicSelector) state).changeState(MainStateType.SKINCONFIG);
+				state.main.changeState(MainStateType.SKINCONFIG);
 			}			
 		}),
 		play(15, (state) -> {
@@ -586,10 +586,9 @@ public class EventFactory {
 		extranotedepth(350, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int depthlength = 4;
-				final MusicSelector selector = (MusicSelector) state;
-				PlayerConfig config = selector.resource.getPlayerConfig();
+				PlayerConfig config = state.resource.getPlayerConfig();
 				config.setExtranoteDepth((config.getExtranoteDepth() + (arg1 >= 0 ? 1 : depthlength - 1)) % depthlength);
-				selector.play(OPTION_CHANGE);
+				state.play(OPTION_CHANGE);
 			}
 		}),
 		minemode(351, (state, arg1) -> {

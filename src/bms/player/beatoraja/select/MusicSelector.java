@@ -90,14 +90,6 @@ public class MusicSelector extends MainState {
 	
 	private int panelstate;
 
-	public static final int SOUND_BGM = 0;
-	public static final int SOUND_SCRATCH = 1;
-	public static final int SOUND_FOLDEROPEN = 2;
-	public static final int SOUND_FOLDERCLOSE = 3;
-	public static final int SOUND_OPTIONCHANGE = 4;
-	public static final int SOUND_OPTIONOPEN = 5;
-	public static final int SOUND_OPTIONCLOSE = 6;
-
 	private BMSPlayerMode play = null;
 
 	private SongData playedsong = null;
@@ -306,7 +298,7 @@ public class MusicSelector extends MainState {
 						resource.setRivalScoreData(current.getRivalScore());
 						
 						playedsong = song;
-						changeState(MainStateType.DECIDE);
+						main.changeState(MainStateType.DECIDE);
 					} else {
 						main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 					}
@@ -342,7 +334,7 @@ public class MusicSelector extends MainState {
 					}
 					
 					playedsong = song;
-					changeState(MainStateType.DECIDE);
+					main.changeState(MainStateType.DECIDE);
 				} else {
 					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 				}
@@ -368,7 +360,7 @@ public class MusicSelector extends MainState {
 						resource.clear();
 						resource.setAutoPlaySongs(paths.toArray(Path.class), false);
 						if(resource.nextSong()) {
-							changeState(MainStateType.DECIDE);
+							main.changeState(MainStateType.DECIDE);
 						}
 					}
 				}
@@ -381,9 +373,9 @@ public class MusicSelector extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		if (input.getControlKeyState(ControlKeys.NUM6)) {
-			changeState(MainStateType.CONFIG);
+			main.changeState(MainStateType.CONFIG);
 		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
-			changeState(MainStateType.SKINCONFIG);
+			main.changeState(MainStateType.SKINCONFIG);
 		}
 
 		musicinput.input();
@@ -391,17 +383,13 @@ public class MusicSelector extends MainState {
 
 	public void shutdown() {
 		preview.stop();
-	}
-	
-	public void changeState(MainStateType type) {
-		main.changeState(type);
 		if (search != null) {
 			search.unfocus(this);
 		}
 		banners.disposeOld();
 		stagefiles.disposeOld();
 	}
-
+	
 	public void select(Bar current) {
 		if (current instanceof DirectoryBar) {
 			if (bar.updateBar(current)) {
@@ -530,7 +518,7 @@ public class MusicSelector extends MainState {
 			resource.setRankingData(songrank);
 			resource.setRivalScoreData(null);
 
-			changeState(MainStateType.DECIDE);
+			main.changeState(MainStateType.DECIDE);
 			return true;
 		}
 		return false;
