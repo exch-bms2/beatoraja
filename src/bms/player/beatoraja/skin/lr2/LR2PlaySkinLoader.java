@@ -551,7 +551,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				noteobj = new SkinNoteDistributionGraph(values[1], values[15], values[16], values[17], values[18]);
+				noteobj = new SkinNoteDistributionGraph(values[1], values[15], values[16], values[17], values[18], values[19]);
 				gauge = new Rectangle(0, 0, values[11], values[12]);
 				skin.add(noteobj);
 			}
