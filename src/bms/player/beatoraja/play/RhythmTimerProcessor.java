@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.LongArray;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 
+import java.util.Arrays;
+
 public class RhythmTimerProcessor {
 
 	private long[] sectiontimes;
@@ -64,21 +66,47 @@ public class RhythmTimerProcessor {
 		rhythmtimer += deltatime * (100 - nowbpm * player.getPlaySpeed() / 60) / 100;
 		player.timer.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
-		if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / freq)) <= player.timer.getNowMicroTime(TIMER_PLAY)) {
+		if(sections < sectiontimes.length && (sectiontimes[sections] * 100 / freq) <= player.main.getNowMicroTime(TIMER_PLAY)) {
 			sections++;;
 			player.timer.setTimerOn(TIMER_RHYTHM);
 			rhythmtimer = micronow;
 		}
 		if(quarterNoteTimes.length > 0) {
-			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / freq)) <= player.timer.getNowMicroTime(TIMER_PLAY)) {
+			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * 100 / freq) <= player.main.getNowMicroTime(TIMER_PLAY)) {
 				quarterNote++;
 				nowQuarterNoteTime = now;
-			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / nowbpm) * (100 / freq)) <= now)  {
+			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / nowbpm) * 100 / freq) <= now)  {
 				nowQuarterNoteTime = now;
 			}
 		}
 	}
-	
+
+	public void setAtStart(BMSPlayer player, int freq) {
+		final long now = player.main.getNowTime();
+		final long micronow = player.main.getNowMicroTime();
+
+		rhythmtimer = micronow;
+		player.main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
+		nowQuarterNoteTime = now;
+
+		sections = Arrays.binarySearch(sectiontimes, player.main.getNowMicroTime(TIMER_PLAY) * freq / 100) + 1;
+		if (sections <= 0) sections *= -1;
+
+		if (quarterNoteTimes.length != 0) {
+			quarterNote = Arrays.binarySearch(quarterNoteTimes, player.main.getNowMicroTime(TIMER_PLAY) * freq / 100) + 1;
+			if (quarterNote <= 0) quarterNote *= -1;
+		}
+
+	}
+
+	public int getSections() {
+		return sections;
+	}
+
+	public int getQuarterNote() {
+		return quarterNote;
+	}
+
 	public long getNowQuarterNoteTime() {
 		return nowQuarterNoteTime;
 	}
