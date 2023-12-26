@@ -533,12 +533,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					if (bmsondecoder == null) {
 						bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
 					}
-					model = bmsondecoder.decode(path);
+					try {
+						model = bmsondecoder.decode(path);
+					} catch (Exception e) {
+						Logger.getGlobal().severe("Error while decoding bmson at path: " + pathname + e.getMessage());
+					}
 				} else {
 					if (bmsdecoder == null) {
 						bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
 					}
-					model = bmsdecoder.decode(path);
+					try {
+						model = bmsdecoder.decode(path);
+					} catch (Exception e) {
+						Logger.getGlobal().severe("Error while decoding bms at path: " + pathname + e.getMessage());
+					}
 				}
 
 				if (model == null) {
