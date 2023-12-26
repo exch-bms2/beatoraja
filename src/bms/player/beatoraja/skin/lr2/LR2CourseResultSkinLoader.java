@@ -68,7 +68,7 @@ enum CourseCommand implements LR2SkinLoader.Command<LR2CourseResultSkinLoader> {
 
         public void execute(LR2CourseResultSkinLoader loader, String[] str) {
             int[] values = loader.parseInt(str);
-            loader.noteobj = new SkinNoteDistributionGraph(values[1], values[15], values[16], values[17], values[18]);
+            loader.noteobj = new SkinNoteDistributionGraph(values[1], values[15], values[16], values[17], values[18], values[19]);
             loader.gauge = new Rectangle(0, 0, values[11], values[12]);
             loader.skin.add(loader.noteobj);
 

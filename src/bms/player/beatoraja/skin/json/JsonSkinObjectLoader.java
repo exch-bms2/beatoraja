@@ -282,7 +282,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		}
 		for (JsonSkin.JudgeGraph ggraph : sk.judgegraph) {
 			if (dst.id.equals(ggraph.id)) {
-				SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type, ggraph.delay, ggraph.backTexOff, ggraph.orderReverse, ggraph.noGap);
+				SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type, ggraph.delay, ggraph.backTexOff, ggraph.orderReverse, ggraph.noGap, ggraph.noGapX);
 				obj = st;
 				break;
 			}

@@ -45,9 +45,9 @@ public class PracticeConfiguration {
 	private PracticeProperty property = new PracticeProperty();
 
 	private SkinNoteDistributionGraph[] graph = { 
-			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_NORMAL, 500, 0, 0, 0),
-			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_JUDGE, 500, 0, 0, 0),
-			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_EARLYLATE, 500, 0, 0, 0),
+			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_NORMAL, 500, 0, 0, 0, 0),
+			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_JUDGE, 500, 0, 0, 0, 0),
+			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_EARLYLATE, 500, 0, 0, 0, 0),
 	};
 	
 	private static final String[] GRAPHTYPE = {"NOTETYPE", "JUDGE", "EARLYLATE"};

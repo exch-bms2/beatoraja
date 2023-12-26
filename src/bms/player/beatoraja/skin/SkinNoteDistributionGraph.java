@@ -67,6 +67,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private int delay = 500;
 	private boolean isOrderReverse = false;
 	private boolean isNoGap = false;
+	private boolean isNoGapX = false;
 
 	/*
 	 * 処理済みノート数 プレイ時は処理済みノート数に変化があった時だけ更新する
@@ -82,20 +83,21 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private static final Color TRANSPARENT_COLOR = Color.valueOf("00000000");
 
 	public SkinNoteDistributionGraph() {
-		this(TYPE_NORMAL, 500, 0, 0, 0);
+		this(TYPE_NORMAL, 500, 0, 0, 0, 0);
 	}
 
-	public SkinNoteDistributionGraph(int type, int delay, int backTexOff, int orderReverse, int noGap) {
-		this(null, type, delay, backTexOff, orderReverse, noGap);
+	public SkinNoteDistributionGraph(int type, int delay, int backTexOff, int orderReverse, int noGap, int noGapX) {
+		this(null, type, delay, backTexOff, orderReverse, noGap, noGapX);
 	}
 	
-	public SkinNoteDistributionGraph(Pixmap[] chips, int type, int delay, int backTexOff, int orderReverse, int noGap) {
+	public SkinNoteDistributionGraph(Pixmap[] chips, int type, int delay, int backTexOff, int orderReverse, int noGap, int noGapX) {
 		this.chips = chips;
 		this.type = type;
 		this.isBackTexOff = backTexOff == 1;
 		this.delay = delay;
 		this.isOrderReverse = orderReverse == 1;
 		this.isNoGap = noGap == 1;
+		this.isNoGapX = noGapX == 1;
 		pastNotes = 0;
 	}
 	
@@ -391,7 +393,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				for (int j = 0, k = n[0], index = 0; j < max && index < n.length;) {
 					if (k > 0) {
 						k--;
-						shape.drawPixmap(chips[index], 0, 0, 1, 1, i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
+						shape.drawPixmap(chips[index], 0, 0, 1, 1, i * 5, j * 5, 4 + (isNoGapX ? 1 : 0), 4 + (isNoGap ? 1 : 0));
 						j++;
 					} else {
 						index++;
@@ -405,7 +407,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				for (int j = 0, k = n[n.length - 1], index = n.length - 1; j < max && index < n.length;) {
 					if (k > 0) {
 						k--;
-						shape.drawPixmap(chips[index], 0, 0, 1, 1, i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
+						shape.drawPixmap(chips[index], 0, 0, 1, 1, i * 5, j * 5, 4 + (isNoGapX ? 1 : 0), 4 + (isNoGap ? 1 : 0));
 						j++;
 					} else {
 						index--;
