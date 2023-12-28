@@ -410,7 +410,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void execute(MusicSelectCommand command) {
-		command.execute(this);
+		command.function.accept(this);
 	}
 
 	private void readCourse(BMSPlayerMode mode) {
