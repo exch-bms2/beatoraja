@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.Mode;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.SerializationException;
 
@@ -72,11 +74,16 @@ public class PracticeConfiguration {
 		if(property.total == 0) {
 			property.total = model.getTotal();
 		}
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal(config.getSystemfontpath()));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 18;
-		titlefont = generator.generateFont(parameter);
+		try {
+			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+					Gdx.files.internal(config.getSystemfontpath()));
+			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+			parameter.size = 18;
+			titlefont = generator.generateFont(parameter);
+			generator.dispose();
+		} catch (GdxRuntimeException e) {
+			Logger.getGlobal().warning("Practice Font読み込み失敗");
+		}
 		
 		for(int i = 0; i < graph.length; i++) {
 			graph[i].setDestination(0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
@@ -262,34 +269,43 @@ public class PracticeConfiguration {
 	public void draw(Rectangle r, SkinObjectRenderer sprite, long time, MainState state) {
 		float x = r.x + r.width / 8;
 		float y = r.y + r.height * 7 / 8;
-		sprite.draw(titlefont, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
-				(property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y, cursorpos == 0 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
-				(property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22,cursorpos == 1 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44,cursorpos == 2 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "GAUGE CATEGORY : " + property.gaugecategory.name(), x, y - 66,cursorpos == 3 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "GAUGE VALUE : " + property.startgauge, x, y - 88, cursorpos == 4 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "JUDGERANK : " + property.judgerank, x, y - 110, cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "TOTAL : " + (int)property.total, x, y - 132, cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "FREQUENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "GRAPHTYPE : " + GRAPHTYPE[property.graphtype], x, y - 176, cursorpos == 8 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 198, cursorpos == 9 ? Color.YELLOW : Color.CYAN);
-		if (model.getMode().player == 2) {
-			sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 242, cursorpos == 11 ? Color.YELLOW : Color.CYAN);
-		}
+		if(titlefont != null) {
+			sprite.draw(titlefont, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
+					(property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y, cursorpos == 0 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
+					(property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22,cursorpos == 1 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44,cursorpos == 2 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "GAUGE CATEGORY : " + property.gaugecategory.name(), x, y - 66,cursorpos == 3 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "GAUGE VALUE : " + property.startgauge, x, y - 88, cursorpos == 4 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "JUDGERANK : " + property.judgerank, x, y - 110, cursorpos == 5 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "TOTAL : " + (int)property.total, x, y - 132, cursorpos == 6 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "FREQUENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "GRAPHTYPE : " + GRAPHTYPE[property.graphtype], x, y - 176, cursorpos == 8 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 198, cursorpos == 9 ? Color.YELLOW : Color.CYAN);
+			if (model.getMode().player == 2) {
+				sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
+				sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 242, cursorpos == 11 ? Color.YELLOW : Color.CYAN);
+			}
 
-		if (state.resource.mediaLoadFinished()) {
-			sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 276, Color.ORANGE);
-		}
-		
-		String[] judge = {"PGREAT :","GREAT  :","GOOD   :", "BAD    :", "POOR   :", "KPOOR  :"};
-		for(int i = 0; i < 6; i++) {
-			sprite.draw(titlefont, String.format("%s %d %d %d",judge[i], state.getJudgeCount(i, true) + state.getJudgeCount(i, false), state.getJudgeCount(i, true), state.getJudgeCount(i, false)), x + 250, y - (i * 22), Color.WHITE);
+			if (state.resource.mediaLoadFinished()) {
+				sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 276, Color.ORANGE);
+			}
+			
+			String[] judge = {"PGREAT :","GREAT  :","GOOD   :", "BAD    :", "POOR   :", "KPOOR  :"};
+			for(int i = 0; i < 6; i++) {
+				sprite.draw(titlefont, String.format("%s %d %d %d",judge[i], state.getJudgeCount(i, true) + state.getJudgeCount(i, false), state.getJudgeCount(i, true), state.getJudgeCount(i, false)), x + 250, y - (i * 22), Color.WHITE);
+			}			
 		}
 
 		graph[property.graphtype].draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
 				property.endtime, property.freq / 100f);
+	}
+	
+	public void dispose() {
+		if(titlefont != null) {
+			titlefont.dispose();
+			titlefont = null;
+		}
 	}
 
 	/**

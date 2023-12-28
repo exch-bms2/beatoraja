@@ -993,6 +993,7 @@ public class BMSPlayer extends MainState {
 	public void dispose() {
 		super.dispose();
 		lanerender.dispose();
+		practice.dispose();
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
