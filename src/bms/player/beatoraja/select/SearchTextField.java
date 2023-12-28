@@ -124,15 +124,12 @@ public class SearchTextField extends Stage {
 			search.setFocusTraversal(false);
 
 			search.setVisible(true);
-			search.addListener(new EventListener() {
-				@Override
-				public boolean handle(Event e) {
-					if (e.isHandled()) {
-						selector.main.getInputProcessor().getKeyBoardInputProcesseor()
-								.setTextInputMode(getKeyboardFocus() != null);
-					}
-					return false;
+			search.addListener((e) -> {
+				if (e.isHandled()) {
+					selector.main.getInputProcessor().getKeyBoardInputProcesseor()
+							.setTextInputMode(getKeyboardFocus() != null);
 				}
+				return false;
 			});			
 
 			screen = new Group();
@@ -176,6 +173,6 @@ public class SearchTextField extends Stage {
 	}
 
 	public Rectangle getSearchBounds() {
-		return new Rectangle(search.getX(), search.getY(), search.getWidth(), search.getHeight());
+		return search != null ? new Rectangle(search.getX(), search.getY(), search.getWidth(), search.getHeight()) : null;
 	}
 }
