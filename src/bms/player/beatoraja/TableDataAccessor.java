@@ -6,6 +6,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import bms.model.BMSDecoder;
 import bms.model.Mode;
@@ -38,7 +40,7 @@ public class TableDataAccessor {
 	}
 
 	public void loadNewTableData(String[] urls) {
-		HashSet<String> localTables = getLocalTableFilenames();
+		Set<String> localTables = getLocalTableFilenames();
 		Arrays.stream(urls).parallel().forEach(url -> {
 			if (localTables.contains(getFileName(url) + ".bmt")) {
 				return;
@@ -51,19 +53,13 @@ public class TableDataAccessor {
 		});		
 	}
 
-	private HashSet<String> getLocalTableFilenames() {
-		HashSet<String> set = new HashSet<>();
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
-			for (Path p : paths) {
-				String fileName = p.getFileName().toString();
-				if (fileName.endsWith(".bmt")) {
-					set.add(fileName);
-				}
-			}
+	private Set<String> getLocalTableFilenames() {
+		try (Stream<Path> paths = Files.list(Paths.get(tabledir))) {
+			return paths.map(p -> p.getFileName().toString())
+					.filter(s -> s.toLowerCase().endsWith(".bmt")).collect(Collectors.toSet());
 		} catch (IOException e) {
 			return null;
 		}
-		return set;
 	}
 
 	public HashMap<String,String> readLocalTableNames(String[] urls) {
@@ -105,39 +101,28 @@ public class TableDataAccessor {
 	 * @return 全てのキャッシュされた難易度表データ
 	 */
 	public TableData[] readAll() {
-		List<TableData> result = new ArrayList<TableData>();
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
-			for (Path p : paths) {
-				TableData td = TableData.read(p);
-				if(td != null) {
-					result.add(td);						
-				}
-			}
+		try (Stream<Path> paths = Files.list(Paths.get(tabledir))) {
+			return paths.map(p -> TableData.read(p)).filter(Objects::nonNull).toArray(TableData[]::new);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return result.toArray(new TableData[result.size()]);
+		return new TableData[0];
 	}
 
 	/**
 	 * 指定のキャッシュされた難易度表データを読み込む
 	 * 
-	 * @param name 難易度表URL
+	 * @param url 難易度表URL
 	 * @return キャッシュされた難易度表データ。存在しない場合はnull
 	 */
 	public TableData readCache(String url) {
 		TableData td = null;
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
-			for (Path p : paths) {
-				if (p.getFileName().toString().equals(getFileName(url) + ".bmt")) {
-					td = TableData.read(p);
-					break;
-				}
-			}
+		try (Stream<Path> paths = Files.list(Paths.get(tabledir))) {
+			return paths.filter(p -> p.getFileName().toString().equals(getFileName(url) + ".bmt")).findFirst()
+					.map(p -> TableData.read(p)).orElse(null);
 		} catch (IOException e) {
-
+			return null;
 		}
-		return td;
 	}
 	
 	public TableData read(String filename) {
@@ -195,60 +180,35 @@ public class TableDataAccessor {
 				td.setName(dt.getName());
 				td.setTag(dt.getTag());
 				Mode defaultMode = dt.getMode() != null ? Mode.getMode(dt.getMode()) : null;
-				String[] levels = dt.getLevelDescription();
-				List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
-				for (String lv : levels) {
+				td.setFolder(Stream.of(dt.getLevelDescription()).map(lv -> {
 					TableData.TableFolder tde = new TableData.TableFolder();
 					tde.setName(td.getTag() + lv);
-					List<SongData> hashes = new ArrayList<SongData>();
-					for (DifficultyTableElement dte : dt.getElements()) {
-						if (lv.equals(dte.getLevel())) {
-							SongData sd = toSongData(dte, defaultMode);
-							hashes.add(sd);
-						}
-					}
-					tde.setSong(hashes.toArray(new SongData[hashes.size()]));
-					tdes.add(tde);
-				}
-				td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));
+					tde.setSong(Stream.of(dt.getElements()).filter(dte -> lv.equals(dte.getLevel()))
+							.map(dte -> toSongData(dte, defaultMode)).toArray(SongData[]::new));
+					return tde;
+				}).toArray(TableData.TableFolder[]::new));
 
 				if (dt.getCourse() != null && dt.getCourse().length > 0) {
-					List<CourseData> gname = new ArrayList<CourseData>();
-					for (Course[] course : dt.getCourse()) {
-						for (Course g : course) {
-							CourseData cd = new CourseData();
-							cd.setName(g.getName());
-							SongData[] songs = new SongData[g.getCharts().length];
-							for(int i = 0;i < songs.length;i++) {
-								songs[i] = toSongData(g.getCharts()[i], defaultMode);
-							}
-							cd.setSong(songs);
-							List<CourseData.CourseDataConstraint> l = new ArrayList<>();
-							for(int i = 0;i < g.getConstraint().length;i++) {
-								for (CourseData.CourseDataConstraint constraint : CourseData.CourseDataConstraint.values()) {
-									if (constraint.name.equals(g.getConstraint()[i])) {
-										l.add(constraint);
-										break;
-									}
-								}
-							}
-							cd.setConstraint(l.toArray(new CourseData.CourseDataConstraint[l.size()]));
-							if (g.getTrophy() != null) {
-								List<TrophyData> tr = new ArrayList<TrophyData>();
-								for (Trophy trophy : g.getTrophy()) {
-									TrophyData t = new TrophyData();
-									t.setName(trophy.getName());
-									t.setMissrate((float) trophy.getMissrate());
-									t.setScorerate((float) trophy.getScorerate());
-									tr.add(t);
-								}
-								cd.setTrophy(tr.toArray(new TrophyData[tr.size()]));
-							}
-							gname.add(cd);
-						}
-					}
+					td.setCourse(Stream.of(dt.getCourse()).flatMap(courses -> Stream.of(courses)).map(g -> {
+						CourseData cd = new CourseData();
+						cd.setName(g.getName());
+						cd.setSong(Stream.of(g.getCharts()).map(chart -> toSongData(chart, defaultMode))
+								.toArray(SongData[]::new));
 
-					td.setCourse(gname.toArray(new CourseData[gname.size()]));
+						cd.setConstraint(Stream.of(g.getConstraint()).map(c -> CourseData.CourseDataConstraint.getValue(c))
+								.filter(Objects::nonNull).toArray(CourseData.CourseDataConstraint[]::new));
+
+						if (g.getTrophy() != null) {
+							cd.setTrophy(Stream.of(g.getTrophy()).map(trophy -> {
+								TrophyData t = new TrophyData();
+								t.setName(trophy.getName());
+								t.setMissrate((float) trophy.getMissrate());
+								t.setScorerate((float) trophy.getScorerate());
+								return t;
+							}).toArray(TrophyData[]::new));
+						}
+						return cd;
+					}).toArray(CourseData[]::new));
 				}
 				if(td == null || !td.validate()) {
 					throw new RuntimeException("難易度表の値が不正です");
