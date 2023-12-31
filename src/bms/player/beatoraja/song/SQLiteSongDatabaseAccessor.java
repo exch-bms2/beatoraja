@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import bms.player.beatoraja.SQLiteDatabaseAccessor;
 import bms.player.beatoraja.Validatable;
 import org.apache.commons.dbutils.QueryRunner;
@@ -295,16 +297,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			return;
 		}
 		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll, bmsroot, info);
-		Path[] paths = null;
-		if (path == null) {
-			paths = new Path[bmsroot.length];
-			for (int i = 0; i < paths.length; i++) {
-				paths[i] = Paths.get(bmsroot[i]);
-			}
-		} else {
-			paths = new Path[]{Paths.get(path)};
-		}
-		updater.updateSongDatas(paths);
+		updater.updateSongDatas(path == null ? Stream.of(bmsroot).map(p -> Paths.get(p)) : Stream.of(Paths.get(path)));
 	}
 	
 	/**
@@ -331,7 +324,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		 * @param paths
 		 *            更新するディレクトリ(ルートディレクトリでなくても可)
 		 */
-		public void updateSongDatas(Path[] paths) {
+		public void updateSongDatas(Stream<Path> paths) {
 			long time = System.currentTimeMillis();
 			SongDatabaseUpdaterProperty property = new SongDatabaseUpdaterProperty(Calendar.getInstance().getTimeInMillis() / 1000, info);
 			property.count.set(0);
@@ -370,8 +363,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 									+ dsql.toString(), param);
 					qr.update(conn, "DELETE FROM song WHERE " + dsql.toString(), param);					
 				}
-				
-				Arrays.asList(paths).parallelStream().forEach((p) -> {
+
+				paths.parallel().forEach((p) -> {
 					try {
 						BMSFolder folder = new BMSFolder(p, bmsroot);
 						folder.processDirectory(property);
@@ -447,7 +440,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			property.count.addAndGet(this.processBMSFolder(records, property));
 
 			final int len = folders.size();
-			for (BMSFolder bf : dirs) {
+			dirs.forEach(bf -> {
 				final String s = (bf.path.startsWith(root) ? root.relativize(bf.path).toString() : bf.path.toString())
 						+ File.separatorChar;
 				for (int i = 0; i < len;i++) {
@@ -456,16 +449,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 //						long t = System.nanoTime();
 						folders.set(i, null);
 //						System.out.println(System.nanoTime() - t);
-						if (record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
-							bf.updateFolder = false;
+						try {
+							if (record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
+								bf.updateFolder = false;
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
 						break;
 					}
 				}
-			}
-			
+			});
+
 			if(!containsBMS) {
-				dirs.parallelStream().forEach((bf) -> {
+				dirs.parallelStream().forEach(bf -> {
 					try {
 						bf.processDirectory(property);
 					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
@@ -493,14 +490,16 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "folder", folder);			
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
-			for (FolderData record : folders) {
-				if(record != null) {
+			folders.parallelStream().filter(Objects::nonNull).forEach(folder -> {
+				try {
 					// System.out.println("Song Database : folder deleted - " +
 					// record.getPath());
-					qr.update(property.conn, "DELETE FROM folder WHERE path LIKE ?", record.getPath() + "%");
-					qr.update(property.conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
+					qr.update(property.conn, "DELETE FROM folder WHERE path LIKE ?", folder.getPath() + "%");
+					qr.update(property.conn, "DELETE FROM song WHERE path LIKE ?", folder.getPath() + "%");
+				} catch (SQLException e) {
+					Logger.getGlobal().severe("ディレクトリ内に存在しないフォルダレコード削除の例外:" + e.getMessage());
 				}
-			}
+			});
 		}
 		
 		private int processBMSFolder(List<SongData> records, SongDatabaseUpdaterProperty property) {
@@ -509,18 +508,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			BMSONDecoder bmsondecoder = null;
 			final int len = records.size();
 			for (Path path : bmsfiles) {
+				long lastModifiedTime = -1;
+				try {
+					lastModifiedTime = Files.getLastModifiedTime(path).toMillis() / 1000;
+				} catch (IOException e) {
+//					throw new RuntimeException(e);
+				}
 				boolean update = true;
 				final String pathname = (path.startsWith(root) ? root.relativize(path).toString() : path.toString());
 				for (int i = 0;i < len;i++) {
 					final SongData record = records.get(i);
 					if (record != null && record.getPath().equals(pathname)) {
 						records.set(i, null);
-						try {
-							if (record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
-								update = false;
-							}
-						} catch (IOException e) {
-							e.printStackTrace();
+						if (record.getDate() == lastModifiedTime) {
+							update = false;
 						}
 						break;
 					}
@@ -589,18 +590,17 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					for(SongDatabaseAccessorPlugin plugin : plugins) {
 						plugin.update(model, sd);
 					}
-					
-					
+
+					sd.setTag(tag != null ? tag : "");
+					sd.setPath(pathname);
+					sd.setFolder(SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()));
+					sd.setParent(SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()));
+					sd.setDate((int) lastModifiedTime);
+					sd.setFavorite(favorite != null ? favorite.intValue() : 0);
+					sd.setAdddate((int) property.updatetime);
 					try {
-						sd.setTag(tag != null ? tag : "");
-						sd.setPath(pathname);
-						sd.setFolder(SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()));
-						sd.setParent(SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()));
-						sd.setDate((int) (Files.getLastModifiedTime(path).toMillis() / 1000));
-						sd.setFavorite(favorite != null ? favorite.intValue() : 0);
-						sd.setAdddate((int) property.updatetime);
 						SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "song", sd);
-					} catch (SQLException | IOException e) {
+					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 					if(property.info != null) {
@@ -616,16 +616,14 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				}
 			}
 			// ディレクトリ内のファイルに存在しないレコードを削除
-			for (SongData record : records) {
-				if(record != null) {
-					try {
-						qr.update(property.conn, "DELETE FROM song WHERE path = ?", record.getPath());
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+			records.parallelStream().filter(Objects::nonNull).forEach(record -> {
+				try {
+					qr.update(property.conn, "DELETE FROM song WHERE path = ?", record.getPath());
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
-			}
-			
+			});
+
 			return count;
 		}
 	}
