@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -817,13 +818,6 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		});
-		addCommandWord(new CommandWord("STRETCH") {
-			@Override
-			public void execute(String[] str) {
-				int[] values = parseInt(str);
-				stretch = values[1];
-			}
-		});
 	}
 
 	protected void loadSkin(Skin skin, Path f, MainState state) throws IOException {
@@ -1004,23 +998,28 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 }
 
 enum CSVCommand implements LR2SkinLoader.Command<LR2SkinCSVLoader> {
-	STARTINPUT {
-		@Override
-		public void execute(LR2SkinCSVLoader loader, String[] str) {
-			loader.skin.setInput(Integer.parseInt(str[1]));
-		}
-	},
-	SCENETIME {
-		@Override
-		public void execute(LR2SkinCSVLoader loader, String[] str) {
-			loader.skin.setScene(Integer.parseInt(str[1]));
-		}
-	},
-	FADEOUT {
-		@Override
-		public void execute(LR2SkinCSVLoader loader, String[] str) {
-			loader.skin.setFadeout(Integer.parseInt(str[1]));
-		}
-	}
+	STARTINPUT ((loader, str) -> {
+		loader.skin.setInput(Integer.parseInt(str[1]));
+	}),
+	SCENETIME ((loader, str) -> {
+		loader.skin.setScene(Integer.parseInt(str[1]));
+	}),
+	FADEOUT ((loader, str) -> {
+		loader.skin.setFadeout(Integer.parseInt(str[1]));
+	}),
+	STRETCH ((loader, str) -> {
+		loader.stretch = Integer.parseInt(str[1]);
+	})
 	;
+	
+	public final BiConsumer<LR2SkinCSVLoader, String[]> function;
+	
+	private CSVCommand(BiConsumer<LR2SkinCSVLoader, String[]> function) {
+		this.function = function;
+	}
+	
+	public void execute(LR2SkinCSVLoader loader, String[] str) {
+		function.accept(loader, str);
+	}
+
 }

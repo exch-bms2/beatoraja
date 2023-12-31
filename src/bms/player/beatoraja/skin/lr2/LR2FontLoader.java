@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.skin.SkinTextImage;
@@ -61,49 +62,36 @@ public class LR2FontLoader extends LR2SkinLoader {
 
 enum FontCommand implements Command<LR2FontLoader> {
 	// size
-	S {
-		@Override
-		public void execute(LR2FontLoader loader, String[] str) {
-			loader.textimage.setSize(Integer.parseInt(str[1]));
-		}
-		
-	},
+	S ((loader, str) -> {
+		loader.textimage.setSize(Integer.parseInt(str[1]));
+	}),
 	// margin
-	M {
-		@Override
-		public void execute(LR2FontLoader loader, String[] str) {
-			loader.textimage.setMargin(Integer.parseInt(str[1]));
-		}
-	},
+	M ((loader, str) -> {
+		loader.textimage.setMargin(Integer.parseInt(str[1]));
+	}),
 	// texture
-	T {
-		@Override
-		public void execute(LR2FontLoader loader, String[] str) {
-			File imagefile = loader.path.getParent().resolve(str[2]).toFile();
-			// System.out.println("Font image loading : " +
-			// imagefile.getPath());
-			if (imagefile.exists()) {
-				loader.textimage.setPath(Integer.parseInt(str[1]),imagefile.getPath());
-			}
+	T ((loader, str) -> {
+		File imagefile = loader.path.getParent().resolve(str[2]).toFile();
+		// System.out.println("Font image loading : " +
+		// imagefile.getPath());
+		if (imagefile.exists()) {
+			loader.textimage.setPath(Integer.parseInt(str[1]),imagefile.getPath());
 		}
-	},
+	}),
 	// reference
-	R {
-		@Override
-		public void execute(LR2FontLoader loader, String[] str) {
-			try {
-				int[] values = loader.parseInt(str);
-				if (loader.textimage.getPath(values[2]) != null) {
-					// System.out.println("Font loaded : " + values[1]);
-                    for(int code : mapCode(values[1])) {
-                    	loader.textimage.setImage(code, values[2], values[3], values[4], values[5], values[6]);
-                    }
-				}
-			} catch (Throwable e) {
-				e.printStackTrace();
+	R ((loader, str) -> {
+		try {
+			int[] values = LR2FontLoader.parseInt(str);
+			if (loader.textimage.getPath(values[2]) != null) {
+				// System.out.println("Font loaded : " + values[1]);
+                for(int code : mapCode(values[1])) {
+                	loader.textimage.setImage(code, values[2], values[3], values[4], values[5], values[6]);
+                }
 			}
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
-	};
+	});
 	
 	private static int[] mapCode(int code) {
 		int sjiscode = code;
@@ -138,4 +126,15 @@ enum FontCommand implements Command<LR2FontLoader> {
 		}
 		return new int[0];
 	}
+	
+	public final BiConsumer<LR2FontLoader, String[]> function;
+
+	private FontCommand(BiConsumer<LR2FontLoader, String[]> function) {
+		this.function = function;
+	}
+
+	public void execute(LR2FontLoader loader, String[] str) {
+		function.accept(loader, str);
+	}
+
 }

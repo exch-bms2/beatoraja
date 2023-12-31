@@ -4,6 +4,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -895,30 +896,28 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 }
 
 enum PlayCommand implements LR2SkinLoader.Command<LR2PlaySkinLoader> {
-	CLOSE {
-		@Override
-		public void execute(LR2PlaySkinLoader loader, String[] str) {
-			loader.skin.setClose(Integer.parseInt(str[1]));
-		}
-	},
-	PLAYSTART {
-		@Override
-		public void execute(LR2PlaySkinLoader loader, String[] str) {
-			loader.skin.setPlaystart(Integer.parseInt(str[1]));
-		}
-	},
-	LOADSTART {
-		@Override
-		public void execute(LR2PlaySkinLoader loader, String[] str) {
-			loader.skin.setLoadstart(Integer.parseInt(str[1]));
-		}
-	},
-	LOADEND {
-		@Override
-		public void execute(LR2PlaySkinLoader loader, String[] str) {
-			loader.skin.setLoadend(Integer.parseInt(str[1]));
-		}
-	}
+	CLOSE ((loader, str) -> {
+		loader.skin.setClose(Integer.parseInt(str[1]));
+	}),
+	PLAYSTART ((loader, str) -> {
+		loader.skin.setPlaystart(Integer.parseInt(str[1]));
+	}),
+	LOADSTART ((loader, str) -> {
+		loader.skin.setLoadstart(Integer.parseInt(str[1]));
+	}),
+	LOADEND ((loader, str) -> {
+		loader.skin.setLoadend(Integer.parseInt(str[1]));
+	})
 	;
 
+	
+	public final BiConsumer<LR2PlaySkinLoader, String[]> function;
+
+	private PlayCommand(BiConsumer<LR2PlaySkinLoader, String[]> function) {
+		this.function = function;
+	}
+
+	public void execute(LR2PlaySkinLoader loader, String[] str) {
+		function.accept(loader, str);
+	}
 }

@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
@@ -79,102 +80,84 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 }
 
 enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
-	INFORMATION {
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			loader.header.setSkinType(SkinType.getSkinTypeById(Integer.parseInt(str[1])));
-			loader.header.setName(str[2]);
-			loader.header.setAuthor(str[3]);
-			switch (loader.header.getSkinType()) {
-				case PLAY_5KEYS:
-				case PLAY_7KEYS:
-				case PLAY_9KEYS:
-				case PLAY_10KEYS:
-				case PLAY_14KEYS:
-				case PLAY_24KEYS:
-				case PLAY_24KEYS_DOUBLE:
-					loader.options.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
-					loader.options.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
-					loader.options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
-					loader.options.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 
-					loader.offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false));
-					loader.offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false));
-					loader.offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
-					loader.offsets.add(new CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true));
-			}
-		}		
-	},
-	RESOLUTION {
+	INFORMATION ((loader, str) -> {
+		loader.header.setSkinType(SkinType.getSkinTypeById(Integer.parseInt(str[1])));
+		loader.header.setName(str[2]);
+		loader.header.setAuthor(str[3]);
+		switch (loader.header.getSkinType()) {
+			case PLAY_5KEYS:
+			case PLAY_7KEYS:
+			case PLAY_9KEYS:
+			case PLAY_10KEYS:
+			case PLAY_14KEYS:
+			case PLAY_24KEYS:
+			case PLAY_24KEYS_DOUBLE:
+				loader.options.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
+				loader.options.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
+				loader.options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
+				loader.options.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
+
+				loader.offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false));
+				loader.offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false));
+				loader.offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
+				loader.offsets.add(new CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true));
+		}
+	}),
+	RESOLUTION ((loader, str) -> {
 		final Resolution res[] = {SD, HD, FULLHD, ULTRAHD};
-
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			loader.header.setResolution(res[Integer.parseInt(str[1])]);
-		}
-		
-	},
-	CUSTOMOPTION {
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			List<String> contents = new ArrayList<String>();
-			for(int i = 3;i < str.length;i++) {
-				if(str[i] != null && str[i].length() > 0) {
-					contents.add(str[i]);
-				}
+		loader.header.setResolution(res[Integer.parseInt(str[1])]);
+	}),
+	CUSTOMOPTION ((loader, str) -> {
+		List<String> contents = new ArrayList<String>();
+		for(int i = 3;i < str.length;i++) {
+			if(str[i] != null && str[i].length() > 0) {
+				contents.add(str[i]);
 			}
-			int[] op = new int[contents.size()];
-			for(int i = 0;i < op.length;i++) {
-				op[i] = Integer.parseInt(str[2]) + i;
-			}
-			loader.options.add(new CustomOption(str[1], op, contents.toArray(new String[contents.size()])));
 		}
-	},
-	CUSTOMFILE {
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			loader.files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", loader.skinpath).replace("\\", "/"), str.length >= 4 ? str[3] : null));
+		int[] op = new int[contents.size()];
+		for(int i = 0;i < op.length;i++) {
+			op[i] = Integer.parseInt(str[2]) + i;
 		}
-	},
-	CUSTOMOFFSET {
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			List<String> contents = new ArrayList<String>();
-			for(int i = 3;i < str.length;i++) {
-				if(str[i] != null && str[i].length() > 0) {
-					contents.add(str[i]);
-				}
-			}
-			boolean[] op = new boolean[6];
-			Arrays.fill(op, true);
-			for(int i = 0;i < op.length && i + 3 < str.length;i++) {
-				op[i] = Integer.parseInt(str[i + 3]) > 0;
-			}
-			loader.offsets.add(new CustomOffset(str[1], Integer.parseInt(str[2]), op[0], op[1], op[2], op[3], op[4], op[5]));
+		loader.options.add(new CustomOption(str[1], op, contents.toArray(new String[contents.size()])));
+	}),
+	CUSTOMFILE ((loader, str) -> {
+		loader.files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", loader.skinpath).replace("\\", "/"), str.length >= 4 ? str[3] : null));
+	}),
+	CUSTOMOFFSET ((loader, str) -> {
+		boolean[] op = new boolean[6];
+		Arrays.fill(op, true);
+		for(int i = 0;i < op.length && i + 3 < str.length;i++) {
+			op[i] = Integer.parseInt(str[i + 3]) > 0;
 		}
-	},
-	CUSTOMOPTION_ADDITION_SETTING {
+		loader.offsets.add(new CustomOffset(str[1], Integer.parseInt(str[2]), op[0], op[1], op[2], op[3], op[4], op[5]));
+	}),
+	CUSTOMOPTION_ADDITION_SETTING ((loader, str) -> {
 		//#CUSTOMOPTION_ADDITION_SETTING, BGA Size, Ghost, Score Graph, Judge Detail
 		//0 = No Add, 1 = Add
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			CustomOption[] addition = new CustomOption[4];
-			String[] additionName = {"BGA Size", "Ghost", "Score Graph", "Judge Detail"};
-			for(CustomOption co : loader.options) {
-				for(int i = 0; i < additionName.length; i++) {
-					if(co.name.equals(additionName[i])) addition[i] = co;
-				}
-			}
-			for(int i = 0; i < addition.length; i++) {
-				if(str[i + 1].replaceAll("[^0-9-]", "").equals("0") && addition[i] != null) {
-					loader.options.removeValue(addition[i], true);
-				}
+		CustomOption[] addition = new CustomOption[4];
+		String[] additionName = {"BGA Size", "Ghost", "Score Graph", "Judge Detail"};
+		for(CustomOption co : loader.options) {
+			for(int i = 0; i < additionName.length; i++) {
+				if(co.name.equals(additionName[i])) addition[i] = co;
 			}
 		}
-	},
-	INCLUDE {
-		@Override
-		public void execute(LR2SkinHeaderLoader loader, String[] str) {
+		for(int i = 0; i < addition.length; i++) {
+			if(str[i + 1].replaceAll("[^0-9-]", "").equals("0") && addition[i] != null) {
+				loader.options.removeValue(addition[i], true);
+			}
 		}
-	};
+	}),
+	INCLUDE ((loader, str) -> {
+	});
+	
+	public final BiConsumer<LR2SkinHeaderLoader, String[]> function;
+	
+	private HeaderCommand(BiConsumer<LR2SkinHeaderLoader, String[]> function) {
+		this.function = function;
+	}
+	
+	public void execute(LR2SkinHeaderLoader loader, String[] str) {
+		function.accept(loader, str);
+	}
 }
