@@ -11,12 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.ir.IRCourseData.IRTrophyData;
+import bms.player.beatoraja.ir.IRTableData.IRTableFolder;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
@@ -30,6 +33,7 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.CourseData.TrophyData;
+import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.external.BMSSearchAccessor;
 import bms.player.beatoraja.song.*;
 import com.badlogic.gdx.utils.StringBuilder;
@@ -181,14 +185,11 @@ public class BarRenderer {
 				for(IRTableData irtd : response.getData()) {
 					TableData td = new TableData();
 					td.setName(irtd.name);
-					TableData.TableFolder[] folder = new TableData.TableFolder[irtd.folders.length];
-					for(int i = 0;i < folder.length;i++) {
+					td.setFolder(Stream.of(irtd.folders).map(folder -> {
 						TableData.TableFolder tf = new TableData.TableFolder();
-						tf.setName(irtd.folders[i].name);
-						SongData[] songs = new SongData[irtd.folders[i].charts.length];
-						for(int j = 0;j < songs.length;j++) {
+						tf.setName(folder.name);
+						tf.setSong(Stream.of(folder.charts).map(chart -> {
 							SongData song = new SongData();
-							IRChartData chart = irtd.folders[i].charts[j];
 							song.setSha256(chart.sha256);
 							song.setMd5(chart.md5);
 							song.setTitle(chart.title);
@@ -199,20 +200,16 @@ public class BarRenderer {
 							if(chart.mode != null) {
 								song.setMode(chart.mode.id);								
 							}
-							songs[j] = song;
-						}
-						tf.setSong(songs);
-						folder[i] = tf;
-					}
-					td.setFolder(folder);
-					CourseData[] course = new CourseData[irtd.courses.length];
-					for(int i = 0;i < course.length;i++) {
+							return song;
+						}).toArray(SongData[]::new));
+						return tf;
+					}).toArray(TableData.TableFolder[]::new));
+					
+					td.setCourse(Stream.of(irtd.courses).map(course -> {
 						CourseData cd = new CourseData();
-						cd.setName(irtd.courses[i].name);
-						SongData[] songs = new SongData[irtd.courses[i].charts.length];
-						for(int j = 0;j < songs.length;j++) {
+						cd.setName(course.name);
+						cd.setSong(Stream.of(course.charts).map(chart -> {
 							SongData song = new SongData();
-							IRChartData chart = irtd.courses[i].charts[j];
 							song.setSha256(chart.sha256);
 							song.setMd5(chart.md5);
 							song.setTitle(chart.title);
@@ -223,24 +220,22 @@ public class BarRenderer {
 							if(chart.mode != null) {
 								song.setMode(chart.mode.id);								
 							}
-							songs[j] = song;
-						}
-						cd.setSong(songs);
-						cd.setConstraint(irtd.courses[i].constraint);
-						TrophyData[] trophyDatas = new TrophyData[irtd.courses[i].trophy.length];
-						for(int j = 0;j < irtd.courses[i].trophy.length; j++) {
+							return song;
+						}).toArray(SongData[]::new));
+						
+						cd.setConstraint(course.constraint);
+						cd.setTrophy(Stream.of(course.trophy).map(t -> {
 						    TrophyData trophyData = new TrophyData();
-						    IRTrophyData t = irtd.courses[i].trophy[j];
 						    trophyData.setName(t.name);
 						    trophyData.setMissrate(t.smissrate);
 						    trophyData.setScorerate(t.scorerate);
-						    trophyDatas[j] = trophyData;
-						}
-						cd.setTrophy(trophyDatas);
+							return trophyData;
+						}).toArray(TrophyData[]::new));
+						
 						cd.setRelease(true);
-						course[i] = cd;
-					}
-					td.setCourse(course);
+						return cd;
+					}).toArray(CourseData[]::new));
+					
 					if(td.validate()) {
 						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(select.resource.getConfig().getTablepath(), td.getUrl())));						
 					}
@@ -281,10 +276,8 @@ public class BarRenderer {
 //			cds[0] = new CourseData();
 //			cds[0].setName("FAVORITE");
 //		}
-		favorites = new HashBar[cds.length];
-		for (int i = 0; i < cds.length; i++) {
-			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getSong());
-		}
+		
+		favorites = Stream.of(cds).map(cd -> new HashBar(select, cd.getName(), cd.getSong())).toArray(HashBar[]::new);
 
 		Array<Bar> l = new Array<Bar>();
 
@@ -302,9 +295,7 @@ public class BarRenderer {
 			Json json = new Json();
 			CommandFolder[] cf = json.fromJson(CommandFolder[].class,
 					new BufferedInputStream(Files.newInputStream(Paths.get("folder/default.json"))));
-			for(CommandFolder folder : cf) {
-				l.add(createCommandBar(main, folder));
-			}
+			Stream.of(cf).forEach(folder -> l.add(createCommandBar(main, folder)));
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -325,9 +316,7 @@ public class BarRenderer {
 
 		commands = l.toArray(Bar.class);
 
-		for(int i = 0;i < barlength;i++) {
-			bararea[i] = new BarArea();
-		}
+		IntStream.range(0,  barlength).forEach(i -> bararea[i] = new BarArea());
 	}
 
 	private Bar createCommandBar(MainController main, CommandFolder folder) {
@@ -1006,7 +995,7 @@ public class BarRenderer {
 			}
 
 			if(isSortable) {
-			    Sort.instance().sort(newcurrentsongs, BarSorter.values()[select.getSort()]);
+			    Sort.instance().sort(newcurrentsongs, BarSorter.defaultSorter[select.getSort()].sorter);
 			}
 
 			Array<Bar> bars = new Array<Bar>();
@@ -1014,8 +1003,7 @@ public class BarRenderer {
 				try {
 					for (RandomFolder randomFolder : randomFolderList) {
 						SongData[] randomTargets = Stream.of(newcurrentsongs).filter(
-								songBar -> songBar instanceof SongBar
-										&& ((SongBar) songBar).getSongData().getPath() != null)
+								songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
 								.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
 						if (randomFolder.filter != null) {
 							Set<String> filterKey = randomFolder.getFilter().keySet();
