@@ -5,9 +5,7 @@ import com.badlogic.gdx.utils.JsonWriter;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * コースデータへのアクセス
@@ -25,32 +23,23 @@ public class CourseDataAccessor {
 		} catch (IOException e) {
 		}
     }
+    
     /**
-     * 全てのキャッシュされた難易度表データを読み込む
+     * 全てのコースデータを読み込む
      *
      * @return 全てのキャッシュされた難易度表データ
      */
     public CourseData[] readAll() {
-        List<CourseData> result = new ArrayList<>();
-        for(String name : readAllNames()) {
-        	result.addAll(Arrays.asList(read(name)));
-        }
-        return result.toArray(new CourseData[result.size()]) ;
+        return Stream.of(readAllNames()).flatMap(name -> Stream.of(read(name))).toArray(CourseData[]::new);
     }
     
     public String[] readAllNames() {
-        List<String> result = new ArrayList<>();
-        try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(coursedir))) {
-            for (Path p : paths) {
-                if (p.toString().endsWith(".json")) {
-                	String filename = p.getFileName().toString();
-                	result.add(filename.substring(0, filename.lastIndexOf('.')));
-                }
-            }
+        try (Stream<Path> paths = Files.list(Paths.get(coursedir))) {
+        	return paths.map(p -> p.getFileName().toString().substring(0, p.getFileName().toString().lastIndexOf('.'))).toArray(String[]::new);
         } catch (IOException e) {
             e.printStackTrace();
+            return new String[0];
         }
-        return result.toArray(new String[result.size()]) ;    	
     }
 
     public CourseData[] read(String name) {
@@ -61,13 +50,7 @@ public class CourseDataAccessor {
 			json.setIgnoreUnknownFields(true);
             CourseData[] courses =  json.fromJson(CourseData[].class,
                     new BufferedInputStream(Files.newInputStream(p)));
-            List<CourseData> result = new ArrayList<CourseData>();            
-            for(CourseData course : courses) {
-            	if(course.validate()) {
-                	result.add(course);
-            	}
-            }
-            return result.toArray(new CourseData[result.size()]);
+            return Stream.of(courses).filter(CourseData::validate).toArray(CourseData[]::new);
         } catch(Throwable e) {
 
         }
@@ -92,9 +75,7 @@ public class CourseDataAccessor {
      */
     public void write(String name, CourseData[] cd) {
         try {
-        	for(CourseData c : cd) {
-        		c.shrink();
-        	}
+        	Stream.of(cd).forEach(CourseData::shrink);
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.json);
             OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
