@@ -180,10 +180,13 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			
 			// 検索並び順保持
 			List<SongData> sorted = m.stream().sorted((a, b) -> {
-			    int aIndexSha256 = Arrays.asList(hashes).indexOf(a.getSha256());
-			    int aIndexMd5 = Arrays.asList(hashes).indexOf(a.getMd5());
-			    int bIndexSha256 = Arrays.asList(hashes).indexOf(b.getSha256());
-			    int bIndexMd5 = Arrays.asList(hashes).indexOf(b.getMd5());
+				int aIndexSha256 = -1,aIndexMd5 = -1,bIndexSha256 = -1,bIndexMd5 = -1;
+				for(int i = 0;i < hashes.length;i++) {
+					if(hashes[i].equals(a.getSha256())) aIndexSha256 = i;
+					if(hashes[i].equals(a.getMd5())) aIndexMd5 = i;
+					if(hashes[i].equals(b.getSha256())) bIndexSha256 = i;
+					if(hashes[i].equals(b.getMd5())) bIndexMd5 = i;
+				}
 			    int aIndex = Math.min((aIndexSha256 == -1 ? Integer.MAX_VALUE : aIndexSha256), (aIndexMd5 == -1 ? Integer.MAX_VALUE : aIndexMd5));
 			    int bIndex = Math.min((bIndexSha256 == -1 ? Integer.MAX_VALUE : bIndexSha256), (bIndexMd5 == -1 ? Integer.MAX_VALUE : bIndexMd5));
 			    return bIndex - aIndex;
