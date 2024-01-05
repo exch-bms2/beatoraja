@@ -484,7 +484,7 @@ public class JudgeManager {
 							} else {
 								this.updateMicro(lane, ln, mtime, j, dmtime);
 							}
-							if (j < 4) {
+							if (j < 4 && judgeVanish[j]) {
 								processing[lane] = ln.getPair();
 								if (sc >= 0) {
 									// BSS処理開始
@@ -619,7 +619,7 @@ public class JudgeManager {
 					this.updateMicro(lane, note, mtime, 4, mjud);
 				} else if (note instanceof LongNote) {
 					final LongNote ln = (LongNote) note;
-					if (!ln.isEnd() && note.getState() == 0) {
+					if (!ln.isEnd() && ln.getState() == 0) {
 						if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 								|| ln.getType() == LongNote.TYPE_CHARGENOTE
 								|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
@@ -673,11 +673,7 @@ public class JudgeManager {
 		score.addJudgeCount(judge, mfast >= 0, 1);
 
 		if (judge < 4) {
-			if (recentJudgesIndex == recentJudges.length - 1) {
-				recentJudgesIndex = 0;
-			} else {
-				recentJudgesIndex++;
-			}
+			recentJudgesIndex = (recentJudgesIndex + 1) % recentJudges.length;
 			recentJudges[recentJudgesIndex] = mfast / 1000;
 			microrecentJudges[recentJudgesIndex] = mfast;
 		}
