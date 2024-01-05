@@ -47,6 +47,7 @@ public enum JudgeAlgorithm {
 	}
 	;
 
+	public static final JudgeAlgorithm[] defaultAlgorithm = {Combo, Duration, Lowest};
 
 	/**
 	 * ２つのノーツを比較する
