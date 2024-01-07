@@ -972,7 +972,10 @@ public class BMSPlayer extends MainState {
 		if (timer.isTimerOn(TIMER_FAILED) || timer.isTimerOn(TIMER_FADEOUT)) {
 			return;
 		}
-		if (state != STATE_FINISHED && notes == resource.getSongdata().getNotes()) {
+		if (state != STATE_FINISHED && 
+				(notes == resource.getSongdata().getNotes() 
+				|| (judge.getJudgeCount(0) + judge.getJudgeCount(1) + judge.getJudgeCount(2) + judge.getJudgeCount(3) == 0)
+				|| resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY)) {
 			state = STATE_FINISHED;
 			timer.setTimerOn(TIMER_FADEOUT);
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
