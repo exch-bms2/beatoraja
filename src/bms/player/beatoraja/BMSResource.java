@@ -29,7 +29,7 @@ public class BMSResource {
 	/**
 	 * 音源読み込みタスク
 	 */
-	private ArrayDeque<AudioLoaderThread> audioloaders = new ArrayDeque<AudioLoaderThread>();
+	private ArrayDeque<Thread> audioloaders = new ArrayDeque<Thread>();
 	/**
 	 * BMSのBGAリソース
 	 */
@@ -39,7 +39,7 @@ public class BMSResource {
 	/**
 	 * BGA読み込みタスク
 	 */
-	private ArrayDeque<BGALoaderThread> bgaloaders = new ArrayDeque<BGALoaderThread>();
+	private ArrayDeque<Thread> bgaloaders = new ArrayDeque<Thread>();
 	/**
 	 * backbmp
 	 */
@@ -102,11 +102,28 @@ public class BMSResource {
 		
 		if(MainLoader.getIllegalSongCount() == 0) {
 			// Audio, BGAともキャッシュがあるため、何があっても全リロードする
-			BGALoaderThread bgaloader = new BGALoaderThread(
-					config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode.mode == BMSPlayerMode.Mode.AUTOPLAY || mode.mode == BMSPlayerMode.Mode.REPLAY)) ? model : null);
+			final BMSModel bgamodel = config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode.mode == BMSPlayerMode.Mode.AUTOPLAY || mode.mode == BMSPlayerMode.Mode.REPLAY)) ? model : null;
+			Thread bgaloader = new Thread(() -> {
+				try {
+					bga.abort();
+					bga.setModel(bgamodel);
+					bgaon = bgamodel != null;
+				} catch (Throwable e) {
+					Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+					e.printStackTrace();
+				}
+			});
 			bgaloaders.addLast(bgaloader);
 			bgaloader.start();
-			AudioLoaderThread audioloader = new AudioLoaderThread(model);
+			Thread audioloader = new Thread(() -> {
+				try {
+					audio.abort();
+					audio.setModel(model);
+				} catch (Throwable e) {
+					Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+					e.printStackTrace();
+				}
+			});
 			audioloaders.addLast(audioloader);
 			audioloader.start();			
 		}
@@ -195,47 +212,6 @@ public class BMSResource {
 		if(backbmp != null) {
 			backbmp.getTexture().dispose();
 			backbmp = null;
-		}
-	}
-
-	class BGALoaderThread extends Thread {
-
-		private final BMSModel model;
-
-		public BGALoaderThread(BMSModel model) {
-			this.model = model;
-		}
-
-		@Override
-		public void run() {
-			try {
-				bga.abort();
-				bga.setModel(model);
-				bgaon = model != null;
-			} catch (Throwable e) {
-				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-	}
-
-	class AudioLoaderThread extends Thread {
-
-		private final BMSModel model;
-
-		public AudioLoaderThread(BMSModel model) {
-			this.model = model;
-		}
-
-		@Override
-		public void run() {
-			try {
-				audio.abort();
-				audio.setModel(model);
-			} catch (Throwable e) {
-				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-				e.printStackTrace();
-			}
 		}
 	}
  }
