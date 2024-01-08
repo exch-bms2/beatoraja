@@ -626,23 +626,23 @@ public class LaneRenderer {
 			// HCN
 			final JudgeManager judge = main.getJudgeManager();
 			sprite.draw(
-					longImage[judge.getProcessingLongNotes()[lane] == ln.getPair() ? 6
-							: (judge.getPassingLongNotes()[lane] == ln && ln.getState() != 0
-									? (judge.getHellChargeJudges()[lane] ? 8 : 9) : 7)],
+					longImage[judge.getProcessingLongNote(lane) == ln.getPair() ? 6
+							: (judge.getPassingLongNote(lane) == ln && ln.getState() != 0
+									? (judge.getHellChargeJudge(lane) ? 8 : 9) : 7)],
 					x, y - height + scale, width, height - scale);
 			sprite.draw(longImage[4], x, y, width, scale);
 			sprite.draw(longImage[5], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 			// CN
-			sprite.draw(longImage[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
+			sprite.draw(longImage[main.getJudgeManager().getProcessingLongNote(lane) == ln.getPair() ? 2 : 3], x,
 					y - height + scale, width, height - scale);
 			sprite.draw(longImage[0], x, y, width, scale);
 			sprite.draw(longImage[1], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 			// LN
-			sprite.draw(longImage[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
+			sprite.draw(longImage[main.getJudgeManager().getProcessingLongNote(lane) == ln.getPair() ? 2 : 3], x,
 					y - height + scale, width, height - scale);
 			sprite.draw(longImage[1], x, y - height, width, scale);
 		}
