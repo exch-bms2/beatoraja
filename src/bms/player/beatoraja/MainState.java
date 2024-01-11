@@ -1,19 +1,17 @@
 package bms.player.beatoraja;
 
-import java.nio.file.Path;
-
 import bms.player.beatoraja.SkinConfig.Offset;
-import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import java.util.Optional;
 
 /**
  * プレイヤー内の各状態の抽象クラス
@@ -34,9 +32,6 @@ public abstract class MainState {
 	public final TimerManager timer;
 	
 	public final PlayerResource resource;
-
-	private final IntMap<String> soundmap = new IntMap<String>();
-	private final IntMap<Boolean> soundloop = new IntMap<Boolean>();
 
 	private final ScoreDataProperty score = new ScoreDataProperty();
 
@@ -75,14 +70,10 @@ public abstract class MainState {
 	}
 
 	public void dispose() {
-		if (skin != null) {
-			skin.dispose();
-			skin = null;
-		}
-		if (stage != null) {
-			stage.dispose();
-			stage = null;
-		}
+		Optional.ofNullable(skin).ifPresent(skin -> skin.dispose());
+		skin = null;
+		Optional.ofNullable(stage).ifPresent(skin -> skin.dispose());
+		stage = null;
 	}
 
 	public void executeEvent(int id) {
@@ -175,10 +166,6 @@ public abstract class MainState {
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
-	}
-
-	public enum SoundType {
-		BGM, SOUND
 	}
 
 	public String getSound(SystemSoundManager.SoundType sound) {
