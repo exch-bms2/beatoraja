@@ -245,7 +245,7 @@ public enum BarSorter {
 	}),
 	;
 	
-	public static final BarSorter[] defaultSorter = {TITLE, ARTIST, BPM, LENGTH, LEVEL, RIVALCOMPARE_CLEAR, SCORE, MISSCOUNT};
+	public static final BarSorter[] defaultSorter = {TITLE, ARTIST, BPM, LENGTH, LEVEL, CLEAR, SCORE, MISSCOUNT};
 
 	/**
 	 * ソート名称
