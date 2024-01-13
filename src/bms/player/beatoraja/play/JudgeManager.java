@@ -87,11 +87,13 @@ public class JudgeManager {
 	 * CN終端判定テーブル
 	 */
 	private long[][] cnendmjudge;
+	private long nreleasemargin;
 	/**
 	 * スクラッチ判定テーブル
 	 */
 	private long[][] smjudge;
 	private long[][] scnendmjudge;
+	private long sreleasemargin;
 	/**
 	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
 	 */
@@ -201,8 +203,10 @@ public class JudgeManager {
 		
 		nmjudge = rule.getJudge(NoteType.NOTE, judgerank, keyJudgeWindowRate);
 		cnendmjudge = rule.getJudge(NoteType.LONGNOTE_END, judgerank, keyJudgeWindowRate);
+		nreleasemargin = rule.longnoteMargin;
 		smjudge = rule.getJudge(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate);
 		scnendmjudge = rule.getJudge(NoteType.LONGSCRATCH_END, judgerank, scratchJudgeWindowRate);
+		sreleasemargin = rule.longscratchMargin;
 		mjudgestart = mjudgeend = 0;
 		for (long[] l : nmjudge) {
 			mjudgestart = Math.min(mjudgestart, l[0]);
@@ -387,12 +391,15 @@ public class JudgeManager {
 							this.updateMicro(state, state.processing, mtime, j, dmtime);
 //							 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 							state.processing = null;
+							state.releasetime = Long.MIN_VALUE;
 							sckey[sc] = 0;							
 						} else {
 							// 押し直し処理							
+							state.releasetime = Long.MIN_VALUE;
 						}
 					} else {
-						// ここに来るのはマルチキーアサイン以外ありえないはず
+						// 押し直し処理							
+						state.releasetime = Long.MIN_VALUE;
 					}
 				} else {
 					final long[][] mjudge = sc >= 0 ? smjudge : nmjudge;
@@ -455,6 +462,7 @@ public class JudgeManager {
 							}
 							if (judge < 4 && judgeVanish[judge]) {
 								state.processing = ln.getPair();
+								state.releasetime = Long.MIN_VALUE;
 								if (sc >= 0) {
 									// BSS処理開始
 //									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
@@ -521,12 +529,17 @@ public class JudgeManager {
 							}
 						}
 						if (release) {
-							if (judge >= 3) {
-								keysound.setVolume(state.processing.getPair(), 0.0f);
+							if(judge == 4 ) {
+								state.releasetime = mtime;								
+							} else {
+								if (judge >= 3) {
+									keysound.setVolume(state.processing.getPair(), 0.0f);
+								}
+								this.updateMicro(state, state.processing, mtime, judge, dmtime);
+								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
+								state.processing = null;
+								state.releasetime = Long.MIN_VALUE;
 							}
-							this.updateMicro(state, state.processing, mtime, judge, dmtime);
-							keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
-							state.processing = null;
 						}
 					} else {
 						boolean release = true;
@@ -545,13 +558,18 @@ public class JudgeManager {
 								for (; judge < mjudge.length && !(dmtime >= mjudge[judge][0] && dmtime <= mjudge[judge][1]); judge++)
 									;
 							}
-							if (judge >= 3) {
-								keysound.setVolume(state.processing.getPair(), 0.0f);
+							if(judge == 4 ) {
+								state.releasetime = mtime;								
+							} else {
+								if (judge >= 3) {
+									keysound.setVolume(state.processing.getPair(), 0.0f);
+								}
+								this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime);
+								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
+								state.processing = null;
+								state.releasetime = Long.MIN_VALUE;
+//								System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);									
 							}
-							this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime);
-							keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
-							state.processing = null;
-//							System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);	
 						}
 					}
 				}
@@ -561,21 +579,38 @@ public class JudgeManager {
 
 		for (LaneState state : states) {
 			final long[][] mjudge = state.sckey >= 0 ? smjudge : nmjudge;
+			final long releasemargin = state.sckey >= 0 ? sreleasemargin : nreleasemargin;
 
 			// LN終端判定
-			if (state.processing != null
-					&& ((lntype == BMSModel.LNTYPE_LONGNOTE && state.processing.getType() == LongNote.TYPE_UNDEFINED)
-							|| state.processing.getType() == LongNote.TYPE_LONGNOTE)
-					&& state.processing.getMicroTime() < mtime) {
-				int j = 0;
-				for (; j < mjudge.length; j++) {
-					if (state.mpassingcount >= mjudge[j][0] && state.mpassingcount <= mjudge[j][1]) {
-						break;
+			if (state.processing != null) {
+				if((lntype == BMSModel.LNTYPE_LONGNOTE && state.processing.getType() == LongNote.TYPE_UNDEFINED)
+					|| state.processing.getType() == LongNote.TYPE_LONGNOTE) {
+					if(state.releasetime != Long.MIN_VALUE && state.releasetime + releasemargin <= mtime) {
+						keysound.setVolume(state.processing.getPair(), 0.0f);
+						this.updateMicro(state, state.processing.getPair(), mtime, 4, state.processing.getMicroTime() - state.releasetime);
+						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
+						state.processing = null;
+						state.releasetime = Long.MIN_VALUE;
+					} else if(state.processing.getMicroTime() < mtime) {
+						int j = 0;
+						for (; j < mjudge.length; j++) {
+							if (state.mpassingcount >= mjudge[j][0] && state.mpassingcount <= mjudge[j][1]) {
+								break;
+							}
+						}
+						this.updateMicro(state, state.processing.getPair(), mtime, j, state.mpassingcount);
+						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
+						state.processing = null;						
+					}
+				} else {
+					if(state.releasetime != Long.MIN_VALUE && state.releasetime + releasemargin < mtime) {
+						keysound.setVolume(state.processing.getPair(), 0.0f);
+						this.updateMicro(state, state.processing, mtime, 4, state.processing.getMicroTime() - state.releasetime);
+						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
+						state.processing = null;
+						state.releasetime = Long.MIN_VALUE;
 					}
 				}
-				this.updateMicro(state, state.processing.getPair(), mtime, j, state.mpassingcount);
-				keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
-				state.processing = null;
 			}
 			// 見逃しPOOR判定
 			state.lanemodel.reset();
@@ -607,6 +642,7 @@ public class JudgeManager {
 						// System.out.println("CN end poor");
 						this.updateMicro(state, ((LongNote) note), mtime, 4, mjud);
 						state.processing = null;
+						state.releasetime = Long.MIN_VALUE;
 						if (state.sckey >= 0) {
 							sckey[state.sckey] = 0;
 						}
@@ -853,6 +889,7 @@ public class JudgeManager {
 		 */
 		public boolean inclease;
 		public long mpassingcount;
+		public long releasetime = Long.MIN_VALUE;
 		
 		public LaneState(int lane, LaneProperty property, Lane lanemodel) {
 			this.lane = lane;

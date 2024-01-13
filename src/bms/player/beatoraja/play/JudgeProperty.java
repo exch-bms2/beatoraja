@@ -10,7 +10,9 @@ public enum JudgeProperty {
     FIVEKEYS(new long[][]{ {-20000, 20000}, {-50000, 50000}, {-100000, 100000}, {-150000, 150000}, {-150000, 500000} },
             new long[][]{ {-30000, 30000}, {-60000, 60000}, {-110000, 110000}, {-160000, 160000}, {-160000, 500000}},
             new long[][]{ {-120000, 120000}, {-150000, 150000}, {-200000, 200000}, {-250000, 250000}},
+            20000,
             new long[][]{ {-130000, 130000}, {-160000, 160000}, {-110000, 110000}, {-260000, 260000}},
+            40000,
             new boolean[]{true, true, true, false, false, false },
             MissCondition.ALWAYS,
             new boolean[]{true, true, true, true, true, false },
@@ -19,7 +21,9 @@ public enum JudgeProperty {
     SEVENKEYS(new long[][]{ {-20000, 20000}, {-60000, 60000}, {-150000, 150000}, {-280000, 220000}, {-150000, 500000} },
             new long[][]{ {-30000, 30000}, {-70000, 70000}, {-160000, 160000}, {-290000, 230000}, {-160000, 500000}},
             new long[][]{ {-120000, 120000}, {-160000, 160000}, {-200000, 200000}, {-280000, 220000}},
+            0,
             new long[][]{ {-130000, 130000}, {-170000, 170000}, {-210000, 210000}, {-290000, 230000}},
+            20000,
             new boolean[]{true, true, true, false, false, true },
             MissCondition.ALWAYS,
             new boolean[]{true, true, true, true, true, false },
@@ -28,7 +32,9 @@ public enum JudgeProperty {
     PMS(new long[][]{ {-20000, 20000}, {-50000, 50000}, {-117000, 117000}, {-183000, 183000}, {-175000, 500000} },
             new long[][]{},
             new long[][]{ {-120000, 120000}, {-150000, 150000}, {-217000, 217000}, {-283000, 283000}},
+            100000,
             new long[][]{},
+            0,
             new boolean[]{true, true, true, false, false, false },
             MissCondition.ONE,
             new boolean[]{true, true, true, false, true, false },
@@ -37,7 +43,9 @@ public enum JudgeProperty {
 	KEYBOARD(new long[][]{ {-30000, 30000}, {-90000, 90000}, {-200000, 200000}, {-320000, 240000}, {-200000, 650000} },
 			new long[][]{},
 			new long[][]{ {-160000, 25000}, {-200000, 75000}, {-260000, 140000}, {-320000, 240000}},
+            0,
 			new long[][]{},
+            0,
             new boolean[]{true, true, true, false, false, true },
             MissCondition.ALWAYS,
             new boolean[]{true, true, true, true, true, false },
@@ -57,10 +65,15 @@ public enum JudgeProperty {
      * 通常ロングノート終端の格判定幅。PG, GR, GD, BD, MSの順で{LATE下限, EARLY上限}のセットで表現する。
      */
     private final long[][] longnote;
+    
+    public final long longnoteMargin;
     /**
      * スクラッチロングノート終端の格判定幅。PG, GR, GD, BD, MSの順で{LATE下限, EARLY上限}のセットで表現する。
      */
     private final long[][] longscratch;
+    
+    public final long longscratchMargin;
+
     /**
      * 各判定毎のコンボ継続
      */
@@ -76,11 +89,13 @@ public enum JudgeProperty {
     
     public final JudgeWindowRule windowrule;
 
-    private JudgeProperty(long[][] note, long[][] scratch, long[][] longnote, long[][] longscratch, boolean[] combo, MissCondition miss, boolean[] judgeVanish, JudgeWindowRule windowrule) {
+    private JudgeProperty(long[][] note, long[][] scratch, long[][] longnote, long longnoteMargin, long[][] longscratch, long longscratchMargin, boolean[] combo, MissCondition miss, boolean[] judgeVanish, JudgeWindowRule windowrule) {
         this.note = note;
         this.scratch = scratch;
         this.longnote = longnote;
+        this.longnoteMargin = longnoteMargin;
         this.longscratch = longscratch;
+        this.longscratchMargin = longscratchMargin;
         this.combo = combo;
         this.miss = miss;
         this.judgeVanish = judgeVanish;
@@ -138,46 +153,35 @@ public enum JudgeProperty {
     }
     
     public enum JudgeWindowRule {
-    	NORMAL (new int[]{25, 50, 75, 100, 125}){
-
-			@Override
-			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate) {
-				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, false);
-			}
-    		
-    	},
-    	PMS (new int[]{33, 50, 70, 100, 133}) {
-
-			@Override
-			public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate) {
-				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, true);
-			}
-    		
-    	};
+    	NORMAL (new int[]{25, 50, 75, 100, 125}, new boolean[]{false, false, false, false, true}),
+    	PMS (new int[]{33, 50, 70, 100, 133}, new boolean[]{true, false, false, true, true});
     	
     	/**
     	 * JUDGERANKの倍率(VERYHARD, HARD, NORMAL, EASY, VERYEASY)
     	 */
     	public final int[] judgerank;
-    	
-        private static long[][] create(long[][] org, int judgerank, int[] judgeWindowRate, boolean pms) {
+        /**
+         * 各判定幅をjudgerankによらず固定にするかどうか(PG, GR, GD, BD, MSの順)
+         */
+    	public final boolean[] fixjudge;
+
+        public long[][] create(long[][] org, int judgerank, int[] judgeWindowRate) {
     		final long[][] judge = new long[org.length][2];
-    		final boolean[] fix = pms ? new boolean[]{true, false, false, true, true} : new boolean[]{false, false, false, false, true};
     		for (int i = 0; i < judge.length; i++) {
     			for(int j = 0;j < 2;j++) {
-					judge[i][j] = fix[i] ? org[i][j] : org[i][j] * judgerank / 100;
+					judge[i][j] = fixjudge[i] ? org[i][j] : org[i][j] * judgerank / 100;
     			}
     		}
 
     		int fixmin = -1;
     		for (int i = 0; i < Math.min(org.length, 4); i++) {
-    			if(fix[i]) {
+    			if(fixjudge[i]) {
     				fixmin = i;
     				continue;
     			}
         		int fixmax = -1;
     			for(int j = i + 1;j < 4;j++) {
-        			if(fix[j]) {
+        			if(fixjudge[j]) {
         				fixmax = j;
         				break;
         			}
@@ -209,10 +213,9 @@ public enum JudgeProperty {
     		return judge;
         }
         
-        private JudgeWindowRule(int[] judgerank) {
+        private JudgeWindowRule(int[] judgerank, boolean[] fixjudge) {
         	this.judgerank = judgerank;
+        	this.fixjudge = fixjudge;
         }
-        
-    	public abstract long[][] create(long[][] org, int judgerank, int[] judgeWindowRate);
     }
 }
