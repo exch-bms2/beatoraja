@@ -28,11 +28,6 @@ public class SameFolderBar extends DirectoryBar {
     }
 
     @Override
-    public String getArtist() {
-        return null;
-    }
-
-    @Override
     public Bar[] getChildren() {
         return SongBar.toSongBarArray(selector.getSongDatabase().getSongDatas("folder", crc));
     }

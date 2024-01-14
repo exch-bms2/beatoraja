@@ -99,12 +99,6 @@ public class ExecutableBar extends SelectableBar {
 		return this.title;
 	}
 
-
-	@Override
-	public String getArtist() {
-		return "";
-	}
-
 	@Override
 	public int getLamp(boolean isPlayer) {
 		return 0;

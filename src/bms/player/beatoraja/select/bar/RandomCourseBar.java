@@ -24,11 +24,6 @@ public class RandomCourseBar extends SelectableBar {
 		return course.getName();
 	}
 
-	@Override
-	public String getArtist() {
-		return null;
-	}
-
 	public SongData[] getSongDatas() {
 		return course.getSongDatas();
 	}

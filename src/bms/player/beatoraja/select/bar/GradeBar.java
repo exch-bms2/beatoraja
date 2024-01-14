@@ -43,11 +43,6 @@ public class GradeBar extends SelectableBar {
         return course.getName();
     }
 
-    @Override
-    public String getArtist() {
-        return null;
-    }
-
     public boolean existsAllSongs() {
         for (SongData song : course.getSong()) {
             if (song == null || song.getPath() == null) {

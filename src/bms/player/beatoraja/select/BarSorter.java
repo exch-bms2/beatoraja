@@ -17,194 +17,203 @@ public enum BarSorter {
 	 * 楽曲/タイトル名ソート
 	 */
 	TITLE((o1, o2) -> {
-			if (!(o1 instanceof SongBar || o1 instanceof FolderBar) && !(o2 instanceof SongBar || o2 instanceof FolderBar)) {
-				return 0;
-			}
-			if (!(o1 instanceof SongBar || o1 instanceof FolderBar)) {
-				return 1;
-			}
-			if (!(o2 instanceof SongBar || o2 instanceof FolderBar)) {
-				return -1;
-			}
+		if (!(o1 instanceof SongBar || o1 instanceof FolderBar) && !(o2 instanceof SongBar || o2 instanceof FolderBar)) {
+			return 0;
+		}
+		if (!(o1 instanceof SongBar || o1 instanceof FolderBar)) {
+			return 1;
+		}
+		if (!(o2 instanceof SongBar || o2 instanceof FolderBar)) {
+			return -1;
+		}
 
-			if((o1 instanceof SongBar && o2 instanceof SongBar)){
-				//タイトルの比較値を変数で保持
-				int title_compare;
-				title_compare = ((SongBar)o1).getSongData().getTitle().compareToIgnoreCase(((SongBar)o2).getSongData().getTitle());
+		if((o1 instanceof SongBar && o2 instanceof SongBar)){
+			//タイトルの比較値を変数で保持
+			int title_compare;
+			title_compare = ((SongBar)o1).getSongData().getTitle().compareToIgnoreCase(((SongBar)o2).getSongData().getTitle());
 
-				if(title_compare == 0){ //タイトルが一致
-					return (((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty());
-				}else{ //タイトルが不一致
-					return title_compare;
-				}
-			}else{
-				return o1.getTitle().compareToIgnoreCase(o2.getTitle()) ;
+			if(title_compare == 0){ //タイトルが一致
+				return (((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty());
+			}else{ //タイトルが不一致
+				return title_compare;
 			}
+		}else{
+			return o1.getTitle().compareToIgnoreCase(o2.getTitle()) ;
+		}
 	}),
 	/**
 	 * アーティスト名ソート
 	 */
 	ARTIST((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			return o1.getArtist().compareToIgnoreCase(o2.getArtist());
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
+			return 0;
+		}
+		if (!((SongBar)o1).existsSong()) {
+			return 1;
+		}
+		if (!((SongBar)o2).existsSong()) {
+			return -1;
+		}
+		return ((SongBar)o1).getSongData().getArtist().compareToIgnoreCase(((SongBar)o2).getSongData().getArtist());
 	}),
 	/**
 	 * 楽曲のBPMソート
 	 */
 	BPM((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
-				return 0;
-			}
-			if (!((SongBar)o1).existsSong()) {
-				return 1;
-			}
-			if (!((SongBar)o2).existsSong()) {
-				return -1;
-			}
-			return ((SongBar) o1).getSongData().getMaxbpm() - ((SongBar) o2).getSongData().getMaxbpm();
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
+			return 0;
+		}
+		if (!((SongBar)o1).existsSong()) {
+			return 1;
+		}
+		if (!((SongBar)o2).existsSong()) {
+			return -1;
+		}
+		return ((SongBar) o1).getSongData().getMaxbpm() - ((SongBar) o2).getSongData().getMaxbpm();
 	}),
 	/**
 	 * 楽曲の長さソート
 	 */
 	LENGTH((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
-				return 0;
-			}
-			if (!((SongBar)o1).existsSong()) {
-				return 1;
-			}
-			if (!((SongBar)o2).existsSong()) {
-				return -1;
-			}
-			return ((SongBar) o1).getSongData().getLength() - ((SongBar) o2).getSongData().getLength();
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
+			return 0;
+		}
+		if (!((SongBar)o1).existsSong()) {
+			return 1;
+		}
+		if (!((SongBar)o2).existsSong()) {
+			return -1;
+		}
+		return ((SongBar) o1).getSongData().getLength() - ((SongBar) o2).getSongData().getLength();
 	}),
 	/**
 	 * レベルソート
 	 */
 	LEVEL((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
-				return 0;
-			}
-			if (!((SongBar)o1).existsSong()) {
-				return 1;
-			}
-			if (!((SongBar)o2).existsSong()) {
-				return -1;
-			}
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (!((SongBar)o1).existsSong() && !((SongBar)o2).existsSong()) {
+			return 0;
+		}
+		if (!((SongBar)o1).existsSong()) {
+			return 1;
+		}
+		if (!((SongBar)o2).existsSong()) {
+			return -1;
+		}
 
-			//levelが同じ場合はDifficultyでソート
-			int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
-			if(revelSort==0){
-				return ((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty();
-			}else{
-				return revelSort;
-			}
+		//levelが同じ場合はDifficultyでソート
+		int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+		if(revelSort==0){
+			return ((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty();
+		}else{
+			return revelSort;
+		}
 	}),
 	/**
 	 * クリアランプソート
 	 */
 	CLEAR((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (o1.getScore() == null && o2.getScore() == null) {
-				return 0;
-			}
-			if (o1.getScore() == null) {
-				return 1;
-			}
-			if (o2.getScore() == null) {
-				return -1;
-			}
-			return o1.getScore().getClear() - o2.getScore().getClear();
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (o1.getScore() == null && o2.getScore() == null) {
+			return 0;
+		}
+		if (o1.getScore() == null) {
+			return 1;
+		}
+		if (o2.getScore() == null) {
+			return -1;
+		}
+		return o1.getScore().getClear() - o2.getScore().getClear();
 	}),
 	/**
 	 * スコアレートソート
 	 */
 	SCORE((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			final int n1 = o1.getScore() != null ? o1.getScore().getNotes() : 0;
-			final int n2 = o2.getScore() != null ? o2.getScore().getNotes() : 0;
-			if (n1 == 0 && n2 == 0) {
-				return 0;
-			}
-			if (n1 == 0) {
-				return 1;
-			}
-			if (n2 == 0) {
-				return -1;
-			}
-			return Float.compare(
-					(float) o1.getScore().getExscore() / n1,
-					(float) o2.getScore().getExscore() / n2
-			);
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		final int n1 = o1.getScore() != null ? o1.getScore().getNotes() : 0;
+		final int n2 = o2.getScore() != null ? o2.getScore().getNotes() : 0;
+		if (n1 == 0 && n2 == 0) {
+			return 0;
+		}
+		if (n1 == 0) {
+			return 1;
+		}
+		if (n2 == 0) {
+			return -1;
+		}
+		return Float.compare(
+				(float) o1.getScore().getExscore() / n1,
+				(float) o2.getScore().getExscore() / n2
+		);
 	}),
 	/**
 	 * ミスカウントソート
 	 */
 	MISSCOUNT((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (o1.getScore() == null && o2.getScore() == null) {
-				return 0;
-			}
-			if (o1.getScore() == null) {
-				return 1;
-			}
-			if (o2.getScore() == null) {
-				return -1;
-			}
-			return o1.getScore().getMinbp() - o2.getScore().getMinbp();
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (o1.getScore() == null && o2.getScore() == null) {
+			return 0;
+		}
+		if (o1.getScore() == null) {
+			return 1;
+		}
+		if (o2.getScore() == null) {
+			return -1;
+		}
+		return o1.getScore().getMinbp() - o2.getScore().getMinbp();
 	}),
 	/**
 	 * Durationソート
 	 */
 	DURATION((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (o1.getScore() == null && o2.getScore() == null) {
-				return 0;
-			}
-			if (o1.getScore() == null || o1.getScore().getAvgjudge() == Long.MAX_VALUE) {
-				return 1;
-			}
-			if (o2.getScore() == null || o2.getScore().getAvgjudge() == Long.MAX_VALUE) {
-				return -1;
-			}
-			return (int) (o1.getScore().getAvgjudge() - o2.getScore().getAvgjudge());
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (o1.getScore() == null && o2.getScore() == null) {
+			return 0;
+		}
+		if (o1.getScore() == null || o1.getScore().getAvgjudge() == Long.MAX_VALUE) {
+			return 1;
+		}
+		if (o2.getScore() == null || o2.getScore().getAvgjudge() == Long.MAX_VALUE) {
+			return -1;
+		}
+		return (int) (o1.getScore().getAvgjudge() - o2.getScore().getAvgjudge());
 	}),
 	/**
 	 * 最終更新日時ソート
 	 */
 	LASTUPDATE((o1, o2) -> {
-			if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
-				return TITLE.sorter.compare(o1, o2);
-			}
-			if (o1.getScore() == null && o2.getScore() == null) {
-				return 0;
-			}
-			if (o1.getScore() == null) {
-				return 1;
-			}
-			if (o2.getScore() == null) {
-				return -1;
-			}
-			return (int) (o1.getScore().getDate() - o2.getScore().getDate());
+		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
+			return TITLE.sorter.compare(o1, o2);
+		}
+		if (o1.getScore() == null && o2.getScore() == null) {
+			return 0;
+		}
+		if (o1.getScore() == null) {
+			return 1;
+		}
+		if (o2.getScore() == null) {
+			return -1;
+		}
+		return (int) (o1.getScore().getDate() - o2.getScore().getDate());
 	}),
 	RIVALCOMPARE_CLEAR((o1, o2) -> {
 		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {

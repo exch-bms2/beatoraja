@@ -22,11 +22,6 @@ public class ContainerBar extends DirectoryBar {
     }
 
     @Override
-    public String getArtist() {
-        return null;
-    }
-
-    @Override
     public Bar[] getChildren() {
         return childbar;
     }

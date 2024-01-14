@@ -24,13 +24,6 @@ public abstract class Bar {
      * @return バーのタイトル
      */
     public abstract String getTitle();
-    /**
-     * バーのアーティストを取得する
-     * TODO ソートにしか使用されていないため、不要
-     * 
-     * @return バーのアーティスト
-     */
-    public abstract String getArtist();
 
     public ScoreData getScore() {
         return score;

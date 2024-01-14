@@ -62,11 +62,6 @@ public class SongBar extends SelectableBar {
         return song.getFullTitle();
     }
 
-    @Override
-    public String getArtist() {
-        return song.getFullArtist();
-    }
-
     public int getLamp(boolean isPlayer) {
     	final ScoreData score = isPlayer ? getScore() : getRivalScore();
         if (score != null) {

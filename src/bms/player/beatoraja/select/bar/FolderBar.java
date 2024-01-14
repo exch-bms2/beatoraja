@@ -5,6 +5,7 @@ import bms.player.beatoraja.song.*;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 /**
  * ファイルシステムと連動したフォルダバー。
@@ -36,34 +37,23 @@ public class FolderBar extends DirectoryBar {
     }
 
     @Override
-    public String getArtist() {
-        return null;
-    }
-
-    @Override
     public Bar[] getChildren() {
-        SongDatabaseAccessor songdb = selector.getSongDatabase();
-        SongData[] songs = songdb.getSongDatas("parent", crc);
+        final SongDatabaseAccessor songdb = selector.getSongDatabase();
+        final SongData[] songs = songdb.getSongDatas("parent", crc);
         if (songs.length > 0) {
             return SongBar.toSongBarArray(songs);
         }
 
-        FolderData[] folders = songdb.getFolderDatas("parent", crc);
-        Bar[] l = new Bar[folders.length];
-
         final String rootpath = Paths.get(".").toAbsolutePath().toString();
-
-        for(int i = 0;i < folders.length;i++) {
-            String path = folders[i].getPath();
+        return Stream.of(songdb.getFolderDatas("parent", crc)).map(folder -> {
+            String path = folder.getPath();
             if (path.endsWith(String.valueOf(File.separatorChar))) {
                 path = path.substring(0, path.length() - 1);
             }
 
             String ccrc = SongUtils.crc32(path, new String[0], rootpath);
-            l[i] = new FolderBar(selector, folders[i], ccrc);
-        }
-
-        return l;
+            return new FolderBar(selector, folder, ccrc);
+        }).toArray(Bar[]::new);
     }
 
     public void updateFolderStatus() {
