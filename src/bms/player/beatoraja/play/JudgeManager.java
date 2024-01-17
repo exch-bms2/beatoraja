@@ -275,7 +275,7 @@ public class JudgeManager {
 					if (note instanceof NormalNote && note.getState() == 0) {
 						auto_presstime[state.laneassign[0]] = now;
 						keysound.play(note, config.getAudioConfig().getKeyvolume(), 0);
-						this.updateMicro(state, note, mtime, 0, 0);
+						this.updateMicro(state, note, mtime, 0, 0, true);
 					}
 					if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
@@ -288,7 +288,7 @@ public class JudgeManager {
 								//LN時のレーザー色変更処理
 								this.judge[state.player][state.offset] = 8;
 							} else {
-								this.updateMicro(state, ln, mtime, 0, 0);
+								this.updateMicro(state, ln, mtime, 0, 0, true);
 							}
 							state.processing = ln.getPair();
 						}
@@ -300,7 +300,7 @@ public class JudgeManager {
 									auto_presstime[state.laneassign[0]] = Long.MIN_VALUE;
 									auto_presstime[state.laneassign[1]] = now;
 								}
-								this.updateMicro(state, ln, mtime, 0, 0);
+								this.updateMicro(state, ln, mtime, 0, 0, true);
 								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 								state.processing = null;
 							}
@@ -337,7 +337,7 @@ public class JudgeManager {
 				state.mpassingcount += (mtime - prevmtime);
 				if (state.mpassingcount > hcnmduration) {
 					main.getGauge().update(1, 0.5f);
-					// System.out.println("HCN : Gauge increase");
+//					 System.out.println("HCN : Gauge increase");
 					state.mpassingcount -= hcnmduration;
 				}
 				timer.switchTimer(state.timerActive, true);
@@ -346,10 +346,10 @@ public class JudgeManager {
 					keysound.setVolume(state.passing, config.getAudioConfig().getKeyvolume());
 				}
 			} else {
-				state.mpassingcount += (mtime - prevmtime);
+				state.mpassingcount -= (mtime - prevmtime);
 				if (state.mpassingcount < -hcnmduration) {
 					main.getGauge().update(3, 0.5f);
-					// System.out.println("HCN : Gauge decrease");
+//					 System.out.println("HCN : Gauge decrease");
 					state.mpassingcount += hcnmduration;
 				}
 				timer.setTimerOff(state.timerActive);
@@ -388,17 +388,18 @@ public class JudgeManager {
 								;
 
 							keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
-							this.updateMicro(state, state.processing, mtime, j, dmtime);
+							this.updateMicro(state, state.processing, mtime, j, dmtime, true);
 //							 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 							state.processing = null;
 							state.releasetime = Long.MIN_VALUE;
+							state.lnendJudge = Integer.MIN_VALUE;
 							sckey[sc] = 0;							
 						} else {
-							// 押し直し処理							
+							// 押し直し処理
 							state.releasetime = Long.MIN_VALUE;
 						}
 					} else {
-						// 押し直し処理							
+						// 押し直し処理
 						state.releasetime = Long.MIN_VALUE;
 					}
 				} else {
@@ -451,29 +452,40 @@ public class JudgeManager {
 							final LongNote ln = (LongNote) tnote;
 							final long dmtime = tnote.getMicroTime() - pmtime;
 							keysound.play(tnote, config.getAudioConfig().getKeyvolume(), 0);
-							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-									|| ln.getType() == LongNote.TYPE_LONGNOTE)
-									&& judge < 4) {
-								state.mpassingcount = dmtime;
-								//LN時のレーザー色変更処理
-								this.judge[state.player][state.offset] = 8;
-							} else {
-								this.updateMicro(state, ln, mtime, judge, dmtime);
-							}
-							if (judge < 4 && judgeVanish[judge]) {
-								state.processing = ln.getPair();
-								state.releasetime = Long.MIN_VALUE;
-								if (sc >= 0) {
-									// BSS処理開始
-//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
-									sckey[sc] = key;
+							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
+								// LN処理
+								if(judgeVanish[judge]) {
+									state.lnstartJudge = judge;
+									state.lnstartDuration = dmtime;
+									state.processing = ln.getPair();
+									state.releasetime = Long.MIN_VALUE;
+									state.lnendJudge = Integer.MIN_VALUE;
+									if (sc >= 0) {
+										sckey[sc] = key;
+									}
+									//LN時のレーザー色変更処理
+									this.judge[state.player][state.offset] = 8;									
+								} else {
+									this.updateMicro(state, tnote, mtime, judge, dmtime, false);
 								}
+							} else {
+								// CN,HCN処理
+								if (judgeVanish[judge]) {
+									state.processing = ln.getPair();
+									state.releasetime = Long.MIN_VALUE;
+									state.lnendJudge = Integer.MIN_VALUE;
+									if (sc >= 0) {
+										sckey[sc] = key;
+									}
+								}
+								this.updateMicro(state, ln, mtime, judge, dmtime, judgeVanish[judge]);
 							}
 						} else {
 							keysound.play(tnote, config.getAudioConfig().getKeyvolume(), 0);
 							// 通常ノート処理
 							final long dmtime = tnote.getMicroTime() - pmtime;
-							this.updateMicro(state, tnote, mtime, judge, dmtime);
+							this.updateMicro(state, tnote, mtime, judge, dmtime, judgeVanish[judge]);
 						}
 					} else {
 						// 空POOR判定がないときのレーザー色変更処理
@@ -529,16 +541,15 @@ public class JudgeManager {
 							}
 						}
 						if (release) {
-							if(judge == 4 ) {
-								state.releasetime = mtime;								
+							if(judge >= 3 && dmtime > 0) {
+								state.releasetime = mtime;
+								state.lnendJudge = judge;
 							} else {
-								if (judge >= 3) {
-									keysound.setVolume(state.processing.getPair(), 0.0f);
-								}
-								this.updateMicro(state, state.processing, mtime, judge, dmtime);
+								this.updateMicro(state, state.processing, mtime, judge, dmtime, true);
 								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 								state.processing = null;
 								state.releasetime = Long.MIN_VALUE;
+								state.lnendJudge = Integer.MIN_VALUE;
 							}
 						}
 					} else {
@@ -553,21 +564,19 @@ public class JudgeManager {
 						}
 						if (release) {
 							// LN離し処理
-							if (Math.abs(state.mpassingcount) > Math.abs(dmtime)) {
-								dmtime = state.mpassingcount;
-								for (; judge < mjudge.length && !(dmtime >= mjudge[judge][0] && dmtime <= mjudge[judge][1]); judge++)
-									;
+							judge = Math.max(judge, state.lnstartJudge);
+							if (Math.abs(state.lnstartDuration) > Math.abs(dmtime)) {
+								dmtime = state.lnstartDuration;
 							}
-							if(judge == 4 ) {
+							if(judge >= 3 && dmtime > 0) {
 								state.releasetime = mtime;								
+								state.lnendJudge = 3;
 							} else {
-								if (judge >= 3) {
-									keysound.setVolume(state.processing.getPair(), 0.0f);
-								}
-								this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime);
+								this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime, true);
 								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 								state.processing = null;
 								state.releasetime = Long.MIN_VALUE;
+								state.lnendJudge = Integer.MIN_VALUE;
 //								System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);									
 							}
 						}
@@ -587,28 +596,28 @@ public class JudgeManager {
 					|| state.processing.getType() == LongNote.TYPE_LONGNOTE) {
 					if(state.releasetime != Long.MIN_VALUE && state.releasetime + releasemargin <= mtime) {
 						keysound.setVolume(state.processing.getPair(), 0.0f);
-						this.updateMicro(state, state.processing.getPair(), mtime, 4, state.processing.getMicroTime() - state.releasetime);
+						this.updateMicro(state, state.processing.getPair(), mtime, state.lnendJudge, state.processing.getMicroTime() - state.releasetime, true);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 						state.processing = null;
 						state.releasetime = Long.MIN_VALUE;
+						state.lnendJudge = Integer.MIN_VALUE;
 					} else if(state.processing.getMicroTime() < mtime) {
-						int j = 0;
-						for (; j < mjudge.length; j++) {
-							if (state.mpassingcount >= mjudge[j][0] && state.mpassingcount <= mjudge[j][1]) {
-								break;
-							}
-						}
-						this.updateMicro(state, state.processing.getPair(), mtime, j, state.mpassingcount);
+						this.updateMicro(state, state.processing.getPair(), mtime, state.lnstartJudge, state.lnstartDuration, true);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 						state.processing = null;						
+						state.releasetime = Long.MIN_VALUE;
+						state.lnendJudge = Integer.MIN_VALUE;
 					}
 				} else {
-					if(state.releasetime != Long.MIN_VALUE && state.releasetime + releasemargin < mtime) {
-						keysound.setVolume(state.processing.getPair(), 0.0f);
-						this.updateMicro(state, state.processing, mtime, 4, state.processing.getMicroTime() - state.releasetime);
+					if(state.releasetime != Long.MIN_VALUE && state.releasetime + releasemargin <= mtime) {
+						if (state.lnendJudge >= 3) {
+							keysound.setVolume(state.processing.getPair(), 0.0f);
+						}
+						this.updateMicro(state, state.processing, mtime, state.lnendJudge, state.processing.getMicroTime() - state.releasetime, true);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 						state.processing = null;
 						state.releasetime = Long.MIN_VALUE;
+						state.lnendJudge = Integer.MIN_VALUE;
 					}
 				}
 			}
@@ -618,7 +627,7 @@ public class JudgeManager {
 					&& note.getMicroTime() < mtime + mjudge[3][0]; note = state.lanemodel.getNote()) {
 				final int mjud = (int) (note.getMicroTime() - mtime);
 				if (note instanceof NormalNote && note.getState() == 0) {
-					this.updateMicro(state, note, mtime, 4, mjud);
+					this.updateMicro(state, note, mtime, 4, mjud, true);
 				} else if (note instanceof LongNote) {
 					final LongNote ln = (LongNote) note;
 					if (!ln.isEnd() && ln.getState() == 0) {
@@ -626,13 +635,13 @@ public class JudgeManager {
 								|| ln.getType() == LongNote.TYPE_CHARGENOTE
 								|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 							// System.out.println("CN start poor");
-							this.updateMicro(state, note, mtime, 4, mjud);
-							this.updateMicro(state, ((LongNote) note).getPair(), mtime, 4, mjud);
+							this.updateMicro(state, note, mtime, 4, mjud, true);
+							this.updateMicro(state, ((LongNote) note).getPair(), mtime, 4, mjud, true);
 						}
 						if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 								|| ln.getType() == LongNote.TYPE_LONGNOTE) && state.processing != ln.getPair()) {
 							// System.out.println("LN start poor");
-							this.updateMicro(state, note, mtime, 4, mjud);
+							this.updateMicro(state, note, mtime, 4, mjud, true);
 						}
 
 					}
@@ -640,9 +649,10 @@ public class JudgeManager {
 							|| ln.getType() == LongNote.TYPE_CHARGENOTE || ln.getType() == LongNote.TYPE_HELLCHARGENOTE)
 							&& ((LongNote) note).isEnd() && ((LongNote) note).getState() == 0) {
 						// System.out.println("CN end poor");
-						this.updateMicro(state, ((LongNote) note), mtime, 4, mjud);
+						this.updateMicro(state, ((LongNote) note), mtime, 4, mjud, true);
 						state.processing = null;
 						state.releasetime = Long.MIN_VALUE;
+						state.lnendJudge = Integer.MIN_VALUE;
 						if (state.sckey >= 0) {
 							sckey[state.sckey] = 0;
 						}
@@ -660,8 +670,8 @@ public class JudgeManager {
 	private final int[] JUDGE_TIMER = { TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P };
 	private final int[] COMBO_TIMER = { TIMER_COMBO_1P, TIMER_COMBO_2P, TIMER_COMBO_3P };
 
-	private void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast) {
-		if (judgeVanish[judge]) {
+	private void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish) {
+		if (judgeVanish) {
 			if (pastNotes < ghost.length) {
 				ghost[pastNotes] = judge;
 			}
@@ -889,7 +899,12 @@ public class JudgeManager {
 		 */
 		public boolean inclease;
 		public long mpassingcount;
+		
+		public int lnstartJudge;
+		public long lnstartDuration;
+		
 		public long releasetime = Long.MIN_VALUE;
+		public int lnendJudge = Integer.MIN_VALUE;
 		
 		public LaneState(int lane, LaneProperty property, Lane lanemodel) {
 			this.lane = lane;
