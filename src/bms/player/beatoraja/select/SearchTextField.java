@@ -87,8 +87,8 @@ public class SearchTextField extends Stage {
 							SearchWordBar swb = new SearchWordBar(selector, textField.getText());
 							int count = swb.getChildren().length;
 							if (count > 0) {
-								selector.getBarRender().addSearch(swb);
-								selector.getBarRender().updateBar(null);
+								selector.getBarManager().addSearch(swb);
+								selector.getBarManager().updateBar(null);
 								selector.getBarRender().setSelected(swb);
 								textField.setText("");
 								textField.setMessageText(count + " song(s) found");

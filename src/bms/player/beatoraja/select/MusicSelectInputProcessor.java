@@ -65,6 +65,7 @@ public class MusicSelectInputProcessor {
         final PlayerResource resource = main.getPlayerResource();
         final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
+        final BarManager barManager = select.getBarManager();
         final Bar current = bar.getSelected();
 
         if (input.isControlKeyPressed(ControlKeys.NUM0)) {
@@ -73,8 +74,8 @@ public class MusicSelectInputProcessor {
                 @Override
                 public void input(String text) {
                     if (text.length() > 1) {
-                        bar.addSearch(new SearchWordBar(select, text));
-                        bar.updateBar(null);
+                    	barManager.addSearch(new SearchWordBar(select, text));
+                    	barManager.updateBar(null);
                     }
                 }
 

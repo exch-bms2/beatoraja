@@ -3,7 +3,6 @@ package bms.player.beatoraja.select;
 import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.*;
@@ -37,17 +36,11 @@ public class BarRenderer {
 
 	private final BarManager manager;
 	
-	private BarContentsLoaderThread loader;
-
 	/**
 	 * 現在のフォルダ階層
 	 */
 	private Queue<DirectoryBar> dir = new Queue<>();
 	private String dirString = "";
-	/**
-	 * 各階層のフォルダを開く元となったバー
-	 */
-	private Queue<Bar> sourcebars = new Queue<>();
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -56,14 +49,6 @@ public class BarRenderer {
 	 * 選択中のバーのインデックス
 	 */
 	private int selectedindex;
-
-	// システム側で挿入されるルートフォルダ
-	private HashMap<String, Bar> appendFolders = new HashMap<String, Bar>();
-
-	/**
-	 * 検索結果バー一覧
-	 */
-	private Array<SearchWordBar> search = new Array<SearchWordBar>();
 
 	private final String[] TROPHY = { "bronzemedal", "silvermedal", "goldmedal" };
 
@@ -104,13 +89,9 @@ public class BarRenderer {
 		durationhigh = select.resource.getConfig().getScrollDurationHigh();
 		analogTicksPerScroll = select.resource.getConfig().getAnalogTicksPerScroll();
 
-		manager.init(select);
+		manager.init();
 		
 		bararea = Stream.generate(BarArea::new).limit(barlength).toArray(BarArea[]::new);
-	}
-
-	synchronized public void setAppendDirectoryBar(String key, Bar bar) {
-	    this.appendFolders.put(key, bar);
 	}
 
 	public Bar getSelected() {
@@ -162,19 +143,6 @@ public class BarRenderer {
 		dir.addLast(current);
 		updateBar(parent);
 		select.play(FOLDER_CLOSE);
-	}
-
-	public void addSearch(SearchWordBar bar) {
-		for (SearchWordBar s : search) {
-			if (s.getTitle().equals(bar.getTitle())) {
-				search.removeValue(s, true);
-				break;
-			}
-		}
-		if (search.size >= select.resource.getConfig().getMaxSearchBarCount()) {
-			search.removeIndex(0);
-		}
-		search.add(bar);
 	}
 
 	public boolean mousePressed(SkinBar baro, int button, int x, int y) {
@@ -327,9 +295,9 @@ public class BarRenderer {
 		}
 
 		// check terminated loader thread and load song images
-		if(loader != null && loader.getState() == Thread.State.TERMINATED){
+		if(manager.loader != null && manager.loader.getState() == Thread.State.TERMINATED){
 			select.loadSelectedSongImages();
-			loader = null;
+			manager.loader = null;
 		}
 
 		// draw song bar
@@ -609,22 +577,22 @@ public class BarRenderer {
 				prevbar = dir.first();
 			}
 			dir.clear();
-			sourcebars.clear();
+			manager.sourcebars.clear();
 			l.addAll(new FolderBar(select, null, "e2977170").getChildren());
 			l.add(manager.courses);
 			l.addAll(manager.favorites);
-			appendFolders.keySet().forEach((key) -> {
-			    l.add(appendFolders.get(key));
+			manager.appendFolders.keySet().forEach((key) -> {
+			    l.add(manager.appendFolders.get(key));
 			});
 			l.addAll(manager.tables);
 			l.addAll(manager.commands);
-			l.addAll(search);
+			l.addAll(manager.search);
 		} else if (bar instanceof DirectoryBar) {
 			showInvisibleCharts = ((DirectoryBar)bar).isShowInvisibleChart();
 			if(dir.indexOf((DirectoryBar) bar, true) != -1) {
 				while(dir.last() != bar) {
 					prevbar = dir.removeLast();
-					sourcebar = sourcebars.removeLast();
+					sourcebar = manager.sourcebars.removeLast();
 				}
 				dir.removeLast();
 			}
@@ -683,7 +651,7 @@ public class BarRenderer {
 			if (bar != null) {
 				dir.addLast((DirectoryBar) bar);
 				if (dir.size > prevdirsize) {
-					sourcebars.addLast(prevbar);
+					manager.sourcebars.addLast(prevbar);
 				}
 			}
 
@@ -784,11 +752,11 @@ public class BarRenderer {
 				}
 			}
 
-			if (loader != null) {
-				loader.stopRunning();
+			if (manager.loader != null) {
+				manager.loader.stopRunning();
 			}
-			loader = new BarContentsLoaderThread(select, currentsongs);
-			loader.start();
+			manager.loader = new BarContentsLoaderThread(select, currentsongs);
+			manager.loader.start();
 			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
 					currentsongs[selectedindex].getRivalScore());
 

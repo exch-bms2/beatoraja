@@ -60,7 +60,7 @@ public class MusicSelector extends MainState {
 	 */
 	private BarRenderer bar;
 	
-	private final BarManager manager = new BarManager();
+	private final BarManager manager = new BarManager(this);
 	
 	private MusicSelectInputProcessor musicinput;
 
@@ -581,6 +581,10 @@ public class MusicSelector extends MainState {
 
 	public BarRenderer getBarRender() {
 		return bar;
+	}
+
+	public BarManager getBarManager() {
+		return manager;
 	}
 
 	public PixmapResourcePool getBannerResource() {

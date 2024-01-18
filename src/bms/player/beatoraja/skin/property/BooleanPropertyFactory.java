@@ -191,13 +191,11 @@ public class BooleanPropertyFactory {
 				if (state instanceof BMSPlayer) {
 					JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
 					if (type == 0) {
-						return judge.getNowJudge().length > player && judge.getNowJudge()[player] == 1;
+						return judge.getNowJudge(player) == 1;
 					} else if (type == 1) {
-						return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
-								&& judge.getRecentJudgeTiming()[player] > 0;
+						return judge.getNowJudge(player) > 1 && judge.getRecentJudgeTiming(player) > 0;
 					} else {
-						return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
-								&& judge.getRecentJudgeTiming()[player] < 0;
+						return judge.getNowJudge(player) > 1 && judge.getRecentJudgeTiming(player) < 0;
 					}
 				}
 				return false;				

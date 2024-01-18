@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Queue;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +35,7 @@ import bms.player.beatoraja.song.SongInformationAccessor;
  */
 public class BarManager {
 	
+	private final MusicSelector select;
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -44,15 +47,32 @@ public class BarManager {
 
 	HashBar[] favorites = new HashBar[0];
 
+	/**
+	 * 各階層のフォルダを開く元となったバー
+	 */
+	final Queue<Bar> sourcebars = new Queue<>();
+
 	// jsonで定義したrandom bar (folder)
 	List<RandomFolder> randomFolderList;
 
+	// システム側で挿入されるルートフォルダ
+	HashMap<String, Bar> appendFolders = new HashMap<String, Bar>();
+	/**
+	 * 検索結果バー一覧
+	 */
+	Array<SearchWordBar> search = new Array<SearchWordBar>();
 	/**
 	 * ランダムコース結果バー一覧
 	 */
 	Array<RandomCourseResult> randomCourseResult = new Array<>();
 
-	void init(MusicSelector select) {
+	BarContentsLoaderThread loader;
+
+	public BarManager(MusicSelector select) {
+		this.select = select;
+	}
+	
+	void init() {
 		TableDataAccessor tdaccessor = new TableDataAccessor(select.resource.getConfig().getTablepath());
 
 		TableData[] unsortedtables = tdaccessor.readAll();
@@ -226,6 +246,16 @@ public class BarManager {
 
 		commands = l.toArray(Bar.class);
 	}
+	
+	public boolean updateBar() {
+		// TODO BarRendererから移行
+		return select.getBarRender().updateBar();
+	}
+
+	public boolean updateBar(Bar bar) {
+		// TODO BarRendererから移行
+		return select.getBarRender().updateBar(bar);
+	}
 
 	private Bar createCommandBar(MusicSelector select, CommandFolder folder) {
 		return (folder.getFolder() != null && folder.getFolder().length > 0 || folder.getRandomCourse() != null && folder.getRandomCourse().length > 0) ?
@@ -235,11 +265,28 @@ public class BarManager {
 			new CommandBar(select, folder.getName(), folder.getSql(), folder.isShowall());
 	}
 
+	public void addSearch(SearchWordBar bar) {
+		for (SearchWordBar s : search) {
+			if (s.getTitle().equals(bar.getTitle())) {
+				search.removeValue(s, true);
+				break;
+			}
+		}
+		if (search.size >= select.resource.getConfig().getMaxSearchBarCount()) {
+			search.removeIndex(0);
+		}
+		search.add(bar);
+	}
+
 	public void addRandomCourse(GradeBar bar, String dirString) {
 		if (randomCourseResult.size >= 100) {
 			randomCourseResult.removeIndex(0);
 		}
 		randomCourseResult.add(new RandomCourseResult(bar, dirString));
+	}
+
+	synchronized public void setAppendDirectoryBar(String key, Bar bar) {
+	    this.appendFolders.put(key, bar);
 	}
 
 	public static class CommandFolder {
