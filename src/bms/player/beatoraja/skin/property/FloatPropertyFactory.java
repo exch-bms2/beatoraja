@@ -94,12 +94,12 @@ public class FloatPropertyFactory {
 	public enum FloatType {
 		
 		musicselect_position(1, 
-				(state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarRender().getSelectedPosition() : 0), 
+				(state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarManager().getSelectedPosition() : 0), 
 				(state, value) -> {
 					if(state instanceof MusicSelector) {
 						final MusicSelector select = (MusicSelector) state;
 						select.selectedBarMoved();
-						select.getBarRender().setSelectedPosition(value);
+						select.getBarManager().setSelectedPosition(value);
 					}
 				}),
 		lanecover(4, (state) -> {
@@ -190,7 +190,7 @@ public class FloatPropertyFactory {
 		targetscorerate(115, (state) -> (state.getScoreDataProperty().getRivalScoreRate())),
 		rate_pgreat(140, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -212,7 +212,7 @@ public class FloatPropertyFactory {
 		}),
 		rate_great(141, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -234,7 +234,7 @@ public class FloatPropertyFactory {
 		}),
 		rate_good(142, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -256,7 +256,7 @@ public class FloatPropertyFactory {
 		}),
 		rate_bad(143, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -278,7 +278,7 @@ public class FloatPropertyFactory {
 		}),
 		rate_poor(144, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -300,7 +300,7 @@ public class FloatPropertyFactory {
 		}),
 		rate_maxcombo(145, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -321,7 +321,7 @@ public class FloatPropertyFactory {
 		}),
 		rate_exscore(147, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
 					return score != null
@@ -361,7 +361,7 @@ public class FloatPropertyFactory {
 	private static FloatProperty getLevelRate(final int difficulty) {
 		return (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar && ((SongBar) selected).getSongData() != null) {
 					SongData sd = ((SongBar) selected).getSongData();
 					if (difficulty >= 0 && sd.getDifficulty() != difficulty) {

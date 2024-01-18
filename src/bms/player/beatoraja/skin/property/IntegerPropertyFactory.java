@@ -360,7 +360,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_MAXCOMBO2:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarManager().getSelected().getScore();
 					return score != null ? score.getCombo() : Integer.MIN_VALUE;
 				}
 				if (state instanceof BMSPlayer) {
@@ -446,7 +446,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_MISSCOUNT2:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					final ScoreData score = ((MusicSelector)state).getBarManager().getSelected().getScore();
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
@@ -521,21 +521,21 @@ public class IntegerPropertyFactory {
 
 		playcount(77, (state) -> {
 			if (state instanceof MusicSelector) {
-				final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+				final ScoreData score = ((MusicSelector)state).getBarManager().getSelected().getScore();
 				return score != null ? score.getPlaycount() : Integer.MIN_VALUE;
 			}
 			return Integer.MIN_VALUE;
 		}),
 		clearcount(78, (state) -> {
 			if (state instanceof MusicSelector) {
-				final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+				final ScoreData score = ((MusicSelector)state).getBarManager().getSelected().getScore();
 				return score != null ? score.getClearcount() : Integer.MIN_VALUE;
 			}
 			return Integer.MIN_VALUE;
 		}),
 		failcount(79, (state) -> {
 			if (state instanceof MusicSelector) {
-				final ScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+				final ScoreData score = ((MusicSelector)state).getBarManager().getSelected().getScore();
 				return score != null ? score.getPlaycount() - score.getClearcount() : Integer.MIN_VALUE;
 			}
 			return Integer.MIN_VALUE;
@@ -836,7 +836,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createFolderClearCountProperty(final int clearType) {
 			return (state) -> {
 				if (state instanceof MusicSelector) {
-					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+					final Bar selected = ((MusicSelector)state).getBarManager().getSelected();
 					if (selected instanceof DirectoryBar) {
 						return ((DirectoryBar) selected).getLamps()[clearType];
 					}
@@ -946,8 +946,7 @@ public class IntegerPropertyFactory {
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
 					final JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
-					return (int) (judge.getRecentJudgeTiming().length > player ? judge.getRecentJudgeTiming()[player]
-							: judge.getRecentJudgeTiming()[0]);
+					return (int) judge.getRecentJudgeTiming(player);
 				}
 				return 0;
 			};
@@ -1217,6 +1216,7 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
+		guidese(343, (state) -> (state.resource.getPlayerConfig().isGuideSE() ? 1 : 0)),
 
 		extranotedepth(350, (state) -> (state.resource.getPlayerConfig().getExtranoteDepth())),
 		minemode(351, (state) -> (state.resource.getPlayerConfig().getMineMode())),
@@ -1228,7 +1228,7 @@ public class IntegerPropertyFactory {
 
 		cleartype(370, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;
 			} else if (state instanceof AbstractResult) {
 				final ScoreData score = ((AbstractResult) state).getNewScore();
@@ -1241,7 +1241,7 @@ public class IntegerPropertyFactory {
 		}),
 		cleartype_target(371, (state) -> {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				return selected.getRivalScore() != null ? selected.getRivalScore().getClear() : Integer.MIN_VALUE;
 			} else if (state instanceof AbstractResult) {
 				return ((AbstractResult) state).getOldScore().getClear();
@@ -1378,7 +1378,7 @@ public class IntegerPropertyFactory {
 		@Override
 		public int get(MainState state) {
 			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+				final Bar selected = ((MusicSelector)state).getBarManager().getSelected();
 				if (selected instanceof DirectoryBar) {
 					int[] lamps = ((DirectoryBar) selected).getLamps();
 					int count = 0;

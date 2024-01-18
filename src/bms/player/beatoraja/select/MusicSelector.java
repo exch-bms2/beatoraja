@@ -139,7 +139,7 @@ public class MusicSelector extends MainState {
 		final int index = IntStream.range(0, rivals.getRivalCount()).filter(i -> rival == rivals.getRivalInformation(i)).findFirst().orElse(-1);
 		this.rival = index != -1 ? rivals.getRivalInformation(index) : null;
 		rivalcache = index != -1 ? rivals.getRivalScoreDataCache(index) : null;
-		bar.updateBar();
+		manager.updateBar();
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
 	}
 
@@ -181,7 +181,7 @@ public class MusicSelector extends MainState {
 		input.setKeyboardConfig(pc.getKeyboardConfig());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
-		bar.updateBar();
+		manager.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
 
@@ -202,7 +202,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void render() {
-		final Bar current = bar.getSelected();
+		final Bar current = manager.getSelected();
         if(timer.getNowTime() > getSkin().getInput()){
         	timer.switchTimer(TIMER_STARTINPUT, true);
         }
@@ -269,7 +269,7 @@ public class MusicSelector extends MainState {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						// TODO 重複コード
-						final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
+						final Queue<DirectoryBar> dir = manager.getDirectory();
 						if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
 							Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
 
@@ -312,7 +312,7 @@ public class MusicSelector extends MainState {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 					// TODO 重複コード
-					final Queue<DirectoryBar> dir = this.getBarRender().getDirectory();
+					final Queue<DirectoryBar> dir = manager.getDirectory();
 					if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
 						Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
 
@@ -388,7 +388,7 @@ public class MusicSelector extends MainState {
 	
 	public void select(Bar current) {
 		if (current instanceof DirectoryBar) {
-			if (bar.updateBar(current)) {
+			if (manager.updateBar(current)) {
 				play(FOLDER_OPEN);
 			}
 			execute(MusicSelectCommand.RESET_REPLAY);
@@ -410,7 +410,7 @@ public class MusicSelector extends MainState {
 	}
 
 	private void readCourse(BMSPlayerMode mode) {
-		final GradeBar gradeBar = (GradeBar) bar.getSelected();
+		final GradeBar gradeBar = (GradeBar) manager.getSelected();
 		if (!gradeBar.existsAllSongs()) {
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 			return;
@@ -423,7 +423,7 @@ public class MusicSelector extends MainState {
 	}
 
 	private void readRandomCourse(BMSPlayerMode mode) {
-		final RandomCourseBar randomCourseBar = (RandomCourseBar) bar.getSelected();
+		final RandomCourseBar randomCourseBar = (RandomCourseBar) manager.getSelected();
 		if (!randomCourseBar.existsAllSongs()) {
 			Logger.getGlobal().info("ランダムコースの楽曲が揃っていません");
 			return;
@@ -438,9 +438,9 @@ public class MusicSelector extends MainState {
 		}
 
 		if (_readCourse(mode, gradeBar)) {
-			manager.addRandomCourse(gradeBar, bar.getDirectoryString());
-			bar.updateBar();
-			bar.setSelected(gradeBar);
+			manager.addRandomCourse(gradeBar, manager.getDirectoryString());
+			manager.updateBar();
+			manager.setSelected(gradeBar);
 		} else {
 			main.getMessageRenderer().addMessage("Failed to loading Random Course : Some of songs not found", 1200, Color.RED, 1);
 			Logger.getGlobal().info("ランダムコースの楽曲が揃っていません");
@@ -559,10 +559,10 @@ public class MusicSelector extends MainState {
 
 	public boolean existsConstraint(CourseData.CourseDataConstraint constraint) {
 		CourseData.CourseDataConstraint[] cons;
-		if ((bar.getSelected() instanceof GradeBar)) {
-			cons = ((GradeBar) bar.getSelected()).getCourseData().getConstraint();
-		} else if (bar.getSelected() instanceof RandomCourseBar) {
-			cons = ((RandomCourseBar) bar.getSelected()).getCourseData().getConstraint();
+		if ((manager.getSelected() instanceof GradeBar)) {
+			cons = ((GradeBar) manager.getSelected()).getCourseData().getConstraint();
+		} else if (manager.getSelected() instanceof RandomCourseBar) {
+			cons = ((RandomCourseBar) manager.getSelected()).getCourseData().getConstraint();
 		} else {
 			return false;
 		}
@@ -576,7 +576,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public Bar getSelectedBar() {
-		return bar.getSelected();
+		return manager.getSelected();
 	}
 
 	public BarRenderer getBarRender() {
@@ -599,12 +599,12 @@ public class MusicSelector extends MainState {
 		loadSelectedSongImages();
 
 		timer.setTimerOn(TIMER_SONGBAR_CHANGE);
-		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
-				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
+		if(preview.getSongData() != null && (!(manager.getSelected() instanceof SongBar) ||
+				((SongBar) manager.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);
 		showNoteGraph = false;
 
-		final Bar current = bar.getSelected();
+		final Bar current = manager.getSelected();
 		if(main.getIRStatus().length > 0) {
 			if(current instanceof SongBar && ((SongBar) current).existsSong()) {
 				currentir = main.getRankingDataCache().get(((SongBar) current).getSongData(), config.getLnmode());
@@ -625,7 +625,7 @@ public class MusicSelector extends MainState {
 	public void loadSelectedSongImages() {
 		// banner
 		// stagefile
-		final Bar current = bar.getSelected();
+		final Bar current = manager.getSelected();
 		resource.getBMSResource().setBanner(
 				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
 		resource.getBMSResource().setStagefile(
@@ -637,7 +637,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public PlayConfig getSelectedBarPlayConfig() {
-		Bar current = bar.getSelected();
+		Bar current = manager.getSelected();
 		PlayConfig pc = null;
 		if (current instanceof SongBar && ((SongBar)current).existsSong()) {
 			SongBar song = (SongBar) current;

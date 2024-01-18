@@ -110,8 +110,8 @@ public class StreamRequestCommand extends StreamCommand {
                     if (songDatas.size() > 0) {
                         bar.setElements(songDatas.toArray(new SongData[0]));
                         try {
-                            selector.getBarRender().setAppendDirectoryBar("Stream Request", bar);
-                            selector.getBarRender().updateBar();
+                            selector.getBarManager().setAppendDirectoryBar("Stream Request", bar);
+                            selector.getBarManager().updateBar();
                         } catch (Exception e) {
                         } // continue
                     }

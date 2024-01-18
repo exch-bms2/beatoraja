@@ -253,7 +253,7 @@ public class StringPropertyFactory {
 
 		directory(1000, (state) -> {
 			if (state instanceof MusicSelector) {
-				return ((MusicSelector) state).getBarRender().getDirectoryString();
+				return ((MusicSelector) state).getBarManager().getDirectoryString();
 			}
 			return "";
 		}),

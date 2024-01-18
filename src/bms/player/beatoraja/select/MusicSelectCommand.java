@@ -27,8 +27,8 @@ import com.badlogic.gdx.graphics.Color;
 public enum MusicSelectCommand {
 
 	RESET_REPLAY(selector -> {
-		if (selector.getBarRender().getSelected() instanceof SelectableBar) {
-			boolean[] replays = ((SelectableBar) selector.getBarRender().getSelected()).getExistsReplayData();
+		if (selector.getBarManager().getSelected() instanceof SelectableBar) {
+			boolean[] replays = ((SelectableBar) selector.getBarManager().getSelected()).getExistsReplayData();
 			for (int i = 0; i < replays.length; i++) {
 				if (replays[i]) {
 					selector.setSelectedReplay(i);
@@ -39,7 +39,7 @@ public enum MusicSelectCommand {
 		selector.setSelectedReplay(-1);
 	}),
 	NEXT_REPLAY(selector -> {
-		Bar current = selector.getBarRender().getSelected();
+		Bar current = selector.getBarManager().getSelected();
 		if (current != null && current instanceof SelectableBar) {
 			boolean[] replays = ((SelectableBar) current).getExistsReplayData();
 			for (int i = 1; i < replays.length; i++) {
@@ -53,7 +53,7 @@ public enum MusicSelectCommand {
 		}
 	}),
 	PREV_REPLAY(selector -> {
-		Bar current = selector.getBarRender().getSelected();
+		Bar current = selector.getBarManager().getSelected();
 		if (current != null && current instanceof SelectableBar) {
 			boolean[] replays = ((SelectableBar) current).getExistsReplayData();
 			for (int i = 1; i < replays.length; i++) {
@@ -70,7 +70,7 @@ public enum MusicSelectCommand {
 	 * 楽曲ファイルの場所をOS既定のファイルブラウザーで開く
 	 */
 	OPEN_WITH_EXPLORER(selector -> {
-		Bar current = selector.getBarRender().getSelected();
+		Bar current = selector.getBarManager().getSelected();
 		try {
 			if (Desktop.isDesktopSupported()) {
 				if (current instanceof SongBar) {
@@ -111,7 +111,7 @@ public enum MusicSelectCommand {
 	 * 譜面のMD5ハッシュをクリップボードにコピーする
 	 */
 	COPY_MD5_HASH(selector -> {
-		Bar current = selector.getBarRender().getSelected();
+		Bar current = selector.getBarManager().getSelected();
 		if (current instanceof SongBar) {
 			final SongData song = ((SongBar) current).getSongData();
 			if (song != null) {
@@ -129,7 +129,7 @@ public enum MusicSelectCommand {
 	 * 譜面のMD5ハッシュをクリップボードにコピーする
 	 */
 	COPY_SHA256_HASH(selector -> {
-		Bar current = selector.getBarRender().getSelected();
+		Bar current = selector.getBarManager().getSelected();
 		if (current instanceof SongBar) {
 			final SongData song = ((SongBar) current).getSongData();
 			if (song != null) {
@@ -147,7 +147,7 @@ public enum MusicSelectCommand {
 	 * 楽曲ファイルのDLサイトをOS既定のブラウザーで開く
 	 */
 	OPEN_DOWNLOAD_SITE(selector -> {
-		Bar current = selector.getBarRender().getSelected();
+		Bar current = selector.getBarManager().getSelected();
 		if (current instanceof SongBar) {
 			final SongData song = ((SongBar) current).getSongData();
 			if (song != null) {
@@ -172,7 +172,7 @@ public enum MusicSelectCommand {
 		}
 	}), 
 	DOWNLOAD_IPFS(selector -> {
-		Queue<DirectoryBar> dir = selector.getBarRender().getDirectory();
+		Queue<DirectoryBar> dir = selector.getBarManager().getDirectory();
 		String[] acceptdomain = { "lnt.softether.net", "www.ribbit.xyz", "rattoto10.jounin.jp",
 				"flowermaster.web.fc2.com", "stellawingroad.web.fc2.com", "pmsdifficulty.xxxxxxxx.jp", "walkure.net",
 				"stellabms.xyz", "dpbmsdelta.web.fc2.com", "cgi.geocities.jp/asahi3jpn", "nekokan.dyndns.info" };
@@ -184,7 +184,7 @@ public enum MusicSelectCommand {
 					break;
 				for (String url : acceptdomain) {
 					if (selecturl.startsWith("http://" + url) || selecturl.startsWith("https://" + url)) {
-						Bar current = selector.getBarRender().getSelected();
+						Bar current = selector.getBarManager().getSelected();
 						if (current instanceof SongBar) {
 							final SongData song = ((SongBar) current).getSongData();
 							if (song != null && song.getIpfs() != null) {
@@ -207,7 +207,7 @@ public enum MusicSelectCommand {
 	 * 楽曲フォルダ/難易度表を更新する
 	 */
 	UPDATE_FOLDER(selector -> {
-		Bar selected = selector.getBarRender().getSelected();
+		Bar selected = selector.getBarManager().getSelected();
 		if (selected instanceof FolderBar) {
 			selector.main.updateSong(((FolderBar) selected).getFolderData().getPath());
 		} else if (selected instanceof TableBar) {
@@ -223,8 +223,8 @@ public enum MusicSelectCommand {
 	 * 同一フォルダにある譜面を全て表示する．コースの場合は構成譜面を全て表示する
 	 */
 	SHOW_SONGS_ON_SAME_FOLDER(selector -> {
-		final BarRenderer bar = selector.getBarRender();
-		Bar current = selector.getBarRender().getSelected();
+		final BarManager bar = selector.getBarManager();
+		Bar current = selector.getBarManager().getSelected();
 		if (current instanceof SongBar && ((SongBar) current).existsSong()
 				&& (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
 			SongData sd = ((SongBar) current).getSongData();

@@ -36,7 +36,6 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
-import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
@@ -71,7 +70,6 @@ public class MainController {
 
 	private PlayerResource resource;
 
-	private FreeTypeFontGenerator generator;
 	private BitmapFont systemfont;
 	private MessageRenderer messageRenderer;
 
@@ -276,14 +274,12 @@ public class MainController {
 
 		if (newState != null && current != newState) {
 			if(current != null) {
+				current.shutdown();
 				current.setSkin(null);
 			}
 			newState.create();
 			if(newState.getSkin() != null) {
 				newState.getSkin().prepare(newState);
-			}
-			if (current != null) {
-				current.shutdown();
 			}
 			current = newState;
 			timer.setMainState(newState);
@@ -312,12 +308,13 @@ public class MainController {
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 		try {
-			generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
+			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 			systemfont = generator.generateFont(parameter);
+			generator.dispose();
 		} catch (GdxRuntimeException e) {
-			Logger.getGlobal().severe("System Font１読み込み失敗");
+			Logger.getGlobal().severe("System Font読み込み失敗");
 		}
 		messageRenderer = new MessageRenderer(config.getMessagefontpath());
 
@@ -563,7 +560,7 @@ public class MainController {
             	download.setDownloadpath(null);
             }
 			if (updateSong != null && !updateSong.isAlive()) {
-				selector.getBarRender().updateBar();
+				selector.getBarManager().updateBar();
 				updateSong = null;
 			}
         }

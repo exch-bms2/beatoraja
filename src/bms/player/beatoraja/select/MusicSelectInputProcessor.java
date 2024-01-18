@@ -66,7 +66,7 @@ public class MusicSelectInputProcessor {
         final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
         final BarManager barManager = select.getBarManager();
-        final Bar current = bar.getSelected();
+        final Bar current = select.getBarManager().getSelected();
 
         if (input.isControlKeyPressed(ControlKeys.NUM0)) {
             // 検索用ポップアップ表示。これ必要？
@@ -310,7 +310,7 @@ public class MusicSelectInputProcessor {
             } else {
                 if (property.isPressed(input, MusicSelectKey.FOLDER_OPEN, true) || input.isControlKeyPressed(ControlKeys.RIGHT) || input.isControlKeyPressed(ControlKeys.ENTER)) {
                     // open folder
-                    if (bar.updateBar(current)) {
+                    if (select.getBarManager().updateBar(current)) {
                         select.play(SoundType.FOLDER_OPEN);
                     }
                 }
@@ -328,7 +328,7 @@ public class MusicSelectInputProcessor {
             // close folder
             if (property.isPressed(input, MusicSelectKey.FOLDER_CLOSE, true) || input.isControlKeyPressed(ControlKeys.LEFT)) {
                 input.resetKeyChangedTime(1);
-                bar.close();
+                select.getBarManager().close();
             }
 
     		if(input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
@@ -349,7 +349,7 @@ public class MusicSelectInputProcessor {
         }
 
         // song bar moved
-        if (bar.getSelected() != current) {
+        if (select.getBarManager().getSelected() != current) {
             select.selectedBarMoved();
         }
         select.timer.switchTimer(TIMER_SONGBAR_CHANGE, true);

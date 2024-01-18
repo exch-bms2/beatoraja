@@ -77,7 +77,7 @@ public class EventFactory {
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
 				config.setMode(MusicSelector.MODE[(mode + (arg1 >= 0 ? 1 : MusicSelector.MODE.length - 1)) % MusicSelector.MODE.length]);
-				selector.getBarRender().updateBar();
+				selector.getBarManager().updateBar();
 				selector.play(OPTION_CHANGE);
 			}
 		}),
@@ -88,7 +88,7 @@ public class EventFactory {
 			if(state instanceof MusicSelector) {
 				final MusicSelector selector = (MusicSelector) state;
 				selector.setSort((selector.getSort() + (arg1 >= 0 ? 1 : BarSorter.defaultSorter.length - 1)) % BarSorter.defaultSorter.length);
-				selector.getBarRender().updateBar();
+				selector.getBarManager().updateBar();
 				selector.play(OPTION_CHANGE);
 			}
 		}),
@@ -131,7 +131,7 @@ public class EventFactory {
 				return;
 			}
 			if(state instanceof MusicSelector) {
-				Bar current = ((MusicSelector)state).getBarRender().getSelected();
+				Bar current = ((MusicSelector)state).getBarManager().getSelected();
 				if(current instanceof SongBar && ((SongBar) current).existsSong()) {
 					try (Stream<Path> paths = Files.list(Paths.get(((SongBar) current).getSongData().getPath()).getParent())) {
 						paths.filter(p -> !Files.isDirectory(p) && p.toString().toLowerCase().endsWith(".txt")).forEach(p -> {
@@ -255,7 +255,7 @@ public class EventFactory {
 			}
 			String url = null;
 			if(state instanceof MusicSelector) {
-				Bar current = ((MusicSelector)state).getBarRender().getSelected();
+				Bar current = ((MusicSelector)state).getBarManager().getSelected();
 				if(current instanceof SongBar) {
 					url = ir.getSongURL(new IRChartData(((SongBar) current).getSongData()));
 				} else if(current instanceof GradeBar) {
@@ -398,7 +398,7 @@ public class EventFactory {
 						changeFav.accept(sd);
 
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-						selector.getBarRender().updateBar();
+						selector.getBarManager().updateBar();
 						selector.play(OPTION_CHANGE);
 					}
 				}
@@ -454,7 +454,7 @@ public class EventFactory {
 						}
 						changeFav.accept(sd);					
 						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-						selector.getBarRender().updateBar();
+						selector.getBarManager().updateBar();
 						selector.play(OPTION_CHANGE);
 					}
 				}
@@ -530,7 +530,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 	            PlayerConfig config = selector.resource.getPlayerConfig();
 	            config.setLnmode((config.getLnmode() + (arg1 >= 0 ? 1 : lnmodelength - 1)) % lnmodelength);
-	            selector.getBarRender().updateBar();
+	            selector.getBarManager().updateBar();
 	            selector.play(OPTION_CHANGE);
 			}
 		}),
@@ -581,6 +581,14 @@ public class EventFactory {
 				}
 			}
 		}),
+		guidese(343, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayerConfig config = state.resource.getPlayerConfig();
+				config.setGuideSE(!config.isGuideSE());
+				state.play(OPTION_CHANGE);
+			}
+		}),
+
 		extranotedepth(350, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				final int depthlength = 4;
