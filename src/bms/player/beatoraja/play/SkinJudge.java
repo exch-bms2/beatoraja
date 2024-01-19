@@ -77,7 +77,7 @@ public class SkinJudge extends SkinObject {
 
 	@Override
 	public void prepare(long time, MainState state) {
-        int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
+        int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge(index) - 1;
         if(judgenow < 0) {
         	draw = false;
             return;
@@ -103,7 +103,7 @@ public class SkinJudge extends SkinObject {
         
     	if(nowJudge.draw) {
             if(nowCount != null) {
-            	nowCount.prepare(time, state, ((BMSPlayer)state).getJudgeManager().getNowCombo()[index], nowJudge.region.x, nowJudge.region.y);
+            	nowCount.prepare(time, state, ((BMSPlayer)state).getJudgeManager().getNowCombo(index), nowJudge.region.x, nowJudge.region.y);
             	nowJudge.region.x += shift ? -nowCount.getLength() / 2 : 0;
             }        		
     	} else {

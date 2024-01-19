@@ -61,10 +61,6 @@ public class BMSPlayer extends MainState {
 	private int playspeed = 100;
 
 	/**
-	 * 処理済ノート数
-	 */
-	private int notes;
-	/**
 	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
 	 */
 	private int[] PMcharaLastnotes = {0, 0};
@@ -594,7 +590,6 @@ public class BMSPlayer extends MainState {
 				model.setJudgerank(property.judgerank);
 				lanerender.init(model);
 				judge.init(model, resource);
-				notes = 0;
 				PMcharaLastnotes[0] = 0;
 				PMcharaLastnotes[1] = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
@@ -648,7 +643,7 @@ public class BMSPlayer extends MainState {
 			timer.switchTimer(TIMER_GAUGE_MAX_1P, gauge.getGauge().isMax());
 
 			if(timer.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && timer.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && timer.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
-				if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
+				if(PMcharaLastnotes[0] != judge.getPastNotes() && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
 						if(gauge.getGauge().isMax()) timer.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
 						else timer.setTimerOn(TIMER_PM_CHARA_1P_GREAT);
@@ -658,7 +653,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			if(timer.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && timer.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && timer.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
-				if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
+				if(PMcharaLastnotes[1] != judge.getPastNotes() && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) timer.setTimerOn(TIMER_PM_CHARA_2P_BAD);
 					else timer.setTimerOn(TIMER_PM_CHARA_2P_GREAT);
 					timer.setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
@@ -668,10 +663,10 @@ public class BMSPlayer extends MainState {
 				if(i != TIMER_PM_CHARA_2P_NEUTRAL && timer.isTimerOn(i) && timer.getNowTime(i) >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
 					if(i <= TIMER_PM_CHARA_1P_BAD) {
 						timer.setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
-						PMcharaLastnotes[0] = notes;
+						PMcharaLastnotes[0] = judge.getPastNotes();
 					} else {
 						timer.setTimerOn(TIMER_PM_CHARA_2P_NEUTRAL);
-						PMcharaLastnotes[1] = notes;
+						PMcharaLastnotes[1] = judge.getPastNotes();
 					}
 					timer.setTimerOff(i);
 				}
@@ -885,7 +880,7 @@ public class BMSPlayer extends MainState {
 			if (assist > 0) {
 				if(resource.getCourseBMSModels() == null) clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
-				if (notes == this.judge.getCombo()) {
+				if (judge.getPastNotes() == judge.getCombo()) {
 					if (judge.getJudgeCount(2) == 0) {
 						if (judge.getJudgeCount(1) == 0) {
 							clear = ClearType.Max;
@@ -925,8 +920,8 @@ public class BMSPlayer extends MainState {
 		replay.doubleoption = playinfo.doubleoption;
 		replay.config = replayConfig;
 
-		score.setPassnotes(notes);
-		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
+		score.setPassnotes(judge.getPastNotes());
+		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - judge.getPastNotes());
 		
 		long count = 0;
 		long avgduration = 0;
@@ -973,7 +968,7 @@ public class BMSPlayer extends MainState {
 			return;
 		}
 		if (state != STATE_FINISHED && 
-				(notes == resource.getSongdata().getNotes() 
+				(judge.getPastNotes() == resource.getSongdata().getNotes() 
 				|| (judge.getJudgeCount(0) + judge.getJudgeCount(1) + judge.getJudgeCount(2) + judge.getJudgeCount(3) == 0)
 				|| resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY)) {
 			state = STATE_FINISHED;
@@ -1017,8 +1012,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void update(int judge, long time) {
-		notes = this.judge.getPastNotes();
-
 		if (this.judge.getCombo() == 0) {
 			bga.setMisslayerTme(time);
 		}
@@ -1026,10 +1019,10 @@ public class BMSPlayer extends MainState {
 		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
 		//フルコン判定
-		timer.switchTimer(TIMER_FULLCOMBO_1P, notes == resource.getSongdata().getNotes()
-				&& notes == this.judge.getCombo());
+		timer.switchTimer(TIMER_FULLCOMBO_1P, this.judge.getPastNotes() == resource.getSongdata().getNotes()
+				&& this.judge.getPastNotes() == this.judge.getCombo());
 
-		getScoreDataProperty().update(this.judge.getScoreData(), notes);
+		getScoreDataProperty().update(this.judge.getScoreData(), this.judge.getPastNotes());
 
 		timer.switchTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
 		timer.switchTimer(TIMER_SCORE_AA, getScoreDataProperty().qualifyRank(21));
@@ -1043,15 +1036,11 @@ public class BMSPlayer extends MainState {
 	}
 
 	public boolean isNoteEnd() {
-		return notes == resource.getSongdata().getNotes();
+		return judge.getPastNotes() == resource.getSongdata().getNotes();
 	}
 
 	public int getPastNotes() {
-		return notes;
-	}
-
-	public void setPastNotes(int notes) {
-		this.notes = notes;
+		return judge.getPastNotes();
 	}
 
 	public int getPlaytime() {

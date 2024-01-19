@@ -117,11 +117,6 @@ public class JudgeManager {
 	private JudgeAlgorithm algorithm;
 
 	/**
-	 * 処理済ノート数
-	 */
-	private int pastNotes = 0;
-
-	/**
 	 * PMS キャラ用 判定
 	 */
 	private int PMcharaJudge = 0;
@@ -168,7 +163,6 @@ public class JudgeManager {
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
-		pastNotes = 0;
 		PMcharaJudge = 0;
 
 		keyassign = main.getLaneProperty().getKeyLaneAssign();
@@ -672,14 +666,13 @@ public class JudgeManager {
 
 	private void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish) {
 		if (judgeVanish) {
-			if (pastNotes < ghost.length) {
-				ghost[pastNotes] = judge;
+			if (score.getPassnotes() < ghost.length) {
+				ghost[score.getPassnotes()] = judge;
 			}
 			n.setState(judge + 1);
-			pastNotes++;
+			score.setPassnotes(score.getPassnotes() + 1);
 		}
 		if (miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
-			main.setPastNotes(pastNotes);
 			return;
 		}
 		n.setMicroPlayTime(mfast);
@@ -751,12 +744,12 @@ public class JudgeManager {
 		return recentJudgesIndex;
 	}
 
-	public long[] getRecentJudgeTiming() {
-		return judgefast;
+	public long getRecentJudgeTiming(int player) {
+		return player >= 0 && player < judgefast.length ? judgefast[player] : 0;
 	}
 
-	public long[] getRecentJudgeMicroTiming() {
-		return mjudgefast;
+	public long getRecentJudgeMicroTiming(int player) {
+		return player >= 0 && player < mjudgefast.length ? mjudgefast[player] : 0;
 	}
 
 	public LongNote getProcessingLongNote(int lane) {
@@ -845,12 +838,12 @@ public class JudgeManager {
 		return judge[player][offset];
 	}
 
-	public int[] getNowJudge() {
-		return judgenow;
+	public int getNowJudge(int player) {
+		return player >= 0 && player < judgenow.length ? judgenow[player] : 0;
 	}
 
-	public int[] getNowCombo() {
-		return judgecombo;
+	public int getNowCombo(int player) {
+		return player >= 0 && player < judgecombo.length ? judgecombo[player] : 0;
 	}
 
 	public long[][] getJudgeTable(boolean sc) {
@@ -858,7 +851,7 @@ public class JudgeManager {
 	}
 
 	public int getPastNotes() {
-		return pastNotes;
+		return score.getPassnotes();
 	}
 
 	public int getPMcharaJudge() {
