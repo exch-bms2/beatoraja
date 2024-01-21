@@ -88,7 +88,7 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 				if(i < sk.note.size.length) {
 					scale[i] = sk.note.size[i] * dy;
 				} else {
-					scale[i] = ((SkinSourceImage)notes[i]).getImages()[0][0].getRegionHeight() * dy;
+					scale[i] = ((SkinSourceImage)notes[i]).getImages()[0].getRegionHeight() * dy;
 				}
 			}
 			Rectangle[] gregion = new Rectangle[sk.note.group.length];

@@ -69,8 +69,8 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int space, int id) {
-		this.image = new SkinSourceImage(image, timer, cycle) ;
-		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.image = new SkinSourceImageSet(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.space = space;
@@ -78,8 +78,8 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref) {
-		this.image = new SkinSourceImage(image, timer, cycle) ;
-		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.image = new SkinSourceImageSet(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.space = space;
@@ -87,8 +87,8 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int space, int id) {
-		this.image = new SkinSourceImage(image, timer, cycle) ;
-		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.image = new SkinSourceImageSet(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.space = space;
@@ -96,8 +96,8 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref) {
-		this.image = new SkinSourceImage(image, timer, cycle) ;
-		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.image = new SkinSourceImageSet(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.space = space;
