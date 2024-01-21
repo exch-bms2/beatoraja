@@ -87,7 +87,7 @@ public class SkinGauge extends SkinObject {
 	private final Color flickerColor = new Color();
 
 	public SkinGauge(TextureRegion[][] image, int timer, int cycle, int parts, int type, int range, int duration) {
-		this.image = new SkinSourceImage(image, timer, cycle);
+		this.image = new SkinSourceImageSet(image, timer, cycle);
 		this.parts = parts;
 		this.animationType = type;
 		this.animationRange = range;
@@ -240,19 +240,19 @@ public class SkinGauge extends SkinObject {
 		this.animationRange = animationRange;
 	}
 
-	public long getDuration() {
+	public final long getDuration() {
 		return duration;
 	}
 
-	public void setDuration(long duration) {
+	public final void setDuration(long duration) {
 		this.duration = duration;
 	}
 
-	public int getParts() {
+	public final int getParts() {
 		return parts;
 	}
 
-	public void setParts(int parts) {
+	public final void setParts(int parts) {
 		this.parts = parts;
 	}
 
