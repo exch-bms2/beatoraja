@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin.json;
 import static bms.player.beatoraja.skin.SkinProperty.OFFSET_HIDDEN_COVER;
 import static bms.player.beatoraja.skin.SkinProperty.OFFSET_LIFT;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -109,7 +110,7 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 				}
 
 			}
-			((PlaySkin) skin).setLine(lines);
+			skin.setLine(lines);
 
 			if(sk.note.bpm != null) {
 				SkinImage[] bpm = new SkinImage[gregion.length];
@@ -127,7 +128,7 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 						}
 					}
 				}
-				((PlaySkin) skin).setBPMLine(bpm);
+				skin.setBPMLine(bpm);
 			}
 
 			if(sk.note.stop != null) {
@@ -146,7 +147,7 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 						}
 					}
 				}
-				((PlaySkin) skin).setStopLine(stop);
+				skin.setStopLine(stop);
 			}
 
 			if(sk.note.time != null) {
@@ -165,17 +166,17 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 						}
 					}
 				}
-				((PlaySkin) skin).setTimeLine(time);
+				skin.setTimeLine(time);
 			}
 
 			if(sk.note.dst2 != Integer.MIN_VALUE) {
-				Arrays.fill(dstnote2, (int) Math.round(sk.note.dst2 * dy));
+				Arrays.fill(dstnote2, Math.round(sk.note.dst2 * dy));
 			}
 			SkinNote sn = new SkinNote(notes, lnss, mines);
 			sn.setLaneRegion(region, scale, dstnote2, skin);
-			((PlaySkin) skin).setLaneRegion(region);
-			((PlaySkin) skin).setLaneGroupRegion(gregion);
-			((PlaySkin) skin).setNoteExpansionRate(sk.note.expansionrate);
+			skin.setLaneRegion(region);
+			skin.setLaneGroupRegion(gregion);
+			skin.setNoteExpansionRate(sk.note.expansionrate);
 			obj = sn;
 		}
 		// hidden cover (playskin only)
@@ -187,14 +188,12 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 					((SkinHidden) obj).setDisapearLine((float) (img.disapearLine * skin.getScaleY()));
 					((SkinHidden) obj).setDisapearLineLinkLift(img.isDisapearLineLinkLift);
 					int[] offsets = new int[dst.offsets.length + 2];
-					for(int i = 0; i < dst.offsets.length; i++) {
-						offsets[i] = dst.offsets[i];
-					}
+                    System.arraycopy(dst.offsets, 0, offsets, 0, dst.offsets.length);
 					offsets[dst.offsets.length] = OFFSET_LIFT;
 					offsets[dst.offsets.length + 1] = OFFSET_HIDDEN_COVER;
 					dst.offsets = offsets;								
 				}
-				break;
+				return obj;
 			}
 		}
 		// lift cover (playskin only)
@@ -206,19 +205,16 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 					((SkinHidden) obj).setDisapearLine((float) (img.disapearLine * skin.getScaleY()));
 					((SkinHidden) obj).setDisapearLineLinkLift(img.isDisapearLineLinkLift);
 					int[] offsets = new int[dst.offsets.length + 2];
-					for(int i = 0; i < dst.offsets.length; i++) {
-						offsets[i] = dst.offsets[i];
-					}
+                    System.arraycopy(dst.offsets, 0, offsets, 0, dst.offsets.length);
 					offsets[dst.offsets.length] = OFFSET_LIFT;
-					dst.offsets = offsets;								
+					dst.offsets = offsets;
+					return obj;
 				}
-
-				break;
 			}
 		}
 		// bga (playskin only)
 		if (sk.bga != null && dst.id.equals(sk.bga.id)) {
-			obj = new SkinBGA(loader.bgaExpand);
+			return new SkinBGA(loader.bgaExpand);
 		}
 		// judge (playskin only)
 		for (JsonSkin.Judge judge : sk.judge) {
@@ -281,11 +277,42 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 				}
 				obj = new SkinJudge(images, numbers, judge.index, judge.shift);
 
-				int region = ((PlaySkin) skin).getJudgeregion();
+				int region = skin.getJudgeregion();
 				if (judge.index >= region) {
-					((PlaySkin) skin).setJudgeregion(judge.index + 1);
+					skin.setJudgeregion(judge.index + 1);
 				}
-				break;
+				return obj;
+			}
+		}
+
+		//POMYU chara
+		for (JsonSkin.PMchara chara : sk.pmchara) {
+			if (dst.id.equals(chara.id)) {
+				//type 0:プレイ 1:キャラ背景 2:名前画像 3:ハリアイ画像(上半身のみ) 4:ハリアイ画像(全体) 5:キャラアイコン 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
+				File imagefile = getSrcIdPath(chara.src, p);
+				if(dst.dst.length > 0 && imagefile != null) {
+					int color = chara.color == 2 ? 2 : 1;
+					int side = chara.side == 2 ? 2 : 1;
+					int[] option = new int[3];
+					for(int i = 0; i < option.length; i++) {
+						if(i < dst.op.length) option[i] = dst.op[i];
+						else option[i] = 0;
+					}
+					if(chara.type == 0) {
+						obj = new PomyuCharaLoader(skin).load(loader.usecim, imagefile, chara.type, color,
+								dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
+								side, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, dst.offset);
+					} else if(chara.type >= 1 && chara.type <= 5) {
+						obj = new PomyuCharaLoader(skin).load(loader.usecim, imagefile, chara.type, color,
+								Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
+								Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+					} else if(chara.type >= 6 && chara.type <= 15) {
+						obj = new PomyuCharaLoader(skin).load(loader.usecim, imagefile, chara.type, color,
+								dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
+								Integer.MIN_VALUE, dst.timer, option[0], option[1], option[2], dst.offset);
+					}
+					return obj;
+				}
 			}
 		}
 

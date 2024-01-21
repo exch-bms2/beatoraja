@@ -117,11 +117,6 @@ public class JudgeManager {
 	private JudgeAlgorithm algorithm;
 
 	/**
-	 * PMS キャラ用 判定
-	 */
-	private int PMcharaJudge = 0;
-
-	/**
 	 * 直近100ノーツの判定差時間
 	 */
 	private long[] recentJudges = new long[100];
@@ -163,7 +158,6 @@ public class JudgeManager {
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
-		PMcharaJudge = 0;
 
 		keyassign = main.getLaneProperty().getKeyLaneAssign();
 		sckey = new int[model.getMode().scratchKey.length];
@@ -700,7 +694,6 @@ public class JudgeManager {
 		if (judge <= ((PlaySkin) main.getSkin()).getJudgetimer()) {
 			main.timer.setTimerOn(SkinPropertyMapper.bombTimerId(state.player, state.offset));
 		}
-		PMcharaJudge = judge + 1;
 
 		final int lanelength = states.length;
 		if (judgenow.length > 0) {
@@ -852,10 +845,6 @@ public class JudgeManager {
 
 	public int getPastNotes() {
 		return score.getPassnotes();
-	}
-
-	public int getPMcharaJudge() {
-		return PMcharaJudge;
 	}
 
 	public int[] getGhost() {

@@ -643,6 +643,111 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("DST_PM_CHARA_1P") {
+			@Override
+			public void execute(String[] str) {
+				//プレイ用 判定連動
+				//x,y,w,h,color,offset,folderpath
+				int[] values = parseInt(str);
+				if (values[3] < 0) {
+					values[1] += values[3];
+					values[3] = -values[3];
+				}
+				if (values[4] < 0) {
+					values[2] += values[4];
+					values[4] = -values[4];
+				}
+				final File imagefile = LR2SkinLoader.getPath(skinpath, str[7], filemap);
+				new PomyuCharaLoader(skin).load(usecim, imagefile,
+						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
+						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
+						1, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+			}
+		});
+		addCommandWord(new CommandWord("DST_PM_CHARA_2P") {
+			@Override
+			public void execute(String[] str) {
+				//プレイ用 判定連動
+				//x,y,w,h,color,offset,folderpath
+				int[] values = parseInt(str);
+				if (values[3] < 0) {
+					values[1] += values[3];
+					values[3] = -values[3];
+				}
+				if (values[4] < 0) {
+					values[2] += values[4];
+					values[4] = -values[4];
+				}
+				final File imagefile = LR2SkinLoader.getPath(skinpath, str[7], filemap);
+				new PomyuCharaLoader(skin).load(usecim, imagefile,
+						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
+						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
+						2, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+			}
+		});
+		addCommandWord(new CommandWord("DST_PM_CHARA_ANIMATION") {
+			@Override
+			public void execute(String[] str) {
+				//プレイ以外用 判定非連動
+				//x,y,w,h,color,animationtype,timer,op1,op2,op3,offset,folderpath
+				//type 0:NEUTRAL 1:FEVER 2:GREAT 3:GOOD 4:BAD 5:FEVERWIN 6:WIN 7:LOSE 8:OJAMA 9:DANCE
+				int[] values = parseInt(str);
+				if(values[6] >= 0 && values[6] <= 9) {
+					if (values[3] < 0) {
+						values[1] += values[3];
+						values[3] = -values[3];
+					}
+					if (values[4] < 0) {
+						values[2] += values[4];
+						values[4] = -values[4];
+					}
+					final File imagefile = LR2SkinLoader.getPath(skinpath, str[12], filemap);
+					new PomyuCharaLoader(skin).load(usecim, imagefile,
+							values[6] + 6, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
+							values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
+							Integer.MIN_VALUE, values[7], values[8], values[9], values[10], values[11]);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_PM_CHARA_IMAGE") {
+			@Override
+			public void execute(String[] str) {
+				//color,type,folderpath
+				//type 0:キャラ背景 1:名前画像 2:ハリアイ画像(上半身のみ) 3:ハリアイ画像(全体) 4:キャラアイコン
+				PMcharaPart = null;
+				int[] values = parseInt(str);
+				if(values[2] >= 0 && values[2] <= 4) {
+					final File imagefile = LR2SkinLoader.getPath(skinpath, str[3], filemap);
+					PMcharaPart = new PomyuCharaLoader(skin).load(usecim, imagefile,
+							values[2] + 1, (values[1] == 1 || values[1] == 2) ? values[1] : 1,
+							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
+							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_PM_CHARA_IMAGE") {
+			@Override
+			public void execute(String[] str) {
+				//DST_IMAGEと同様
+				if (PMcharaPart != null) {
+					int[] values = parseInt(str);
+					if (values[5] < 0) {
+						values[3] += values[5];
+						values[5] = -values[5];
+					}
+					if (values[6] < 0) {
+						values[4] += values[6];
+						values[6] = -values[6];
+					}
+					PMcharaPart.setDestination(values[2], values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20], readOffset(str, 21));
+				}
+			}
+		});
+
 	}
 	
 	private void setSrcNowCombo(int index, String[] str) {

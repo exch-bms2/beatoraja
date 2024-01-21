@@ -50,6 +50,8 @@ public class PlaySkin extends Skin {
 	private int[] noteExpansionRate = {100,100};
 
 	public SkinSlider laneCover;
+
+	public final PomyuCharaProcessor pomyu = new PomyuCharaProcessor();
 	
 	public PlaySkin(SkinHeader header) {
 		super(header);

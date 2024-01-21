@@ -12,13 +12,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
+import bms.player.beatoraja.play.PlaySkin;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class PomyuCharaLoader {
 
-	private final Skin skin;
+	private final PlaySkin skin;
 
 	public static final int PLAY = 0;
 	public static final int BACKGROUND = 1;
@@ -37,7 +38,7 @@ public class PomyuCharaLoader {
 	public static final int OJAMA = 14;
 	public static final int DANCE = 15;
 
-	public PomyuCharaLoader(Skin skin) {
+	public PomyuCharaLoader(PlaySkin skin) {
 		this.skin = skin;
 	}
 
@@ -342,7 +343,7 @@ public class PomyuCharaLoader {
 									int cycle = frame[motion] * dst[0].length() / 2;
 									int loopTime = frame[motion] * (loop[motion]+1);
 									if(setMotion == Integer.MIN_VALUE && timer >= TIMER_PM_CHARA_1P_NEUTRAL && timer < TIMER_MUSIC_END) {
-										skin.setPMcharaTime(timer - TIMER_PM_CHARA_1P_NEUTRAL, cycle);
+										skin.pomyu.setPMcharaTime(timer - TIMER_PM_CHARA_1P_NEUTRAL, cycle);
 									}
 									boolean hyphenFlag = false;
 									for(int i = 1; i < dst.length; i++) {
