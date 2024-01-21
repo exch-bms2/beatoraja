@@ -10,8 +10,8 @@ import bms.player.beatoraja.song.SongData;
  */
 public class SearchWordBar extends DirectoryBar {
 
-    private String text;
-    private String title;
+    private final String text;
+    private final String title;
 
     public SearchWordBar(MusicSelector selector, String text) {
         super(selector);
@@ -20,16 +20,16 @@ public class SearchWordBar extends DirectoryBar {
     }
 
     @Override
-    public Bar[] getChildren() {
+    public final Bar[] getChildren() {
         return SongBar.toSongBarArray(selector.getSongDatabase().getSongDatasByText(text));
     }
 
-    public void updateFolderStatus() {
+    public final void updateFolderStatus() {
         updateFolderStatus(selector.getSongDatabase().getSongDatasByText(text));
     }
 
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return title;
     }
 }

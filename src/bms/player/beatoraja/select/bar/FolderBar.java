@@ -14,8 +14,8 @@ import java.util.stream.Stream;
  */
 public class FolderBar extends DirectoryBar {
 
-    private FolderData folder;
-    private String crc;
+    private final FolderData folder;
+    private final String crc;
 
     public FolderBar(MusicSelector selector, FolderData folder, String crc) {
         super(selector);
@@ -23,16 +23,16 @@ public class FolderBar extends DirectoryBar {
         this.crc = crc;
     }
 
-    public FolderData getFolderData() {
+    public final FolderData getFolderData() {
         return folder;
     }
 
-    public String getCRC() {
+    public final String getCRC() {
         return crc;
     }
 
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return folder.getTitle();
     }
 

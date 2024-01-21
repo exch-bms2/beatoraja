@@ -9,26 +9,26 @@ import bms.player.beatoraja.song.SongData;
  */
 public class RandomCourseBar extends SelectableBar {
 
-	private RandomCourseData course;
+	private final RandomCourseData course;
 
 	public RandomCourseBar(RandomCourseData course) {
 		this.course = course;
 	}
 
-	public RandomCourseData getCourseData() {
+	public final RandomCourseData getCourseData() {
 		return course;
 	}
 
 	@Override
-	public String getTitle() {
+	public final String getTitle() {
 		return course.getName();
 	}
 
-	public SongData[] getSongDatas() {
+	public final SongData[] getSongDatas() {
 		return course.getSongDatas();
 	}
 
-	public boolean existsAllSongs() {
+	public final boolean existsAllSongs() {
 		if (course.getStage().length == 0) {
 			return false;
 		}
@@ -40,7 +40,7 @@ public class RandomCourseBar extends SelectableBar {
 		return true;
 	}
 
-	public int getLamp(boolean isPlayer) {
+	public final int getLamp(boolean isPlayer) {
 		return 0;
 	}
 }

@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class SameFolderBar extends DirectoryBar {
 
-    private String crc;
-    private String title;
+    private final String crc;
+    private final String title;
 
     public SameFolderBar(MusicSelector selector, String title, String crc) {
         super(selector);
@@ -23,12 +23,12 @@ public class SameFolderBar extends DirectoryBar {
     }
 
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return title;
     }
 
     @Override
-    public Bar[] getChildren() {
+    public final Bar[] getChildren() {
         return SongBar.toSongBarArray(selector.getSongDatabase().getSongDatas("folder", crc));
     }
 }

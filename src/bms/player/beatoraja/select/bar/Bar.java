@@ -25,19 +25,19 @@ public abstract class Bar {
      */
     public abstract String getTitle();
 
-    public ScoreData getScore() {
+    public final ScoreData getScore() {
         return score;
     }
 
-    public void setScore(ScoreData score) {
+    public final void setScore(ScoreData score) {
         this.score = score;
     }
 
-    public ScoreData getRivalScore() {
+    public final ScoreData getRivalScore() {
         return rscore;
     }
 
-    public void setRivalScore(ScoreData score) {
+    public final void setRivalScore(ScoreData score) {
         this.rscore = score;
     }
 

@@ -14,7 +14,7 @@ public class GradeBar extends SelectableBar {
 	/**
 	 * コースデータ
 	 */
-    private CourseData course;
+    private final CourseData course;
 	/**
 	 * ミラー使用時のスコア
 	 * TODO 不要かも
@@ -30,20 +30,20 @@ public class GradeBar extends SelectableBar {
         this.course = course;
     }
 
-    public CourseData getCourseData() {
+    public final CourseData getCourseData() {
         return course;
     }
 
-    public SongData[] getSongDatas() {
+    public final SongData[] getSongDatas() {
     	return course.getSong();
     }
 
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return course.getName();
     }
 
-    public boolean existsAllSongs() {
+    public final boolean existsAllSongs() {
         for (SongData song : course.getSong()) {
             if (song == null || song.getPath() == null) {
                 return false;
@@ -52,23 +52,23 @@ public class GradeBar extends SelectableBar {
         return true;
     }
 
-    public ScoreData getMirrorScore() {
+    public final ScoreData getMirrorScore() {
         return mscore;
     }
 
-    public void setMirrorScore(ScoreData score) {
+    public final void setMirrorScore(ScoreData score) {
         this.mscore = score;
     }
 
-    public ScoreData getRandomScore() {
+    public final ScoreData getRandomScore() {
         return rscore;
     }
 
-    public void setRandomScore(ScoreData score) {
+    public final void setRandomScore(ScoreData score) {
         this.rscore = score;
     }
 
-    public CourseData.TrophyData getTrophy() {
+    public final CourseData.TrophyData getTrophy() {
     	ScoreData[] scores = {this.getScore(), mscore, rscore};
 
         CourseData.TrophyData[] trophies = course.getTrophy();
@@ -88,7 +88,7 @@ public class GradeBar extends SelectableBar {
                 && trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
     }
 
-    public int getLamp(boolean isPlayer) {
+    public final int getLamp(boolean isPlayer) {
     	// TODO ライバルスコア
         int result = 0;
         if (getScore() != null && getScore().getClear() > result) {

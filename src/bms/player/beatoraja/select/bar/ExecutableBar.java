@@ -22,17 +22,17 @@ public class ExecutableBar extends SelectableBar {
 	/**
 	 * bar title
 	 */
-	private String title = "RANDOM SELECT";
+	private final String title;
 	
 	/**
 	 * source songs
 	 */
-	private SongData[] songs = null;
+	private final SongData[] songs;
 
 	/**
 	 * current state pointer
 	 */
-	private MainState state;
+	private final MainState state;
 
 	/**
 	 * Queue for get index to SongData array.
