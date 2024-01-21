@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
@@ -705,12 +706,9 @@ public class BarManager {
 						}
 						bar.setRivalScore(rivalScore);
 					}
-					boolean[] replay = new boolean[MusicSelector.REPLAY];
-					for (int i = 0; i < MusicSelector.REPLAY; i++) {
-						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),
-								config.getLnmode(), i);
+					for(int i = 0;i < MusicSelector.REPLAY;i++) {
+						((SongBar) bar).setExistsReplay(i, main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),config.getLnmode(), i));						
 					}
-					((SongBar) bar).setExistsReplayData(replay);
 				} else if (bar instanceof GradeBar && ((GradeBar)bar).existsAllSongs()) {
 					final GradeBar gb = (GradeBar) bar;
 					String[] hash = new String[gb.getSongDatas().length];
@@ -723,11 +721,9 @@ public class BarManager {
 					gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, constraint));
 					gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, constraint));
 					gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2, constraint));
-					boolean[] replay = new boolean[MusicSelector.REPLAY];
-					for (int i = 0; i < MusicSelector.REPLAY; i++) {
-						replay[i] = main.getPlayDataAccessor().existsReplayData(hash, ln, config.getLnmode(), i, constraint);
+					for(int i = 0;i < MusicSelector.REPLAY;i++) {
+						gb.setExistsReplay(i, main.getPlayDataAccessor().existsReplayData(hash, ln ,config.getLnmode(), i, constraint));						
 					}
-					gb.setExistsReplayData(replay);
 				}
 
 				if (select.resource.getConfig().isFolderlamp()) {

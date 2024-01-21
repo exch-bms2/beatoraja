@@ -28,9 +28,9 @@ public enum MusicSelectCommand {
 
 	RESET_REPLAY(selector -> {
 		if (selector.getBarManager().getSelected() instanceof SelectableBar) {
-			boolean[] replays = ((SelectableBar) selector.getBarManager().getSelected()).getExistsReplayData();
-			for (int i = 0; i < replays.length; i++) {
-				if (replays[i]) {
+			final SelectableBar bar = (SelectableBar) selector.getBarManager().getSelected();
+			for (int i = 0; i < MusicSelector.REPLAY; i++) {
+				if (bar.existsReplay(i)) {
 					selector.setSelectedReplay(i);
 					return;
 				}
@@ -39,13 +39,12 @@ public enum MusicSelectCommand {
 		selector.setSelectedReplay(-1);
 	}),
 	NEXT_REPLAY(selector -> {
-		Bar current = selector.getBarManager().getSelected();
-		if (current != null && current instanceof SelectableBar) {
-			boolean[] replays = ((SelectableBar) current).getExistsReplayData();
-			for (int i = 1; i < replays.length; i++) {
+		if (selector.getBarManager().getSelected() instanceof SelectableBar) {
+			final SelectableBar bar = (SelectableBar) selector.getBarManager().getSelected();
+			for (int i = 1; i < MusicSelector.REPLAY; i++) {
 				final int selectedreplay = selector.getSelectedReplay();
-				if (replays[(i + selectedreplay) % replays.length]) {
-					selector.setSelectedReplay((i + selectedreplay) % replays.length);
+				if (bar.existsReplay((i + selectedreplay) % MusicSelector.REPLAY)) {
+					selector.setSelectedReplay((i + selectedreplay) % MusicSelector.REPLAY);
 					selector.play(OPTION_CHANGE);
 					break;
 				}
@@ -53,13 +52,12 @@ public enum MusicSelectCommand {
 		}
 	}),
 	PREV_REPLAY(selector -> {
-		Bar current = selector.getBarManager().getSelected();
-		if (current != null && current instanceof SelectableBar) {
-			boolean[] replays = ((SelectableBar) current).getExistsReplayData();
-			for (int i = 1; i < replays.length; i++) {
+		if (selector.getBarManager().getSelected() instanceof SelectableBar) {
+			final SelectableBar bar = (SelectableBar) selector.getBarManager().getSelected();
+			for (int i = 1; i < MusicSelector.REPLAY; i++) {
 				final int selectedreplay = selector.getSelectedReplay();
-				if (replays[(selectedreplay + replays.length - i) % replays.length]) {
-					selector.setSelectedReplay((selectedreplay + replays.length - i) % replays.length);
+				if (bar.existsReplay((selectedreplay + MusicSelector.REPLAY - i) % MusicSelector.REPLAY)) {
+					selector.setSelectedReplay((selectedreplay + MusicSelector.REPLAY - i) % MusicSelector.REPLAY);
 					selector.play(OPTION_CHANGE);
 					break;
 				}
