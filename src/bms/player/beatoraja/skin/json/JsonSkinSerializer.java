@@ -93,10 +93,10 @@ public class JsonSkinSerializer {
 
 		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
 		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
-		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatProperty, FloatPropertyFactory::getFloatProperty));
+		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatProperty, FloatPropertyFactory::getRateProperty));
 		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadStringProperty, StringPropertyFactory::getStringProperty));
 		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
-		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getFloatWriter));
+		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getRateWriter));
 		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, EventFactory::getEvent));
 	}
 

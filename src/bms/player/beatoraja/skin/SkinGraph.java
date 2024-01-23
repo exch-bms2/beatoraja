@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * 
  * @author exch
  */
-public class SkinGraph extends SkinObject {
+public final class SkinGraph extends SkinObject {
 
 	/**
 	 * イメージ
@@ -35,7 +35,7 @@ public class SkinGraph extends SkinObject {
 
 	public SkinGraph(int imageid, int id) {
 		source = new SkinSourceReference(imageid);
-		ref = FloatPropertyFactory.getFloatProperty(id);
+		ref = FloatPropertyFactory.getRateProperty(id);
 	}
 
 	public SkinGraph(int imageid, FloatProperty ref) {
@@ -50,7 +50,7 @@ public class SkinGraph extends SkinObject {
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id) {
 		source = new SkinSourceImage(image, timer, cycle);
-		ref = FloatPropertyFactory.getFloatProperty(id);
+		ref = FloatPropertyFactory.getRateProperty(id);
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, FloatProperty ref) {
@@ -65,7 +65,7 @@ public class SkinGraph extends SkinObject {
 
 	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id) {
 		source = new SkinSourceImage(image, timer, cycle);
-		ref = FloatPropertyFactory.getFloatProperty(id);
+		ref = FloatPropertyFactory.getRateProperty(id);
 	}
 
 	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, FloatProperty ref) {

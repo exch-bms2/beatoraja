@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * 
  * @author exch
  */
-public class SkinSlider extends SkinObject {
+public final class SkinSlider extends SkinObject {
 
 	/**
 	 * イメージ
@@ -46,8 +46,8 @@ public class SkinSlider extends SkinObject {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;
-		ref = FloatPropertyFactory.getFloatProperty(type);
-		writer = FloatPropertyFactory.getFloatWriter(type);
+		ref = FloatPropertyFactory.getRateProperty(type);
+		writer = FloatPropertyFactory.getRateWriter(type);
 	}
 
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, FloatProperty ref) {
@@ -74,8 +74,8 @@ public class SkinSlider extends SkinObject {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;
-		ref = FloatPropertyFactory.getFloatProperty(type);
-		writer = FloatPropertyFactory.getFloatWriter(type);
+		ref = FloatPropertyFactory.getRateProperty(type);
+		writer = FloatPropertyFactory.getRateWriter(type);
 	}
 
 	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, FloatProperty ref, FloatWriter writer) {

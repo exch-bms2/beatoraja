@@ -20,15 +20,18 @@ import bms.player.beatoraja.result.AbstractResult;
  * @author exch
  */
 public class FloatPropertyFactory {
+	
+	private static RateType[] RateTypeValues = RateType.values();
+	private static FloatType[] FloatTypeValues = FloatType.values();
 
 	/**
-	 * property IDに対応するFloatPropertyを返す
+	 * RateType IDに対応するFloatPropertyを返す
 	 * 
 	 * @param id property ID
 	 * @return 対応するFloatProperty
 	 */
-	public static FloatProperty getFloatProperty(int optionid) {
-		for(FloatType t : FloatType.values()) {
+	public static FloatProperty getRateProperty(int optionid) {
+		for(RateType t : RateTypeValues) {
 			if(t.id == optionid) {
 				return t.property;
 			}
@@ -37,13 +40,13 @@ public class FloatPropertyFactory {
 	}
 
 	/**
-	 * property nameに対応するFloatPropertyを返す
+	 * RateType名に対応するFloatPropertyを返す
 	 * 
 	 * @param name property name
 	 * @return 対応するFloatProperty
 	 */
-	public static FloatProperty getFloatProperty(String name) {
-		for(FloatType t : FloatType.values()) {
+	public static FloatProperty getRateProperty(String name) {
+		for(RateType t : RateTypeValues) {
 			if(t.name().equals(name)) {
 				return t.property;
 			}
@@ -57,8 +60,8 @@ public class FloatPropertyFactory {
 	 * @param id property ID
 	 * @return 対応するFloatWriter
 	 */
-	public static FloatWriter getFloatWriter(int id) {
-		for(FloatType t : FloatType.values()) {
+	public static FloatWriter getRateWriter(int id) {
+		for(RateType t : RateTypeValues) {
 			if(t.id == id) {
 				return t.writer;
 			}
@@ -72,8 +75,8 @@ public class FloatPropertyFactory {
 	 * @param name property name
 	 * @return 対応するFloatWriter
 	 */
-	public static FloatWriter getFloatWriter(String name) {
-		for(FloatType t : FloatType.values()) {
+	public static FloatWriter getRateWriter(String name) {
+		for(RateType t : RateTypeValues) {
 			if(t.name().equals(name)) {
 				return t.writer;
 			}
@@ -81,17 +84,49 @@ public class FloatPropertyFactory {
 		return null;
 	}
 
-	private static final FloatProperty PROPERTY_MUSIC_PROGRESS = (state) -> {
-		if (state instanceof BMSPlayer) {
-			if (state.timer.isTimerOn(TIMER_PLAY)) {
-				return Math.min((float) state.timer.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
-						1);
+	/**
+	 * FloatType IDに対応するFloatPropertyを返す
+	 * 
+	 * @param id property ID
+	 * @return 対応するFloatProperty
+	 */
+	public static FloatProperty getFloatProperty(int optionid) {
+		for(FloatType t : FloatTypeValues) {
+			if(t.id == optionid) {
+				return t.property;
 			}
 		}
-		return 0;
-	};
+		return null;
+	}
+
+	/**
+	 * FloatType名に対応するFloatPropertyを返す
+	 * 
+	 * @param name property name
+	 * @return 対応するFloatProperty
+	 */
+	public static FloatProperty getFloatProperty(String name) {
+		for(FloatType t : FloatTypeValues) {
+			if(t.name().equals(name)) {
+				return t.property;
+			}
+		}
+		return null;
+	}
+
+	private static FloatProperty createMusicProgress() {
+		return (state) -> {
+			if (state instanceof BMSPlayer) {
+				if (state.timer.isTimerOn(TIMER_PLAY)) {
+					return Math.min((float) state.timer.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
+							1);
+				}
+			}
+			return 0;
+		};
+	}
 	
-	public enum FloatType {
+	public enum RateType {
 		
 		musicselect_position(1, 
 				(state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarManager().getSelectedPosition() : 0), 
@@ -128,7 +163,7 @@ public class FloatPropertyFactory {
 			}
 			return 0;
 		}),
-		music_progress(6, PROPERTY_MUSIC_PROGRESS),
+		music_progress(6, createMusicProgress()),
 		skinselect_position(7,
 				(state) -> ((state instanceof SkinConfiguration) ? ((SkinConfiguration) state).getSkinSelectPosition() : 0),
 				(state, value) -> {
@@ -169,7 +204,7 @@ public class FloatPropertyFactory {
 				(state, value) -> {
 					state.resource.getConfig().getAudioConfig().setBgvolume(value);					
 				}),
-		music_progress_bar(101, PROPERTY_MUSIC_PROGRESS),
+		music_progress_bar(101, createMusicProgress()),
 		load_progress(102, (state) -> {
 			final BMSResource resource = state.resource.getBMSResource();
 			return resource.isBGAOn()
@@ -188,116 +223,11 @@ public class FloatPropertyFactory {
 		bestscorerate(113, (state) -> (state.getScoreDataProperty().getBestScoreRate())),
 		targetscorerate_now(114, (state) -> (state.getScoreDataProperty().getNowRivalScoreRate())),
 		targetscorerate(115, (state) -> (state.getScoreDataProperty().getRivalScoreRate())),
-		rate_pgreat(140, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) (score.getEpg() + score.getLpg()))
-									/ ((SongBar) selected).getSongData().getNotes()
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) (score.getEpg() + score.getLpg())) / notes;
-				}
-			}
-			return 0;
-		}),
-		rate_great(141, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) (score.getEgr() + score.getLgr()))
-									/ ((SongBar) selected).getSongData().getNotes()
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) (score.getEgr() + score.getLgr())) / notes;
-				}
-			}
-			return 0;
-		}),
-		rate_good(142, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) (score.getEgd() + score.getLgd()))
-									/ ((SongBar) selected).getSongData().getNotes()
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) (score.getEgd() + score.getLgd())) / notes;
-				}
-			}
-			return 0;
-		}),
-		rate_bad(143, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) (score.getEbd() + score.getLbd()))
-									/ ((SongBar) selected).getSongData().getNotes()
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) (score.getEbd() + score.getLbd())) / notes;
-				}
-			}
-			return 0;
-		}),
-		rate_poor(144, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) (score.getEpr() + score.getLpr()))
-									/ ((SongBar) selected).getSongData().getNotes()
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) (score.getEpr() + score.getLpr())) / notes;
-				}
-			}
-			return 0;
-		}),
+		rate_pgreat(140, createJudgeRate(0)),
+		rate_great(141, createJudgeRate(1)),
+		rate_good(142, createJudgeRate(2)),
+		rate_bad(143, createJudgeRate(3)),
+		rate_poor(144, createJudgeRate(4)),
 		rate_maxcombo(145, (state) -> {
 			if (state instanceof MusicSelector) {
 				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
@@ -346,17 +276,61 @@ public class FloatPropertyFactory {
 		private final FloatProperty property;
 		private final FloatWriter writer;
 
-		private FloatType(int id, FloatProperty property) {
+		private RateType(int id, FloatProperty property) {
 			this(id, property, null);
 		}
 
-		private FloatType(int id, FloatProperty property, FloatWriter writer) {
+		private RateType(int id, FloatProperty property, FloatWriter writer) {
 			this.id = id;
 			this.property = property;
 			this.writer = writer;
 		}
 	}
+	
+	public enum FloatType {
 
+		groovegauge_1p(107, (state) -> {
+			if (state instanceof BMSPlayer) {
+				return ((BMSPlayer) state).getGauge().getValue();
+			}
+			if (state instanceof AbstractResult) {
+				final int gaugeType = ((AbstractResult) state).getGaugeType();
+				return state.resource.getGauge()[gaugeType].get(state.resource.getGauge()[gaugeType].size - 1);
+			}
+			return Float.MIN_VALUE;
+		});
+		
+		private final int id;
+		private final FloatProperty property;
+
+		private FloatType(int id, FloatProperty property) {
+			this.id = id;
+			this.property = property;
+		}
+
+	}
+
+	private static FloatProperty createJudgeRate(final int judge) {
+		return (state) -> {
+			if (state instanceof MusicSelector) {
+				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
+				if (selected instanceof SongBar) {
+					ScoreData score = selected.getScore();
+					return score != null ? ((float) (score.getJudgeCount(judge))) / ((SongBar) selected).getSongData().getNotes() : 0;
+				}
+				if (selected instanceof GradeBar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) score.getJudgeCount(judge)) / notes;
+				}
+			}
+			return 0;
+		};
+	}
 
 	private static FloatProperty getLevelRate(final int difficulty) {
 		return (state) -> {

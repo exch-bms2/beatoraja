@@ -195,7 +195,7 @@ public class MainStateAccessor {
 	private class float_number extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
-			FloatProperty prop = FloatPropertyFactory.getFloatProperty(luaValue.toint());
+			FloatProperty prop = FloatPropertyFactory.getRateProperty(luaValue.toint());
 			return LuaDouble.valueOf(prop.get(state));
 		}
 	}
