@@ -7,14 +7,12 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import java.util.Arrays;
 
-import com.badlogic.gdx.math.Rectangle;
-
 /**
  * 判定オブジェクト
  * 
  * @author exch
  */
-public class SkinJudge extends SkinObject {
+public final class SkinJudge extends SkinObject {
 
 	/**
 	 * 文字イメージ
@@ -24,8 +22,8 @@ public class SkinJudge extends SkinObject {
      * 数字イメージ
      */
     private final SkinNumber[] count = new SkinNumber[7];
-    private int index;
-    private boolean shift;
+    private final int player;
+    private final boolean shift;
     
     private SkinImage nowJudge;
     private SkinNumber nowCount;
@@ -34,50 +32,54 @@ public class SkinJudge extends SkinObject {
         this(null, null, index, shift);
     }
 
-    public SkinJudge(SkinImage[] judge, SkinNumber[] count, int index, boolean shift) {
-    	setJudge(judge);
-    	setJudgeCount(count);
-        this.index = index;
+    public SkinJudge(SkinImage[] judge, SkinNumber[] count, int player, boolean shift) {
+    	if(judge == null) {
+    		Arrays.fill(this.judge, null);
+    	} else {
+        	for(int i = 0; i < this.judge.length && i < judge.length;i++) {
+        		this.judge[i] = judge[i];
+        	}
+    	}
+    	if(count == null) {
+    		Arrays.fill(this.count, null);
+    	} else {
+        	for(int i = 0; i < this.count.length && i < count.length;i++) {
+        		this.count[i] = count[i];
+        	}
+    	}
+        this.player = player;
         this.shift = shift;
         
         this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
-    public void setJudge(SkinImage[] judge) {
-    	if(judge == null) {
-    		Arrays.fill(this.judge, null);
-    		return;
-    	}
-    	for(int i = 0; i < this.judge.length && i < judge.length;i++) {
-    		this.judge[i] = judge[i];
+    public SkinImage getJudge(int index) {
+        return  index >= 0 && index < judge.length ? judge[index] : null;
+    }
+
+    public void setJudge(int index, SkinImage judge) {
+    	if(index >= 0 && index < this.judge.length) {
+    		this.judge[index] = judge;
     	}
     }
 
-    public SkinImage[] getJudge() {
-        return  judge;
-    }
-
-    public void setJudgeCount(SkinNumber[] count) {
-    	if(count == null) {
-    		Arrays.fill(this.count, null);
-    		return;
-    	}
-    	for(int i = 0; i < this.count.length && i < count.length;i++) {
-    		this.count[i] = count[i];
-    	}
-    }
-
-    public SkinNumber[] getJudgeCount() {
-        return count;
+    public SkinNumber getJudgeCount(int index) {
+        return  index >= 0 && index < count.length ? count[index] : null;
     }
     
+    public void setJudgeCount(int index, SkinNumber count) {
+    	if(index >= 0 && index < this.count.length) {
+    		this.count[index] = count;
+    	}
+    }
+
     public boolean isShift() {
     	return shift;
     }
 
 	@Override
 	public void prepare(long time, MainState state) {
-        int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge(index) - 1;
+        final int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge(player) - 1;
         if(judgenow < 0) {
         	draw = false;
             return;
@@ -103,7 +105,7 @@ public class SkinJudge extends SkinObject {
         
     	if(nowJudge.draw) {
             if(nowCount != null) {
-            	nowCount.prepare(time, state, ((BMSPlayer)state).getJudgeManager().getNowCombo(index), nowJudge.region.x, nowJudge.region.y);
+            	nowCount.prepare(time, state, ((BMSPlayer)state).getJudgeManager().getNowCombo(player), nowJudge.region.x, nowJudge.region.y);
             	nowJudge.region.x += shift ? -nowCount.getLength() / 2 : 0;
             }        		
     	} else {
