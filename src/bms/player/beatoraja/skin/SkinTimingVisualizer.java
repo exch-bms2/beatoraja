@@ -3,7 +3,6 @@ package bms.player.beatoraja.skin;
 import java.util.Optional;
 
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 
@@ -19,6 +18,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
  */
 public class SkinTimingVisualizer extends SkinObject {
 
+	// TODO 各Textureを1枚にまとめてblBindTextureの回数を削減する
 	private TextureRegion backtex = null;
 	private TextureRegion shapetex = null;
 	private Pixmap shape = null;
