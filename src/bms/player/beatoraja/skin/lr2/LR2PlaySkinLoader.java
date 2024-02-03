@@ -323,7 +323,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						judge[0] = new SkinJudge(0, (values[11] != 1));
 						skin.add(judge[0]);
 					}
-					judge[0].getJudge()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinImage(images, values[10], values[9]);
+					judge[0].setJudge(values[1] <= 5  ? (5 - values[1]) : values[1], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -336,7 +336,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 			@Override
 			public void execute(String[] str) {
-				if (judge[0] != null && judge[0].getJudge()[Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])] != null) {
+				if (judge[0] != null && judge[0].getJudge(Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])) != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -347,7 +347,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						judge[0].getJudge()[values[1] <= 5  ? (5 - values[1]) : values[1]].setDestination(values[2], values[3] * dstw / srcw,
+						judge[0].getJudge(values[1] <= 5  ? (5 - values[1]) : values[1]).setDestination(values[2], values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
@@ -375,7 +375,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						judge[1] = new SkinJudge(1, (values[11] != 1));
 						skin.add(judge[1]);
 					}
-					judge[1].getJudge()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinImage(images, values[10], values[9]);
+					judge[1].setJudge(values[1] <= 5  ? (5 - values[1]) : values[1], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -388,7 +388,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 			@Override
 			public void execute(String[] str) {
-				if (judge[1] != null && judge[1].getJudge()[Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])] != null) {
+				if (judge[1] != null && judge[1].getJudge(Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])) != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -399,7 +399,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						judge[1].getJudge()[values[1] <= 5  ? (5 - values[1]) : values[1]].setDestination(values[2], values[3] * dstw / srcw,
+						judge[1].getJudge(values[1] <= 5  ? (5 - values[1]) : values[1]).setDestination(values[2], values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
@@ -426,7 +426,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						judge[2] = new SkinJudge(2, (values[11] != 1));
 						skin.add(judge[2]);
 					}
-					judge[2].getJudge()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinImage(images, values[10], values[9]);
+					judge[2].setJudge(values[1] <= 5  ? (5 - values[1]) : values[1], new SkinImage(images, values[10], values[9]));
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -439,7 +439,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 			@Override
 			public void execute(String[] str) {
-				if (judge[2] != null && judge[2].getJudge()[Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])] != null) {
+				if (judge[2] != null && judge[2].getJudge(Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])) != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -450,7 +450,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						judge[2].getJudge()[values[1] <= 5  ? (5 - values[1]) : values[1]].setDestination(values[2], values[3] * dstw / srcw,
+						judge[2].getJudge(values[1] <= 5  ? (5 - values[1]) : values[1]).setDestination(values[2], values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
@@ -763,9 +763,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				}
 			}
 
-			judge[index].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]] = new SkinNumber(images, values[10], values[9], values[13],
-					images.length > 10 ? 2 : 0, values[15], values[11]);
-			judge[index].getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
+			judge[index].setJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1], new SkinNumber(images, values[10], values[9], values[13],
+					images.length > 10 ? 2 : 0, values[15], values[11]));
+			judge[index].getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).setAlign(values[12] == 1 ?  2 : values[12]);
 			// System.out.println("Number Added - " +
 			// (num.getId()));
 		}
@@ -773,14 +773,14 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 	private void setDstNowCombo(int index, String[] str, int[] offset) {
 		final SkinJudge sj = judge[index];
-		if (sj != null && sj.getJudgeCount()[Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])] != null) {
+		if (sj != null && sj.getJudgeCount(Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])) != null) {
 			int[] values = parseInt(str);
-			sj.getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setRelative(true);
+			sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).setRelative(true);
 			float x = values[3];
-			if(sj.getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].getAlign() == 2) {
-				x -= sj.getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].getKeta() * values[5] / 2;
+			if(sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).getAlign() == 2) {
+				x -= sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).getKeta() * values[5] / 2;
 			}
-			sj.getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setDestination(values[2], x * dstw / srcw,
+			sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).setDestination(values[2], x * dstw / srcw,
 					-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 					values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 					values[15], values[16], values[17], values[18], values[19], values[20], offset);

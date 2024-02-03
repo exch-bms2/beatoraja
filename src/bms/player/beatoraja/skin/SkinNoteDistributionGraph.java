@@ -7,6 +7,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongData;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -17,10 +18,11 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class SkinNoteDistributionGraph extends SkinObject {
+public final class SkinNoteDistributionGraph extends SkinObject {
 
 	private MainState state;
 
+	// TODO 各Textureを1枚にまとめてblBindTextureの回数を削減する
 	private TextureRegion backtex;
 	private TextureRegion shapetex;
 	private TextureRegion cursortex;
@@ -73,7 +75,8 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	 * 処理済みノート数 プレイ時は処理済みノート数に変化があった時だけ更新する
 	 */
 	private int pastNotes = 0;
-	private long lastUpdateTime;
+	private long notesLastUpdateTime;
+	private long cursorLastUpdateTime;
 	
 	private int starttime;
 	private int endtime;
@@ -140,7 +143,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			if(type == TYPE_NORMAL && song != null && song.getInformation() != null) {
 				updateGraph(song.getInformation().getDistributionValues());				
 			} else {
-				updateGraph(model);
+				updateGraph();
 			}
 		}
 
@@ -150,56 +153,65 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		 * BMSPlayerから更新したノーツの時間だけを渡し。指定時間のデータ/イメージのみ更新する
 		 * backtex更新は初回のみ
 		 */
-		if(model != null && state instanceof BMSPlayer && type != TYPE_NORMAL 
-				&& pastNotes != ((BMSPlayer)state).getPastNotes() && System.currentTimeMillis() > lastUpdateTime + 500) {
-			pastNotes = ((BMSPlayer)state).getPastNotes();
-			lastUpdateTime = System.currentTimeMillis();
-			updateData(model);
-			updateTexture(false);
+		if(model != null && state instanceof BMSPlayer) {
+			if(System.currentTimeMillis() > notesLastUpdateTime + 750) {
+				if(type != TYPE_NORMAL && pastNotes != ((BMSPlayer)state).getPastNotes()) {
+					pastNotes = ((BMSPlayer)state).getPastNotes();
+					updateData();
+					updateTexture(false);
+				}
+				notesLastUpdateTime = System.currentTimeMillis();
+			}
+			if(System.currentTimeMillis() > cursorLastUpdateTime + 50) {
+				final int oldw = cursor != null ? cursor.getWidth() : 0;
+				final int oldh = cursor != null ? cursor.getHeight() : 0;
+				final int w = data.length * 5;
+				final int h = max * 5;
+				cursor.setColor(TRANSPARENT_COLOR);
+				cursor.fill();
+				// スタートカーソル描画		
+				if (starttime >= 0) {
+					int dx = (int) (starttime * w / (data.length * 1000));
+					cursor.setColor(Color.toIntBits(255, 128, 255, 128));
+					cursor.fillRectangle(dx, 0, 3, h);
+				}
+				// エンドカーソル描画
+				if (endtime >= 0) {
+					int dx = (int) (endtime * w / (data.length * 1000));
+					cursor.setColor(Color.toIntBits(255, 128, 128, 255));
+					cursor.fillRectangle(dx, 0, 3, h);
+				}
+				// 現在カーソル描画
+				if (state instanceof BMSPlayer && state.timer.isTimerOn(SkinProperty.TIMER_PLAY)) {
+					float currenttime = state.timer.getNowTime(SkinProperty.TIMER_PLAY);
+					if (freq > 0) {
+						currenttime *= freq;
+					}
+					int dx = (int) (currenttime * w / (data.length * 1000));
+					cursor.setColor(Color.toIntBits(255, 255, 255, 255));
+					cursor.fillRectangle(dx, 0, 3, h);
+				}
+				
+				if(cursortex == null) {
+					cursortex = new TextureRegion(new Texture(cursor));
+				} else if(oldw != w || oldh != h) {
+					cursortex.getTexture().dispose();
+					cursortex = new TextureRegion(new Texture(cursor));
+				} else {
+					cursortex.getTexture().draw(cursor, 0, 0);
+				}
+				cursorLastUpdateTime = System.currentTimeMillis();				
+			}
+			draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
+			shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
+			draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height);			
+			draw(sprite, cursortex, region.x, region.y + region.height, region.width, -region.height);
+		} else {
+			draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
+			shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
+			draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height);
 		}
 
-		draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
-		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		draw(sprite, shapetex, region.x, region.y + region.height, region.width * render, -region.height);
-		
-		final int oldw = cursor != null ? cursor.getWidth() : 0;
-		final int oldh = cursor != null ? cursor.getHeight() : 0;
-		final int w = data.length * 5;
-		final int h = max * 5;
-		cursor.setColor(TRANSPARENT_COLOR);
-		cursor.fill();
-		// スタートカーソル描画		
-		if (starttime >= 0) {
-			int dx = (int) (starttime * w / (data.length * 1000));
-			cursor.setColor(Color.toIntBits(255, 128, 255, 128));
-			cursor.fillRectangle(dx, 0, 3, h);
-		}
-		// エンドカーソル描画
-		if (endtime >= 0) {
-			int dx = (int) (endtime * w / (data.length * 1000));
-			cursor.setColor(Color.toIntBits(255, 128, 128, 255));
-			cursor.fillRectangle(dx, 0, 3, h);
-		}
-		// 現在カーソル描画
-		if (state instanceof BMSPlayer && state.timer.isTimerOn(SkinProperty.TIMER_PLAY)) {
-			float currenttime = state.timer.getNowTime(SkinProperty.TIMER_PLAY);
-			if (freq > 0) {
-				currenttime *= freq;
-			}
-			int dx = (int) (currenttime * w / (data.length * 1000));
-			cursor.setColor(Color.toIntBits(255, 255, 255, 255));
-			cursor.fillRectangle(dx, 0, 3, h);
-		}
-		
-		if(cursortex == null) {
-			cursortex = new TextureRegion(new Texture(cursor));
-		} else if(oldw != w || oldh != h) {
-			cursortex.getTexture().dispose();
-			cursortex = new TextureRegion(new Texture(cursor));
-		} else {
-			cursortex.getTexture().draw(cursor, 0, 0);
-		}
-		draw(sprite, cursortex, region.x, region.y + region.height, region.width, -region.height);
 	}
 	
 	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime, float freq) {
@@ -226,19 +238,19 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 
 	
-	private void updateGraph(BMSModel model) {
+	private void updateGraph() {
 		if (model == null) {
 			data = new int[0][DATA_LENGTH[type]];
 		} else {
 			data = new int[model.getLastTime() / 1000 + 1][DATA_LENGTH[type]];
 			
-			updateData(model);
+			updateData();
 		}
 		
 		updateTexture(true);
 	}
 	
-	private void updateData(BMSModel modell) {
+	private void updateData() {
 		int pos = -1;
 		int count = 0;
 		max = 20;
@@ -269,8 +281,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 						if (n instanceof NormalNote) {
 							data[index][mode.isScratchKey(i) ? 2 : 5]++;
 							count++;
-						}
-						if (n instanceof LongNote) {
+						} else if (n instanceof LongNote) {
 							if(!((LongNote)n).isEnd()) {
 								for(int lnindex = index;lnindex <= ((LongNote)n).getPair().getTime() / 1000;lnindex++) {
 									data[lnindex][mode.isScratchKey(i) ? 1 : 4]++;
@@ -282,8 +293,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 								data[index][mode.isScratchKey(i) ? 0 : 3]++;
 								data[index][mode.isScratchKey(i) ? 1 : 4]--;									
 							}
-						}
-						if (n instanceof MineNote) {
+						} else if (n instanceof MineNote) {
 							data[index][6]++;
 							count++;
 						}
@@ -388,7 +398,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 
 		for (int i = start; i < end; i++) {
-			int[] n = data[i];
+			final int[] n = data[i];
 			if(!isOrderReverse) {
 				for (int j = 0, k = n[0], index = 0; j < max && index < n.length;) {
 					if (k > 0) {
@@ -432,18 +442,13 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	@Override
 	public void dispose() {
-		if (shapetex != null) {
-			backtex.getTexture().dispose();
-			shapetex.getTexture().dispose();
-			cursortex.getTexture().dispose();
-			back.dispose();
-			shape.dispose();
-			cursor.dispose();
-			shapetex = null;
-		}
-		if(chips != null) {
-			disposeAll(chips);
-		}
+		Optional.ofNullable(backtex).ifPresent(t -> t.getTexture().dispose());
+		backtex = null;
+		Optional.ofNullable(shapetex).ifPresent(t -> t.getTexture().dispose());
+		shapetex = null;
+		Optional.ofNullable(cursortex).ifPresent(t -> t.getTexture().dispose());
+		cursortex = null;
+		Optional.ofNullable(chips).ifPresent(t -> disposeAll(t));
 	}
 
 }
