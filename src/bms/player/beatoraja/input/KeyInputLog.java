@@ -16,35 +16,39 @@ import bms.player.beatoraja.Validatable;
  * 
  * @author exch
  */
-public class KeyInputLog implements Validatable {
+public final class KeyInputLog implements Validatable {
 	
 	public static final KeyInputLog[] EMPTYARRAY = new KeyInputLog[0];
 
 	/**
-	 * キー入力時間(ms)
-	 */
-	long time;
-	/**
 	 * キー入力時間(us)
 	 */	
-	long presstime;
-
+	private long presstime;
 	/**
 	 * キーコード
 	 */
-	int keycode;
+	private int keycode;
 	/**
 	 * キー押し離し
 	 */
-	boolean pressed;
+	private boolean pressed;
+
+	/**
+	 * キー入力時間(ms)。旧データとの互換性維持用
+	 */
+	long time;
 
 	public KeyInputLog() {
 	}
 
-	public KeyInputLog(long time, int keycode, boolean pressed) {
-		this.time = time;
+	public KeyInputLog(long presstime, int keycode, boolean pressed) {
+		setData(presstime, keycode, pressed);
+	}
+	
+	public void setData(long presstime, int keycode, boolean pressed) {
+		this.presstime = presstime;
 		this.keycode = keycode;
-		this.pressed = pressed;
+		this.pressed = pressed;		
 	}
 	
 	public long getTime() {
@@ -105,6 +109,10 @@ public class KeyInputLog implements Validatable {
 
 	@Override
 	public boolean validate() {
-		return presstime >= 0 && time >= 0 && keycode >= 0;
+		if(time > 0) {
+			presstime = time * 1000;
+			time = 0;
+		}
+		return presstime >= 0 && keycode >= 0;
 	}
 }

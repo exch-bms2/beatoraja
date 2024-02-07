@@ -544,9 +544,7 @@ public class BMSPlayerInputProcessor {
 		public void add(long presstime, int keycode, boolean pressed) {
 			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
 			poolindex++;
-			log.presstime = presstime;
-			log.keycode = keycode;
-			log.pressed = pressed;
+			log.setData(presstime, keycode, pressed);
 			keylog.add(log);
 		}
 		
