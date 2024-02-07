@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -29,10 +30,9 @@ import com.badlogic.gdx.utils.StringBuilder;
  * 
  * @author exch
  */
-public class PlayDataAccessor {
+public final class PlayDataAccessor {
 
 	// TODO スコアハッシュを付与するかどうかの判定(前のスコアハッシュの正当性を確認できなかった時)
-	// TODO リプレイ暗号、復号化
 	// TODO BATTLEは別ハッシュで登録したい}			
 
 	private final String hashkey;
@@ -567,6 +567,7 @@ public class PlayDataAccessor {
 		json.setOutputType(OutputType.json);
 		try {
 			String path = this.getReplayDataFilePath(model, lnmode, index) + ".brd";
+			rd.shrink();
 			OutputStreamWriter fw = new OutputStreamWriter(
 					new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(path))), "UTF-8");
 			fw.write(json.prettyPrint(rd));
@@ -654,6 +655,7 @@ public class PlayDataAccessor {
 		json.setOutputType(OutputType.json);
 		try {
 			String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd";
+			Stream.of(rd).forEach(ReplayData::shrink);
 			OutputStreamWriter fw = new OutputStreamWriter(
 					new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(path))), "UTF-8");
 			fw.write(json.prettyPrint(rd));
