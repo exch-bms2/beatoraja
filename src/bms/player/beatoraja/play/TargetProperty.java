@@ -1,11 +1,13 @@
 package bms.player.beatoraja.play;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.RivalDataAccessor;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.select.ScoreDataCache;
@@ -51,11 +53,8 @@ public abstract class TargetProperty {
     	if(s != null) {
     		targets = s;
     	}
-    	targetNames = new String[targets.length];
-    	for(int i = 0;i < targets.length;i++) {
-    		TargetProperty target = getTargetProperty(targets[i]);
-    		targetNames[i] = target != null ? target.getName(main) : "";
-    	}
+    	targetNames = Stream.of(s).map(TargetProperty::getTargetProperty)
+    			.map(target -> target != null ? target.getName(main) : "").toArray(String[]::new);
     }
     
     public static TargetProperty getTargetProperty(String id) {
@@ -170,10 +169,10 @@ class RivalTargetProperty extends TargetProperty {
 
 	@Override
 	public String getName(MainController main) {
-    	PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
+    	final PlayerInformation info = main.getRivalDataAccessor().getRivalInformation(index);
     	switch(target) {
     	case INDEX:
-    		return index < info.length ? "RIVAL " + info[index].getName() : "NO RIVAL";
+    		return info != null ? "RIVAL " + info.getName() : "NO RIVAL";
     	case RANK:
     		return index > 0 ? "RIVAL RANK " + (index + 1) : "RIVAL TOP";
     	case NEXT:
@@ -184,18 +183,16 @@ class RivalTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
-    	final PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
-    	final ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+    	final PlayerInformation info = main.getRivalDataAccessor().getRivalInformation(index);
+    	final ScoreDataCache cache = main.getRivalDataAccessor().getRivalScoreDataCache(index);
     	
     	String name = null;
     	ScoreData score = null;
     	ScoreData[] scores = null;
     	switch(target) {
     	case INDEX:
-        	if(index < info.length) {
-        		name = info[index].getName();
-        		score = cache[index].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
-        	}
+    		name = info != null ? info.getName() : name;
+    		score = cache != null ? cache.readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode()) : score;
         	break;
     	case RANK:
     		scores = createScoreArray(main);
@@ -240,13 +237,12 @@ class RivalTargetProperty extends TargetProperty {
     }
     
     private ScoreData[] createScoreArray(MainController main) {
-    	final PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
-    	final ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+    	final RivalDataAccessor rivals = main.getRivalDataAccessor();
 		Array<ScoreData> scorearray = new Array<ScoreData>();
-		for(int i = 0;i < info.length;i++) {
-			ScoreData sd = cache[i].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
+		for(int i = 0;i < rivals.getRivalCount();i++) {
+			ScoreData sd = rivals.getRivalScoreDataCache(i).readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
 			if(sd != null) {
-				sd.setPlayer(info[i].getName());
+				sd.setPlayer(rivals.getRivalInformation(i).getName());
 				scorearray.add(sd);
 			}
 		}
