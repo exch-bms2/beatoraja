@@ -4,7 +4,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
 
-public class SkinSourceReference implements SkinSource {
+/**
+ * スキンのソースイメージ(システム参照)
+ *
+ * @author exch
+ */
+public class SkinSourceReference extends SkinSource {
 
 	private final int id;
 	
