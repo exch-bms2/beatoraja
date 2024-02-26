@@ -8,6 +8,7 @@ import bms.player.beatoraja.song.SongData;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -448,7 +449,8 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 		shapetex = null;
 		Optional.ofNullable(cursortex).ifPresent(t -> t.getTexture().dispose());
 		cursortex = null;
-		Optional.ofNullable(chips).ifPresent(t -> disposeAll(t));
+		Optional.ofNullable(chips).ifPresent(t -> Stream.of(t).forEach(Pixmap::dispose));
+		setDisposed();
 	}
 
 }

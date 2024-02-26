@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.DisposableObject;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.*;
@@ -15,7 +16,7 @@ import com.badlogic.gdx.utils.*;
  * 
  * @author exch
  */
-public abstract class SkinObject implements Disposable {
+public abstract class SkinObject extends DisposableObject {
 
 	/**
 	 * オフセットの参照ID
@@ -91,8 +92,6 @@ public abstract class SkinObject implements Disposable {
 	 * 描画先
 	 */
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
-	
-	private boolean disposed = false;
 	
 	// 以下、高速化用
 	private long starttime;
@@ -750,15 +749,6 @@ public abstract class SkinObject implements Disposable {
 		return dsttimer;
 	}
 	
-	public static void disposeAll(Disposable[] obj) {
-		for(int i = 0;i < obj.length;i++) {
-			if(obj[i] != null) {
-				obj[i].dispose();
-				obj[i] = null;
-			}
-		}
-	}
-
 	public final int getImageType() {
 		return imageType;
 	}
@@ -777,13 +767,5 @@ public abstract class SkinObject implements Disposable {
 
 	public void setMouseRect(float x2, float y2, float w2, float h2) {
 		this.mouseRect = new Rectangle(x2, y2, w2, h2);
-	}
-
-	public final boolean isDisposed() {
-		return disposed;
-	}
-
-	public final void setDisposed() {
-		this.disposed = true;
 	}
 }
