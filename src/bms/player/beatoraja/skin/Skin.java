@@ -244,10 +244,14 @@ public class Skin {
 
 	public void dispose() {
 		for (SkinObject obj : objects) {
-			obj.dispose();
+			if(!obj.isDisposed()) {
+				obj.dispose();
+			}
 		}
 		for (SkinObject obj : removes) {
-			obj.dispose();
+			if(!obj.isDisposed()) {
+				obj.dispose();
+			}
 		}
 	}
 
@@ -307,7 +311,7 @@ public class Skin {
 		return dh;
 	}
 	
-	public static class SkinObjectRenderer {
+	public static final class SkinObjectRenderer {
 		
 		private final SpriteBatch sprite;
 		

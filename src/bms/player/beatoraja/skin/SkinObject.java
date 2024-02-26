@@ -92,6 +92,8 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
 	
+	private boolean disposed = false;
+	
 	// 以下、高速化用
 	private long starttime;
 	private long endtime;
@@ -266,7 +268,7 @@ public abstract class SkinObject implements Disposable {
 		this.dstdraw = dstdraw;
 	}
 
-	public void setStretch(int stretch) {
+	public final void setStretch(int stretch) {
 		if (stretch < 0)
 			return;
 		for (StretchType type : StretchType.values()) {
@@ -277,15 +279,15 @@ public abstract class SkinObject implements Disposable {
 		}
 	}
 
-	public void setStretch(StretchType stretch) {
+	public final void setStretch(StretchType stretch) {
 		this.stretch = stretch;
 	}
 
-	public StretchType getStretch() {
+	public final StretchType getStretch() {
 		return stretch;
 	}
 
-	public int getBlend() {
+	public final int getBlend() {
 		return this.dstblend;
 	}
 
@@ -757,23 +759,31 @@ public abstract class SkinObject implements Disposable {
 		}
 	}
 
-	public int getImageType() {
+	public final int getImageType() {
 		return imageType;
 	}
 
-	public void setImageType(int imageType) {
+	public final void setImageType(int imageType) {
 		this.imageType = imageType;
 	}
 	
-	public int getFilter() {
+	public final int getFilter() {
 		return dstfilter;
 	}
 
-	public void setFilter(int filter) {
+	public final void setFilter(int filter) {
 		dstfilter = filter;
 	}
 
 	public void setMouseRect(float x2, float y2, float w2, float h2) {
 		this.mouseRect = new Rectangle(x2, y2, w2, h2);
+	}
+
+	public final boolean isDisposed() {
+		return disposed;
+	}
+
+	public final void setDisposed() {
+		this.disposed = true;
 	}
 }
