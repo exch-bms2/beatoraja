@@ -3,6 +3,7 @@ package bms.player.beatoraja.play;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.ir.IRScoreData;
 import com.badlogic.gdx.utils.Array;
 
 import bms.player.beatoraja.MainController;
@@ -226,11 +227,14 @@ class RivalTargetProperty extends TargetProperty {
     		targetScore.setEpg(score.getEpg());
     		targetScore.setLpg(score.getLpg());
     		targetScore.setEgr(score.getEgr());
-    		targetScore.setLgr(score.getLgr());    		
+    		targetScore.setLgr(score.getLgr());
+    		targetScore.setOption(score.getOption());
     	} else if(name != null) {
-    		targetScore.setPlayer("NO DATA");    		
+    		targetScore.setPlayer("NO DATA");
+    		targetScore.setOption(0);
     	} else {
-    		targetScore.setPlayer("NO RIVAL");    		
+    		targetScore.setPlayer("NO RIVAL");
+    		targetScore.setOption(0);
     	}
     	
         return targetScore;
@@ -360,18 +364,22 @@ class InternetRankingTargetProperty extends TargetProperty {
     	final RankingData ranking = main.getPlayerResource().getRankingData();
     	if(ranking == null) {
 			targetScore.setPlayer("NO DATA");
+			targetScore.setOption(0);
 			return targetScore;    		
     	}
     	
     	if(ranking.getState() == RankingData.FINISH) {
     		if(ranking.getTotalPlayer() > 0) {
-    			int index = getTargetRank(main, ranking);
-    			int targetscore = ranking.getScore(index).getExscore();
-    			targetScore.setPlayer(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+    			final int index = getTargetRank(main, ranking);
+    			final IRScoreData irScore = ranking.getScore(index);
+    			final int targetscore = irScore.getExscore();
+    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
         		targetScore.setEpg(targetscore / 2);
         		targetScore.setEgr(targetscore % 2);
+				targetScore.setOption(irScore.option);
     		} else {
-    			targetScore.setPlayer("NO DATA");    			
+    			targetScore.setPlayer("NO DATA");
+    			targetScore.setOption(0);
     		}
     		return targetScore;
     	}
@@ -385,13 +393,16 @@ class InternetRankingTargetProperty extends TargetProperty {
 			}
 	    	if(ranking.getState() == RankingData.FINISH) {
 	    		if(ranking.getTotalPlayer() > 0) {
-	    			int index = getTargetRank(main, ranking);
-	    			int targetscore = ranking.getScore(index).getExscore();
-	    			targetScore.setPlayer(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+	    			final int index = getTargetRank(main, ranking);
+	    			final IRScoreData irScore = ranking.getScore(index);
+	    			final int targetscore = irScore.getExscore();
+	    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
 	        		targetScore.setEpg(targetscore / 2);
 	        		targetScore.setEgr(targetscore % 2);
+	    			targetScore.setOption(irScore.option);
 	    		} else {
-	    			targetScore.setPlayer("NO DATA");    			
+	    			targetScore.setPlayer("NO DATA");
+	    			targetScore.setOption(0);
 	    		}
 	    		
 				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
