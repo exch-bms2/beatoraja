@@ -14,7 +14,13 @@ public interface IRConnection {
 	 *            アカウント情報
 	 * @return
 	 */
-	public IRResponse<IRPlayerData> register(IRAccount account);
+	default public IRResponse<IRPlayerData> register(IRAccount account)  {
+		throw new IllegalArgumentException("Use of this function with this signature without providing an implementation is not permitted");
+	};
+
+	default public IRResponse<IRPlayerData> register(String id, String pass, String name)  {
+		throw new IllegalArgumentException("Use of this function with this signature without providing an implementation is not permitted");
+	};
 
 	/**
 	 * IRにログインする。起動時に呼び出される
@@ -23,7 +29,12 @@ public interface IRConnection {
 	 *            アカウント情報
 	 * @return
 	 */
-	public IRResponse<IRPlayerData> login(IRAccount account);
+	default public IRResponse<IRPlayerData> login(IRAccount account)  {
+		throw new IllegalArgumentException("Use of this function with this signature without providing an implementation is not permitted");
+	};
+	default public IRResponse<IRPlayerData> login(String id, String pass)  {
+		throw new IllegalArgumentException("Use of this function with this signature without providing an implementation is not permitted");
+	};
 
 	/**
 	 * ライバルデータを収録する
