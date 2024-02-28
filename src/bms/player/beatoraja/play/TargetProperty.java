@@ -231,13 +231,13 @@ class RivalTargetProperty extends TargetProperty {
     		targetScore.setLpg(score.getLpg());
     		targetScore.setEgr(score.getEgr());
     		targetScore.setLgr(score.getLgr());
-			targetScore.setOption(score.getOption());
+    		targetScore.setOption(score.getOption());
     	} else if(name != null) {
     		targetScore.setPlayer("NO DATA");
-			targetScore.setOption(0);
+    		targetScore.setOption(0);
     	} else {
     		targetScore.setPlayer("NO RIVAL");
-			targetScore.setOption(0);
+    		targetScore.setOption(0);
     	}
     	
         return targetScore;
@@ -375,15 +375,15 @@ class InternetRankingTargetProperty extends TargetProperty {
     	if(ranking.getState() == RankingData.FINISH) {
     		if(ranking.getTotalPlayer() > 0) {
     			final int index = getTargetRank(main, ranking);
-				final IRScoreData irScore = ranking.getScore(index);
-				final int targetscore = irScore.getExscore();
+    			final IRScoreData irScore = ranking.getScore(index);
+    			final int targetscore = irScore.getExscore();
     			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
         		targetScore.setEpg(targetscore / 2);
         		targetScore.setEgr(targetscore % 2);
 				targetScore.setOption(irScore.option);
     		} else {
     			targetScore.setPlayer("NO DATA");
-				targetScore.setOption(0);
+    			targetScore.setOption(0);
     		}
     		return targetScore;
     	}
@@ -398,15 +398,15 @@ class InternetRankingTargetProperty extends TargetProperty {
 	    	if(ranking.getState() == RankingData.FINISH) {
 	    		if(ranking.getTotalPlayer() > 0) {
 	    			final int index = getTargetRank(main, ranking);
-					final IRScoreData irScore = ranking.getScore(index);
-					final int targetscore = irScore.getExscore();
+	    			final IRScoreData irScore = ranking.getScore(index);
+	    			final int targetscore = irScore.getExscore();
 	    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
 	        		targetScore.setEpg(targetscore / 2);
 	        		targetScore.setEgr(targetscore % 2);
-					targetScore.setOption(irScore.option);
+	    			targetScore.setOption(irScore.option);
 	    		} else {
 	    			targetScore.setPlayer("NO DATA");
-					targetScore.setOption(0);
+	    			targetScore.setOption(0);
 	    		}
 	    		
 				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
