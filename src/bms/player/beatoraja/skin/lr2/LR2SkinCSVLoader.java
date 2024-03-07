@@ -389,13 +389,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				int gr = values[2];
 				if (gr >= 100) {
-					bar = new SkinGraph(gr, values[11] + 100);
-					bar.setDirection(values[12]);
+					bar = new SkinGraph(gr, values[11] + 100, values[12]);
 				} else {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						bar = new SkinGraph(images, values[10], values[9],values[11] + 100);
-						bar.setDirection(values[12]);
+						bar = new SkinGraph(images, values[10], values[9],values[11] + 100, values[12]);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					}
@@ -414,13 +412,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				int gr = values[2];
 				if (gr >= 100) {
-					bar = new SkinGraph(gr,values[11],values[13],values[14]);
-					bar.setDirection(values[12]);
+					bar = new SkinGraph(gr,values[11],values[13],values[14], values[12]);
 				} else {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						bar = new SkinGraph(images,values[10], values[9], values[11],values[13],values[14]);
-						bar.setDirection(values[12]);
+						bar = new SkinGraph(images,values[10], values[9], values[11],values[13],values[14], values[12]);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					}
@@ -435,7 +431,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (bar != null) {
 					int[] values = parseInt(str);
-					if (bar.getDirection() == 1) {
+					if (bar.direction == 1) {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}

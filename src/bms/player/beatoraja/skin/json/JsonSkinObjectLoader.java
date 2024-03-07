@@ -246,15 +246,14 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 					if(tex != null) {
 						if(img.value != null) {
 							obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-									img.timer, img.cycle, img.value);
+									img.timer, img.cycle, img.value, img.angle);
 						} else if(img.isRefNum) {
 							obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-									img.timer, img.cycle, img.type, img.min, img.max);
+									img.timer, img.cycle, img.type, img.min, img.max, img.angle);
 						} else {
 							obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-									img.timer, img.cycle, img.type);
+									img.timer, img.cycle, img.type, img.angle);
 						}
-						((SkinGraph) obj).setDirection(img.angle);									
 					}
 				}
 				return obj;
