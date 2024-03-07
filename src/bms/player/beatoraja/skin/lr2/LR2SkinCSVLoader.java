@@ -337,8 +337,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				if (images != null) {
 					slider = new SkinSlider(images, values[10], values[9], values[11],
 							(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw) : (dsth / srch))),
-							values[13]);
-					slider.setChangeable(values[14] == 0);
+							values[13], values[14] == 0);
 					skin.add(slider);
 
 					// TODO 固有実装の汎用化
@@ -363,7 +362,6 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					slider = new SkinSlider(images, values[10], values[9], values[11],
 							(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw) : (dsth / srch))),
 							values[13], values[15], values[16]);
-					slider.setChangeable(values[14] == 0);
 					skin.add(slider);
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));

@@ -216,9 +216,8 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 								img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
 										? ((float)loader.dstr.width / sk.w) : ((float)loader.dstr.height / sk.h)) * img.range),
-								img.type);
-					}								
-					((SkinSlider)obj).setChangeable(img.changeable);
+								img.type, img.changeable);
+					}
 				}
 				return obj;
 			}

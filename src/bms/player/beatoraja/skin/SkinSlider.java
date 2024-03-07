@@ -7,6 +7,7 @@ import bms.player.beatoraja.skin.property.FloatProperty;
 import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
+
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -19,35 +20,34 @@ public final class SkinSlider extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private SkinSource source;
+	private final SkinSource source;
 
 	/**
 	 * slider移動方向(0:上, 1:右, 2:下, 3:左)
 	 */
-	private int direction;
+	private final int direction;
 	/**
 	 * slider移動範囲
 	 */
-	private int range = 100;
+	private final int range;
 	/**
-	 * slider値参照先
+	 * slider値参照元
 	 */	
 	private final FloatProperty ref;
-	private final FloatWriter writer;
 	/**
-	 * ユーザーによる値変更を受け付けるかどうか
-	 */
-	private boolean changeable;
+	 * slider値反映先
+	 */	
+	private final FloatWriter writer;
 
 	private TextureRegion currentImage;
 	private float currentValue;
 
-	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type) {
+	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type, boolean changeable) {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;
 		ref = FloatPropertyFactory.getRateProperty(type);
-		writer = FloatPropertyFactory.getRateWriter(type);
+		writer = changeable ? FloatPropertyFactory.getRateWriter(type) : null;
 	}
 
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, FloatProperty ref) {
@@ -70,12 +70,12 @@ public final class SkinSlider extends SkinObject {
 		writer = null;
 	}
 
-	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, int type) {
+	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, int type, boolean changeable) {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;
 		ref = FloatPropertyFactory.getRateProperty(type);
-		writer = FloatPropertyFactory.getRateWriter(type);
+		writer = changeable ? FloatPropertyFactory.getRateWriter(type) : null;
 	}
 
 	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, FloatProperty ref, FloatWriter writer) {
@@ -121,69 +121,61 @@ public final class SkinSlider extends SkinObject {
 	}
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
-		if (isChangeable()) {
+		if (writer != null) {
 			switch (direction) {
 			case 0:
 				if (region.x <= x && region.x + region.width >= x && region.y <= y && region.y + range >= y) {
-					if(writer != null) {
-						float value;
-						if (Math.abs(y - region.y) < 1) {
-							value = 0;
-						} else if (Math.abs(y - (region.y + range)) < 1) {
-							value = 1;
-						} else {
-							value = (y - region.y) / range;
-						}
-						writer.set(state, value);
+					float value;
+					if (Math.abs(y - region.y) < 1) {
+						value = 0;
+					} else if (Math.abs(y - (region.y + range)) < 1) {
+						value = 1;
+					} else {
+						value = (y - region.y) / range;
 					}
+					writer.set(state, value);
 					return true;
 				}
 				break;
 			case 1:
 				if (region.x <= x && region.x + range >= x && region.y <= y && region.y + region.height >= y) {
-					if(writer != null) {
-						float value;
-						if (Math.abs(x - region.x) < 1) {
-							value = 0;
-						} else if (Math.abs(x - (region.x + range)) < 1) {
-							value = 1;
-						} else {
-							value = (x - region.x) / range;
-						}
-						writer.set(state, value);
+					float value;
+					if (Math.abs(x - region.x) < 1) {
+						value = 0;
+					} else if (Math.abs(x - (region.x + range)) < 1) {
+						value = 1;
+					} else {
+						value = (x - region.x) / range;
 					}
+					writer.set(state, value);
 					return true;
 				}
 				break;
 			case 2:
 				if (region.x <= x && region.x + region.width >= x && region.y - range <= y && region.y >= y) {
-					if(writer != null) {
-						float value;
-						if (Math.abs(y - region.y) < 1) {
-							value = 0;
-						} else if (Math.abs(y - (region.y - range)) < 1) {
-							value = 1;
-						} else {
-							value = (region.y - y) / range;
-						}
-						writer.set(state, value);
+					float value;
+					if (Math.abs(y - region.y) < 1) {
+						value = 0;
+					} else if (Math.abs(y - (region.y - range)) < 1) {
+						value = 1;
+					} else {
+						value = (region.y - y) / range;
 					}
+					writer.set(state, value);
 					return true;
 				}
 				break;
 			case 3:
 				if (region.x >= x && region.x - range <= x && region.y <= y && region.y + region.height >= y) {
-					if(writer != null) {
-						float value;
-						if (Math.abs(x - region.x) < 1) {
-							value = 0;
-						} else if (Math.abs(x - (region.x - range)) < 1) {
-							value = 1;
-						} else {
-							value = (region.x - x) / range;
-						}
-						writer.set(state, value);
+					float value;
+					if (Math.abs(x - region.x) < 1) {
+						value = 0;
+					} else if (Math.abs(x - (region.x - range)) < 1) {
+						value = 1;
+					} else {
+						value = (region.x - x) / range;
 					}
+					writer.set(state, value);
 					return true;
 				}
 				break;
@@ -193,20 +185,10 @@ public final class SkinSlider extends SkinObject {
 	}
 
 	public void dispose() {
-		if (source != null) {
-			source.dispose();
-			source = null;
-		}
+		disposeAll(source);
+		setDisposed();
 	}
 
-	public boolean isChangeable() {
-		return changeable;
-	}
-
-	public void setChangeable(boolean changeable) {
-		this.changeable = changeable;
-	}
-	
 	public int getRange() {
 		return range;
 	}
