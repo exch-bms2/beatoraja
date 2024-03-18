@@ -127,13 +127,12 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 					SkinNumber num = null;
 					if(value.value != null) {
 						num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding, value.space,
-								value.value);
+								value.value, value.align);
 					} else {
 						num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, value.zeropadding, value.space,
-								value.ref);
+								value.ref, value.align);
 					}
 
-					num.setAlign(value.align);
 					if(value.offset != null) {
 						SkinOffset[] offsets = new SkinOffset[value.offset.length];
 						for(int i = 0;i < offsets.length;i++) {
@@ -159,12 +158,11 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 					SkinNumber num = null;
 					if(value.value != null) {
 						num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-								d > 10 ? 2 : value.padding, value.space, value.value);
+								d > 10 ? 2 : value.padding, value.space, value.value, value.align);
 					} else {
 						num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-								d > 10 ? 2 : value.padding, value.space, value.ref);
+								d > 10 ? 2 : value.padding, value.space, value.ref, value.align);
 					}
-					num.setAlign(value.align);
 					if(value.offset != null) {
 						SkinOffset[] offsets = new SkinOffset[value.offset.length];
 						for(int i = 0;i < offsets.length;i++) {

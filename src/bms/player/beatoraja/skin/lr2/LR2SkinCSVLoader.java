@@ -250,8 +250,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								}
 							}
 
-							num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, str[14].length() > 0 ? values[14] : 2, values[15], values[11]);
-							num.setAlign(values[12]);
+							num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, str[14].length() > 0 ? values[14] : 2, values[15], values[11], values[12]);
 						} else {
 							int d = images.length % 10 == 0 ? 10 : 11;
 
@@ -262,9 +261,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								}
 							}
 
-							num = new SkinNumber(nimages, values[10], values[9], values[13], d > 10 ? 2 : 0, values[15],
-									values[11]);
-							num.setAlign(values[12]);
+							num = new SkinNumber(nimages, values[10], values[9], values[13], d > 10 ? 2 : 0, values[15], values[11], values[12]);
 						}
 						skin.add(num);
 						// System.out.println("Number Added - " +

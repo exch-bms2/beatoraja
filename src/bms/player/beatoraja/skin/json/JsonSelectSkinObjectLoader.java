@@ -193,8 +193,7 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 								}
 							}
 							SkinNumber numbers = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-									d > 10 ? 2 : 0, value.space, value.ref);
-							numbers.setAlign(value.align);
+									d > 10 ? 2 : 0, value.space, value.ref, value.align);
 							setDestination(skin, numbers, sk.songlist.level[i]);
 							barobj.setBarlevel(i, numbers);										
 						}
