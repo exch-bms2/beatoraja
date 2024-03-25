@@ -193,8 +193,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				for (int i = 0; i < values[4]; i++) {
 					tr[i] = (TextureRegion[]) imagesetarray.get(values[5+i]);
 				}
-				part = new SkinImage(tr, values[2], values[1]);
-				part.setReferenceID(values[3]);
+				part = new SkinImage(tr, values[2], values[1], values[3]);
 				if (part != null) {
 					skin.add(part);
 				}
@@ -478,8 +477,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							}
 						}
 					}
-					button = new SkinImage(tr, values[10], values[9]);
-					button.setReferenceID(values[11]);
+					button = new SkinImage(tr, values[10], values[9], values[11]);
 					if (values[12] == 1) {
 						button.setClickevent(values[11]);
 						button.setClickeventType(values[14] > 0 ? 0 : values[14] < 0 ? 1 : 2);

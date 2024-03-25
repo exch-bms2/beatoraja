@@ -83,7 +83,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				}
 				
 				if(barimageoff[values[1]] == null) {
-	                barimageoff[values[1]] = new SkinImage(barimage, 0, barcycle);
+	                barimageoff[values[1]] = new SkinImage(barimage, 0, barcycle, null);
 				}
                 barimageoff[values[1]].setDestination(values[2], values[3] * dstw / srcw,
 						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
@@ -104,7 +104,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					values[6] = -values[6];
 				}
 				if(barimageon[values[1]] == null) {
-					barimageon[values[1]] = new SkinImage(barimage, 0, barcycle);
+					barimageon[values[1]] = new SkinImage(barimage, 0, barcycle, null);
 				}
 				barimageon[values[1]].setDestination(values[2], values[3] * dstw / srcw,
 						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,

@@ -66,8 +66,8 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 							}
 						}
 
-						onimage[i] = new SkinImage(tr, timer, cycle);
-						offimage[i] = new SkinImage(tr, timer, cycle);
+						onimage[i] = new SkinImage(tr, timer, cycle, null);
+						offimage[i] = new SkinImage(tr, timer, cycle, null);
 						setDestination(skin, onimage[i], sk.songlist.liston[i]);
 						setDestination(skin, offimage[i], sk.songlist.listoff[i]);
 						break;

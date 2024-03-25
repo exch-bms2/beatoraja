@@ -56,8 +56,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 								tr[i][j] = srcimg[i * tr[i].length + j];
 							}
 						}
-						SkinImage si = new SkinImage(tr, img.timer, img.cycle);
-						si.setReferenceID(img.ref);
+						SkinImage si = new SkinImage(tr, img.timer, img.cycle, img.ref);
 						obj = si;
 					} else {
 						obj = new SkinImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
@@ -85,19 +84,12 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 								sources[index] = new SkinSourceImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle);
 							} 
-							
 							break;
 						}
 					}
 				}
 
-				SkinImage si = new SkinImage(sources);
-				if (imgs.value != null) {
-					si.setReference(imgs.value);
-				} else {
-					si.setReferenceID(imgs.ref);
-				}
-				obj = si;
+				obj = imgs.value != null ? new SkinImage(sources, imgs.value) : new SkinImage(sources, imgs.ref);
 				if (imgs.act != null) {
 					obj.setClickevent(imgs.act);
 					obj.setClickeventType(imgs.click);
