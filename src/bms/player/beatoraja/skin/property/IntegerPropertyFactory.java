@@ -307,6 +307,15 @@ public class IntegerPropertyFactory {
 				}
 				return Integer.MIN_VALUE;
 			};
+		case NUMBER_LANECOVER2:
+			return (state) -> {
+				if (state instanceof BMSPlayer) {
+					LaneRenderer laneRenderer = ((BMSPlayer) state).getLanerender();
+					int laneCover = (int)((1.0 - laneRenderer.getLiftRegion()) * laneRenderer.getLanecover() * 1000);
+					return laneCover;
+				}
+				return Integer.MIN_VALUE;
+			};
 		case NUMBER_LIFT1:
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
