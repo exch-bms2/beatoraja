@@ -12,7 +12,8 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.IntSet;
+import com.badlogic.gdx.utils.IntSet.IntSetIterator;
 
 import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.*;
@@ -52,6 +53,8 @@ public class BarRenderer {
 	private final BarArea[] bararea;
 
 	private boolean bartextupdate = false;
+//	private final boolean[] bartextCharset = new boolean[Character.MAX_VALUE + 1];
+	private final IntSet bartextCharset = new IntSet(1024);
 
 	private static class BarArea {
 		public Bar sd;
@@ -202,23 +205,44 @@ public class BarRenderer {
 
 		if (bartextupdate) {
 			bartextupdate = false;
-			ObjectSet<Character> charset = new ObjectSet<Character>();
-
+			
+			bartextCharset.clear();
 			for (Bar song : manager.currentsongs) {
 				for (char c : song.getTitle().toCharArray()) {
-					charset.add(c);
+					bartextCharset.add(c);
 				}
 			}
-
-			char[] chars = new char[charset.size];
+			char[] chars = new char[bartextCharset.size];
 			int i = 0;
-			for (char c : charset) {
-				chars[i++] = c;
+			for (IntSetIterator iterator = bartextCharset.iterator();iterator.hasNext;) {
+				chars[i++] = (char) iterator.next();
 			}
+//			Arrays.fill(bartextCharset, false);
+//			int charCount = 0;
+//			for (Bar song : manager.currentsongs) {
+//				final String title = song.getTitle();
+//				for(int index = title.length() - 1;index >= 0;index--) {
+//					final char c = title.charAt(index);
+//					if(!bartextCharset[c]) {
+//						bartextCharset[c] = true;
+//						charCount++;
+//					}
+//				}
+//			}
+//			char[] chars = new char[charCount];
+//			int count = 0;
+//			for (char c = (char) (bartextCharset.length - 1) ;;c--) {
+//				if(bartextCharset[c]) {
+//					chars[count++] = c;
+//				}
+//				if(c == 0) {
+//					break;
+//				}
+//			}
 			
 			for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
 				if(baro.getText(index) != null) {
-					baro.getText(index).prepareFont(String.valueOf(chars));				
+					baro.getText(index).prepareFont(String.valueOf(chars));
 				}				
 			}
 		}
