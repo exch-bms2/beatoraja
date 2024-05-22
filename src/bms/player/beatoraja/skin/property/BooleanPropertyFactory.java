@@ -15,6 +15,7 @@ import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.*;
+import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.SongData;
 
 public class BooleanPropertyFactory {
@@ -651,6 +652,9 @@ public class BooleanPropertyFactory {
 		trophy_option_allscr(OPTION_CLEAR_ALLSCR, new TrophyDrawCondition(SongTrophy.ALL_SCR)),
 		trophy_option_exrandom(OPTION_CLEAR_EXRANDOM, new TrophyDrawCondition(SongTrophy.EX_RANDOM)),
 		trophy_option_exsrandom(OPTION_CLEAR_EXSRANDOM, new TrophyDrawCondition(SongTrophy.EX_S_RANDOM)),
+
+		constant(OPTION_CONSTANT, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnableConstant() : false))),
 
 		;
 		/**
