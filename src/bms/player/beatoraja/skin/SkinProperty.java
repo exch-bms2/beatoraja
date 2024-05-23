@@ -871,6 +871,8 @@ public class SkinProperty {
 	public static final int OFFSET_JUDGE_3P = 32;
 	public static final int OFFSET_JUDGEDETAIL_3P = 33;
 
+	public static final int OPTION_CONSTANT = 400;
+
 	// オフセットのユーザー定義は40番以降を使用して下さい
 
 	// 廃止予定

@@ -102,6 +102,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> gvalue;
 	@FXML
+	private CheckBox enableConstant;
+	@FXML
+	private Spinner<Integer> constFadeinTime;
+	@FXML
 	private Spinner<Double> hispeedmargin;
 	@FXML
 	private CheckBox hispeedautoadjust;
@@ -618,6 +622,8 @@ public class PlayConfigurationView implements Initializable {
 			PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
+			conf.setEnableConstant(enableConstant.isSelected());
+			conf.setConstantFadeinTime(getValue(constFadeinTime));
 			conf.setHispeedMargin(getValue(hispeedmargin).floatValue());
 			conf.setFixhispeed(fixhispeed.getValue());
 			conf.setEnablelanecover(enableLanecover.isSelected());
@@ -636,6 +642,8 @@ public class PlayConfigurationView implements Initializable {
 		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
+		enableConstant.setSelected(conf.isEnableConstant());
+		constFadeinTime.getValueFactory().setValue(conf.getConstantFadeinTime());
 		hispeedmargin.getValueFactory().setValue((double) conf.getHispeedMargin());
 		fixhispeed.setValue(conf.getFixhispeed());
 		enableLanecover.setSelected(conf.isEnablelanecover());

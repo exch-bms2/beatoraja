@@ -433,10 +433,29 @@ public class LaneRenderer {
 				}
 			}
 			// ノート描画
+			final boolean enableConstant = playconfig.isEnableConstant();
+			final int baseduration = playconfig.getDuration();
+			final float alphaLimit =  playconfig.getConstantFadeinTime() * 1000;
 			for (int lane = 0; lane < lanes.length; lane++) {
 				final float scale = lanes[lane].scale;
 				final Note note = tl.getNote(lane);
 				if (note != null) {
+					if (enableConstant) {
+						long targetTime = microtime + (baseduration * 1000);
+						long timeDifference = tl.getMicroTime() - targetTime;
+						if (tl.getMicroTime() >= targetTime) {
+						    if (timeDifference < alphaLimit) {
+						    	// フェードイン処理
+						        float alpha = (alphaLimit - timeDifference) / alphaLimit;
+						        sprite.setColor(new Color(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha));
+						    } else {
+						    	// ノーツ非表示
+						        continue;
+						    }
+						} else {
+						    sprite.setColor(Color.WHITE);
+						}
+					}
 					//4分のタイミングでノートを拡大する
 					float dstx = lanes[lane].region.x + offsetX;
 					float dsty = (float) y + offsetY - offsetH / 2;

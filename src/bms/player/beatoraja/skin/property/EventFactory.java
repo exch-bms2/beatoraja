@@ -10,6 +10,7 @@ import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.*;
+import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
@@ -635,6 +636,15 @@ public class EventFactory {
 				PlayerConfig config = state.resource.getPlayerConfig();
 				config.setSevenToNineType((config.getSevenToNineType() + (arg1 >= 0 ? 1 : typelength - 1)) % typelength);
 				state.play(OPTION_CHANGE);
+			}
+		}),
+		constant(SkinProperty.OPTION_CONSTANT, (state) -> {
+			if(state instanceof MusicSelector) {
+				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+				if (pc != null) {
+					pc.setEnableConstant(!pc.isEnableConstant());
+					state.play(OPTION_CHANGE);
+				}
 			}
 		}),
 		;
