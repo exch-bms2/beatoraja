@@ -330,7 +330,7 @@ public class Skin {
 		public static final int TYPE_LAYER = 4;
 		public static final int TYPE_DISTANCE_FIELD = 5;
 		
-		private Color color;
+		private final Color color = new Color(Color.WHITE);
 		
 		private Color orgcolor;
 		
@@ -475,7 +475,11 @@ public class Skin {
 		}
 
 		public void setColor(Color color) {
-			this.color = color;
+			this.color.set(color);
+		}
+		
+		public void setColor(float r, float g, float b, float a) {
+			this.color.set(r,g,b,a);
 		}
 	}
 
