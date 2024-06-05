@@ -120,6 +120,9 @@ public class KeyConfiguration extends MainState {
 		input = main.getInputProcessor();
 		keyboard = input.getKeyBoardInputProcesseor();
 		controllers = input.getBMInputProcessor();
+		for (BMControllerInputProcessor controller: controllers) {
+			controller.setEnable(true);
+		}
 		midiinput = input.getMidiInputProcessor();
 		setMode(0);
 	}
