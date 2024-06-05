@@ -287,34 +287,50 @@ public class GrooveGauge {
 				float fix1=1.0f;
 				float fix2=1.0f;
 				if(f < 0) {
-					if(model.getTotal()>=240.0){
-						fix1=1.0f;
-					}else if(model.getTotal()>=230.0){
-						fix1=1.11f;
-					}else if(model.getTotal()>=210.0){
-						fix1=1.25f;
-					}else if(model.getTotal()>=200.0){
-						fix1=1.5f;
-					}else if(model.getTotal()>=180.0){
-						fix1=1.666f;
-					}else if(model.getTotal()>=160.0){
-						fix1=2.0f;
-					}else if(model.getTotal()>=150.0){
-						fix1=2.5f;
-					}else if(model.getTotal()>=130.0){
-						fix1=3.333f;
-					}else if(model.getTotal()>=120.0){
-						fix1=5.0f;
+					// トータル補正 (<240)
+					final double total = model.getTotal();
+					if(total >= 240.0){
+						fix1 = 1.0f;
+					}else if(total >= 230.0){
+						fix1 = 1.11f;
+					}else if(total >= 210.0){
+						fix1 = 1.25f;
+					}else if(total >= 200.0){
+						fix1 = 1.5f;
+					}else if(total >= 180.0){
+						fix1 = 1.666f;
+					}else if(total >= 160.0){
+						fix1 = 2.0f;
+					}else if(total >= 150.0){
+						fix1 = 2.5f;
+					}else if(total >= 130.0){
+						fix1 = 3.333f;
+					}else if(total >= 120.0){
+						fix1 = 5.0f;
 					}else{
-						fix1=10.0f;
+						fix1 = 10.0f;
 					}
-					int note=1000;
-					float mod=0.002f;
-					while(note>model.getTotalNotes()||note>1){
-						fix2 += mod * (float)(note - Math.max(model.getTotalNotes(), note/2));
-						note/=2;
-						mod*=2.0f;
+
+					// ノート数補正 (<1000)
+					final int totalNotes = model.getTotalNotes();
+					if(totalNotes <= 20) {
+						fix2 = 10.0f;
+					}else if(totalNotes < 30) {
+						fix2 = 8.0f + 0.2f*(30-totalNotes);
+					}else if(totalNotes < 60) {
+						fix2 = 5.0f + 0.2f*(60-totalNotes)/3.0f;
+					}else if(totalNotes < 125) {
+						fix2 = 4.0f + (125-totalNotes)/65.0f;
+					}else if(totalNotes < 250) {
+						fix2 = 3.0f + 0.008f*(250-totalNotes);
+					}else if(totalNotes < 500) {
+						fix2 = 2.0f + 0.004f*(500-totalNotes);
+					}else if(totalNotes < 1000) {
+						fix2 = 1.0f + 0.002f*(1000-totalNotes);
+					}else {
+						fix2 = 1.0f;
 					}
+
 					f *= Math.max(fix1, fix2);
 				}
 				return f;
