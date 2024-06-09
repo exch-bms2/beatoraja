@@ -272,14 +272,7 @@ public class BMSPlayerInputProcessor {
 		
 		// 各デバイスにキーコンフィグをセット
 		kbinput.setConfig(playconfig.getKeyboardConfig());
-		for(int i = 0;i < bminput.length;i++) {
-			for(ControllerConfig controller : playconfig.getController()) {
-				if(bminput[i].getName().equals(controller.getName())) {
-					bminput[i].setConfig(controller);
-					break;
-				}
-			}
-		}
+		setControllerConfig(playconfig.getController());
 		midiinput.setConfig(playconfig.getMidiConfig());
 		
 		if(kbcount >= cocount && kbcount >= micount) {
