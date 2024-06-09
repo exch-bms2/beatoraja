@@ -238,7 +238,7 @@
                                          <Label text="%CONSTANT_FADEIN_TIME" GridPane.columnIndex="1" GridPane.rowIndex="12" />
                                          <NumericSpinner fx:id="constFadeinTime" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="12">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="-1000" />
                                              </valueFactory>
                                          </NumericSpinner>
                                      </GridPane>

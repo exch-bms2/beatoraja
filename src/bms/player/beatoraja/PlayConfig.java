@@ -35,7 +35,7 @@ public class PlayConfig implements Cloneable {
 	 */
 	private int constantFadeinTime = 100;
 	public static final int CONSTANT_FADEIN_MAX = 1000;
-	public static final int CONSTANT_FADEIN_MIN = 0;
+	public static final int CONSTANT_FADEIN_MIN = -1000;
 
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる

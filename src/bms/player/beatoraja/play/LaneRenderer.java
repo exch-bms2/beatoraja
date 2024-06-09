@@ -341,16 +341,30 @@ public class LaneRenderer {
 				if (enableConstant) {
 					final long targetTime = microtime + (baseduration * 1000);
 					final long timeDifference = tl.getMicroTime() - targetTime;
-					if (tl.getMicroTime() >= targetTime) {
-					    if (timeDifference < alphaLimit) {
-					    	// フェードイン処理
-					        sprite.setColor(1f, 1f, 1f, (alphaLimit - timeDifference) / alphaLimit);
-					    } else {
-					    	// ノーツ非表示
-					        continue;
-					    }
+					if(alphaLimit >= 0) {
+						if (tl.getMicroTime() >= targetTime) {
+						    if (timeDifference < alphaLimit) {
+						    	// フェードイン処理
+						        sprite.setColor(1f, 1f, 1f, (alphaLimit - timeDifference) / alphaLimit);
+						    } else {
+						    	// ノーツ非表示
+						        continue;
+						    }
+						} else {
+						    sprite.setColor(Color.WHITE);
+						}
 					} else {
-					    sprite.setColor(Color.WHITE);
+						if (tl.getMicroTime() >= targetTime) {
+					    	// ノーツ非表示
+							continue;
+						} else {
+						    if (timeDifference > alphaLimit) {
+						    	// フェードイン処理
+						        sprite.setColor(1f, 1f, 1f, 1f - (alphaLimit - timeDifference) / alphaLimit);
+						    } else {
+							    sprite.setColor(Color.WHITE);
+						    }
+						}						
 					}
 				}
 
@@ -441,16 +455,30 @@ public class LaneRenderer {
 			if (enableConstant) {
 				final long targetTime = microtime + (baseduration * 1000);
 				final long timeDifference = tl.getMicroTime() - targetTime;
-				if (tl.getMicroTime() >= targetTime) {
-				    if (timeDifference < alphaLimit) {
-				    	// フェードイン処理
-				        sprite.setColor(1f, 1f, 1f, (alphaLimit - timeDifference) / alphaLimit);
-				    } else {
-				    	// ノーツ非表示
-				        continue;
-				    }
+				if(alphaLimit >= 0) {
+					if (tl.getMicroTime() >= targetTime) {
+					    if (timeDifference < alphaLimit) {
+					    	// フェードイン処理
+					        sprite.setColor(1f, 1f, 1f, (alphaLimit - timeDifference) / alphaLimit);
+					    } else {
+					    	// ノーツ非表示
+					        continue;
+					    }
+					} else {
+					    sprite.setColor(Color.WHITE);
+					}
 				} else {
-				    sprite.setColor(Color.WHITE);
+					if (tl.getMicroTime() >= targetTime) {
+				    	// ノーツ非表示
+						continue;
+					} else {
+					    if (timeDifference > alphaLimit) {
+					    	// フェードイン処理
+					        sprite.setColor(1f, 1f, 1f, 1f - (alphaLimit - timeDifference) / alphaLimit);
+					    } else {
+						    sprite.setColor(Color.WHITE);
+					    }
+					}						
 				}
 			}
 
