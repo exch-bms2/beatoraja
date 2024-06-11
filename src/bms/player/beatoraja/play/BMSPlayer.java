@@ -8,6 +8,9 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.ir.RankingData;
+import bms.player.beatoraja.ir.RankingDataCache;
+import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -469,6 +472,16 @@ public class BMSPlayer extends MainState {
 			practice.create(model, main.getConfig());
 			state = STATE_PRACTICE;
 		} else {
+			if(main.getIRStatus().length > 0) {
+				SongData sd = resource.getSongdata();
+				RankingDataCache rankingCache = main.getRankingDataCache();
+				RankingData ranking = rankingCache.get(sd, config.getLnmode());
+				if (ranking == null) {
+					ranking = new RankingData();
+					rankingCache.put(sd, config.getLnmode(), ranking);
+				}
+				resource.setRankingData(ranking);
+			}
 			
 			if(resource.getRivalScoreData() == null || resource.getCourseBMSModels() != null) {
 				ScoreData targetScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);

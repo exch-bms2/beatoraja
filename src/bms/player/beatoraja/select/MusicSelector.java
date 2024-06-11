@@ -288,14 +288,7 @@ public class MusicSelector extends MainState {
 								}
 							}
 						}
-						
-						if(main.getIRStatus().length > 0 && currentir == null) {
-							currentir = new RankingData();
-							main.getRankingDataCache().put(song, config.getLnmode(), currentir);
-						}
-						resource.setRankingData(currentir);
-						resource.setRivalScoreData(current.getRivalScore());
-						
+
 						playedsong = song;
 						main.changeState(MainStateType.DECIDE);
 					} else {
@@ -501,15 +494,6 @@ public class MusicSelector extends MainState {
 				currentir = new RankingData();
 				main.getRankingDataCache().put(gradeBar.getCourseData(), config.getLnmode(), currentir);
 			}
-			
-			RankingData songrank = main.getRankingDataCache().get(songs[0], config.getLnmode());
-			if(main.getIRStatus().length > 0 && songrank == null) {
-				songrank = new RankingData();
-				main.getRankingDataCache().put(songs[0], config.getLnmode(), songrank);
-			}
-			resource.setRankingData(songrank);
-			resource.setRivalScoreData(null);
-
 			main.changeState(MainStateType.DECIDE);
 			return true;
 		}
