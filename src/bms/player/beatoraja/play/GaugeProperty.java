@@ -1,6 +1,6 @@
 package bms.player.beatoraja.play;
 
-import static bms.player.beatoraja.play.GrooveGauge.GaugeType.*;
+import static bms.player.beatoraja.play.GrooveGauge.GaugeModifier.*;
 
 /**
  * ゲージの仕様
@@ -9,19 +9,18 @@ import static bms.player.beatoraja.play.GrooveGauge.GaugeType.*;
  */
 public enum GaugeProperty {
 
-    FIVEKEYS(new GaugeElementProperty[]{
-            GaugeElementProperty.ASSIST_EASY_5,
-                GaugeElementProperty.EASY_5,
-                GaugeElementProperty.NORMAL_5,
-                GaugeElementProperty.HARD_5,
-                GaugeElementProperty.EXHARD_5,
-                GaugeElementProperty.HAZARD_5,
-                GaugeElementProperty.CLASS_5,
-                GaugeElementProperty.EXCLASS_5,
-                GaugeElementProperty.EXHARDCLASS_5,
-        }),
-    SEVENKEYS(new GaugeElementProperty[]{
-        GaugeElementProperty.ASSIST_EASY,
+    FIVEKEYS(
+    		GaugeElementProperty.ASSIST_EASY_5,
+            GaugeElementProperty.EASY_5,
+            GaugeElementProperty.NORMAL_5,
+            GaugeElementProperty.HARD_5,
+            GaugeElementProperty.EXHARD_5,
+            GaugeElementProperty.HAZARD_5,
+            GaugeElementProperty.CLASS_5,
+            GaugeElementProperty.EXCLASS_5,
+            GaugeElementProperty.EXHARDCLASS_5),
+    SEVENKEYS(
+    		GaugeElementProperty.ASSIST_EASY,
             GaugeElementProperty.EASY,
             GaugeElementProperty.NORMAL,
             GaugeElementProperty.HARD,
@@ -29,9 +28,8 @@ public enum GaugeProperty {
             GaugeElementProperty.HAZARD,
             GaugeElementProperty.CLASS,
             GaugeElementProperty.EXCLASS,
-            GaugeElementProperty.EXHARDCLASS,
-    }),
-    PMS(new GaugeElementProperty[]{
+            GaugeElementProperty.EXHARDCLASS),
+    PMS(
             GaugeElementProperty.ASSIST_EASY_PMS,
             GaugeElementProperty.EASY_PMS,
             GaugeElementProperty.NORMAL_PMS,
@@ -40,9 +38,8 @@ public enum GaugeProperty {
             GaugeElementProperty.HAZARD_PMS,
             GaugeElementProperty.CLASS_PMS,
             GaugeElementProperty.EXCLASS_PMS,
-            GaugeElementProperty.EXHARDCLASS_PMS,
-    }),
-    KEYBOARD(new GaugeElementProperty[]{
+            GaugeElementProperty.EXHARDCLASS_PMS),
+    KEYBOARD(
             GaugeElementProperty.ASSIST_EASY_KB,
             GaugeElementProperty.EASY_KB,
             GaugeElementProperty.NORMAL_KB,
@@ -51,9 +48,8 @@ public enum GaugeProperty {
             GaugeElementProperty.HAZARD_KB,
             GaugeElementProperty.CLASS_KB,
             GaugeElementProperty.EXCLASS_KB,
-            GaugeElementProperty.EXHARDCLASS_KB,
-    }),
-    LR2(new GaugeElementProperty[]{
+            GaugeElementProperty.EXHARDCLASS_KB),
+    LR2(
             GaugeElementProperty.ASSIST_EASY_LR2,
             GaugeElementProperty.EASY_LR2,
             GaugeElementProperty.NORMAL_LR2,
@@ -62,13 +58,12 @@ public enum GaugeProperty {
             GaugeElementProperty.HAZARD_LR2,
             GaugeElementProperty.CLASS_LR2,
             GaugeElementProperty.EXCLASS_LR2,
-            GaugeElementProperty.EXHARDCLASS_LR2,
-    }),
+            GaugeElementProperty.EXHARDCLASS_LR2),
     ;
 
     public final GaugeElementProperty[] values;
 
-    private GaugeProperty(GaugeElementProperty[] values) {
+    private GaugeProperty(GaugeElementProperty... values) {
         this.values = values;
     }
 
@@ -131,9 +126,9 @@ public enum GaugeProperty {
         ;
 
         /**
-         * ゲージタイプ
+         * ゲージ増減補正タイプ
          */
-        public final GrooveGauge.GaugeType type;
+        public final GrooveGauge.GaugeModifier modifier;
         /**
          * 格判定のゲージ変化量。PG, GR, GD, BD, PR, MSの順
          */
@@ -159,8 +154,8 @@ public enum GaugeProperty {
          */
         public final float[][] guts;
 
-        private GaugeElementProperty(GrooveGauge.GaugeType type, float min, float max, float init, float border, float[] value, float[][] guts) {
-            this.type = type;
+        private GaugeElementProperty(GrooveGauge.GaugeModifier modifier, float min, float max, float init, float border, float[] value, float[][] guts) {
+            this.modifier = modifier;
             this.min = min;
             this.max = max;
             this.init = init;
