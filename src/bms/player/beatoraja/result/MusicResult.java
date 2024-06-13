@@ -340,11 +340,12 @@ public class MusicResult extends AbstractResult {
 		int count = 0;
 		avgduration = newscore.getAvgjudge();
 		timingDistribution.init();
-		final int lanes = resource.getBMSModel().getMode().key;
-		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
+		BMSModel model = resource.getBMSModel();
+		final int lanes = model.getMode().key;
+		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
-				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE
+				if (n != null && !((model.getLnmode() == 1 || (model.getLnmode() == 0 && model.getLntype() == BMSModel.LNTYPE_LONGNOTE))
 						&& n instanceof LongNote && ((LongNote) n).isEnd())) {
 					int state = n.getState();
 					int time = n.getPlayTime();

@@ -260,6 +260,9 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 		}
 
 		final Mode mode = model.getMode();
+		// #LNMODE is explicitly set to 1 (LN)
+		// or #LNMODE is undefined and getLntype (which reflects playconfig) is LN (0)
+		final boolean ignoreLNEnd = model.getLnmode() == 1 || (model.getLnmode() == 0 && model.getLntype() == BMSModel.LNTYPE_LONGNOTE);
 		for (TimeLine tl : model.getAllTimeLines()) {
 			final int index = tl.getTime() / 1000;
 			if(index >= data.length) {
@@ -289,8 +292,7 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 								}
 								count++;
 							}
-							if((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-									&& ((LongNote) n).isEnd())) {
+							if((ignoreLNEnd && ((LongNote) n).isEnd())) {
 								data[index][mode.isScratchKey(i) ? 0 : 3]++;
 								data[index][mode.isScratchKey(i) ? 1 : 4]--;									
 							}
@@ -300,16 +302,14 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 						}
 						break;
 					case TYPE_JUDGE:
-						if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-								&& ((LongNote) n).isEnd())) {
+						if (n instanceof MineNote || (ignoreLNEnd && n instanceof LongNote && ((LongNote) n).isEnd())) {
 							break;
 						}
 						data[index][st]++;
 						count++;
 						break;
 					case TYPE_EARLYLATE:
-						if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-						&& ((LongNote) n).isEnd())) {
+						if (n instanceof MineNote || (ignoreLNEnd && n instanceof LongNote && ((LongNote) n).isEnd())) {
 							break;
 						}
 						if (st <= 1) {
