@@ -837,7 +837,8 @@ public class BMSPlayer extends MainState {
 	public ScoreData createScoreData() {
 		final PlayerConfig config = resource.getPlayerConfig();
 		ScoreData score = judge.getScoreData();
-		if (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0) {
+		if (resource.getCourseBMSModels() == null
+				&& (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0)) {
 			return null;
 		}
 
@@ -934,8 +935,7 @@ public class BMSPlayer extends MainState {
 			return;
 		}
 		if (state != STATE_FINISHED && 
-				(judge.getPastNotes() == resource.getSongdata().getNotes() 
-				|| (judge.getJudgeCount(0) + judge.getJudgeCount(1) + judge.getJudgeCount(2) + judge.getJudgeCount(3) == 0)
+				(judge.getPastNotes() == resource.getSongdata().getNotes()
 				|| resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY)) {
 			state = STATE_FINISHED;
 			timer.setTimerOn(TIMER_FADEOUT);
