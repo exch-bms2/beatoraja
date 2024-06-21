@@ -86,6 +86,7 @@ public final class ReplayData implements Validatable {
 	public PlayConfig config;
 	
 	public void shrink() {
+		if (keylog.length == 0) return;
 		try {
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			OutputStream base64 = Base64.getUrlEncoder().wrap(output);
