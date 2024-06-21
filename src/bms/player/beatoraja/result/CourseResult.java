@@ -113,40 +113,46 @@ public class CourseResult extends AbstractResult {
         	}
 
 			Thread irprocess = new Thread(() -> {
-				try {
-                	int irsend = 0;
-                	boolean succeed = true;
-                	List<IRSendStatus> removeIrSendStatus = new ArrayList<IRSendStatus>();
-                	
-                	for(IRSendStatus irc : irSendStatus) {
-        				if(irsend == 0) {
-        					timer.switchTimer(TIMER_IR_CONNECT_BEGIN, true);                					
-        				}
-        				irsend++;
-                        succeed &= irc.send();
-                        if(irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
-                        	removeIrSendStatus.add(irc);
-                        }
-                	}
-                	irSendStatus.removeAll(removeIrSendStatus);
-                	
-                	if(irsend > 0) {
-                		timer.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
+				int irsend = 0;
+				boolean succeed = true;
+				List<IRSendStatus> removeIrSendStatus = new ArrayList<>();
 
-                        IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
-						if(response.isSucceeded()) {
-                    		ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
-                    		rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
-							Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+				for (IRSendStatus irc : irSendStatus) {
+					try {
+						if (irsend == 0) {
+							timer.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
+						}
+						irsend++;
+						succeed &= irc.send();
+						if (irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
+							removeIrSendStatus.add(irc);
+						}
+					} catch (Exception e) {
+						Logger.getGlobal().warning("IR送信時の例外:" + e.getMessage());
+						e.printStackTrace();
+						// remove from queue
+						removeIrSendStatus.add(irc);
+					}
+				}
+				irSendStatus.removeAll(removeIrSendStatus);
+
+				if (irsend > 0) {
+					timer.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
+					try {
+						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, new IRCourseData(resource.getCourseData(), lnmode));
+						if (response.isSucceeded()) {
+							ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
+							rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
+							Logger.getGlobal().info("IRからのスコア取得成功 : " + response.getMessage());
 						} else {
 							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-						}	                    		
-                	}
-				} catch (Exception e) {
-					Logger.getGlobal().severe(e.getMessage());
-				} finally {
-					state = STATE_IR_FINISHED;
+						}
+					} catch (Exception e) {
+						Logger.getGlobal().warning("IRからのスコア取得時例外:" + e.getMessage());
+						e.printStackTrace();
+					}
 				}
+				state = STATE_IR_FINISHED;
 			});
 			irprocess.start();
 		}
