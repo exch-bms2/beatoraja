@@ -294,7 +294,39 @@ public class MusicSelector extends MainState {
 							main.getRankingDataCache().put(song, config.getLnmode(), currentir);
 						}
 						resource.setRankingData(currentir);
-						resource.setRivalScoreData(current.getRivalScore());
+						ScoreData rival = current.getRivalScore();
+						resource.setRivalScoreData(rival);
+						ReplayData chartOption = null;
+						switch(config.getChartReplicationMode()) {
+						case NONE:
+							// TODO 通常オプションもここに入れて渡す？
+							break;
+						case RIVALCHART:
+							if(rival != null) {
+								chartOption = new ReplayData();
+								chartOption.randomoption = rival.getOption() % 10;
+								chartOption.randomoption2 = (rival.getOption() / 10) % 10;
+								chartOption.doubleoption = rival.getOption() / 100;
+								chartOption.randomoptionseed = rival.getSeed() % (65536 * 256);
+								chartOption.randomoption2seed = rival.getSeed() / (65536 * 256);
+							}
+							break;
+						case RIVALOPTION:
+							if(rival != null) {
+								chartOption = new ReplayData();
+								chartOption.randomoption = rival.getOption() % 10;
+								chartOption.randomoption2 = (rival.getOption() / 10) % 10;
+								chartOption.doubleoption = rival.getOption() / 100;
+							}
+							break;							
+						case REPLAYCHART:
+							// TODO 未実装
+							break;
+						case REPLAYOPTION:
+							// TODO 未実装
+							break;
+						}
+						resource.setChartOption(chartOption);
 						
 						playedsong = song;
 						main.changeState(MainStateType.DECIDE);
@@ -509,6 +541,7 @@ public class MusicSelector extends MainState {
 			}
 			resource.setRankingData(songrank);
 			resource.setRivalScoreData(null);
+			resource.setChartOption(null);
 
 			main.changeState(MainStateType.DECIDE);
 			return true;
@@ -682,5 +715,9 @@ public class MusicSelector extends MainState {
 			final int rankingMax = currentir != null ? Math.max(1, currentir.getTotalPlayer()) : 1;
 			rankingOffset = (int) (rankingMax * value);
 		}
+	}
+
+	public enum ChartReplicationMode {
+		NONE, RIVALCHART, RIVALOPTION, REPLAYCHART, REPLAYOPTION;
 	}
 }

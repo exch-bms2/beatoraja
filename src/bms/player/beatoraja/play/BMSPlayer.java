@@ -97,19 +97,14 @@ public class BMSPlayer extends MainState {
 
 		ReplayData HSReplay = null;
 
-		// TODO ターゲットスコアはPlayerResourceで受け渡す
-		if(resource.getRivalScoreData() == null) {
-		} else {
-			ScoreData rival = resource.getRivalScoreData();
-			if(rival.getSeed() != -1) {
-				playinfo.randomoption = rival.getOption() % 10;
-				playinfo.randomoption2 = (rival.getOption() / 10) % 10;
-				playinfo.doubleoption = rival.getOption() / 100;
-				playinfo.randomoptionseed = rival.getSeed() % (65536 * 256);
-				playinfo.randomoption2seed = rival.getSeed() / (65536 * 256);
-//				main.getMessageRenderer().addMessage("Rival Chart Option Mode - Option : " + playinfo.randomoption + "/" +
-//						playinfo.randomoption2 + "/" + playinfo.doubleoption + " , Seed : " + playinfo.randomoptionseed + "/" + playinfo.randomoption2seed, 3000, Color.GOLD, 0);
-			}
+		if(resource.getChartOption() != null) {
+			ReplayData chartOption = resource.getChartOption();
+			playinfo.randomoption = chartOption.randomoption;
+			playinfo.randomoptionseed = chartOption.randomoptionseed;
+			playinfo.randomoption2 = chartOption.randomoption2;
+			playinfo.randomoption2seed = chartOption.randomoption2seed;
+			playinfo.doubleoption = chartOption.doubleoption;
+			playinfo.rand = chartOption.rand;
 		}
 
 		if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {

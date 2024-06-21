@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.select.MusicSelector.ChartReplicationMode;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -24,7 +25,7 @@ import com.badlogic.gdx.utils.SerializationException;
  *
  * @author exch
  */
-public class PlayerConfig {
+public final class PlayerConfig {
 
 	/**
 	 * 旧コンフィグパス。そのうち削除
@@ -57,6 +58,8 @@ public class PlayerConfig {
 	 * DP用オプション
 	 */
 	private int doubleoption;
+	
+	private ChartReplicationMode chartReplicationMode = ChartReplicationMode.RIVALCHART;
 
 	/**
 	 * スコアターゲット
@@ -1042,5 +1045,13 @@ public class PlayerConfig {
 
 	public void setEventMode(boolean eventMode) {
 		this.eventMode = eventMode;
+	}
+
+	public ChartReplicationMode getChartReplicationMode() {
+		return chartReplicationMode;
+	}
+
+	public void setChartReplicationMode(ChartReplicationMode chartReplicationMode) {
+		this.chartReplicationMode = chartReplicationMode;
 	}
 }
