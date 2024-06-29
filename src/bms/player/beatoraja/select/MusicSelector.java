@@ -266,73 +266,7 @@ public class MusicSelector extends MainState {
 			if (current instanceof SongBar) {
 				SongData song = ((SongBar) current).getSongData();
 				if (((SongBar) current).existsSong()) {
-					resource.clear();
-					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
-						// TODO 重複コード
-						final Queue<DirectoryBar> dir = manager.getDirectory();
-						if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
-							Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
-
-							boolean isdtable = false;
-							for (DirectoryBar bar : dir) {
-								if (bar instanceof TableBar) {
-									String currenturl = ((TableBar) bar).getUrl();
-									if (currenturl != null && urls.contains(currenturl, false)) {
-										isdtable = true;
-										resource.setTablename(bar.getTitle());
-									}
-								}
-								if (bar instanceof HashBar && isdtable) {
-									resource.setTablelevel(bar.getTitle());
-									break;
-								}
-							}
-						}
-						
-						if(main.getIRStatus().length > 0 && currentir == null) {
-							currentir = new RankingData();
-							main.getRankingDataCache().put(song, config.getLnmode(), currentir);
-						}
-						resource.setRankingData(currentir);
-						ScoreData rival = current.getRivalScore();
-						resource.setRivalScoreData(rival);
-						ReplayData chartOption = null;
-						switch(config.getChartReplicationMode()) {
-						case NONE:
-							// TODO 通常オプションもここに入れて渡す？
-							break;
-						case RIVALCHART:
-							if(rival != null) {
-								chartOption = new ReplayData();
-								chartOption.randomoption = rival.getOption() % 10;
-								chartOption.randomoption2 = (rival.getOption() / 10) % 10;
-								chartOption.doubleoption = rival.getOption() / 100;
-								chartOption.randomoptionseed = rival.getSeed() % (65536 * 256);
-								chartOption.randomoption2seed = rival.getSeed() / (65536 * 256);
-							}
-							break;
-						case RIVALOPTION:
-							if(rival != null) {
-								chartOption = new ReplayData();
-								chartOption.randomoption = rival.getOption() % 10;
-								chartOption.randomoption2 = (rival.getOption() / 10) % 10;
-								chartOption.doubleoption = rival.getOption() / 100;
-							}
-							break;							
-						case REPLAYCHART:
-							// TODO 未実装
-							break;
-						case REPLAYOPTION:
-							// TODO 未実装
-							break;
-						}
-						resource.setChartOption(chartOption);
-						
-						playedsong = song;
-						main.changeState(MainStateType.DECIDE);
-					} else {
-						main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
-					}
+					readChart(song, current);					
 				} else if (song.getIpfs() != null && main.getMusicDownloadProcessor() != null
 						&& main.getMusicDownloadProcessor().isAlive()) {
 					execute(MusicSelectCommand.DOWNLOAD_IPFS);
@@ -340,35 +274,7 @@ public class MusicSelector extends MainState {
 	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
 				}
 			} else if (current instanceof ExecutableBar) {
-				SongData song = ((ExecutableBar) current).getSongData();
-				resource.clear();
-				if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
-					// TODO 重複コード
-					final Queue<DirectoryBar> dir = manager.getDirectory();
-					if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
-						Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
-
-						boolean isdtable = false;
-						for (DirectoryBar bar : dir) {
-							if (bar instanceof TableBar) {
-								String currenturl = ((TableBar) bar).getUrl();
-								if (currenturl != null && urls.contains(currenturl, false)) {
-									isdtable = true;
-									resource.setTablename(bar.getTitle());
-								}
-							}
-							if (bar instanceof HashBar && isdtable) {
-								resource.setTablelevel(bar.getTitle());
-								break;
-							}
-						}
-					}
-					
-					playedsong = song;
-					main.changeState(MainStateType.DECIDE);
-				} else {
-					main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
-				}
+				readChart(((ExecutableBar) current).getSongData(), current);					
 			}else if (current instanceof GradeBar) {
 				if (play.mode == BMSPlayerMode.Mode.PRACTICE) {
 					play = BMSPlayerMode.PLAY;
@@ -441,6 +347,76 @@ public class MusicSelector extends MainState {
 		command.function.accept(this);
 	}
 
+	private void readChart(SongData song, Bar current) {
+		resource.clear();
+		if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
+			// TODO 表名、フォルダ名をPlayerResource上でも重複実施している
+			final Queue<DirectoryBar> dir = manager.getDirectory();
+			if(dir.size > 0 && !(dir.last() instanceof SameFolderBar)) {
+				Array<String> urls = new Array<String>(resource.getConfig().getTableURL());
+
+				boolean isdtable = false;
+				for (DirectoryBar bar : dir) {
+					if (bar instanceof TableBar) {
+						String currenturl = ((TableBar) bar).getUrl();
+						if (currenturl != null && urls.contains(currenturl, false)) {
+							isdtable = true;
+							resource.setTablename(bar.getTitle());
+						}
+					}
+					if (bar instanceof HashBar && isdtable) {
+						resource.setTablelevel(bar.getTitle());
+						break;
+					}
+				}
+			}
+			
+			if(main.getIRStatus().length > 0 && currentir == null) {
+				currentir = new RankingData();
+				main.getRankingDataCache().put(song, config.getLnmode(), currentir);
+			}
+			resource.setRankingData(currentir);
+			ScoreData rival = current.getRivalScore();
+			resource.setRivalScoreData(rival);
+			ReplayData chartOption = null;
+			switch(config.getChartReplicationMode()) {
+			case NONE:
+				// TODO 通常オプションもここに入れて渡す？
+				break;
+			case RIVALCHART:
+				if(rival != null) {
+					chartOption = new ReplayData();
+					chartOption.randomoption = rival.getOption() % 10;
+					chartOption.randomoption2 = (rival.getOption() / 10) % 10;
+					chartOption.doubleoption = rival.getOption() / 100;
+					chartOption.randomoptionseed = rival.getSeed() % (65536 * 256);
+					chartOption.randomoption2seed = rival.getSeed() / (65536 * 256);
+				}
+				break;
+			case RIVALOPTION:
+				if(rival != null) {
+					chartOption = new ReplayData();
+					chartOption.randomoption = rival.getOption() % 10;
+					chartOption.randomoption2 = (rival.getOption() / 10) % 10;
+					chartOption.doubleoption = rival.getOption() / 100;
+				}
+				break;							
+			case REPLAYCHART:
+				// TODO 未実装
+				break;
+			case REPLAYOPTION:
+				// TODO 未実装
+				break;
+			}
+			resource.setChartOption(chartOption);
+			
+			playedsong = song;
+			main.changeState(MainStateType.DECIDE);
+		} else {
+			main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
+		}
+	}
+	
 	private void readCourse(BMSPlayerMode mode) {
 		final GradeBar gradeBar = (GradeBar) manager.getSelected();
 		if (!gradeBar.existsAllSongs()) {
