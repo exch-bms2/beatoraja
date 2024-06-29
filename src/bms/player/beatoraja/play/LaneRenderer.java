@@ -332,7 +332,7 @@ public class LaneRenderer {
 
 		// draw section line
 		final double orgy = y;
-		final boolean enableConstant = playconfig.isEnableConstant();
+		final boolean enableConstant = playconfig.isEnableConstant() && (main.getState() != BMSPlayer.STATE_PRACTICE);
 		final int baseduration = playconfig.getDuration();
 		final float alphaLimit =  playconfig.getConstantFadeinTime() * 1000;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
