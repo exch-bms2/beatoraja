@@ -15,6 +15,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 final public class SkinFloat extends SkinObject {
 
+
+	/**
+	 * double値から各桁の配列を返すフォーマッター
+	 */
+	private FloatFormatter ff;
 	/**
 	 * プラス値用イメージ
 	 */
@@ -30,21 +35,21 @@ final public class SkinFloat extends SkinObject {
 	/**
 	 * 整数表示桁数
 	 */
-	private int iketa;
+	public final int iketa;
 	/**
 	 * 小数表示桁数
 	 */
-	private int fketa;
+	public final int fketa;
 	/**
 	 * 符号を表示するか
 	 */
-	private boolean isSignvisible;
+	public final boolean isSignvisible;
 
 	private int keta;
 	/**
 	 * 0:なし 1:表ゼロ 2:裏ゼロ
 	 */
-	private int zeropadding;
+	public final int zeropadding;
 
 	private int space;
 	/**
@@ -111,30 +116,15 @@ final public class SkinFloat extends SkinObject {
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 	}	
 	private SkinFloat(int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space) {
+		this.ff = new FloatFormatter(iketa, fketa, isSignvisible, zeropadding);
 		this.align = align;
 		this.zeropadding = zeropadding;
 		this.space = space;
-		setKeta(iketa, fketa, isSignvisible);	
-	}
-
-	/**
-	 * 以下の3パターン * 符号ありなし + 符号のみ
-	 * 整数部
-	 * 整数部 & 小数点 & 小数部
-	 * 小数点 & 小数部
-	 *  */
-	private void setKeta(int k, int fk, boolean sign) {
-		int keta = sign ? 1 : 0;
-		if(fk == 0) {
-			keta += k;
-		}
-		else {
-			keta += k + fk + 1;
-		}
-		this.keta = keta;
-		this.iketa = k;
-		this.fketa = fk;
-		this.currentImages = new TextureRegion[keta];
+		this.iketa = this.ff.getIketa();
+		this.fketa = this.ff.getFketa();
+		this.keta = this.ff.getketaLength();
+		this.isSignvisible = isSignvisible;
+		this.currentImages = new TextureRegion[this.keta];
 	}
 
 	public void setOffsets(SkinOffset[] offsets) {
@@ -177,64 +167,12 @@ final public class SkinFloat extends SkinObject {
 			this.value = value;
 			this.imageSet = image;
 			shiftbase = 0;
-			int nowketa = 0;
-			// currentImages[]に値設定 数値:0~9 裏ゼロ:10 符号:11 小数点:12
-			// 左詰めで入れていく。ゼロパディングなしなら数値なしはnull
-			// 小数は必ずfketa分表示
-			// iketa==0なら整数部表示なし
-			// 
-			value = Math.abs(value);
-			// 符号の表示
-			if (isSignvisible) {
-				currentImages[nowketa] = image[11];
-				nowketa++;
-			}
-			// 整数部の表示
-			if (iketa != 0) {
-				// 表示桁数baseの算出
-				int ivalue = (int) value;
-				int base;
-				if (zeropadding == 0) {
-					if (ivalue == 0) {
-						base = 1;
-					} else {
-						base = Math.min(iketa, (int)Math.log10(ivalue) + 1);
-					}
-				} else {
-					base = iketa;
+			int[] digits = ff.calcuateAndGetDigits(Math.abs(value));
+			for (int nowketa = 1; nowketa < digits.length; nowketa++) {
+				currentImages[nowketa - 1] = (digits[nowketa] != -1) ? image[digits[nowketa]] : null;
+				if (digits[nowketa] == -1) {
+					shiftbase++;
 				}
-
-				// 整数部を一の位から割当
-				int j = 1;
-				do {
-					currentImages[nowketa + base - j] = image[ivalue % 10];
-					ivalue /= 10;
-					j++;
-				} while (ivalue > 0 && base >= j);
-				
-				// ゼロ埋め
-				if (zeropadding != 0) {
-					while(base >= j) {
-						currentImages[nowketa + base - j] = image[(zeropadding == 1 ? 0 : 10)];
-						j++;
-					}
-				}
-				
-				nowketa += base;
-			}
-			// 小数点の表示
-			if (fketa != 0) {
-				currentImages[nowketa] = image[11];
-				nowketa++;
-			}
-			// 小数部の表示
-			double fvalue = value - ((long) value);
-			for (int j = 0; j < fketa; j++) {
-				fvalue *= 10;
-				int num = (int) fvalue;
-				currentImages[nowketa] = image[num];
-				fvalue -= num;
-				nowketa++;
 			}
 
 		}
