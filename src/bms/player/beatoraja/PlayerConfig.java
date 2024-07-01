@@ -221,6 +221,10 @@ public final class PlayerConfig {
 	 * 選択中の選曲時ソート
 	 */
 	private int sort;
+	/**
+	 * 選択中の選曲時ソート
+	 */
+	private String sortid;
 
 	/**
 	 * 選曲時でのキー入力方式
@@ -499,6 +503,15 @@ public final class PlayerConfig {
 	public void setSort(int sort) {
 		this.sort = sort;
 	}
+
+	public String getSortid() {
+		return sortid;
+	}
+
+	public void setSortid(String sortid) {
+		this.sortid = sortid;
+	}
+
 
 	public int getMusicselectinput() {
 		return musicselectinput;
@@ -818,8 +831,11 @@ public final class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
+
 		sort = MathUtils.clamp(sort, 0 , BarSorter.defaultSorter.length - 1);
+		if(sortid == null) {
+			sortid = BarSorter.defaultSorter[sort].name();
+		}
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
 		random = MathUtils.clamp(random, 0, 9);

@@ -5,11 +5,7 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.FOLDER_CLOSE;
 import java.io.BufferedInputStream;
 import java.lang.reflect.Method;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -46,19 +42,19 @@ public class BarManager {
 	/**
 	 * 難易度表バー一覧
 	 */
-	TableBar[] tables = new TableBar[0];
+	private TableBar[] tables = new TableBar[0];
 
-	Bar[] commands;
+	private Bar[] commands;
 	
-	TableBar courses;
+	private TableBar courses;
 
-	HashBar[] favorites = new HashBar[0];
+	private HashBar[] favorites = new HashBar[0];
 
 	/**
 	 * 現在のフォルダ階層
 	 */
-	Queue<DirectoryBar> dir = new Queue<>();
-	String dirString = "";
+	private final Queue<DirectoryBar> dir = new Queue<>();
+	private String dirString = "";
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -71,21 +67,21 @@ public class BarManager {
 	/**
 	 * 各階層のフォルダを開く元となったバー
 	 */
-	final Queue<Bar> sourcebars = new Queue<>();
+	private final Queue<Bar> sourcebars = new Queue<>();
 
 	// jsonで定義したrandom bar (folder)
-	List<RandomFolder> randomFolderList;
+	private List<RandomFolder> randomFolderList;
 
 	// システム側で挿入されるルートフォルダ
-	HashMap<String, Bar> appendFolders = new HashMap<String, Bar>();
+	private final HashMap<String, Bar> appendFolders = new HashMap<String, Bar>();
 	/**
 	 * 検索結果バー一覧
 	 */
-	Array<SearchWordBar> search = new Array<SearchWordBar>();
+	private final Array<SearchWordBar> search = new Array<SearchWordBar>();
 	/**
 	 * ランダムコース結果バー一覧
 	 */
-	Array<RandomCourseResult> randomCourseResult = new Array<>();
+	private final Array<RandomCourseResult> randomCourseResult = new Array<>();
 
 	BarContentsLoaderThread loader;
 
@@ -97,7 +93,7 @@ public class BarManager {
 		TableDataAccessor tdaccessor = new TableDataAccessor(select.resource.getConfig().getTablepath());
 
 		TableData[] unsortedtables = tdaccessor.readAll();
-		List<TableData> sortedtables = new ArrayList<TableData>(unsortedtables.length);
+		final List<TableData> sortedtables = new ArrayList<TableData>(unsortedtables.length);
 		
 		for(String url : select.resource.getConfig().getTableURL()) {
 			for(int i = 0;i < unsortedtables.length;i++) {
@@ -109,13 +105,8 @@ public class BarManager {
 				}
 			}
 		}
-		
-		
-		for(TableData td : unsortedtables) {
-			if(td != null) {
-				sortedtables.add(td);
-			}
-		}
+
+		Arrays.stream(unsortedtables).filter(Objects::nonNull).forEach(td -> sortedtables.add(td));
 
 		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(select.resource.getConfig().getTablepath());
 
@@ -380,7 +371,8 @@ public class BarManager {
 			}
 
 			if(isSortable) {
-			    Sort.instance().sort(newcurrentsongs, BarSorter.defaultSorter[select.getSort()].sorter);
+				final BarSorter sorter = BarSorter.valueOf(select.main.getPlayerConfig().getSortid());
+			    Sort.instance().sort(newcurrentsongs, sorter != null ? sorter.sorter : BarSorter.TITLE.sorter);
 			}
 
 			Array<Bar> bars = new Array<Bar>();

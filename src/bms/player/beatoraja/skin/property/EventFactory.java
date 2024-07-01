@@ -94,6 +94,22 @@ public class EventFactory {
 			}
 		}),
 		/**
+		 * 選曲バーソート(曲名,  クリアランプ, ...)変更
+		 */
+		songbar_sort(312, (state, arg1) -> {
+			if(state instanceof MusicSelector) {
+				final MusicSelector selector = (MusicSelector) state;
+				for(int index = 0;index < BarSorter.allSorter.length;index++) {
+					if(BarSorter.allSorter[index].name().equals(selector.main.getPlayerConfig().getSortid())) {
+						selector.main.getPlayerConfig().setSortid(BarSorter.allSorter[(selector.getSort() + (arg1 >= 0 ? 1 : BarSorter.allSorter.length - 1)) % BarSorter.allSorter.length].name());
+						selector.getBarManager().updateBar();
+						selector.play(OPTION_CHANGE);
+						return;
+					}
+				}
+			}
+		}),
+		/**
 		 * キーコンフィグへ遷移
 		 */
 		keyconfig(13, (state) -> {

@@ -531,6 +531,7 @@ public class MusicSelector extends MainState {
 
 	public void setSort(int sort) {
 		config.setSort(sort);
+		config.setSortid(BarSorter.defaultSorter[sort].name());
 	}
 
 	public void dispose() {

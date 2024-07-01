@@ -113,11 +113,11 @@ public enum BarSorter {
 		}
 
 		//levelが同じ場合はDifficultyでソート
-		int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
-		if(revelSort==0){
-			return ((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty();
+		final int levelSort = ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+		if(levelSort == 0){
+			return ((SongBar)o1).getSongData().getDifficulty() - ((SongBar)o2).getSongData().getDifficulty();
 		}else{
-			return revelSort;
+			return levelSort;
 		}
 	}),
 	/**
@@ -255,6 +255,8 @@ public enum BarSorter {
 	;
 	
 	public static final BarSorter[] defaultSorter = {TITLE, ARTIST, BPM, LENGTH, LEVEL, CLEAR, SCORE, MISSCOUNT};
+
+	public static final BarSorter[] allSorter = BarSorter.values();
 
 	/**
 	 * ソート名称
