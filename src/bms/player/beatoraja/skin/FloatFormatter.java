@@ -12,8 +12,8 @@ public final class FloatFormatter {
     private final int[] digits;
     private int base;
 
-    private final int SIGNSYMBOL = 11;
-    private final int DECIMALPOINT = 12;
+    private final int SIGNSYMBOL = 12;
+    private final int DECIMALPOINT = 11;
     private final int REVERSEZERO = 10;
 
     public int getIketa() {
