@@ -527,6 +527,8 @@ public class SkinProperty {
 	public static final int NUMBER_RANDOM_2P_7KEY = 466;
 	public static final int NUMBER_RANDOM_2P_SCR = 469;
 
+	public static final int FLOAT_GROOVEGAUGE = 107;
+	public static final int FLOAT_AVERAGE_DENSITY = 364;
 	
 	public static final int VALUE_JUDGE_1P_DURATION = 525;
 	public static final int VALUE_JUDGE_2P_DURATION = 526;

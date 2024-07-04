@@ -171,6 +171,219 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				return obj;
 			}
 		}
+
+		for (JsonSkin.FloatValue fv : sk.floatvalue) {
+			if (dst.id.equals(fv.id)) {
+				Texture tex = getTexture(fv.src, p);
+				TextureRegion[] images = getSourceImage(tex, fv.x, fv.y, fv.w, fv.h, fv.divx, fv.divy);
+				// 26の倍数:符号あり、+-別image
+				// 24の倍数:符号なし、+-別image
+				// 22の倍数:符号なし、+-別image、裏ゼロ共有
+				// 12の倍数:符号なし、+-同image
+				// 11の倍数:符号なし、+-同image、裏ゼロ共有
+				// それ以外:12の倍数として処理
+				if (images.length % 26 == 0) {
+					TextureRegion[][] pn = new TextureRegion[images.length / 26][];
+					TextureRegion[][] mn = new TextureRegion[images.length / 26][];
+
+					for (int j = 0; j < pn.length; j++) {
+						pn[j] = new TextureRegion[13];
+						mn[j] = new TextureRegion[13];
+
+						for (int i = 0; i < 13; i++) {
+							pn[j][i] = images[j * 26 + i];
+							mn[j][i] = images[j * 26 + i + 13];
+						}
+					}
+
+					SkinFloat fnum = null;
+					if(fv.value != null) {
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, fv.isSignvisible, fv.align, fv.zeropadding, fv.space, fv.value);
+					} else {
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, fv.isSignvisible, fv.align, fv.zeropadding, fv.space, fv.ref);
+					}
+
+					if(fv.offset != null) {
+						SkinOffset[] offsets = new SkinOffset[fv.offset.length];
+						for(int i = 0;i < offsets.length;i++) {
+							offsets[i] = new SkinOffset();
+							offsets[i].x = fv.offset[i].x;
+							offsets[i].y = fv.offset[i].y;
+							offsets[i].w = fv.offset[i].w;
+							offsets[i].h = fv.offset[i].h;
+						}
+						fnum.setOffsets(offsets);
+					}
+					obj = fnum;
+				}
+				else if (images.length % 24 == 0) {
+					TextureRegion[][] pn = new TextureRegion[images.length / 24][];
+					TextureRegion[][] mn = new TextureRegion[images.length / 24][];
+
+					for (int j = 0; j < pn.length; j++) {
+						pn[j] = new TextureRegion[12];
+						mn[j] = new TextureRegion[12];
+
+						for (int i = 0; i < 12; i++) {
+							pn[j][i] = images[j * 24 + i];
+							mn[j][i] = images[j * 24 + i + 12];
+						}
+					}
+
+					SkinFloat fnum = null;
+					if(fv.value != null) {
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+					} else {
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+					}
+
+					if(fv.offset != null) {
+						SkinOffset[] offsets = new SkinOffset[fv.offset.length];
+						for(int i = 0;i < offsets.length;i++) {
+							offsets[i] = new SkinOffset();
+							offsets[i].x = fv.offset[i].x;
+							offsets[i].y = fv.offset[i].y;
+							offsets[i].w = fv.offset[i].w;
+							offsets[i].h = fv.offset[i].h;
+						}
+						fnum.setOffsets(offsets);
+					}
+					obj = fnum;
+				}
+				else if (images.length % 22 == 0) {
+					TextureRegion[][] pn = new TextureRegion[images.length / 22][];
+					TextureRegion[][] mn = new TextureRegion[images.length / 22][];
+
+					for (int j = 0; j < pn.length; j++) {
+						pn[j] = new TextureRegion[12];
+						mn[j] = new TextureRegion[12];
+						for (int i = 0; i < 10; i++) {
+							pn[j][i] = images[j * 22 + i];
+							mn[j][i] = images[j * 22 + i + 11];
+						}
+						pn[j][10] = images[j * 22 + 0]; // +裏ゼロ共有
+						pn[j][11] = images[j * 22 + 10];// +小数点
+						mn[j][10] = images[j * 22 + 11];// -裏
+						mn[j][11] = images[j * 22 + 21];// -小
+					}
+
+					SkinFloat fnum = null;
+					if(fv.value != null) {
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+					} else {
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+					}
+
+					if(fv.offset != null) {
+						SkinOffset[] offsets = new SkinOffset[fv.offset.length];
+						for(int i = 0;i < offsets.length;i++) {
+							offsets[i] = new SkinOffset();
+							offsets[i].x = fv.offset[i].x;
+							offsets[i].y = fv.offset[i].y;
+							offsets[i].w = fv.offset[i].w;
+							offsets[i].h = fv.offset[i].h;
+						}
+						fnum.setOffsets(offsets);
+					}
+					obj = fnum;
+				}
+				else if (images.length % 12 == 0) {
+					TextureRegion[][] nimage = new TextureRegion[images.length / 12][];
+
+					for (int j = 0; j < nimage.length; j++) {
+						nimage[j] = new TextureRegion[12];
+						for (int i = 0; i < 12; i++) {
+							nimage[j][i] = images[j * 12 + i];
+						}
+					}
+
+					SkinFloat fnum = null;
+					if(fv.value != null) {
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+					} else {
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+					}
+
+					if(fv.offset != null) {
+						SkinOffset[] offsets = new SkinOffset[fv.offset.length];
+						for(int i = 0;i < offsets.length;i++) {
+							offsets[i] = new SkinOffset();
+							offsets[i].x = fv.offset[i].x;
+							offsets[i].y = fv.offset[i].y;
+							offsets[i].w = fv.offset[i].w;
+							offsets[i].h = fv.offset[i].h;
+						}
+						fnum.setOffsets(offsets);
+					}
+					obj = fnum;
+				}
+				else if (images.length % 11 == 0) {
+					TextureRegion[][] nimage = new TextureRegion[images.length / 11][];
+
+					for (int j = 0; j < nimage.length; j++) {
+						nimage[j] = new TextureRegion[12];
+						for (int i = 0; i < 10; i++) {
+							nimage[j][i] = images[j * 11 + i];
+						}
+						nimage[j][10] = images[j * 11 + 0]; // 裏ゼロ共有
+						nimage[j][11] = images[j * 11 + 10];// 小数点
+					}
+
+					SkinFloat fnum = null;
+					if(fv.value != null) {
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+					} else {
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+					}
+
+					if(fv.offset != null) {
+						SkinOffset[] offsets = new SkinOffset[fv.offset.length];
+						for(int i = 0;i < offsets.length;i++) {
+							offsets[i] = new SkinOffset();
+							offsets[i].x = fv.offset[i].x;
+							offsets[i].y = fv.offset[i].y;
+							offsets[i].w = fv.offset[i].w;
+							offsets[i].h = fv.offset[i].h;
+						}
+						fnum.setOffsets(offsets);
+					}
+					obj = fnum;
+				}
+				else { // 12で割り切れるものとして処理する
+					final int d = 12;
+
+					TextureRegion[][] nimages = new TextureRegion[fv.divx * fv.divy / d][d];
+					for (int i = 0; i < d; i++) {
+						for (int j = 0; j < fv.divx * fv.divy / d; j++) {
+							nimages[j][i] = images[j * d + i];
+						}
+					}
+
+					SkinFloat fnum = null;
+					if(fv.value != null) {
+						fnum = new SkinFloat(nimages, fv.timer, fv.cycle, fv.iketa, fv.fketa,
+								false, fv.align, fv.zeropadding, fv.space, fv.value);
+					} else {
+						fnum = new SkinFloat(nimages, fv.timer, fv.cycle, fv.iketa, fv.fketa,
+								false, fv.align, fv.zeropadding, fv.space, fv.ref);
+					}
+					if(fv.offset != null) {
+						SkinOffset[] offsets = new SkinOffset[fv.offset.length];
+						for(int i = 0;i < offsets.length;i++) {
+							offsets[i] = new SkinOffset();
+							offsets[i].x = fv.offset[i].x;
+							offsets[i].y = fv.offset[i].y;
+							offsets[i].w = fv.offset[i].w;
+							offsets[i].h = fv.offset[i].h;
+						}
+						fnum.setOffsets(offsets);
+					}
+					obj = fnum;
+				}
+				return obj;
+			}
+		}
+		
 		// text
 		for (JsonSkin.Text text : sk.text) {
 			if (dst.id.equals(text.id)) {

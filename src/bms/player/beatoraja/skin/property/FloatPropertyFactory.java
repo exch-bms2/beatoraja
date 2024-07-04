@@ -298,6 +298,13 @@ public class FloatPropertyFactory {
 				return state.resource.getGauge()[gaugeType].get(state.resource.getGauge()[gaugeType].size - 1);
 			}
 			return Float.MIN_VALUE;
+		}),
+		chart_averagedensity(367, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getDensity();
+			}
+			return Float.MIN_VALUE;
 		});
 		
 		private final int id;
