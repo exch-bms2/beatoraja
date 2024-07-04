@@ -190,9 +190,9 @@ public final class SkinNumber extends SkinObject {
 		for (int j = 0; j < currentImages.length; j++) {
 			if (currentImages[j] != null) {
 				if(offsets != null && j < offsets.length) {
-					draw(sprite, currentImages[j], region.x + (region.width + space) * j + shift + offsets[j].x, region.y + offsets[j].y, region.width + offsets[j].w, region.height + offsets[j].h);
+					draw(sprite, currentImages[j], region.x + (region.width + space) * j - shift + offsets[j].x, region.y + offsets[j].y, region.width + offsets[j].w, region.height + offsets[j].h);
 				} else {
-					draw(sprite, currentImages[j], region.x + (region.width + space) * j + shift, region.y, region.width, region.height);
+					draw(sprite, currentImages[j], region.x + (region.width + space) * j - shift, region.y, region.width, region.height);
 				}
 			}
 		}
