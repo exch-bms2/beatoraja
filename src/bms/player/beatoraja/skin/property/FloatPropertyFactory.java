@@ -306,6 +306,7 @@ public class FloatPropertyFactory {
 			}
 		}),
 		score_rate2(155, FloatType.total_rate.property),
+		
 		hispeed(310, (state) -> {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getLanerender().getHispeed();
