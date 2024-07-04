@@ -44,6 +44,10 @@ final public class SkinFloat extends SkinObject {
 	 * 符号を表示するか
 	 */
 	public final boolean isSignvisible;
+	/**
+	 * 値の倍数
+	 */
+	public final float gain;
 
 	private int keta;
 	/**
@@ -77,51 +81,52 @@ final public class SkinFloat extends SkinObject {
 	 * TimerとValueがidとProperty
 	 * 8パターン
 	 *  */
-	public SkinFloat(TextureRegion[][] image, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id) {
-		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, id);
+	public SkinFloat(TextureRegion[][] image, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id, float gain) {
+		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, id, gain);
 	}
-	public SkinFloat(TextureRegion[][] image, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id) {
-		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, id);
+	public SkinFloat(TextureRegion[][] image, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id, float gain) {
+		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, id, gain);
 	}
-	public SkinFloat(TextureRegion[][] image, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref) {
-		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, ref);
+	public SkinFloat(TextureRegion[][] image, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref, float gain) {
+		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, ref, gain);
 	}
-	public SkinFloat(TextureRegion[][] image, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref) {
-		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, ref);
+	public SkinFloat(TextureRegion[][] image, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref, float gain) {
+		this(image, null, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, ref, gain);
 	}
-	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id) {
-		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space);
+	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id, float gain) {
+		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, gain);
 		this.ref = FloatPropertyFactory.getFloatProperty(id);
 	}
-	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id) {
-		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space);
+	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, int id, float gain) {
+		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, gain);
 		this.ref = FloatPropertyFactory.getFloatProperty(id);
 	}
-	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref) {
-		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space);
+	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref, float gain) {
+		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, gain);
 		this.ref = ref;
 	}
-	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref) {
-		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space);
+	public SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, FloatProperty ref, float gain) {
+		this(image, mimage, timer, cycle, iketa, fketa, isSignvisible, align, zeropadding, space, gain);
 		this.ref = ref;
 	}
-	private SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space) {
-		this(iketa, fketa, isSignvisible, align, zeropadding, space);
+	private SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, float gain) {
+		this(iketa, fketa, isSignvisible, align, zeropadding, space, gain);
 		this.image = new SkinSourceImageSet(image, timer, cycle);
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 	}
-	private SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space) {
-		this(iketa, fketa, isSignvisible, align, zeropadding, space);
+	private SkinFloat(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, float gain) {
+		this(iketa, fketa, isSignvisible, align, zeropadding, space, gain);
 		this.image = new SkinSourceImageSet(image, timer, cycle);
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
 	}	
-	private SkinFloat(int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space) {
+	private SkinFloat(int iketa, int fketa, boolean isSignvisible, int align, int zeropadding, int space, float gain) {
 		this.ff = new FloatFormatter(iketa, fketa, isSignvisible, zeropadding);
 		this.align = align;
 		this.zeropadding = zeropadding;
 		this.space = space;
 		this.iketa = this.ff.getIketa();
 		this.fketa = this.ff.getFketa();
+		this.gain = gain;
 		this.keta = this.ff.getketaLength();
 		this.isSignvisible = isSignvisible;
 		this.currentImages = new TextureRegion[this.keta];
@@ -140,12 +145,13 @@ final public class SkinFloat extends SkinObject {
 	}
 
 	public void prepare(long time, MainState state, float value, float offsetX, float offsetY) {
-		if (value == Float.MIN_VALUE || value == Float.MAX_VALUE || this.keta == 0) {
+		var v = value * gain;
+		if (v == Float.MIN_VALUE || v == Float.MAX_VALUE || this.keta == 0) {
 			length = 0;
 			draw = false;
 			return;
 		}
-		final SkinSourceSet images = (mimage == null || value >= 0.0f) ? this.image : mimage;
+		final SkinSourceSet images = (mimage == null || v >= 0.0f) ? this.image : mimage;
 		if (images == null) {
 			length = 0;
 			draw = false;
@@ -163,11 +169,11 @@ final public class SkinFloat extends SkinObject {
 			return;
 		}
 
-		if(this.value != value || this.imageSet != image) {
-			this.value = value;
+		if(this.value != v || this.imageSet != image) {
+			this.value = v;
 			this.imageSet = image;
 			shiftbase = 0;
-			int[] digits = ff.calcuateAndGetDigits(Math.abs(value));
+			int[] digits = ff.calcuateAndGetDigits(Math.abs(v));
 			for (int nowketa = 1; nowketa < digits.length; nowketa++) {
 				currentImages[nowketa - 1] = (digits[nowketa] != -1) ? image[digits[nowketa]] : null;
 				if (digits[nowketa] == -1) {
@@ -192,7 +198,7 @@ final public class SkinFloat extends SkinObject {
 		}
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state, float offsetX, float offsetY) {
+	public void draw(SkinObjectRenderer sprite, long time, float value, MainState state, float offsetX, float offsetY) {
 		prepare(time, state, value, offsetX,offsetY);
 		if(draw) {
 			draw(sprite);

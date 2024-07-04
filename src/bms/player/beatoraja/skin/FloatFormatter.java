@@ -40,6 +40,9 @@ public final class FloatFormatter {
         return length;
     }
 
+    // public FloatFormatter(int iketa, int fketa, boolean sign, int zeropadding) {
+    //     this(iketa, fketa, sign, zeropadding, 1.0f);
+    // }
     public FloatFormatter(int iketa, int fketa, boolean sign, int zeropadding) {
         int tempiketa = (iketa >= 0) ? iketa : 0;
         int tempfketa = (fketa >= 0) ? fketa : 0;

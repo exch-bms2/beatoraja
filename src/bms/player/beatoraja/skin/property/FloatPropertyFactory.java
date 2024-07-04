@@ -305,8 +305,11 @@ public class FloatPropertyFactory {
 				return Float.MIN_VALUE;
 			}
 		}),
+		// best_rate(183)
+		// target_rate(121,151,271)
+		// 
 		score_rate2(155, FloatType.total_rate.property),
-		
+
 		hispeed(310, (state) -> {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getLanerender().getHispeed();
