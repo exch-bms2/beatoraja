@@ -2,6 +2,8 @@ package bms.player.beatoraja.skin.property;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.util.Optional;
+
 import bms.player.beatoraja.BMSResource;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.PlayConfig;
@@ -289,6 +291,33 @@ public class FloatPropertyFactory {
 	
 	public enum FloatType {
 
+		score_rate(102, (state) -> {
+			if (state.getScoreDataProperty().getScoreData() != null) {
+				return state.getScoreDataProperty().getNowRate();
+			} else {
+				return Float.MIN_VALUE;
+			}
+		}),
+		total_rate(115, (state) -> {
+			if (state.getScoreDataProperty().getScoreData() != null) {
+				return state.getScoreDataProperty().getRate();
+			} else {
+				return Float.MIN_VALUE;
+			}
+		}),
+		score_rate2(155, FloatType.total_rate.property),
+		hispeed(310, (state) -> {
+			if (state instanceof BMSPlayer) {
+				return ((BMSPlayer) state).getLanerender().getHispeed();
+			} else if (state.main.getPlayerResource().getSongdata() != null) {
+				var song = state.main.getPlayerResource().getSongdata();
+				var pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
+						.getPlayconfig();
+				return pc.getHispeed();
+			}
+			return Float.MIN_VALUE;
+		}),
+		// 
 		groovegauge_1p(107, (state) -> {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getGauge().getValue();
