@@ -2,8 +2,6 @@ package bms.player.beatoraja.skin.property;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.util.Optional;
-
 import bms.player.beatoraja.BMSResource;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.PlayConfig;
@@ -25,6 +23,13 @@ public class FloatPropertyFactory {
 	
 	private static RateType[] RateTypeValues = RateType.values();
 	private static FloatType[] FloatTypeValues = FloatType.values();
+
+	private static final int PG = 0;
+	private static final int GR = 1;
+	private static final int GD = 2;
+	private static final int BD = 3;
+	private static final int PR = 4;
+	private static final int MS = 5;
 
 	/**
 	 * RateType IDに対応するFloatPropertyを返す
@@ -305,10 +310,85 @@ public class FloatPropertyFactory {
 				return Float.MIN_VALUE;
 			}
 		}),
-		// best_rate(183)
-		// target_rate(121,151,271)
-		// 
 		score_rate2(155, FloatType.total_rate.property),
+		// average_duration(372)
+		// average_timing(374)
+		// stddev_timing(376)
+		// 
+		perfect_rate(85, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PG) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		great_rate(86, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		good_rate(87, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		bad_rate(88, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(BD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		poor_rate(89, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_perfect_rate(285, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PG) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_great_rate(286, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_good_rate(287, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_bad_rate(288, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(BD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_poor_rate(289, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		best_rate(183, state -> state.getScoreDataProperty().getBestScoreRate()),
+		rival_rate(122, state -> state.getScoreDataProperty().getRivalScoreRate()),
+		target_rate(135, FloatType.rival_rate.property),
+		target_rate2(157, FloatType.rival_rate.property),
 
 		hispeed(310, (state) -> {
 			if (state instanceof BMSPlayer) {
@@ -321,7 +401,6 @@ public class FloatPropertyFactory {
 			}
 			return Float.MIN_VALUE;
 		}),
-		// 
 		groovegauge_1p(107, (state) -> {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getGauge().getValue();
