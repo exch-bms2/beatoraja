@@ -29,7 +29,6 @@ public class FloatPropertyFactory {
 	private static final int GD = 2;
 	private static final int BD = 3;
 	private static final int PR = 4;
-	private static final int MS = 5;
 
 	/**
 	 * RateType IDに対応するFloatPropertyを返す
@@ -103,6 +102,11 @@ public class FloatPropertyFactory {
 				return t.property;
 			}
 		}
+		for(RateType r : RateTypeValues) {
+			if(r.id == optionid) {
+				return r.property;
+			}
+		}
 		return null;
 	}
 
@@ -116,6 +120,11 @@ public class FloatPropertyFactory {
 		for(FloatType t : FloatTypeValues) {
 			if(t.name().equals(name)) {
 				return t.property;
+			}
+		}
+		for(RateType r : RateTypeValues) {
+			if(r.name().equals(name)) {
+				return r.property;
 			}
 		}
 		return null;
@@ -296,14 +305,14 @@ public class FloatPropertyFactory {
 	
 	public enum FloatType {
 
-		score_rate(102, (state) -> {
+		score_rate(1102, (state) -> {
 			if (state.getScoreDataProperty().getScoreData() != null) {
 				return state.getScoreDataProperty().getNowRate();
 			} else {
 				return Float.MIN_VALUE;
 			}
 		}),
-		total_rate(115, (state) -> {
+		total_rate(1115, (state) -> {
 			if (state.getScoreDataProperty().getScoreData() != null) {
 				return state.getScoreDataProperty().getRate();
 			} else {
@@ -314,7 +323,6 @@ public class FloatPropertyFactory {
 		// average_duration(372)
 		// average_timing(374)
 		// stddev_timing(376)
-		// 
 		perfect_rate(85, (state) -> {
 			final var score = state.getScoreDataProperty().getScoreData();
 			if (score != null && score.getNotes() > 0) {
@@ -401,7 +409,7 @@ public class FloatPropertyFactory {
 			}
 			return Float.MIN_VALUE;
 		}),
-		groovegauge_1p(107, (state) -> {
+		groovegauge_1p(1107, (state) -> {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getGauge().getValue();
 			}
@@ -418,7 +426,7 @@ public class FloatPropertyFactory {
 			}
 			return Float.MIN_VALUE;
 		});
-		
+
 		private final int id;
 		private final FloatProperty property;
 

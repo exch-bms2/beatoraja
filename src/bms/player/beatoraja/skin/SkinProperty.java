@@ -527,8 +527,26 @@ public class SkinProperty {
 	public static final int NUMBER_RANDOM_2P_7KEY = 466;
 	public static final int NUMBER_RANDOM_2P_SCR = 469;
 
-	public static final int FLOAT_GROOVEGAUGE = 107;
-	public static final int FLOAT_AVERAGE_DENSITY = 364;
+	public static final int FLOAT_SCORE_RATE = 1102;
+	public static final int FLOAT_TOTAL_RATE = 1115;
+	public static final int FLOAT_SCORE_RATE2 = 155;
+	public static final int FLOAT_PERFECT_RATE = 85;
+	public static final int FLOAT_GREAT_RATE = 86;
+	public static final int FLOAT_GOOD_RATE = 87;
+	public static final int FLOAT_BAD_RATE = 88;
+	public static final int FLOAT_POOR_RATE = 89;
+	public static final int FLOAT_RIVAL_PERFECT_RATE = 285;
+	public static final int FLOAT_RIVAL_GREAT_RATE = 286;
+	public static final int FLOAT_RIVAL_GOOD_RATE = 287;
+	public static final int FLOAT_RIVAL_BAD_RATE = 288;
+	public static final int FLOAT_RIVAL_POOR_RATE = 289;
+	public static final int FLOAT_BEST_RATE = 183;
+	public static final int FLOAT_RIVAL_RATE = 122;
+	public static final int FLOAT_TARGET_RATE = 135;
+	public static final int FLOAT_TARGET_RATE2 = 157;
+	public static final int FLOAT_HISPEED = 310;
+	public static final int FLOAT_GROOVEGAUGE = 1107;
+	public static final int FLOAT_AVERAGE_DENSITY = 367;
 	
 	public static final int VALUE_JUDGE_1P_DURATION = 525;
 	public static final int VALUE_JUDGE_2P_DURATION = 526;
