@@ -146,7 +146,7 @@ final public class SkinFloat extends SkinObject {
 
 	public void prepare(long time, MainState state, float value, float offsetX, float offsetY) {
 		var v = value * gain;
-		if (Float.isInfinite(v) || Float.isNaN(v) || v == Float.MIN_VALUE || v == Float.MAX_VALUE || this.keta == 0) {
+		if (value == Float.MIN_VALUE || value == Float.MAX_VALUE || Float.isInfinite(v) || Float.isNaN(v) || v == Float.MIN_VALUE || v == Float.MAX_VALUE || this.keta == 0) {
 			length = 0;
 			draw = false;
 			return;
