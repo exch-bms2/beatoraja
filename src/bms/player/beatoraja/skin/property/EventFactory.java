@@ -101,7 +101,7 @@ public class EventFactory {
 				final MusicSelector selector = (MusicSelector) state;
 				for(int index = 0;index < BarSorter.allSorter.length;index++) {
 					if(BarSorter.allSorter[index].name().equals(selector.main.getPlayerConfig().getSortid())) {
-						selector.main.getPlayerConfig().setSortid(BarSorter.allSorter[(selector.getSort() + (arg1 >= 0 ? 1 : BarSorter.allSorter.length - 1)) % BarSorter.allSorter.length].name());
+						selector.main.getPlayerConfig().setSortid(BarSorter.allSorter[(index + (arg1 >= 0 ? 1 : BarSorter.allSorter.length - 1)) % BarSorter.allSorter.length].name());
 						selector.getBarManager().updateBar();
 						selector.play(OPTION_CHANGE);
 						return;
