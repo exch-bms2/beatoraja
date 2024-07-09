@@ -6,6 +6,7 @@ import bms.player.beatoraja.BMSResource;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.config.SkinConfiguration;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
@@ -320,9 +321,25 @@ public class FloatPropertyFactory {
 			}
 		}),
 		score_rate2(155, FloatType.total_rate.property),
-		// average_duration(372)
-		// average_timing(374)
-		// stddev_timing(376)
+
+		duration_average(372, (state) ->{
+			if (state instanceof AbstractResult) {
+				return ((AbstractResult) state).getAverageDuration() / 1000.0f;
+			}
+			return Float.MIN_VALUE;
+		}),
+		timing_average(374, (state) ->{
+			if (state instanceof AbstractResult) {
+				return ((AbstractResult) state).getTimingDistribution().getArrayCenter() / 1000.0f;
+			}
+			return Float.MIN_VALUE;
+		}),
+		timign_stddev(376, (state) ->{
+			if (state instanceof AbstractResult) {
+				return ((AbstractResult) state).getTimingDistribution().getStdDev();
+			}
+			return Float.MIN_VALUE;
+		}),
 		perfect_rate(85, (state) -> {
 			final var score = state.getScoreDataProperty().getScoreData();
 			if (score != null && score.getNotes() > 0) {
@@ -425,7 +442,41 @@ public class FloatPropertyFactory {
 				return (float) song.getInformation().getDensity();
 			}
 			return Float.MIN_VALUE;
-		});
+		}),
+		chart_enddensity(362, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getEnddensity();
+			}
+			return Float.MIN_VALUE;
+		}),
+		chart_peakdensity(360, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getPeakdensity();
+			}
+			return Float.MIN_VALUE;
+		}),
+		chart_totalgauge(368, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getTotal();
+			}
+			return Float.MIN_VALUE;
+		}),
+		ir_totalclearrate(227, createIRTotalClearRateProperty(new int[]{2,3,4,5,6,7,8,9,10})),
+		ir_totalfullcomborate(229,createIRTotalClearRateProperty(new int[]{8,9,10})),
+		ir_player_noplay_rate(203, createIRClearRateProperty(0)),
+		ir_player_failed_rate(211, createIRClearRateProperty(1)),
+		ir_player_assist_rate(205, createIRClearRateProperty(2)),
+		ir_player_lightassist_rate(207, createIRClearRateProperty(3)),
+		ir_player_easy_rate(213, createIRClearRateProperty(4)),
+		ir_player_normal_rate(215, createIRClearRateProperty(5)),
+		ir_player_hard_rate(217, createIRClearRateProperty(6)),
+		ir_player_exhard_rate(209, createIRClearRateProperty(7)),
+		ir_player_fullcombo_rate(219, createIRClearRateProperty(8)),
+		ir_player_perfect_rate(223, createIRClearRateProperty(9)),
+		ir_player_max_rate(225, createIRClearRateProperty(10));
 
 		private final int id;
 		private final FloatProperty property;
@@ -435,6 +486,41 @@ public class FloatPropertyFactory {
 			this.property = property;
 		}
 
+	}
+
+	private static FloatProperty createIRClearRateProperty(int clearType) {
+		return (state) -> {
+			RankingData irc = null;
+			if (state instanceof MusicSelector) {
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
+			}
+			if (irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
+				return 1.0f * irc.getClearCount(clearType) / irc.getTotalPlayer();
+			} else {
+				return Float.MIN_VALUE;
+			}
+		};
+	}
+
+	private static FloatProperty createIRTotalClearRateProperty (int[] clearType) {
+		return (state) -> {
+			RankingData irc = null;
+			if (state instanceof MusicSelector) {
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
+			}
+			if(irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
+				int count = 0;
+				for(int c : clearType) {
+					count += irc.getClearCount(c);
+				}
+				return 1.0f * count / irc.getTotalPlayer();
+			}
+			return Float.MIN_VALUE;
+		};
 	}
 
 	private static FloatProperty createJudgeRate(final int judge) {
@@ -483,7 +569,7 @@ public class FloatPropertyFactory {
 						maxLevel = 10;
 					}
 					if (maxLevel > 0) {
-						return (float) sd.getLevel() / maxLevel;
+						return 1.0f * sd.getLevel() / maxLevel;
 					}
 				}
 			}
