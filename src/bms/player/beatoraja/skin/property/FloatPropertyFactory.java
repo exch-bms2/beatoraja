@@ -464,6 +464,12 @@ public class FloatPropertyFactory {
 			}
 			return Float.MIN_VALUE;
 		}),
+		loading_progress(165, (state) -> {
+			final BMSResource resource = state.resource.getBMSResource();
+			return resource.isBGAOn()
+					? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2
+					: resource.getAudioDriver().getProgress();
+		}),
 		ir_totalclearrate(227, createIRTotalClearRateProperty(new int[]{2,3,4,5,6,7,8,9,10})),
 		ir_totalfullcomborate(229,createIRTotalClearRateProperty(new int[]{8,9,10})),
 		ir_player_noplay_rate(203, createIRClearRateProperty(0)),
