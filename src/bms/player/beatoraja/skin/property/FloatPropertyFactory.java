@@ -93,6 +93,7 @@ public class FloatPropertyFactory {
 
 	/**
 	 * FloatType IDに対応するFloatPropertyを返す
+	 * なければRateType IDに対応するFloatPropertyを返す
 	 * 
 	 * @param id property ID
 	 * @return 対応するFloatProperty
@@ -113,6 +114,7 @@ public class FloatPropertyFactory {
 
 	/**
 	 * FloatType名に対応するFloatPropertyを返す
+	 * なければRateTYpe名に対応するFloatPropertyを返す
 	 * 
 	 * @param name property name
 	 * @return 対応するFloatProperty
