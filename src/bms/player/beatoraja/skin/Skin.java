@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
@@ -20,6 +21,9 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -79,6 +83,14 @@ public class Skin {
 	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
 	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
 
+	/**
+	 * デバッグ用
+	 */
+	public final Map<Class, long[]> tempmap;
+	public final Map<Class, long[]> pcntmap;
+	public long pcntPrepare;
+	public long pcntDraw;
+
 	public Skin(SkinHeader header) {
 		this.header = header;
 		Resolution org = header.getSourceResolution();
@@ -87,6 +99,14 @@ public class Skin {
 		height = dst.height;
 		dw = ((float)dst.width) / org.width;
 		dh = ((float)dst.height) / org.height;
+
+		if(MainController.debug) {
+			tempmap = new HashMap<>(32);
+			pcntmap = new HashMap<>(32);
+		} else {
+			tempmap = null;
+			pcntmap = null;
+		}
 	}
 
 	public void add(SkinObject object) {
@@ -184,6 +204,16 @@ public class Skin {
 		for(SkinObject obj : objects) {
 			obj.load();
 		}
+
+		if(MainController.debug) {
+			for (SkinObject obj : objects) {
+				if (!tempmap.containsKey(obj.getClass())) {
+					tempmap.put(obj.getClass(), new long[] { 1, 0, 0, 0 });
+				} else {
+					tempmap.get(obj.getClass())[0]++;
+				}
+			}
+		}
 		
 		prepareduration = state.main.getConfig().getPrepareFramePerSecond() > 0 ? 1000000 / state.main.getConfig().getPrepareFramePerSecond() : 1;
 		nextpreparetime = -1;
@@ -208,18 +238,46 @@ public class Skin {
 		}
 		
 		final long microtime = state.timer.getNowMicroTime();
-		if(nextpreparetime <= microtime) {
-			final long time = state.timer.getNowTime();
-			for (SkinObject obj : objectarray) {
-				obj.prepare(time, state);
+
+		if (MainController.debug) {
+			if (nextpreparetime <= microtime) {
+				tempmap.values().forEach(l -> Arrays.fill(l, 1, 3, 0L));
+				final long time = state.timer.getNowTime();
+				var startPrepare = System.nanoTime();
+				for (SkinObject obj : objectarray) {
+					var objPrepare = System.nanoTime();
+					obj.prepare(time, state);
+					tempmap.get(obj.getClass())[1] += (System.nanoTime() - objPrepare);
+				}
+				pcntPrepare = (System.nanoTime() - startPrepare) / 1000;
+				nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
 			}
-			
-			nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
-		}
 		
-		for (SkinObject obj : objectarray) {
-			if (obj.draw) {
-				obj.draw(renderer);
+			var startDraw = System.nanoTime();
+			for (SkinObject obj : objectarray) {
+				if (obj.draw) {
+					var objDraw = System.nanoTime();
+					obj.draw(renderer);
+					tempmap.get(obj.getClass())[2] += (System.nanoTime() - objDraw);
+				}
+			}
+			pcntmap.putAll(tempmap);
+			pcntDraw = (System.nanoTime() - startDraw) / 1000;
+
+		} else {
+			if (nextpreparetime <= microtime) {
+				final long time = state.timer.getNowTime();
+				for (SkinObject obj : objectarray) {
+					obj.prepare(time, state);
+				}
+
+				nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
+			}
+
+			for (SkinObject obj : objectarray) {
+				if (obj.draw) {
+					obj.draw(renderer);
+				}
 			}
 		}
 	}

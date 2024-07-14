@@ -469,7 +469,7 @@ public class MainController {
 					var f = "%" + l + "s";
 					for (Map.Entry<Class, long[]> e : current.getSkin().pcntmap.entrySet()) {
 						message.setLength(0);
-						message.append(String.format(f,e.getKey().getSimpleName())).append(" ").append(e.getValue()[0]/100).append(" / ").append(e.getValue()[1]/100);
+						message.append(String.format(f,e.getKey().getSimpleName())).append(" ").append(e.getValue()[0]).append(" / ").append(e.getValue()[1]/100);
 						systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - (242 + i * 24));
 						i++;
 					}
