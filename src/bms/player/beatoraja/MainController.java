@@ -49,7 +49,8 @@ public class MainController {
 
 	private static final String VERSION = "beatoraja 0.8.7";
 
-	public static final boolean debug = false;
+	public static final boolean debug = true;
+	public static final int debugTextXpos = 600;
 
 	/**
 	 * 起動時間
@@ -432,30 +433,47 @@ public class MainController {
 			sprite.begin();
 			systemfont.setColor(Color.CYAN);
 			message.setLength(0);
-			systemfont.draw(sprite, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), 10,
+			systemfont.draw(sprite, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), debugTextXpos,
 					config.getResolution().height - 2);
 			if(debug) {
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Skin Pixmap Images ").append(SkinLoader.getResource().size()), 10,
+				systemfont.draw(sprite, message.append("Skin Pixmap Images ").append(SkinLoader.getResource().size()), debugTextXpos,
 						config.getResolution().height - 26);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Total Memory Used(MB) ").append(Runtime.getRuntime().totalMemory() / (1024 * 1024)), 10,
+				systemfont.draw(sprite, message.append("Total Memory Used(MB) ").append(Runtime.getRuntime().totalMemory() / (1024 * 1024)), debugTextXpos,
 						config.getResolution().height - 50);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Total Free Memory(MB) ").append(Runtime.getRuntime().freeMemory() / (1024 * 1024)), 10,
+				systemfont.draw(sprite, message.append("Total Free Memory(MB) ").append(Runtime.getRuntime().freeMemory() / (1024 * 1024)), debugTextXpos,
 						config.getResolution().height - 74);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Max Sprite In Batch ").append(sprite.maxSpritesInBatch), 10,
+				systemfont.draw(sprite, message.append("Max Sprite In Batch ").append(sprite.maxSpritesInBatch), debugTextXpos,
 						config.getResolution().height - 98);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Skin Pixmap Resource Size ").append(SkinLoader.getResource().size()), 10,
+				systemfont.draw(sprite, message.append("Skin Pixmap Resource Size ").append(SkinLoader.getResource().size()), debugTextXpos,
 						config.getResolution().height - 122);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Stagefile Pixmap Resource Size ").append(selector.getStagefileResource().size()), 10,
+				systemfont.draw(sprite, message.append("Stagefile Pixmap Resource Size ").append(selector.getStagefileResource().size()), debugTextXpos,
 						config.getResolution().height - 146);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), 10,
+				systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), debugTextXpos,
 						config.getResolution().height - 170);
+						if (current.getSkin() != null) {
+					message.setLength(0);
+					systemfont.draw(sprite, message.append("Skin Prepare Time ").append(current.getSkin().pcntPrepare), debugTextXpos,
+							config.getResolution().height - 194);
+					message.setLength(0);
+					systemfont.draw(sprite, message.append("Skin Draw Time ").append(current.getSkin().pcntDraw), debugTextXpos,
+							config.getResolution().height - 218);
+					var i = 0;
+					var l = current.getSkin().pcntmap.keySet().stream().mapToInt(c->c.getSimpleName().length()).max().getAsInt();
+					var f = "%" + l + "s";
+					for (Map.Entry<Class, long[]> e : current.getSkin().pcntmap.entrySet()) {
+						message.setLength(0);
+						message.append(String.format(f,e.getKey().getSimpleName())).append(" ").append(e.getValue()[0]/100).append(" / ").append(e.getValue()[1]/100);
+						systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - (242 + i * 24));
+						i++;
+					}
+				}
 			}
 
 			sprite.end();
