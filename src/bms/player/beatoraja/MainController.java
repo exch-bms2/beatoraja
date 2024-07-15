@@ -467,10 +467,20 @@ public class MainController {
 					var i = 0;
 					var l = current.getSkin().pcntmap.keySet().stream().mapToInt(c->c.getSimpleName().length()).max().getAsInt();
 					var f = "%" + l + "s";
+					message.setLength(0);
+					message.append(String.format(f,"SkinObject")).append(" num // prepare cur/avg/max // draw cur/avg/max");
+					systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - 242);
 					for (Map.Entry<Class, long[]> e : current.getSkin().pcntmap.entrySet()) {
 						message.setLength(0);
-						message.append(String.format(f,e.getKey().getSimpleName())).append(" ").append(e.getValue()[0]).append(" / ").append(e.getValue()[1]/100);
-						systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - (242 + i * 24));
+						message.append(String.format(f,e.getKey().getSimpleName())).append(" ")
+						.append(e.getValue()[0]).append(" // ")
+						.append(e.getValue()[1]/100).append(" / ")
+						.append(e.getValue()[2]/10000).append(" / ")
+						.append(e.getValue()[3]/100).append(" // ")
+						.append(e.getValue()[4]/100).append(" / ")
+						.append(e.getValue()[5]/10000).append(" / ")
+						.append(e.getValue()[6]/100);
+						systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - (266 + i * 24));
 						i++;
 					}
 				}

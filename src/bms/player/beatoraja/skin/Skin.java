@@ -19,11 +19,16 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.IntMap;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -88,6 +93,8 @@ public class Skin {
 	 */
 	public final Map<Class, long[]> tempmap;
 	public final Map<Class, long[]> pcntmap;
+	private final Map<Class, Queue<Long>> avemPrepare;
+	private final Map<Class, Queue<Long>> avemDraw;
 	public long pcntPrepare;
 	public long pcntDraw;
 
@@ -103,9 +110,13 @@ public class Skin {
 		if(MainController.debug) {
 			tempmap = new HashMap<>(32);
 			pcntmap = new HashMap<>(32);
+			avemPrepare = new HashMap<>(32);
+			avemDraw = new HashMap<>(32);
 		} else {
 			tempmap = null;
 			pcntmap = null;
+			avemPrepare = null;
+			avemDraw = null;
 		}
 	}
 
@@ -208,11 +219,23 @@ public class Skin {
 		if(MainController.debug) {
 			for (SkinObject obj : objects) {
 				if (!tempmap.containsKey(obj.getClass())) {
-					tempmap.put(obj.getClass(), new long[] { 1, 0, 0, 0 });
+					tempmap.put(obj.getClass(), new long[] { 1, 0, 0, 0, 0, 0, 0});
 				} else {
 					tempmap.get(obj.getClass())[0]++;
 				}
 			}
+			tempmap.forEach((k,v)-> {
+				pcntmap.put(k, Arrays.copyOf(v, 7));
+				Queue<Long> q1 = new ArrayDeque<>(110);
+				Queue<Long> q2 = new ArrayDeque<>(110);
+				for (int i = 0; i < 100; i++) {
+					q1.add(0L);
+					q2.add(0L);
+				}
+				avemDraw.put(k, q1);
+				avemPrepare.put(k, q2);
+			});
+
 		}
 		
 		prepareduration = state.main.getConfig().getPrepareFramePerSecond() > 0 ? 1000000 / state.main.getConfig().getPrepareFramePerSecond() : 1;
@@ -241,7 +264,7 @@ public class Skin {
 
 		if (MainController.debug) {
 			if (nextpreparetime <= microtime) {
-				tempmap.values().forEach(l -> Arrays.fill(l, 1, 3, 0L));
+				tempmap.forEach((c,l) -> Arrays.fill(l, 1, 6, 0L));
 				final long time = state.timer.getNowTime();
 				var startPrepare = System.nanoTime();
 				for (SkinObject obj : objectarray) {
@@ -258,10 +281,19 @@ public class Skin {
 				if (obj.draw) {
 					var objDraw = System.nanoTime();
 					obj.draw(renderer);
-					tempmap.get(obj.getClass())[2] += (System.nanoTime() - objDraw);
+					tempmap.get(obj.getClass())[4] += (System.nanoTime() - objDraw);
 				}
 			}
-			pcntmap.putAll(tempmap);
+			tempmap.forEach((k, v) -> {
+				avemPrepare.get(k).add(v[1]);
+				pcntmap.get(k)[1] = v[1];
+				pcntmap.get(k)[2] += v[1] - avemPrepare.get(k).poll();
+				pcntmap.get(k)[3] = Math.max(pcntmap.get(k)[3], v[1]);
+				avemDraw.get(k).add(v[4]);
+				pcntmap.get(k)[4] = v[4];
+				pcntmap.get(k)[5] += v[4] - avemDraw.get(k).poll();
+				pcntmap.get(k)[6] = Math.max(pcntmap.get(k)[6], v[4]);
+			});
 			pcntDraw = (System.nanoTime() - startDraw) / 1000;
 
 		} else {
