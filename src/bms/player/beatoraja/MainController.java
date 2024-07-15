@@ -465,7 +465,7 @@ public class MainController {
 					systemfont.draw(sprite, message.append("Skin Draw Time ").append(current.getSkin().pcntDraw), debugTextXpos,
 							config.getResolution().height - 218);
 					var i = 0;
-					var l = current.getSkin().pcntmap.keySet().stream().mapToInt(c->c.getSimpleName().length()).max().getAsInt();
+					var l = current.getSkin().pcntmap.keySet().stream().mapToInt(c->c.getSimpleName().length()).max().orElse(1);
 					var f = "%" + l + "s";
 					message.setLength(0);
 					message.append(String.format(f,"SkinObject")).append(" num // prepare cur/avg/max // draw cur/avg/max");
