@@ -435,7 +435,7 @@ public class MainController {
 			message.setLength(0);
 			systemfont.draw(sprite, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), debugTextXpos,
 					config.getResolution().height - 2);
-			if(debug) {
+					if(debug) {
 				message.setLength(0);
 				systemfont.draw(sprite, message.append("Skin Pixmap Images ").append(SkinLoader.getResource().size()), debugTextXpos,
 						config.getResolution().height - 26);
@@ -475,10 +475,10 @@ public class MainController {
 						message.append(String.format(f,e.getKey().getSimpleName())).append(" ")
 						.append(e.getValue()[0]).append(" // ")
 						.append(e.getValue()[1]/100).append(" / ")
-						.append(e.getValue()[2]/10000).append(" / ")
+						.append(e.getValue()[2]/100000).append(" / ")
 						.append(e.getValue()[3]/100).append(" // ")
 						.append(e.getValue()[4]/100).append(" / ")
-						.append(e.getValue()[5]/10000).append(" / ")
+						.append(e.getValue()[5]/100000).append(" / ")
 						.append(e.getValue()[6]/100);
 						systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - (266 + i * 24));
 						i++;

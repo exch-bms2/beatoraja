@@ -226,9 +226,9 @@ public class Skin {
 			}
 			tempmap.forEach((k,v)-> {
 				pcntmap.put(k, Arrays.copyOf(v, 7));
-				Queue<Long> q1 = new ArrayDeque<>(110);
-				Queue<Long> q2 = new ArrayDeque<>(110);
-				for (int i = 0; i < 100; i++) {
+				Queue<Long> q1 = new ArrayDeque<>(1010);
+				Queue<Long> q2 = new ArrayDeque<>(1010);
+				for (int i = 0; i < 1000; i++) {
 					q1.add(0L);
 					q2.add(0L);
 				}
