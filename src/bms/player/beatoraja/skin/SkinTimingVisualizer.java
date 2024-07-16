@@ -16,7 +16,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
  *
  * @author keh
  */
-public class SkinTimingVisualizer extends SkinObject {
+public final class SkinTimingVisualizer extends SkinObject {
 
 	// TODO 各Textureを1枚にまとめてblBindTextureの回数を削減する
 	private TextureRegion backtex = null;
