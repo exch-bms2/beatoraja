@@ -49,7 +49,7 @@ public class MainController {
 
 	private static final String VERSION = "beatoraja 0.8.7";
 
-	public static final boolean debug = true;
+	public static final boolean debug = false;
 	public static final int debugTextXpos = 600;
 
 	/**
@@ -470,7 +470,10 @@ public class MainController {
 					message.setLength(0);
 					message.append(String.format(f,"SkinObject")).append(" num // prepare cur/avg/max // draw cur/avg/max");
 					systemfont.draw(sprite, message, debugTextXpos, config.getResolution().height - 242);
-					for (Map.Entry<Class, long[]> e : current.getSkin().pcntmap.entrySet()) {
+					var entrys = current.getSkin().pcntmap.entrySet().stream()
+						.sorted((e1,e2) -> e1.getKey().getSimpleName().compareTo(e2.getKey().getSimpleName()))
+						.toList();
+					for (Map.Entry<Class, long[]> e : entrys) {
 						message.setLength(0);
 						message.append(String.format(f,e.getKey().getSimpleName())).append(" ")
 						.append(e.getValue()[0]).append(" // ")
