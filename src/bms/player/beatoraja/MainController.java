@@ -50,7 +50,7 @@ public class MainController {
 	private static final String VERSION = "beatoraja 0.8.7";
 
 	public static final boolean debug = false;
-	public static final int debugTextXpos = 600;
+	public static final int debugTextXpos = 10;
 
 	/**
 	 * 起動時間
