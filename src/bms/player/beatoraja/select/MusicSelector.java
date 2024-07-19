@@ -379,6 +379,7 @@ public class MusicSelector extends MainState {
 			ScoreData rival = current.getRivalScore();
 			resource.setRivalScoreData(rival);
 			ReplayData chartOption = null;
+			ReplayData replay;
 			switch(config.getChartReplicationMode()) {
 			case NONE:
 				// TODO 通常オプションもここに入れて渡す？
@@ -391,6 +392,7 @@ public class MusicSelector extends MainState {
 					chartOption.doubleoption = rival.getOption() / 100;
 					chartOption.randomoptionseed = rival.getSeed() % (65536 * 256);
 					chartOption.randomoption2seed = rival.getSeed() / (65536 * 256);
+//					chartOption.rand = rival.getRandom();
 				}
 				break;
 			case RIVALOPTION:
@@ -402,10 +404,25 @@ public class MusicSelector extends MainState {
 				}
 				break;							
 			case REPLAYCHART:
-				// TODO 未実装
+				replay = main.getPlayDataAccessor().readReplayData(resource.getBMSModel(), config.getLnmode(), play.id);
+				if (replay != null) {
+					chartOption = new ReplayData();
+					chartOption.randomoption = replay.randomoption;
+					chartOption.randomoptionseed = replay.randomoptionseed;
+					chartOption.randomoption2 = replay.randomoption2;
+					chartOption.randomoption2seed = replay.randomoption2seed;
+					chartOption.doubleoption = replay.doubleoption;
+					chartOption.rand = replay.rand;
+				}
 				break;
 			case REPLAYOPTION:
-				// TODO 未実装
+				replay = main.getPlayDataAccessor().readReplayData(resource.getBMSModel(), config.getLnmode(), play.id);
+				if (replay != null) {
+					chartOption = new ReplayData();
+					chartOption.randomoption = replay.randomoption;
+					chartOption.randomoption2 = replay.randomoption2;
+					chartOption.doubleoption = replay.doubleoption;
+				}
 				break;
 			}
 			resource.setChartOption(chartOption);
