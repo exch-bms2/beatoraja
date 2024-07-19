@@ -16,12 +16,11 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
  *
  * @author keh
  */
-public class SkinTimingVisualizer extends SkinObject {
+public final class SkinTimingVisualizer extends SkinObject {
 
-	// TODO 各Textureを1枚にまとめてblBindTextureの回数を削減する
-	private TextureRegion backtex = null;
-	private TextureRegion shapetex = null;
-	private Pixmap shape = null;
+	private TextureRegion backtex;
+	private TextureRegion line;
+	private Color[] lineColors;
 
 	private Color[] JColor;
 	/**
@@ -37,15 +36,12 @@ public class SkinTimingVisualizer extends SkinObject {
 	 * 判定履歴表示用ラインの幅
 	 */
 	private final int lineWidth;
-	private final int width;
 	private final int center;
 	private final float judgeWidthRate;
 	private final boolean drawDecay;
 	
 	private BMSModel model;
 	private int[][] judgeArea;
-
-	private int currentindex = -1;
 	
 	private int index;
 	private long[] recent;
@@ -63,7 +59,6 @@ public class SkinTimingVisualizer extends SkinObject {
 			int transparent, int drawDecay) {
 
 		this.lineWidth = MathUtils.clamp(lineWidth, 1, 4);
-		this.width = width;
 		this.center = judgeWidthMillis;
 		this.judgeWidthRate = width / (float) (judgeWidthMillis * 2 + 1);
 		this.lineColor = Color.valueOf(colorStringValidation(lineColor));
@@ -85,20 +80,16 @@ public class SkinTimingVisualizer extends SkinObject {
 		}
 		super.prepare(time, state);
 		final PlayerResource resource = state.resource;
-		if(resource.getBMSModel() != model) {
-			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);			
-		}
-		
 		index = ((BMSPlayer)state).getJudgeManager().getRecentJudgesIndex();
 		recent = ((BMSPlayer)state).getJudgeManager().getRecentJudges();
-	}
-	
-	public void draw(SkinObjectRenderer sprite) {
-		// 背景テクスチャ生成
-		if (backtex == null) {
+
+		if(resource.getBMSModel() != model) {
+			model = resource.getBMSModel();
+			judgeArea = getJudgeArea(resource);	
+
+			// BMSModel毎に背景テクスチャ生成
 			int pwidth = center * 2 + 1;
-			shape = new Pixmap(pwidth, 1, Pixmap.Format.RGBA8888);
+			var shape = new Pixmap(pwidth, 1, Pixmap.Format.RGBA8888);
 
 			int beforex1 = center;
 			int beforex2 = center + 1;
@@ -119,53 +110,43 @@ public class SkinTimingVisualizer extends SkinObject {
 					beforex2 = x2;
 				}
 			}
-			
+
 			shape.setColor(0f, 0f, 0f, 0.25f);
-			for(int x = center % 10;x < pwidth;x += 10) {
+			for (int x = center % 10; x < pwidth; x += 10) {
 				shape.drawLine(x, 0, x, 1);
 			}
 
 			backtex = new TextureRegion(new Texture(shape));
 			shape.dispose();
-			shape = null;
+
 		}
 
-		if (shape == null) {
-			shape = new Pixmap(width, recent.length * 2, Pixmap.Format.RGBA8888);
-		}
-
-		if(currentindex != index) {
-			currentindex = index;
-			// 前景テクスチャ 透明色でフィルして初期化
-			shape.setColor(Color.CLEAR);
-			shape.fill();
-
+		if(line == null) {
+			var pix = new Pixmap(lineWidth, 1, Pixmap.Format.RGBA8888);
+			pix.setColor(Color.WHITE);
+			pix.fill();
+			line = new TextureRegion(new Texture(pix));
+			lineColors = new Color[recent.length];
 			for (int i = 0; i < recent.length; i++) {
-				int j = i + index + 1;
-				if (recent[j % recent.length] == Long.MIN_VALUE) {
-					continue;
-				}
+				lineColors[i] = new Color(lineColor.r, lineColor.g, lineColor.b, lineColor.a / 100 * (i + 1));
+			}
+			pix.dispose();
+		}
+	}
+	
+	public void draw(SkinObjectRenderer sprite) {
 
-				shape.setColor(
-						Color.rgba8888(lineColor.r, lineColor.g, lineColor.b, (lineColor.a * i / (1.0f * recent.length))));
-				int x = (width - lineWidth) / 2
-						+ (int) (MathUtils.clamp(recent[j % recent.length], -center, center) * judgeWidthRate);
-				if (drawDecay) {
-					shape.fillRectangle(x, recent.length - i, lineWidth, i * 2);
+		draw(sprite, backtex);
+		for (int i = 0; i < recent.length; i++) {
+			int j = (index + i + 1) % recent.length;
+			if (-center <= recent[j] && recent[j] <= center) {
+				if(drawDecay) {
+					draw(sprite, line, region.x + (region.width - lineWidth) / 2 + recent[j] * judgeWidthRate, region.y + region.height * (recent.length - i) / recent.length / 2, lineWidth, region.height * i / recent.length, lineColors[i], 0);
 				} else {
-					shape.fillRectangle(x, 0, lineWidth, recent.length * 2);
+					draw(sprite, line, region.x + (region.width - lineWidth) / 2 + recent[j] * judgeWidthRate, region.y, lineWidth, region.height, lineColors[i], 0);
 				}
 			}
 		}
-
-		if (shapetex == null) {
-			shapetex = new TextureRegion(new Texture(shape));
-		} else {
-			shapetex.getTexture().draw(shape, 0, 0);
-		}
-
-		draw(sprite, backtex);
-		draw(sprite, shapetex);
 	}
 
 	static int[][] getJudgeArea(PlayerResource resource) {
@@ -192,8 +173,7 @@ public class SkinTimingVisualizer extends SkinObject {
 	@Override
 	public void dispose() {
 		Optional.ofNullable(backtex).ifPresent(t -> t.getTexture().dispose());
-		Optional.ofNullable(shapetex).ifPresent(t -> t.getTexture().dispose());
-		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
+		Optional.ofNullable(line).ifPresent(t -> t.getTexture().dispose());
 	}
 
 	/**
