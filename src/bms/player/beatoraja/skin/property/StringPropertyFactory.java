@@ -129,6 +129,8 @@ public class StringPropertyFactory {
 		key8(47, createKeyname(7)),
 		key9(48, createKeyname(8)),
 		key10(49, createKeyname(9)),
+		sort(61, (state) -> state.resource.getPlayerConfig().getSortid()),
+
 		key11(240, createKeyname(10)),
 		key12(241, createKeyname(11)),
 		key13(242, createKeyname(12)),
