@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
@@ -18,8 +19,16 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.IntMap;
 
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -79,6 +88,16 @@ public class Skin {
 	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
 	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
 
+	/**
+	 * デバッグ用
+	 */
+	public final Map<Class, long[]> tempmap;
+	public final Map<Class, long[]> pcntmap;
+	private final Map<Class, Queue<Long>> avemPrepare;
+	private final Map<Class, Queue<Long>> avemDraw;
+	public long pcntPrepare;
+	public long pcntDraw;
+
 	public Skin(SkinHeader header) {
 		this.header = header;
 		Resolution org = header.getSourceResolution();
@@ -87,6 +106,18 @@ public class Skin {
 		height = dst.height;
 		dw = ((float)dst.width) / org.width;
 		dh = ((float)dst.height) / org.height;
+
+		if(MainController.debug) {
+			tempmap = new HashMap<>(32);
+			pcntmap = new HashMap<>(32);
+			avemPrepare = new HashMap<>(32);
+			avemDraw = new HashMap<>(32);
+		} else {
+			tempmap = null;
+			pcntmap = null;
+			avemPrepare = null;
+			avemDraw = null;
+		}
 	}
 
 	public void add(SkinObject object) {
@@ -184,6 +215,28 @@ public class Skin {
 		for(SkinObject obj : objects) {
 			obj.load();
 		}
+
+		if(MainController.debug) {
+			for (SkinObject obj : objects) {
+				if (!tempmap.containsKey(obj.getClass())) {
+					tempmap.put(obj.getClass(), new long[] { 1, 0, 0, 0, 0, 0, 0});
+				} else {
+					tempmap.get(obj.getClass())[0]++;
+				}
+			}
+			tempmap.forEach((k,v)-> {
+				pcntmap.put(k, Arrays.copyOf(v, 7));
+				Queue<Long> q1 = new ArrayDeque<>(1010);
+				Queue<Long> q2 = new ArrayDeque<>(1010);
+				for (int i = 0; i < 1000; i++) {
+					q1.add(0L);
+					q2.add(0L);
+				}
+				avemDraw.put(k, q1);
+				avemPrepare.put(k, q2);
+			});
+
+		}
 		
 		prepareduration = state.main.getConfig().getPrepareFramePerSecond() > 0 ? 1000000 / state.main.getConfig().getPrepareFramePerSecond() : 1;
 		nextpreparetime = -1;
@@ -208,18 +261,55 @@ public class Skin {
 		}
 		
 		final long microtime = state.timer.getNowMicroTime();
-		if(nextpreparetime <= microtime) {
-			final long time = state.timer.getNowTime();
-			for (SkinObject obj : objectarray) {
-				obj.prepare(time, state);
+
+		if (MainController.debug) {
+			if (nextpreparetime <= microtime) {
+				tempmap.forEach((c,l) -> Arrays.fill(l, 1, 6, 0L));
+				final long time = state.timer.getNowTime();
+				var startPrepare = System.nanoTime();
+				for (SkinObject obj : objectarray) {
+					var objPrepare = System.nanoTime();
+					obj.prepare(time, state);
+					tempmap.get(obj.getClass())[1] += (System.nanoTime() - objPrepare);
+				}
+				pcntPrepare = (System.nanoTime() - startPrepare) / 1000;
+				nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
 			}
-			
-			nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
-		}
 		
-		for (SkinObject obj : objectarray) {
-			if (obj.draw) {
-				obj.draw(renderer);
+			var startDraw = System.nanoTime();
+			for (SkinObject obj : objectarray) {
+				if (obj.draw) {
+					var objDraw = System.nanoTime();
+					obj.draw(renderer);
+					tempmap.get(obj.getClass())[4] += (System.nanoTime() - objDraw);
+				}
+			}
+			tempmap.forEach((k, v) -> {
+				avemPrepare.get(k).add(v[1]);
+				pcntmap.get(k)[1] = v[1];
+				pcntmap.get(k)[2] += v[1] - avemPrepare.get(k).poll();
+				pcntmap.get(k)[3] = Math.max(pcntmap.get(k)[3], v[1]);
+				avemDraw.get(k).add(v[4]);
+				pcntmap.get(k)[4] = v[4];
+				pcntmap.get(k)[5] += v[4] - avemDraw.get(k).poll();
+				pcntmap.get(k)[6] = Math.max(pcntmap.get(k)[6], v[4]);
+			});
+			pcntDraw = (System.nanoTime() - startDraw) / 1000;
+
+		} else {
+			if (nextpreparetime <= microtime) {
+				final long time = state.timer.getNowTime();
+				for (SkinObject obj : objectarray) {
+					obj.prepare(time, state);
+				}
+
+				nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
+			}
+
+			for (SkinObject obj : objectarray) {
+				if (obj.draw) {
+					obj.draw(renderer);
+				}
 			}
 		}
 	}
