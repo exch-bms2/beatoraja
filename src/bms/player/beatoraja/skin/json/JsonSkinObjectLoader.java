@@ -198,9 +198,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 
 					SkinFloat fnum = null;
 					if(fv.value != null) {
-						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, fv.isSignvisible, fv.align, fv.zeropadding, fv.space, fv.value);
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, fv.isSignvisible, fv.align, fv.zeropadding, fv.space, fv.value, fv.gain);
 					} else {
-						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, fv.isSignvisible, fv.align, fv.zeropadding, fv.space, fv.ref);
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, fv.isSignvisible, fv.align, fv.zeropadding, fv.space, fv.ref, fv.gain);
 					}
 
 					if(fv.offset != null) {
@@ -232,9 +232,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 
 					SkinFloat fnum = null;
 					if(fv.value != null) {
-						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value, fv.gain);
 					} else {
-						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref, fv.gain);
 					}
 
 					if(fv.offset != null) {
@@ -269,9 +269,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 
 					SkinFloat fnum = null;
 					if(fv.value != null) {
-						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value, fv.gain);
 					} else {
-						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+						fnum = new SkinFloat(pn, mn, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref, fv.gain);
 					}
 
 					if(fv.offset != null) {
@@ -299,9 +299,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 
 					SkinFloat fnum = null;
 					if(fv.value != null) {
-						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value, fv.gain);
 					} else {
-						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref, fv.gain);
 					}
 
 					if(fv.offset != null) {
@@ -331,9 +331,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 
 					SkinFloat fnum = null;
 					if(fv.value != null) {
-						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value);
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.value, fv.gain);
 					} else {
-						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref);
+						fnum = new SkinFloat(nimage, fv.timer, fv.cycle, fv.iketa, fv.fketa, false, fv.align, fv.zeropadding, fv.space, fv.ref, fv.gain);
 					}
 
 					if(fv.offset != null) {
@@ -362,10 +362,10 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 					SkinFloat fnum = null;
 					if(fv.value != null) {
 						fnum = new SkinFloat(nimages, fv.timer, fv.cycle, fv.iketa, fv.fketa,
-								false, fv.align, fv.zeropadding, fv.space, fv.value);
+								false, fv.align, fv.zeropadding, fv.space, fv.value, fv.gain);
 					} else {
 						fnum = new SkinFloat(nimages, fv.timer, fv.cycle, fv.iketa, fv.fketa,
-								false, fv.align, fv.zeropadding, fv.space, fv.ref);
+								false, fv.align, fv.zeropadding, fv.space, fv.ref, fv.gain);
 					}
 					if(fv.offset != null) {
 						SkinOffset[] offsets = new SkinOffset[fv.offset.length];

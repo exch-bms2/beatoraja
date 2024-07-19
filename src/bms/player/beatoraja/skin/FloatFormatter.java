@@ -1,7 +1,11 @@
 package bms.player.beatoraja.skin;
 
 import java.util.Arrays;
-
+/**
+ * 小数点数の配列表現フォーマッター
+ *
+ * @author keh
+ */
 public final class FloatFormatter {
 
     private final int iketa;
@@ -12,9 +16,11 @@ public final class FloatFormatter {
     private final int[] digits;
     private int base;
 
-    private final int SIGNSYMBOL = 12;
-    private final int DECIMALPOINT = 11;
-    private final int REVERSEZERO = 10;
+    private static final int KETAMAX = 8;
+
+    private static final int SIGNSYMBOL = 12;
+    private static final int DECIMALPOINT = 11;
+    private static final int REVERSEZERO = 10;
 
     public int getIketa() {
         return iketa;
@@ -39,15 +45,21 @@ public final class FloatFormatter {
     public int getketaLength() {
         return length;
     }
-
+    /**
+     * 整数桁+少数桁≧8 超える場合は少数桁優先で8となる
+     * @param iketa 整数桁数
+     * @param fketa 少数桁数
+     * @param sign 符号を表示するか
+     * @param zeropadding ゼロパディング方式
+     */
     public FloatFormatter(int iketa, int fketa, boolean sign, int zeropadding) {
         int tempiketa = (iketa >= 0) ? iketa : 0;
         int tempfketa = (fketa >= 0) ? fketa : 0;
         this.sign = sign ? 1 : 0;
         this.zeropadding = (zeropadding >= 2) ? 2 : zeropadding >= 1 ? 1 : 0; // 2 or 1 or 0
-        if (tempiketa >= 15 || tempfketa >= 15 || tempiketa + tempfketa >= 15) {
-            this.fketa = (tempfketa < 15) ? tempfketa : 15;
-            this.iketa = 15 - this.fketa;
+        if (tempiketa >= KETAMAX || tempfketa >= KETAMAX || tempiketa + tempfketa >= KETAMAX) {
+            this.fketa = (tempfketa < KETAMAX) ? tempfketa : KETAMAX;
+            this.iketa = KETAMAX - this.fketa;
         } else {
             this.iketa = tempiketa;
             this.fketa = tempfketa;

@@ -162,6 +162,7 @@ public class JsonSkin {
 		public int align;
 		public int fketa;
 		public int iketa;
+		public float gain = 1.0f;
 		public boolean isSignvisible;
 		public int padding;
 		public int zeropadding;
