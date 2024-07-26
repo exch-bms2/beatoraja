@@ -815,6 +815,9 @@ public class IntegerPropertyFactory {
 		ranking_index9(398, createRankingindex(8)),
 		ranking_index10(399, createRankingindex(9)),
 
+		judgerank(400, (state) -> (state.resource.getSongdata() != null
+				? state.resource.getSongdata().getJudge() : Integer.MIN_VALUE)),
+
 		judge_duration1(525, createJudgeduration(0)),
 		judge_duration2(526, createJudgeduration(1)),
 		judge_duration3(527, createJudgeduration(2)),
