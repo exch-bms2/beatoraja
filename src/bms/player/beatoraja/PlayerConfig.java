@@ -66,7 +66,7 @@ public final class PlayerConfig {
 	 */
 	private String targetid = "MAX";
 	
-	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
+	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "RATE_MAX-", "MAX"
 			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3", "IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10"
 			, "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANK_20", "IR_RANK_30", "IR_RANK_40", "IR_RANK_50"
 			, "IR_RANKRATE_5", "IR_RANKRATE_10", "IR_RANKRATE_15", "IR_RANKRATE_20", "IR_RANKRATE_25", "IR_RANKRATE_30", "IR_RANKRATE_35", "IR_RANKRATE_40", "IR_RANKRATE_45","IR_RANKRATE_50"
