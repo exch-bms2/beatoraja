@@ -526,6 +526,8 @@ public class SkinProperty {
 	public static final int NUMBER_RANDOM_2P_7KEY = 466;
 	public static final int NUMBER_RANDOM_2P_SCR = 469;
 
+	public static final int NUMBER_JUDGERANK = 400;
+
 	public static final int RATE_MUSICSELECT_POSITION = 1;
 	public static final int RATE_LANECOVER = 4;
 	public static final int RATE_LANECOVER2 = 5;
