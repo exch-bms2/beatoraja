@@ -1281,6 +1281,19 @@ public class IntegerPropertyFactory {
 		cleartype_ranking8(397, createRankinCleartypeProperty(7)),
 		cleartype_ranking9(398, createRankinCleartypeProperty(8)),
 		cleartype_ranking10(399, createRankinCleartypeProperty(9)),
+
+		constant(400, (state) -> {
+			if (state instanceof MusicSelector selector) {
+				final PlayConfig playConfig = selector.getSelectedBarPlayConfig();
+				if (playConfig != null) {
+					return playConfig.isEnableConstant() ? 1 : 0;
+				}
+			} else if (state instanceof BMSPlayer player) {
+				return player.getLanerender().getPlayConfig().isEnableConstant() ? 1 : 0;
+			}
+			return -1;
+		}),
+
 		pattern_1p_1(450, getAssignedLane(0, false)),
 		pattern_1p_2(451, getAssignedLane(1, false)),
 		pattern_1p_3(452, getAssignedLane(2, false)),
