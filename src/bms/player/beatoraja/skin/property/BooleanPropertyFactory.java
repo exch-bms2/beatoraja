@@ -654,7 +654,18 @@ public class BooleanPropertyFactory {
 		trophy_option_exsrandom(OPTION_CLEAR_EXSRANDOM, new TrophyDrawCondition(SongTrophy.EX_S_RANDOM)),
 
 		constant(OPTION_CONSTANT, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnableConstant() : false))),
+				(state -> {
+					if (state instanceof MusicSelector selector) {
+						final PlayConfig playConfig = selector.getSelectedBarPlayConfig();
+						if (playConfig != null) {
+							return playConfig.isEnableConstant();
+						}
+					} else if (state instanceof BMSPlayer player) {
+						return player.getLanerender().getPlayConfig().isEnableConstant();
+					}
+					return false;
+				})
+		)),
 
 		;
 		/**
