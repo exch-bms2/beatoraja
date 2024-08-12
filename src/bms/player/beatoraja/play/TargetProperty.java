@@ -114,28 +114,30 @@ class StaticTargetProperty extends TargetProperty {
     }
     
     public static TargetProperty getTargetProperty(String id) {
-    	switch(id) {
-    	case "RATE_A-":
-    		return new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 18.0f / 27.0f);
-    	case "RATE_A":
-    		return new StaticTargetProperty("RATE_A", "RANK A",   100.0f * 19.0f / 27.0f);
-    	case "RATE_A+":
-    		return new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 20.0f / 27.0f);
-    	case "RATE_AA-":
-    		return new StaticTargetProperty("RATE_AA-", "RANK AA-",   100.0f * 21.0f / 27.0f);
-    	case "RATE_AA":
-    		return new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 22.0f / 27.0f);
-    	case "RATE_AA+":
-    		return new StaticTargetProperty("RATE_AA+", "RANK AA+",   100.0f * 23.0f / 27.0f);
-    	case "RATE_AAA-":
-    		return new StaticTargetProperty("RATE_AAA-", "RANK AAA-",   100.0f * 24.0f / 27.0f);
-    	case "RATE_AAA":
-    		return new StaticTargetProperty("RATE_AAA", "RANK AAA",   100.0f * 25.0f / 27.0f);
-    	case "RATE_AAA+":
-    		return new StaticTargetProperty("RATE_AAA+", "RANK AAA+",   100.0f * 26.0f / 27.0f);
-    	case "MAX":
-    		return new StaticTargetProperty(id, "MAX", 100.0f);
-    	}
+		switch(id) {
+			case "RATE_A-":
+				return new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 17.0f / 27.0f);
+			case "RATE_A":
+				return new StaticTargetProperty("RATE_A", "RANK A",   100.0f * 18.0f / 27.0f);
+			case "RATE_A+":
+				return new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 19.0f / 27.0f);
+			case "RATE_AA-":
+				return new StaticTargetProperty("RATE_AA-", "RANK AA-",   100.0f * 20.0f / 27.0f);
+			case "RATE_AA":
+				return new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 21.0f / 27.0f);
+			case "RATE_AA+":
+				return new StaticTargetProperty("RATE_AA+", "RANK AA+",   100.0f * 22.0f / 27.0f);
+			case "RATE_AAA-":
+				return new StaticTargetProperty("RATE_AAA-", "RANK AAA-",   100.0f * 23.0f / 27.0f);
+			case "RATE_AAA":
+				return new StaticTargetProperty("RATE_AAA", "RANK AAA",   100.0f * 24.0f / 27.0f);
+			case "RATE_AAA+":
+				return new StaticTargetProperty("RATE_AAA+", "RANK AAA+",   100.0f * 25.0f / 27.0f);
+			case "RATE_MAX-":
+				return new StaticTargetProperty("RATE_MAX-", "RANK MAX-",   100.0f * 26.0f / 27.0f);
+			case "MAX":
+				return new StaticTargetProperty(id, "MAX", 100.0f);
+		}
 
 		if(id.startsWith("RATE_")) {
 			try {
