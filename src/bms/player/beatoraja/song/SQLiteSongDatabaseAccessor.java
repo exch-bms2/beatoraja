@@ -560,27 +560,40 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				if (sd.getNotes() != 0 || model.getWavList().length != 0) {
 					if (sd.getDifficulty() == 0) {
 						final String fulltitle = (sd.getTitle() + sd.getSubtitle()).toLowerCase();
-						if (fulltitle.contains("beginner")) {
+						final String diffname = (sd.getSubtitle()).toLowerCase();
+						if (diffname.contains("beginner")) {
 							sd.setDifficulty(1);
-						} else if (fulltitle.contains("normal")) {
+						} else if (diffname.contains("normal")) {
 							sd.setDifficulty(2);
-						} else if (fulltitle.contains("hyper")) {
+						} else if (diffname.contains("hyper")) {
 							sd.setDifficulty(3);
-						} else if (fulltitle.contains("another")) {
+						} else if (diffname.contains("another")) {
 							sd.setDifficulty(4);
-						} else if (fulltitle.contains("insane")) {
+						} else if (diffname.contains("insane") || diffname.contains("leggendaria")) {
 							sd.setDifficulty(5);
 						} else {
-							if (sd.getNotes() < 250) {
+							if (fulltitle.contains("beginner")) {
 								sd.setDifficulty(1);
-							} else if (sd.getNotes() < 600) {
+							} else if (fulltitle.contains("normal")) {
 								sd.setDifficulty(2);
-							} else if (sd.getNotes() < 1000) {
+							} else if (fulltitle.contains("hyper")) {
 								sd.setDifficulty(3);
-							} else if (sd.getNotes() < 2000) {
+							} else if (fulltitle.contains("another")) {
 								sd.setDifficulty(4);
-							} else {
+							} else if (fulltitle.contains("insane") || fulltitle.contains("leggendaria")) {
 								sd.setDifficulty(5);
+							} else {
+								if (sd.getNotes() < 250) {
+									sd.setDifficulty(1);
+								} else if (sd.getNotes() < 600) {
+									sd.setDifficulty(2);
+								} else if (sd.getNotes() < 1000) {
+									sd.setDifficulty(3);
+								} else if (sd.getNotes() < 2000) {
+									sd.setDifficulty(4);
+								} else {
+									sd.setDifficulty(5);
+								}
 							}
 						}
 					}
