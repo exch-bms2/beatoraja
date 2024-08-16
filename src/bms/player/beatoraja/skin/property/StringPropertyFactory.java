@@ -56,8 +56,8 @@ public class StringPropertyFactory {
 	public enum StringType {
 		
 		rival(1, (state) -> {
-			if (state instanceof MusicSelector) {
-				final PlayerInformation rival = ((MusicSelector) state).getRival();
+			if (state instanceof MusicSelector selector) {
+				final PlayerInformation rival = selector.getRival();
 				return rival != null ? rival.getName() : "";
 			} else {
 				final ScoreData rival = state.resource.getTargetScoreData();
@@ -74,14 +74,10 @@ public class StringPropertyFactory {
 			}
 		}),
 		title(10, (state) -> {
-			if (state instanceof MusicSelector) {
-				if (((MusicSelector) state).getSelectedBar() instanceof DirectoryBar) {
-					return ((MusicSelector) state).getSelectedBar().getTitle();
-				}
-			} else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-				if(state.resource.getCoursetitle() != null) {
-					return state.resource.getCoursetitle();						
-				}
+			if (state instanceof MusicSelector selector && selector.getSelectedBar() instanceof DirectoryBar) {
+				return selector.getSelectedBar().getTitle();
+			} else if ((state instanceof MusicDecide || state instanceof CourseResult) && state.resource.getCoursetitle() != null) {
+				return state.resource.getCoursetitle();						
 			}
 			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getTitle() : "";
@@ -91,14 +87,10 @@ public class StringPropertyFactory {
 			return song != null ? song.getSubtitle() : "";
 		}),
 		fulltitle(12, (state) -> {
-			if (state instanceof MusicSelector) {
-				if (((MusicSelector) state).getSelectedBar() instanceof DirectoryBar) {
-					return ((MusicSelector) state).getSelectedBar().getTitle();
-				}
-			} else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-				if(state.resource.getCoursetitle() != null) {
-					return state.resource.getCoursetitle();
-				}
+			if (state instanceof MusicSelector selector && selector.getSelectedBar() instanceof DirectoryBar) {
+				return selector.getSelectedBar().getTitle();
+			} else if ((state instanceof MusicDecide || state instanceof CourseResult) && state.resource.getCoursetitle() != null) {
+				return state.resource.getCoursetitle();
 			}
 			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getFullTitle() : "";
@@ -130,6 +122,8 @@ public class StringPropertyFactory {
 		key9(48, createKeyname(8)),
 		key10(49, createKeyname(9)),
 		sort(61, (state) -> state.resource.getPlayerConfig().getSortid()),
+
+		chartreplication(86, (state) -> state.resource.getPlayerConfig().getChartReplicationMode().name()),
 
 		key11(240, createKeyname(10)),
 		key12(241, createKeyname(11)),
@@ -177,16 +171,16 @@ public class StringPropertyFactory {
 		key54(283, createKeyname(53)),
 
 		skinname(50, (state) -> {
-			if (state instanceof SkinConfiguration) {
-				return ((SkinConfiguration)state).getSelectedSkinHeader() != null ? ((SkinConfiguration)state).getSelectedSkinHeader().getName() : "";
+			if (state instanceof SkinConfiguration skinconfig) {
+				return skinconfig.getSelectedSkinHeader() != null ? skinconfig.getSelectedSkinHeader().getName() : "";
 			} else if(state.getSkin() != null && state.getSkin().header != null) {
 				return state.getSkin().header.getName();
 			}
 			return "";
 		}),
 		skinauthor(51, (state) -> {
-			if (state instanceof SkinConfiguration) {
-				return ((SkinConfiguration)state).getSelectedSkinHeader() != null ? ((SkinConfiguration)state).getSelectedSkinHeader().getAuthor() : "";
+			if (state instanceof SkinConfiguration skinconfig) {
+				return skinconfig.getSelectedSkinHeader() != null ? skinconfig.getSelectedSkinHeader().getAuthor() : "";
 			} else if(state.getSkin() != null && state.getSkin().header != null) {
 				return state.getSkin().header.getAuthor();
 			}
@@ -253,12 +247,7 @@ public class StringPropertyFactory {
 		targetnamen9(218, createTargetname(9)),
 		targetnamen10(219, createTargetname(10)),
 
-		directory(1000, (state) -> {
-			if (state instanceof MusicSelector) {
-				return ((MusicSelector) state).getBarManager().getDirectoryString();
-			}
-			return "";
-		}),
+		directory(1000, (state) -> ((state instanceof MusicSelector selector) ? selector.getBarManager().getDirectoryString() : "")),
 		tablename(1001, (state) -> (state.resource.getTablename())),
 		tablelevel(1002, (state) -> (state.resource.getTablelevel())),
 		tablefull(1003, (state) -> (state.resource.getTableFullname())),
@@ -338,13 +327,13 @@ public class StringPropertyFactory {
 			return (state) -> {
 				RankingData irc = null;
 				int rankingOffset = 0;
-				if (state instanceof MusicSelector) {
-					irc = ((MusicSelector) state).getCurrentRankingData();
-					rankingOffset = ((MusicSelector) state).getRankingOffset();
+				if (state instanceof MusicSelector selector) {
+					irc =selector.getCurrentRankingData();
+					rankingOffset = selector.getRankingOffset();
 				}
-				if (state instanceof AbstractResult) {
-					irc = ((AbstractResult) state).getRankingData();
-					rankingOffset = ((AbstractResult) state).getRankingOffset();
+				if (state instanceof AbstractResult result) {
+					irc = result.getRankingData();
+					rankingOffset = result.getRankingOffset();
 				}
 				IRScoreData score = irc != null ? irc.getScore(index + rankingOffset) : null;
 				return score != null ? (score.player.length() > 0 ? score.player : "YOU") : "";
@@ -369,18 +358,18 @@ public class StringPropertyFactory {
 		
 		private static StringProperty createCoursetitle(final int index) {
 			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final Bar bar = ((MusicSelector) state).getSelectedBar();
-					if (bar instanceof GradeBar) {
-						if (((GradeBar) bar).getSongDatas().length > index) {
-							SongData song = ((GradeBar) bar).getSongDatas()[index];
+				if (state instanceof MusicSelector selector) {
+					final Bar bar = selector.getSelectedBar();
+					if (bar instanceof GradeBar coursebar) {
+						if (coursebar.getSongDatas().length > index) {
+							SongData song = coursebar.getSongDatas()[index];
 							final String songname = song != null && song.getTitle() != null ? song.getTitle()
 									: "----";
 							return song != null && song.getPath() != null ? songname : "(no song) " + songname;
 						}
-					} else if (bar instanceof RandomCourseBar) {
-						if (((RandomCourseBar) bar).getCourseData().getStage().length > index) {
-							RandomStageData stage = ((RandomCourseBar) bar).getCourseData().getStage()[index];
+					} else if (bar instanceof RandomCourseBar randomcoursebar) {
+						if (randomcoursebar.getCourseData().getStage().length > index) {
+							RandomStageData stage = randomcoursebar.getCourseData().getStage()[index];
 							final String stagename = stage != null && stage.getTitle() != null ? stage.getTitle()
 									: "----";
 							return stage != null ? stagename : "(no song) " + stagename;
@@ -398,8 +387,8 @@ public class StringPropertyFactory {
 		
 		private static StringProperty createKeyname(final int index) {
 			return (state) -> {
-				if (state instanceof KeyConfiguration) {
-					return ((KeyConfiguration)state).getKeyAssign(index);
+				if (state instanceof KeyConfiguration keyconfig) {
+					return keyconfig.getKeyAssign(index);
 				}
 				return "";
 			};
