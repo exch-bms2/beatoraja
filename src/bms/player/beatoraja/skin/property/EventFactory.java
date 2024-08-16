@@ -72,8 +72,7 @@ public class EventFactory {
 		 * 次のMODEフィルター(5KEY, 7KEY, ...)へ移動
 		 */
 		mode(11, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 				int mode = 0;
 				PlayerConfig config = selector.resource.getPlayerConfig();
 				for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
@@ -86,8 +85,7 @@ public class EventFactory {
 		 * 選曲バーソート(曲名,  クリアランプ, ...)変更
 		 */
 		sort(12, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 				selector.setSort((selector.getSort() + (arg1 >= 0 ? 1 : BarSorter.defaultSorter.length - 1)) % BarSorter.defaultSorter.length);
 				selector.getBarManager().updateBar();
 				selector.play(OPTION_CHANGE);
@@ -97,8 +95,7 @@ public class EventFactory {
 		 * 選曲バーソート(曲名,  クリアランプ, ...)変更
 		 */
 		songbar_sort(312, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 				for(int index = 0;index < BarSorter.allSorter.length;index++) {
 					if(BarSorter.allSorter[index].name().equals(selector.main.getPlayerConfig().getSortid())) {
 						selector.main.getPlayerConfig().setSortid(BarSorter.allSorter[(index + (arg1 >= 0 ? 1 : BarSorter.allSorter.length - 1)) % BarSorter.allSorter.length].name());
@@ -147,20 +144,17 @@ public class EventFactory {
 			if (!Desktop.isDesktopSupported()) {
 				return;
 			}
-			if(state instanceof MusicSelector) {
-				Bar current = ((MusicSelector)state).getBarManager().getSelected();
-				if(current instanceof SongBar && ((SongBar) current).existsSong()) {
-					try (Stream<Path> paths = Files.list(Paths.get(((SongBar) current).getSongData().getPath()).getParent())) {
-						paths.filter(p -> !Files.isDirectory(p) && p.toString().toLowerCase().endsWith(".txt")).forEach(p -> {
-							try {
-								Desktop.getDesktop().open(p.toFile());
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						});
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
+			if(state instanceof MusicSelector selector && selector.getBarManager().getSelected() instanceof SongBar songbar && songbar.existsSong()) {
+				try (Stream<Path> paths = Files.list(Paths.get(songbar.getSongData().getPath()).getParent())) {
+					paths.filter(p -> !Files.isDirectory(p) && p.toString().toLowerCase().endsWith(".txt")).forEach(p -> {
+						try {
+							Desktop.getDesktop().open(p.toFile());
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					});
+				} catch (Throwable e) {
+					e.printStackTrace();
 				}
 			}
 		}),
@@ -209,8 +203,8 @@ public class EventFactory {
 	     * ハイスピード固定オプションの変更
 	     */
 		hsfix(55, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-	            PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			if(state instanceof MusicSelector selector) {
+	            PlayConfig pc = selector.getSelectedBarPlayConfig();
 	            if (pc != null) {
 	                pc.setFixhispeed((pc.getFixhispeed() + (arg1 >= 0 ? 1 : 4)) % 5);
 	                state.play(OPTION_CHANGE);
@@ -221,8 +215,7 @@ public class EventFactory {
 	     * hispeedの変更
 	     */
 		hispeed1p(57, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 	            PlayConfig pc = selector.getSelectedBarPlayConfig();	            
             	float hispeed = pc.getHispeed() + (arg1 >= 0 ? pc.getHispeedMargin() : -pc.getHispeedMargin());
             	hispeed = MathUtils.clamp(hispeed, PlayConfig.HISPEED_MIN, PlayConfig.HISPEED_MAX);
@@ -236,8 +229,7 @@ public class EventFactory {
 	     * durationの変更
 	     */
 		duration1p(59, (state, arg1, arg2) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 	            PlayConfig pc = selector.getSelectedBarPlayConfig();	            
             	final int inc = arg2 > 0 ? arg2 : 1;
             	int duration = pc.getDuration() + (arg1 >= 0 ? inc : -inc);
@@ -249,8 +241,8 @@ public class EventFactory {
 			}
 		}),
 		hispeedautoadjust(342, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			if(state instanceof MusicSelector selector) {
+				PlayConfig pc = selector.getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setHispeedAutoAdjust(!pc.isEnableHispeedAutoAdjust());
 					state.play(OPTION_CHANGE);
@@ -271,12 +263,12 @@ public class EventFactory {
 				return;
 			}
 			String url = null;
-			if(state instanceof MusicSelector) {
-				Bar current = ((MusicSelector)state).getBarManager().getSelected();
-				if(current instanceof SongBar) {
-					url = ir.getSongURL(new IRChartData(((SongBar) current).getSongData()));
-				} else if(current instanceof GradeBar) {
-					url = ir.getCourseURL(new IRCourseData(((GradeBar) current).getCourseData()));
+			if(state instanceof MusicSelector selector) {
+				Bar current = selector.getBarManager().getSelected();
+				if(current instanceof SongBar songbar) {
+					url = ir.getSongURL(new IRChartData(songbar.getSongData()));
+				} else if(current instanceof GradeBar coursebar) {
+					url = ir.getCourseURL(new IRCourseData(coursebar.getCourseData()));
 				}
 			} else if(state instanceof MusicResult) {
 	            url = ir.getSongURL(new IRChartData(state.resource.getSongdata()));
@@ -338,16 +330,14 @@ public class EventFactory {
 			}
 		}),
 		gaugeautoshift(78, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 				final int gaslength = 5;
 	            selector.resource.getPlayerConfig().setGaugeAutoShift((selector.resource.getPlayerConfig().getGaugeAutoShift() + (arg1 >= 0 ?1 : gaslength - 1)) % gaslength);
 	            selector.play(OPTION_CHANGE);
 			}
 		}),
 		bottomshiftablegauge(341, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 				final int gaugelength = 3;
 				selector.resource.getPlayerConfig().setBottomShiftableGauge((selector.resource.getPlayerConfig().getBottomShiftableGauge() + (arg1 >= 0 ? 1 : gaugelength - 1)) % gaugelength);
 				selector.play(OPTION_CHANGE);
@@ -357,8 +347,7 @@ public class EventFactory {
 		 * 選択ライバル変更
 		 */
 		rival(79, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
+			if(state instanceof MusicSelector selector) {
 				final RivalDataAccessor rivals = state.main.getRivalDataAccessor();
 	            int index = -1;
 	            for(int i = 0;i < rivals.getRivalCount();i++) {
@@ -399,25 +388,22 @@ public class EventFactory {
 				sd.setFavorite(favorite);
 				state.main.getSongDatabase().setSongDatas(new SongData[]{sd});
 			};
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
-				if (selector.getSelectedBar() instanceof SongBar) {
-					final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
+			if(state instanceof MusicSelector selector && selector.getSelectedBar() instanceof SongBar songbar) {
+				final SongData sd = songbar.getSongData();
 
-					if (sd != null && sd.getPath() != null) {
-						String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
-						if ((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
-							message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
-						} else if ((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
-							message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
-						}
-						
-						changeFav.accept(sd);
-
-						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-						selector.getBarManager().updateBar();
-						selector.play(OPTION_CHANGE);
+				if (sd != null && sd.getPath() != null) {
+					String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
+					if ((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
+						message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
+					} else if ((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+						message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
 					}
+					
+					changeFav.accept(sd);
+
+					selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
+					selector.getBarManager().updateBar();
+					selector.play(OPTION_CHANGE);
 				}
 			}
 			if(state instanceof MusicResult) {
@@ -458,22 +444,19 @@ public class EventFactory {
 				state.main.getSongDatabase().setSongDatas(songs);
 			};
 
-			if(state instanceof MusicSelector) {
-				final MusicSelector selector = (MusicSelector) state;
-				if(selector.getSelectedBar() instanceof SongBar) {
-					final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
-					if(sd != null && sd.getPath() != null) {
-						String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
-						if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
-							message = next ? "Added to Favorite Song" : "Added to Invisible Song";
-						} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
-							message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
-						}
-						changeFav.accept(sd);					
-						selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
-						selector.getBarManager().updateBar();
-						selector.play(OPTION_CHANGE);
+			if(state instanceof MusicSelector selector && selector.getSelectedBar() instanceof SongBar songbar) {
+				final SongData sd = songbar.getSongData();
+				if(sd != null && sd.getPath() != null) {
+					String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
+					if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
+						message = next ? "Added to Favorite Song" : "Added to Invisible Song";
+					} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+						message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
 					}
+					changeFav.accept(sd);					
+					selector.main.getMessageRenderer().addMessage(message, 1200, Color.GREEN, 1);
+					selector.getBarManager().updateBar();
+					selector.play(OPTION_CHANGE);
 				}
 			}
 			if(state instanceof MusicResult) {
@@ -542,9 +525,8 @@ public class EventFactory {
 	     * LNモードの変更
 	     */
 		lnmode(308, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
+			if(state instanceof MusicSelector selector) {
 				final int lnmodelength = 3;
-				final MusicSelector selector = (MusicSelector) state;
 	            PlayerConfig config = selector.resource.getPlayerConfig();
 	            config.setLnmode((config.getLnmode() + (arg1 >= 0 ? 1 : lnmodelength - 1)) % lnmodelength);
 	            selector.getBarManager().updateBar();
@@ -556,8 +538,8 @@ public class EventFactory {
 		autosavereplay3(323, changeAutoSaveReplay(2)),
 		autosavereplay4(324, changeAutoSaveReplay(3)),
 		lanecover(330, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			if(state instanceof MusicSelector selector) {
+				PlayConfig pc = selector.getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setEnablelanecover(!pc.isEnablelanecover());
 					state.play(OPTION_CHANGE);
@@ -574,8 +556,8 @@ public class EventFactory {
 			}
 		}),
 		hidden(332, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			if(state instanceof MusicSelector selector) {
+				PlayConfig pc = selector.getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setEnablehidden(!pc.isEnablehidden());
 					state.play(OPTION_CHANGE);
@@ -583,8 +565,8 @@ public class EventFactory {
 			}
 		}),
 		judgealgorithm(340, (state, arg1) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			if(state instanceof MusicSelector selector) {
+				PlayConfig pc = selector.getSelectedBarPlayConfig();
 				if (pc == null) {
 					return;
 				}
@@ -603,6 +585,18 @@ public class EventFactory {
 				PlayerConfig config = state.resource.getPlayerConfig();
 				config.setGuideSE(!config.isGuideSE());
 				state.play(OPTION_CHANGE);
+			}
+		}),
+		chartreplicationmode(344, (state, arg1) -> {
+			if(state instanceof MusicSelector selector) {
+				var values = MusicSelector.ChartReplicationMode.values();
+				for(int index = 0;index < values.length;index++) {
+					if(values[index].name().equals(selector.main.getPlayerConfig().getSortid())) {
+						selector.main.getPlayerConfig().setSortid(values[(index + (arg1 >= 0 ? 1 : values.length - 1)) % values.length].name());
+						selector.play(OPTION_CHANGE);
+						return;
+					}
+				}
 			}
 		}),
 
@@ -655,8 +649,8 @@ public class EventFactory {
 			}
 		}),
 		constant(SkinProperty.OPTION_CONSTANT, (state) -> {
-			if(state instanceof MusicSelector) {
-				PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
+			if(state instanceof MusicSelector selector) {
+				PlayConfig pc = selector.getSelectedBarPlayConfig();
 				if (pc != null) {
 					pc.setEnableConstant(!pc.isEnableConstant());
 					state.play(OPTION_CHANGE);
@@ -691,8 +685,7 @@ public class EventFactory {
 		
 	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(final int index) {
 	    	return (state, arg1) -> {
-	    		if(state instanceof MusicSelector) {
-					final MusicSelector selector = (MusicSelector) state;
+	    		if(state instanceof MusicSelector selector) {
 	    	        int[] asr = selector.resource.getPlayerConfig().getAutoSaveReplay();
 	    	        final int length = AbstractResult.ReplayAutoSaveConstraint.values().length;
 	    	        asr[index] = (asr[index] + (arg1 >= 0 ? 1 : length - 1)) % length;
