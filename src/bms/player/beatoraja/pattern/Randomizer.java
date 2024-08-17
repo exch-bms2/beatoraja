@@ -153,38 +153,37 @@ public abstract class Randomizer {
 		}
 
 		switch (r) {
-		case ALL_SCR:
-			if (mode == Mode.POPN_9K) {
-				randomizer = new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
-			} else {
+			case ALL_SCR -> {
 				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
+				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		case H_RANDOM:
-			randomizer = new SRandomizer(thresholdMillis);
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		case SPIRAL:
-			randomizer = new SpiralRandomizer();
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		case S_RANDOM:
-			if (mode == Mode.POPN_9K) {
+			case CONVERGE -> {
+				randomizer = new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
+				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
+			}
+			case H_RANDOM -> {
+				randomizer = new SRandomizer(thresholdMillis);
+				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
+			}
+			case SPIRAL -> {
+				randomizer = new SpiralRandomizer();
+				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
+			}
+			case S_RANDOM -> {
+				randomizer = new SRandomizer(SRAN_THRESHOLD);
+			}
+			case S_RANDOM_NO_THRESHOLD -> {
 				randomizer = new SRandomizer(0);
-			} else {
-				randomizer = new SRandomizer(SRAN_THRESHOLD);
 			}
-			break;
-		case S_RANDOM_EX:
-			if (mode == Mode.POPN_9K) {
+			case S_RANDOM_EX -> {
+				randomizer = new SRandomizer(SRAN_THRESHOLD);
+				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
+			}
+			case S_RANDOM_NO_MURIOSHI -> {
 				randomizer = new NoMurioshiRandomizer(thresholdMillis);
-			} else {
-				randomizer = new SRandomizer(SRAN_THRESHOLD);
+				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		default:
+			default -> {}
 		}
 		randomizer.setMode(mode);
 		return randomizer;
@@ -429,24 +428,24 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 		if (isDoublePlay) {
 			int index = -1;
 			switch (modifySide) {
-			case SIDE_1P:
-				int min = Integer.MAX_VALUE;
-				for (int i = 0; i < lane.size(); i++) {
-					if (lane.get(i) < min) {
-						min = lane.get(i);
-						index = i;
+				case SIDE_1P -> {
+					int min = Integer.MAX_VALUE;
+					for (int i = 0; i < lane.size(); i++) {
+						if (lane.get(i) < min) {
+							min = lane.get(i);
+							index = i;
+						}
 					}
 				}
-				break;
-			case SIDE_2P:
-				int max = Integer.MIN_VALUE;
-				for (int i = 0; i < lane.size(); i++) {
-					if (lane.get(i) > max) {
-						max = lane.get(i);
-						index = i;
-					}
+				case SIDE_2P -> {
+					int max = Integer.MIN_VALUE;
+					for (int i = 0; i < lane.size(); i++) {
+						if (lane.get(i) > max) {
+							max = lane.get(i);
+							index = i;
+						}
+					}					
 				}
-				break;
 			}
 			return index;
 		}

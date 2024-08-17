@@ -44,6 +44,7 @@ public abstract class PatternModifier {
 		this.assist = AssistLevel.values()[assist];
 	}
 
+	// TODO PatternModifyLogは現状保存していないため、返り値不要
 	public abstract List<PatternModifyLog> modify(BMSModel model);
 
 	/**
@@ -78,56 +79,6 @@ public abstract class PatternModifier {
 				}
 			}
 		}
-	}
-
-	public static List<PatternModifyLog> merge(List<PatternModifyLog> log, List<PatternModifyLog> log2) {
-		List<PatternModifyLog> result = new ArrayList(Math.max(log.size(), log2.size()));
-		for (PatternModifyLog pml : log) {
-			boolean b = true;
-			for (PatternModifyLog pml2 : log2) {
-				if (pml.section == pml2.section) {
-					int[] newmod = new int[Math.max(pml.modify.length, pml2.modify.length)];
-					for (int i = 0; i < newmod.length; i++) {
-						if (i >= pml.modify.length) {
-							newmod[i] = pml2.modify[i];
-						} else if (i >= pml2.modify.length) {
-							newmod[i] = pml.modify[i];
-						} else {
-							newmod[i] = pml.modify[pml2.modify[i]];
-						}
-					}
-					result.add(new PatternModifyLog(pml.section, newmod));
-					b = true;
-					break;
-				}
-			}
-			if (b) {
-				result.add(pml);
-			}
-		}
-
-		for (PatternModifyLog pml2 : log2) {
-			boolean b = true;
-			for (PatternModifyLog pml : log) {
-				if (pml2.section == pml.section) {
-					b = false;
-					break;
-				}
-			}
-			if (b) {
-				for (int index = 0; index < result.size(); index++) {
-					if (pml2.section < result.get(index).section) {
-						result.add(index, pml2);
-						b = false;
-						break;
-					}
-				}
-				if (b) {
-					result.add(pml2);
-				}
-			}
-		}
-		return result;
 	}
 
 	public AssistLevel getAssistLevel() {
@@ -165,30 +116,17 @@ public abstract class PatternModifier {
      * @return
      */
     public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config) {
-		PatternModifier pm = null;
-		Random r = Random.getRandom(id);
-		switch (r) {
-			case IDENTITY:
-			pm = new DummyModifier();
-			break;
-			case MIRROR:
-			case RANDOM:
-			case R_RANDOM:
-			case RANDOM_EX:
-			case CROSS:
-			pm = new LaneShuffleModifier(r);
-			break;
-			case S_RANDOM:
-			case SPIRAL:
-			case H_RANDOM:
-			case S_RANDOM_EX:
-			pm = new NoteShuffleModifier(r, mode, config);
-			break;
-			case ALL_SCR:
-			pm = new NoteShuffleModifier(r, side, mode, config);
-			break;
-		}
-
+		final Random r = Random.getRandom(id, mode);
+		PatternModifier pm = switch (r.unit) {
+			case NONE -> new PatternModifier() {
+				@Override
+				public List<PatternModifyLog> modify(BMSModel model) {
+					return Collections.emptyList();
+				}
+			};
+			case LANE, PLAYER -> new LaneShuffleModifier(r);
+			case NOTE -> new NoteShuffleModifier(r, side, mode, config);
+		};
 		if (pm != null) {
 			pm.setModifyTarget(side);
 		}
@@ -204,9 +142,7 @@ public abstract class PatternModifier {
 	 * @return レーン番号の配列
 	 */
 	protected int[] getKeys(Mode mode, boolean containsScratch) {
-		int key = (modifyTargetSide == SIDE_2P)
-				? mode.key / mode.player
-				: 0;
+		int key = (modifyTargetSide == SIDE_2P) ? mode.key / mode.player : 0;
 		if (key == mode.key) {
 			return new int[0];
 		} else {
@@ -218,52 +154,6 @@ public abstract class PatternModifier {
 			}
 			return keys.toArray();
 		}
-	}
-
-	protected static int[] shuffle(int[] keys, long seed) {
-		java.util.Random rand = new java.util.Random(seed);
-		List<Integer> l = new ArrayList<Integer>(keys.length);
-		for (int key : keys) {
-			l.add(key);
-		}
-		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
-		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
-		for (int lane = 0; lane < keys.length; lane++) {
-			int r = rand.nextInt(l.size());
-			result[keys[lane]] = l.get(r);
-			l.remove(r);
-		}
-
-		return result;
-	}
-
-	protected static int[] rotate(int[] keys, long seed) {
-		java.util.Random rand = new java.util.Random(seed);
-		boolean inc = (rand.nextInt(2) == 1);
-		int start = rand.nextInt(keys.length - 1) + (inc ? 1 : 0);
-		return rotate(keys, start, inc);
-	}
-
-	protected static int[] rotate(int[] keys, int start, boolean inc) {
-		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
-		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
-		for (int lane = 0, rlane = start; lane < keys.length; lane++) {
-			result[keys[lane]] = keys[rlane];
-			rlane = inc ? (rlane + 1) % keys.length : (rlane + keys.length - 1) % keys.length;
-		}
-		return result;
 	}
 
 	protected static void moveToBackground(TimeLine[] tls, TimeLine tl, int lane) {
@@ -286,19 +176,6 @@ public abstract class PatternModifier {
 			tl.addBackGroundNote(tl.getNote(lane));
 		}
 		tl.setNote(lane, null);
-
-	}
-
-	static class DummyModifier extends PatternModifier {
-
-		public DummyModifier() {
-			super(0);
-		}
-
-		@Override
-		public List<PatternModifyLog> modify(BMSModel model) {
-			return Collections.emptyList();
-		}
 
 	}
 

@@ -1364,7 +1364,8 @@ public class IntegerPropertyFactory {
 				}
 
 				ReplayData rd = state.resource.getReplayData();
-				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption);
+				Mode mode = state.resource.getBMSModel().getMode();
+				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption, mode);
 
 				switch (type){
 					case RANDOM:
@@ -1380,7 +1381,6 @@ public class IntegerPropertyFactory {
 					return 0;
 				}
 
-				Mode mode = state.resource.getBMSModel().getMode();
 				if(mode.player == 1 && is2PSide){
 					return 0;
 				}
