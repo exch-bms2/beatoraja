@@ -241,8 +241,7 @@ public class BMSPlayer extends MainState {
 						case BEAT_7K -> model.setMode(Mode.BEAT_14K);
 						case KEYBOARD_24K -> model.setMode(Mode.KEYBOARD_24K_DOUBLE);
 					}
-					LaneShuffleModifier mod = new LaneShuffleModifier(Random.BATTLE);
-					mod.setModifyTarget(PatternModifier.SIDE_1P);
+					LaneShuffleModifier mod = LaneShuffleModifier.create(Random.BATTLE);
 					mod.modify(model);
 					if(playinfo.doubleoption == 3) {
 						PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
@@ -292,11 +291,11 @@ public class BMSPlayer extends MainState {
 			// DP譜面オプション
 			if(model.getMode().player == 2) {
 				if (playinfo.doubleoption == 1) {
-					mods.add(new LaneShuffleModifier(Random.FLIP));
+					mods.add(LaneShuffleModifier.create(Random.FLIP));
 				}
 				Logger.getGlobal().info("譜面オプション(DP) :  " + playinfo.doubleoption);
 
-				PatternModifier pm = PatternModifier.create(playinfo.randomoption2, PatternModifier.SIDE_2P, model.getMode(), config);
+				PatternModifier pm = PatternModifier.create(playinfo.randomoption2, 1, model, config);
 				if(playinfo.randomoption2seed != -1) {
 					pm.setSeed(playinfo.randomoption2seed);
 				} else {
@@ -307,7 +306,7 @@ public class BMSPlayer extends MainState {
 			}
 
 			// SP譜面オプション
-			PatternModifier pm = PatternModifier.create(playinfo.randomoption, PatternModifier.SIDE_1P, model.getMode(), config);
+			PatternModifier pm = PatternModifier.create(playinfo.randomoption, 0, model, config);
 			if(playinfo.randomoptionseed != -1) {
 				pm.setSeed(playinfo.randomoptionseed);
 			} else {
@@ -319,7 +318,6 @@ public class BMSPlayer extends MainState {
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
 				ModeModifier mod = new ModeModifier(Mode.BEAT_7K, Mode.POPN_9K, config);
-				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				mods.add(mod);
 			}
 
@@ -335,7 +333,7 @@ public class BMSPlayer extends MainState {
 
 				if (mod instanceof LaneShuffleModifier lmod){
 					if(lmod.isToDisplay()){
-						patternArray[lmod.getModifyTarget()] = lmod.getRandomPattern(model.getMode());
+						patternArray[lmod.player] = lmod.getRandomPattern(model.getMode());
 					}
 				}
 			}
@@ -549,11 +547,11 @@ public class BMSPlayer extends MainState {
 					pm.modify(model);
 					if (model.getMode().player == 2) {
 						if (property.doubleop == 1) {
-							new LaneShuffleModifier(Random.FLIP).modify(model);
+							LaneShuffleModifier.create(Random.FLIP).modify(model);
 						}
-						PatternModifier.create(property.random2, PatternModifier.SIDE_2P, model.getMode(), config).modify(model);
+						PatternModifier.create(property.random2, 1, model, config).modify(model);
 					}
-					PatternModifier.create(property.random, PatternModifier.SIDE_1P, model.getMode(), config).modify(model);
+					PatternModifier.create(property.random, 0, model, config).modify(model);
 
 					gauge = practice.getGauge(model);
 					model.setJudgerank(property.judgerank);
@@ -869,11 +867,9 @@ public class BMSPlayer extends MainState {
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
-				if (n != null && (
-						n instanceof NormalNote ||
-						(n instanceof LongNote && 
-						!(((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ((LongNote) n).getType() == LongNote.TYPE_UNDEFINED)
-								|| ((LongNote) n).getType() == LongNote.TYPE_LONGNOTE)
+				if (n != null && (n instanceof NormalNote || (n instanceof LongNote ln && 
+						!(((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+								|| ln.getType() == LongNote.TYPE_LONGNOTE)
 								&& ((LongNote) n).isEnd())))) {
 					int state = n.getState();
 					long time = n.getMicroPlayTime();

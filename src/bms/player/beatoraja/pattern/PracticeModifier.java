@@ -21,7 +21,7 @@ public class PracticeModifier extends PatternModifier {
 	private long end;
 
 	public PracticeModifier(long start, long end) {
-		super(2);
+		super(AssistLevel.ASSIST);
 		this.start = start;
 		this.end = end;
 	}

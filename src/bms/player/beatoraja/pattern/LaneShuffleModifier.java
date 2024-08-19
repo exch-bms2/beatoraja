@@ -4,139 +4,254 @@ import bms.model.*;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
+
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * レーン単位でノーツを入れ替えるオプション MIRROR、RANDOM、R-RANDOMが該当する
  *
  * @author exch
  */
-public class LaneShuffleModifier extends PatternModifier {
+public abstract class LaneShuffleModifier extends PatternModifier {
 
 	/**
 	 * 各レーンの移動先
 	 */
 	private int[] random;
-	/**
-	 * ランダムのタイプ
-	 */
-	private Random type;
+	
+	public final boolean isScratchLaneModify;
 
-	public LaneShuffleModifier(Random type) {
-		this.type = type;
-	}
+	public final boolean showShufflePattern;
 
-	private void makeRandom(BMSModel model) {
-		Mode mode = model.getMode();
-		switch (type) {
-			case MIRROR -> {
-				final int[] keys = getKeys(mode, false);
-				random = keys.length > 0 ? rotate(keys, keys.length - 1, false) : keys;
-			}
-			case R_RANDOM -> {
-				final int[] keys = getKeys(mode, false);
-				random = keys.length > 0 ? rotate(keys, getSeed()) : keys;
-			}
-			case RANDOM -> {
-				final int[] keys = getKeys(mode, false);
-				random = keys.length > 0 ? shuffle(keys, getSeed()) : keys;
-			}
-			case CROSS -> {
-				final int[] keys = getKeys(mode, false);
-				random = new int[keys.length];
-				for (int i = 0; i < keys.length / 2 - 1; i += 2) {
-					random[i] = keys[i + 1];
-					random[i + 1] = keys[i];
-					random[keys.length - i - 1] = keys[keys.length - i - 2];
-					random[keys.length - i - 2] = keys[keys.length - i - 1];
-				}
-			}
-			case RANDOM_EX -> {
-				final int[] keys = getKeys(mode, true);
-				random = keys.length > 0 ? shuffle(keys, getSeed()) : keys;
-				setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case RANDOM_NO_MURIOSHI -> {
-				final int[] keys = getKeys(mode, true);
-				random = keys.length > 0 ? noMurioshiLaneShuffle(model) : keys;
-				setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case FLIP -> {
-				if (mode.player == 2) {
-					random = new int[mode.key];
-					for (int i = 0; i < random.length; i++) {
-						random[i] = (i + (mode.key / mode.player)) % mode.key;
-					}
-				} else {
-					random = new int[0];
-				}
-			}
-			case BATTLE -> {
-				if (mode.player == 1) {
-					random = new int[0];
-				} else {
-					final int[] keys = getKeys(mode, true);
-					random = new int[keys.length * 2];
-					System.arraycopy(keys, 0, random, 0, keys.length);
-					System.arraycopy(keys, 0, random, keys.length, keys.length);
-					setAssistLevel(AssistLevel.LIGHT_ASSIST);
-				}
-			}
-		}
+	public LaneShuffleModifier(int player, boolean isScratchLaneModify, boolean showShufflePattern) {
+		super(player);
+		this.isScratchLaneModify = isScratchLaneModify;
+		this.showShufflePattern = showShufflePattern;
 	}
 	
-	private int[] shuffle(int[] keys, long seed) {
-		java.util.Random rand = new java.util.Random(seed);
-		List<Integer> l = new ArrayList<Integer>(keys.length);
-		for (int key : keys) {
-			l.add(key);
+	public static LaneShuffleModifier create(Random chartOption) {
+		return switch (chartOption) {
+			case FLIP -> new PlayerFlipModifier();
+			case BATTLE -> new PlayerBattleModifier();
+			default -> null;
+		};
+	}
+	
+	public static LaneShuffleModifier create(Random chartOption, Mode mode, int player) {
+		return switch (chartOption) {
+			case MIRROR -> new LaneMirrorShuffleModifier(player, false);
+			case R_RANDOM -> new LaneRotateShuffleModifier(player, false);
+			case RANDOM -> new LaneRandomShuffleModifier(player, false);
+			case RANDOM_EX -> new LaneRandomShuffleModifier(player, true);
+			case CROSS -> new LaneCrossShuffleModifier(player, false);
+			case RANDOM_NO_MURIOSHI -> new LanePlayableRandomShuffleModifier(player, false);
+			default -> null;
+		};
+	}
+	
+	protected abstract int[] makeRandom(int[] keys, BMSModel model);
+
+	@Override
+	public List<PatternModifyLog> modify(BMSModel model) {
+		Mode mode = model.getMode();
+		final int[] keys = getKeys(mode, player, isScratchLaneModify);
+		if(keys.length == 0) {
+			return null;
 		}
-		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
+		random = makeRandom(keys, model);
+		final int lanes = model.getMode().key;
+		Note[] notes = new Note[lanes];
+		Note[] hnotes = new Note[lanes];
+		boolean[] clone = new boolean[lanes];
+		TimeLine[] timelines = model.getAllTimeLines();
+		for (int index = 0; index < timelines.length; index++) {
+			final TimeLine tl = timelines[index];
+			if (tl.existNote() || tl.existHiddenNote()) {
+				for (int i = 0; i < lanes; i++) {
+					notes[i] = tl.getNote(i);
+					hnotes[i] = tl.getHiddenNote(i);
+					clone[i] = false;
+				}
+				for (int i = 0; i < lanes; i++) {
+					final int mod = i < random.length ? random[i] : i;
+					if (clone[mod]) {
+						if (notes[mod] != null) {
+							if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
+								for (int j = index - 1; j >= 0; j--) {
+									if (((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
+										LongNote ln = (LongNote) timelines[j].getNote(i);
+										tl.setNote(i, ln.getPair());
+//										System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == "
+//												+ ((LongNote) notes[mod]).getPair().toString() + " : "
+//												+ notes[mod].toString());
+										break;
+									}
+								}
+							} else {
+								tl.setNote(i, (Note) notes[mod].clone());
+							}
+						} else {
+							tl.setNote(i, null);
+						}
+						if (hnotes[mod] != null) {
+							tl.setHiddenNote(i, (Note) hnotes[mod].clone());
+						} else {
+							tl.setHiddenNote(i, null);
+						}
+					} else {
+						tl.setNote(i, notes[mod]);
+						tl.setHiddenNote(i, hnotes[mod]);
+						clone[mod] = true;
+					}
+				}
+			}
 		}
-		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
+		return null;
+	}
+
+	public boolean isToDisplay() {
+		return showShufflePattern;
+	}
+
+	public int[] getRandomPattern(Mode mode) {
+		int keys = mode.key / mode.player;
+		int[] repr = new int[keys];
+		if(showShufflePattern) {
+			if (mode.scratchKey.length > 0 && !isScratchLaneModify) { // BEAT-*K
+				System.arraycopy(random, keys * player, repr, 0, keys - 1);
+				repr[keys - 1] = mode.scratchKey[player];
+			} else {
+				System.arraycopy(random, keys * player, repr, 0, keys);
+			}
 		}
+		return repr;
+	}
+}
+
+class LaneMirrorShuffleModifier extends LaneShuffleModifier {
+
+	public LaneMirrorShuffleModifier(int player, boolean isScratchLaneModify) {
+		super(player, isScratchLaneModify, false);
+		setAssistLevel(isScratchLaneModify ? AssistLevel.LIGHT_ASSIST : AssistLevel.NONE);
+	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		int[] result = IntStream.range(0, model.getMode().key).toArray();
 		for (int lane = 0; lane < keys.length; lane++) {
-			int r = rand.nextInt(l.size());
-			result[keys[lane]] = l.get(r);
-			l.remove(r);
+			result[keys[lane]] = keys[keys.length - 1 - lane];
 		}
-
 		return result;
-	}
+	}	
+}
 
-	private int[] rotate(int[] keys, long seed) {
-		java.util.Random rand = new java.util.Random(seed);
-		boolean inc = (rand.nextInt(2) == 1);
-		int start = rand.nextInt(keys.length - 1) + (inc ? 1 : 0);
-		return rotate(keys, start, inc);
-	}
+class LaneRotateShuffleModifier extends LaneShuffleModifier {
 
-	private int[] rotate(int[] keys, int start, boolean inc) {
-		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
-		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
+	public LaneRotateShuffleModifier(int player, boolean isScratchLaneModify) {
+		super(player, isScratchLaneModify, true);
+		setAssistLevel(isScratchLaneModify ? AssistLevel.LIGHT_ASSIST : AssistLevel.NONE);
+	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		java.util.Random rand = new java.util.Random(getSeed());
+		final boolean inc = (rand.nextInt(2) == 1);
+		final int start = rand.nextInt(keys.length - 1) + (inc ? 1 : 0);
+		int[] result = IntStream.range(0, model.getMode().key).toArray();
 		for (int lane = 0, rlane = start; lane < keys.length; lane++) {
 			result[keys[lane]] = keys[rlane];
 			rlane = inc ? (rlane + 1) % keys.length : (rlane + keys.length - 1) % keys.length;
 		}
 		return result;
+	}	
+}
+
+class LaneRandomShuffleModifier extends LaneShuffleModifier {
+
+	public LaneRandomShuffleModifier(int player, boolean isScratchLaneModify) {
+		super(player, isScratchLaneModify, true);
+		setAssistLevel(isScratchLaneModify ? AssistLevel.LIGHT_ASSIST : AssistLevel.NONE);
 	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		java.util.Random rand = new java.util.Random(getSeed());
+		IntArray l = new IntArray(keys);
+		int[] result = IntStream.range(0, model.getMode().key).toArray();
+		for (int lane = 0; lane < keys.length; lane++) {
+			int r = rand.nextInt(l.size);
+			result[keys[lane]] = l.get(r);
+			l.removeIndex(r);
+		}
+		return result;
+	}	
+}
 
+class PlayerFlipModifier extends LaneShuffleModifier {
 
+	public PlayerFlipModifier() {
+		super(0, true, false);
+		setAssistLevel(AssistLevel.NONE);
+	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		int[] result = IntStream.range(0, model.getMode().key).toArray();
+		if (model.getMode().player == 2) {
+			for (int i = 0; i < result.length; i++) {
+				result[i] = (i + result.length / 2) % result.length;
+			}
+		}
+		return result;
+	}	
+}
 
-	// 無理押しが来ないようにLaneShuffleをかける(ただし正規鏡を除く)。無理押しが来ない譜面が存在しない場合は正規か鏡でランダム
-	private int[] noMurioshiLaneShuffle(BMSModel model) {
+class PlayerBattleModifier extends LaneShuffleModifier {
+
+	public PlayerBattleModifier() {
+		super(0, true, false);
+		setAssistLevel(AssistLevel.ASSIST);
+	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		if (model.getMode().player == 1) {
+			return new int[0];
+		} else {
+			int[] result = new int[keys.length * 2];
+			System.arraycopy(keys, 0, result, 0, keys.length);
+			System.arraycopy(keys, 0, result, keys.length, keys.length);
+			setAssistLevel(AssistLevel.ASSIST);
+			return result;
+		}
+	}	
+}
+
+class LaneCrossShuffleModifier extends LaneShuffleModifier {
+
+	public LaneCrossShuffleModifier(int player, boolean isScratchLaneModify) {
+		super(player, isScratchLaneModify, true);
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
+	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		int[] result = IntStream.range(0, model.getMode().key).toArray();
+		for (int i = 0; i < keys.length / 2 - 1; i += 2) {
+			result[keys[i]] = keys[i + 1];
+			result[keys[i + 1]] = keys[i];
+			result[keys[keys.length - i - 1]] = keys[keys.length - i - 2];
+			result[keys[keys.length - i - 2]] = keys[keys.length - i - 1];
+		}
+		return result;
+	}	
+}
+
+class LanePlayableRandomShuffleModifier extends LaneShuffleModifier {
+
+	public LanePlayableRandomShuffleModifier(int player, boolean isScratchLaneModify) {
+		super(player, isScratchLaneModify, true);
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
+	}
+	
+	protected int[] makeRandom(int[] keys, BMSModel model) {
+		// 無理押しが来ないようにLaneShuffleをかける(ただし正規鏡を除く)。無理押しが来ない譜面が存在しない場合は正規か鏡でランダム
 		Mode mode = model.getMode();
-		int[] keys;
-		keys = getKeys(mode, false);
 		int lanes = mode.key;
 		int[] ln = new int[lanes];
 		int[] endLnNoteTime = new int[lanes];
@@ -273,91 +388,11 @@ public class LaneShuffleModifier extends PatternModifier {
 		noMurioshiLaneCombinations.remove(Arrays.asList(8, 7, 6, 5, 4, 3, 2, 1, 0));
 		return noMurioshiLaneCombinations;
 	}
-
+	
 	private void swap(int[] input, int a, int b) {
 		int tmp = input[a];
 		input[a] = input[b];
 		input[b] = tmp;
 	}
-
-	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
-		makeRandom(model);
-		int lanes = model.getMode().key;
-		TimeLine[] timelines = model.getAllTimeLines();
-		for (int index = 0; index < timelines.length; index++) {
-			final TimeLine tl = timelines[index];
-			if (tl.existNote() || tl.existHiddenNote()) {
-				Note[] notes = new Note[lanes];
-				Note[] hnotes = new Note[lanes];
-				for (int i = 0; i < lanes; i++) {
-					notes[i] = tl.getNote(i);
-					hnotes[i] = tl.getHiddenNote(i);
-				}
-				boolean[] clone = new boolean[lanes];
-				for (int i = 0; i < lanes; i++) {
-					final int mod = i < random.length ? random[i] : i;
-					if (clone[mod]) {
-						if (notes[mod] != null) {
-							if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
-								for (int j = index - 1; j >= 0; j--) {
-									if (((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
-										LongNote ln = (LongNote) timelines[j].getNote(i);
-										tl.setNote(i, ln.getPair());
-//										System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == "
-//												+ ((LongNote) notes[mod]).getPair().toString() + " : "
-//												+ notes[mod].toString());
-										break;
-									}
-								}
-							} else {
-								tl.setNote(i, (Note) notes[mod].clone());
-							}
-						} else {
-							tl.setNote(i, null);
-						}
-						if (hnotes[mod] != null) {
-							tl.setHiddenNote(i, (Note) hnotes[mod].clone());
-						} else {
-							tl.setHiddenNote(i, null);
-						}
-					} else {
-						tl.setNote(i, notes[mod]);
-						tl.setHiddenNote(i, hnotes[mod]);
-						clone[mod] = true;
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	public boolean isToDisplay() {
-		return switch (type) {
-			case RANDOM, R_RANDOM, CROSS, RANDOM_EX -> true;
-			default -> false;
-		};
-	}
-
-	public int[] getRandomPattern(Mode mode) {
-		int targetSide = getModifyTarget();
-		int keys = mode.key / mode.player;
-		int[] repr = new int[keys];
-		switch (type) {
-			case RANDOM:
-			case R_RANDOM:
-			case CROSS:
-			case RANDOM_EX:
-				if (mode.scratchKey.length > 0 && type != Random.RANDOM_EX) { // BEAT-*K
-					System.arraycopy(random, keys * targetSide, repr, 0, keys - 1);
-					repr[keys - 1] = mode.scratchKey[targetSide];
-				} else {
-					System.arraycopy(random, keys * targetSide, repr, 0, keys);
-				}
-				break;
-			default:
-				break;
-		}
-		return repr;
-	}
 }
+

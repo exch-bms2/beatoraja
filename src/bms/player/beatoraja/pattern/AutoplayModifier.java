@@ -22,32 +22,31 @@ public class AutoplayModifier extends PatternModifier {
 	}
 
 	public AutoplayModifier(int[] lanes, int margin) {
-		super(2);
 		this.lanes = lanes;
 		this.margin = margin;
 	}
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
+		AssistLevel assist = AssistLevel.NONE;
 		TimeLine[] tls = model.getAllTimeLines();
-		boolean[] ln = new boolean[model.getMode().key];
+		boolean[] lns = new boolean[model.getMode().key];
 		for (int i = 0, pos = 0;i < tls.length;i++) {
 			final TimeLine tl = tls[i];
 			boolean remove = false;
 
 			if(margin > 0) {
 				while(tls[pos].getTime() < tl.getTime() - margin) {
-					for(int lane = 0;lane < ln.length;lane++) {
-						if(tls[pos].getNote(lane) instanceof LongNote) {
-							LongNote note = (LongNote)tls[pos].getNote(lane);
-							ln[lane] = !note.isEnd();
+					for(int lane = 0;lane < lns.length;lane++) {
+						if(tls[pos].getNote(lane) instanceof LongNote note) {
+							lns[lane] = !note.isEnd();
 						}
 					}
 					pos++;
 				}
 				int endtime = tl.getTime() + margin;
 				for(int lane : lanes) {
-					if(tl.getNote(lane) instanceof LongNote && !((LongNote) tl.getNote(lane)).isEnd()) {
-						endtime = Math.max(((LongNote) tl.getNote(lane)).getPair().getTime() + margin, endtime);
+					if(tl.getNote(lane) instanceof LongNote ln && !ln.isEnd()) {
+						endtime = Math.max(ln.getPair().getTime() + margin, endtime);
 					}
 				}
 
@@ -60,7 +59,7 @@ public class AutoplayModifier extends PatternModifier {
 								break;
 							}
 						}
-						if(b && (tls[j].getNote(lane) != null || ln[lane])) {
+						if(b && (tls[j].getNote(lane) != null || lns[lane])) {
 							remove = true;
 							break;
 						}
@@ -72,10 +71,14 @@ public class AutoplayModifier extends PatternModifier {
 
 			if(remove) {
 				for(int lane : lanes) {
+					if(tl.existNote(lane)) {
+						assist = AssistLevel.ASSIST;
+					}
 					moveToBackground(tls, tl, lane);
 				}
 			}
 		}
+		setAssistLevel(assist);
 		return null;
 	}
 

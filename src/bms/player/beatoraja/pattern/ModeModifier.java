@@ -30,7 +30,7 @@ public class ModeModifier extends PatternModifier {
 	private final Mode afterMode;
 
 	public ModeModifier(Mode beforeMode, Mode afterMode, PlayerConfig config) {
-		super(1);		
+		super(AssistLevel.LIGHT_ASSIST);		
 		this.beforeMode = beforeMode;
 		this.afterMode = afterMode;
 		this.config = config;
@@ -60,7 +60,7 @@ public class ModeModifier extends PatternModifier {
 					hnotes[i] = tl.getHiddenNote(i);
 				}
 				int[] keys;
-				keys = getKeys(afterMode, true);
+				keys = getKeys(afterMode, 0, true);
 				random = algorithm != null && keys.length > 0 ? algorithm.modify(keys, ln,
 						notes, lastNoteTime, tl.getTime(), hranThreshold, config)
 						: keys;
