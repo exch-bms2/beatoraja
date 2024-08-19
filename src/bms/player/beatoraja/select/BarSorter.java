@@ -186,13 +186,16 @@ public enum BarSorter {
 		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
 			return TITLE.sorter.compare(o1, o2);
 		}
-		if (o1.getScore() == null && o2.getScore() == null) {
+		
+		final boolean existsDuration1 = (o1.getScore() != null && o1.getScore().getAvgjudge() != Long.MAX_VALUE);
+		final boolean existsDuration2 = (o2.getScore() != null && o2.getScore().getAvgjudge() != Long.MAX_VALUE);
+		if (!existsDuration1 && !existsDuration2) {
 			return 0;
 		}
-		if (o1.getScore() == null || o1.getScore().getAvgjudge() == Long.MAX_VALUE) {
+		if (!existsDuration1) {
 			return 1;
 		}
-		if (o2.getScore() == null || o2.getScore().getAvgjudge() == Long.MAX_VALUE) {
+		if (!existsDuration2) {
 			return -1;
 		}
 		return (int) (o1.getScore().getAvgjudge() - o2.getScore().getAvgjudge());
