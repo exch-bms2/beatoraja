@@ -29,16 +29,14 @@ public class NoteShuffleModifier extends PatternModifier {
 	}
 
 	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
-		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
+	public void modify(BMSModel model) {
 		randomizer.setRandomSeed(getSeed());
 		randomizer.setModifyLanes(getKeys(model.getMode(), player, isScratchLaneModify));
 		for(TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
-				log.add(new PatternModifyLog(tl.getSection(), randomizer.permutate(tl)));
+				randomizer.permutate(tl);
 			}
 		}
 		setAssistLevel(randomizer.getAssistLevel());
-		return log;
 	}
 }

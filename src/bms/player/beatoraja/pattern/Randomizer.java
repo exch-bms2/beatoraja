@@ -179,7 +179,7 @@ public abstract class Randomizer {
 				randomizer = new SRandomizer(SRAN_THRESHOLD);
 				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}
-			case S_RANDOM_NO_MURIOSHI -> {
+			case S_RANDOM_PLAYABLE -> {
 				randomizer = new NoMurioshiRandomizer(thresholdMillis);
 				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
 			}

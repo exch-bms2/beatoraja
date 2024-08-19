@@ -16,7 +16,7 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.AudioConfig.FrequencyType;
 import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.pattern.*;
-import bms.player.beatoraja.pattern.Random;
+import bms.player.beatoraja.pattern.LaneShuffleModifier.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.SkinType;
@@ -241,7 +241,7 @@ public class BMSPlayer extends MainState {
 						case BEAT_7K -> model.setMode(Mode.BEAT_14K);
 						case KEYBOARD_24K -> model.setMode(Mode.KEYBOARD_24K_DOUBLE);
 					}
-					LaneShuffleModifier mod = LaneShuffleModifier.create(Random.BATTLE);
+					LaneShuffleModifier mod = new PlayerBattleModifier();
 					mod.modify(model);
 					if(playinfo.doubleoption == 3) {
 						PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
@@ -291,11 +291,11 @@ public class BMSPlayer extends MainState {
 			// DP譜面オプション
 			if(model.getMode().player == 2) {
 				if (playinfo.doubleoption == 1) {
-					mods.add(LaneShuffleModifier.create(Random.FLIP));
+					mods.add(new PlayerFlipModifier());
 				}
 				Logger.getGlobal().info("譜面オプション(DP) :  " + playinfo.doubleoption);
 
-				PatternModifier pm = PatternModifier.create(playinfo.randomoption2, 1, model, config);
+				PatternModifier pm = PatternModifier.create(playinfo.randomoption2, 1, model.getMode(), config);
 				if(playinfo.randomoption2seed != -1) {
 					pm.setSeed(playinfo.randomoption2seed);
 				} else {
@@ -306,7 +306,7 @@ public class BMSPlayer extends MainState {
 			}
 
 			// SP譜面オプション
-			PatternModifier pm = PatternModifier.create(playinfo.randomoption, 0, model, config);
+			PatternModifier pm = PatternModifier.create(playinfo.randomoption, 0, model.getMode(), config);
 			if(playinfo.randomoptionseed != -1) {
 				pm.setSeed(playinfo.randomoptionseed);
 			} else {
@@ -547,11 +547,11 @@ public class BMSPlayer extends MainState {
 					pm.modify(model);
 					if (model.getMode().player == 2) {
 						if (property.doubleop == 1) {
-							LaneShuffleModifier.create(Random.FLIP).modify(model);
+							new PlayerFlipModifier().modify(model);
 						}
-						PatternModifier.create(property.random2, 1, model, config).modify(model);
+						PatternModifier.create(property.random2, 1, model.getMode(), config).modify(model);
 					}
-					PatternModifier.create(property.random, 0, model, config).modify(model);
+					PatternModifier.create(property.random, 0, model.getMode(), config).modify(model);
 
 					gauge = practice.getGauge(model);
 					model.setJudgerank(property.judgerank);

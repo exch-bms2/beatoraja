@@ -1,6 +1,5 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.List;
 import bms.model.*;
 
 /**
@@ -26,7 +25,7 @@ public class AutoplayModifier extends PatternModifier {
 		this.margin = margin;
 	}
 	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
+	public void modify(BMSModel model) {
 		AssistLevel assist = AssistLevel.NONE;
 		TimeLine[] tls = model.getAllTimeLines();
 		boolean[] lns = new boolean[model.getMode().key];
@@ -79,7 +78,6 @@ public class AutoplayModifier extends PatternModifier {
 			}
 		}
 		setAssistLevel(assist);
-		return null;
 	}
 
 }

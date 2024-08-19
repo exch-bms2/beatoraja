@@ -5,8 +5,6 @@ import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 
-import java.util.List;
-
 /**
  * BGレーンからノーツを追加する譜面オプション
  *
@@ -36,10 +34,10 @@ public class ExtraNoteModifier extends PatternModifier {
     }
 
     @Override
-    public List<PatternModifyLog> modify(BMSModel model) {
+    public void modify(BMSModel model) {
         AssistLevel assist = AssistLevel.NONE;
         TimeLine[] tls = model.getAllTimeLines();
-        boolean[] ln = new boolean[model.getMode().key];
+        boolean[] lns = new boolean[model.getMode().key];
         boolean[] blank = new boolean[model.getMode().key];
         Note[] lastnote = new Note[model.getMode().key];
 
@@ -50,10 +48,10 @@ public class ExtraNoteModifier extends PatternModifier {
 
             for(int key = 0;key < model.getMode().key;key++) {
                 final Note note = tl.getNote(key);
-                if(note instanceof LongNote) {
-                    ln[key] = !((LongNote) note).isEnd();
+                if(note instanceof LongNote ln) {
+                    lns[key] = !ln.isEnd();
                 }
-                blank[key] = !ln[key] && note == null && (scratch || !model.getMode().isScratchKey(key));
+                blank[key] = !lns[key] && note == null && (scratch || !model.getMode().isScratchKey(key));
             }
 
             for(int d = 0; d < depth;d++) {
@@ -82,6 +80,5 @@ public class ExtraNoteModifier extends PatternModifier {
         }
 
         setAssistLevel(assist);
-        return null;
     }
 }

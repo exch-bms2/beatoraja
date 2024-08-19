@@ -6,20 +6,22 @@ public enum Random {
 	IDENTITY(RandomUnit.NONE, false),
 	MIRROR(RandomUnit.LANE, false),
 	RANDOM(RandomUnit.LANE, false),
-	R_RANDOM(RandomUnit.LANE, false),
+	ROTATE(RandomUnit.LANE, false),
 	S_RANDOM(RandomUnit.NOTE, false),
 	SPIRAL(RandomUnit.NOTE, false),
 	H_RANDOM(RandomUnit.NOTE, false),
 	ALL_SCR(RandomUnit.NOTE, true),
+	MIRROR_EX(RandomUnit.LANE, true),
 	RANDOM_EX(RandomUnit.LANE, true),
+	ROTATE_EX(RandomUnit.LANE, true),
 	S_RANDOM_EX(RandomUnit.NOTE, true),
 
     CROSS(RandomUnit.LANE, false),
 
     CONVERGE(RandomUnit.NOTE, true),
     S_RANDOM_NO_THRESHOLD(RandomUnit.NOTE, false),
-    RANDOM_NO_MURIOSHI(RandomUnit.LANE, true),
-    S_RANDOM_NO_MURIOSHI(RandomUnit.NOTE, true),
+    RANDOM_PLAYABLE(RandomUnit.LANE, true),
+    S_RANDOM_PLAYABLE(RandomUnit.NOTE, true),
 
     FLIP(RandomUnit.PLAYER, true),
     BATTLE(RandomUnit.PLAYER, true),
@@ -28,9 +30,9 @@ public enum Random {
 	public final RandomUnit unit;
 	
 	public static final Random[] OPTION_GENERAL = 
-		{IDENTITY, MIRROR, RANDOM, R_RANDOM, S_RANDOM, SPIRAL, H_RANDOM, ALL_SCR, RANDOM_EX, S_RANDOM_EX};
+		{IDENTITY, MIRROR, RANDOM, ROTATE, S_RANDOM, SPIRAL, H_RANDOM, ALL_SCR, RANDOM_EX, S_RANDOM_EX};
 	public static final Random[] OPTION_PMS = 
-		{IDENTITY, MIRROR, RANDOM, R_RANDOM, S_RANDOM_NO_THRESHOLD, SPIRAL, H_RANDOM, CONVERGE, RANDOM_NO_MURIOSHI, S_RANDOM_NO_MURIOSHI};
+		{IDENTITY, MIRROR, RANDOM, ROTATE, S_RANDOM_NO_THRESHOLD, SPIRAL, H_RANDOM, CONVERGE, RANDOM_PLAYABLE, S_RANDOM_PLAYABLE};
 
 	public static final Random[] OPTION_DOUBLE = {IDENTITY, FLIP};
 	public static final Random[] OPTION_SINGLE = {IDENTITY, BATTLE};

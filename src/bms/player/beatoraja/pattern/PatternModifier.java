@@ -1,11 +1,11 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import bms.model.*;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.pattern.LaneShuffleModifier.*;
 
 /**
  * 譜面オプションの抽象クラス
@@ -36,8 +36,7 @@ public abstract class PatternModifier {
 		this.assist = assist;
 	}
 
-	// TODO PatternModifyLogは現状保存していないため、返り値不要
-	public abstract List<PatternModifyLog> modify(BMSModel model);
+	public abstract void modify(BMSModel model);
 
 	/**
 	 * 譜面変更ログの通りに譜面オプションをかける
@@ -99,18 +98,33 @@ public abstract class PatternModifier {
      * @param mode 譜面のモード
      * @return
      */
-    public static PatternModifier create(int id, int side, BMSModel model, PlayerConfig config) {
-		final Random chartOprion = Random.getRandom(id, model.getMode());
-		PatternModifier pm = switch (chartOprion.unit) {
-			case NONE -> new PatternModifier() {
-				@Override
-				public List<PatternModifyLog> modify(BMSModel model) {
-					return Collections.emptyList();
+    public static PatternModifier create(int id, int player, Mode mode, PlayerConfig config) {
+		final Random chartOprion = Random.getRandom(id, mode);
+		PatternModifier pm = switch (chartOprion) {
+			case IDENTITY -> new PatternModifier() {
+			@Override
+				public void modify(BMSModel model) {
 				}
 			};
-			case LANE, PLAYER -> LaneShuffleModifier.create(chartOprion, model.getMode(), side);
-			case NOTE -> new NoteShuffleModifier(chartOprion, side, model.getMode(), config);
+			case MIRROR -> new LaneMirrorShuffleModifier(player, false);
+			case MIRROR_EX -> new LaneMirrorShuffleModifier(player, true);
+			case ROTATE -> new LaneRotateShuffleModifier(player, false);
+			case ROTATE_EX -> new LaneRotateShuffleModifier(player, true);
+			case RANDOM -> new LaneRandomShuffleModifier(player, false);
+			case RANDOM_EX -> new LaneRandomShuffleModifier(player, true);
+			case CROSS -> new LaneCrossShuffleModifier(player, false);
+			case RANDOM_PLAYABLE -> new LanePlayableRandomShuffleModifier(player, false);
+
+			case FLIP -> new PlayerFlipModifier();
+			// TODO BATTLEはModeModifierの方がいいかも
+			case BATTLE -> new PlayerBattleModifier();
+
+			default -> switch (chartOprion.unit) {
+				case NOTE -> new NoteShuffleModifier(chartOprion, player, mode, config);
+				default -> throw new IllegalArgumentException("Unexpected value: " + chartOprion.unit);
+			};
 		};
+		
 		return pm;
 	}
 

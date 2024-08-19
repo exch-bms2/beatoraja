@@ -37,8 +37,7 @@ public class ModeModifier extends PatternModifier {
 	}
 
 	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
-		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
+	public void modify(BMSModel model) {
 		model.setMode(afterMode);
 		final Algorithm algorithm = Algorithm.get(beforeMode, afterMode);
 		int lanes = afterMode.key;
@@ -91,10 +90,8 @@ public class ModeModifier extends PatternModifier {
 					}
 					tl.setHiddenNote(i, hn);
 				}
-				log.add(new PatternModifyLog(tl.getSection(), random));
 			}
 		}
-		return log;
 	}
 	
 	enum Algorithm {
