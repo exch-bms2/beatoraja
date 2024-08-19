@@ -796,7 +796,7 @@ public class BMSPlayer extends MainState {
 		}
 		PlayConfig pc = resource.getPlayerConfig().getPlayConfig(model.getMode()).getPlayconfig();
 		if (pc.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
-			pc.setDuration(lanerender.getGreenValue());
+			pc.setDuration(lanerender.getDuration());
 		} else {
 			pc.setHispeed(lanerender.getHispeed());
 		}

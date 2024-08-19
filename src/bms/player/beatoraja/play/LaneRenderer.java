@@ -164,11 +164,11 @@ public class LaneRenderer {
 		return playconfig.getHispeed();
 	}
 
-	public int getGreenValue() {
+	public int getDuration() {
 		return playconfig.getDuration();
 	}
 
-	public void setGreenValue(int gvalue) {
+	public void setDuration(int gvalue) {
 		playconfig.setDuration(gvalue < 1 ? 1 : gvalue);
 		setLanecover(playconfig.getLanecover());
 	}

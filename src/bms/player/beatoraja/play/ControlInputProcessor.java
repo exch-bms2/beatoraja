@@ -61,65 +61,58 @@ public final class ControlInputProcessor {
 		exitPressDuration = player.main.getPlayerConfig().getExitPressDuration();
 
 		final int[] keybinds = switch (this.player.getMode()) {
-			case BEAT_5K, BEAT_10K -> new int[]{-1, 1, -1, 1, -1, 2, -2, -1, 1, -1, 1, -1, 3, -3};
+			case BEAT_5K, BEAT_10K -> new int[]{-1, 1, -1, 1, -1, 2, -2, -1, 1, -1, 1, -1, 2, -2};
 			case POPN_5K, POPN_9K -> new int[]{-1, 1, -1, 1, -1, 1, -1, 2, -2};
-			case BEAT_7K, BEAT_14K -> new int[]{-1, 1, -1, 1, -1, 1, -1, 2, -2, -1, 1, -1, 1, -1, 1, -1, 3, -3};
+			case BEAT_7K, BEAT_14K -> new int[]{-1, 1, -1, 1, -1, 1, -1, 2, -2, -1, 1, -1, 1, -1, 1, -1, 2, -2};
 			case KEYBOARD_24K, KEYBOARD_24K_DOUBLE ->
 					new int[]{-1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1,
 							-1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -2, 2,
 							-1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1,
-							-1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -3, 3};
+							-1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -2, 2};
 		};
-		final int[] analogbinds = new int[]{-1,-1,-1,-1};
-		for(int i = 0;i < keybinds.length;i++) {
-			switch(keybinds[i]) {
-				case 2 -> analogbinds[0] = i;
-				case 3 -> analogbinds[1] = i;
-				case -2 -> analogbinds[2] = i;
-				case -3 -> analogbinds[3] = i;
-			}
-		}
 
-		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		processStart = () -> {
+			final LaneRenderer lanerender = player.getLanerender();
+			final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 			// change hi speed by START + Keys
-			for(int i = 0; i <= keybinds.length; i++) {
+			for(int i = 0; i < keybinds.length; i++) {
 				final boolean keystate = input.getKeyState(i);
 				switch(keybinds[i]) {
 					case -1 -> {
-						if(!hschanged[i]) {
+						if(keystate && !hschanged[i]) {
 							lanerender.changeHispeed(false);
 						}
 					}
 					case 1 -> {
-						if(!hschanged[i]) {
+						if(keystate && !hschanged[i]) {
 							lanerender.changeHispeed(true);
 						}
 					}
-					case 2,3 -> coverValueChange(i, true);
-					case -2,-3 -> coverValueChange(i, false);
+					case 2 -> changeCoverValue(i, true);
+					case -2 -> changeCoverValue(i, false);
 				}
 				hschanged[i] = keystate;
 			}
 		};
 		processSelect = () -> {
+			final LaneRenderer lanerender = player.getLanerender();
+			final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 			// change duration by SELECT + Keys
-			for(int i = 0; i <= keybinds.length; i++) {
+			for(int i = 0; i < keybinds.length; i++) {
 				final boolean keystate = input.getKeyState(i);
 				switch(keybinds[i]) {
 					case -1 -> {
-						if(!hschanged[i]) {
-							lanerender.setGreenValue(lanerender.getGreenValue() -1);
+						if(keystate && !hschanged[i]) {
+							lanerender.setDuration(lanerender.getDuration() -1);
 						}
 					}
 					case 1 -> {
-						if(!hschanged[i]) {
-							lanerender.setGreenValue(lanerender.getGreenValue() +1);
+						if(keystate && !hschanged[i]) {
+							lanerender.setDuration(lanerender.getDuration() +1);
 						}
 					}
-					case 2,3 -> greenNumberChange(i, true);
-					case -2,-3 -> greenNumberChange(i, false);
+					case 2 -> changeDuration(i, true);
+					case -2 -> changeDuration(i, false);
 				}
 				hschanged[i] = keystate;
 			}
@@ -250,7 +243,7 @@ public final class ControlInputProcessor {
 		}
 	}
 
-	private void coverValueChange(int key, boolean up) {
+	private void changeCoverValue(int key, boolean up) {
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
 		// move lane cover by START + Scratch
@@ -275,7 +268,7 @@ public final class ControlInputProcessor {
 		}
 	}
 
-	private void greenNumberChange(int key, boolean up) {
+	private void changeDuration(int key, boolean up) {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
@@ -284,14 +277,14 @@ public final class ControlInputProcessor {
 			// analog
 			int dTicks = input.getAnalogDiffAndReset(key, 200) * (up ? 1 : -1);
 			if (dTicks != 0) {
-				lanerender.setGreenValue(lanerender.getGreenValue() + dTicks);
+				lanerender.setDuration(lanerender.getDuration() + dTicks);
 			}
 		} else {
 			// non-analog
 			if (input.getKeyState(key)) {
 				long l = System.currentTimeMillis();
 				if (l - lanecovertiming > 50) {
-					lanerender.setGreenValue(lanerender.getGreenValue() + (up ? 1 : -1));
+					lanerender.setDuration(lanerender.getDuration() + (up ? 1 : -1));
 					lanecovertiming = l;
 				}
 			}
