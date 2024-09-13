@@ -32,7 +32,7 @@ import com.badlogic.gdx.utils.SerializationException;
  * @author exch
  */
 public final class PracticeConfiguration {
-	
+
 
 	private BitmapFont titlefont;
 
@@ -48,12 +48,12 @@ public final class PracticeConfiguration {
 	private static final String[] DPRANDOM = { "NORMAL", "FLIP" };
 
 	private PracticeProperty property = new PracticeProperty();
-	
+
 	public PracticeConfiguration() {
 		// TODO 描画位置、使用テキスト等をスキン定義できるように
 		// TODO スキン定義がない場合のデフォルト配置の定義
 	}
-	
+
 	private SkinNoteDistributionGraph[] graph = { 
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_NORMAL, 500, 0, 0, 0, 0),
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_JUDGE, 500, 0, 0, 0, 0),
@@ -61,7 +61,7 @@ public final class PracticeConfiguration {
 	};
 	
 	private static final String[] GRAPHTYPESTR = {"NOTETYPE", "JUDGE", "EARLYLATE"};
-		
+
 	public static final PracticeElement[] elements = PracticeElement.values();
 
 	public void create(BMSModel model, Config config) {
@@ -97,7 +97,7 @@ public final class PracticeConfiguration {
 		
 		for(int i = 0; i < graph.length; i++) {
 			graph[i].setDestination(0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
-		}		
+		}
 	}
 
 	public void saveProperty() {
@@ -127,7 +127,7 @@ public final class PracticeConfiguration {
 	public void processInput(BMSPlayerInputProcessor input) {
 		if (input.isControlKeyPressed(ControlKeys.UP)) {
 			do {
-				cursorpos = (cursorpos + elements.length - 1) % elements.length;				
+				cursorpos = (cursorpos + elements.length - 1) % elements.length;
 			} while(!elements[cursorpos].predicate.test(this));
 		}
 		if (input.isControlKeyPressed(ControlKeys.DOWN)) {
@@ -186,7 +186,7 @@ public final class PracticeConfiguration {
 	}
 
 	enum PracticeElement {
-		
+
 		STARTTIME((practice, inc) -> {
 			final TimeLine[] tl = practice.model.getAllTimeLines();
 			final PracticeProperty property = practice.property;
@@ -252,7 +252,7 @@ public final class PracticeConfiguration {
 		GRAPHTYPE((practice, inc) -> {
 			practice.property.graphtype = (practice.property.graphtype + (inc ? 1 : 2)) % 3;
 		}, property -> "GRAPHTYPE : " + GRAPHTYPESTR[property.graphtype]),
-		OPTION1P((practice, inc) -> {			
+		OPTION1P((practice, inc) -> {
 			final int options = (practice.model.getMode() == Mode.POPN_5K || practice.model.getMode() == Mode.POPN_9K ? 7 : 10);
 			practice.property.random = (practice.property.random + (inc ? 1 : (options -1))) % options;
 		}, property -> "OPTION-1P : " + RANDOM[property.random]),
@@ -262,17 +262,17 @@ public final class PracticeConfiguration {
 		OPTIONDP((practice, inc) -> {
 			practice.property.doubleop = (practice.property.doubleop + 1) % 2;
 		}, property -> "OPTION-DP : " + DPRANDOM[property.doubleop], practice -> practice.model.getMode().player == 2);
-		
+
 		public final BiConsumer<PracticeConfiguration, Boolean> action;
-		
+
 		public final Function<PracticeProperty, String> text;
-		
+
 		public final Predicate<PracticeConfiguration> predicate;
-		
+
 		private PracticeElement(BiConsumer<PracticeConfiguration, Boolean> action, Function<PracticeProperty, String> text) {
 			this(action, text, property -> true);
 		}
-		
+
 		private PracticeElement(BiConsumer<PracticeConfiguration, Boolean> action, Function<PracticeProperty, String> text, Predicate<PracticeConfiguration> predicate) {
 			this.action = action;
 			this.text = text;
@@ -285,17 +285,54 @@ public final class PracticeConfiguration {
 	 * @author exch
 	 */
 	public static class PracticeProperty {
+
+		/**
+		 * 演奏開始時間
+		 */
 		public int starttime = 0;
+		/**
+		 * 演奏終了時間
+		 */
 		public int endtime = 10000;
+		/**
+		 * 選択ゲージカテゴリ
+		 */
 		public GaugeProperty gaugecategory;
+		/**
+		 * 選択ゲージタイプ
+		 */
 		public int gaugetype = 2;
+		/**
+		 * 開始ゲージ量
+		 */
 		public int startgauge = 20;
+		/**
+		 * 1P側オプション
+		 */
 		public int random = 0;
+		/**
+		 * 2P側オプション
+		 */
 		public int random2 = 0;
+		/**
+		 * DPオプション
+		 */
 		public int doubleop = 0;
+		/**
+		 * 判定幅
+		 */
 		public int judgerank = 100;
+		/**
+		 * 再生速度倍率
+		 */
 		public int freq = 100;
+		/**
+		 * TOTAL値
+		 */
 		public double total = 0;
+		/**
+		 *
+		 */
 		public int graphtype = 0;
 	}
 }
