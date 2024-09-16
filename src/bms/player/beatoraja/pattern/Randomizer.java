@@ -152,39 +152,17 @@ public abstract class Randomizer {
 			thresholdMillis = DEFAULT_HRAN_THRESHOLD;
 		}
 
-		switch (r) {
-			case ALL_SCR -> {
-				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
-				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case CONVERGE -> {
-				randomizer = new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
-				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case H_RANDOM -> {
-				randomizer = new SRandomizer(thresholdMillis);
-				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case SPIRAL -> {
-				randomizer = new SpiralRandomizer();
-				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case S_RANDOM -> {
-				randomizer = new SRandomizer(SRAN_THRESHOLD);
-			}
-			case S_RANDOM_NO_THRESHOLD -> {
-				randomizer = new SRandomizer(0);
-			}
-			case S_RANDOM_EX -> {
-				randomizer = new SRandomizer(SRAN_THRESHOLD);
-				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			case S_RANDOM_PLAYABLE -> {
-				randomizer = new NoMurioshiRandomizer(thresholdMillis);
-				randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			}
-			default -> {}
-		}
+		randomizer = switch (r) {
+			case ALL_SCR -> new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
+			case CONVERGE -> new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
+			case H_RANDOM -> new SRandomizer(thresholdMillis, AssistLevel.LIGHT_ASSIST);
+			case SPIRAL -> new SpiralRandomizer();
+			case S_RANDOM -> new SRandomizer(SRAN_THRESHOLD, AssistLevel.NONE);
+			case S_RANDOM_NO_THRESHOLD -> new SRandomizer(0, AssistLevel.NONE);
+			case S_RANDOM_EX -> new SRandomizer(SRAN_THRESHOLD, AssistLevel.LIGHT_ASSIST);
+			case S_RANDOM_PLAYABLE -> new NoMurioshiRandomizer(thresholdMillis);
+			default -> throw new IllegalArgumentException("Unexpected value: " + r);
+		};
 		randomizer.setMode(mode);
 		return randomizer;
 	}
@@ -293,8 +271,9 @@ abstract class TimeBasedRandomizer extends Randomizer {
  */
 class SRandomizer extends TimeBasedRandomizer {
 
-	public SRandomizer(int threshold) {
+	public SRandomizer(int threshold, AssistLevel assist) {
 		super(threshold);
+		setAssistLevel(assist);
 	}
 
 	@Override
@@ -323,6 +302,9 @@ class SpiralRandomizer extends Randomizer {
 	private int head;
 	private int cycle;
 
+	public SpiralRandomizer() {
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
+	}
 	@Override
 	public void setModifyLanes(int[] lanes) {
 		super.setModifyLanes(lanes);
@@ -373,6 +355,7 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 		this.scratchThreshold = s;
 		this.scratchIndex = 0;
 		this.modifySide = modifySide; // 1P側は0,2P側は1
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
 	}
 
 	// scratchLaneの決定
@@ -481,6 +464,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 
 	public NoMurioshiRandomizer(int threshold) {
 		super(threshold);
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
 	}
 
 	@Override
@@ -587,6 +571,7 @@ class ConvergeRandomizer extends TimeBasedRandomizer {
 		super(threshold1);
 		this.threshold2 = threshold2;
 		this.rendaCount = new HashMap<>();
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
 	}
 
 	@Override
