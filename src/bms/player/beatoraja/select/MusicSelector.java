@@ -22,6 +22,7 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
@@ -30,7 +31,7 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
  *
  * @author exch
  */
-public class MusicSelector extends MainState {
+public final class MusicSelector extends MainState {
 
 	// TODO　ミラーランダム段位のスコア表示
 
@@ -271,7 +272,7 @@ public class MusicSelector extends MainState {
 						&& main.getMusicDownloadProcessor().isAlive()) {
 					execute(MusicSelectCommand.DOWNLOAD_IPFS);
 				} else {
-	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
+	                executeEvent(EventType.open_download_site);
 				}
 			} else if (current instanceof ExecutableBar) {
 				readChart(((ExecutableBar) current).getSongData(), current);					
@@ -325,8 +326,8 @@ public class MusicSelector extends MainState {
 	}
 	
 	public void select(Bar current) {
-		if (current instanceof DirectoryBar) {
-			if (manager.updateBar(current)) {
+		if (current instanceof DirectoryBar dirbar) {
+			if (manager.updateBar(dirbar)) {
 				play(FOLDER_OPEN);
 			}
 			execute(MusicSelectCommand.RESET_REPLAY);

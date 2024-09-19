@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -284,6 +286,97 @@ public class EventFactory {
 				}
 			}
 		}),
+		/**
+		 * 楽曲フォルダ/難易度表を更新する
+		 */
+		update_folder(211, state -> {
+			if(state instanceof MusicSelector selector) {
+				Bar selected = selector.getBarManager().getSelected();
+				if (selected instanceof FolderBar) {
+					selector.main.updateSong(((FolderBar) selected).getFolderData().getPath());
+				} else if (selected instanceof TableBar) {
+					selector.main.updateTable((TableBar) selected);
+				} else if (selected instanceof SongBar) {
+					final String path = ((SongBar) selected).getSongData().getPath();
+					if (path != null) {
+						selector.main.updateSong(Paths.get(path).getParent().toString());
+					}
+				}				
+			}
+		}),
+		/**
+		 * 楽曲ファイルの場所をOS既定のファイルブラウザーで開く
+		 */
+		open_with_explorer(212, state -> {
+			if(state instanceof MusicSelector selector) {
+				Bar current = selector.getBarManager().getSelected();
+				try {
+					if (Desktop.isDesktopSupported()) {
+						if (current instanceof SongBar songbar) {
+							if (songbar.existsSong()) {
+								Desktop.getDesktop().open(Paths.get(songbar.getSongData().getPath()).getParent().toFile());
+							} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
+								String[] md5 = songbar.getSongData().getOrg_md5()
+										.toArray(new String[songbar.getSongData().getOrg_md5().size()]);
+								SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
+								for (SongData sd : songdata) {
+									if (sd.getPath() != null) {
+										Desktop.getDesktop().open(Paths.get(sd.getPath()).getParent().toFile());
+										break;
+									}
+								}
+							} else {
+								Matcher m = Pattern.compile(".[^\\(\\[～~]*").matcher(current.getTitle());
+								if (m.find()) {
+									SongData[] songdata = selector.getSongDatabase().getSongDatasByText(m.group());
+									for (SongData sd : songdata) {
+										if (sd.getPath() != null) {
+											Desktop.getDesktop().open(Paths.get(sd.getPath()).getParent().toFile());
+											break;
+										}
+									}
+								}
+							}
+						} else if (current instanceof FolderBar) {
+							Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}				
+			}
+		}),
+		/**
+		 * 楽曲ファイルのDLサイトをOS既定のブラウザーで開く
+		 */
+		open_download_site(213, state -> {
+			if(state instanceof MusicSelector selector) {
+				Bar current = selector.getBarManager().getSelected();
+				if (current instanceof SongBar) {
+					final SongData song = ((SongBar) current).getSongData();
+					if (song != null) {
+						if (song.getUrl() != null && song.getUrl().length() > 0) {
+							try {
+								URI uri = new URI(song.getUrl());
+								Desktop.getDesktop().browse(uri);
+							} catch (Throwable e) {
+								e.printStackTrace();
+							}
+						}
+						if (song.getAppendurl() != null && song.getAppendurl().length() > 0
+								&& !song.getAppendurl().equals(song.getUrl())) {
+							try {
+								URI uri = new URI(song.getAppendurl());
+								Desktop.getDesktop().browse(uri);
+							} catch (Throwable e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}				
+			}
+		}), 
+
 		bga(72, (state, arg1) -> {
 			if(state instanceof MusicSelector) {
 				state.main.getConfig().setBga((state.resource.getConfig().getBga() + (arg1 >= 0 ? 1 : 2)) % 3);
