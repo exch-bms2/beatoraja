@@ -48,9 +48,11 @@ public enum MusicSelectKeyProperty {
         {DOWN, TARGET_DOWN}
 	}),
 	;
+	
+	public static final MusicSelectKeyProperty[] values = MusicSelectKeyProperty.values();
 
 	private final MusicSelectKey[][] assign;
-
+	
 	private MusicSelectKeyProperty(MusicSelectKey[][] assign) {
 		this.assign = assign;
 	}
