@@ -661,7 +661,7 @@ public class BooleanPropertyFactory {
 							return playConfig.isEnableConstant();
 						}
 					} else if (state instanceof BMSPlayer player) {
-						return player.getLanerender().getPlayConfig().isEnableConstant();
+						return player.resource.getPlayerConfig().getPlayConfig(player.getMode()).getPlayconfig().isEnableConstant();
 					}
 					return false;
 				})
