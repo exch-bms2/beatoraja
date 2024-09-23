@@ -123,7 +123,7 @@ public class StringPropertyFactory {
 		key10(49, createKeyname(9)),
 		sort(61, (state) -> state.resource.getPlayerConfig().getSortid()),
 
-		chartreplication(86, (state) -> state.resource.getPlayerConfig().getChartReplicationMode().name()),
+		chartreplication(86, (state) -> state.resource.getPlayerConfig().getChartReplicationMode()),
 
 		key11(240, createKeyname(10)),
 		key12(241, createKeyname(11)),

@@ -77,6 +77,9 @@
 			</valueFactory>
 		</NumericSpinner>
 	</HBox>
-	
+    <HBox spacing="10" prefHeight="30.0">
+        <Label text="Chart Replication Mode" prefHeight="25.0"/>
+        <ComboBox fx:id="chartReplicationMode" prefHeight="25.0"/>
+    </HBox>
 </VBox>
 

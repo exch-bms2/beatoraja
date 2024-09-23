@@ -381,7 +381,7 @@ public final class MusicSelector extends MainState {
 			resource.setRivalScoreData(rival);
 			ReplayData chartOption = null;
 			ReplayData replay;
-			switch(config.getChartReplicationMode()) {
+			switch(ChartReplicationMode.get(config.getChartReplicationMode())) {
 			case NONE:
 				// TODO 通常オプションもここに入れて渡す？
 				break;
@@ -714,5 +714,17 @@ public final class MusicSelector extends MainState {
 
 	public enum ChartReplicationMode {
 		NONE, RIVALCHART, RIVALOPTION, REPLAYCHART, REPLAYOPTION;
+		
+		public static final ChartReplicationMode[] allMode = {NONE, RIVALCHART, RIVALOPTION};
+		
+		public static ChartReplicationMode get(String name) {
+			for(ChartReplicationMode mode : allMode) {
+				if(mode.name().equals(name)) {
+					return mode;
+				}
+			}
+			return NONE;
+		}
+		
 	}
 }

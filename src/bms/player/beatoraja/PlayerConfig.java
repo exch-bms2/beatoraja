@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.select.MusicSelector.ChartReplicationMode;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -59,7 +58,7 @@ public final class PlayerConfig {
 	 */
 	private int doubleoption;
 	
-	private ChartReplicationMode chartReplicationMode = ChartReplicationMode.RIVALCHART;
+	private String chartReplicationMode = "RIVALCHART";
 
 	/**
 	 * スコアターゲット
@@ -841,7 +840,7 @@ public final class PlayerConfig {
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
-		chartReplicationMode = chartReplicationMode != null ? chartReplicationMode : ChartReplicationMode.NONE;
+		chartReplicationMode = chartReplicationMode != null ? chartReplicationMode : "NONE";
 		targetid = targetid!= null ? targetid : "MAX";
 		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
@@ -1064,11 +1063,11 @@ public final class PlayerConfig {
 		this.eventMode = eventMode;
 	}
 
-	public ChartReplicationMode getChartReplicationMode() {
+	public String getChartReplicationMode() {
 		return chartReplicationMode;
 	}
 
-	public void setChartReplicationMode(ChartReplicationMode chartReplicationMode) {
+	public void setChartReplicationMode(String chartReplicationMode) {
 		this.chartReplicationMode = chartReplicationMode;
 	}
 }
