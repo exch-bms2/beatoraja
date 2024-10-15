@@ -102,7 +102,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				if(keys[i] < 0) {
 					continue;
 				}
-				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
+				final boolean pressed = KeyPressedPreferNative.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = microtime;
