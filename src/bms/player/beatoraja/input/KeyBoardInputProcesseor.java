@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.Input.Keys;
+import org.lwjgl.opengl.Display;
 
 /**
  * キーボード入力処理用クラス
@@ -98,11 +99,18 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void poll(final long microtime) {
 		if (!textmode) {
+			final boolean isWindowFocused = Display.isActive();
+
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
 				}
-				final boolean pressed = KeyPressedPreferNative.isKeyPressed(keys[i]);
+
+				// KeyPressedPreferNative.isKeyPressed internally uses GetAsyncKeyState when
+				// used on windows, so it returns true even if the window is NOT foreground.
+				// We use `isWindowFocused` so that the key will only be pressed when the game
+				// is the focused application.
+				final boolean pressed = isWindowFocused && KeyPressedPreferNative.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = microtime;
