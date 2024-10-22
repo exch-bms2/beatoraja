@@ -45,6 +45,7 @@ public class KeyPressedPreferNative {
 
     /**
      * Get HWND pointer value of beatoraja window.
+     *
      * @return
      */
     private static Pointer getBeatorajaHWND() {
@@ -63,7 +64,7 @@ public class KeyPressedPreferNative {
                 Method getHwndMethod = windowsDisplayClass.getDeclaredMethod("getHwnd");
                 getHwndMethod.setAccessible(true);
 
-                beatorajaHWND = new Pointer((long)getHwndMethod.invoke(implementation));
+                beatorajaHWND = new Pointer((long) getHwndMethod.invoke(implementation));
             } catch (Exception exception) {
                 throw new RuntimeException(exception);
             }
@@ -76,7 +77,7 @@ public class KeyPressedPreferNative {
     }
 
     public static boolean windowsGetAsyncKeyStateVK(Win32VK vKey) {
-        return (User32.INSTANCE.GetAsyncKeyState(vKey.code) & 0x8000) != 0;
+        return windowsGetAsyncKeyState(vKey.code);
     }
 
     public static boolean windowsIsKeyPressed(int gdxKey) {
@@ -152,6 +153,9 @@ public class KeyPressedPreferNative {
             case Input.Keys.Y:
             case Input.Keys.Z:
                 return windowsGetAsyncKeyState(0x41 + gdxKey - Input.Keys.A);
+
+            // Some people *might* want to use control keys for gameplays, so
+            // unlike F1~F12 keys we just use GetAsyncKeyState here.
             case Input.Keys.ALT_LEFT:
                 return windowsGetAsyncKeyStateVK(VK_LMENU);
             case Input.Keys.ALT_RIGHT:
@@ -215,7 +219,11 @@ public class KeyPressedPreferNative {
             case Input.Keys.F10:
             case Input.Keys.F11:
             case Input.Keys.F12:
-                return windowsGetAsyncKeyState(gdxKey - Input.Keys.F1 + VK_F1.code);
+                // If we just use GetAsyncKeyState for polling F(\d+) keys,
+                // common keystrokes like Alt+F4 would not work.
+                // I suspect nobody would use function keys for gaming, so
+                // some delay in processing keys won't matter that much?
+                return Gdx.input.isKeyPressed(gdxKey);
             case Input.Keys.NUMPAD_0:
             case Input.Keys.NUMPAD_1:
             case Input.Keys.NUMPAD_2:
