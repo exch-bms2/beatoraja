@@ -20,11 +20,14 @@ package bms.player.beatoraja.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.Win32VK;
+import com.sun.jna.platform.win32.WinDef;
+import org.lwjgl.LWJGLUtil;
+import org.lwjgl.opengl.Display;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
 
 import static com.sun.jna.platform.win32.Win32VK.*;
 
@@ -37,21 +40,37 @@ import static com.sun.jna.platform.win32.Win32VK.*;
  * wraps around the api for libgdx.
  */
 public class KeyPressedPreferNative {
-    // Os utilities
-    private static String OS = null;
+    // Windows specific utilities
+    private static Pointer beatorajaHWND = null;
 
-    public static String getOsName() {
-        if (OS == null) {
-            OS = System.getProperty("os.name");
+    /**
+     * Get HWND pointer value of beatoraja window.
+     * @return
+     */
+    private static Pointer getBeatorajaHWND() {
+        if (beatorajaHWND == null) {
+            // Reflection hack.
+            try {
+                Method getImplementationMethod = Display.class.getDeclaredMethod("getImplementation");
+                getImplementationMethod.setAccessible(true);
+                Object implementation = getImplementationMethod.invoke(null);
+                Class<?> windowsDisplayClass = Class.forName("org.lwjgl.opengl.WindowsDisplay");
+
+                if (!windowsDisplayClass.isInstance(implementation)) {
+                    throw new Exception("The current platform must be Windows!");
+                }
+
+                Method getHwndMethod = windowsDisplayClass.getDeclaredMethod("getHwnd");
+                getHwndMethod.setAccessible(true);
+
+                beatorajaHWND = new Pointer((long)getHwndMethod.invoke(implementation));
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
         }
-        return OS;
+        return beatorajaHWND;
     }
 
-    public static boolean isWindows() {
-        return getOsName().startsWith("Windows");
-    }
-
-    // Windows- specific utilities
     public static boolean windowsGetAsyncKeyState(int vKey) {
         return (User32.INSTANCE.GetAsyncKeyState(vKey) & 0x8000) != 0;
     }
@@ -61,6 +80,15 @@ public class KeyPressedPreferNative {
     }
 
     public static boolean windowsIsKeyPressed(int gdxKey) {
+        // Note: GetAsyncKeyState checks if the key is pressed regardless of whether the application window
+        // is in focus or not. This may severely interfere with user usability when beatoraja is NOT
+        // in foreground. (e.g minimized). We check if the beatoraja is the focused window before
+        // using GetAsyncKeyState.
+        WinDef.HWND foregroundWindow = User32.INSTANCE.GetForegroundWindow();
+        if (foregroundWindow == null || !foregroundWindow.getPointer().equals(getBeatorajaHWND())) {
+            return Gdx.input.isKeyPressed(gdxKey);
+        }
+
         // Key list reference: https://github.com/libgdx/libgdx/blob/1.8.0/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglInput.java
         // Vkey reference: https://github.com/LWJGL/lwjgl/blob/master/src/java/org/lwjgl/opengl/WindowsKeycodes.java
         switch (gdxKey) {
@@ -206,9 +234,11 @@ public class KeyPressedPreferNative {
     }
 
     public static boolean isKeyPressed(int gdxKey) {
-        if (isWindows()) {
+        int platform = LWJGLUtil.getPlatform();
+        if (platform == LWJGLUtil.PLATFORM_WINDOWS) {
             return windowsIsKeyPressed(gdxKey);
+        } else {
+            return Gdx.input.isKeyPressed(gdxKey);
         }
-        return Gdx.input.isKeyPressed(gdxKey);
     }
 }

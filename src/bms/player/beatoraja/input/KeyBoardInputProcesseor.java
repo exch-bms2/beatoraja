@@ -99,18 +99,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void poll(final long microtime) {
 		if (!textmode) {
-			final boolean isWindowFocused = Display.isActive();
-
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
 				}
 
-				// KeyPressedPreferNative.isKeyPressed internally uses GetAsyncKeyState when
-				// used on windows, so it returns true even if the window is NOT foreground.
-				// We use `isWindowFocused` so that the key will only be pressed when the game
-				// is the focused application.
-				final boolean pressed = isWindowFocused && KeyPressedPreferNative.isKeyPressed(keys[i]);
+				final boolean pressed = KeyPressedPreferNative.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = microtime;
@@ -119,12 +113,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
-			final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
+			final boolean startpressed = KeyPressedPreferNative.isKeyPressed(control[0]);
 			if (startpressed != keystate[control[0]]) {
 				keystate[control[0]] = startpressed;
 				this.bmsPlayerInputProcessor.startChanged(startpressed);
 			}
-			final boolean selectpressed = Gdx.input.isKeyPressed(control[1]);
+			final boolean selectpressed = KeyPressedPreferNative.isKeyPressed(control[1]);
 			if (selectpressed != keystate[control[1]]) {
 				keystate[control[1]] = selectpressed;
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
@@ -132,7 +126,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		}
 		
 		for (ControlKeys key : ControlKeys.values()) {
-			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
+			final boolean pressed = KeyPressedPreferNative.isKeyPressed(key.keycode);
 			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
 				keystate[key.keycode] = pressed;
 				keytime[key.keycode] = microtime;
@@ -144,9 +138,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	private int currentlyHeldModifiers() {
-		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
-		boolean ctrl = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
-		boolean alt = Gdx.input.isKeyPressed(Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Keys.ALT_RIGHT);
+		boolean shift = KeyPressedPreferNative.isKeyPressed(Keys.SHIFT_LEFT) || KeyPressedPreferNative.isKeyPressed(Keys.SHIFT_RIGHT);
+		boolean ctrl = KeyPressedPreferNative.isKeyPressed(Keys.CONTROL_LEFT) || KeyPressedPreferNative.isKeyPressed(Keys.CONTROL_RIGHT);
+		boolean alt = KeyPressedPreferNative.isKeyPressed(Keys.ALT_LEFT) || KeyPressedPreferNative.isKeyPressed(Keys.ALT_RIGHT);
 		return (shift ? MASK_SHIFT : 0) | (ctrl ? MASK_CTRL : 0) | (alt ? MASK_ALT : 0);
 	}
 
