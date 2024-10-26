@@ -218,12 +218,17 @@ public class KeyPressedPreferNative {
             case Input.Keys.F9:
             case Input.Keys.F10:
             case Input.Keys.F11:
-            case Input.Keys.F12:
-                // If we just use GetAsyncKeyState for polling F(\d+) keys,
-                // common keystrokes like Alt+F4 would not work.
-                // I suspect nobody would use function keys for gaming, so
-                // some delay in processing keys won't matter that much?
-                return Gdx.input.isKeyPressed(gdxKey);
+            case Input.Keys.F12: {
+                boolean state = windowsGetAsyncKeyState(VK_F1.code + (gdxKey - Input.Keys.F1));
+                if (state) {
+                    // If we just use GetAsyncKeyState for polling F(\d+) keys,
+                    // common keystrokes like Alt+F4 would not work.
+                    // I suspect nobody would use function keys for gaming, so
+                    // some delay in processing keys won't matter that much?
+                    return Gdx.input.isKeyPressed(gdxKey);
+                }
+                return false;
+            }
             case Input.Keys.NUMPAD_0:
             case Input.Keys.NUMPAD_1:
             case Input.Keys.NUMPAD_2:
