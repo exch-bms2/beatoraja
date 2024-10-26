@@ -20,16 +20,14 @@ package bms.player.beatoraja.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.Win32VK;
-import com.sun.jna.platform.win32.WinDef;
 import org.lwjgl.LWJGLUtil;
 import org.lwjgl.opengl.Display;
 
 import java.lang.reflect.Method;
 
-import static com.sun.jna.platform.win32.Win32VK.*;
+import static bms.player.beatoraja.input.WinNativeMethods.GetForegroundWindow;
+import static bms.player.beatoraja.input.WinNativeMethods.isKeyPressedAsync;
+import static bms.player.beatoraja.input.WinVKCode.*;
 
 /**
  * Performant key getter for beatoraja
@@ -40,16 +38,15 @@ import static com.sun.jna.platform.win32.Win32VK.*;
  * wraps around the api for libgdx.
  */
 public class KeyPressedPreferNative {
-    // Windows specific utilities
-    private static Pointer beatorajaHWND = null;
+    private static long beatorajaHWND = 0;
 
     /**
      * Get HWND pointer value of beatoraja window.
      *
      * @return
      */
-    private static Pointer getBeatorajaHWND() {
-        if (beatorajaHWND == null) {
+    private static long windowsGetBeatorajaHWND() {
+        if (beatorajaHWND == 0) {
             // Reflection hack.
             try {
                 Method getImplementationMethod = Display.class.getDeclaredMethod("getImplementation");
@@ -64,7 +61,7 @@ public class KeyPressedPreferNative {
                 Method getHwndMethod = windowsDisplayClass.getDeclaredMethod("getHwnd");
                 getHwndMethod.setAccessible(true);
 
-                beatorajaHWND = new Pointer((long) getHwndMethod.invoke(implementation));
+                beatorajaHWND = (long) getHwndMethod.invoke(implementation);
             } catch (Exception exception) {
                 throw new RuntimeException(exception);
             }
@@ -72,21 +69,17 @@ public class KeyPressedPreferNative {
         return beatorajaHWND;
     }
 
-    public static boolean windowsGetAsyncKeyState(int vKey) {
-        return (User32.INSTANCE.GetAsyncKeyState(vKey) & 0x8000) != 0;
+    private static boolean isKeyPressedAsyncVK(WinVKCode vk) {
+        return isKeyPressedAsync(vk.code);
     }
 
-    public static boolean windowsGetAsyncKeyStateVK(Win32VK vKey) {
-        return windowsGetAsyncKeyState(vKey.code);
-    }
-
-    public static boolean windowsIsKeyPressed(int gdxKey) {
+    private static boolean windowsIsKeyPressed(int gdxKey) {
         // Note: GetAsyncKeyState checks if the key is pressed regardless of whether the application window
         // is in focus or not. This may severely interfere with user usability when beatoraja is NOT
         // in foreground. (e.g minimized). We check if the beatoraja is the focused window before
         // using GetAsyncKeyState.
-        WinDef.HWND foregroundWindow = User32.INSTANCE.GetForegroundWindow();
-        if (foregroundWindow == null || !foregroundWindow.getPointer().equals(getBeatorajaHWND())) {
+        long foregroundWindow = GetForegroundWindow();
+        if (foregroundWindow != windowsGetBeatorajaHWND()) {
             return Gdx.input.isKeyPressed(gdxKey);
         }
 
@@ -94,27 +87,27 @@ public class KeyPressedPreferNative {
         // Vkey reference: https://github.com/LWJGL/lwjgl/blob/master/src/java/org/lwjgl/opengl/WindowsKeycodes.java
         switch (gdxKey) {
             case Input.Keys.LEFT_BRACKET:
-                return windowsGetAsyncKeyStateVK(VK_OEM_4);
+                return isKeyPressedAsyncVK(VK_OEM_4);
             case Input.Keys.RIGHT_BRACKET:
-                return windowsGetAsyncKeyStateVK(VK_OEM_6);
+                return isKeyPressedAsyncVK(VK_OEM_6);
             case Input.Keys.GRAVE:
-                return windowsGetAsyncKeyStateVK(VK_OEM_8);
+                return isKeyPressedAsyncVK(VK_OEM_8);
             case Input.Keys.STAR:
-                return windowsGetAsyncKeyStateVK(VK_MULTIPLY);
+                return isKeyPressedAsyncVK(VK_MULTIPLY);
             case Input.Keys.NUM:
-                return windowsGetAsyncKeyStateVK(VK_NUMLOCK);
+                return isKeyPressedAsyncVK(VK_NUMLOCK);
             case Input.Keys.PERIOD:
-                return windowsGetAsyncKeyStateVK(VK_OEM_PERIOD);
+                return isKeyPressedAsyncVK(VK_OEM_PERIOD);
             case Input.Keys.SLASH:
-                return windowsGetAsyncKeyStateVK(VK_OEM_2);
+                return isKeyPressedAsyncVK(VK_OEM_2);
             case Input.Keys.SYM:
-                return windowsGetAsyncKeyStateVK(VK_RWIN);
+                return isKeyPressedAsyncVK(VK_RWIN);
             case Input.Keys.EQUALS:
-                return windowsGetAsyncKeyStateVK(VK_OEM_PLUS);
+                return isKeyPressedAsyncVK(VK_OEM_PLUS);
             case Input.Keys.COMMA:
-                return windowsGetAsyncKeyStateVK(VK_OEM_COMMA);
+                return isKeyPressedAsyncVK(VK_OEM_COMMA);
             case Input.Keys.ENTER:
-                return windowsGetAsyncKeyStateVK(VK_RETURN);
+                return isKeyPressedAsyncVK(VK_RETURN);
             case Input.Keys.NUM_0:
             case Input.Keys.NUM_1:
             case Input.Keys.NUM_2:
@@ -125,7 +118,7 @@ public class KeyPressedPreferNative {
             case Input.Keys.NUM_7:
             case Input.Keys.NUM_8:
             case Input.Keys.NUM_9:
-                return windowsGetAsyncKeyState(0x30 + gdxKey - Input.Keys.NUM_0);
+                return isKeyPressedAsync(0x30 + gdxKey - Input.Keys.NUM_0);
             case Input.Keys.A:
             case Input.Keys.B:
             case Input.Keys.C:
@@ -152,61 +145,61 @@ public class KeyPressedPreferNative {
             case Input.Keys.X:
             case Input.Keys.Y:
             case Input.Keys.Z:
-                return windowsGetAsyncKeyState(0x41 + gdxKey - Input.Keys.A);
+                return isKeyPressedAsync(0x41 + gdxKey - Input.Keys.A);
 
             // Some people *might* want to use control keys for gameplays, so
             // unlike F1~F12 keys we just use GetAsyncKeyState here.
             case Input.Keys.ALT_LEFT:
-                return windowsGetAsyncKeyStateVK(VK_LMENU);
+                return isKeyPressedAsyncVK(VK_LMENU);
             case Input.Keys.ALT_RIGHT:
-                return windowsGetAsyncKeyStateVK(VK_RMENU);
+                return isKeyPressedAsyncVK(VK_RMENU);
             case Input.Keys.BACKSLASH:
-                return windowsGetAsyncKeyStateVK(VK_OEM_5);
+                return isKeyPressedAsyncVK(VK_OEM_5);
             case Input.Keys.FORWARD_DEL:
-                return windowsGetAsyncKeyStateVK(VK_DELETE);
+                return isKeyPressedAsyncVK(VK_DELETE);
             case Input.Keys.DPAD_LEFT:
-                return windowsGetAsyncKeyStateVK(VK_LEFT);
+                return isKeyPressedAsyncVK(VK_LEFT);
             case Input.Keys.DPAD_RIGHT:
-                return windowsGetAsyncKeyStateVK(VK_RIGHT);
+                return isKeyPressedAsyncVK(VK_RIGHT);
             case Input.Keys.DPAD_UP:
-                return windowsGetAsyncKeyStateVK(VK_UP);
+                return isKeyPressedAsyncVK(VK_UP);
             case Input.Keys.DPAD_DOWN:
-                return windowsGetAsyncKeyStateVK(VK_DOWN);
+                return isKeyPressedAsyncVK(VK_DOWN);
             case Input.Keys.HOME:
-                return windowsGetAsyncKeyStateVK(VK_HOME);
+                return isKeyPressedAsyncVK(VK_HOME);
             case Input.Keys.MINUS:
-                return windowsGetAsyncKeyStateVK(VK_SUBTRACT);
+                return isKeyPressedAsyncVK(VK_SUBTRACT);
             case Input.Keys.PLUS:
-                return windowsGetAsyncKeyStateVK(VK_ADD);
+                return isKeyPressedAsyncVK(VK_ADD);
             case Input.Keys.SEMICOLON:
             case Input.Keys.COLON:
-                return windowsGetAsyncKeyStateVK(VK_OEM_1);
+                return isKeyPressedAsyncVK(VK_OEM_1);
             case Input.Keys.SHIFT_LEFT:
-                return windowsGetAsyncKeyStateVK(VK_LSHIFT);
+                return isKeyPressedAsyncVK(VK_LSHIFT);
             case Input.Keys.SHIFT_RIGHT:
-                return windowsGetAsyncKeyStateVK(VK_RSHIFT);
+                return isKeyPressedAsyncVK(VK_RSHIFT);
             case Input.Keys.SPACE:
-                return windowsGetAsyncKeyStateVK(VK_SPACE);
+                return isKeyPressedAsyncVK(VK_SPACE);
             case Input.Keys.TAB:
-                return windowsGetAsyncKeyStateVK(VK_TAB);
+                return isKeyPressedAsyncVK(VK_TAB);
             case Input.Keys.CONTROL_LEFT:
-                return windowsGetAsyncKeyStateVK(VK_LCONTROL);
+                return isKeyPressedAsyncVK(VK_LCONTROL);
             case Input.Keys.CONTROL_RIGHT:
-                return windowsGetAsyncKeyStateVK(VK_RCONTROL);
+                return isKeyPressedAsyncVK(VK_RCONTROL);
             case Input.Keys.PAGE_DOWN:
-                return windowsGetAsyncKeyStateVK(VK_NEXT);
+                return isKeyPressedAsyncVK(VK_NEXT);
             case Input.Keys.PAGE_UP:
-                return windowsGetAsyncKeyStateVK(VK_PRIOR);
+                return isKeyPressedAsyncVK(VK_PRIOR);
             case Input.Keys.ESCAPE:
-                return windowsGetAsyncKeyStateVK(VK_ESCAPE);
+                return isKeyPressedAsyncVK(VK_ESCAPE);
             case Input.Keys.END:
-                return windowsGetAsyncKeyStateVK(VK_END);
+                return isKeyPressedAsyncVK(VK_END);
             case Input.Keys.INSERT:
-                return windowsGetAsyncKeyStateVK(VK_INSERT);
+                return isKeyPressedAsyncVK(VK_INSERT);
             case Input.Keys.DEL:
-                return windowsGetAsyncKeyStateVK(VK_BACK);
+                return isKeyPressedAsyncVK(VK_BACK);
             case Input.Keys.APOSTROPHE:
-                return windowsGetAsyncKeyStateVK(VK_OEM_7);
+                return isKeyPressedAsyncVK(VK_OEM_7);
             case Input.Keys.F1:
             case Input.Keys.F2:
             case Input.Keys.F3:
@@ -219,8 +212,7 @@ public class KeyPressedPreferNative {
             case Input.Keys.F10:
             case Input.Keys.F11:
             case Input.Keys.F12: {
-                boolean state = windowsGetAsyncKeyState(VK_F1.code + (gdxKey - Input.Keys.F1));
-                if (state) {
+                if (isKeyPressedAsync(VK_F1.code + (gdxKey - Input.Keys.F1))) {
                     // If we just use GetAsyncKeyState for polling F(\d+) keys,
                     // common keystrokes like Alt+F4 would not work.
                     // I suspect nobody would use function keys for gaming, so
@@ -239,7 +231,7 @@ public class KeyPressedPreferNative {
             case Input.Keys.NUMPAD_7:
             case Input.Keys.NUMPAD_8:
             case Input.Keys.NUMPAD_9:
-                return windowsGetAsyncKeyState(gdxKey - Input.Keys.NUMPAD_0 + VK_NUMPAD0.code);
+                return isKeyPressedAsync(gdxKey - Input.Keys.NUMPAD_0 + VK_NUMPAD0.code);
             default:  // Fallback
                 // TODO: above list should be exhaustive. Show error
                 return Gdx.input.isKeyJustPressed(gdxKey);
