@@ -408,7 +408,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		
 		private void processDirectory(SongDatabaseUpdaterProperty property)
 				throws IOException, SQLException, ReflectiveOperationException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
-			final List<SongData> records = qr.query(property.conn, "SELECT path,date FROM song WHERE folder = ?", songhandler,
+			final List<SongData> records = qr.query(property.conn, "SELECT path, date, preview FROM song WHERE folder = ?", songhandler,
 					SongUtils.crc32(path.toString(), bmsroot, root.toString()));
 			final List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
 					folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
@@ -525,6 +525,16 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 						records.set(i, null);
 						if (record.getDate() == lastModifiedTime) {
 							update = false;
+
+							String oldpp = record.getPreview() == null ? "" : record.getPreview();
+							String newpp = previewpath == null ? "" : previewpath;
+							if (!oldpp.equals(newpp)) {
+								try {
+									qr.update(property.conn, "UPDATE song SET preview=? WHERE path=?", newpp, pathname);
+								} catch (SQLException e) {
+									Logger.getGlobal().warning("Error while updating preview at " + pathname + ": " + e.getMessage());
+								}
+							}
 						}
 						break;
 					}
