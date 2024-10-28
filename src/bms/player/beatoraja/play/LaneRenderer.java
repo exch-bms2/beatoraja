@@ -489,7 +489,7 @@ public class LaneRenderer {
 				if (note != null) {
 					//4分のタイミングでノートを拡大する
 					float dstx = lanes[lane].region.x + offsetX;
-					float dsty = (float) y + offsetY - offsetH / 2;
+					float dsty = (float) y + offsetY;
 					float dstw = lanes[lane].region.width + offsetW;
 					float dsth = scale + offsetH;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
