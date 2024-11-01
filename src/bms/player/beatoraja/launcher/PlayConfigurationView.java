@@ -272,6 +272,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	public CheckBox clipboardScreenshot;
 
+	private String dbUpdateCheckDialogMessage;
+
 	static void initComboBox(ComboBox<Integer> combo, final String[] values) {
 		combo.setCellFactory((param) -> new OptionListCell(values));
 		combo.setButtonCell(new OptionListCell(values));
@@ -317,6 +319,8 @@ public class PlayConfigurationView implements Initializable {
 
 		notesdisplaytiming.setValueFactoryValues(PlayerConfig.JUDGETIMING_MIN, PlayerConfig.JUDGETIMING_MAX, 0, 1);
 		resourceController.init(this);
+
+		dbUpdateCheckDialogMessage = arg1.getString("UPDATE_DATABASE_MESSAGE");
 
 		checkNewVersion();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
@@ -685,13 +689,17 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void loadAllBMS() {
 		commit();
-		loadBMS(null, true);
+		if (checkIfLoadBMS()) {
+			loadBMS(null, true);
+		}
 	}
 
     @FXML
 	public void loadDiffBMS() {
 		commit();
-		loadBMS(null, false);
+		if (checkIfLoadBMS()) {
+			loadBMS(null, false);
+		}
 	}
 
 	public void loadBMSPath(String updatepath){
@@ -718,6 +726,12 @@ public class PlayConfigurationView implements Initializable {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean checkIfLoadBMS() {
+		Alert confirmAlert = new Alert(Alert.AlertType.NONE, dbUpdateCheckDialogMessage, ButtonType.OK, ButtonType.CANCEL);
+		ButtonType confirmResult = confirmAlert.showAndWait().orElse(ButtonType.CANCEL);
+		return confirmResult == ButtonType.OK;
 	}
 
     @FXML
