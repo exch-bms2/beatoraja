@@ -8,7 +8,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.Input.Keys;
-import org.lwjgl.opengl.Display;
 
 /**
  * キーボード入力処理用クラス
@@ -32,7 +31,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	/**
 	 * 最後に押されたキー
 	 */
-	private int lastPressedKey = -1;
+	private int libgdxLastPressedKey = -1;
 
 	private boolean textmode = false;
 
@@ -78,7 +77,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public boolean keyDown(int keycode) {
-		setLastPressedKey(keycode);
+		setLibgdxLastPresssedKey(keycode);
 		return true;
 	}
 
@@ -93,7 +92,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	public void clear() {
 		// Arrays.fill(keystate, false);
 		Arrays.fill(keytime, Long.MIN_VALUE);
-		lastPressedKey = -1;
+		libgdxLastPressedKey = -1;
 		mouseScratchInput.clear();
 	}
 
@@ -216,12 +215,19 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return false;
 	}
 
-	public int getLastPressedKey() {
-		return lastPressedKey;
+	/**
+	 * Get last key input from libgdx event system. Other functions like 'isKeyPressed' may utilize native
+	 * system APIs for faster key input, so those functions may reflect key state FASTER than this functions.
+	 * Don't mix `getLibgdxLastPressedKey` and other keyboard state functions.
+	 *
+	 * @return Last inputed key, as reported by libgdx event system.
+	 */
+	public int getLibgdxLastPressedKey() {
+		return libgdxLastPressedKey;
 	}
 
-	public void setLastPressedKey(int lastPressedKey) {
-		this.lastPressedKey = lastPressedKey;
+	public void setLibgdxLastPresssedKey(int lastPressedKey) {
+		this.libgdxLastPressedKey = lastPressedKey;
 	}
 
 	public MouseScratchInput getMouseScratchInput() {
