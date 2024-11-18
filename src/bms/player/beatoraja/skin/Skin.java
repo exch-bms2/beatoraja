@@ -98,7 +98,7 @@ public class Skin {
 	public long pcntPrepare;
 	public long pcntDraw;
 
-	private TimeSmoother timeSmoother;
+	private VsyncSmoother vsyncSmoother;
 
 	public Skin(SkinHeader header) {
 		this.header = header;
@@ -215,9 +215,9 @@ public class Skin {
 		option.clear();
 
         if (state.main.getConfig().isVsync()) {
-			timeSmoother = new TimeSmoother();
+			vsyncSmoother = new VsyncSmoother();
         } else {
-            timeSmoother = null;
+            vsyncSmoother = null;
         }
 
 		for(SkinObject obj : objects) {
@@ -273,8 +273,8 @@ public class Skin {
 		if (MainController.debug) {
 			if (nextpreparetime <= microtime) {
 				tempmap.forEach((c,l) -> Arrays.fill(l, 1, 6, 0L));
-				final long time = (timeSmoother != null)
-                        ? timeSmoother.smoothTime(state.timer.getNowTime())
+				final long time = (vsyncSmoother != null)
+                        ? vsyncSmoother.smoothTime(state.timer.getNowTime())
                         : state.timer.getNowTime();
 				var startPrepare = System.nanoTime();
 				for (SkinObject obj : objectarray) {
@@ -308,8 +308,8 @@ public class Skin {
 
 		} else {
 			if (nextpreparetime <= microtime) {
-				final long time = (timeSmoother != null)
-                        ? timeSmoother.smoothTime(state.timer.getNowTime())
+				final long time = (vsyncSmoother != null)
+                        ? vsyncSmoother.smoothTime(state.timer.getNowTime())
                         : state.timer.getNowTime();
 				for (SkinObject obj : objectarray) {
 					obj.prepare(time, state);
