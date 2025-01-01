@@ -67,7 +67,7 @@ public class KeyConfiguration extends MainState {
 					-2 } };
 	private static final int playerOffset = 100;
 
-	private static final String[] SELECTKEY = { "2dx sp", "popn", "2dx dp" };
+	private static final String[] SELECTKEY = { "7 KEYS", "9 KEYS", "14 KEYS" };
 
 	private int cursorpos = 0;
 	private int scrollpos = 0;
@@ -255,11 +255,11 @@ public class KeyConfiguration extends MainState {
 			titlefont.setColor(Color.CYAN);
 			titlefont.draw(sprite, "<-- " + MODE[mode] + " -->", 80 * scaleX, 650 * scaleY);
 			titlefont.setColor(Color.YELLOW);
-			titlefont.draw(sprite, "Key Board", 180 * scaleX, 620 * scaleY);
+			titlefont.draw(sprite, "Keyboard", 180 * scaleX, 620 * scaleY);
 			titlefont.draw(sprite, "Controller1", 330 * scaleX, 620 * scaleY);
 			titlefont.draw(sprite, "MIDI", 630 * scaleX, 620 * scaleY);
 			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "Music Select (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
+			titlefont.draw(sprite, "Music Select Input (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
 			titlefont.draw(sprite, SELECTKEY[config.getMusicselectinput()], 780 * scaleX, 590 * scaleY);
 
 			titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   ", 750 * scaleX, 500 * scaleY);
