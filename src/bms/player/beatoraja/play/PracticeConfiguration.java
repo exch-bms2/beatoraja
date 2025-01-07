@@ -175,14 +175,29 @@ public final class PracticeConfiguration {
 				}
 			}
 
+			String helpLine1 = "";
+			String helpLine2 = "";
 			if (model.getMode() == Mode.POPN_9K) {
-				sprite.draw(titlefont, "KEYS: 2,8=UP, 3,7=DOWN, 4=LEFT, 6=RIGHT, 5=TURBO", x, y - ySpacing*12 - 12, Color.ORANGE);
+				helpLine1 = "KEYS: 2/8=UP, 3/7=DOWN, 4=LEFT, 6=RIGHT,";
+				helpLine2 = "5=TURBO";
+			} else if (model.getMode() == Mode.KEYBOARD_24K || model.getMode() == Mode.KEYBOARD_24K_DOUBLE) {
+				helpLine1 = "KEYS: F#1/A#1=UP, G1/A1=DOWN, F1=LEFT,";
+				helpLine2 = "B1=RIGHT, D#1/G#1=TURBO";
 			} else {
-				sprite.draw(titlefont, "KEYS: SCR=UP/DOWN, 2+SCR=LEFT/RIGHT, 4=TURBO", x, y - ySpacing*12 - 12, Color.ORANGE);
+				helpLine1 = "KEYS: SCR=UP/DOWN, 2+SCR=LEFT/RIGHT, 4=TURBO";
 			}
 			if (state.resource.mediaLoadFinished()) {
-				sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - ySpacing*13 - 12, Color.ORANGE);
+				if (helpLine2.length() > 0) {
+					helpLine2 += ". ";
+				}
+				if (model.getMode() == Mode.KEYBOARD_24K || model.getMode() == Mode.KEYBOARD_24K_DOUBLE) {
+					helpLine2 += "PRESS C1 TO PLAY";
+				} else {
+					helpLine2 += "PRESS 1KEY TO PLAY";
+				}
 			}
+			sprite.draw(titlefont, helpLine1, x, y - ySpacing*12 - 12, Color.ORANGE);
+			sprite.draw(titlefont, helpLine2, x, y - ySpacing*13 - 12, Color.ORANGE);
 
 			String[] judge = {"PGREAT :","GREAT  :","GOOD   :", "BAD    :", "POOR   :", "KPOOR  :"};
 			for(int i = 0; i < 6; i++) {
@@ -252,6 +267,31 @@ public final class PracticeConfiguration {
 				inputRight = input.getControlKeyState(ControlKeys.RIGHT);
 				inputTurbo = input.getKeyState(3);
 				boolean turntableHorizontalMode = input.getKeyState(1) || inputTurbo;
+
+				if (mode == Mode.BEAT_10K) {
+					//  1 3    8 10
+					// 0 2 4  7 9 11
+					inputUp = inputUp || input.getKeyState(8) || input.getKeyState(10);
+					inputDown = inputDown || input.getKeyState(9);
+					inputLeft = inputLeft || input.getKeyState(7);
+					inputRight = inputRight || input.getKeyState(11);
+				} else if (mode == Mode.BEAT_14K) {
+					//  1 3 5    10 12 14
+					// 0 2 4 6  9 11 13 15
+					inputUp = inputUp || input.getKeyState(10) || input.getKeyState(14);
+					inputDown = inputDown || input.getKeyState(11) || input.getKeyState(13);
+					inputLeft = inputLeft || input.getKeyState(9);
+					inputRight = inputRight || input.getKeyState(15);
+					inputTurbo = inputTurbo || input.getKeyState(12);
+				} else if (mode == Mode.KEYBOARD_24K || mode == Mode.KEYBOARD_24K_DOUBLE) {
+					//  1 3   6 8 10
+					// 0 2 4 5 7 9 11
+					inputUp = inputUp || input.getKeyState(6) || input.getKeyState(10);
+					inputDown = inputDown || input.getKeyState(7) || input.getKeyState(9);
+					inputLeft = inputLeft || input.getKeyState(5);
+					inputRight = inputRight || input.getKeyState(11);
+					inputTurbo = inputTurbo || input.getKeyState(8);
+				}
 
 				int turntableUpIndex1 = -1;
 				int turntableDownIndex1 = -1;
