@@ -269,17 +269,17 @@ public class Skin {
 		}
 		
 		final long microtime = state.timer.getNowMicroTime();
+		final long smoothedNowTime = (vsyncSmoother != null)
+				? vsyncSmoother.smoothTime(state.timer.getNowTime())
+				: state.timer.getNowTime();
 
 		if (MainController.debug) {
 			if (nextpreparetime <= microtime) {
 				tempmap.forEach((c,l) -> Arrays.fill(l, 1, 6, 0L));
-				final long time = (vsyncSmoother != null)
-                        ? vsyncSmoother.smoothTime(state.timer.getNowTime())
-                        : state.timer.getNowTime();
 				var startPrepare = System.nanoTime();
 				for (SkinObject obj : objectarray) {
 					var objPrepare = System.nanoTime();
-					obj.prepare(time, state);
+					obj.prepare(smoothedNowTime, state);
 					tempmap.get(obj.getClass())[1] += (System.nanoTime() - objPrepare);
 				}
 				pcntPrepare = (System.nanoTime() - startPrepare) / 1000;
@@ -308,11 +308,8 @@ public class Skin {
 
 		} else {
 			if (nextpreparetime <= microtime) {
-				final long time = (vsyncSmoother != null)
-                        ? vsyncSmoother.smoothTime(state.timer.getNowTime())
-                        : state.timer.getNowTime();
 				for (SkinObject obj : objectarray) {
-					obj.prepare(time, state);
+					obj.prepare(smoothedNowTime, state);
 				}
 
 				nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
