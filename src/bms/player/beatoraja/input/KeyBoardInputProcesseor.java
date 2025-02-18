@@ -31,7 +31,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	/**
 	 * 最後に押されたキー
 	 */
-	private int lastPressedKey = -1;
+	private int libgdxLastPressedKey = -1;
 
 	private boolean textmode = false;
 
@@ -77,7 +77,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public boolean keyDown(int keycode) {
-		setLastPressedKey(keycode);
+		setLibgdxLastPresssedKey(keycode);
 		return true;
 	}
 
@@ -92,7 +92,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	public void clear() {
 		// Arrays.fill(keystate, false);
 		Arrays.fill(keytime, Long.MIN_VALUE);
-		lastPressedKey = -1;
+		libgdxLastPressedKey = -1;
 		mouseScratchInput.clear();
 	}
 
@@ -102,7 +102,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				if(keys[i] < 0) {
 					continue;
 				}
-				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
+
+				final boolean pressed = KeyPressedPreferNative.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = microtime;
@@ -111,12 +112,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
-			final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
+			final boolean startpressed = KeyPressedPreferNative.isKeyPressed(control[0]);
 			if (startpressed != keystate[control[0]]) {
 				keystate[control[0]] = startpressed;
 				this.bmsPlayerInputProcessor.startChanged(startpressed);
 			}
-			final boolean selectpressed = Gdx.input.isKeyPressed(control[1]);
+			final boolean selectpressed = KeyPressedPreferNative.isKeyPressed(control[1]);
 			if (selectpressed != keystate[control[1]]) {
 				keystate[control[1]] = selectpressed;
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
@@ -124,7 +125,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		}
 		
 		for (ControlKeys key : ControlKeys.values()) {
-			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
+			final boolean pressed = KeyPressedPreferNative.isKeyPressed(key.keycode);
 			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
 				keystate[key.keycode] = pressed;
 				keytime[key.keycode] = microtime;
@@ -136,9 +137,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	private int currentlyHeldModifiers() {
-		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
-		boolean ctrl = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
-		boolean alt = Gdx.input.isKeyPressed(Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Keys.ALT_RIGHT);
+		boolean shift = KeyPressedPreferNative.isKeyPressed(Keys.SHIFT_LEFT) || KeyPressedPreferNative.isKeyPressed(Keys.SHIFT_RIGHT);
+		boolean ctrl = KeyPressedPreferNative.isKeyPressed(Keys.CONTROL_LEFT) || KeyPressedPreferNative.isKeyPressed(Keys.CONTROL_RIGHT);
+		boolean alt = KeyPressedPreferNative.isKeyPressed(Keys.ALT_LEFT) || KeyPressedPreferNative.isKeyPressed(Keys.ALT_RIGHT);
 		return (shift ? MASK_SHIFT : 0) | (ctrl ? MASK_CTRL : 0) | (alt ? MASK_ALT : 0);
 	}
 
@@ -214,12 +215,19 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return false;
 	}
 
-	public int getLastPressedKey() {
-		return lastPressedKey;
+	/**
+	 * Get last key input from libgdx event system. Other functions like 'isKeyPressed' may utilize native
+	 * system APIs for faster key input, so those functions may reflect key state FASTER than this functions.
+	 * Don't mix `getLibgdxLastPressedKey` and other keyboard state functions.
+	 *
+	 * @return Last inputed key, as reported by libgdx event system.
+	 */
+	public int getLibgdxLastPressedKey() {
+		return libgdxLastPressedKey;
 	}
 
-	public void setLastPressedKey(int lastPressedKey) {
-		this.lastPressedKey = lastPressedKey;
+	public void setLibgdxLastPresssedKey(int lastPressedKey) {
+		this.libgdxLastPressedKey = lastPressedKey;
 	}
 
 	public MouseScratchInput getMouseScratchInput() {
