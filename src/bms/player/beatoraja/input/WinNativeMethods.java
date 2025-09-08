@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import com.badlogic.gdx.Gdx;
+
 import java.lang.reflect.Method;
 
 /**
@@ -8,7 +10,8 @@ import java.lang.reflect.Method;
  */
 public class WinNativeMethods {
     /// HWND GetForegroundWindow();
-    static Method lwjgl_getForegroundWindow = null;
+    private static Method lwjgl_getForegroundWindow = null;
+    private static Long foregroundWindowCache = null;
 
     static long GetForegroundWindow() {
         if (lwjgl_getForegroundWindow == null) {
@@ -22,10 +25,21 @@ public class WinNativeMethods {
             }
         }
 
-        try {
-            return (long) lwjgl_getForegroundWindow.invoke(null);
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
+        if (foregroundWindowCache == null) {
+            try {
+                foregroundWindowCache = (long) lwjgl_getForegroundWindow.invoke(null);
+                Gdx.app.postRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        foregroundWindowCache = null;
+                    }
+                });
+                return foregroundWindowCache;
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        } else {
+            return foregroundWindowCache;
         }
     }
 
