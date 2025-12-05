@@ -538,18 +538,17 @@ public class BMSPlayer extends MainState {
 					control.setEnableCursor(true);
 					final FrequencyType freqOption = main.getConfig().getAudioConfig().getFreqOption();
 					final AudioDriver audio = main.getAudioProcessor();
-					final boolean canTimeStretch = audio instanceof bms.player.beatoraja.audio.AbstractAudioDriver;
 					final float freqRate = property.freq / 100f;
 					if (property.freq != 100) {
 						BMSModelUtils.changeFrequency(model, freqRate);
 					}
 					if (property.freq != 100) {
-						if (freqOption == FrequencyType.SPEED && canTimeStretch) {
+						if (freqOption == FrequencyType.SPEED) {
 							// オフライン伸縮＋ピッチ固定。再読み込みで反映。
 							audio.setTimeStretchRate(freqRate);
 							audio.setGlobalPitch(1f);
 							audio.setModel(model);
-						} else if (freqOption == FrequencyType.FREQUENCY || freqOption == FrequencyType.SPEED) {
+						} else if (freqOption == FrequencyType.FREQUENCY) {
 							audio.setTimeStretchRate(1f);
 							audio.setGlobalPitch(freqRate);
 						}
