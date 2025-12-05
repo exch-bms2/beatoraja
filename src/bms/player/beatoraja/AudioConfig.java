@@ -204,8 +204,8 @@ public class AudioConfig implements Validatable {
 		 */
 		FREQUENCY,
 		/**
-		 * オーディオ再生速度変化の処理:ピッチ変化なしに速度を変更(未実装)
+		 * オーディオ再生速度変化の処理:ピッチ変化なしに速度を変更(Practice + PortAudioのみ対応)
 		 */
-//		SPEED
+		SPEED
 	}
 }

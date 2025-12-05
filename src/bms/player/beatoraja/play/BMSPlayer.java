@@ -13,7 +13,9 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.AudioConfig.FrequencyType;
+import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.pattern.LaneShuffleModifier.*;
@@ -535,11 +537,25 @@ public class BMSPlayer extends MainState {
 					PracticeProperty property = practice.getPracticeProperty();
 					control.setEnableControl(true);
 					control.setEnableCursor(true);
+					final FrequencyType freqOption = main.getConfig().getAudioConfig().getFreqOption();
+					final AudioDriver audio = main.getAudioProcessor();
+					final boolean isPortAudio = audio instanceof PortAudioDriver;
+					final float freqRate = property.freq / 100f;
 					if (property.freq != 100) {
-						BMSModelUtils.changeFrequency(model, property.freq / 100f);
-						if (main.getConfig().getAudioConfig().getFreqOption() == FrequencyType.FREQUENCY) {
-							main.getAudioProcessor().setGlobalPitch(property.freq / 100f);
+						BMSModelUtils.changeFrequency(model, freqRate);
+					}
+					if (property.freq != 100) {
+						if (freqOption == FrequencyType.SPEED && isPortAudio) {
+							// オフライン伸縮＋ピッチ固定。再読み込みで反映。
+							audio.setTimeStretchRate(freqRate);
+							audio.setGlobalPitch(1f);
+							audio.setModel(model);
+						} else if (freqOption == FrequencyType.FREQUENCY || freqOption == FrequencyType.SPEED) {
+							audio.setTimeStretchRate(1f);
+							audio.setGlobalPitch(freqRate);
 						}
+					} else {
+						audio.setTimeStretchRate(1f);
 					}
 					model.setTotal(property.total);
 					PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,
@@ -758,7 +774,8 @@ public class BMSPlayer extends MainState {
 
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
-		if (main.getConfig().getAudioConfig().getFastForward() == FrequencyType.FREQUENCY) {
+		FrequencyType fastForward = main.getConfig().getAudioConfig().getFastForward();
+		if (fastForward == FrequencyType.FREQUENCY || fastForward == FrequencyType.SPEED) {
 			main.getAudioProcessor().setGlobalPitch(playspeed / 100f);
 		}
 	}

@@ -2,6 +2,7 @@ package bms.player.beatoraja.audio;
 
 import bms.model.*;
 import bms.player.beatoraja.ResourcePool;
+import bms.player.beatoraja.audio.TimeStretchProcessor;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -52,6 +53,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * 音源全体のピッチ
 	 */
 	private float globalPitch = 1.0f;
+		/**
+		 * オフラインタイムストレッチ倍率(1.0で無効)
+		 */
+		private float timeStretchRate = 1.0f;
 	/**
 	 * オーディオキャッシュデータ
 	 */
@@ -546,6 +551,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		return (float)progress.get() / (float)noteMapSize;
 	}
 
+	public void setTimeStretchRate(float rate) {
+		timeStretchRate = rate > 0f ? rate : 1f;
+		cache.disposeOld();
+	}
+
 	public void disposeOld() {
 		cache.disposeOld();
 	}
@@ -624,8 +634,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		    Logger.getGlobal().fine("音源ファイルを読み込む中：" + key.path);
 
 		    T sound = key.start == 0 && key.duration == 0
-                    ? getKeySound(Paths.get(key.path)) // 音切りなしのケース
-                    : loadSlice(key);
+		            ? getKeySound(Paths.get(key.path)) // 音切りなしのケース
+		            : loadSlice(key);
+
+		    if (sound != null && timeStretchRate != 1f && sound instanceof PCM<?>) {
+		    	try {
+		    		sound = (T) TimeStretchProcessor.stretch((PCM<?>) sound, timeStretchRate);
+		    	} catch (Throwable e) {
+		    		Logger.getGlobal().warning("タイムストレッチ失敗: " + e.getMessage());
+		    	}
+		    }
 
 		    if (sound == null) {
                 Logger.getGlobal().warning("音源ファイル読み込み失敗：" + key.path);

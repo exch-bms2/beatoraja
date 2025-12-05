@@ -38,3 +38,10 @@ On JRE 32bit, maximum heap memory size is limited to 1.4G-1.6G. See http://www.o
 
 # License
 - GNU General Public License v3
+
+# Build
+
+```
+docker build -t beatoraja:local .
+docker run --rm -v "${PWD}:/usr/src/app" beatoraja-build
+```

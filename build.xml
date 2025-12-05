@@ -21,6 +21,7 @@
 
 	<path id="build.lib">
 		<fileset dir="lib" includes="*.jar" />
+		<fileset dir="${env.JAVAFX_LIB_PATH}" includes="*.jar" erroronmissingdir="false" />
 	</path>
 
 	<target name="clean">
@@ -45,6 +46,7 @@
 			</manifest>
 			<fileset dir="${build.dest}" />
 			<fileset excludes="**/*.java" dir="${build.src}" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/tarsosdsp-latest.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop-natives.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-freetype-natives.jar" />

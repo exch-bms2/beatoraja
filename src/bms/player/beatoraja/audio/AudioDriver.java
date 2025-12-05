@@ -120,6 +120,12 @@ public interface AudioDriver extends Disposable {
 	public void setVolume(Note n, float volume);
 
 	/**
+	 * オフラインのタイムストレッチ倍率を設定する(1.0で無効)。
+	 * 主にPracticeモードSPEED(PortAudio)で使用。
+	 */
+	public void setTimeStretchRate(float rate);
+
+	/**
 	 * 全体のピッチを変更する。可能な場合は再生中の音のピッチも変更する
 	 *
 	 * @param pitch ピッチ(0.5 - 2.0)
