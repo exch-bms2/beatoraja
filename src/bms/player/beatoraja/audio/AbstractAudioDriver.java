@@ -547,6 +547,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		return this.globalPitch;
 	}
 
+	protected float getTimeStretchRate() {
+		return this.timeStretchRate;
+	}
+
 	public float getProgress() {
 		return (float)progress.get() / (float)noteMapSize;
 	}
