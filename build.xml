@@ -45,7 +45,6 @@
 			</manifest>
 			<fileset dir="${build.dest}" />
 			<fileset excludes="**/*.java" dir="${build.src}" />
-			<zipfileset excludes="META-INF/*.SF" src="./lib/tarsosdsp-latest.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop-natives.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-freetype-natives.jar" />
@@ -73,6 +72,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/luaj-jse-3.0.2-custom.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-compress-1.16.1.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/java-discord-rpc-2.0.1-all.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/tarsosdsp-latest.jar" />
 		</jar>
 	</target>
 
