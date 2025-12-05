@@ -53,10 +53,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * 音源全体のピッチ
 	 */
 	private float globalPitch = 1.0f;
-		/**
-		 * オフラインタイムストレッチ倍率(1.0で無効)
-		 */
-		private float timeStretchRate = 1.0f;
+	/**
+	 * オフラインタイムストレッチ倍率(1.0で無効)
+	 */
+	private float timeStretchRate = 1.0f;
 	/**
 	 * オーディオキャッシュデータ
 	 */

@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Offline time-stretch for PCM using TarsosDSP WSOLA.
- * Only used for Practice SPEED (PortAudio) to keep pitch while changing tempo.
+ * TarsosDSP WSOLA を使ったオフラインの PCM タイムストレッチ処理。
+ * 
+ * @author souki202
  */
 public final class TimeStretchProcessor {
 
@@ -96,7 +97,7 @@ public final class TimeStretchProcessor {
 	}
 
 	private static PCM<?> toPCM(PCM<?> src, float[] stretched) {
-		// Keep channels/sampleRate; store as FloatPCM to avoid clipping.
+		// チャンネル数とサンプルレートを維持し、クリッピング回避のため FloatPCM で保持する。
 		int channels = src.channels;
 		int len = (stretched.length / channels) * channels;
 		float[] data = new float[len];

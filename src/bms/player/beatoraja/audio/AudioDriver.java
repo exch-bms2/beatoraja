@@ -121,7 +121,8 @@ public interface AudioDriver extends Disposable {
 
 	/**
 	 * オフラインのタイムストレッチ倍率を設定する(1.0で無効)。
-	 * 主にPracticeモードSPEED(PortAudio)で使用。
+	 * 
+	 * @param rate タイムストレッチ倍率(0.5 - 2.0)
 	 */
 	public void setTimeStretchRate(float rate);
 

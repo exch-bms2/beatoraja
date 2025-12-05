@@ -21,7 +21,6 @@
 
 	<path id="build.lib">
 		<fileset dir="lib" includes="*.jar" />
-		<fileset dir="${env.JAVAFX_LIB_PATH}" includes="*.jar" erroronmissingdir="false" />
 	</path>
 
 	<target name="clean">

@@ -774,7 +774,7 @@ public class BMSPlayer extends MainState {
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
 		FrequencyType fastForward = main.getConfig().getAudioConfig().getFastForward();
-		if (fastForward == FrequencyType.FREQUENCY || fastForward == FrequencyType.SPEED) {
+		if (fastForward == FrequencyType.FREQUENCY) {
 			main.getAudioProcessor().setGlobalPitch(playspeed / 100f);
 		}
 	}
