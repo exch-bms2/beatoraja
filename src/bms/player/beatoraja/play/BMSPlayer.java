@@ -542,18 +542,12 @@ public class BMSPlayer extends MainState {
 					if (property.freq != 100) {
 						BMSModelUtils.changeFrequency(model, freqRate);
 					}
-					if (property.freq != 100) {
-						if (freqOption == FrequencyType.SPEED) {
-							// オフライン伸縮＋ピッチ固定。再読み込みで反映。
-							audio.setTimeStretchRate(freqRate);
-							audio.setGlobalPitch(1f);
-							audio.setModel(model);
-						} else if (freqOption == FrequencyType.FREQUENCY) {
-							audio.setTimeStretchRate(1f);
-							audio.setGlobalPitch(freqRate);
-						}
-					} else {
-						audio.setTimeStretchRate(1f);
+					if (freqOption == FrequencyType.SPEED) {
+						// オフライン伸縮＋ピッチ固定。再読み込みで反映。
+						audio.setGlobalPitch(1f);
+						audio.setModel(model, freqRate);
+					} else if (freqOption == FrequencyType.FREQUENCY) {
+						audio.setGlobalPitch(freqRate);
 					}
 					model.setTotal(property.total);
 					PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,

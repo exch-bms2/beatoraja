@@ -244,9 +244,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * BMSの音源データを読み込む
 	 *
-	 * @param model
+	 * @param model BMSモデル
+	 * @param stretchRate タイムストレッチ倍率(0.5 - 2.0, 1.0で無効)
 	 */
-	public synchronized void setModel(BMSModel model) {
+	public synchronized void setModel(BMSModel model, float stretchRate) {
+		this.timeStretchRate = stretchRate > 0f ? stretchRate : 1f;
 		Logger.getGlobal().info("音源ファイル読み込み開始。");
 		String[] wavlist = model.getWavList();
 		final int wavcount = wavlist.length;
@@ -318,7 +320,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					// 音切りあり・なし両方のデータが必要になるケースがある
 					if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
 						// 音切りなしのケース
-						wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
+						wavmap[wavid] = cache.get(new AudioKey(p.toString(), note, timeStretchRate));
 						if (wavmap[wavid] == null) {
 							break;
 						}
@@ -334,9 +336,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 								break;
 							}
 						}
-						if (b) {
-							T sliceaudio = cache.get(new AudioKey(p.toString(), note));
-							if (sliceaudio != null) {
+							if (b) {
+								T sliceaudio = cache.get(new AudioKey(p.toString(), note, timeStretchRate));
+								if (sliceaudio != null) {
 								slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
 							} else {
 								return;
@@ -555,11 +557,6 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		return (float)progress.get() / (float)noteMapSize;
 	}
 
-	public void setTimeStretchRate(float rate) {
-		timeStretchRate = rate > 0f ? rate : 1f;
-		cache.disposeOld();
-	}
-
 	public void disposeOld() {
 		cache.disposeOld();
 	}
@@ -641,9 +638,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		            ? getKeySound(Paths.get(key.path)) // 音切りなしのケース
 		            : loadSlice(key);
 
-		    if (sound != null && timeStretchRate != 1f && sound instanceof PCM<?>) {
+		    if (sound != null && key.stretchRate != 1f && sound instanceof PCM<?>) {
 		    	try {
-		    		sound = (T) TimeStretchProcessor.stretch((PCM<?>) sound, timeStretchRate);
+		    		sound = (T) TimeStretchProcessor.stretch((PCM<?>) sound, key.stretchRate);
 		    	} catch (Throwable e) {
 		    		Logger.getGlobal().warning("タイムストレッチ失敗: " + e.getMessage());
 		    	}
@@ -699,23 +696,28 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		 * Audio duration(us)
 		 */
 		public final long duration;
+		/**
+		 * Time stretch rate (1.0 = no stretch)
+		 */
+		public final float stretchRate;
 
-		public AudioKey(String path, Note n) {
+		public AudioKey(String path, Note n, float stretchRate) {
 			this.path = path;
 			this.start = n.getMicroStarttime();
 			this.duration = n.getMicroDuration();
+			this.stretchRate = stretchRate;
 		}
 
 		public boolean equals(Object o) {
 			if (o instanceof AudioKey) {
 				final AudioKey key = (AudioKey) o;
-				return path.equals(key.path) && start == key.start && duration == key.duration;
+				return path.equals(key.path) && start == key.start && duration == key.duration && stretchRate == key.stretchRate;
 			}
 			return false;
 		}
 		
 		public int hashCode() {
-			return java.util.Objects.hash(path, start, duration);
+			return java.util.Objects.hash(path, start, duration, stretchRate);
 		}
 	}
 }

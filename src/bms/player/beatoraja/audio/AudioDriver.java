@@ -66,8 +66,20 @@ public interface AudioDriver extends Disposable {
 	 * 
 	 * @param model
 	 *            BMSモデル
+	 * @param stretchRate
+	 *            タイムストレッチ倍率(0.5 - 2.0, 1.0で無効)
 	 */
-	public void setModel(BMSModel model);
+	public void setModel(BMSModel model, float stretchRate);
+	
+	/**
+	 * BMSの音源データを読み込む(タイムストレッチなし)
+	 * 
+	 * @param model
+	 *            BMSモデル
+	 */
+	default void setModel(BMSModel model) {
+		setModel(model, 1f);
+	}
 	
 	/**
 	 * 判定に対応した追加キー音を定義する
@@ -118,13 +130,6 @@ public interface AudioDriver extends Disposable {
 	 *            ボリューム
 	 */
 	public void setVolume(Note n, float volume);
-
-	/**
-	 * オフラインのタイムストレッチ倍率を設定する(1.0で無効)。
-	 * 
-	 * @param rate タイムストレッチ倍率(0.5 - 2.0)
-	 */
-	public void setTimeStretchRate(float rate);
 
 	/**
 	 * 全体のピッチを変更する。可能な場合は再生中の音のピッチも変更する
