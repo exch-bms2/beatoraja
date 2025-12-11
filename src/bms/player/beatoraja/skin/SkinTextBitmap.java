@@ -21,16 +21,12 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 /**
  * .fnt ファイルをソースとして持つスキン用テキスト
  */
-public class SkinTextBitmap extends SkinText {
+public final class SkinTextBitmap extends SkinText {
 
-	private SkinTextBitmapSource source;
-	private BitmapFont font;
-	private GlyphLayout layout;
-	private float size;
-
-	@Override
-	public void load() {
-	}
+	private final SkinTextBitmapSource source;
+	private final BitmapFont font;
+	private final GlyphLayout layout;
+	private final float size;
 
 	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
 		this(source, size, StringPropertyFactory.getStringProperty(-1));
@@ -42,6 +38,10 @@ public class SkinTextBitmap extends SkinText {
 		this.size = size;
 		this.layout =new GlyphLayout();
 		this.font = source.getFont();
+	}
+
+	@Override
+	public void load() {
 	}
 
 	@Override
@@ -88,20 +88,20 @@ public class SkinTextBitmap extends SkinText {
 			layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], true);
 		} else {
 			switch (getOverflow()) {
-			case OVERFLOW_OVERFLOW:
-				layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
-				break;
-			case OVERFLOW_SHRINK:
-				layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
-				float actualWidth = layout.width;
-				if (actualWidth > r.getWidth()) {
-					font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
+				case OVERFLOW_OVERFLOW -> {
 					layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
 				}
-				break;
-			case OVERFLOW_TRUNCATE:
-				layout.setText(font, getText(), 0, getText().length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
-				break;
+				case OVERFLOW_SHRINK -> {
+					layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+					float actualWidth = layout.width;
+					if (actualWidth > r.getWidth()) {
+						font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
+						layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+					}
+				}
+				case OVERFLOW_TRUNCATE -> {
+					layout.setText(font, getText(), 0, getText().length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
+				}
 			}
 		}
 	}
@@ -110,7 +110,7 @@ public class SkinTextBitmap extends SkinText {
 		source.dispose();
 	}
 
-	public static class SkinTextBitmapSource implements Disposable {
+	public static final class SkinTextBitmapSource implements Disposable {
 
 		public static final int TYPE_STANDARD = 0;
 		public static final int TYPE_DISTANCE_FIELD = 1;

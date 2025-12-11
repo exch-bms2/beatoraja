@@ -132,9 +132,8 @@ public class SkinProperty {
 	public static final int TIMER_IR_CONNECT_SUCCESS = 173;
 	public static final int TIMER_IR_CONNECT_FAIL = 174;
 
-
-	//ぽみゅキャラ用タイマー
-	//ここから
+	// ぽみゅキャラ用タイマー
+	// ここから
 	public static final int TIMER_PM_CHARA_1P_NEUTRAL = 900;
 	public static final int TIMER_PM_CHARA_1P_FEVER = 901;
 	public static final int TIMER_PM_CHARA_1P_GREAT = 902;
@@ -144,9 +143,9 @@ public class SkinProperty {
 	public static final int TIMER_PM_CHARA_2P_GREAT = 906;
 	public static final int TIMER_PM_CHARA_2P_BAD = 907;
 	public static final int TIMER_MUSIC_END = 908;
-	//FEVERWIN WIN LOSEはOPTION_1P_100とOPTION_1P_BORDER_OR_MOREを用いて分岐
+	// FEVERWIN WIN LOSEはOPTION_1P_100とOPTION_1P_BORDER_OR_MOREを用いて分岐
 	public static final int TIMER_PM_CHARA_DANCE = 909;
-	//ここまで連番でお願いします
+	// ここまで連番でお願いします
 
 	// 拡張版TIMER
 	public static final int TIMER_BOMB_1P_KEY10 = 1010;
@@ -271,9 +270,10 @@ public class SkinProperty {
 	public static final int NUMBER_MAXBPM_DURATION_LANECOVER_OFF = 1326;
 	public static final int NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_OFF = 1327;
 	public static final int NUMBER_JUDGETIMING = 12;
-    public static final int NUMBER_LANECOVER1 = 14;
+	public static final int NUMBER_LANECOVER1 = 14;
 	public static final int NUMBER_LIFT1 = 314;
 	public static final int NUMBER_HIDDEN1 = 315;
+	public static final int NUMBER_LANECOVER2 = 316;
 
 	public static final int NUMBER_TOTALPLAYTIME_HOUR = 17;
 	public static final int NUMBER_TOTALPLAYTIME_MINUTE = 18;
@@ -526,7 +526,80 @@ public class SkinProperty {
 	public static final int NUMBER_RANDOM_2P_7KEY = 466;
 	public static final int NUMBER_RANDOM_2P_SCR = 469;
 
-	
+	public static final int NUMBER_JUDGERANK = 400;
+
+	public static final int RATE_MUSICSELECT_POSITION = 1;
+	public static final int RATE_LANECOVER = 4;
+	public static final int RATE_LANECOVER2 = 5;
+	public static final int RATE_MUSIC_PROGRESS = 6;
+	public static final int RATE_SKINSELECT_POSITION = 7;
+	public static final int RATE_RANKING_POSITION = 8;
+	public static final int RATE_MASTERVOLUME = 17;
+	public static final int RATE_KEYVOLUME = 18;
+	public static final int RATE_BGMVOLUME = 19;
+	public static final int RATE_MUSIC_PROGRESS_BAR = 101;
+	public static final int RATE_LOAD_PROGRESS = 102;
+	public static final int RATE_LEVEL = 103;
+	public static final int RATE_LEVEL_BEGINNER = 105;
+	public static final int RATE_LEVEL_NORMAL = 106;
+	public static final int RATE_LEVEL_HYPER = 107;
+	public static final int RATE_LEVEL_ANOTHER = 108;
+	public static final int RATE_LEVEL_INSANE = 109;
+	public static final int RATE_SCORE = 110;
+	public static final int RATE_SCORE_FINAL = 111;
+	public static final int RATE_BESTSCORE_NOW = 112;
+	public static final int RATE_BESTSCORE = 113;
+	public static final int RATE_TARGETSCORE_NOW = 114;
+	public static final int RATE_TARGETSCORE = 115;
+	public static final int RATE_PGREAT = 140;
+	public static final int RATE_GREAT = 141;
+	public static final int RATE_GOOD = 142;
+	public static final int RATE_BAD = 143;
+	public static final int RATE_POOR = 144;
+	public static final int RATE_MAXCOMBO = 145;
+	public static final int RATE_EXSCORE = 147;
+
+	public static final int FLOAT_SCORE_RATE = 1102;
+	public static final int FLOAT_TOTAL_RATE = 1115;
+	public static final int FLOAT_SCORE_RATE2 = 155;
+	public static final int FLOAT_DURATION_AVERAGE = 372;
+	public static final int FLOAT_TIMING_AVERAGE = 374;
+	public static final int FLOAT_TIMIGN_STDDEV = 376;
+	public static final int FLOAT_PERFECT_RATE = 85;
+	public static final int FLOAT_GREAT_RATE = 86;
+	public static final int FLOAT_GOOD_RATE = 87;
+	public static final int FLOAT_BAD_RATE = 88;
+	public static final int FLOAT_POOR_RATE = 89;
+	public static final int FLOAT_RIVAL_PERFECT_RATE = 285;
+	public static final int FLOAT_RIVAL_GREAT_RATE = 286;
+	public static final int FLOAT_RIVAL_GOOD_RATE = 287;
+	public static final int FLOAT_RIVAL_BAD_RATE = 288;
+	public static final int FLOAT_RIVAL_POOR_RATE = 289;
+	public static final int FLOAT_BEST_RATE = 183;
+	public static final int FLOAT_RIVAL_RATE = 122;
+	public static final int FLOAT_TARGET_RATE = 135;
+	public static final int FLOAT_TARGET_RATE2 = 157;
+	public static final int FLOAT_HISPEED = 310;
+	public static final int FLOAT_GROOVEGAUGE_1P = 1107;
+	public static final int FLOAT_CHART_AVERAGEDENSITY = 367;
+	public static final int FLOAT_CHART_ENDDENSITY = 362;
+	public static final int FLOAT_CHART_PEAKDENSITY = 360;
+	public static final int FLOAT_CHART_TOTALGAUGE = 368;
+	public static final int FLOAT_LOADING_PROGRESS = 165;
+	public static final int FLOAT_IR_TOTALCLEARRATE = 227;
+	public static final int FLOAT_IR_TOTALFULLCOMBORATE = 229;
+	public static final int FLOAT_IR_PLAYER_NOPLAY_RATE = 203;
+	public static final int FLOAT_IR_PLAYER_FAILED_RATE = 211;
+	public static final int FLOAT_IR_PLAYER_ASSIST_RATE = 205;
+	public static final int FLOAT_IR_PLAYER_LIGHTASSIST_RATE = 207;
+	public static final int FLOAT_IR_PLAYER_EASY_RATE = 213;
+	public static final int FLOAT_IR_PLAYER_NORMAL_RATE = 215;
+	public static final int FLOAT_IR_PLAYER_HARD_RATE = 217;
+	public static final int FLOAT_IR_PLAYER_EXHARD_RATE = 209;
+	public static final int FLOAT_IR_PLAYER_FULLCOMBO_RATE = 219;
+	public static final int FLOAT_IR_PLAYER_PERFECT_RATE = 223;
+	public static final int FLOAT_IR_PLAYER_MAX_RATE = 225;
+
 	public static final int VALUE_JUDGE_1P_DURATION = 525;
 	public static final int VALUE_JUDGE_2P_DURATION = 526;
 	public static final int VALUE_JUDGE_3P_DURATION = 527;
@@ -870,6 +943,8 @@ public class SkinProperty {
 	public static final int OFFSET_JUDGE_3P = 32;
 	public static final int OFFSET_JUDGEDETAIL_3P = 33;
 
+	public static final int OPTION_CONSTANT = 400;
+
 	// オフセットのユーザー定義は40番以降を使用して下さい
 
 	// 廃止予定
@@ -955,7 +1030,6 @@ public class SkinProperty {
 	// ユーザー定義イベント用
 	public static final int EVENT_CUSTOM_BEGIN = 1000;
 	public static final int EVENT_CUSTOM_END = 1999;
-
 
 	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
 	public static final int VALUE_JUDGE_1P_KEY1 = 501;

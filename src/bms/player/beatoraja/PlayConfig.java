@@ -25,6 +25,18 @@ public class PlayConfig implements Cloneable {
 	
 	public static final int DURATION_MAX = 10000;
 	public static final int DURATION_MIN = 1;
+
+	/**
+	 * CONSTANT 使用
+	 */
+	private boolean enableConstant = false;
+	/**
+	 * CONSTANT フェードイン時間(ms)
+	 */
+	private int constantFadeinTime = 100;
+	public static final int CONSTANT_FADEIN_MAX = 1000;
+	public static final int CONSTANT_FADEIN_MIN = -1000;
+
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
 	 */
@@ -107,6 +119,22 @@ public class PlayConfig implements Cloneable {
 
 	public void setDuration(int duration) {
 		this.duration = duration;
+	}
+
+	public boolean isEnableConstant() {
+		return enableConstant;
+	}
+
+	public void setEnableConstant(boolean enableConstant) {
+		this.enableConstant = enableConstant;
+	}
+
+	public int getConstantFadeinTime() {
+		return constantFadeinTime;
+	}
+
+	public void setConstantFadeinTime(int constantFadeinTime) {
+		this.constantFadeinTime = constantFadeinTime;
 	}
 
 	public float getHispeedMargin() {
@@ -222,6 +250,7 @@ public class PlayConfig implements Cloneable {
 	public void validate() {
 		hispeed = MathUtils.clamp(hispeed, HISPEED_MIN, HISPEED_MAX);
 		duration = MathUtils.clamp(duration, DURATION_MIN, DURATION_MAX);
+		constantFadeinTime = MathUtils.clamp(constantFadeinTime, CONSTANT_FADEIN_MIN, CONSTANT_FADEIN_MAX);
 		hispeedmargin = MathUtils.clamp(hispeedmargin, HISPEEDMARGIN_MIN, HISPEEDMARGIN_MAX);
 		fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
 		lanecover = MathUtils.clamp(lanecover, 0f, 1f);

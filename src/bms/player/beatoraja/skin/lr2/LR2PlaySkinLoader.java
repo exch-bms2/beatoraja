@@ -764,8 +764,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			}
 
 			judge[index].setJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1], new SkinNumber(images, values[10], values[9], values[13],
-					images.length > 10 ? 2 : 0, values[15], values[11]));
-			judge[index].getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).setAlign(values[12] == 1 ?  2 : values[12]);
+					images.length > 10 ? 2 : 0, values[15], values[11], values[12] == 1 ?  2 : values[12]));
 			// System.out.println("Number Added - " +
 			// (num.getId()));
 		}
@@ -777,7 +776,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			int[] values = parseInt(str);
 			sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).setRelative(true);
 			float x = values[3];
-			if(sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).getAlign() == 2) {
+			if(sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).align == 2) {
 				x -= sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).getKeta() * values[5] / 2;
 			}
 			sj.getJudgeCount(values[1] <= 5  ? (5 - values[1]) : values[1]).setDestination(values[2], x * dstw / srcw,
@@ -845,8 +844,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 		TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
 		SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
-				new TextureRegion[][] { images[2] }, 0, 0, 4, 0, values[15], VALUE_JUDGE_DURATION[side]);
-		num.setAlign(values[12]);
+				new TextureRegion[][] { images[2] }, 0, 0, 4, 0, values[15], VALUE_JUDGE_DURATION[side], values[12]);
 		num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
@@ -855,8 +853,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		skin.add(num);
 		SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
-				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, values[15], VALUE_JUDGE_DURATION[side]);
-		num2.setAlign(values[12]);
+				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, values[15], VALUE_JUDGE_DURATION[side], values[12]);
 		num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});

@@ -14,7 +14,6 @@ import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -56,8 +55,6 @@ public class LaneRenderer {
 	private double minbpm;
 	private double maxbpm;
 	
-	private TextureRegion blank;
-
 	//PMSのリズムに合わせたノートの拡大用
 	//4分から最大拡大までの時間
 	private final float noteExpansionTime = 9;
@@ -69,7 +66,6 @@ public class LaneRenderer {
 		this.main = main;
 		Pixmap hp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		hp.drawPixel(0, 0, Color.toIntBits(255, 255, 255, 255));
-		blank = new TextureRegion(new Texture(hp));
 		hp.dispose();
 
 		try {
@@ -95,6 +91,7 @@ public class LaneRenderer {
 				playconfig.setLanecover(0);
 				playconfig.setLift(0);
 				playconfig.setHidden(0);
+				playconfig.setEnableConstant(false);
 			}
 		}
 	}
@@ -136,22 +133,14 @@ public class LaneRenderer {
 				mainbpm = bpm;
 			}
 		}
-		switch (playconfig.getFixhispeed()) {
-		case PlayConfig.FIX_HISPEED_OFF:
-			break;
-		case PlayConfig.FIX_HISPEED_STARTBPM:
-			basebpm = model.getBpm();
-			break;
-		case PlayConfig.FIX_HISPEED_MINBPM:
-			basebpm = minbpm;
-			break;
-		case PlayConfig.FIX_HISPEED_MAXBPM:
-			basebpm = maxbpm;
-			break;
-		case PlayConfig.FIX_HISPEED_MAINBPM:
-			basebpm = mainbpm;
-			break;
-		}
+		basebpm = switch (playconfig.getFixhispeed()) {
+			case PlayConfig.FIX_HISPEED_OFF -> basebpm;
+			case PlayConfig.FIX_HISPEED_STARTBPM -> model.getBpm();
+			case PlayConfig.FIX_HISPEED_MINBPM -> minbpm;
+			case PlayConfig.FIX_HISPEED_MAXBPM -> maxbpm;
+			case PlayConfig.FIX_HISPEED_MAINBPM -> mainbpm;
+			default -> basebpm;
+		};
 
 		this.setLanecover(playconfig.getLanecover());
 		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
@@ -164,11 +153,11 @@ public class LaneRenderer {
 		return playconfig.getHispeed();
 	}
 
-	public int getGreenValue() {
+	public int getDuration() {
 		return playconfig.getDuration();
 	}
 
-	public void setGreenValue(int gvalue) {
+	public void setDuration(int gvalue) {
 		playconfig.setDuration(gvalue < 1 ? 1 : gvalue);
 		setLanecover(playconfig.getLanecover());
 	}
@@ -321,7 +310,7 @@ public class LaneRenderer {
 						for (int j = color.length - 1; j >= 0; j--) {
 							sprite.setColor(color[j]);
 							long nj = j > 0 ? judgetime[j - 1][1] : 0;
-							sprite.draw(blank, lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
+							sprite.draw(main.getImage(IMAGE_WHITE), lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
 									(float) ((judgetime[j][1] - nj) * rate));
 						}
 						break;
@@ -332,9 +321,42 @@ public class LaneRenderer {
 
 		// draw section line
 		final double orgy = y;
+		final boolean enableConstant = playconfig.isEnableConstant() && (main.getState() != BMSPlayer.STATE_PRACTICE);
+		final int baseduration = playconfig.getDuration();
+		final float alphaLimit =  playconfig.getConstantFadeinTime() * 1000;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getMicroTime() >= microtime) {
+				if (enableConstant) {
+					final long targetTime = microtime + (baseduration * 1000);
+					final long timeDifference = tl.getMicroTime() - targetTime;
+					if(alphaLimit >= 0) {
+						if (tl.getMicroTime() >= targetTime) {
+						    if (timeDifference < alphaLimit) {
+						    	// フェードイン処理
+						        sprite.setColor(1f, 1f, 1f, (alphaLimit - timeDifference) / alphaLimit);
+						    } else {
+						    	// ノーツ非表示
+						        continue;
+						    }
+						} else {
+						    sprite.setColor(Color.WHITE);
+						}
+					} else {
+						if (tl.getMicroTime() >= targetTime) {
+					    	// ノーツ非表示
+							continue;
+						} else {
+						    if (timeDifference > alphaLimit) {
+						    	// フェードイン処理
+						        sprite.setColor(1f, 1f, 1f, 1f - (alphaLimit - timeDifference) / alphaLimit);
+						    } else {
+							    sprite.setColor(Color.WHITE);
+						    }
+						}						
+					}
+				}
+
 				if (i > 0) {
 					final TimeLine prevtl = timelines[i - 1];
 					if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
@@ -397,9 +419,7 @@ public class LaneRenderer {
 				boolean b = true;
 				for (int lane = 0; lane < lanes.length; lane++) {
 					final Note note = tl.getNote(lane);
-					if (note != null && ((note instanceof LongNote
-							&& (((LongNote) note).isEnd() ? (LongNote) note : ((LongNote) note).getPair())
-									.getMicroTime() >= microtime)
+					if (note != null && ((note instanceof LongNote ln && (ln.isEnd() ? ln : ln.getPair()).getMicroTime() >= microtime)
 							|| (config.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
@@ -419,6 +439,36 @@ public class LaneRenderer {
 		
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
+			if (enableConstant) {
+				final long targetTime = microtime + (baseduration * 1000);
+				final long timeDifference = tl.getMicroTime() - targetTime;
+				if(alphaLimit >= 0) {
+					if (tl.getMicroTime() >= targetTime) {
+					    if (timeDifference < alphaLimit) {
+					    	// フェードイン処理
+					        sprite.setColor(1f, 1f, 1f, (alphaLimit - timeDifference) / alphaLimit);
+					    } else {
+					    	// ノーツ非表示
+					        continue;
+					    }
+					} else {
+					    sprite.setColor(Color.WHITE);
+					}
+				} else {
+					if (tl.getMicroTime() >= targetTime) {
+				    	// ノーツ非表示
+						continue;
+					} else {
+					    if (timeDifference > alphaLimit) {
+					    	// フェードイン処理
+					        sprite.setColor(1f, 1f, 1f, 1f - (alphaLimit - timeDifference) / alphaLimit);
+					    } else {
+						    sprite.setColor(Color.WHITE);
+					    }
+					}						
+				}
+			}
+
 			if (tl.getMicroTime() >= microtime) {
 				if (i > 0) {
 					final TimeLine prevtl = timelines[i - 1];
@@ -468,8 +518,7 @@ public class LaneRenderer {
 									? lanes[lane].processedImage : lanes[lane].noteImage;
 							sprite.draw(s, dstx, dsty, dstw, dsth);
 						}
-					} else if (note instanceof LongNote) {
-						final LongNote ln = (LongNote) note;
+					} else if (note instanceof LongNote ln) {
 						if (!ln.isEnd() && ln.getPair().getMicroTime() >= microtime) {
 							// if (((LongNote) note).getEnd() == null) {
 							// Logger.getGlobal().warning(
@@ -652,10 +701,6 @@ public class LaneRenderer {
 		if (font != null) {
 			font.dispose();
 			font = null;
-		}
-		if (blank != null) {
-			blank.getTexture().dispose();
-			blank = null;
 		}
 	}
 }

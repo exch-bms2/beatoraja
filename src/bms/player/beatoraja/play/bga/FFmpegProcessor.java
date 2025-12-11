@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play.bga;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
@@ -94,6 +96,19 @@ public class FFmpegProcessor implements MovieProcessor {
 	 * @author exch
 	 */
 	class MovieSeekThread extends Thread {
+		/**
+		 * FFmpegFrameGrabber::setVideoFrameNumber
+		 * 1.4.1以前のJavaCVには存在しない
+		 */
+		private static final Method setVideoFrameNumber;
+		static {
+			Method method = null;
+			try {
+				method = FFmpegFrameGrabber.class.getMethod("setVideoFrameNumber", int.class);
+			} catch (NoSuchMethodException | SecurityException ignored) {}
+			setVideoFrameNumber = method;
+		}
+
 		/**
 		 * ffmpegアクセサ
 		 */
@@ -239,8 +254,17 @@ public class FFmpegProcessor implements MovieProcessor {
 		
 		private void restart() throws Exception {
 			pixmap = null;
-			grabber.restart();
-			grabber.grabImage();
+			if (setVideoFrameNumber != null) {
+				try {
+					setVideoFrameNumber.invoke(grabber, 0);
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					grabber.restart();
+					grabber.grabImage();
+				}
+			} else {
+				grabber.restart();
+				grabber.grabImage();
+			}
 			eof = false;
 			offset = grabber.getTimestamp() - time * 1000;
 			framecount = 1;

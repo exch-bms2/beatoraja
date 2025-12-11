@@ -107,8 +107,8 @@ public class SongInformation implements Validatable {
 						}
 					}
 
-					if(!(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-							&& ((LongNote) n).isEnd())) {
+					if(!((model.getLnmode() == 1 || (model.getLnmode() == 0 && model.getLntype() == BMSModel.LNTYPE_LONGNOTE))
+							&& n instanceof LongNote && ((LongNote) n).isEnd())){
 						if (n instanceof NormalNote) {
 							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 2 : 5]++;
 							lanenotes[i][0]++;

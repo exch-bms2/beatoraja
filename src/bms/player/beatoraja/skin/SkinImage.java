@@ -6,6 +6,9 @@ import bms.player.beatoraja.skin.property.IntegerProperty;
 import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
+
+import java.util.stream.Stream;
+
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
@@ -19,51 +22,65 @@ public class SkinImage extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private SkinSource[] image;
+	private final SkinSource[] image;
 
-	private IntegerProperty ref;
+	private final IntegerProperty ref;
 
 	private TextureRegion currentImage;
 	
-	private Array<SkinSource> removedSources = new Array<SkinSource>();
+	private final Array<SkinSource> removedSources = new Array<SkinSource>();
 	
-	public SkinImage() {
-		
-	}
-
 	public SkinImage(int imageid) {
-		this.image = new SkinSource[1];
-		this.image[0] = new SkinSourceReference(imageid);
+		this.image = new SkinSource[]{new SkinSourceReference(imageid)};
+		ref = null;
 	}
 
 	public SkinImage(TextureRegion image) {
-		setImage(new TextureRegion[]{image}, 0, 0);
+		this.image = new SkinSource[]{new SkinSourceImage(new TextureRegion[]{image}, 0, 0)};
+		ref = null;
 	}
 
 	public SkinImage(TextureRegion[] image, int timer, int cycle) {
-		setImage(image, timer, cycle);
+		this.image = new SkinSource[]{new SkinSourceImage(image, timer, cycle)};
+		ref = null;
 	}
 
-	public SkinImage(TextureRegion[][] image, int timer, int cycle) {
-		setImage(image, timer, cycle);
+	public SkinImage(TextureRegion[][] images, int timer, int cycle, int ref) {
+		this(images, timer, cycle, IntegerPropertyFactory.getImageIndexProperty(ref));
+	}
+
+	public SkinImage(TextureRegion[][] images, int timer, int cycle, IntegerProperty ref) {
+		this.image = Stream.of(images).map(image -> new SkinSourceImage(image, timer, cycle)).toArray(SkinSource[]::new);
+		this.ref = ref;
 	}
 
 	public SkinImage(TextureRegion[] image, TimerProperty timer, int cycle) {
-		setImage(image, timer, cycle);
+		this.image = new SkinSource[]{new SkinSourceImage(image, timer, cycle)};
+		ref = null;
 	}
 
-	public SkinImage(TextureRegion[][] image, TimerProperty timer, int cycle) {
-		setImage(image, timer, cycle);
+	public SkinImage(TextureRegion[][] images, TimerProperty timer, int cycle, int ref) {
+		this(images, timer, cycle, IntegerPropertyFactory.getImageIndexProperty(ref));
 	}
 
-	public SkinImage(SkinSourceMovie image) {
-		this.image = new SkinSource[1];
-		this.image[0] = image;
+	public SkinImage(TextureRegion[][] images, TimerProperty timer, int cycle, IntegerProperty ref) {
+		this.image = Stream.of(images).map(image -> new SkinSourceImage(image, timer, cycle)).toArray(SkinSource[]::new);
+		this.ref = ref;
+	}
+
+	public SkinImage(SkinSourceMovie movie) {
+		this.image = new SkinSource[]{movie};
 		this.setImageType(SkinObjectRenderer.TYPE_FFMPEG);
+		ref = null;
 	}
 
-	public SkinImage(SkinSourceImage[] image) {
+	public SkinImage(SkinSourceImage[] image, int ref) {
+		this(image, IntegerPropertyFactory.getImageIndexProperty(ref));
+	}
+
+	public SkinImage(SkinSourceImage[] image, IntegerProperty ref) {
 		this.image = image;
+		this.ref = ref;
 	}
 
 	public TextureRegion getImage(long time, MainState state) {
@@ -75,30 +92,6 @@ public class SkinImage extends SkinObject {
 		return source != null ? source.getImage(time, state) : null;
 	}
 
-	public void setImage(TextureRegion[] image, int timer, int cycle) {
-		this.image = new SkinSource[1];
-		this.image[0] = new SkinSourceImage(image, timer, cycle);
-	}
-
-	public void setImage(TextureRegion[][] image, int timer, int cycle) {
-		this.image = new SkinSource[image.length];
-		for(int i = 0;i < image.length;i++) {
-			this.image[i] = new SkinSourceImage(image[i], timer, cycle);
-		}		
-	}
-
-	public void setImage(TextureRegion[] image, TimerProperty timer, int cycle) {
-		this.image = new SkinSource[1];
-		this.image[0] = new SkinSourceImage(image, timer, cycle);
-	}
-
-	public void setImage(TextureRegion[][] image, TimerProperty timer, int cycle) {
-		this.image = new SkinSource[image.length];
-		for(int i = 0;i < image.length;i++) {
-			this.image[i] = new SkinSourceImage(image[i], timer, cycle);
-		}
-	}
-	
 	public boolean validate() {
 		if(image == null) {
 			return false;
@@ -183,21 +176,7 @@ public class SkinImage extends SkinObject {
 
     public void dispose() {
     	disposeAll(removedSources.toArray(SkinSource.class));
-		if(image != null) {
-			for(SkinSource tr : image) {
-				if(tr != null) {
-					tr.dispose();					
-				}
-			}
-			image = null;
-		}
-	}
-
-	public void setReference(IntegerProperty property) {
-		ref = property;
-	}
-
-	public void setReferenceID(int id) {
-		ref = IntegerPropertyFactory.getImageIndexProperty(id);
+    	disposeAll(image);
+    	setDisposed();
 	}
 }

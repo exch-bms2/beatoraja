@@ -29,6 +29,7 @@ public class JsonSkin {
 		public Image[] image = new Image[0];
 		public ImageSet[] imageset = new ImageSet[0];
 		public Value[] value = new Value[0];
+		public FloatValue[] floatvalue = new FloatValue[0];
 		public Text[] text = new Text[0];
 		public Slider[] slider = new Slider[0];
 		public Graph[] graph = new Graph[0];
@@ -144,6 +145,30 @@ public class JsonSkin {
 		public int space;
 		public int ref;
 		public IntegerProperty value;
+		public Value[] offset;
+	}
+
+	public static class FloatValue {
+		public String id;
+		public String src;
+		public int x;
+		public int y;
+		public int w;
+		public int h;
+		public int divx = 1;
+		public int divy = 1;
+		public TimerProperty timer;
+		public int cycle;
+		public int align;
+		public int fketa;
+		public int iketa;
+		public float gain = 1.0f;
+		public boolean isSignvisible;
+		public int padding;
+		public int zeropadding;
+		public int space;
+		public int ref;
+		public FloatProperty value;
 		public Value[] offset;
 	}
 

@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.function.*;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
@@ -29,7 +31,8 @@ import com.badlogic.gdx.utils.SerializationException;
  *
  * @author exch
  */
-public class PracticeConfiguration {
+public final class PracticeConfiguration {
+
 
 	private BitmapFont titlefont;
 
@@ -46,13 +49,20 @@ public class PracticeConfiguration {
 
 	private PracticeProperty property = new PracticeProperty();
 
+	public PracticeConfiguration() {
+		// TODO 描画位置、使用テキスト等をスキン定義できるように
+		// TODO スキン定義がない場合のデフォルト配置の定義
+	}
+
 	private SkinNoteDistributionGraph[] graph = { 
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_NORMAL, 500, 0, 0, 0, 0),
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_JUDGE, 500, 0, 0, 0, 0),
 			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_EARLYLATE, 500, 0, 0, 0, 0),
 	};
 	
-	private static final String[] GRAPHTYPE = {"NOTETYPE", "JUDGE", "EARLYLATE"};
+	private static final String[] GRAPHTYPESTR = {"NOTETYPE", "JUDGE", "EARLYLATE"};
+
+	public static final PracticeElement[] elements = PracticeElement.values();
 
 	public void create(BMSModel model, Config config) {
 		property.judgerank = model.getJudgerank();
@@ -115,12 +125,15 @@ public class PracticeConfiguration {
 	}
 	
 	public void processInput(BMSPlayerInputProcessor input) {
-		final int values = model.getMode().player == 2 ? 12 : 10;
 		if (input.isControlKeyPressed(ControlKeys.UP)) {
-			cursorpos = (cursorpos + values - 1) % values;
+			do {
+				cursorpos = (cursorpos + elements.length - 1) % elements.length;
+			} while(!elements[cursorpos].predicate.test(this));
 		}
 		if (input.isControlKeyPressed(ControlKeys.DOWN)) {
-			cursorpos = (cursorpos + 1) % values;
+			do {
+				cursorpos = (cursorpos + 1) % elements.length;
+			} while(!elements[cursorpos].predicate.test(this));
 		}
 		if (input.getControlKeyState(ControlKeys.LEFT) && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
@@ -128,139 +141,14 @@ public class PracticeConfiguration {
 			} else {
 				presscount = System.currentTimeMillis();
 			}
-			switch (cursorpos) {
-			case 0:
-				if (property.starttime >= 100) {
-					property.starttime -= 100;
-				}
-				break;
-			case 1:
-				if (property.endtime > property.starttime + 1000) {
-					property.endtime -= 100;
-				}
-				break;
-			case 2:
-				property.gaugetype = (property.gaugetype + 8) % 9;
-				if ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3
-						&& property.startgauge > 100) {
-					property.startgauge = 100;
-				}
-				break;
-				case 3:
-					GaugeProperty[] cateories = GaugeProperty.values();
-					for(int i = 0;i < cateories.length;i++) {
-						if(property.gaugecategory == cateories[i]) {
-							property.gaugecategory = cateories[(i + cateories.length - 1) % cateories.length];
-							break;
-						}
-					}
-					property.startgauge = (int) property.gaugecategory.values[property.gaugetype].init;
-					break;
-			case 4:
-				if (property.startgauge > 1) {
-					property.startgauge--;
-				}
-				break;
-			case 5:
-				if (property.judgerank > 1) {
-					property.judgerank--;
-				}
-				break;
-				case 6:
-					if (property.total > 20) {
-						property.total -= 10;
-					}
-					break;
-			case 7:
-				if (property.freq > 50) {
-					property.freq -= 5;
-				}
-				break;
-			case 8:
-				property.graphtype = (property.graphtype + 2) % 3;
-				break;
-			case 9:
-				property.random = (property.random + (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 6 : 9))
-						% (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
-				break;
-			case 10:
-				property.random2 = (property.random2 + 9) % 10;
-				break;
-			case 11:
-				property.doubleop = (property.doubleop + 1) % 2;
-				break;
-			}
+			elements[cursorpos].action.accept(this, false);
 		} else if (input.getControlKeyState(ControlKeys.RIGHT) && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
 				presscount = System.currentTimeMillis();
 			}
-			TimeLine[] tl = model.getAllTimeLines();
-			switch (cursorpos) {
-			case 0:
-				if (property.starttime + 2000 <= tl[tl.length - 1].getTime()) {
-					property.starttime += 100;
-				}
-				if (property.starttime + 900 >= property.endtime) {
-					property.endtime += 100;
-				}
-				break;
-			case 1:
-				if (property.endtime <= tl[tl.length - 1].getTime() + 1000) {
-					property.endtime += 100;
-				}
-				break;
-			case 2:
-				property.gaugetype = (property.gaugetype + 1) % 9;
-				if ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3 && property.startgauge > 100) {
-					property.startgauge = 100;
-				}
-				break;
-				case 3:
-					GaugeProperty[] cateories = GaugeProperty.values();
-					for(int i = 0;i < cateories.length;i++) {
-						if(property.gaugecategory == cateories[i]) {
-							property.gaugecategory = cateories[(i + 1) % cateories.length];
-							break;
-						}
-					}
-					property.startgauge = (int) property.gaugecategory.values[property.gaugetype].init;
-					break;
-				case 4:
-				if (property.startgauge < property.gaugecategory.values[property.gaugetype].max) {
-					property.startgauge++;
-				}
-				break;
-			case 5:
-				if (property.judgerank < 400) {
-					property.judgerank++;
-				}
-				break;
-				case 6:
-					if (property.total < 5000) {
-						property.total += 10;
-					}
-					break;
-			case 7:
-				if (property.freq < 200) {
-					property.freq += 5;
-				}
-				break;
-			case 8:
-				property.graphtype = (property.graphtype + 1) % 3;
-				break;
-			case 9:
-				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
-				break;
-			case 10:
-				property.random2 = (property.random2 + 1) % 10;
-				break;
-			case 11:
-				property.doubleop = (property.doubleop + 1) % 2;
-				break;
-
-			}
+			elements[cursorpos].action.accept(this, true);
 		} else if (!(input.getControlKeyState(ControlKeys.LEFT) || input.getControlKeyState(ControlKeys.RIGHT))) {
 			presscount = 0;
 		}
@@ -270,21 +158,10 @@ public class PracticeConfiguration {
 		float x = r.x + r.width / 8;
 		float y = r.y + r.height * 7 / 8;
 		if(titlefont != null) {
-			sprite.draw(titlefont, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
-					(property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y, cursorpos == 0 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
-					(property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22,cursorpos == 1 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44,cursorpos == 2 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "GAUGE CATEGORY : " + property.gaugecategory.name(), x, y - 66,cursorpos == 3 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "GAUGE VALUE : " + property.startgauge, x, y - 88, cursorpos == 4 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "JUDGERANK : " + property.judgerank, x, y - 110, cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "TOTAL : " + (int)property.total, x, y - 132, cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "FREQUENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "GRAPHTYPE : " + GRAPHTYPE[property.graphtype], x, y - 176, cursorpos == 8 ? Color.YELLOW : Color.CYAN);
-			sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 198, cursorpos == 9 ? Color.YELLOW : Color.CYAN);
-			if (model.getMode().player == 2) {
-				sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
-				sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 242, cursorpos == 11 ? Color.YELLOW : Color.CYAN);
+			for(int i = 0;i < elements.length;i++) {
+				if(elements[i].predicate.test(this)) {
+					sprite.draw(titlefont, elements[i].text.apply(property), x, y - 22 * i, cursorpos == i ? Color.YELLOW : Color.CYAN);
+				}
 			}
 
 			if (state.resource.mediaLoadFinished()) {
@@ -308,23 +185,154 @@ public class PracticeConfiguration {
 		}
 	}
 
+	enum PracticeElement {
+
+		STARTTIME((practice, inc) -> {
+			final TimeLine[] tl = practice.model.getAllTimeLines();
+			final PracticeProperty property = practice.property;
+			if(inc) {
+				if (property.starttime + 2000 <= tl[tl.length - 1].getTime()) {
+					property.starttime += 100;
+				}
+				if (property.starttime + 900 >= property.endtime) {
+					property.endtime += 100;
+				}
+			} else {
+				if (property.starttime >= 100) {
+					property.starttime -= 100;
+				}
+			}
+		}, property -> String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
+				(property.starttime / 1000) % 60, (property.starttime / 100) % 10)),
+		ENDTIME((practice, inc) -> {
+			final TimeLine[] tl = practice.model.getAllTimeLines();
+			final PracticeProperty property = practice.property;
+			if(inc) {
+				if (property.endtime <= tl[tl.length - 1].getTime() + 1000) {
+					property.endtime += 100;
+				}
+			} else {
+				if (property.endtime > property.starttime + 1000) {
+					property.endtime -= 100;
+				}
+			}
+		}, property -> String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
+				(property.endtime / 1000) % 60, (property.endtime / 100) % 10)),
+		GAUGETYPE((practice, inc) -> {
+			final PracticeProperty property = practice.property;
+			property.gaugetype = (property.gaugetype + (inc ? 1 : 8)) % 9;
+			if ((practice.model.getMode() == Mode.POPN_5K || practice.model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3 && property.startgauge > 100) {
+				property.startgauge = 100;
+			}
+		}, property -> "GAUGE TYPE : " + GAUGE[property.gaugetype]),
+		GAUGECATEGORY((practice, inc) -> {
+			final PracticeProperty property = practice.property;
+			GaugeProperty[] cateories = GaugeProperty.values();
+			for(int i = 0;i < cateories.length;i++) {
+				if(property.gaugecategory == cateories[i]) {
+					property.gaugecategory = cateories[(i + (inc ? 1 : (cateories.length - 1))) % cateories.length];
+					break;
+				}
+			}
+			property.startgauge = (int) property.gaugecategory.values[property.gaugetype].init;
+		}, property -> "GAUGE CATEGORY : " + property.gaugecategory.name()),
+		GAUGEVALUE((practice, inc) -> {
+			final PracticeProperty property = practice.property;
+			property.startgauge = MathUtils.clamp(property.startgauge + (inc ? 1 : -1), 1, (int)property.gaugecategory.values[property.gaugetype].max);
+		}, property -> "GAUGE VALUE : " + property.startgauge),
+		JUDGERANK((practice, inc) -> {
+			practice.property.judgerank = MathUtils.clamp(practice.property.judgerank + (inc ? 1 : -1), 1, 400);
+		}, property -> "JUDGERANK : " + property.judgerank),
+		TOTAL((practice, inc) -> {
+			practice.property.total = MathUtils.clamp(practice.property.total + (inc ? 10 : -10), 20, 5000);
+		}, property -> "TOTAL : " + (int)property.total),
+		FREQ((practice, inc) -> {
+			practice.property.freq = MathUtils.clamp(practice.property.freq + (inc ? 5 : -5), 50, 200);
+		}, property -> "FREQUENCY : " + property.freq),
+		GRAPHTYPE((practice, inc) -> {
+			practice.property.graphtype = (practice.property.graphtype + (inc ? 1 : 2)) % 3;
+		}, property -> "GRAPHTYPE : " + GRAPHTYPESTR[property.graphtype]),
+		OPTION1P((practice, inc) -> {
+			final int options = (practice.model.getMode() == Mode.POPN_5K || practice.model.getMode() == Mode.POPN_9K ? 7 : 10);
+			practice.property.random = (practice.property.random + (inc ? 1 : (options -1))) % options;
+		}, property -> "OPTION-1P : " + RANDOM[property.random]),
+		OPTION2P((practice, inc) -> {
+			practice.property.random2 = (practice.property.random2 + (inc ? 1 : 9)) % 10;
+		}, property -> "OPTION-2P : " + RANDOM[property.random2], practice -> practice.model.getMode().player == 2),
+		OPTIONDP((practice, inc) -> {
+			practice.property.doubleop = (practice.property.doubleop + 1) % 2;
+		}, property -> "OPTION-DP : " + DPRANDOM[property.doubleop], practice -> practice.model.getMode().player == 2);
+
+		public final BiConsumer<PracticeConfiguration, Boolean> action;
+
+		public final Function<PracticeProperty, String> text;
+
+		public final Predicate<PracticeConfiguration> predicate;
+
+		private PracticeElement(BiConsumer<PracticeConfiguration, Boolean> action, Function<PracticeProperty, String> text) {
+			this(action, text, property -> true);
+		}
+
+		private PracticeElement(BiConsumer<PracticeConfiguration, Boolean> action, Function<PracticeProperty, String> text, Predicate<PracticeConfiguration> predicate) {
+			this.action = action;
+			this.text = text;
+			this.predicate = predicate;
+		}
+	}
 	/**
 	 * プラクティスの各種設定値
 	 *
 	 * @author exch
 	 */
 	public static class PracticeProperty {
+
+		/**
+		 * 演奏開始時間
+		 */
 		public int starttime = 0;
+		/**
+		 * 演奏終了時間
+		 */
 		public int endtime = 10000;
+		/**
+		 * 選択ゲージカテゴリ
+		 */
 		public GaugeProperty gaugecategory;
+		/**
+		 * 選択ゲージタイプ
+		 */
 		public int gaugetype = 2;
+		/**
+		 * 開始ゲージ量
+		 */
 		public int startgauge = 20;
+		/**
+		 * 1P側オプション
+		 */
 		public int random = 0;
+		/**
+		 * 2P側オプション
+		 */
 		public int random2 = 0;
+		/**
+		 * DPオプション
+		 */
 		public int doubleop = 0;
+		/**
+		 * 判定幅
+		 */
 		public int judgerank = 100;
+		/**
+		 * 再生速度倍率
+		 */
 		public int freq = 100;
+		/**
+		 * TOTAL値
+		 */
 		public double total = 0;
+		/**
+		 *
+		 */
 		public int graphtype = 0;
 	}
 }

@@ -1,18 +1,11 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
-import com.badlogic.gdx.utils.IntArray;
-
-import bms.model.BMSModel;
-import bms.model.LongNote;
-import bms.model.MineNote;
-import bms.model.Mode;
-import bms.model.Note;
-import bms.model.TimeLine;
+import bms.model.*;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.pattern.LaneShuffleModifier.*;
 
 /**
  * 譜面オプションの抽象クラス
@@ -25,26 +18,25 @@ public abstract class PatternModifier {
 	 * 譜面変更のアシストレベル
 	 */
 	private AssistLevel assist = AssistLevel.NONE;
-
-	/**
-	 * 1P側、2P側どちらの譜面を変更するか
-	 */
-	private int modifyTargetSide;
-
-	public static final int SIDE_1P = 0;
-	public static final int SIDE_2P = 1;
 	
 	private long seed = (long) (Math.random() * 65536 * 256);
 
+	public final int player;
+
 	public PatternModifier() {
-
+		this(0);
 	}
 
-	public PatternModifier(int assist) {
-		this.assist = AssistLevel.values()[assist];
+	public PatternModifier(int player) {
+		this.player = player;
 	}
 
-	public abstract List<PatternModifyLog> modify(BMSModel model);
+	public PatternModifier(AssistLevel assist) {
+		this(0);
+		this.assist = assist;
+	}
+
+	public abstract void modify(BMSModel model);
 
 	/**
 	 * 譜面変更ログの通りに譜面オプションをかける
@@ -80,70 +72,12 @@ public abstract class PatternModifier {
 		}
 	}
 
-	public static List<PatternModifyLog> merge(List<PatternModifyLog> log, List<PatternModifyLog> log2) {
-		List<PatternModifyLog> result = new ArrayList(Math.max(log.size(), log2.size()));
-		for (PatternModifyLog pml : log) {
-			boolean b = true;
-			for (PatternModifyLog pml2 : log2) {
-				if (pml.section == pml2.section) {
-					int[] newmod = new int[Math.max(pml.modify.length, pml2.modify.length)];
-					for (int i = 0; i < newmod.length; i++) {
-						if (i >= pml.modify.length) {
-							newmod[i] = pml2.modify[i];
-						} else if (i >= pml2.modify.length) {
-							newmod[i] = pml.modify[i];
-						} else {
-							newmod[i] = pml.modify[pml2.modify[i]];
-						}
-					}
-					result.add(new PatternModifyLog(pml.section, newmod));
-					b = true;
-					break;
-				}
-			}
-			if (b) {
-				result.add(pml);
-			}
-		}
-
-		for (PatternModifyLog pml2 : log2) {
-			boolean b = true;
-			for (PatternModifyLog pml : log) {
-				if (pml2.section == pml.section) {
-					b = false;
-					break;
-				}
-			}
-			if (b) {
-				for (int index = 0; index < result.size(); index++) {
-					if (pml2.section < result.get(index).section) {
-						result.add(index, pml2);
-						b = false;
-						break;
-					}
-				}
-				if (b) {
-					result.add(pml2);
-				}
-			}
-		}
-		return result;
-	}
-
 	public AssistLevel getAssistLevel() {
 		return assist;
 	}
 
 	protected void setAssistLevel(AssistLevel assist) {
 		this.assist = (assist != null ? assist : AssistLevel.NONE);
-	}
-
-	public int getModifyTarget() {
-		return modifyTargetSide;
-	}
-
-	public void setModifyTarget(int type) {
-		this.modifyTargetSide = type;
 	}
 
 	public long getSeed() {
@@ -164,34 +98,33 @@ public abstract class PatternModifier {
      * @param mode 譜面のモード
      * @return
      */
-    public static PatternModifier create(int id, int side, Mode mode, PlayerConfig config) {
-		PatternModifier pm = null;
-		Random r = Random.getRandom(id);
-		switch (r) {
-			case IDENTITY:
-			pm = new DummyModifier();
-			break;
-			case MIRROR:
-			case RANDOM:
-			case R_RANDOM:
-			case RANDOM_EX:
-			case CROSS:
-			pm = new LaneShuffleModifier(r);
-			break;
-			case S_RANDOM:
-			case SPIRAL:
-			case H_RANDOM:
-			case S_RANDOM_EX:
-			pm = new NoteShuffleModifier(r, mode, config);
-			break;
-			case ALL_SCR:
-			pm = new NoteShuffleModifier(r, side, mode, config);
-			break;
-		}
+    public static PatternModifier create(int id, int player, Mode mode, PlayerConfig config) {
+		final Random chartOprion = Random.getRandom(id, mode);
+		PatternModifier pm = switch (chartOprion) {
+			case IDENTITY -> new PatternModifier() {
+			@Override
+				public void modify(BMSModel model) {
+				}
+			};
+			case MIRROR -> new LaneMirrorShuffleModifier(player, false);
+			case MIRROR_EX -> new LaneMirrorShuffleModifier(player, true);
+			case ROTATE -> new LaneRotateShuffleModifier(player, false);
+			case ROTATE_EX -> new LaneRotateShuffleModifier(player, true);
+			case RANDOM -> new LaneRandomShuffleModifier(player, false);
+			case RANDOM_EX -> new LaneRandomShuffleModifier(player, true);
+			case CROSS -> new LaneCrossShuffleModifier(player, false);
+			case RANDOM_PLAYABLE -> new LanePlayableRandomShuffleModifier(player, false);
 
-		if (pm != null) {
-			pm.setModifyTarget(side);
-		}
+			case FLIP -> new PlayerFlipModifier();
+			// TODO BATTLEはModeModifierの方がいいかも
+			case BATTLE -> new PlayerBattleModifier();
+
+			default -> switch (chartOprion.unit) {
+				case NOTE -> new NoteShuffleModifier(chartOprion, player, mode, config);
+				default -> throw new IllegalArgumentException("Unexpected value: " + chartOprion.unit);
+			};
+		};
+		
 		return pm;
 	}
 
@@ -203,67 +136,12 @@ public abstract class PatternModifier {
 	 * スクラッチレーンを含むか
 	 * @return レーン番号の配列
 	 */
-	protected int[] getKeys(Mode mode, boolean containsScratch) {
-		int key = (modifyTargetSide == SIDE_2P)
-				? mode.key / mode.player
-				: 0;
-		if (key == mode.key) {
+	protected int[] getKeys(Mode mode, int player, boolean containsScratch) {
+		if(player >= mode.player) {
 			return new int[0];
-		} else {
-			IntArray keys = new IntArray();
-			for (int i = 0; i < mode.key / mode.player; i++) {
-				if (containsScratch || !mode.isScratchKey(key + i)) {
-					keys.add(key + i);
-				}
-			}
-			return keys.toArray();
 		}
-	}
-
-	protected static int[] shuffle(int[] keys, long seed) {
-		java.util.Random rand = new java.util.Random(seed);
-		List<Integer> l = new ArrayList<Integer>(keys.length);
-		for (int key : keys) {
-			l.add(key);
-		}
-		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
-		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
-		for (int lane = 0; lane < keys.length; lane++) {
-			int r = rand.nextInt(l.size());
-			result[keys[lane]] = l.get(r);
-			l.remove(r);
-		}
-
-		return result;
-	}
-
-	protected static int[] rotate(int[] keys, long seed) {
-		java.util.Random rand = new java.util.Random(seed);
-		boolean inc = (rand.nextInt(2) == 1);
-		int start = rand.nextInt(keys.length - 1) + (inc ? 1 : 0);
-		return rotate(keys, start, inc);
-	}
-
-	protected static int[] rotate(int[] keys, int start, boolean inc) {
-		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
-		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
-		for (int lane = 0, rlane = start; lane < keys.length; lane++) {
-			result[keys[lane]] = keys[rlane];
-			rlane = inc ? (rlane + 1) % keys.length : (rlane + keys.length - 1) % keys.length;
-		}
-		return result;
+		final int startkey = mode.key * player / mode.player;
+		return IntStream.range(startkey, startkey + mode.key / mode.player).filter(i -> containsScratch || !mode.isScratchKey(i)).toArray();
 	}
 
 	protected static void moveToBackground(TimeLine[] tls, TimeLine tl, int lane) {
@@ -286,19 +164,6 @@ public abstract class PatternModifier {
 			tl.addBackGroundNote(tl.getNote(lane));
 		}
 		tl.setNote(lane, null);
-
-	}
-
-	static class DummyModifier extends PatternModifier {
-
-		public DummyModifier() {
-			super(0);
-		}
-
-		@Override
-		public List<PatternModifyLog> modify(BMSModel model) {
-			return Collections.emptyList();
-		}
 
 	}
 

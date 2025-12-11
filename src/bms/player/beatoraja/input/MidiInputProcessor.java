@@ -4,15 +4,14 @@ import bms.player.beatoraja.PlayModeConfig.MidiConfig;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
+import java.util.Arrays;
 
 /**
  * MIDIデバイス入力処理用クラス
  *
  * @author excln
  */
-public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoCloseable {
+public final class MidiInputProcessor extends BMSPlayerInputDevice implements AutoCloseable {
 
 	static final int MaxKeys = 128;
 
@@ -32,9 +31,9 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	// MIDI note number -> game key number
 	// NOTE: この方法だと1つのMIDIキーに複数キー割り当てが不可能
-	Consumer<Boolean>[] keyMap = new Consumer[MaxKeys];
+	KeyHandler[] keyMap = new KeyHandler[MaxKeys];
 
-	Consumer<Boolean> pitchBendUp, pitchBendDown;
+	KeyHandler pitchBendUp, pitchBendDown;
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
 		super(inputProcessor, Type.MIDI);
@@ -51,19 +50,17 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	public void open() {
-		for (MidiDevice device : devices) {
+		devices.forEach(device -> {
 			try {
 				device.open();
 				device.getTransmitter().setReceiver(receiver);
 			} catch (MidiUnavailableException e) {
-			}
-		}
+			}			
+		});
 	}
 
 	public void close() {
-		for (MidiDevice device : devices) {
-			device.close();
-		}
+		devices.forEach(MidiDevice::close);
 	}
 
 	public void setConfig(MidiConfig config) {
@@ -73,16 +70,16 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		MidiConfig.Input[] keys = config.getKeys();
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
-			setHandler(keys[i], (Boolean pressed) -> {
+			setHandler(keys[i], pressed -> {
 				bmsPlayerInputProcessor.keyChanged(this, currentTime(), key, pressed);
 				bmsPlayerInputProcessor.setAnalogState(key, false, 0);
 			});
 		}
 
-		setHandler(config.getStart(), (Boolean pressed) -> {
+		setHandler(config.getStart(), pressed -> {
 			bmsPlayerInputProcessor.startChanged(pressed);
 		});
-		setHandler(config.getSelect(), (Boolean pressed) -> {
+		setHandler(config.getSelect(), pressed -> {
 			bmsPlayerInputProcessor.setSelectPressed(pressed);
 		});
 	}
@@ -96,14 +93,12 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	public void clearHandlers() {
-		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = null;
-		}
+		Arrays.fill(keyMap, null);
 		pitchBendUp = null;
 		pitchBendDown = null;
 	}
 
-	void setHandler(MidiConfig.Input input, Consumer<Boolean> handler) {
+	void setHandler(MidiConfig.Input input, KeyHandler handler) {
 		if (input == null)
 			return;
 		switch (input.type) {
@@ -177,7 +172,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		lastPressedKeyAvailable = false;
 	}
 
-	class MidiReceiver implements Receiver {
+	private final class MidiReceiver implements Receiver {
 
 		public void send(MidiMessage message, long timeStamp) {
 			if (message instanceof ShortMessage) {
@@ -226,5 +221,10 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 		public void close(){
 		}
+	}
+	
+	private interface KeyHandler {
+		
+		public void accept(boolean pressed);
 	}
 }

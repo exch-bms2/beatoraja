@@ -113,11 +113,11 @@ public enum BarSorter {
 		}
 
 		//levelが同じ場合はDifficultyでソート
-		int revelSort=((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
-		if(revelSort==0){
-			return ((SongBar)o1).getSongData().getDifficulty()-((SongBar)o2).getSongData().getDifficulty();
+		final int levelSort = ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+		if(levelSort == 0){
+			return ((SongBar)o1).getSongData().getDifficulty() - ((SongBar)o2).getSongData().getDifficulty();
 		}else{
-			return revelSort;
+			return levelSort;
 		}
 	}),
 	/**
@@ -186,13 +186,16 @@ public enum BarSorter {
 		if (!(o1 instanceof SongBar) || !(o2 instanceof SongBar)) {
 			return TITLE.sorter.compare(o1, o2);
 		}
-		if (o1.getScore() == null && o2.getScore() == null) {
+		
+		final boolean existsDuration1 = (o1.getScore() != null && o1.getScore().getAvgjudge() != Long.MAX_VALUE);
+		final boolean existsDuration2 = (o2.getScore() != null && o2.getScore().getAvgjudge() != Long.MAX_VALUE);
+		if (!existsDuration1 && !existsDuration2) {
 			return 0;
 		}
-		if (o1.getScore() == null || o1.getScore().getAvgjudge() == Long.MAX_VALUE) {
+		if (!existsDuration1) {
 			return 1;
 		}
-		if (o2.getScore() == null || o2.getScore().getAvgjudge() == Long.MAX_VALUE) {
+		if (!existsDuration2) {
 			return -1;
 		}
 		return (int) (o1.getScore().getAvgjudge() - o2.getScore().getAvgjudge());
@@ -255,6 +258,8 @@ public enum BarSorter {
 	;
 	
 	public static final BarSorter[] defaultSorter = {TITLE, ARTIST, BPM, LENGTH, LEVEL, CLEAR, SCORE, MISSCOUNT};
+
+	public static final BarSorter[] allSorter = BarSorter.values();
 
 	/**
 	 * ソート名称

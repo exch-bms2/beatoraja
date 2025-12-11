@@ -164,8 +164,11 @@ public class Config implements Validatable {
 	private boolean useDiscordRPC = false;
 	private boolean setClipboardScreenshot = false;
 
-	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
-			"http://bmsnormal2.syuriken.jp/table_insane.html",
+	private static final String[] DEFAULT_TABLEURL = { "https://rattoto10.jounin.jp/table.html",
+			"https://rattoto10.jounin.jp/table_insane.html",
+			"https://rattoto10.jounin.jp/table_overjoy.html",
+			"https://miraiscarlet.github.io/bms/table/genocide_normal/normal_bms.html",
+			"https://miraiscarlet.github.io/bms/table/genocide_insane/insane_bms.html",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=normal",
 			"http://walkure.net/hakkyou/for_glassist/bms/?lamp=hard",

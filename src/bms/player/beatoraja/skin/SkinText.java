@@ -52,11 +52,11 @@ public abstract class SkinText extends SkinObject {
         ref = property;
     }
 
-    public int getAlign() {
+    public final int getAlign() {
 		return align;
 	}
 
-    public void setAlign(int align) {
+    public final void setAlign(int align) {
         this.align = align;
     }
     
@@ -98,67 +98,67 @@ public abstract class SkinText extends SkinObject {
 
     public abstract void draw(SkinObjectRenderer sprite, float offsetX, float offsetY);
     
-    public boolean isEditable() {
+    public final boolean isEditable() {
         return editable;
     }
 
-    public void setEditable(boolean editable) {
+    public final void setEditable(boolean editable) {
         this.editable = editable;
     }
 
-    public boolean isWrapping() {
+    public final boolean isWrapping() {
         return wrapping;
     }
 
-    public void setWrapping(boolean value) {
+    public final void setWrapping(boolean value) {
         wrapping = value;
     }
 
-    public int getOverflow() {
+    public final int getOverflow() {
         return overflow;
     }
 
-    public void setOverflow(int value) {
+    public final void setOverflow(int value) {
         overflow = value;
     }
 
-    public Color getOutlineColor() {
+    public final Color getOutlineColor() {
         return outlineColor;
     }
 
-    public void setOutlineColor(Color color) {
+    public final void setOutlineColor(Color color) {
         outlineColor = color;
     }
 
-    public float getOutlineWidth() {
+    public final float getOutlineWidth() {
         return outlineWidth;
     }
 
-    public void setOutlineWidth(float value) {
+    public final void setOutlineWidth(float value) {
         outlineWidth = value;
     }
 
-    public Color getShadowColor() {
+    public final Color getShadowColor() {
         return shadowColor;
     }
 
-    public void setShadowColor(Color color) {
+    public final void setShadowColor(Color color) {
         shadowColor = color;
     }
 
-    public Vector2 getShadowOffset() {
+    public final Vector2 getShadowOffset() {
         return shadowOffset;
     }
 
-    public void setShadowOffset(Vector2 offset) {
+    public final void setShadowOffset(Vector2 offset) {
         shadowOffset = offset;
     }
 
-    public float getShadowSmoothness() {
+    public final float getShadowSmoothness() {
         return shadowSmoothness;
     }
 
-    public void setShadowSmoothness(float value) {
+    public final void setShadowSmoothness(float value) {
         shadowSmoothness = value;
     }
 }

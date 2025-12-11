@@ -46,21 +46,13 @@ public class IntegerPropertyFactory {
 			result = (state) -> {
 				if (state instanceof BMSPlayer) {
 					final LaneRenderer lanerender = ((BMSPlayer) state).getLanerender();
-					double bpm = 0;
-					switch (mode) {
-					case 0:
-						bpm = lanerender.getNowBPM();
-						break;
-					case 1:
-						bpm = lanerender.getMainBPM();
-						break;
-					case 2:
-						bpm = lanerender.getMinBPM();
-						break;
-					case 3:
-						bpm = lanerender.getMaxBPM();
-						break;
-					}
+					double bpm = switch (mode) {
+						case 0 -> lanerender.getNowBPM();
+						case 1 -> lanerender.getMainBPM();
+						case 2 -> lanerender.getMinBPM();
+						case 3 -> lanerender.getMaxBPM();
+						default -> 0;
+					};
 					return (int) Math.round((240000 / bpm / lanerender.getHispeed())
 							* (cover ? 1 - lanerender.getLanecover() : 1) * (green ? 0.6 : 1));
 				}
@@ -268,42 +260,21 @@ public class IntegerPropertyFactory {
 				}
 				return Integer.MIN_VALUE;
 			};
-		case NUMBER_DURATION:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-					return pc != null ? pc.getDuration() : Integer.MIN_VALUE;
-				} else if (state instanceof BMSPlayer) {
-					return ((BMSPlayer) state).getLanerender().getCurrentDuration();
-				} else if (state.resource.getSongdata() != null) {
-					SongData song = state.resource.getSongdata();
-					PlayConfig pc = state.resource.getPlayerConfig().getPlayConfig(song.getMode())
-							.getPlayconfig();
-					return pc.getDuration();
-				}
-				return Integer.MIN_VALUE;
-			};
-		case NUMBER_DURATION_GREEN:
-			return (state) -> {
-				if (state instanceof MusicSelector) {
-					final PlayConfig pc = ((MusicSelector)state).getSelectedBarPlayConfig();
-					return pc != null ? pc.getDuration() * 3 / 5 : Integer.MIN_VALUE;
-				} else if (state instanceof BMSPlayer) {
-					return ((BMSPlayer) state).getLanerender().getCurrentDuration() * 3 / 5;
-				} else if (state.main.getPlayerResource().getSongdata() != null) {
-					SongData song = state.resource.getSongdata();
-					PlayConfig pc = state.resource.getPlayerConfig().getPlayConfig(song.getMode())
-							.getPlayconfig();
-					return pc.getDuration() * 3 / 5;
-				}
-				return Integer.MIN_VALUE;
-			};
 		case NUMBER_FOLDER_TOTALSONGS:
 			return new FolderTotalClearCountProperty(new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		case NUMBER_LANECOVER1:
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
 					return (int) (((BMSPlayer) state).getLanerender().getLanecover() * 1000);
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_LANECOVER2:
+			return (state) -> {
+				if (state instanceof BMSPlayer) {
+					LaneRenderer laneRenderer = ((BMSPlayer) state).getLanerender();
+					int laneCover = (int)((1.0 - laneRenderer.getLiftRegion()) * laneRenderer.getLanecover() * 1000);
+					return laneCover;
 				}
 				return Integer.MIN_VALUE;
 			};
@@ -346,13 +317,6 @@ public class IntegerPropertyFactory {
 					if (value > 0 && value < 1)
 						value = 1;
 					return ((int) value) % 10;
-				}
-				return Integer.MIN_VALUE;
-			};
-		case NUMBER_NOWBPM:
-			return (state) -> {
-				if (state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer) state).getLanerender().getNowBPM());
 				}
 				return Integer.MIN_VALUE;
 			};
@@ -554,6 +518,7 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
+		nowbpm(160, (state) -> (state instanceof BMSPlayer player ? (int)player.getLanerender().getNowBPM() : Integer.MIN_VALUE)),
 		playtime_minute(161, (state) -> ((int) (((int) (state.timer.isTimerOn(TIMER_PLAY) ? state.timer.getNowTime(TIMER_PLAY) : 0)) / 60000))),
 		playtime_second(162, (state) -> ((((int) (state.timer.isTimerOn(TIMER_PLAY) ? state.timer.getNowTime(TIMER_PLAY) : 0)) / 1000) % 60)),
 		timeleft_minute(163, (state) -> {
@@ -651,6 +616,33 @@ public class IntegerPropertyFactory {
 		ir_player_perfect_rate_afterdot(239, createIRClearRateProperty(9, true)),
 		ir_player_max_rate(225, createIRClearRateProperty(10, false)),
 		ir_player_max_rate_afterdot(240, createIRClearRateProperty(10, true)),
+
+		duration(312, (state) -> {
+			if (state instanceof MusicSelector selector) {
+				final PlayConfig pc = selector.getSelectedBarPlayConfig();
+				return pc != null ? pc.getDuration() : Integer.MIN_VALUE;
+			} else if (state instanceof BMSPlayer player) {
+				return player.getLanerender().getCurrentDuration();
+			} else if (state.resource.getSongdata() != null) {
+				SongData song = state.resource.getSongdata();
+				PlayConfig pc = state.resource.getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
+				return pc.getDuration();
+			}
+			return Integer.MIN_VALUE;
+		}),
+		duration_green(313, (state) -> {
+			if (state instanceof MusicSelector selector) {
+				final PlayConfig pc = selector.getSelectedBarPlayConfig();
+				return pc != null ? pc.getDuration() * 3 / 5 : Integer.MIN_VALUE;
+			} else if (state instanceof BMSPlayer player) {
+				return player.getLanerender().getCurrentDuration() * 3 / 5;
+			} else if (state.main.getPlayerResource().getSongdata() != null) {
+				SongData song = state.resource.getSongdata();
+				PlayConfig pc = state.resource.getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
+				return pc.getDuration() * 3 / 5;
+			}
+			return Integer.MIN_VALUE;
+		}),
 
 		folder_noplay(320, createFolderClearCountProperty(0)),
 		folder_failed(321, createFolderClearCountProperty(1)),
@@ -754,12 +746,7 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
-		timing_average(374, (state) -> {
-			if (state instanceof AbstractResult) {
-				return (int) ((AbstractResult) state).getTimingDistribution().getAverage();
-			}
-			return Integer.MIN_VALUE;
-		}),
+		timing_average(374, state -> (state instanceof AbstractResult result ? (int) result.getTimingDistribution().getAverage() : Integer.MIN_VALUE)),
 		timing_average_afterdot(375, (state) -> {
 			if (state instanceof AbstractResult) {
 				TimingDistribution timingDistribution = ((AbstractResult) state).getTimingDistribution();
@@ -771,12 +758,7 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
-		timing_stddev(376, (state) -> {
-			if (state instanceof AbstractResult) {
-				return (int) ((AbstractResult) state).getTimingDistribution().getStdDev();
-			}
-			return Integer.MIN_VALUE;
-		}),
+		timing_stddev(376, (state) -> (state instanceof AbstractResult result ? (int) result.getTimingDistribution().getStdDev() :  Integer.MIN_VALUE)),
 		timing_atddev_afterdot(377, (state) -> {
 			if (state instanceof AbstractResult) {
 				return (int) (((AbstractResult) state).getTimingDistribution().getStdDev() * 100) % 100;
@@ -805,6 +787,9 @@ public class IntegerPropertyFactory {
 		ranking_index8(397, createRankingindex(7)),
 		ranking_index9(398, createRankingindex(8)),
 		ranking_index10(399, createRankingindex(9)),
+
+		judgerank(400, (state) -> (state.resource.getSongdata() != null
+				? state.resource.getSongdata().getJudge() : Integer.MIN_VALUE)),
 
 		judge_duration1(525, createJudgeduration(0)),
 		judge_duration2(526, createJudgeduration(1)),
@@ -1008,7 +993,21 @@ public class IntegerPropertyFactory {
 		bpmguide(306, (state) -> (state.resource.getPlayerConfig().isBpmguide() ? 1 : 0)),
 
 		customjudge(301, (state) -> (state.resource.getPlayerConfig().isCustomJudge() ? 1 : 0)),
-		lnmode(308, (state) -> (state.resource.getPlayerConfig().getLnmode())),
+		lnmode(308, (state) -> {
+			if (state instanceof BMSPlayer || state instanceof MusicResult) {
+				SongData model = state.resource.getSongdata();
+				if (model.hasAnyLongNote() && !model.hasUndefinedLongNote()) { // #LNMODE defined
+					if (model.hasLongNote()) {
+						return 0;
+					} else if (model.hasChargeNote()) {
+						return 1;
+					} else {
+						return 2;
+					}
+				}
+			}
+			return state.resource.getPlayerConfig().getLnmode();
+		}),
 		notesdisplaytimingautoadjust(75, (state) -> (state.resource.getPlayerConfig().isNotesDisplayTimingAutoAdjust() ? 1 : 0)),
 		gaugeautoshift(78, (state) -> (state.resource.getPlayerConfig().getGaugeAutoShift())),
 		bottomshiftablegauge(341, (state) -> (state.resource.getPlayerConfig().getBottomShiftableGauge())),
@@ -1248,6 +1247,16 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
+		playertype_ranking1(380, createRankingPlayertypeProperty(0)),
+		playertype_ranking2(381, createRankingPlayertypeProperty(1)),
+		playertype_ranking3(382, createRankingPlayertypeProperty(2)),
+		playertype_ranking4(383, createRankingPlayertypeProperty(3)),
+		playertype_ranking5(384, createRankingPlayertypeProperty(4)),
+		playertype_ranking6(385, createRankingPlayertypeProperty(5)),
+		playertype_ranking7(386, createRankingPlayertypeProperty(6)),
+		playertype_ranking8(387, createRankingPlayertypeProperty(7)),
+		playertype_ranking9(388, createRankingPlayertypeProperty(8)),
+		playertype_ranking10(389, createRankingPlayertypeProperty(9)),
 		cleartype_ranking1(390, createRankinCleartypeProperty(0)),
 		cleartype_ranking2(391, createRankinCleartypeProperty(1)),
 		cleartype_ranking3(392, createRankinCleartypeProperty(2)),
@@ -1258,6 +1267,19 @@ public class IntegerPropertyFactory {
 		cleartype_ranking8(397, createRankinCleartypeProperty(7)),
 		cleartype_ranking9(398, createRankinCleartypeProperty(8)),
 		cleartype_ranking10(399, createRankinCleartypeProperty(9)),
+
+		constant(400, (state) -> {
+			if (state instanceof MusicSelector selector) {
+				final PlayConfig playConfig = selector.getSelectedBarPlayConfig();
+				if (playConfig != null) {
+					return playConfig.isEnableConstant() ? 1 : 0;
+				}
+			} else if (state instanceof BMSPlayer player) {
+				return player.getLanerender().getPlayConfig().isEnableConstant() ? 1 : 0;
+			}
+			return -1;
+		}),
+
 		pattern_1p_1(450, getAssignedLane(0, false)),
 		pattern_1p_2(451, getAssignedLane(1, false)),
 		pattern_1p_3(452, getAssignedLane(2, false)),
@@ -1298,6 +1320,22 @@ public class IntegerPropertyFactory {
 			this.property = property;
 		}
 
+		private static IntegerProperty createRankingPlayertypeProperty(int index) {
+			return (state) -> {
+				RankingData irc = null;
+				int rankingOffset = 0;
+				if (state instanceof MusicSelector) {
+					irc = ((MusicSelector) state).getCurrentRankingData();
+					rankingOffset = ((MusicSelector) state).getRankingOffset();
+				}
+				if (state instanceof AbstractResult) {
+					irc = ((AbstractResult) state).getRankingData();
+					rankingOffset = ((AbstractResult) state).getRankingOffset();
+				}
+				return irc != null ? irc.getPlayerType(index + rankingOffset) : Integer.MIN_VALUE;
+			};
+		}
+
 		private static IntegerProperty createRankinCleartypeProperty(int index) {
 			return (state) -> {
 				RankingData irc = null;
@@ -1325,11 +1363,12 @@ public class IntegerPropertyFactory {
 				}
 
 				ReplayData rd = state.resource.getReplayData();
-				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption);
+				Mode mode = state.resource.getBMSModel().getMode();
+				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption, mode);
 
 				switch (type){
 					case RANDOM:
-					case R_RANDOM:
+					case ROTATE:
 					case CROSS:
 					case RANDOM_EX:
 						break;
@@ -1341,7 +1380,6 @@ public class IntegerPropertyFactory {
 					return 0;
 				}
 
-				Mode mode = state.resource.getBMSModel().getMode();
 				if(mode.player == 1 && is2PSide){
 					return 0;
 				}

@@ -6,6 +6,7 @@ import bms.player.beatoraja.BMSResource;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.config.SkinConfiguration;
+import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
@@ -23,6 +24,12 @@ public class FloatPropertyFactory {
 	
 	private static RateType[] RateTypeValues = RateType.values();
 	private static FloatType[] FloatTypeValues = FloatType.values();
+
+	private static final int PG = 0;
+	private static final int GR = 1;
+	private static final int GD = 2;
+	private static final int BD = 3;
+	private static final int PR = 4;
 
 	/**
 	 * RateType IDに対応するFloatPropertyを返す
@@ -86,6 +93,7 @@ public class FloatPropertyFactory {
 
 	/**
 	 * FloatType IDに対応するFloatPropertyを返す
+	 * なければRateType IDに対応するFloatPropertyを返す
 	 * 
 	 * @param id property ID
 	 * @return 対応するFloatProperty
@@ -96,11 +104,17 @@ public class FloatPropertyFactory {
 				return t.property;
 			}
 		}
+		for(RateType r : RateTypeValues) {
+			if(r.id == optionid) {
+				return r.property;
+			}
+		}
 		return null;
 	}
 
 	/**
 	 * FloatType名に対応するFloatPropertyを返す
+	 * なければRateTYpe名に対応するFloatPropertyを返す
 	 * 
 	 * @param name property name
 	 * @return 対応するFloatProperty
@@ -109,6 +123,11 @@ public class FloatPropertyFactory {
 		for(FloatType t : FloatTypeValues) {
 			if(t.name().equals(name)) {
 				return t.property;
+			}
+		}
+		for(RateType r : RateTypeValues) {
+			if(r.name().equals(name)) {
+				return r.property;
 			}
 		}
 		return null;
@@ -289,7 +308,127 @@ public class FloatPropertyFactory {
 	
 	public enum FloatType {
 
-		groovegauge_1p(107, (state) -> {
+		score_rate(1102, (state) -> {
+			if (state.getScoreDataProperty().getScoreData() != null) {
+				return state.getScoreDataProperty().getNowRate();
+			} else {
+				return Float.MIN_VALUE;
+			}
+		}),
+		total_rate(1115, (state) -> {
+			if (state.getScoreDataProperty().getScoreData() != null) {
+				return state.getScoreDataProperty().getRate();
+			} else {
+				return Float.MIN_VALUE;
+			}
+		}),
+		score_rate2(155, FloatType.total_rate.property),
+
+		duration_average(372, (state) ->{
+			if (state instanceof AbstractResult) {
+				return ((AbstractResult) state).getAverageDuration() / 1000.0f;
+			}
+			return Float.MIN_VALUE;
+		}),
+		timing_average(374, (state) ->{
+			if (state instanceof AbstractResult) {
+				return ((AbstractResult) state).getTimingDistribution().getArrayCenter() / 1000.0f;
+			}
+			return Float.MIN_VALUE;
+		}),
+		timign_stddev(376, (state) ->{
+			if (state instanceof AbstractResult) {
+				return ((AbstractResult) state).getTimingDistribution().getStdDev();
+			}
+			return Float.MIN_VALUE;
+		}),
+		perfect_rate(85, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PG) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		great_rate(86, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		good_rate(87, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		bad_rate(88, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(BD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		poor_rate(89, (state) -> {
+			final var score = state.getScoreDataProperty().getScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_perfect_rate(285, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PG) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_great_rate(286, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_good_rate(287, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(GD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_bad_rate(288, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(BD) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		rival_poor_rate(289, (state) -> {
+			final var score = state.getScoreDataProperty().getRivalScoreData();
+			if (score != null && score.getNotes() > 0) {
+				return 1.0f *  score.getJudgeCount(PR) / score.getNotes();
+			}
+			return Float.MIN_VALUE;
+		}),
+		best_rate(183, state -> state.getScoreDataProperty().getBestScoreRate()),
+		rival_rate(122, state -> state.getScoreDataProperty().getRivalScoreRate()),
+		target_rate(135, FloatType.rival_rate.property),
+		target_rate2(157, FloatType.rival_rate.property),
+
+		hispeed(310, (state) -> {
+			if (state instanceof BMSPlayer) {
+				return ((BMSPlayer) state).getLanerender().getHispeed();
+			} else if (state.main.getPlayerResource().getSongdata() != null) {
+				var song = state.main.getPlayerResource().getSongdata();
+				var pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
+						.getPlayconfig();
+				return pc.getHispeed();
+			}
+			return Float.MIN_VALUE;
+		}),
+		groovegauge_1p(1107, (state) -> {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getGauge().getValue();
 			}
@@ -298,8 +437,55 @@ public class FloatPropertyFactory {
 				return state.resource.getGauge()[gaugeType].get(state.resource.getGauge()[gaugeType].size - 1);
 			}
 			return Float.MIN_VALUE;
-		});
-		
+		}),
+		chart_averagedensity(367, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getDensity();
+			}
+			return Float.MIN_VALUE;
+		}),
+		chart_enddensity(362, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getEnddensity();
+			}
+			return Float.MIN_VALUE;
+		}),
+		chart_peakdensity(360, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getPeakdensity();
+			}
+			return Float.MIN_VALUE;
+		}),
+		chart_totalgauge(368, (state) -> {
+			final SongData song = state.resource.getSongdata();
+			if (song != null && song.getInformation() != null) {
+				return (float) song.getInformation().getTotal();
+			}
+			return Float.MIN_VALUE;
+		}),
+		loading_progress(165, (state) -> {
+			final BMSResource resource = state.resource.getBMSResource();
+			return resource.isBGAOn()
+					? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2
+					: resource.getAudioDriver().getProgress();
+		}),
+		ir_totalclearrate(227, createIRTotalClearRateProperty(new int[]{2,3,4,5,6,7,8,9,10})),
+		ir_totalfullcomborate(229,createIRTotalClearRateProperty(new int[]{8,9,10})),
+		ir_player_noplay_rate(203, createIRClearRateProperty(0)),
+		ir_player_failed_rate(211, createIRClearRateProperty(1)),
+		ir_player_assist_rate(205, createIRClearRateProperty(2)),
+		ir_player_lightassist_rate(207, createIRClearRateProperty(3)),
+		ir_player_easy_rate(213, createIRClearRateProperty(4)),
+		ir_player_normal_rate(215, createIRClearRateProperty(5)),
+		ir_player_hard_rate(217, createIRClearRateProperty(6)),
+		ir_player_exhard_rate(209, createIRClearRateProperty(7)),
+		ir_player_fullcombo_rate(219, createIRClearRateProperty(8)),
+		ir_player_perfect_rate(223, createIRClearRateProperty(9)),
+		ir_player_max_rate(225, createIRClearRateProperty(10));
+
 		private final int id;
 		private final FloatProperty property;
 
@@ -308,6 +494,41 @@ public class FloatPropertyFactory {
 			this.property = property;
 		}
 
+	}
+
+	private static FloatProperty createIRClearRateProperty(int clearType) {
+		return (state) -> {
+			RankingData irc = null;
+			if (state instanceof MusicSelector) {
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
+			}
+			if (irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
+				return 1.0f * irc.getClearCount(clearType) / irc.getTotalPlayer();
+			} else {
+				return Float.MIN_VALUE;
+			}
+		};
+	}
+
+	private static FloatProperty createIRTotalClearRateProperty (int[] clearType) {
+		return (state) -> {
+			RankingData irc = null;
+			if (state instanceof MusicSelector) {
+				irc = ((MusicSelector) state).getCurrentRankingData();
+			} else if(state instanceof AbstractResult) {
+				irc = ((AbstractResult) state).getRankingData();
+			}
+			if(irc != null && irc.getState() == RankingData.FINISH && irc.getTotalPlayer() > 0) {
+				int count = 0;
+				for(int c : clearType) {
+					count += irc.getClearCount(c);
+				}
+				return 1.0f * count / irc.getTotalPlayer();
+			}
+			return Float.MIN_VALUE;
+		};
 	}
 
 	private static FloatProperty createJudgeRate(final int judge) {
@@ -356,7 +577,7 @@ public class FloatPropertyFactory {
 						maxLevel = 10;
 					}
 					if (maxLevel > 0) {
-						return (float) sd.getLevel() / maxLevel;
+						return 1.0f * sd.getLevel() / maxLevel;
 					}
 				}
 			}

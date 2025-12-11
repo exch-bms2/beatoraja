@@ -1,11 +1,6 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.List;
-
 import bms.model.*;
-
-import javax.print.DocFlavor;
-
 
 public class MineNoteModifier extends PatternModifier {
 
@@ -23,7 +18,7 @@ public class MineNoteModifier extends PatternModifier {
 	}
 
 	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
+	public void modify(BMSModel model) {
 		if(mode == Mode.REMOVE) {
 			AssistLevel assist = AssistLevel.NONE;
 			for (TimeLine tl : model.getAllTimeLines()) {
@@ -36,46 +31,43 @@ public class MineNoteModifier extends PatternModifier {
 				}
 			}
 			setAssistLevel(assist);
-			return null;
-		}
+		} else {
+			TimeLine[] tls = model.getAllTimeLines();
+			boolean[] ln = new boolean[model.getMode().key];
+			boolean[] blank = new boolean[model.getMode().key];
 
-		TimeLine[] tls = model.getAllTimeLines();
-		boolean[] ln = new boolean[model.getMode().key];
-		boolean[] blank = new boolean[model.getMode().key];
+			for (int i = 0;i < tls.length;i++) {
+				final TimeLine tl = tls[i];
 
-		for (int i = 0;i < tls.length;i++) {
-			final TimeLine tl = tls[i];
-
-			for(int key = 0;key < model.getMode().key;key++) {
-				final Note note = tl.getNote(key);
-				if(note instanceof LongNote) {
-					ln[key] = !((LongNote) note).isEnd();
+				for(int key = 0;key < model.getMode().key;key++) {
+					final Note note = tl.getNote(key);
+					if(note instanceof LongNote) {
+						ln[key] = !((LongNote) note).isEnd();
+					}
+					blank[key] = !ln[key] && note == null;
 				}
-				blank[key] = !ln[key] && note == null;
-			}
 
-			for(int key = 0;key < model.getMode().key;key++) {
-				if(blank[key]) {
-					switch (mode) {
-						case ADD_RANDOM:
-							if(Math.random() > 0.9) {
+				for(int key = 0;key < model.getMode().key;key++) {
+					if(blank[key]) {
+						switch (mode) {
+							case ADD_RANDOM -> {
+								if(Math.random() > 0.9) {
+									tl.setNote(key, new MineNote(-1, damage));
+								}
+							}
+							case ADD_NEAR -> {
+								if((key > 0 && !blank[key - 1]) || (key < model.getMode().key - 1 && !blank[key + 1])) {
+									tl.setNote(key, new MineNote(-1, damage));
+								}							
+							}
+							case ADD_BLANK -> {
 								tl.setNote(key, new MineNote(-1, damage));
 							}
-							break;
-						case ADD_NEAR:
-							if((key > 0 && !blank[key - 1]) || (key < model.getMode().key - 1 && !blank[key + 1])) {
-								tl.setNote(key, new MineNote(-1, damage));
-							}
-							break;
-						case ADD_BLANK:
-							tl.setNote(key, new MineNote(-1, damage));
-							break;
+						}
 					}
 				}
-			}
+			}			
 		}
-
-		return null;
 	}
 	
 	public boolean mineNoteExists() {

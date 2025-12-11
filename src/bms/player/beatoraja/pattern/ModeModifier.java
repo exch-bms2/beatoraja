@@ -30,15 +30,14 @@ public class ModeModifier extends PatternModifier {
 	private final Mode afterMode;
 
 	public ModeModifier(Mode beforeMode, Mode afterMode, PlayerConfig config) {
-		super(1);		
+		super(AssistLevel.LIGHT_ASSIST);		
 		this.beforeMode = beforeMode;
 		this.afterMode = afterMode;
 		this.config = config;
 	}
 
 	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
-		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
+	public void modify(BMSModel model) {
 		model.setMode(afterMode);
 		final Algorithm algorithm = Algorithm.get(beforeMode, afterMode);
 		int lanes = afterMode.key;
@@ -60,7 +59,7 @@ public class ModeModifier extends PatternModifier {
 					hnotes[i] = tl.getHiddenNote(i);
 				}
 				int[] keys;
-				keys = getKeys(afterMode, true);
+				keys = getKeys(afterMode, 0, true);
 				random = algorithm != null && keys.length > 0 ? algorithm.modify(keys, ln,
 						notes, lastNoteTime, tl.getTime(), hranThreshold, config)
 						: keys;
@@ -91,10 +90,8 @@ public class ModeModifier extends PatternModifier {
 					}
 					tl.setHiddenNote(i, hn);
 				}
-				log.add(new PatternModifyLog(tl.getSection(), random));
 			}
 		}
-		return log;
 	}
 	
 	enum Algorithm {

@@ -1,19 +1,15 @@
 package bms.player.beatoraja;
 
 import java.io.File;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
-import bms.player.beatoraja.ir.IRPlayerData;
-import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.ir.IRScoreData;
+import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.ScoreDataCache;
 import bms.player.beatoraja.song.SongData;
 
@@ -22,7 +18,7 @@ import bms.player.beatoraja.song.SongData;
  * 
  * @author exch
  */
-public class RivalDataAccessor {
+public final class RivalDataAccessor {
 
 	/**
 	 * ライバル情報
@@ -43,11 +39,6 @@ public class RivalDataAccessor {
 		return index >= 0 && index < rivals.length ? rivals[index] : null;
 	}
 	
-	@Deprecated
-	public PlayerInformation[] getRivals() {
-		return rivals;
-	}
-	
 	/**
 	 * ライバルスコアデータキャッシュを取得する
 	 * 
@@ -56,11 +47,6 @@ public class RivalDataAccessor {
 	 */
 	public ScoreDataCache getRivalScoreDataCache(int index) {
 		return index >= 0 && index < rivalcaches.length ? rivalcaches[index] : null;
-	}
-	
-	@Deprecated
-	public ScoreDataCache[] getRivalScoreDataCaches() {
-		return rivalcaches;
 	}
 	
 	/**
@@ -199,10 +185,8 @@ public class RivalDataAccessor {
 	}
 	
 	private ScoreData[] convert(IRScoreData[] irscores) {
-		ScoreData[] scores = new ScoreData[irscores.length];
-		for(int i = 0;i < scores.length;i++) {
+		return Stream.of(irscores).map(irscore -> {
 			final ScoreData score = new ScoreData();
-			final bms.player.beatoraja.ir.IRScoreData irscore = irscores[i];
 			score.setSha256(irscore.sha256);
 			score.setMode(irscore.lntype);
 			score.setPlayer(irscore.player);
@@ -224,14 +208,13 @@ public class RivalDataAccessor {
 			score.setNotes(irscore.notes);
 			score.setPassnotes(irscore.passnotes != 0 ? irscore.notes : irscore.passnotes);
 			score.setMinbp(irscore.minbp);
+			score.setAvgjudge(irscore.avgjudge);
 			score.setOption(irscore.option);
 			score.setSeed(irscore.seed);
 			score.setAssist(irscore.assist);
 			score.setGauge(irscore.gauge);
 			score.setDeviceType(irscore.deviceType);
-			
-			scores[i] = score;
-		}
-		return scores;
+			return score;
+		}).toArray(ScoreData[]::new);
 	}
 }

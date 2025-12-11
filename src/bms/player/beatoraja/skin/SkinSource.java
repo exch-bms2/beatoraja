@@ -1,18 +1,17 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.DisposableObject;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Validatable;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Disposable;
 
 /**
  * スキンのソースイメージ
  * 
  * @author exch
  */
-public interface SkinSource extends Disposable {
+public abstract class SkinSource extends DisposableObject implements Validatable {
 
-	public boolean validate();
-	
-	public TextureRegion getImage(long time, MainState state);
+	public abstract TextureRegion getImage(long time, MainState state);
 }

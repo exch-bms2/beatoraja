@@ -25,7 +25,7 @@ public class AudioConfig implements Validatable {
 	/**
 	 * オーディオ同時発音数
 	 */
-	private int deviceSimultaneousSources = 128;
+	private int deviceSimultaneousSources = 256;
 	/**
 	 * オーディオサンプリングレート(0:指定なし)
 	 */

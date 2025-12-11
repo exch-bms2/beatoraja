@@ -5,17 +5,13 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.FOLDER_CLOSE;
 import java.io.BufferedInputStream;
 import java.lang.reflect.Method;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.Sort;
 import com.badlogic.gdx.utils.StringBuilder;
@@ -40,25 +36,25 @@ import bms.player.beatoraja.song.SongInformationAccessor;
  *
  * @author exch
  */
-public class BarManager {
+public final class BarManager {
 	
 	private final MusicSelector select;
 	/**
 	 * 難易度表バー一覧
 	 */
-	TableBar[] tables = new TableBar[0];
+	private TableBar[] tables = new TableBar[0];
 
-	Bar[] commands;
+	private Bar[] commands;
 	
-	TableBar courses;
+	private TableBar courses;
 
-	HashBar[] favorites = new HashBar[0];
+	private HashBar[] favorites = new HashBar[0];
 
 	/**
 	 * 現在のフォルダ階層
 	 */
-	Queue<DirectoryBar> dir = new Queue<>();
-	String dirString = "";
+	private final Queue<DirectoryBar> dir = new Queue<>();
+	private String dirString = "";
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -71,21 +67,21 @@ public class BarManager {
 	/**
 	 * 各階層のフォルダを開く元となったバー
 	 */
-	final Queue<Bar> sourcebars = new Queue<>();
+	private final Queue<Bar> sourcebars = new Queue<>();
 
 	// jsonで定義したrandom bar (folder)
-	List<RandomFolder> randomFolderList;
+	private List<RandomFolder> randomFolderList;
 
 	// システム側で挿入されるルートフォルダ
-	HashMap<String, Bar> appendFolders = new HashMap<String, Bar>();
+	private final ObjectMap<String, Bar> appendFolders = new ObjectMap<String, Bar>();
 	/**
 	 * 検索結果バー一覧
 	 */
-	Array<SearchWordBar> search = new Array<SearchWordBar>();
+	private final Array<SearchWordBar> search = new Array<SearchWordBar>();
 	/**
 	 * ランダムコース結果バー一覧
 	 */
-	Array<RandomCourseResult> randomCourseResult = new Array<>();
+	private final Array<RandomCourseResult> randomCourseResult = new Array<>();
 
 	BarContentsLoaderThread loader;
 
@@ -97,7 +93,7 @@ public class BarManager {
 		TableDataAccessor tdaccessor = new TableDataAccessor(select.resource.getConfig().getTablepath());
 
 		TableData[] unsortedtables = tdaccessor.readAll();
-		List<TableData> sortedtables = new ArrayList<TableData>(unsortedtables.length);
+		final List<TableData> sortedtables = new ArrayList<TableData>(unsortedtables.length);
 		
 		for(String url : select.resource.getConfig().getTableURL()) {
 			for(int i = 0;i < unsortedtables.length;i++) {
@@ -109,13 +105,8 @@ public class BarManager {
 				}
 			}
 		}
-		
-		
-		for(TableData td : unsortedtables) {
-			if(td != null) {
-				sortedtables.add(td);
-			}
-		}
+
+		Arrays.stream(unsortedtables).filter(Objects::nonNull).forEach(td -> sortedtables.add(td));
 
 		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(select.resource.getConfig().getTablepath());
 
@@ -275,7 +266,7 @@ public class BarManager {
 		return updateBar(null);
 	}
 
-	public boolean updateBar(Bar bar) {
+	public boolean updateBar(DirectoryBar bar) {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		int prevdirsize = dir.size;
 		Bar sourcebar = null;
@@ -295,23 +286,21 @@ public class BarManager {
 			l.addAll(new FolderBar(select, null, "e2977170").getChildren());
 			l.add(courses);
 			l.addAll(favorites);
-			appendFolders.keySet().forEach((key) -> {
-			    l.add(appendFolders.get(key));
-			});
+			appendFolders.entries().forEach(e -> l.add(e.value));
 			l.addAll(tables);
 			l.addAll(commands);
 			l.addAll(search);
-		} else if (bar instanceof DirectoryBar) {
-			showInvisibleCharts = ((DirectoryBar)bar).isShowInvisibleChart();
-			if(dir.indexOf((DirectoryBar) bar, true) != -1) {
+		} else {
+			showInvisibleCharts = bar.isShowInvisibleChart();
+			if(dir.indexOf(bar, true) != -1) {
 				while(dir.last() != bar) {
 					prevbar = dir.removeLast();
 					sourcebar = sourcebars.removeLast();
 				}
 				dir.removeLast();
 			}
-			l.addAll(((DirectoryBar) bar).getChildren());
-			isSortable = ((DirectoryBar) bar).isSortable();
+			l.addAll(bar.getChildren());
+			isSortable = bar.isSortable();
 
 			if (bar instanceof ContainerBar && randomCourseResult.size > 0) {
 				StringBuilder str = new StringBuilder();
@@ -331,8 +320,7 @@ public class BarManager {
 		if(!select.resource.getConfig().isShowNoSongExistingBar()) {
 			Array<Bar> remove = new Array<Bar>();
 			for (Bar b : l) {
-				if ((b instanceof SongBar && !((SongBar) b).existsSong())
-					|| b instanceof GradeBar && !((GradeBar) b).existsAllSongs()) {
+				if ((b instanceof SongBar sb && !sb.existsSong()) || (b instanceof GradeBar gb && !gb.existsAllSongs())) {
 					remove.add(b);
 				}
 			}
@@ -348,8 +336,8 @@ public class BarManager {
 				config.setMode(mode);
 				Array<Bar> remove = new Array<Bar>();
 				for (Bar b : l) {
-					if(b instanceof SongBar && ((SongBar) b).getSongData() != null) {
-						final SongData song = ((SongBar) b).getSongData();
+					if(b instanceof SongBar sb && sb.getSongData() != null) {
+						final SongData song = sb.getSongData();
 						if((!showInvisibleCharts && (song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
 								|| (mode != null && song.getMode() != 0 && song.getMode() != mode.id)) {
 							remove.add(b);
@@ -363,7 +351,7 @@ public class BarManager {
 			}
 
 			if (bar != null) {
-				dir.addLast((DirectoryBar) bar);
+				dir.addLast(bar);
 				if (dir.size > prevdirsize) {
 					sourcebars.addLast(prevbar);
 				}
@@ -371,8 +359,8 @@ public class BarManager {
 
 			Bar[] newcurrentsongs = l.toArray(Bar.class);
 			for (Bar b : newcurrentsongs) {
-				if (b instanceof SongBar) {
-					SongData sd = ((SongBar) b).getSongData();
+				if (b instanceof SongBar sb) {
+					SongData sd = sb.getSongData();
 					if (sd != null && select.getScoreDataCache().existsScoreDataCache(sd, config.getLnmode())) {
 						b.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
@@ -380,7 +368,8 @@ public class BarManager {
 			}
 
 			if(isSortable) {
-			    Sort.instance().sort(newcurrentsongs, BarSorter.defaultSorter[select.getSort()].sorter);
+				final BarSorter sorter = BarSorter.valueOf(select.main.getPlayerConfig().getSortid());
+			    Sort.instance().sort(newcurrentsongs, sorter != null ? sorter.sorter : BarSorter.TITLE.sorter);
 			}
 
 			Array<Bar> bars = new Array<Bar>();
@@ -446,12 +435,9 @@ public class BarManager {
 				prevbar = sourcebar;
 			}
 			if (prevbar != null) {
-				if (prevbar instanceof SongBar && ((SongBar) prevbar).existsSong()) {
-					final SongBar prevsong = (SongBar) prevbar;
+				if (prevbar instanceof SongBar prevsong && prevsong.existsSong()) {
 					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).existsSong() &&
-								((SongBar) currentsongs[i]).getSongData().getSha256()
-								.equals(prevsong.getSongData().getSha256())) {
+						if (currentsongs[i] instanceof SongBar sb && sb.existsSong() && sb.getSongData().getSha256().equals(prevsong.getSongData().getSha256())) {
 							selectedindex = i;
 							break;
 						}
@@ -586,7 +572,7 @@ public class BarManager {
 	    this.appendFolders.put(key, bar);
 	}
 
-	public static class CommandFolder {
+	public static final class CommandFolder {
 
 		private String name;
 		private CommandFolder[] folder = new CommandFolder[0];
@@ -632,7 +618,7 @@ public class BarManager {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class RandomFolder {
+	public static final class RandomFolder {
 		private String name;
 		private Map<String, Object> filter;
 		public String getName() {
@@ -652,20 +638,13 @@ public class BarManager {
 		}
 	}
 
-	static class RandomCourseResult {
-		public GradeBar course;
-		public String dirString;
-
-		public RandomCourseResult(GradeBar course, String dirString) {
-			this.course = course;
-			this.dirString = dirString;
-		}
+	private record RandomCourseResult(GradeBar course, String dirString) {
 	}
 
 	/**
 	 * 選曲バー内のスコアデータ等を読み込むためのスレッド
 	 */
-	static class BarContentsLoaderThread extends Thread {
+	static final class BarContentsLoaderThread extends Thread {
 
 		private final MusicSelector select;
 		/**
@@ -694,8 +673,8 @@ public class BarManager {
 			// loading score
 			// TODO collectorを使用してスコアをまとめて取得
 			for (Bar bar : bars) {
-				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
-					SongData sd = ((SongBar) bar).getSongData();
+				if (bar instanceof SongBar sb && sb.existsSong()) {
+					SongData sd = sb.getSongData();
 					if (bar.getScore() == null) {
 						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
@@ -707,10 +686,9 @@ public class BarManager {
 						bar.setRivalScore(rivalScore);
 					}
 					for(int i = 0;i < MusicSelector.REPLAY;i++) {
-						((SongBar) bar).setExistsReplay(i, main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),config.getLnmode(), i));						
+						sb.setExistsReplay(i, main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),config.getLnmode(), i));						
 					}
-				} else if (bar instanceof GradeBar && ((GradeBar)bar).existsAllSongs()) {
-					final GradeBar gb = (GradeBar) bar;
+				} else if (bar instanceof GradeBar gb && gb.existsAllSongs()) {
 					String[] hash = new String[gb.getSongDatas().length];
 					boolean ln = false;
 					for (int j = 0; j < gb.getSongDatas().length; j++) {
@@ -743,8 +721,7 @@ public class BarManager {
 			// loading banner
 			// loading stagefile
 			for (Bar bar : bars) {
-				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
-					final SongBar songbar = (SongBar) bar;
+				if (bar instanceof SongBar songbar && songbar.existsSong()) {
 					SongData song = songbar.getSongData();
 					try {
 						Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());

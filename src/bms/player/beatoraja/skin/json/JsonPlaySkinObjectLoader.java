@@ -250,8 +250,7 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 									}
 								}
 								numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-										d > 10 ? 2 : 0, value.space, value.ref);
-								numbers[i].setAlign(2);
+										d > 10 ? 2 : 0, value.space, value.ref, 2);
 								numbers[i].setRelative(true);
 								if(value.offset != null) {
 									SkinOffset[] offsets = new SkinOffset[value.offset.length];

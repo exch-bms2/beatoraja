@@ -408,7 +408,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		
 		private void processDirectory(SongDatabaseUpdaterProperty property)
 				throws IOException, SQLException, ReflectiveOperationException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
-			final List<SongData> records = qr.query(property.conn, "SELECT path,date FROM song WHERE folder = ?", songhandler,
+			final List<SongData> records = qr.query(property.conn, "SELECT path, date, preview FROM song WHERE folder = ?", songhandler,
 					SongUtils.crc32(path.toString(), bmsroot, root.toString()));
 			final List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
 					folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
@@ -525,6 +525,16 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 						records.set(i, null);
 						if (record.getDate() == lastModifiedTime) {
 							update = false;
+
+							String oldpp = record.getPreview() == null ? "" : record.getPreview();
+							String newpp = previewpath == null ? "" : previewpath;
+							if (!oldpp.equals(newpp)) {
+								try {
+									qr.update(property.conn, "UPDATE song SET preview=? WHERE path=?", newpp, pathname);
+								} catch (SQLException e) {
+									Logger.getGlobal().warning("Error while updating preview at " + pathname + ": " + e.getMessage());
+								}
+							}
 						}
 						break;
 					}
@@ -560,27 +570,40 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				if (sd.getNotes() != 0 || model.getWavList().length != 0) {
 					if (sd.getDifficulty() == 0) {
 						final String fulltitle = (sd.getTitle() + sd.getSubtitle()).toLowerCase();
-						if (fulltitle.contains("beginner")) {
+						final String diffname = (sd.getSubtitle()).toLowerCase();
+						if (diffname.contains("beginner")) {
 							sd.setDifficulty(1);
-						} else if (fulltitle.contains("normal")) {
+						} else if (diffname.contains("normal")) {
 							sd.setDifficulty(2);
-						} else if (fulltitle.contains("hyper")) {
+						} else if (diffname.contains("hyper")) {
 							sd.setDifficulty(3);
-						} else if (fulltitle.contains("another")) {
+						} else if (diffname.contains("another")) {
 							sd.setDifficulty(4);
-						} else if (fulltitle.contains("insane")) {
+						} else if (diffname.contains("insane") || diffname.contains("leggendaria")) {
 							sd.setDifficulty(5);
 						} else {
-							if (sd.getNotes() < 250) {
+							if (fulltitle.contains("beginner")) {
 								sd.setDifficulty(1);
-							} else if (sd.getNotes() < 600) {
+							} else if (fulltitle.contains("normal")) {
 								sd.setDifficulty(2);
-							} else if (sd.getNotes() < 1000) {
+							} else if (fulltitle.contains("hyper")) {
 								sd.setDifficulty(3);
-							} else if (sd.getNotes() < 2000) {
+							} else if (fulltitle.contains("another")) {
 								sd.setDifficulty(4);
-							} else {
+							} else if (fulltitle.contains("insane") || fulltitle.contains("leggendaria")) {
 								sd.setDifficulty(5);
+							} else {
+								if (sd.getNotes() < 250) {
+									sd.setDifficulty(1);
+								} else if (sd.getNotes() < 600) {
+									sd.setDifficulty(2);
+								} else if (sd.getNotes() < 1000) {
+									sd.setDifficulty(3);
+								} else if (sd.getNotes() < 2000) {
+									sd.setDifficulty(4);
+								} else {
+									sd.setDifficulty(5);
+								}
 							}
 						}
 					}

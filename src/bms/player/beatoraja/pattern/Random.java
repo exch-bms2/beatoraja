@@ -1,52 +1,61 @@
 package bms.player.beatoraja.pattern;
 
+import bms.model.Mode;
+
 public enum Random {
-	IDENTITY(0, RandomUnit.LANE, false),
-	MIRROR(1, RandomUnit.LANE, false),
-	RANDOM(2, RandomUnit.LANE, false),
-	R_RANDOM(3, RandomUnit.LANE, false),
-	S_RANDOM(4, RandomUnit.NOTE, false),
-	SPIRAL(5, RandomUnit.NOTE, false),
-	H_RANDOM(6, RandomUnit.NOTE, false),
-	ALL_SCR(7, RandomUnit.NOTE, true),
-	RANDOM_EX(8, RandomUnit.LANE, true),
-	S_RANDOM_EX(9, RandomUnit.NOTE, true),
+	IDENTITY(RandomUnit.NONE, false),
+	MIRROR(RandomUnit.LANE, false),
+	RANDOM(RandomUnit.LANE, false),
+	ROTATE(RandomUnit.LANE, false),
+	S_RANDOM(RandomUnit.NOTE, false),
+	SPIRAL(RandomUnit.NOTE, false),
+	H_RANDOM(RandomUnit.NOTE, false),
+	ALL_SCR(RandomUnit.NOTE, true),
+	MIRROR_EX(RandomUnit.LANE, true),
+	RANDOM_EX(RandomUnit.LANE, true),
+	ROTATE_EX(RandomUnit.LANE, true),
+	S_RANDOM_EX(RandomUnit.NOTE, true),
 
-    CROSS(10, RandomUnit.LANE, false),
+    CROSS(RandomUnit.LANE, false),
 
-    FLIP(20, RandomUnit.NOTE, true),
-    BATTLE(21, RandomUnit.NOTE, true),
+    CONVERGE(RandomUnit.NOTE, true),
+    S_RANDOM_NO_THRESHOLD(RandomUnit.NOTE, false),
+    RANDOM_PLAYABLE(RandomUnit.LANE, true),
+    S_RANDOM_PLAYABLE(RandomUnit.NOTE, true),
+
+    FLIP(RandomUnit.PLAYER, true),
+    BATTLE(RandomUnit.PLAYER, true),
     ;
 
-	/**
-	 * PlayerConfigから渡されるid
-	 */
-	public final int id;
-
 	public final RandomUnit unit;
+	
+	public static final Random[] OPTION_GENERAL = 
+		{IDENTITY, MIRROR, RANDOM, ROTATE, S_RANDOM, SPIRAL, H_RANDOM, ALL_SCR, RANDOM_EX, S_RANDOM_EX};
+	public static final Random[] OPTION_PMS = 
+		{IDENTITY, MIRROR, RANDOM, ROTATE, S_RANDOM_NO_THRESHOLD, SPIRAL, H_RANDOM, CONVERGE, RANDOM_PLAYABLE, S_RANDOM_PLAYABLE};
+
+	public static final Random[] OPTION_DOUBLE = {IDENTITY, FLIP};
+	public static final Random[] OPTION_SINGLE = {IDENTITY, BATTLE};
 
 	/**
 	 * 変更レーンにスクラッチレーンを含むか
 	 */
 	public final boolean isScratchLaneModify;
 
-	private Random(int id, RandomUnit unit, boolean s) {
-		this.id = id;
+	private Random(RandomUnit unit, boolean s) {
 		this.unit = unit;
 		this.isScratchLaneModify = s;
 	}
 
-	public static Random getRandom(int id) {
-		for(Random r : Random.values()) {
-			if (r.id == id) {
-				return r;
-			}
-		}
-		return Random.IDENTITY;
-	}
+	public static Random getRandom(int id, Mode mode) {
+		final Random[] randoms = switch(mode) {
+			case POPN_5K, POPN_9K -> OPTION_PMS;
+			default -> OPTION_GENERAL;
+		};
+		return id >= 0 && id < randoms.length ? randoms[id] : IDENTITY;
+	}	
 }
 
 enum RandomUnit {
-	LANE,
-	NOTE
+	NONE, LANE, NOTE, PLAYER;
 }

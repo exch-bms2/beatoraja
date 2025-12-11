@@ -15,7 +15,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author exch
  */
-public class ScoreData implements Validatable {
+public final class ScoreData implements Validatable {
 
 	// TODO 各OPでのクリア、各DPオプションでのクリア、増加型/減少型プレイゲージでの最大クリア
 
@@ -23,6 +23,8 @@ public class ScoreData implements Validatable {
 	 * 譜面のハッシュ値
 	 */
 	private String sha256 = "";
+	
+	private String id = "";
 	/**
 	 * プレイヤー名。自身のスコアの場合は空白
 	 */
@@ -143,21 +145,27 @@ public class ScoreData implements Validatable {
 	public long getDate() {
 		return date;
 	}
+	
 	public void setDate(long date) {
 		this.date = date;
 	}
+	
 	public int getPlaycount() {
 		return playcount;
 	}
+	
 	public void setPlaycount(int playcount) {
 		this.playcount = playcount;
 	}
+	
 	public int getClear() {
 		return clear;
 	}
+	
 	public void setClear(int clear) {
 		this.clear = clear;
 	}
+	
 	public int getEpg() {
 		return epg;
 	}
@@ -245,67 +253,61 @@ public class ScoreData implements Validatable {
 	 * @return 判定のカウント数
 	 */
 	public int getJudgeCount(int judge, boolean fast) {
-		switch (judge) {
-			case 0:
-				return fast ? epg : lpg;
-			case 1:
-				return fast ? egr : lgr;
-			case 2:
-				return fast ? egd : lgd;
-			case 3:
-				return fast ? ebd : lbd;
-			case 4:
-				return fast ? epr : lpr;
-			case 5:
-				return fast ? ems : lms;
-		}
-		return 0;
+		return switch (judge) {
+			case 0 -> fast ? epg : lpg;
+			case 1 -> fast ? egr : lgr;
+			case 2 -> fast ? egd : lgd;
+			case 3 -> fast ? ebd : lbd;
+			case 4 -> fast ? epr : lpr;
+			case 5 -> fast ? ems : lms;
+			default -> 0;
+		};
 	}
 
 	public void addJudgeCount(int judge, boolean fast, int count) {
 		switch (judge) {
-		case 0:
-			if(fast) {
-				epg += count;
-			} else {
-				lpg += count;
+			case 0 -> {
+				if(fast) {
+					epg += count;
+				} else {
+					lpg += count;
+				}
 			}
-			break;
-		case 1:
-			if(fast) {
-				egr += count;
-			} else {
-				lgr += count;
+			case 1 -> {
+				if(fast) {
+					egr += count;
+				} else {
+					lgr += count;
+				}
 			}
-			break;
-		case 2:
-			if(fast) {
-				egd += count;
-			} else {
-				lgd += count;
+			case 2 -> {
+				if(fast) {
+					egd += count;
+				} else {
+					lgd += count;
+				}
 			}
-			break;
-		case 3:
-			if(fast) {
-				ebd += count;
-			} else {
-				lbd += count;
+			case 3 -> {
+				if(fast) {
+					ebd += count;
+				} else {
+					lbd += count;
+				}
 			}
-			break;
-		case 4:
-			if(fast) {
-				epr += count;
-			} else {
-				lpr += count;
+			case 4 -> {
+				if(fast) {
+					epr += count;
+				} else {
+					lpr += count;
+				}
 			}
-			break;
-		case 5:
-			if(fast) {
-				ems += count;
-			} else {
-				lms += count;
+			case 5 -> {
+				if(fast) {
+					ems += count;
+				} else {
+					lms += count;
+				}
 			}
-			break;
 		}
 	}
 
@@ -384,6 +386,14 @@ public class ScoreData implements Validatable {
 		this.sha256 = sha256;
 	}
 	
+	public String getID() {
+		return id;
+	}
+
+	public void setID(String id) {
+		this.id = id != null ? id : "";
+	}
+
 	public String getPlayer() {
 		return player;
 	}

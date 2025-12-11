@@ -4,15 +4,17 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.*;
+import java.util.Optional;
+
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 
 /**
  * 楽曲バー描画用スキンオブジェクト
  * 
  * @author exch
  */
-public class SkinBar extends SkinObject {
+public final class SkinBar extends SkinObject {
 
     /**
      * 選択時のBarのSkinImage
@@ -28,7 +30,7 @@ public class SkinBar extends SkinObject {
     /**
      * トロフィーのSkinImage。描画位置はBarの相対座標
      */
-    private SkinImage[] trophy = new SkinImage[BARTROPHY_COUNT];
+    private final SkinImage[] trophy = new SkinImage[BARTROPHY_COUNT];
     
     public static final int BARTROPHY_COUNT = 3;
 
@@ -38,7 +40,7 @@ public class SkinBar extends SkinObject {
      * 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
      * 3以降で定義されてなければ0か1を用いる
      */
-    private SkinText[] text = new SkinText[BARTEXT_COUNT];
+    private final SkinText[] text = new SkinText[BARTEXT_COUNT];
 
     public static final int BARTEXT_NORMAL = 0;
     public static final int BARTEXT_NEW = 1;
@@ -55,14 +57,14 @@ public class SkinBar extends SkinObject {
     /**
      * レベルのSkinNumber。描画位置はBarの相対座標
      */
-    private SkinNumber[] barlevel = new SkinNumber[BARLEVEL_COUNT];
+    private final SkinNumber[] barlevel = new SkinNumber[BARLEVEL_COUNT];
     
     public static final int BARLEVEL_COUNT = 7;
 
     /**
      * 譜面ラベルのSkinImage。描画位置はBarの相対座標
      */
-    private SkinImage[] label = new SkinImage[BARLABEL_COUNT];
+    private final SkinImage[] label = new SkinImage[BARLABEL_COUNT];
     
     public static final int BARLABEL_COUNT = 5;
 
@@ -73,23 +75,23 @@ public class SkinBar extends SkinObject {
     /**
      * ランプ画像
      */
-    private SkinImage[] lamp = new SkinImage[BARLAMP_COUNT];
+    private final SkinImage[] lamp = new SkinImage[BARLAMP_COUNT];
     /**
      * ライバルランプ表示時のプレイヤーランプ画像
      */
-    private SkinImage[] mylamp = new SkinImage[BARLAMP_COUNT];
+    private final SkinImage[] mylamp = new SkinImage[BARLAMP_COUNT];
     /**
      * ライバルランプ表示時のライバルランプ画像
      */
-    private SkinImage[] rivallamp = new SkinImage[BARLAMP_COUNT];
+    private final SkinImage[] rivallamp = new SkinImage[BARLAMP_COUNT];
 
     public static final int BARLAMP_COUNT = 11;
     
-    private MusicSelector selector;
+    private BarRenderer render;
     /**
      * 描画不可スキンオブジェクト
      */
-    private Array<SkinObject> removes = new Array();
+    private Array<SkinObject> removes = new Array<SkinObject>();
 
     public SkinBar(int position) {
         this.position = position;
@@ -102,45 +104,27 @@ public class SkinBar extends SkinObject {
     }
 
     public SkinImage getBarImages(boolean on, int index) {
-    	if(index >= 0 && index < barimageoff.length) {
-            return on ? barimageon[index] : barimageoff[index];    		
-    	}
-    	return null;
+    	return index >= 0 && index < barimageoff.length ? (on ? barimageon[index] : barimageoff[index]) : null;
     }
 
     public SkinImage getLamp(int id) {
-        if(id >= 0 && id < this.lamp.length) {
-            return this.lamp[id];
-        }
-        return null;
+        return id >= 0 && id < this.lamp.length ? this.lamp[id] : null;
     }
 
     public SkinImage getPlayerLamp(int id) {
-        if(id >= 0 && id < this.mylamp.length) {
-            return this.mylamp[id];
-        }
-        return null;
+        return id >= 0 && id < this.mylamp.length ? this.mylamp[id] : null;
     }
 
     public SkinImage getRivalLamp(int id) {
-        if(id >= 0 && id < this.rivallamp.length) {
-            return this.rivallamp[id];
-        }
-        return null;
+        return id >= 0 && id < rivallamp.length ? rivallamp[id] : null;
     }
 
     public SkinImage getTrophy(int id) {
-        if(id >= 0 && id < this.trophy.length) {
-            return this.trophy[id];
-        }
-        return null;
+        return id >= 0 && id < trophy.length ? trophy[id] : null;
     }
 
     public SkinText getText(int id) {
-        if(id >= 0 && id < this.text.length) {
-            return this.text[id];
-        }
-        return null;
+        return id >= 0 && id < text.length ? text[id] : null;
     }
 
     public void setTrophy(int id, SkinImage trophy) {
@@ -227,9 +211,9 @@ public class SkinBar extends SkinObject {
     
     @Override
     public void prepare(long time, MainState state) {
-    	if(selector == null) {
-    		selector = ((MusicSelector) state);
-    		if(selector == null) {
+    	if(render == null) {
+    		render = ((MusicSelector) state).getBarRender();
+    		if(render == null) {
     			draw = false;
     			return;
     		}
@@ -285,12 +269,11 @@ public class SkinBar extends SkinObject {
     		graph.prepare(time, state);
     	}
 
-        selector.getBarRender().prepare((MusicSelectSkin) selector.getSkin(), this, time);
-
+        render.prepare(this, time);
     }
 
     public void draw(SkinObjectRenderer sprite) {
-        selector.getBarRender().render(sprite, (MusicSelectSkin) selector.getSkin(), this);
+    	render.render(sprite, this);
     }
 
     @Override
@@ -305,17 +288,12 @@ public class SkinBar extends SkinObject {
         disposeAll(lamp);
         disposeAll(mylamp);
         disposeAll(rivallamp);
-    	if(graph != null) {
-    		graph.dispose();
-    		graph = null;
-    	}
+        Optional.ofNullable(graph).ifPresent(Disposable::dispose);
+        setDisposed();
     }
 
     public SkinNumber getBarlevel(int id) {
-        if(id >= 0 && id < this.barlevel.length) {
-            return this.barlevel[id];
-        }
-        return null;
+        return id >= 0 && id < barlevel.length ? barlevel[id] : null;
     }
 
     public void setBarlevel(int id, SkinNumber barlevel) {
@@ -334,10 +312,7 @@ public class SkinBar extends SkinObject {
 	}
 
     public SkinImage getLabel(int id) {
-        if(id >= 0 && id < this.label.length) {
-            return this.label[id];
-        }
-        return null;
+        return id >= 0 && id < label.length ? label[id] : null;
     }
 
     public void setLabel(int id, SkinImage label) {

@@ -3,6 +3,11 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.property.TimerProperty;
 import bms.player.beatoraja.skin.property.TimerPropertyFactory;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -10,17 +15,17 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  *
  * @author exch
  */
-public class SkinSourceImageSet implements SkinSourceSet {
+public final class SkinSourceImageSet extends SkinSourceSet {
 
     /**
      * イメージ
      */
-    private TextureRegion[][] image;
+    private final TextureRegion[][] image;
 
     private final TimerProperty timer;
 
     private final int cycle;
-
+    
     public SkinSourceImageSet(TextureRegion[][] image, int timer, int cycle) {
         this(image, timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null, cycle);
     }
@@ -83,16 +88,11 @@ public class SkinSourceImageSet implements SkinSourceSet {
     }
 
     public void dispose() {
-        if (image != null) {
-            for (TextureRegion[] trs : image) {
-                if (trs != null) {
-                    for (TextureRegion tr : trs) {
-                        tr.getTexture().dispose();
-                    }
-                }
-            }
-            image = null;
-        }
+    	if(isNotDisposed()) {
+    		Optional.ofNullable(image).ifPresent(image -> Stream.of(image).filter(Objects::nonNull).flatMap(trs -> Stream.of(trs))
+    				.filter(Objects::nonNull).forEach(tr -> tr.getTexture().dispose()));
+    		setDisposed();
+    	}
     }
 
 }

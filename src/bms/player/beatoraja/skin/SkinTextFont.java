@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
@@ -21,7 +22,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
  * 
  * @author exch
  */
-public class SkinTextFont extends SkinText {
+public final class SkinTextFont extends SkinText {
 
     /**
      * ビットマップフォント
@@ -33,6 +34,8 @@ public class SkinTextFont extends SkinText {
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private String preparedFonts;
+    
+    private final Color shadowcolor = new Color();
 
     public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
         this(fontpath, cycle, size, shadow, StringPropertyFactory.getStringProperty(-1));
@@ -103,7 +106,8 @@ public class SkinTextFont extends SkinText {
 
             final float x = (getAlign() == 2 ? region.x - region.width : (getAlign() == 1 ? region.x - region.width / 2 : region.x));
             if(!getShadowOffset().isZero()) {
-                setLayout(new Color(color.r / 2, color.g / 2, color.b / 2, color.a), region);
+            	shadowcolor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
+                setLayout(shadowcolor, region);
                 sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
             }
             setLayout(color, region);
@@ -116,32 +120,23 @@ public class SkinTextFont extends SkinText {
             layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], true);
         } else {
             switch (getOverflow()) {
-            case OVERFLOW_OVERFLOW:
-                layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
-                break;
-            case OVERFLOW_SHRINK:
-                layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
-                float actualWidth = layout.width;
-                if (actualWidth > r.getWidth()) {
-                    font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
-                    layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
-                }
-                break;
-            case OVERFLOW_TRUNCATE:
-                layout.setText(font, getText(), 0, getText().length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
-                break;
+            	case OVERFLOW_OVERFLOW -> layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+            	case OVERFLOW_SHRINK -> {
+            		layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+            		float actualWidth = layout.width;
+            		if (actualWidth > r.getWidth()) {
+            			font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
+            			layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+            		}
+            	}
+            	case OVERFLOW_TRUNCATE -> layout.setText(font, getText(), 0, getText().length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
             }
         }
     }
 
     public void dispose() {
-        if(generator != null) {
-        	generator.dispose();
-        	generator = null;
-        }
-        if(font != null) {
-            font.dispose();;
-            font = null;
-        }
+    	Optional.ofNullable(generator).ifPresent(FreeTypeFontGenerator::dispose);
+    	Optional.ofNullable(font).ifPresent(BitmapFont::dispose);
+    	setDisposed();
     }
 }

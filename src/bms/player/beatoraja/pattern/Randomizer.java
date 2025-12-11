@@ -152,40 +152,17 @@ public abstract class Randomizer {
 			thresholdMillis = DEFAULT_HRAN_THRESHOLD;
 		}
 
-		switch (r) {
-		case ALL_SCR:
-			if (mode == Mode.POPN_9K) {
-				randomizer = new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
-			} else {
-				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
-			}
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		case H_RANDOM:
-			randomizer = new SRandomizer(thresholdMillis);
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		case SPIRAL:
-			randomizer = new SpiralRandomizer();
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		case S_RANDOM:
-			if (mode == Mode.POPN_9K) {
-				randomizer = new SRandomizer(0);
-			} else {
-				randomizer = new SRandomizer(SRAN_THRESHOLD);
-			}
-			break;
-		case S_RANDOM_EX:
-			if (mode == Mode.POPN_9K) {
-				randomizer = new NoMurioshiRandomizer(thresholdMillis);
-			} else {
-				randomizer = new SRandomizer(SRAN_THRESHOLD);
-			}
-			randomizer.setAssistLevel(AssistLevel.LIGHT_ASSIST);
-			break;
-		default:
-		}
+		randomizer = switch (r) {
+			case ALL_SCR -> new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
+			case CONVERGE -> new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
+			case H_RANDOM -> new SRandomizer(thresholdMillis, AssistLevel.LIGHT_ASSIST);
+			case SPIRAL -> new SpiralRandomizer();
+			case S_RANDOM -> new SRandomizer(SRAN_THRESHOLD, AssistLevel.NONE);
+			case S_RANDOM_NO_THRESHOLD -> new SRandomizer(0, AssistLevel.NONE);
+			case S_RANDOM_EX -> new SRandomizer(SRAN_THRESHOLD, AssistLevel.LIGHT_ASSIST);
+			case S_RANDOM_PLAYABLE -> new NoMurioshiRandomizer(thresholdMillis);
+			default -> throw new IllegalArgumentException("Unexpected value: " + r);
+		};
 		randomizer.setMode(mode);
 		return randomizer;
 	}
@@ -294,8 +271,9 @@ abstract class TimeBasedRandomizer extends Randomizer {
  */
 class SRandomizer extends TimeBasedRandomizer {
 
-	public SRandomizer(int threshold) {
+	public SRandomizer(int threshold, AssistLevel assist) {
 		super(threshold);
+		setAssistLevel(assist);
 	}
 
 	@Override
@@ -324,6 +302,9 @@ class SpiralRandomizer extends Randomizer {
 	private int head;
 	private int cycle;
 
+	public SpiralRandomizer() {
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
+	}
 	@Override
 	public void setModifyLanes(int[] lanes) {
 		super.setModifyLanes(lanes);
@@ -374,6 +355,7 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 		this.scratchThreshold = s;
 		this.scratchIndex = 0;
 		this.modifySide = modifySide; // 1P側は0,2P側は1
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
 	}
 
 	// scratchLaneの決定
@@ -429,24 +411,24 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 		if (isDoublePlay) {
 			int index = -1;
 			switch (modifySide) {
-			case SIDE_1P:
-				int min = Integer.MAX_VALUE;
-				for (int i = 0; i < lane.size(); i++) {
-					if (lane.get(i) < min) {
-						min = lane.get(i);
-						index = i;
+				case SIDE_1P -> {
+					int min = Integer.MAX_VALUE;
+					for (int i = 0; i < lane.size(); i++) {
+						if (lane.get(i) < min) {
+							min = lane.get(i);
+							index = i;
+						}
 					}
 				}
-				break;
-			case SIDE_2P:
-				int max = Integer.MIN_VALUE;
-				for (int i = 0; i < lane.size(); i++) {
-					if (lane.get(i) > max) {
-						max = lane.get(i);
-						index = i;
-					}
+				case SIDE_2P -> {
+					int max = Integer.MIN_VALUE;
+					for (int i = 0; i < lane.size(); i++) {
+						if (lane.get(i) > max) {
+							max = lane.get(i);
+							index = i;
+						}
+					}					
 				}
-				break;
 			}
 			return index;
 		}
@@ -482,6 +464,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 
 	public NoMurioshiRandomizer(int threshold) {
 		super(threshold);
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
 	}
 
 	@Override
@@ -588,6 +571,7 @@ class ConvergeRandomizer extends TimeBasedRandomizer {
 		super(threshold1);
 		this.threshold2 = threshold2;
 		this.rendaCount = new HashMap<>();
+		setAssistLevel(AssistLevel.LIGHT_ASSIST);
 	}
 
 	@Override

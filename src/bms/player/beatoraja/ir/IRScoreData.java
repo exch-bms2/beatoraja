@@ -22,6 +22,10 @@ public class IRScoreData {
 	 */
 	public final int lntype;
 	/**
+	 * プレイヤーID
+	 */
+	public final String id;
+	/**
 	 * プレイヤー名。自身のスコアの場合は空白
 	 */
 	public final String player;
@@ -113,6 +117,7 @@ public class IRScoreData {
 	public IRScoreData(ScoreData score) {
 		this.sha256 = score.getSha256();
 		this.lntype = score.getMode();
+		this.id = score.getID();
 		this.player = score.getPlayer();
 		this.clear = ClearType.getClearTypeByID(score.getClear());
 		this.date = score.getDate();

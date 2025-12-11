@@ -12,7 +12,8 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.IntSet;
+import com.badlogic.gdx.utils.IntSet.IntSetIterator;
 
 import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.*;
@@ -22,7 +23,7 @@ import bms.player.beatoraja.song.*;
  *
  * @author exch
  */
-public class BarRenderer {
+public final class BarRenderer {
 
 	private final MusicSelector select;
 
@@ -52,6 +53,8 @@ public class BarRenderer {
 	private final BarArea[] bararea;
 
 	private boolean bartextupdate = false;
+//	private final boolean[] bartextCharset = new boolean[Character.MAX_VALUE + 1];
+	private final IntSet bartextCharset = new IntSet(1024);
 
 	private static class BarArea {
 		public Bar sd;
@@ -101,7 +104,11 @@ public class BarRenderer {
 
 	private long time;
 	
-	public void prepare(MusicSelectSkin skin, SkinBar baro, long time) {
+	public void prepare(SkinBar baro, long time) {
+		final MusicSelectSkin skin = (MusicSelectSkin) select.getSkin();
+		if (skin == null) {
+			return;
+		}
 		this.time = time;		
 		final long timeMillis = System.currentTimeMillis();
 		boolean applyMovement = duration != 0 && duration > timeMillis;
@@ -140,9 +147,7 @@ public class BarRenderer {
 				Bar sd = manager.currentsongs[index];
 				ba.sd = sd;
 
-				if (sd instanceof TableBar) {
-					ba.value = 2;
-				} else if (sd instanceof HashBar) {
+				if (sd instanceof TableBar || sd instanceof HashBar || sd instanceof ExecutableBar) {
 					ba.value = 2;
 				} else if (sd instanceof GradeBar) {
 					ba.value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
@@ -156,8 +161,6 @@ public class BarRenderer {
 					ba.value = 6;
 				} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
 					ba.value = 5;
-				} else if (sd instanceof ExecutableBar) {
-					ba.value = 2;
 				} else {
 					ba.value = -1;
 				}
@@ -195,30 +198,52 @@ public class BarRenderer {
 		}
 	}
 
-	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro) {
+	public void render(SkinObjectRenderer sprite, SkinBar baro) {
+		final MusicSelectSkin skin = (MusicSelectSkin) select.getSkin();
 		if (skin == null) {
 			return;
 		}
 
 		if (bartextupdate) {
 			bartextupdate = false;
-			ObjectSet<Character> charset = new ObjectSet<Character>();
-
+			
+			bartextCharset.clear();
 			for (Bar song : manager.currentsongs) {
 				for (char c : song.getTitle().toCharArray()) {
-					charset.add(c);
+					bartextCharset.add(c);
 				}
 			}
-
-			char[] chars = new char[charset.size];
+			char[] chars = new char[bartextCharset.size];
 			int i = 0;
-			for (char c : charset) {
-				chars[i++] = c;
+			for (IntSetIterator iterator = bartextCharset.iterator();iterator.hasNext;) {
+				chars[i++] = (char) iterator.next();
 			}
+//			Arrays.fill(bartextCharset, false);
+//			int charCount = 0;
+//			for (Bar song : manager.currentsongs) {
+//				final String title = song.getTitle();
+//				for(int index = title.length() - 1;index >= 0;index--) {
+//					final char c = title.charAt(index);
+//					if(!bartextCharset[c]) {
+//						bartextCharset[c] = true;
+//						charCount++;
+//					}
+//				}
+//			}
+//			char[] chars = new char[charCount];
+//			int count = 0;
+//			for (char c = (char) (bartextCharset.length - 1) ;;c--) {
+//				if(bartextCharset[c]) {
+//					chars[count++] = c;
+//				}
+//				if(c == 0) {
+//					break;
+//				}
+//			}
 			
 			for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
 				if(baro.getText(index) != null) {
-					baro.getText(index).prepareFont(String.valueOf(chars));				
+					baro.getText(index).prepareFont(String.valueOf(chars));
 				}				
 			}
 		}
@@ -343,17 +368,14 @@ public class BarRenderer {
 			}
 
 			int flag = 0;
-			if (ba.sd instanceof SongBar && ((SongBar) ba.sd).existsSong()) {
-				SongData song = ((SongBar) ba.sd).getSongData();
+			if (ba.sd instanceof SongBar songbar && songbar.existsSong()) {
+				SongData song = songbar.getSongData();
 				flag |= song.getFeature();
 			}
 
-			if (ba.sd instanceof GradeBar) {
-				GradeBar gb = (GradeBar) ba.sd;
-				if (gb.existsAllSongs()) {
-					for (SongData song : gb.getSongDatas()) {
-						flag |= song.getFeature();
-					}
+			if (ba.sd instanceof GradeBar gb && gb.existsAllSongs()) {
+				for (SongData song : gb.getSongDatas()) {
+					flag |= song.getFeature();
 				}
 			}
 
@@ -396,7 +418,7 @@ public class BarRenderer {
 	public void input() {
 		BMSPlayerInputProcessor input = select.main.getInputProcessor();
 
-        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.resource.getPlayerConfig().getMusicselectinput()];
+        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values[select.resource.getPlayerConfig().getMusicselectinput()];
 
 		// song bar scroll on mouse wheel
 		int mov = -input.getScroll();

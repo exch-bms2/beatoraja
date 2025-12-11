@@ -15,7 +15,7 @@ import bms.model.BMSModel;
  * 
  * @author exch
  */
-public class GrooveGauge {
+public final class GrooveGauge {
 
 	public static final int ASSISTEASY = 0;
 	public static final int EASY = 1;
@@ -181,7 +181,7 @@ public class GrooveGauge {
 		return new GrooveGauge(model, id, gauge);
 	}
 
-	public static class Gauge {
+	public static final class Gauge {
 		/**
 		 * ゲージの現在値
 		 */
@@ -193,7 +193,7 @@ public class GrooveGauge {
 		/**
 		 * 各判定毎のゲージの増減
 		 */
-		private float[] gauge;
+		private final float[] gauge;
 		/**
 		 * ゲージのクリアタイプ
 		 */
@@ -204,9 +204,9 @@ public class GrooveGauge {
 			this.value = element.init;
 			this.cleartype = cleartype;
 			this.gauge = element.value.clone();
-			if(element.type != null) {
+			if(element.modifier != null) {
 				for(int i = 0;i < gauge.length;i++) {
-					gauge[i] = element.type.modify(gauge[i], model);
+					gauge[i] = element.modifier.modify(gauge[i], model);
 				}				
 			}
 		}
@@ -252,76 +252,44 @@ public class GrooveGauge {
 		}
 	}
 	
-	public enum GaugeType {
+	public interface GaugeModifier {
+		
 		/**
 		 * 回復量にTOTALを使用
 		 */
-		TOTAL {
-			@Override
-			public float modify(float f, BMSModel model) {
-				if(f > 0) {
-					return (float) (f * model.getTotal() / model.getTotalNotes());
-				}
-				return f;
-			}
-		},
+		public static final GaugeModifier TOTAL = (f, model) -> (f > 0 ? (float) (f * model.getTotal() / model.getTotalNotes()) : f);
 		/**
 		 * TOTAL値によって回復量に制限をかける
 		 */
-		LIMIT_INCREMENT {
-			@Override
-			public float modify(float f, BMSModel model) {
-				final float pg = (float) Math.max(Math.min(0.15f, (2 * model.getTotal() - 320) / model.getTotalNotes()), 0);
-				if(f > 0) {
-					f *= pg / 0.15f;
-				}
-				return f;
+		public static final GaugeModifier LIMIT_INCREMENT = (f, model) -> {
+			final float pg = (float) Math.max(Math.min(0.15f, (2 * model.getTotal() - 320) / model.getTotalNotes()), 0);
+			if(f > 0) {
+				f *= pg / 0.15f;
 			}
-		},
+			return f;
+		};
 		/**
 		 * TOTAL値、総ノート数によってダメージ量を増加させる
 		 */
-		MODIFY_DAMAGE {
-			@Override
-			public float modify(float f, BMSModel model) {
-				float fix1=1.0f;
+		public static final GaugeModifier MODIFY_DAMAGE = (f, model) -> {			
+			if(f < 0) {
 				float fix2=1.0f;
-				if(f < 0) {
-					if(model.getTotal()>=240.0){
-						fix1=1.0f;
-					}else if(model.getTotal()>=230.0){
-						fix1=1.11f;
-					}else if(model.getTotal()>=210.0){
-						fix1=1.25f;
-					}else if(model.getTotal()>=200.0){
-						fix1=1.5f;
-					}else if(model.getTotal()>=180.0){
-						fix1=1.666f;
-					}else if(model.getTotal()>=160.0){
-						fix1=2.0f;
-					}else if(model.getTotal()>=150.0){
-						fix1=2.5f;
-					}else if(model.getTotal()>=130.0){
-						fix1=3.333f;
-					}else if(model.getTotal()>=120.0){
-						fix1=5.0f;
-					}else{
-						fix1=10.0f;
-					}
-					int note=1000;
-					float mod=0.002f;
-					while(note>model.getTotalNotes()||note>1){
-						fix2 += mod * (float)(note - Math.max(model.getTotalNotes(), note/2));
-						note/=2;
-						mod*=2.0f;
-					}
-					f *= Math.max(fix1, fix2);
+				final double[] fix1total = {240.0, 230.0, 210.0, 200.0, 180.0, 160.0, 150.0, 130.0, 120.0, 0};
+				final float[] fix1table = {1.0f, 1.11f, 1.25f, 1.5f, 1.666f, 2.0f, 2.5f, 3.333f, 5.0f, 10.0f};
+				int i = 0;
+				for(;i < fix1total.length - 1 && model.getTotal() < fix1total[i];i++);
+				int note=1000;
+				float mod=0.002f;
+				while(note>model.getTotalNotes()||note>1){
+					fix2 += mod * (float)(note - Math.max(model.getTotalNotes(), note/2));
+					note/=2;
+					mod*=2.0f;
 				}
-				return f;
+				f *= Math.max(fix1table[i], fix2);
 			}
-		},
-		;
-
-		public abstract float modify(float f, BMSModel model);
+			return f;
+		};
+		
+		public abstract float modify(float f, BMSModel model);		
 	}
 }

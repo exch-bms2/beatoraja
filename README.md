@@ -3,8 +3,8 @@ Codename beatoraja is a Cross-platform rhythm game based on Java and libGDX.
 It works on Windows, Mac OS, and Linux.
 
 # Features
-- 3 types of Long Note mode : Long Notes, Charge Notes, Hell Charge Notes, and Back Spin Scratch like iidx
-- show note timing duration (like iidx green number), judge details (fast/slow or +-ms)
+- 3 types of Long Note mode : Long Notes, Charge Notes, Hell Charge Notes, and Back Spin Scratch like IIDX
+- show note timing duration (like IIDX green number), judge details (fast/slow or +-ms)
 - 8 types of groove gauge (ex. assist-easy, ex-hard, ex-grade)
 - 11 types of clear lamp (ex. assist, light-assist, ex-hard, perfect, and max)
 - real-time play speed controller (x0.25 - x4.0. auto play mode, replay mode only)
@@ -17,7 +17,7 @@ It works on Windows, Mac OS, and Linux.
 - import LunaticRave2 scores (clear lamp, score. not including score verifier like scorehash)
 
 # System Requirement
-- Java Runtime Environment 1.8.0 64bit (32bit is not recommended)
+- Java Runtime Environment 17 64bit (32bit is not recommended)
 - OpenGL 3.1- (may not work under Windows 10 + Intel HD Graphics 2000/3000. See also https://github.com/LWJGL/lwjgl/issues/119)
 
 # How To Use

@@ -24,7 +24,7 @@ import com.badlogic.gdx.utils.SerializationException;
  *
  * @author exch
  */
-public class PlayerConfig {
+public final class PlayerConfig {
 
 	/**
 	 * 旧コンフィグパス。そのうち削除
@@ -57,13 +57,15 @@ public class PlayerConfig {
 	 * DP用オプション
 	 */
 	private int doubleoption;
+	
+	private String chartReplicationMode = "RIVALCHART";
 
 	/**
 	 * スコアターゲット
 	 */
 	private String targetid = "MAX";
 	
-	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "MAX"
+	private String[] targetlist = new String[] {"RATE_A-","RATE_A", "RATE_A+","RATE_AA-","RATE_AA", "RATE_AA+", "RATE_AAA-", "RATE_AAA", "RATE_AAA+", "RATE_MAX-", "MAX"
 			,"RANK_NEXT", "IR_NEXT_1", "IR_NEXT_2", "IR_NEXT_3", "IR_NEXT_4", "IR_NEXT_5", "IR_NEXT_10"
 			, "IR_RANK_1", "IR_RANK_5", "IR_RANK_10", "IR_RANK_20", "IR_RANK_30", "IR_RANK_40", "IR_RANK_50"
 			, "IR_RANKRATE_5", "IR_RANKRATE_10", "IR_RANKRATE_15", "IR_RANKRATE_20", "IR_RANKRATE_25", "IR_RANKRATE_30", "IR_RANKRATE_35", "IR_RANKRATE_40", "IR_RANKRATE_45","IR_RANKRATE_50"
@@ -218,6 +220,10 @@ public class PlayerConfig {
 	 * 選択中の選曲時ソート
 	 */
 	private int sort;
+	/**
+	 * 選択中の選曲時ソート
+	 */
+	private String sortid;
 
 	/**
 	 * 選曲時でのキー入力方式
@@ -496,6 +502,15 @@ public class PlayerConfig {
 	public void setSort(int sort) {
 		this.sort = sort;
 	}
+
+	public String getSortid() {
+		return sortid;
+	}
+
+	public void setSortid(String sortid) {
+		this.sortid = sortid;
+	}
+
 
 	public int getMusicselectinput() {
 		return musicselectinput;
@@ -815,13 +830,17 @@ public class PlayerConfig {
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
+
 		sort = MathUtils.clamp(sort, 0 , BarSorter.defaultSorter.length - 1);
+		if(sortid == null) {
+			sortid = BarSorter.defaultSorter[sort].name();
+		}
 
 		gauge = MathUtils.clamp(gauge, 0, 5);
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
 		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
+		chartReplicationMode = chartReplicationMode != null ? chartReplicationMode : "NONE";
 		targetid = targetid!= null ? targetid : "MAX";
 		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
@@ -1042,5 +1061,13 @@ public class PlayerConfig {
 
 	public void setEventMode(boolean eventMode) {
 		this.eventMode = eventMode;
+	}
+
+	public String getChartReplicationMode() {
+		return chartReplicationMode;
+	}
+
+	public void setChartReplicationMode(String chartReplicationMode) {
+		this.chartReplicationMode = chartReplicationMode;
 	}
 }

@@ -6,6 +6,7 @@ import bms.player.beatoraja.skin.property.FloatProperty;
 import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
+
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -18,7 +19,7 @@ public final class SkinGraph extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private SkinSource source;
+	private final SkinSource source;
 	/**
 	 * グラフ値参照先
 	 */	
@@ -26,56 +27,53 @@ public final class SkinGraph extends SkinObject {
 	/**
 	 * グラフの伸びる向き(1:下, それ以外:右)
 	 */
-	private int direction = 1;
+	public final int direction;
 
 	private final TextureRegion current = new TextureRegion();
 	
 	private TextureRegion currentImage;
 	private float currentValue;
 
-	public SkinGraph(int imageid, int id) {
+	public SkinGraph(int imageid, int id, int direction) {
 		source = new SkinSourceReference(imageid);
 		ref = FloatPropertyFactory.getRateProperty(id);
+		this.direction = direction;
 	}
 
-	public SkinGraph(int imageid, FloatProperty ref) {
-		source = new SkinSourceReference(imageid);
-		this.ref = ref;
-	}
-
-	public SkinGraph(int imageid, int id, int min, int max) {
+	public SkinGraph(int imageid, int id, int min, int max, int direction) {
 		source = new SkinSourceReference(imageid);
 		ref = new RateProperty(id, min, max);
+		this.direction = direction;
 	}
 
-	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id) {
+	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int direction) {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = FloatPropertyFactory.getRateProperty(id);
+		this.direction = direction;
 	}
 
-	public SkinGraph(TextureRegion[] image, int timer, int cycle, FloatProperty ref) {
-		source = new SkinSourceImage(image, timer, cycle);
-		this.ref = ref;
-	}
-
-	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int min, int max) {
+	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int min, int max, int direction) {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = new RateProperty(id, min, max);
+		this.direction = direction;
 	}
 
-	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id) {
+	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id, int direction) {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = FloatPropertyFactory.getRateProperty(id);
+		this.direction = direction;
 	}
 
-	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, FloatProperty ref) {
+	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, FloatProperty ref, int direction) {
 		source = new SkinSourceImage(image, timer, cycle);
 		this.ref = ref;
+		this.direction = direction;
 	}
 
-	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id, int min, int max) {
+	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id, int min, int max, int direction) {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = new RateProperty(id, min, max);
+		this.direction = direction;
 	}
 
 	public boolean validate() {
@@ -109,17 +107,7 @@ public final class SkinGraph extends SkinObject {
 	}
 
 	public void dispose() {
-		if (source != null) {
-			source.dispose();
-			source = null;
-		}
-	}
-
-	public int getDirection() {
-		return direction;
-	}
-
-	public void setDirection(int direction) {
-		this.direction = direction;
+		disposeAll(source);
+		setDisposed();
 	}
 }

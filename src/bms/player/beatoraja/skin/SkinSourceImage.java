@@ -2,6 +2,11 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import bms.player.beatoraja.skin.property.TimerPropertyFactory;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
@@ -11,7 +16,7 @@ import bms.player.beatoraja.MainState;
  *
  * @author exch
  */
-public class SkinSourceImage implements SkinSource {
+public final class SkinSourceImage extends SkinSource {
 
 	/**
 	 * イメージ
@@ -84,12 +89,10 @@ public class SkinSourceImage implements SkinSource {
 	}
 
 	public void dispose() {
-		if (image != null) {
-			for (TextureRegion tr : image) {
-				tr.getTexture().dispose();
-			}
-			image = null;
-		}
+    	if(isNotDisposed()) {
+    		Optional.ofNullable(image).ifPresent(image -> Stream.of(image).filter(Objects::nonNull).forEach(tr -> tr.getTexture().dispose()));
+    		setDisposed();
+    	}
 	}
 
 }

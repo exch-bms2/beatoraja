@@ -15,15 +15,15 @@ import java.io.UnsupportedEncodingException;
  * 
  * @author exch
  */
-public class SkinTextImage extends SkinText {
+public final class SkinTextImage extends SkinText {
 	/**
 	 * テキストイメージ
 	 */
-	private SkinTextImageSource source;
+	private final SkinTextImageSource source;
 	/**
 	 * 現在のテキスト
 	 */
-	private Array<TextureRegion> texts = new Array<TextureRegion>(256);
+	private final Array<TextureRegion> texts = new Array<TextureRegion>(256);
 	/**
 	 * 現在のテキスト長
 	 */
@@ -116,7 +116,7 @@ public class SkinTextImage extends SkinText {
 	 * 
 	 * @author exch
 	 */
-	public static class SkinTextImageSource implements Disposable {
+	public static final class SkinTextImageSource implements Disposable {
 		/**
 		 * サイズ
 		 */
@@ -125,9 +125,9 @@ public class SkinTextImage extends SkinText {
 		 * 文字間のマージン
 		 */
 		private int margin = 0;
-		private IntMap<SkinTextImageSourceElement> elements = new IntMap<SkinTextImageSourceElement>(400);
+		private final IntMap<SkinTextImageSourceElement> elements = new IntMap<SkinTextImageSourceElement>(400);
 		private final boolean usecim;
-		private IntMap<SkinTextImageSourceRegion> regions = new IntMap<SkinTextImageSourceRegion>(10000);
+		private final IntMap<SkinTextImageSourceRegion> regions = new IntMap<SkinTextImageSourceRegion>(10000);
 
 		public SkinTextImageSource(boolean usecim) {
 			this.usecim = usecim;
@@ -198,13 +198,13 @@ public class SkinTextImage extends SkinText {
 		}
 	}
 
-	private static class SkinTextImageSourceElement {
+	private static final class SkinTextImageSourceElement {
 
 		private String path;
 		private Texture texture;
 	}
 
-	private static class SkinTextImageSourceRegion {
+	private static final class SkinTextImageSourceRegion {
 
 		private final int id;
 		private final int x;

@@ -6,6 +6,7 @@ import bms.player.beatoraja.skin.property.IntegerProperty;
 import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
+
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -13,30 +14,30 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  *
  * @author exch
  */
-public class SkinNumber extends SkinObject {
+public final class SkinNumber extends SkinObject {
 
 	/**
 	 * プラス値用イメージ
 	 */
-	private SkinSourceSet image;
+	private final SkinSourceSet image;
 	/**
 	 * マイナス値用イメージ
 	 */
-	private SkinSourceSet mimage;
+	private final SkinSourceSet mimage;
 	/**
 	 * 数値参照先
 	 */
-	private IntegerProperty ref;
+	private final IntegerProperty ref;
 	/**
 	 * 表示桁数
 	 */
-	private int keta;
+	public final int keta;
 
-	private int zeropadding;
+	public final int zeropadding;
 
-	private int space;
+	public final int space;
 
-	private int align;
+	public final int align;
 
 	private int value = Integer.MIN_VALUE;
 	private int shiftbase;
@@ -52,65 +53,68 @@ public class SkinNumber extends SkinObject {
 
 	private float shift;
 
-	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int space, int rid) {
-		this(image, null, timer, cycle, keta, zeropadding, space, rid);
+	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int space, int rid, int align) {
+		this(image, null, timer, cycle, keta, zeropadding, space, rid, align);
 	}
 
-	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref) {
-		this(image, null, timer, cycle, keta, zeropadding, space, ref);
+	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref, int align) {
+		this(image, null, timer, cycle, keta, zeropadding, space, ref, align);
 	}
 
-	public SkinNumber(TextureRegion[][] image, TimerProperty timer, int cycle, int keta, int zeropadding, int space, int rid) {
-		this(image, null, timer, cycle, keta, zeropadding, space, rid);
+	public SkinNumber(TextureRegion[][] image, TimerProperty timer, int cycle, int keta, int zeropadding, int space, int rid, int align) {
+		this(image, null, timer, cycle, keta, zeropadding, space, rid, align);
 	}
 
-	public SkinNumber(TextureRegion[][] image, TimerProperty timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref) {
-		this(image, null, timer, cycle, keta, zeropadding, space, ref);
+	public SkinNumber(TextureRegion[][] image, TimerProperty timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref, int align) {
+		this(image, null, timer, cycle, keta, zeropadding, space, ref, align);
 	}
 
-	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int space, int id) {
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int space, int id, int align) {
 		this.image = new SkinSourceImageSet(image, timer, cycle) ;
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
-		this.setKeta(keta);
+		this.keta = keta;
+		this.currentImages = new TextureRegion[keta];
 		this.zeropadding = zeropadding;
 		this.space = space;
 		ref = IntegerPropertyFactory.getIntegerProperty(id);
+		this.align = align;
 	}
 
-	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref) {
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref, int align) {
 		this.image = new SkinSourceImageSet(image, timer, cycle) ;
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
-		this.setKeta(keta);
+		this.keta = keta;
+		this.currentImages = new TextureRegion[keta];
 		this.zeropadding = zeropadding;
 		this.space = space;
 		this.ref = ref;
+		this.align = align;
 	}
 
-	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int space, int id) {
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int space, int id, int align) {
 		this.image = new SkinSourceImageSet(image, timer, cycle) ;
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
-		this.setKeta(keta);
+		this.keta = keta;
+		this.currentImages = new TextureRegion[keta];
 		this.zeropadding = zeropadding;
 		this.space = space;
 		ref = IntegerPropertyFactory.getIntegerProperty(id);
+		this.align = align;
 	}
 
-	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref) {
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int space, IntegerProperty ref, int align) {
 		this.image = new SkinSourceImageSet(image, timer, cycle) ;
 		this.mimage = mimage != null ? new SkinSourceImageSet(mimage, timer, cycle) : null;
-		this.setKeta(keta);
+		this.keta = keta;
+		this.currentImages = new TextureRegion[keta];
 		this.zeropadding = zeropadding;
 		this.space = space;
 		this.ref = ref;
+		this.align = align;
 	}
 
 	public int getKeta() {
 		return keta;
-	}
-
-	public void setKeta(int keta) {
-		this.keta = keta;
-		this.currentImages = new TextureRegion[keta];
 	}
 
 	public void setOffsets(SkinOffset[] offsets) {
@@ -211,21 +215,7 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public void dispose() {
-		if (image != null) {
-			image.dispose();
-			image = null;
-		}
-		if (mimage != null) {
-			mimage.dispose();
-			mimage = null;
-		}
-	}
-
-	public int getAlign() {
-		return align;
-	}
-
-	public void setAlign(int align) {
-		this.align = align;
+		disposeAll(image, mimage);
+		setDisposed();
 	}
 }

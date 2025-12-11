@@ -1,12 +1,19 @@
 package bms.player.beatoraja.skin;
 
+import java.util.Optional;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.bga.FFmpegProcessor;
 
-public class SkinSourceMovie implements SkinSource {
+/**
+ * スキンのソースイメージ(ムービー)
+ *
+ * @author exch
+ */
+public class SkinSourceMovie extends SkinSource {
 
 	/**
 	 * イメージ
@@ -48,9 +55,9 @@ public class SkinSourceMovie implements SkinSource {
 	}
 
 	public void dispose() {
-		if (image != null) {
-			image.dispose();
-			image = null;
-		}
+    	if(isNotDisposed()) {
+    		Optional.ofNullable(image).ifPresent(FFmpegProcessor::dispose);
+    		setDisposed();
+    	}
 	}
 }

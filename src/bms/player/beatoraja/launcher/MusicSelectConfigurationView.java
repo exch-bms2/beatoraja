@@ -2,10 +2,12 @@ package bms.player.beatoraja.launcher;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.select.MusicSelector.ChartReplicationMode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
@@ -40,12 +42,16 @@ public class MusicSelectConfigurationView implements Initializable {
 	private CheckBox randomselect;
 	@FXML
 	private NumericSpinner<Integer> maxsearchbar;
+	
+	@FXML
+	private ComboBox<String> chartReplicationMode;
 
     private Config config;
     private PlayerConfig player;
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		songPreview.getItems().setAll(SongPreview.values());
+		chartReplicationMode.getItems().setAll(Stream.of(ChartReplicationMode.allMode).map(ChartReplicationMode::name).toList());
 	}
 
 	public void update(Config config) {
@@ -63,6 +69,7 @@ public class MusicSelectConfigurationView implements Initializable {
 		songPreview.setValue(config.getSongPreview());
 		
 		maxsearchbar.getValueFactory().setValue(config.getMaxSearchBarCount());
+		
 	}
 	
 	public void commit() {
@@ -87,6 +94,8 @@ public class MusicSelectConfigurationView implements Initializable {
 		}
 
 		randomselect.setSelected(player.isRandomSelect());
+		
+		chartReplicationMode.setValue(player.getChartReplicationMode());
 	}
 
 	public void commitPlayer() {
@@ -94,6 +103,8 @@ public class MusicSelectConfigurationView implements Initializable {
 			return;
 		}
 		player.setRandomSelect(randomselect.isSelected());
+
+		player.setChartReplicationMode(chartReplicationMode.getValue());
 	}
 
 }

@@ -1,11 +1,14 @@
 package bms.player.beatoraja.play;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
+import bms.player.beatoraja.ir.IRScoreData;
 import com.badlogic.gdx.utils.Array;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.RivalDataAccessor;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.select.ScoreDataCache;
@@ -51,11 +54,8 @@ public abstract class TargetProperty {
     	if(s != null) {
     		targets = s;
     	}
-    	targetNames = new String[targets.length];
-    	for(int i = 0;i < targets.length;i++) {
-    		TargetProperty target = getTargetProperty(targets[i]);
-    		targetNames[i] = target != null ? target.getName(main) : "";
-    	}
+    	targetNames = Stream.of(s).map(TargetProperty::getTargetProperty)
+    			.map(target -> target != null ? target.getName(main) : "").toArray(String[]::new);
     }
     
     public static TargetProperty getTargetProperty(String id) {
@@ -114,28 +114,30 @@ class StaticTargetProperty extends TargetProperty {
     }
     
     public static TargetProperty getTargetProperty(String id) {
-    	switch(id) {
-    	case "RATE_A-":
-    		return new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 18.0f / 27.0f);
-    	case "RATE_A":
-    		return new StaticTargetProperty("RATE_A", "RANK A",   100.0f * 19.0f / 27.0f);
-    	case "RATE_A+":
-    		return new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 20.0f / 27.0f);
-    	case "RATE_AA-":
-    		return new StaticTargetProperty("RATE_AA-", "RANK AA-",   100.0f * 21.0f / 27.0f);
-    	case "RATE_AA":
-    		return new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 22.0f / 27.0f);
-    	case "RATE_AA+":
-    		return new StaticTargetProperty("RATE_AA+", "RANK AA+",   100.0f * 23.0f / 27.0f);
-    	case "RATE_AAA-":
-    		return new StaticTargetProperty("RATE_AAA-", "RANK AAA-",   100.0f * 24.0f / 27.0f);
-    	case "RATE_AAA":
-    		return new StaticTargetProperty("RATE_AAA", "RANK AAA",   100.0f * 25.0f / 27.0f);
-    	case "RATE_AAA+":
-    		return new StaticTargetProperty("RATE_AAA+", "RANK AAA+",   100.0f * 26.0f / 27.0f);
-    	case "MAX":
-    		return new StaticTargetProperty(id, "MAX", 100.0f);
-    	}
+		switch(id) {
+			case "RATE_A-":
+				return new StaticTargetProperty("RATE_A-", "RANK A-",   100.0f * 17.0f / 27.0f);
+			case "RATE_A":
+				return new StaticTargetProperty("RATE_A", "RANK A",   100.0f * 18.0f / 27.0f);
+			case "RATE_A+":
+				return new StaticTargetProperty("RATE_A+", "RANK A+",   100.0f * 19.0f / 27.0f);
+			case "RATE_AA-":
+				return new StaticTargetProperty("RATE_AA-", "RANK AA-",   100.0f * 20.0f / 27.0f);
+			case "RATE_AA":
+				return new StaticTargetProperty("RATE_AA", "RANK AA",   100.0f * 21.0f / 27.0f);
+			case "RATE_AA+":
+				return new StaticTargetProperty("RATE_AA+", "RANK AA+",   100.0f * 22.0f / 27.0f);
+			case "RATE_AAA-":
+				return new StaticTargetProperty("RATE_AAA-", "RANK AAA-",   100.0f * 23.0f / 27.0f);
+			case "RATE_AAA":
+				return new StaticTargetProperty("RATE_AAA", "RANK AAA",   100.0f * 24.0f / 27.0f);
+			case "RATE_AAA+":
+				return new StaticTargetProperty("RATE_AAA+", "RANK AAA+",   100.0f * 25.0f / 27.0f);
+			case "RATE_MAX-":
+				return new StaticTargetProperty("RATE_MAX-", "RANK MAX-",   100.0f * 26.0f / 27.0f);
+			case "MAX":
+				return new StaticTargetProperty(id, "MAX", 100.0f);
+		}
 
 		if(id.startsWith("RATE_")) {
 			try {
@@ -170,10 +172,10 @@ class RivalTargetProperty extends TargetProperty {
 
 	@Override
 	public String getName(MainController main) {
-    	PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
+    	final PlayerInformation info = main.getRivalDataAccessor().getRivalInformation(index);
     	switch(target) {
     	case INDEX:
-    		return index < info.length ? "RIVAL " + info[index].getName() : "NO RIVAL";
+    		return info != null ? "RIVAL " + info.getName() : "NO RIVAL";
     	case RANK:
     		return index > 0 ? "RIVAL RANK " + (index + 1) : "RIVAL TOP";
     	case NEXT:
@@ -184,18 +186,16 @@ class RivalTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
-    	final PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
-    	final ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+    	final PlayerInformation info = main.getRivalDataAccessor().getRivalInformation(index);
+    	final ScoreDataCache cache = main.getRivalDataAccessor().getRivalScoreDataCache(index);
     	
     	String name = null;
     	ScoreData score = null;
     	ScoreData[] scores = null;
     	switch(target) {
     	case INDEX:
-        	if(index < info.length) {
-        		name = info[index].getName();
-        		score = cache[index].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
-        	}
+    		name = info != null ? info.getName() : name;
+    		score = cache != null ? cache.readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode()) : score;
         	break;
     	case RANK:
     		scores = createScoreArray(main);
@@ -229,24 +229,26 @@ class RivalTargetProperty extends TargetProperty {
     		targetScore.setEpg(score.getEpg());
     		targetScore.setLpg(score.getLpg());
     		targetScore.setEgr(score.getEgr());
-    		targetScore.setLgr(score.getLgr());    		
+    		targetScore.setLgr(score.getLgr());
+    		targetScore.setOption(score.getOption());
     	} else if(name != null) {
-    		targetScore.setPlayer("NO DATA");    		
+    		targetScore.setPlayer("NO DATA");
+    		targetScore.setOption(0);
     	} else {
-    		targetScore.setPlayer("NO RIVAL");    		
+    		targetScore.setPlayer("NO RIVAL");
+    		targetScore.setOption(0);
     	}
     	
         return targetScore;
     }
     
     private ScoreData[] createScoreArray(MainController main) {
-    	final PlayerInformation[] info = main.getRivalDataAccessor().getRivals();
-    	final ScoreDataCache[] cache = main.getRivalDataAccessor().getRivalScoreDataCaches();
+    	final RivalDataAccessor rivals = main.getRivalDataAccessor();
 		Array<ScoreData> scorearray = new Array<ScoreData>();
-		for(int i = 0;i < info.length;i++) {
-			ScoreData sd = cache[i].readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
+		for(int i = 0;i < rivals.getRivalCount();i++) {
+			ScoreData sd = rivals.getRivalScoreDataCache(i).readScoreData(main.getPlayerResource().getSongdata(), main.getPlayerConfig().getLnmode());
 			if(sd != null) {
-				sd.setPlayer(info[i].getName());
+				sd.setPlayer(rivals.getRivalInformation(i).getName());
 				scorearray.add(sd);
 			}
 		}
@@ -364,18 +366,22 @@ class InternetRankingTargetProperty extends TargetProperty {
     	final RankingData ranking = main.getPlayerResource().getRankingData();
     	if(ranking == null) {
 			targetScore.setPlayer("NO DATA");
+			targetScore.setOption(0);
 			return targetScore;    		
     	}
     	
     	if(ranking.getState() == RankingData.FINISH) {
     		if(ranking.getTotalPlayer() > 0) {
-    			int index = getTargetRank(main, ranking);
-    			int targetscore = ranking.getScore(index).getExscore();
-    			targetScore.setPlayer(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+    			final int index = getTargetRank(main, ranking);
+    			final IRScoreData irScore = ranking.getScore(index);
+    			final int targetscore = irScore.getExscore();
+    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
         		targetScore.setEpg(targetscore / 2);
         		targetScore.setEgr(targetscore % 2);
+				targetScore.setOption(irScore.option);
     		} else {
-    			targetScore.setPlayer("NO DATA");    			
+    			targetScore.setPlayer("NO DATA");
+    			targetScore.setOption(0);
     		}
     		return targetScore;
     	}
@@ -389,13 +395,16 @@ class InternetRankingTargetProperty extends TargetProperty {
 			}
 	    	if(ranking.getState() == RankingData.FINISH) {
 	    		if(ranking.getTotalPlayer() > 0) {
-	    			int index = getTargetRank(main, ranking);
-	    			int targetscore = ranking.getScore(index).getExscore();
-	    			targetScore.setPlayer(ranking.getScore(index).player.length() > 0 ? ranking.getScore(index).player : "YOU");
+	    			final int index = getTargetRank(main, ranking);
+	    			final IRScoreData irScore = ranking.getScore(index);
+	    			final int targetscore = irScore.getExscore();
+	    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
 	        		targetScore.setEpg(targetscore / 2);
 	        		targetScore.setEgr(targetscore % 2);
+	    			targetScore.setOption(irScore.option);
 	    		} else {
-	    			targetScore.setPlayer("NO DATA");    			
+	    			targetScore.setPlayer("NO DATA");
+	    			targetScore.setOption(0);
 	    		}
 	    		
 				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
