@@ -543,7 +543,6 @@ public class BMSPlayer extends MainState {
 						BMSModelUtils.changeFrequency(model, freqRate);
 					}
 					if (freqOption == FrequencyType.SPEED) {
-						// オフライン伸縮＋ピッチ固定。再読み込みで反映。
 						audio.setGlobalPitch(1f);
 						audio.setModel(model, freqRate);
 					} else if (freqOption == FrequencyType.FREQUENCY) {
