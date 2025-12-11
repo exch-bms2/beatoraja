@@ -336,9 +336,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 								break;
 							}
 						}
-							if (b) {
-								T sliceaudio = cache.get(new AudioKey(p.toString(), note, timeStretchRate));
-								if (sliceaudio != null) {
+						if (b) {
+							T sliceaudio = cache.get(new AudioKey(p.toString(), note, timeStretchRate));
+							if (sliceaudio != null) {
 								slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
 							} else {
 								return;

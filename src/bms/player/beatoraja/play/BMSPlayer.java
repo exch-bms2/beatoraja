@@ -570,6 +570,8 @@ public class BMSPlayer extends MainState {
 					playtime = (property.endtime + 1000) * 100 / property.freq + TIME_MARGIN;
 					bga.prepare(this);
 					state = STATE_READY;
+					// setModel等の同期処理で時間が経過しているため、タイマーを更新してからREADYタイマーを設定
+					timer.update();
 					timer.setTimerOn(TIMER_READY);
 					play(PLAY_READY);
 					Logger.getGlobal().info("STATE_READYに移行");
