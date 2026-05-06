@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.Array;
  * 
  * @author exch
  */
-public class SkinImage extends SkinObject {
+public final class SkinImage extends SkinObject {
 	
 	/**
 	 * イメージ

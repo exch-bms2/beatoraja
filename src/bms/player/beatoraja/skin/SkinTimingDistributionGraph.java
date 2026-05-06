@@ -3,13 +3,10 @@ package bms.player.beatoraja.skin;
 import java.util.Optional;
 
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -29,10 +26,10 @@ public class SkinTimingDistributionGraph extends SkinObject {
 	private final boolean drawAverage;
 	private final boolean drawDev;
 	private int max = 10;
-	private Color[] JColor;
-	private Color graphColor;
-	private Color averageColor;
-	private Color devColor;
+	private final Color[] JColor;
+	private final Color graphColor;
+	private final Color averageColor;
+	private final Color devColor;
 
 	private MusicResult state;
 
@@ -146,6 +143,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 	public void dispose() {
 		Optional.ofNullable(tex).ifPresent(t -> t.getTexture().dispose());
 		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
+		setDisposed();
 	}
 
 }

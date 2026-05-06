@@ -14,7 +14,7 @@ import java.util.*;
  * 
  * @author exch
  */
-public class SkinHeader {
+public final class SkinHeader {
 
 	/**
 	 * スキンの種類
@@ -258,7 +258,7 @@ public class SkinHeader {
 	 * 
 	 * @author exch
 	 */
-	public static class CustomOption extends CustomItem {
+	public static final class CustomOption extends CustomItem {
 
 		public static final CustomOption[] EMPTY_ARRAY = new CustomOption[0];
 
@@ -309,7 +309,7 @@ public class SkinHeader {
 	 * 
 	 * @author exch
 	 */
-	public static class CustomFile extends CustomItem {
+	public static final class CustomFile extends CustomItem {
 
 		public static final CustomFile[] EMPTY_ARRAY = new CustomFile[0];
 
@@ -340,7 +340,7 @@ public class SkinHeader {
 	 * 
 	 * @author exch
 	 */
-	public static class CustomOffset extends CustomItem {
+	public static final class CustomOffset extends CustomItem {
 
 		public static final CustomOffset[] EMPTY_ARRAY = new CustomOffset[0];
 
@@ -382,7 +382,7 @@ public class SkinHeader {
 	 * 
 	 * @author exch
 	 */
-	public static class CustomCategory {
+	public static final class CustomCategory {
 	
 		public static final CustomCategory[] EMPTY_ARRAY = new CustomCategory[0];
 		

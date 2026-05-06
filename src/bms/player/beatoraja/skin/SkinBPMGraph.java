@@ -10,7 +10,6 @@ import java.util.*;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.LongDeserializer;
 
 /**
  * BPM推移のグラフ
@@ -230,10 +229,8 @@ public class SkinBPMGraph extends SkinObject {
 
 	@Override
 	public void dispose() {
-		if (shapetex != null) {
-			shapetex.getTexture().dispose();
-			shapetex = null;
-		}
+		Optional.ofNullable(shapetex).ifPresent(t -> t.getTexture().dispose());
+		setDisposed();
 	}
 
 }
