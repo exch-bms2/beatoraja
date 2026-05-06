@@ -54,7 +54,7 @@ public class AudioConfigurationView implements Initializable {
 		audio.getItems().setAll(DriverType.OpenAL , DriverType.PortAudio);
 		audiosamplerate.getItems().setAll(null, 44100, 48000);
 
-		audioFreqOption.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
+		audioFreqOption.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY, FrequencyType.SPEED);
 		audioFastForward.getItems().setAll(FrequencyType.UNPROCESSED , FrequencyType.FREQUENCY);
 	}
 

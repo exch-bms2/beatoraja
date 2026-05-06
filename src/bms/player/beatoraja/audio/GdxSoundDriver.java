@@ -44,6 +44,12 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	@Override
 	protected Sound getKeySound(Path p) {
 		for(Path path : AudioDriver.getPaths(p.toString())) {
+			if (getTimeStretchRate() != 1f) {
+				PCM pcm = PCM.load(path.toString(), this);
+				if (pcm != null) {
+					return getKeySound(pcm);
+				}
+			}
 			final String filename = path.toString();
 			final String name = filename.substring(0, filename.lastIndexOf('.'));
 			final String ext = filename.substring(filename.lastIndexOf('.'));
@@ -74,10 +80,23 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 	@Override
 	protected Sound getKeySound(final PCM pcm) {
+		final PCM source;
+		if (getTimeStretchRate() != 1f) {
+			PCM stretched = pcm;
+			try {
+				stretched = (PCM) TimeStretchProcessor.stretch(pcm, getTimeStretchRate());
+			} catch (Throwable e) {
+				Logger.getGlobal().warning("タイムストレッチ失敗: " + e.getMessage());
+			}
+			source = stretched;
+		} else {
+			source = pcm;
+		}
+
 		return Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
 			@Override
 			public InputStream read() {
-				return new WavFileInputStream(pcm);
+				return new WavFileInputStream(source);
 			}
 
 			@Override
