@@ -260,7 +260,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
 
-		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
+		if (model.getVolwav() > 0 && model.getVolwav() < 200) {
 			volume = model.getVolwav() / 100f;
 		} else {
 			volume = 1.0f;
@@ -310,12 +310,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				return;
 			}
 			try {
-				Path p;
-				if (wavid < wavcount) {
-					p = dpath.resolve(wavlist[wavid]).toAbsolutePath();
-				} else {
-					p = Paths.get("defaultsound/landmine.wav").toAbsolutePath();
-				}
+				Path p = wavid < wavcount ? dpath.resolve(wavlist[wavid]).toAbsolutePath(): Paths.get("defaultsound/landmine.wav").toAbsolutePath();
 				for (Note note : waventry.getValue()) {
 					// 音切りあり・なし両方のデータが必要になるケースがある
 					if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
@@ -354,11 +349,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
 		for (int i = 0; i < wavmap.length; i++) {
-			if (slicesound[i] != null) {
-				this.slicesound[i] = slicesound[i].toArray(SliceWav.class);
-			} else {
-				this.slicesound[i] = new SliceWav[0];
-			}
+			this.slicesound[i] = slicesound[i] != null ? slicesound[i].toArray(SliceWav.class) : new SliceWav[0];
 		}
 
 		final int prevsize = cache.size();
@@ -709,11 +700,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 
 		public boolean equals(Object o) {
-			if (o instanceof AudioKey) {
-				final AudioKey key = (AudioKey) o;
-				return path.equals(key.path) && start == key.start && duration == key.duration && stretchRate == key.stretchRate;
-			}
-			return false;
+			return o instanceof AudioKey key ? path.equals(key.path) && start == key.start && duration == key.duration && stretchRate == key.stretchRate : false;
 		}
 		
 		public int hashCode() {

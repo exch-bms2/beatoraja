@@ -44,8 +44,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				
 				if(data instanceof SkinSourceMovie) {
 					obj = new SkinImage((SkinSourceMovie)data);
-				} else if(data instanceof Texture) {
-					Texture tex = (Texture) data;
+				} else if(data instanceof Texture tex) {
 					if (img.len > 1) {
 						TextureRegion[] srcimg = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx,
 								img.divy);
@@ -79,8 +78,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						if (img.id.equals(imgs.images[index])) {
 							Object data = loader.getSource(img.src, p);
 							
-							if(data instanceof Texture) {
-								Texture tex = (Texture) data;
+							if(data instanceof Texture tex) {
 								sources[index] = new SkinSourceImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle);
 							} 
@@ -516,23 +514,16 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		
 		// gauge (playskin or resultskin only)
 		if (sk.gauge != null && dst.id.equals(sk.gauge.id)) {
-			int[][] indexmap = null;
-			switch(sk.gauge.nodes.length) {
-				case 4:
-					indexmap = new int[][]{{0,4,6,10,12,16,18,22,24,28,30,34},{1,5,7,11,13,17,19,23,25,29,31,35},{2,8,14,20,26,32},{3,9,15,21,27,33}};
-					break;
-				case 8:
-					indexmap = new int[][]{{12,16,18,22},{13,17,19,23},{14,20},{15,21},
+			int[][] indexmap = switch(sk.gauge.nodes.length) {
+				case 4 -> new int[][]{{0,4,6,10,12,16,18,22,24,28,30,34},{1,5,7,11,13,17,19,23,25,29,31,35},{2,8,14,20,26,32},{3,9,15,21,27,33}};
+				case 8 -> new int[][]{{12,16,18,22},{13,17,19,23},{14,20},{15,21},
 							{0,4,6,10,24,28,30,34},{1,5,7,11,25,29,31,35},{2,8,26,32},{3,9,27,33}};
-					break;
-				case 12:
-					indexmap = new int[][]{{12,18},{13,19},{14,20},{15,21},
+				case 12 -> new int[][]{{12,18},{13,19},{14,20},{15,21},
 							{0,6,24,30},{1,7,25,31},{2,8,26,32},{3,9,27,33},
 							{16,22}, {17,23}, {4, 10, 28, 34}, {5,11,29,35}};
-					break;
-				case 36:
-					break;
-			}
+				case 36 -> null;
+				default -> null;
+			};
 			TextureRegion[][] pgaugetex = new TextureRegion[36][];
 
 			int gaugelength = 0;

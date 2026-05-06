@@ -22,7 +22,7 @@ import java.util.Optional;
  *
  * @author hadronyche
  */
-public class SkinHitErrorVisualizer extends SkinObject {
+public final class SkinHitErrorVisualizer extends SkinObject {
 
 	private TextureRegion shapetex = null;
 	private Pixmap shape = null;
@@ -186,6 +186,7 @@ public class SkinHitErrorVisualizer extends SkinObject {
 	}
 
 	static int[][] getJudgeArea(PlayerResource resource) {
+		// TODO JudgeManagerと重複した処理
 		BMSModel model = resource.getBMSModel();
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
 

@@ -21,33 +21,31 @@ public class FloatPCM extends PCM<float[]> {
 		pcm.rewind();
 
 		switch(loader.bitsPerSample) {
-		case 8:
-			sample = new float[bytes];
-			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (pcm.get() - 128) / 128.0f;
+			case 8 -> {
+				sample = new float[bytes];
+				for (int i = 0; i < sample.length; i++) {
+					sample[i] = (pcm.get() - 128) / 128.0f;
+				}
 			}
-			break;
-		case 16:
-			// final long time = System.nanoTime();
-			sample = new float[bytes / 2];
-			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (float) (pcm.getShort()) / Short.MAX_VALUE;
+			case 16 -> {
+				sample = new float[bytes / 2];
+				for (int i = 0; i < sample.length; i++) {
+					sample[i] = (float) (pcm.getShort()) / Short.MAX_VALUE;
+				}
 			}
-			break;
-		case 24:
-			sample = new float[bytes / 3];
-			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (float) (((pcm.get(i * 3) & 0xff) << 8) | ((pcm.get(i * 3 + 1) & 0xff) << 16) | ((pcm.get(i * 3 + 2) & 0xff) << 24)) / Integer.MAX_VALUE;
+			case 24 -> {
+				sample = new float[bytes / 3];
+				for (int i = 0; i < sample.length; i++) {
+					sample[i] = (float) (((pcm.get(i * 3) & 0xff) << 8) | ((pcm.get(i * 3 + 1) & 0xff) << 16) | ((pcm.get(i * 3 + 2) & 0xff) << 24)) / Integer.MAX_VALUE;
+				}
 			}
-			break;
-		case 32:
-			sample = new float[bytes / 4];
-			for (int i = 0; i < sample.length; i++) {
-				sample[i] = pcm.getFloat();
+			case 32 -> {
+				sample = new float[bytes / 4];
+				for (int i = 0; i < sample.length; i++) {
+					sample[i] = pcm.getFloat();
+				}
 			}
-			break;
-		default:
-			throw new IOException(loader.bitsPerSample + " bits per samples isn't supported");			
+			default -> throw new IOException(loader.bitsPerSample + " bits per samples isn't supported");			
 		}
 		
 		return new FloatPCM(loader.channels, loader.sampleRate, 0, sample.length, sample);

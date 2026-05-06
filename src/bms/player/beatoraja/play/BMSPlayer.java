@@ -106,6 +106,9 @@ public class BMSPlayer extends MainState {
 			playinfo.randomoption2seed = chartOption.randomoption2seed;
 			playinfo.doubleoption = chartOption.doubleoption;
 			playinfo.rand = chartOption.rand;
+			Logger.getGlobal().info("譜面再現 : op1 - " + playinfo.randomoption + " seed1 - " + playinfo.randomoptionseed
+					 + " op2 - " + playinfo.randomoption2 + " seed2 - " + playinfo.randomoption2seed + " opdp - "+ playinfo.doubleoption
+					 + " random - " + Arrays.toString(playinfo.rand));
 		}
 
 		if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
@@ -481,7 +484,14 @@ public class BMSPlayer extends MainState {
 						timer.setTimerOff(141);
 						lanerender.init(model);					
 					} else if(!timer.isTimerOn(141) && micronow == startpressedtime){
-						timer.setMicroTimer(141, micronow - starttimeoffset * 1000);				
+						long  starttime = 0;
+						for(TimeLine tl : model.getAllTimeLines()) {
+							if(tl.existNote()) {
+								starttime = tl.getMicroTime();
+								break;
+							}
+						}
+						timer.setMicroTimer(141, micronow - starttime + 1000000);				
 					}				
 				}
 				

@@ -151,18 +151,10 @@ public class JSONSkinLoader extends SkinLoader {
 				}
 				header.setCustomFiles(files);
 
-				int offsetLengthAddition = 0;
-				switch (header.getSkinType()) {
-					case PLAY_5KEYS:
-					case PLAY_7KEYS:
-					case PLAY_9KEYS:
-					case PLAY_10KEYS:
-					case PLAY_14KEYS:
-					case PLAY_24KEYS:
-					case PLAY_24KEYS_DOUBLE:
-						offsetLengthAddition = 4;
-					default:
-				}
+				int offsetLengthAddition = switch (header.getSkinType()) {
+					case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE -> 4;
+					default -> 0;
+				};
 				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length + offsetLengthAddition];
 				for (int i = 0; i < sk.offset.length; i++) {
 					JsonSkin.Offset pr = sk.offset[i];
@@ -176,18 +168,12 @@ public class JSONSkinLoader extends SkinLoader {
 					}
 				}
 				switch (header.getSkinType()) {
-					case PLAY_5KEYS:
-					case PLAY_7KEYS:
-					case PLAY_9KEYS:
-					case PLAY_10KEYS:
-					case PLAY_14KEYS:
-					case PLAY_24KEYS:
-					case PLAY_24KEYS_DOUBLE:
+					case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE -> {
 						offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false);
 						offsets[sk.offset.length + 1] = new SkinHeader.CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false);
 						offsets[sk.offset.length + 2] = new SkinHeader.CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true);
-						offsets[sk.offset.length + 3] = new SkinHeader.CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true);
-					default:
+						offsets[sk.offset.length + 3] = new SkinHeader.CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true);					
+					}
 				}
 				header.setCustomOffsets(offsets);
 				
@@ -269,37 +255,16 @@ public class JSONSkinLoader extends SkinLoader {
 			sourceMap = new HashMap<>();
 			bitmapSourceMap = new HashMap<>();
 
-			JsonSkinObjectLoader objectLoader = null;
-			switch(type) {
-			case MUSIC_SELECT:
-				objectLoader = new JsonSelectSkinObjectLoader(this);
-				break;
-			case PLAY_5KEYS:
-			case PLAY_7KEYS:
-			case PLAY_9KEYS:
-			case PLAY_10KEYS:
-			case PLAY_14KEYS:
-			case PLAY_24KEYS:
-			case PLAY_24KEYS_DOUBLE:
-				objectLoader = new JsonPlaySkinObjectLoader(this);
-				break;
-			case DECIDE:
-				objectLoader = new JsonDecideSkinObjectLoader(this);
-				break;
-			case RESULT:
-				objectLoader = new JsonResultSkinObjectLoader(this);
-				break;
-			case COURSE_RESULT:
-				objectLoader = new JsonCourseResultSkinObjectLoader(this);
-				break;
-			case SKIN_SELECT:
-				objectLoader = new JsonSkinConfigurationSkinObjectLoader(this);
-				break;
-			case KEY_CONFIG:
-			default:
-				objectLoader = new JsonKeyConfigurationSkinObjectLoader(this);
-				break;				
-			}
+			final JsonSkinObjectLoader objectLoader = switch(type) {
+				case MUSIC_SELECT ->  new JsonSelectSkinObjectLoader(this);
+				case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE ->  new JsonPlaySkinObjectLoader(this);
+				case DECIDE -> new JsonDecideSkinObjectLoader(this);
+				case RESULT -> new JsonResultSkinObjectLoader(this);
+				case COURSE_RESULT -> new JsonCourseResultSkinObjectLoader(this);
+				case SKIN_SELECT -> new JsonSkinConfigurationSkinObjectLoader(this);
+				case KEY_CONFIG -> new JsonKeyConfigurationSkinObjectLoader(this);
+				default -> new JsonKeyConfigurationSkinObjectLoader(this);
+			};
 			
 			header.setSourceResolution(src);
 			header.setDestinationResolution(dstr);

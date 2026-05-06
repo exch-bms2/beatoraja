@@ -62,16 +62,11 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	private Sound getKeySound(String name, String ext) {
-		switch (ext.toLowerCase(Locale.ROOT)) {
-			case ".wav":
-			case ".flac":
-				return getKeySound(new PCMHandleStream(name + ext));
-			case ".ogg":
-			case ".mp3":
-				return getKeySound(Gdx.files.internal(name + ext));
-		}
-		return null;
-
+		return switch (ext.toLowerCase(Locale.ROOT)) {
+			case ".wav", ".flac" -> getKeySound(new PCMHandleStream(name + ext));
+			case ".ogg", ".mp3" -> getKeySound(Gdx.files.internal(name + ext));
+			default -> null;
+		};
 	}
 
 	private Sound getKeySound(FileHandle handle) {
