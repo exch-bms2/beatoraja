@@ -2,7 +2,6 @@ package bms.player.beatoraja.audio;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * 16bit short PCM (using diect buffer)
@@ -22,34 +21,33 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 		pcm.rewind();
 		
 		switch(loader.bitsPerSample) {
-		case 8:
-			sample = getDirectByteBuffer(bytes * 2);
-			for (int i = 0; i < bytes; i++) {
-				sample.putShort((short) ((((short) pcm.get()) - 128) * 256));
+			case 8 -> {
+				sample = getDirectByteBuffer(bytes * 2);
+				for (int i = 0; i < bytes; i++) {
+					sample.putShort((short) ((((short) pcm.get()) - 128) * 256));
+				}
 			}
-			break;
-		case 16:
+			case 16 -> {
+				if(pcm.isDirect()) {
+					sample = pcm;
+				} else {
+					sample = getDirectByteBuffer(bytes).put(pcm.array(), 0, bytes);				
+				}
+			}
 			// final long time = System.nanoTime();
-			if(pcm.isDirect()) {
-				sample = pcm;
-			} else {
-				sample = getDirectByteBuffer(bytes).put(pcm.array(), 0, bytes);				
+			case 24 -> {
+				sample = getDirectByteBuffer(bytes * 2 / 3);
+				for (int i = 0, len = bytes / 3; i < len; i++) {
+					sample.putShort(pcm.getShort(i * 3 + 1));
+				}
 			}
-			break;
-		case 24:
-			sample = getDirectByteBuffer(bytes * 2 / 3);
-			for (int i = 0, len = bytes / 3; i < len; i++) {
-				sample.putShort(pcm.getShort(i * 3 + 1));
+			case 32 -> {
+				sample = getDirectByteBuffer(bytes / 2);
+				for (int i = 0, len = bytes / 4; i < len; i++) {
+					sample.putShort((short) (pcm.getFloat() * Short.MAX_VALUE));
+				}
 			}
-			break;
-		case 32:
-			sample = getDirectByteBuffer(bytes / 2);
-			for (int i = 0, len = bytes / 4; i < len; i++) {
-				sample.putShort((short) (pcm.getFloat() * Short.MAX_VALUE));
-			}
-			break;
-		default:
-			throw new IOException(loader.bitsPerSample + " bits per samples isn't supported");			
+			default -> throw new IOException(loader.bitsPerSample + " bits per samples isn't supported");			
 		}
 		
 		return new ShortDirectPCM(loader.channels, loader.sampleRate, 0, bytes * 8 / (loader.bitsPerSample), sample);
