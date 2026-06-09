@@ -27,6 +27,7 @@ import bms.player.beatoraja.external.BMSSearchAccessor;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.ir.IRTableData;
 import bms.player.beatoraja.select.bar.*;
+import bms.player.beatoraja.select.bar.ExecutableBar.RandomFolder;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongInformationAccessor;
@@ -380,35 +381,8 @@ public final class BarManager {
 								songBar -> songBar instanceof SongBar && ((SongBar) songBar).getSongData().getPath() != null)
 								.map(songBar -> ((SongBar) songBar).getSongData()).toArray(SongData[]::new);
 						if (randomFolder.getFilter() != null) {
-							Set<String> filterKey = randomFolder.getFilter().keySet();
-							randomTargets = Stream.of(randomTargets).filter(r -> {
-								ScoreData scoreData = select.getScoreDataCache().readScoreData(r, config.getLnmode());
-								for (String key : filterKey) {
-									String getterMethodName = "get" + key.substring(0, 1).toUpperCase()
-											+ key.substring(1);
-									try {
-										Object value = randomFolder.getFilter().get(key);
-										if (scoreData == null) {
-											if (value instanceof String && !"".equals((String) value)) {
-												return false;
-											}
-											if (value instanceof Integer && 0 != (Integer) value) {
-												return false;
-											}
-										} else {
-											Method getterMethod = ScoreData.class.getMethod(getterMethodName);
-											Object propertyValue = getterMethod.invoke(scoreData);
-											if (!propertyValue.equals(value)) {
-												return false;
-											}
-										}
-									} catch (Throwable e) {
-										e.printStackTrace();
-										return false;
-									}
-								}
-								return true;
-							}).toArray(SongData[]::new);
+							randomTargets = Stream.of(randomTargets).
+									filter(r -> randomFolder.filter(select.getScoreDataCache().readScoreData(r, config.getLnmode()))).toArray(SongData[]::new);
 						}
 						if ((randomFolder.getFilter() != null && randomTargets.length >= 1)
 								|| (randomFolder.getFilter() == null && randomTargets.length >= 2)) {
@@ -614,27 +588,6 @@ public final class BarManager {
 
 		public void setShowall(boolean showall) {
 			this.showall = showall;
-		}
-	}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static final class RandomFolder {
-		private String name;
-		private Map<String, Object> filter;
-		public String getName() {
-			return "[RANDOM] " + name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public Map<String, Object> getFilter() {
-			return filter;
-		}
-
-		public void setFilter(Map<String, Object> filter) {
-			this.filter = filter;
 		}
 	}
 
