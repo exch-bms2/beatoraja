@@ -495,9 +495,16 @@ public class BMSPlayerInputProcessor {
 		scrollX = scrollY = 0;
 	}
 
+	static public Runnable controllerPollRunner = null;
+
 	public void poll() {
 		final long now = System.nanoTime() / 1000 - starttime;
 		kbinput.poll(now);
+
+		if (controllerPollRunner != null) {
+			controllerPollRunner.run();
+		}
+
 		for (BMControllerInputProcessor controller : bminput) {
 			controller.poll(now);
 		}

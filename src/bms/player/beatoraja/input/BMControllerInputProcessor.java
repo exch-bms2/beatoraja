@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.PovDirection;
 
 /**
  * 専用コントローラー入力処理用クラス
@@ -134,21 +135,38 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		for (int button = 0; button < buttonstate.length; button++) {
 			if (microtime >= buttontime[button] + duration * 1000) {
 				final boolean prev = buttonstate[button];
-				if (button <= BMKeys.BUTTON_32) {
+				if (button <= BMKeys.BUTTON_28) {
 					buttonstate[button] = controller.getButton(button);
-                } else {
-                    if (jkoc) {
-                        if (button == BMKeys.AXIS1_PLUS) {
-                            buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
-                        } else if (button == BMKeys.AXIS1_MINUS) {
-                            buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
-                        } else {
-                            buttonstate[button] = false;
-                        }
-                    } else {
-                        buttonstate[button] = scratchInput((button - BMKeys.AXIS1_PLUS) / 2, (button - BMKeys.AXIS1_PLUS) % 2 == 0);
-                    }
-                }
+				} else if (button <= BMKeys.HAT1_BOTTOM){
+					PovDirection pov = controller.getPov((button - BMKeys.HAT1_LEFT) / 4);
+					switch ((button - BMKeys.HAT1_LEFT) % 4) {
+						case 0:  // Left
+							buttonstate[button] = (pov == PovDirection.west || pov == PovDirection.northWest || pov == PovDirection.southWest);
+							break;
+						case 1:  // Top
+							buttonstate[button] = (pov == PovDirection.north || pov == PovDirection.northEast || pov == PovDirection.northWest);
+							break;
+						case 2:  // Right
+							buttonstate[button] = (pov == PovDirection.east || pov == PovDirection.northEast || pov == PovDirection.southEast);
+							break;
+						case 3:  // bottom
+							buttonstate[button] = (pov == PovDirection.south || pov == PovDirection.southEast || pov == PovDirection.southWest);
+							break;
+					}
+                    buttonstate[button] |= controller.getButton(button);
+				} else {
+					if (jkoc) {
+						if (button == BMKeys.AXIS1_PLUS) {
+							buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
+						} else if (button == BMKeys.AXIS1_MINUS) {
+							buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
+						} else {
+							buttonstate[button] = false;
+						}
+					} else {
+						buttonstate[button] = scratchInput((button - BMKeys.AXIS1_PLUS) / 2, (button - BMKeys.AXIS1_PLUS) % 2 == 0);
+					}
+				}
 
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
 					buttontime[button] = microtime;
@@ -265,10 +283,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		public static final int BUTTON_26 = 25;
 		public static final int BUTTON_27 = 26;
 		public static final int BUTTON_28 = 27;
-		public static final int BUTTON_29 = 28;
-		public static final int BUTTON_30 = 29;
-		public static final int BUTTON_31 = 30;
-		public static final int BUTTON_32 = 31;
+        public static final int HAT1_LEFT = 28;
+        public static final int HAT1_TOP = 29;
+        public static final int HAT1_RIGHT = 30;
+        public static final int HAT1_BOTTOM = 31;
         public static final int AXIS1_PLUS = 32;
         public static final int AXIS1_MINUS = 33;
         public static final int AXIS2_PLUS = 34;
@@ -294,8 +312,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
         private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5", "BUTTON 6",
                 "BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13", "BUTTON 14",
                 "BUTTON 15", "BUTTON 16", "BUTTON 17", "BUTTON 18", "BUTTON 19", "BUTTON 20", "BUTTON 21", "BUTTON 22",
-                "BUTTON 23", "BUTTON 24", "BUTTON 25", "BUTTON 26", "BUTTON 27", "BUTTON 28", "BUTTON 29", "BUTTON 30",
-                "BUTTON 31", "BUTTON 32", "UP (AXIS 1 +)", "DOWN (AXIS 1 -)", "RIGHT (AXIS 2 +)", "LEFT (AXIS 2 -)",
+                "BUTTON 23", "BUTTON 24", "BUTTON 25", "BUTTON 26", "BUTTON 27", "BUTTON 28",
+                "HAT 1 LEFT", "HAT 1 TOP", "HAT 1 RIGHT", "HAT 1 BOTTOM",
+                "UP (AXIS 1 +)", "DOWN (AXIS 1 -)", "RIGHT (AXIS 2 +)", "LEFT (AXIS 2 -)",
                 "AXIS 3 +", "AXIS 3 -", "AXIS 4 +", "AXIS 4 -", "AXIS 5 +", "AXIS 5 -", "AXIS 6 +", "AXIS 6 -", "AXIS 7 +", "AXIS 7 -", "AXIS 8 +", "AXIS 8 -" };
 
 		public static final String toString(int keycode) {

@@ -9,7 +9,9 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +30,7 @@ import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongUtils;
+import jdk.jfr.StackTrace;
 
 /**
  * 起動用クラス
@@ -149,6 +152,7 @@ public class MainLoader extends Application {
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
+
 			new LwjglApplication(new ApplicationListener() {
 				
 				public void resume() {
@@ -174,7 +178,32 @@ public class MainLoader extends Application {
 				public void create() {
 					main.create();
 				}
-			}, cfg);
+			}, cfg) {
+				// This is some kind of hack. Refer to com.badlogic.gdx.controllers.desktop.OisControllers code.
+				// OisControllers creates a runnable that polls the controller input. It polls the input every frame via
+				// `Gdx.app.postRunnable` function.
+				//
+				// We want it to poll the input on every poll thread's interval. Be it 1000Hz or 8000Hz.
+				// To achieve that, we *intercept* the runnable, store it somewhere else, and call that runnable
+				// directly on the polling thread. (BMSPlayerInputProcessor.poll). Further postRunnable for that
+				// runnable will be prohibited.
+				private Runnable oisRunnable = null;
+				@Override
+				public void postRunnable(Runnable runnable) {
+					if (oisRunnable == null) {
+						StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+						if (stackTrace.length >= 3) {
+							if (stackTrace[2].getClassName().startsWith("com.badlogic.gdx.controllers.desktop.OisControllers")) {
+								oisRunnable = runnable;
+								BMSPlayerInputProcessor.controllerPollRunner = runnable;
+							}
+						}
+					}
+					else if (runnable == oisRunnable) return;
+
+					super.postRunnable(runnable);
+				}
+			};
 
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //
