@@ -1,4 +1,4 @@
-package bms.player.beatoraja.external;
+package bms.player.beatoraja.external.discord;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.MainStateListener;

@@ -24,6 +24,7 @@ import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.external.*;
+import bms.player.beatoraja.external.discord.DiscordListener;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.*;
@@ -36,6 +37,7 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
+import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
@@ -45,9 +47,9 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
  *
  * @author exch
  */
-public class MainController {
+public final class MainController {
 
-	private static final String VERSION = "beatoraja 0.8.7";
+	private static final String VERSION = "beatoraja 0.8.9";
 
 	public static final boolean debug = false;
 	public static final int debugTextXpos = 10;
@@ -240,38 +242,26 @@ public class MainController {
 	}
 
 	public void changeState(MainStateType state) {
-		MainState newState = null;
-		switch (state) {
-		case MUSICSELECT:
-			if (this.bmsfile != null) {
-				exit();
-			} else {
-				newState = selector;
+		final MainState newState = switch (state) {
+			case MUSICSELECT -> {
+				if (this.bmsfile != null) {
+					exit();
+				}
+				yield selector;
 			}
-			break;
-		case DECIDE:
-			newState = decide;
-			break;
-		case PLAY:
-			if (bmsplayer != null) {
-				bmsplayer.dispose();
+			case DECIDE -> decide;
+			case PLAY -> {
+				if (bmsplayer != null) {
+					bmsplayer.dispose();
+				}
+				bmsplayer = new BMSPlayer(this, resource);
+				yield bmsplayer;
 			}
-			bmsplayer = new BMSPlayer(this, resource);
-			newState = bmsplayer;
-			break;
-		case RESULT:
-			newState = result;
-			break;
-		case COURSERESULT:
-			newState = gresult;
-			break;
-		case CONFIG:
-			newState = keyconfig;
-			break;
-		case SKINCONFIG:
-			newState = skinconfig;
-			break;
-		}
+			case RESULT -> result;
+			case COURSERESULT  -> gresult;
+			case CONFIG -> keyconfig;
+			case SKINCONFIG -> skinconfig;
+		};
 
 		if (newState != null && current != newState) {
 			if(current != null) {
@@ -455,7 +445,7 @@ public class MainController {
 				systemfont.draw(sprite, message.append("Stagefile Pixmap Resource Size ").append(selector.getStagefileResource().size()), debugTextXpos,
 						config.getResolution().height - 146);
 				message.setLength(0);
-				systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), debugTextXpos,
+				systemfont.draw(sprite, message.append("Sort ID ").append(StringPropertyFactory.getStringProperty(61).get(current)), debugTextXpos,
 						config.getResolution().height - 170);
 						if (current.getSkin() != null) {
 					message.setLength(0);
@@ -600,37 +590,19 @@ public class MainController {
 	public void dispose() {
 		saveConfig();
 
-		if (bmsplayer != null) {
-			bmsplayer.dispose();
-		}
-		if (selector != null) {
-			selector.dispose();
-		}
-		if (streamController != null) {
-		    streamController.dispose();
-        }
-		if (decide != null) {
-			decide.dispose();
-		}
-		if (result != null) {
-			result.dispose();
-		}
-		if (gresult != null) {
-			gresult.dispose();
-		}
-		if (keyconfig != null) {
-			keyconfig.dispose();
-		}
-		if (skinconfig != null) {
-			skinconfig.dispose();
-		}
+		Optional.ofNullable(bmsplayer).ifPresent(MainState::dispose);
+		Optional.ofNullable(selector).ifPresent(MainState::dispose);
+		Optional.ofNullable(streamController).ifPresent(StreamController::dispose);
+		Optional.ofNullable(decide).ifPresent(MainState::dispose);
+		Optional.ofNullable(result).ifPresent(MainState::dispose);
+		Optional.ofNullable(gresult).ifPresent(MainState::dispose);
+		Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
+		Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
 		resource.dispose();
 //		input.dispose();
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
-		if (download != null) {
-			download.dispose();
-		}
+		Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
 
 		Logger.getGlobal().info("全リソース破棄完了");
 	}
