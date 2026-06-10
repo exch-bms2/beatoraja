@@ -18,7 +18,7 @@ public class MusicDecide extends MainState {
 	private boolean cancel;
 
 	public MusicDecide(MainController main) {
-		super(main);
+		super(main, MainStateType.DECIDE);
 	}
 
 	public void create() {

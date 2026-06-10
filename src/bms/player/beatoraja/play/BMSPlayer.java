@@ -83,7 +83,7 @@ public class BMSPlayer extends MainState {
 	private long startpressedtime;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
-		super(main);
+		super(main, MainStateType.PLAY);
 		this.model = resource.getBMSModel();
 		BMSPlayerMode autoplay = resource.getPlayMode();
 		final PlayerConfig config = resource.getPlayerConfig();

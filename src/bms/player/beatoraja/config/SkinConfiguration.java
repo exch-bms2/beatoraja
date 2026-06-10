@@ -42,7 +42,7 @@ public class SkinConfiguration extends MainState {
 	private PlayerConfig player;
 
 	public SkinConfiguration(MainController main, PlayerConfig player) {
-		super(main);
+		super(main, MainStateType.SKINCONFIG);
 		this.player = player;
 	}
 

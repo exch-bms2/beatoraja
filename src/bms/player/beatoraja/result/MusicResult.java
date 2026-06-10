@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.FloatArray;
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
+import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.GrooveGauge;
@@ -35,7 +36,7 @@ public class MusicResult extends AbstractResult {
 	private List<IRSendStatus> irSendStatus = new ArrayList<IRSendStatus>();
 
 	public MusicResult(MainController main) {
-		super(main);
+		super(main, MainStateType.RESULT);
 	}
 
 	public void create() {

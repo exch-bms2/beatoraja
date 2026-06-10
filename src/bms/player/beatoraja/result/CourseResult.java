@@ -31,7 +31,7 @@ public class CourseResult extends AbstractResult {
 	private ResultKeyProperty property;
 
 	public CourseResult(MainController main) {
-		super(main);
+		super(main, MainStateType.COURSERESULT);
 	}
 
 	public void create() {

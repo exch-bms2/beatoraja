@@ -106,7 +106,7 @@ public final class MusicSelector extends MainState {
 	private PixmapResourcePool stagefiles;
 
 	public MusicSelector(MainController main, boolean songUpdated) {
-		super(main);
+		super(main, MainStateType.MUSICSELECT);
 		this.config = main.getPlayerResource().getPlayerConfig();
 
 		songdb = main.getSongDatabase();
@@ -382,49 +382,48 @@ public final class MusicSelector extends MainState {
 			ReplayData chartOption = null;
 			ReplayData replay;
 			switch(ChartReplicationMode.get(config.getChartReplicationMode())) {
-			case NONE:
-				// TODO 通常オプションもここに入れて渡す？
-				break;
-			case RIVALCHART:
-				if(rival != null) {
-					chartOption = new ReplayData();
-					chartOption.randomoption = rival.getOption() % 10;
-					chartOption.randomoption2 = (rival.getOption() / 10) % 10;
-					chartOption.doubleoption = rival.getOption() / 100;
-					chartOption.randomoptionseed = rival.getSeed() % (65536 * 256);
-					chartOption.randomoption2seed = rival.getSeed() / (65536 * 256);
-//					chartOption.rand = rival.getRandom();
+			// TODO 通常オプションもここに入れて渡す？
+				case NONE -> {}
+				case RIVALCHART -> {
+					if(rival != null) {
+						chartOption = new ReplayData();
+						chartOption.randomoption = rival.getOption() % 10;
+						chartOption.randomoption2 = (rival.getOption() / 10) % 10;
+						chartOption.doubleoption = rival.getOption() / 100;
+						chartOption.randomoptionseed = rival.getSeed() % (65536 * 256);
+						chartOption.randomoption2seed = rival.getSeed() / (65536 * 256);
+	//					chartOption.rand = rival.getRandom();
+					}
 				}
-				break;
-			case RIVALOPTION:
-				if(rival != null) {
-					chartOption = new ReplayData();
-					chartOption.randomoption = rival.getOption() % 10;
-					chartOption.randomoption2 = (rival.getOption() / 10) % 10;
-					chartOption.doubleoption = rival.getOption() / 100;
+				case RIVALOPTION -> {
+					if(rival != null) {
+						chartOption = new ReplayData();
+						chartOption.randomoption = rival.getOption() % 10;
+						chartOption.randomoption2 = (rival.getOption() / 10) % 10;
+						chartOption.doubleoption = rival.getOption() / 100;
+					}
 				}
-				break;							
-			case REPLAYCHART:
-				replay = main.getPlayDataAccessor().readReplayData(resource.getBMSModel(), config.getLnmode(), play.id);
-				if (replay != null) {
-					chartOption = new ReplayData();
-					chartOption.randomoption = replay.randomoption;
-					chartOption.randomoptionseed = replay.randomoptionseed;
-					chartOption.randomoption2 = replay.randomoption2;
-					chartOption.randomoption2seed = replay.randomoption2seed;
-					chartOption.doubleoption = replay.doubleoption;
-					chartOption.rand = replay.rand;
+				case REPLAYCHART -> {
+					replay = main.getPlayDataAccessor().readReplayData(resource.getBMSModel(), config.getLnmode(), play.id);
+					if (replay != null) {
+						chartOption = new ReplayData();
+						chartOption.randomoption = replay.randomoption;
+						chartOption.randomoptionseed = replay.randomoptionseed;
+						chartOption.randomoption2 = replay.randomoption2;
+						chartOption.randomoption2seed = replay.randomoption2seed;
+						chartOption.doubleoption = replay.doubleoption;
+						chartOption.rand = replay.rand;
+					}
 				}
-				break;
-			case REPLAYOPTION:
-				replay = main.getPlayDataAccessor().readReplayData(resource.getBMSModel(), config.getLnmode(), play.id);
-				if (replay != null) {
-					chartOption = new ReplayData();
-					chartOption.randomoption = replay.randomoption;
-					chartOption.randomoption2 = replay.randomoption2;
-					chartOption.doubleoption = replay.doubleoption;
+				case REPLAYOPTION -> {
+					replay = main.getPlayDataAccessor().readReplayData(resource.getBMSModel(), config.getLnmode(), play.id);
+					if (replay != null) {
+						chartOption = new ReplayData();
+						chartOption.randomoption = replay.randomoption;
+						chartOption.randomoption2 = replay.randomoption2;
+						chartOption.doubleoption = replay.doubleoption;
+					}
 				}
-				break;
 			}
 			resource.setChartOption(chartOption);
 			
@@ -481,12 +480,12 @@ public final class MusicSelector extends MainState {
 			if (mode.mode == BMSPlayerMode.Mode.PLAY || mode.mode == BMSPlayerMode.Mode.AUTOPLAY) {
 				for (CourseData.CourseDataConstraint constraint : gradeBar.getCourseData().getConstraint()) {
 					switch (constraint) {
-						case CLASS:
+						case CLASS -> {
 							config.setRandom(0);
 							config.setRandom2(0);
 							config.setDoubleoption(0);
-							break;
-						case MIRROR:
+						}
+						case MIRROR -> {
 							if (config.getRandom() == 1) {
 								config.setRandom2(1);
 								config.setDoubleoption(1);
@@ -495,26 +494,19 @@ public final class MusicSelector extends MainState {
 								config.setRandom2(0);
 								config.setDoubleoption(0);
 							}
-							break;
-						case RANDOM:
+						}
+						case RANDOM -> {
 							if (config.getRandom() > 5) {
 								config.setRandom(0);
 							}
 							if (config.getRandom2() > 5) {
 								config.setRandom2(0);
 							}
-							break;
-						case LN:
-							config.setLnmode(0);
-							break;
-						case CN:
-							config.setLnmode(1);
-							break;
-						case HCN:
-							config.setLnmode(2);
-							break;
-						default:
-							break;
+						}
+						case LN -> config.setLnmode(0);
+						case CN -> config.setLnmode(1);
+						case HCN -> config.setLnmode(2);
+						default -> {}
 					}
 				}
 			}
@@ -667,11 +659,9 @@ public final class MusicSelector extends MainState {
 	public PlayConfig getSelectedBarPlayConfig() {
 		Bar current = manager.getSelected();
 		PlayConfig pc = null;
-		if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-			SongBar song = (SongBar) current;
+		if (current instanceof SongBar song && song.existsSong()) {
 			pc = main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-		} else if(current instanceof GradeBar && ((GradeBar)current).existsAllSongs()) {
-			GradeBar grade = (GradeBar)current;
+		} else if(current instanceof GradeBar grade && grade.existsAllSongs()) {
 			for(SongData song : grade.getSongDatas()) {
 				PlayConfig pc2 = main.getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				if(pc == null) {
