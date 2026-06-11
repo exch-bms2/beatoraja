@@ -560,7 +560,7 @@ public class BMSPlayer extends MainState {
 					}
 					model.setTotal(property.total);
 					PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,
-							property.endtime * 100 / property.freq);
+							property.endtime * 100 / property.freq, property.gaugetype);
 					pm.modify(model);
 					if (model.getMode().player == 2) {
 						if (property.doubleop == 1) {

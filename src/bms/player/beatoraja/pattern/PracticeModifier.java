@@ -12,16 +12,19 @@ public class PracticeModifier extends PatternModifier {
 	/**
 	 * 開始時間(ms)
 	 */
-	private long start;
+	private final long start;
 	/**
 	 * 終了時間(ms)
 	 */
-	private long end;
+	private final long end;
 
-	public PracticeModifier(long start, long end) {
+	private final int gaugetype;
+
+	public PracticeModifier(long start, long end, int gaugetype) {
 		super(AssistLevel.ASSIST);
 		this.start = start;
 		this.end = end;
+		this.gaugetype = gaugetype;
 	}
 
 	@Override
@@ -35,7 +38,11 @@ public class PracticeModifier extends PatternModifier {
 				}
 			}
 		}
-		model.setTotal(model.getTotal() * model.getTotalNotes() / totalnotes);
+
+		// NORMALゲージ以下の時にTOTAL補正をかける
+		if(gaugetype < 3) {
+			model.setTotal(model.getTotal() * model.getTotalNotes() / totalnotes);
+		}
 	}
 
 }
