@@ -300,7 +300,7 @@ public class LaneRenderer {
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
 			for (int lane = 0; lane < lanes.length; lane++) {
-				final long[][] judgetime = main.getJudgeManager().getJudgeTimeRegion(lane);
+				final long[] judgetime = main.getJudgeManager().getJudgeTimeRegion(lane);
 				for (int i = pos; i < timelines.length; i++) {
 					final TimeLine tl = timelines[i];
 					if (tl.getMicroTime() >= microtime) {
@@ -309,9 +309,9 @@ public class LaneRenderer {
 										? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
 						for (int j = color.length - 1; j >= 0; j--) {
 							sprite.setColor(color[j]);
-							long nj = j > 0 ? judgetime[j - 1][1] : 0;
+							long nj = j > 0 ? judgetime[j * 2 - 1] : 0;
 							sprite.draw(main.getImage(IMAGE_WHITE), lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
-									(float) ((judgetime[j][1] - nj) * rate));
+									(float) ((judgetime[j * 2 + 1] - nj) * rate));
 						}
 						break;
 					}
@@ -575,7 +575,7 @@ public class LaneRenderer {
 		// TODO dstnote2をレーン毎に変更
 		if (lanes[0].dstnote2 != Integer.MIN_VALUE) {
 			//遅BADからノースピの速度で落下
-			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] );
+			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[４] );
 			double stopTime;
 			double orgy2 = lanes[0].dstnote2;
 			if(orgy2 < -lanes[0].region.height) orgy2 = -lanes[0].region.height;
