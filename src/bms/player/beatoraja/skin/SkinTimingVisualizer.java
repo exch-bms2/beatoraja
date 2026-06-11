@@ -41,7 +41,7 @@ public final class SkinTimingVisualizer extends SkinObject {
 	private final boolean drawDecay;
 	
 	private BMSModel model;
-	private int[][] judgeArea;
+	private int[] judgeArea;
 	
 	private int index;
 	private long[] recent;
@@ -97,8 +97,8 @@ public final class SkinTimingVisualizer extends SkinObject {
 			shape.fillRectangle(center, 0, 1, 1);
 			for (int i = 0; i < JColor.length; i++) {
 				shape.setColor(JColor[i]);
-				int x1 = center + MathUtils.clamp(judgeArea[i][0], -center, center);
-				int x2 = center + MathUtils.clamp(judgeArea[i][1], -center, center) + 1;
+				int x1 = center + MathUtils.clamp(judgeArea[i * 2], -center, center);
+				int x2 = center + MathUtils.clamp(judgeArea[i * 2 + 1], -center, center) + 1;
 
 				if (beforex1 > x1) {
 					shape.fillRectangle(x1, 0, Math.abs(x1 - beforex1), 1);
@@ -149,7 +149,7 @@ public final class SkinTimingVisualizer extends SkinObject {
 		}
 	}
 
-	static int[][] getJudgeArea(PlayerResource resource) {
+	static int[] getJudgeArea(PlayerResource resource) {
 		BMSModel model = resource.getBMSModel();
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
 

@@ -44,7 +44,7 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 	private final boolean drawDecay;
 
 	private BMSModel model;
-	private int[][] judgeArea;
+	private int[] judgeArea;
 
 	private int currentindex = -1;
 
@@ -122,13 +122,13 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 				// Judge color or single color
 				if (colorMode) {
 					long judge = recent[cycle];
-					if (judge > judgeArea[0][0] && judge < judgeArea[0][1]) {
+					if (judge > judgeArea[0] && judge < judgeArea[1]) {
 						shape.setColor(JColor[0]);
-					} else if (judge > judgeArea[1][0] && judge < judgeArea[1][1]) {
+					} else if (judge > judgeArea[2] && judge < judgeArea[3]) {
 						shape.setColor(JColor[1]);
-					} else if (judge > judgeArea[2][0] && judge < judgeArea[2][1]) {
+					} else if (judge > judgeArea[4] && judge < judgeArea[5]) {
 						shape.setColor(JColor[2]);
-					} else if (judge > judgeArea[3][0] && judge < judgeArea[3][1]) {
+					} else if (judge > judgeArea[6] && judge < judgeArea[7]) {
 						shape.setColor(JColor[3]);
 					} else {//(judge > judgeArea[4][0] && judge < judgeArea[4][1]) {
 						shape.setColor(JColor[4]);
@@ -155,7 +155,7 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		if (emaMode != 0) {
 			long last = recent[index];
 			// Ignore misses
-			if (last != Long.MIN_VALUE && (last > judgeArea[3][0] && last < judgeArea[3][1])) {
+			if (last != Long.MIN_VALUE && (last > judgeArea[6] && last < judgeArea[7])) {
 				updateEMA(last);
 			}
 			int x = (width - lineWidth) / 2
@@ -185,7 +185,7 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		draw(sprite, shapetex);
 	}
 
-	static int[][] getJudgeArea(PlayerResource resource) {
+	static int[] getJudgeArea(PlayerResource resource) {
 		// TODO JudgeManagerと重複した処理
 		BMSModel model = resource.getBMSModel();
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
