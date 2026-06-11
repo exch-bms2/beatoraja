@@ -369,12 +369,12 @@ public final class JudgeManager {
 							// BSS終端処理
 							final long[] mjudge = scnendmjudge;
 							final long dmtime = state.processing.getMicroTime() - pmtime;
-							int j = 0;
-							for (; j < mjudge.length && !(dmtime >= mjudge[j * 2] && dmtime <= mjudge[j * 2 + 1]); j++)
+							int judge = 0;
+							for (; judge < mjudge.length / 2 && !(dmtime >= mjudge[judge * 2] && dmtime <= mjudge[judge * 2 + 1]); judge++)
 								;
 
 							keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
-							this.updateMicro(state, state.processing, mtime, j, dmtime, true);
+							this.updateMicro(state, state.processing, mtime, judge, dmtime, true);
 //							 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 							state.processing = null;
 							state.releasetime = Long.MIN_VALUE;
