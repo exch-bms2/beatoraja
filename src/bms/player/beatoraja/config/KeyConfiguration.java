@@ -91,7 +91,7 @@ public class KeyConfiguration extends MainState {
 	private boolean deletepressed = false;
 
 	public KeyConfiguration(MainController main) {
-		super(main);
+		super(main, MainStateType.CONFIG);
 
 	}
 

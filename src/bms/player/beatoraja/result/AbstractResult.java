@@ -63,8 +63,8 @@ public abstract class AbstractResult extends MainState {
 	 */
 	protected ScoreData oldscore = new ScoreData();
 
-	public AbstractResult(MainController main) {
-		super(main);
+	public AbstractResult(MainController main, MainStateType type) {
+		super(main, type);
 		timingDistribution = new TimingDistribution(distRange);
 	}
 	

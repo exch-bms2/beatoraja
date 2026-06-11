@@ -19,8 +19,10 @@ import java.util.Optional;
  * @author exch
  */
 public abstract class MainState {
-
+	
 	public final MainController main;
+	
+	public final MainStateType type;
 
 	/**
 	 * スキン
@@ -35,8 +37,9 @@ public abstract class MainState {
 
 	private final ScoreDataProperty score = new ScoreDataProperty();
 
-	public MainState(MainController main) {
+	public MainState(MainController main, MainStateType type) {
 		this.main = main;
+		this.type = type;
 		timer = main.getTimer();
 		resource = main.getPlayerResource();
 	}
@@ -102,15 +105,15 @@ public abstract class MainState {
 		e.event.exec(this, arg1, arg2);
 	}
 	
-	public ScoreDataProperty getScoreDataProperty() {
+	public final ScoreDataProperty getScoreDataProperty() {
 		return score;
 	}
 
-	public Skin getSkin() {
+	public final Skin getSkin() {
 		return skin;
 	}
 
-	public void setSkin(Skin skin) {
+	public final void setSkin(Skin skin) {
 		if (this.skin != null) {
 			this.skin.dispose();
 		}
@@ -131,7 +134,7 @@ public abstract class MainState {
 		}
 	}
 
-	public void loadSkin(SkinType skinType) {
+	public final void loadSkin(SkinType skinType) {
 		setSkin(SkinLoader.load(this, skinType));
 	}
 
@@ -140,31 +143,26 @@ public abstract class MainState {
 		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
 	}
 
-	public SkinOffset getOffsetValue(int id) {
+	public final SkinOffset getOffsetValue(int id) {
 		return main.getOffset(id);
 	}
 
-	public TextureRegion getImage(int imageid) {
-		switch (imageid) {
-		case IMAGE_BACKBMP:
-			return resource.getBMSResource().getBackbmp();
-		case IMAGE_STAGEFILE:
-			return resource.getBMSResource().getStagefile();
-		case IMAGE_BANNER:
-			return resource.getBMSResource().getBanner();
-		case IMAGE_BLACK:
-			return main.black;
-		case IMAGE_WHITE:
-			return main.white;
-		}
-		return null;
+	public final TextureRegion getImage(int imageid) {
+		return switch (imageid) {
+			case IMAGE_BACKBMP -> resource.getBMSResource().getBackbmp();
+			case IMAGE_STAGEFILE -> resource.getBMSResource().getStagefile();
+			case IMAGE_BANNER -> resource.getBMSResource().getBanner();
+			case IMAGE_BLACK -> main.black;
+			case IMAGE_WHITE -> main.white;
+			default -> null;
+		};
 	}
 
-	public Stage getStage() {
+	public final Stage getStage() {
 		return stage;
 	}
 
-	public void setStage(Stage stage) {
+	public final void setStage(Stage stage) {
 		this.stage = stage;
 	}
 
@@ -185,6 +183,12 @@ public abstract class MainState {
 	}
 	
 	public enum MainStateType {
-		MUSICSELECT,DECIDE,PLAY,RESULT,COURSERESULT,CONFIG,SKINCONFIG;
+		MUSICSELECT,
+		DECIDE,
+		PLAY,
+		RESULT,
+		COURSERESULT,
+		CONFIG,
+		SKINCONFIG;
 	}
 }

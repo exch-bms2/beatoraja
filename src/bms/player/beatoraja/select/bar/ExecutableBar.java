@@ -1,9 +1,15 @@
 package bms.player.beatoraja.select.bar;
 
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
@@ -104,4 +110,97 @@ public class ExecutableBar extends SelectableBar {
 		return 0;
 	}
 
+	
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static final class RandomFolder {
+		private String name;
+		private Map<String, Object> filter;
+		public String getName() {
+			return "[RANDOM] " + name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Map<String, Object> getFilter() {
+			return filter;
+		}
+
+		public void setFilter(Map<String, Object> filter) {
+			this.filter = filter;
+		}
+		
+        public boolean filter(ScoreData scoreData) {
+            Set<String> filterKey = this.getFilter().keySet();
+            for (String key : filterKey) {
+                String getterMethodName = "get" + key.substring(0, 1).toUpperCase()
+                        + key.substring(1);
+                try {
+                    if (getFilter().get(key) instanceof Integer value) {
+                        if (scoreData == null) {
+                            if (0 != value) {
+                                return false;
+                            }
+                        } else {
+                            Method getterMethod = ScoreData.class.getMethod(getterMethodName);
+                            Object propertyValue = getterMethod.invoke(scoreData);
+                            if (!propertyValue.equals(value)) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    Object valueArr[] = ((String)this.getFilter().get(key)).split("&&");
+                    for (Object value : valueArr) {
+                        String valueString = ((String)value).replaceAll("\\s",""); 
+                        if (scoreData == null) {
+                            if (!valueString.isEmpty() && !(valueString.charAt(0) == '<')) {
+                                return false; 
+                            }
+                        } else {
+                            Method getterMethod = ScoreData.class.getMethod(getterMethodName);
+                            Object propertyValue = getterMethod.invoke(scoreData);
+                            if (propertyValue instanceof Integer propertyValueInt) {
+                                
+                                if(valueString.startsWith(">=") || valueString.startsWith("=>")) {
+                                    final int filterValueInt = Integer.parseInt(valueString.substring(2));
+                                    if (propertyValueInt < filterValueInt) {
+                                        return false;
+                                    }
+                                } else if(valueString.startsWith("<=") || valueString.startsWith("=<")) {
+                                	final int filterValueInt = Integer.parseInt(valueString.substring(2));
+                                    if (propertyValueInt > filterValueInt) {
+                                        return false;
+                                    }
+                                } else if(valueString.startsWith("<>") || valueString.startsWith("><")  || valueString.startsWith("!=")) {
+                                	final int filterValueInt = Integer.parseInt(valueString.substring(2));
+                                    if (propertyValueInt == filterValueInt) {
+                                        return false;
+                                    }
+                                } else if(valueString.startsWith(">")) {
+                                	final int filterValueInt = Integer.parseInt(valueString.substring(1));
+                                    if (propertyValueInt <= filterValueInt) {
+                                        return false;
+                                    }                                	
+                                } else  if(valueString.startsWith("<")) {
+                                	final int filterValueInt = Integer.parseInt(valueString.substring(1));
+                                	if (propertyValueInt >= filterValueInt) {
+                                        return false;
+                                    }
+                                } else if (!propertyValue.equals(value)) {
+                                	return false;
+                                }
+                            }
+                        }
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+	}
 }
