@@ -197,13 +197,13 @@ public final class JudgeManager {
 		scnendmjudge = rule.getJudge(NoteType.LONGSCRATCH_END, judgerank, scratchJudgeWindowRate);
 		sreleasemargin = rule.longscratchMargin;
 		mjudgestart = mjudgeend = 0;
-		for (int i = 0;i < nmjudge.length;i++) {
-			mjudgestart = Math.min(mjudgestart, nmjudge[i * 2]);
-			mjudgeend = Math.max(mjudgeend, nmjudge[i * 2 + 1]);
+		for (int i = 0;i < nmjudge.length;i+=2) {
+			mjudgestart = Math.min(mjudgestart, nmjudge[i]);
+			mjudgeend = Math.max(mjudgeend, nmjudge[i + 1]);
 		}
-		for (int i = 0;i < smjudge.length;i++) {
-			mjudgestart = Math.min(mjudgestart, smjudge[i * 2]);
-			mjudgeend = Math.max(mjudgeend, smjudge[i * 2 + 1]);
+		for (int i = 0;i < smjudge.length;i+=2) {
+			mjudgestart = Math.min(mjudgestart, smjudge[i]);
+			mjudgeend = Math.max(mjudgeend, smjudge[i + 1]);
 		}
 
 		this.autoplay = resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY;
@@ -412,7 +412,7 @@ public final class JudgeManager {
 								if (judgenote.getState() != 0) {
 									judge = (dmtime >= mjudge[8] && dmtime <= mjudge[9]) ? 5 : 6;
 								} else {
-									for (judge = 0; judge < mjudge.length
+									for (judge = 0; judge < mjudge.length / 2
 											&& !(dmtime >= mjudge[judge * 2] && dmtime <= mjudge[judge * 2 + 1]); judge++) {
 									}
 									judge = (judge >= 4 ? judge + 1 : judge);
@@ -507,7 +507,7 @@ public final class JudgeManager {
 					final long[] mjudge = sc >= 0 ? scnendmjudge : cnendmjudge;
 					long dmtime = state.processing.getMicroTime() - pmtime;
 					int judge = 0;
-					for (; judge < mjudge.length && !(dmtime >= mjudge[judge * 2] && dmtime <= mjudge[judge * 2 + 1]); judge++)
+					for (; judge < mjudge.length / 2 && !(dmtime >= mjudge[judge * 2] && dmtime <= mjudge[judge * 2 + 1]); judge++)
 						;
 
 					if ((lntype != BMSModel.LNTYPE_LONGNOTE

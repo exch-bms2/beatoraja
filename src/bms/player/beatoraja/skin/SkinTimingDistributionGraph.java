@@ -71,7 +71,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			TimingDistribution td = state.getTimingDistribution();
 			int[] dist = td.getTimingDistribution();
 			final int center = td.getArrayCenter();
-			int[][] judgeArea = SkinTimingVisualizer.getJudgeArea(state.resource);
+			int[] judgeArea = SkinTimingVisualizer.getJudgeArea(state.resource);
 
 			for (int d : dist) {
 				if (max < d) {
@@ -87,8 +87,8 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			int beforex2 = c + 1;
 			for (int i = 0; i < JColor.length; i++) {
 				shape.setColor(JColor[i]);
-				int x1 = c + MathUtils.clamp(judgeArea[i][0], -c, c);
-				int x2 = c + MathUtils.clamp(judgeArea[i][1], -c, c) + 1;
+				int x1 = c + MathUtils.clamp(judgeArea[i * 2], -c, c);
+				int x2 = c + MathUtils.clamp(judgeArea[i * 2 + 1], -c, c) + 1;
 
 				if (beforex1 > x1) {
 					shape.fillRectangle(x1, 0, Math.abs(x1 - beforex1), max);

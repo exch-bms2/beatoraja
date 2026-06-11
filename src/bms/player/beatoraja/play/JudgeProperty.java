@@ -159,7 +159,7 @@ public enum JudgeProperty {
 
         public long[] create(long[] org, int judgerank, int[] judgeWindowRate) {
     		final long[] judge = new long[org.length];
-    		for (int i = 0; i < judge.length; i++) {
+    		for (int i = 0; i < judge.length / 2; i++) {
     			for(int j = 0;j < 2;j++) {
 					judge[i * 2 + j] = fixjudge[i] ? org[i * 2 + j] : org[i * 2 + j] * judgerank / 100;
     			}

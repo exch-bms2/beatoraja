@@ -575,7 +575,7 @@ public class LaneRenderer {
 		// TODO dstnote2をレーン毎に変更
 		if (lanes[0].dstnote2 != Integer.MIN_VALUE) {
 			//遅BADからノースピの速度で落下
-			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[４] );
+			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[4] );
 			double stopTime;
 			double orgy2 = lanes[0].dstnote2;
 			if(orgy2 < -lanes[0].region.height) orgy2 = -lanes[0].region.height;
