@@ -3,6 +3,8 @@ package bms.player.beatoraja;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import org.lwjgl.input.Mouse;
@@ -79,6 +81,7 @@ public final class MainController {
 	private MainState current;
 	
 	private TimerManager timer;
+	private Lock timerLock;
 
 	private Config config;
 	private PlayerConfig player;
@@ -194,6 +197,7 @@ public final class MainController {
 		}
 
 		timer = new TimerManager();
+		timerLock = new ReentrantLock();
 		sound = new SystemSoundManager(this);
 		
 		if(config.isUseDiscordRPC()) {
@@ -351,6 +355,13 @@ public final class MainController {
 				if (time != now) {
 					time = now;
 					input.poll();
+					if (timerLock.tryLock()) {
+						try {
+							timer.update();
+						} finally {
+							timerLock.unlock();
+						}
+					}
 				} else {
 					try {
 						Thread.sleep(0, 500000);
@@ -400,22 +411,26 @@ public final class MainController {
 
 	public void render() {
 //		input.poll();
-		timer.update();
+		timerLock.lock();
+		try {
+			timer.update();
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			current.render();
+			sprite.begin();
+			if (current.getSkin() != null) {
+				current.getSkin().updateCustomObjects(current);
+				current.getSkin().drawAllObjects(sprite, current);
+			}
+			sprite.end();
 
-		current.render();
-		sprite.begin();
-		if (current.getSkin() != null) {
-			current.getSkin().updateCustomObjects(current);
-			current.getSkin().drawAllObjects(sprite, current);
-		}
-		sprite.end();
-
-		final Stage stage = current.getStage();
-		if (stage != null) {
-			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-			stage.draw();
+			final Stage stage = current.getStage();
+			if (stage != null) {
+				stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+				stage.draw();
+			}
+		} finally {
+			timerLock.unlock();
 		}
 
 		// show fps
