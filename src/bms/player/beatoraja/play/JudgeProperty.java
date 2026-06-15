@@ -126,7 +126,7 @@ public enum JudgeProperty {
     	return mjudge;
     }
     
-    public long[] getJudge(NoteType notetype, int judgerank, int[] judgeWindowRate) {
+    public long[] getJudgeWindow(NoteType notetype, int judgerank, int[] judgeWindowRate) {
     	return switch(notetype) {
 			case NOTE -> windowrule.create(note, judgerank, judgeWindowRate);
 			case LONGNOTE_END -> windowrule.create(longnote, judgerank, judgeWindowRate);
@@ -134,6 +134,58 @@ public enum JudgeProperty {
 			case LONGSCRATCH_END -> windowrule.create(longscratch, judgerank, judgeWindowRate);
 			default -> windowrule.create(note, judgerank, judgeWindowRate);
     	};
+    }
+    
+    public static class JudgeWindow {
+    	
+        /**
+         * 通常ノートの格判定幅。PG, GR, GD, BD, MSの順で{LATE下限, EARLY上限}のセットで表現する。
+         */
+        private final long[] note;
+        /**
+         * スクラッチノートの格判定幅。PG, GR, GD, BD, MSの順で{LATE下限, EARLY上限}のセットで表現する。
+         */
+        private final long[] scratch;
+        /**
+         * 通常ロングノート終端の格判定幅。PG, GR, GD, BD, MSの順で{LATE下限, EARLY上限}のセットで表現する。
+         */
+        private final long[] longnote;
+        /**
+         * スクラッチロングノート終端の格判定幅。PG, GR, GD, BD, MSの順で{LATE下限, EARLY上限}のセットで表現する。
+         */
+        private final long[] longscratch;
+
+        public JudgeWindow(JudgeProperty property, int judgerank, int[] judgeWindowRate) {
+        	note = property.windowrule.create(property.note, judgerank, judgeWindowRate);
+        	scratch = property.windowrule.create(property.scratch, judgerank, judgeWindowRate);
+        	longnote = property.windowrule.create(property.longnote, judgerank, judgeWindowRate);
+        	longscratch = property.windowrule.create(property.longscratch, judgerank, judgeWindowRate);
+        }
+
+        public final long getTime(NoteType type, int judge, boolean early) {
+        	final long[] judges = getJudgeWindow(type);
+        	final int index = judge * 2 + (early ? 1 : 0);
+        	if(index >= 0 && index < judges.length) {
+        		return judges[index];
+        	}
+        	return 0;
+        }        
+
+        public final int getJudge(NoteType type, long difftime) {
+        	int judge = 0;
+        	final long[] mjudge = getJudgeWindow(type);
+        	for (; judge < mjudge.length / 2 && !(difftime >= mjudge[judge * 2] && difftime <= mjudge[judge * 2 + 1]); judge++);
+        	return judge;
+        }
+        
+        private final long[] getJudgeWindow(NoteType type) {
+        	return switch(type) {
+	        	case NOTE -> note;
+	        	case LONGNOTE_END -> longnote;
+	        	case SCRATCH -> scratch;
+	        	case LONGSCRATCH_END -> longscratch;
+        	};
+        }
     }
     
     public enum MissCondition {
