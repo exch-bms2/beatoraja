@@ -170,6 +170,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> sjudgegd;
 	@FXML
+	private Spinner<Integer> longnotemargin;
+	@FXML
 	private ComboBox<Integer> minemode;
 	@FXML
 	private ComboBox<Integer> scrollmode;
@@ -454,6 +456,7 @@ public class PlayConfigurationView implements Initializable {
 		sjudgepg.getValueFactory().setValue(player.getScratchJudgeWindowRatePerfectGreat());
 		sjudgegr.getValueFactory().setValue(player.getScratchJudgeWindowRateGreat());
 		sjudgegd.getValueFactory().setValue(player.getScratchJudgeWindowRateGood());
+		longnotemargin.getValueFactory().setValue(player.getLongnoteMarginRate());
 		minemode.getSelectionModel().select(player.getMineMode());
 		scrollmode.getSelectionModel().select(player.getScrollMode());
 		longnotemode.getSelectionModel().select(player.getLongnoteMode());
@@ -559,6 +562,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setScratchJudgeWindowRatePerfectGreat(getValue(sjudgepg));
 		player.setScratchJudgeWindowRateGreat(getValue(sjudgegr));
 		player.setScratchJudgeWindowRateGood(getValue(sjudgegd));
+		player.setLongnoteMarginRate(getValue(longnotemargin));
 		player.setMineMode(minemode.getValue());
 		player.setScrollMode(scrollmode.getValue());
 		player.setLongnoteMode(longnotemode.getValue());
@@ -885,4 +889,3 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 }
-

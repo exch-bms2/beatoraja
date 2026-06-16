@@ -142,7 +142,8 @@ public final class JudgeManager {
 		this.lntype = model.getLntype();
 		Lane[] lanes = model.getLanes();
 
-		algorithm = JudgeAlgorithm.valueOf(resource.getPlayerConfig().getPlayConfig(orgmode).getPlayconfig().getJudgetype());
+		PlayConfig playconfig = resource.getPlayerConfig().getPlayConfig(orgmode).getPlayconfig();
+		algorithm = JudgeAlgorithm.valueOf(playconfig.getJudgetype());
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
 		score.setJudgeAlgorithm(algorithm);
 		score.setRule(BMSPlayerRule.getBMSPlayerRule(orgmode));
@@ -182,7 +183,7 @@ public final class JudgeManager {
 		}
 		
 		final long[] nmjudge = rule.getJudgeWindow(NoteType.NOTE, judgerank, keyJudgeWindowRate);
-		nreleasemargin = rule.longnoteMargin;		
+		nreleasemargin = config.isCustomJudge() ? rule.longnoteMargin * config.getLongnoteMarginRate() / 100L : rule.longnoteMargin;
 		final long[] smjudge = rule.getJudgeWindow(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate);
 		sreleasemargin = rule.longscratchMargin;
 		mjudgestart = mjudgeend = 0;

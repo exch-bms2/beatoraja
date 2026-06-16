@@ -207,6 +207,15 @@
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
+                                         <Label text="%LONGNOTE_MARGIN" prefWidth="60.0" />
+                                         <NumericSpinner fx:id="longnotemargin" editable="true" prefWidth="100.0">
+                                             <tooltip>
+                                                <Tooltip text="%LONGNOTE_MARGIN_TOOLTIP" textAlignment="CENTER" />
+                                             </tooltip>
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
                                          </HBox>
                                          <HBox prefHeight="30.0" prefWidth="723.0" GridPane.columnIndex="1" GridPane.rowIndex="11" GridPane.columnSpan="3">
                                          <Label text="SCR PG" prefWidth="60.0" />

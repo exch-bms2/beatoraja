@@ -117,6 +117,7 @@ public final class PlayerConfig {
 	private int scratchJudgeWindowRatePerfectGreat = 400;
 	private int scratchJudgeWindowRateGreat = 400;
 	private int scratchJudgeWindowRateGood = 100;
+	private int longnoteMarginRate = 100;
 
 	/**
 	 * 地雷モード
@@ -631,6 +632,14 @@ public final class PlayerConfig {
 		this.scratchJudgeWindowRateGood = judgeWindowRateGood;
 	}
 
+	public int getLongnoteMarginRate() {
+		return longnoteMarginRate;
+	}
+
+	public void setLongnoteMarginRate(int longnoteMarginRate) {
+		this.longnoteMarginRate = longnoteMarginRate;
+	}
+
 	public int getHranThresholdBPM() {
 		return hranThresholdBPM;
 	}
@@ -852,6 +861,7 @@ public final class PlayerConfig {
 		scratchJudgeWindowRatePerfectGreat = MathUtils.clamp(scratchJudgeWindowRatePerfectGreat, 25, 400);
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
+		longnoteMarginRate = MathUtils.clamp(longnoteMarginRate, 0, 400);
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 		
 		if(autosavereplay == null) {

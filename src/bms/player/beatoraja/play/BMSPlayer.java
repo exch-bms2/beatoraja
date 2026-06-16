@@ -206,7 +206,8 @@ public class BMSPlayer extends MainState {
 
 			if (config.isCustomJudge() &&
 					(config.getKeyJudgeWindowRatePerfectGreat() > 100 || config.getKeyJudgeWindowRateGreat() > 100 || config.getKeyJudgeWindowRateGood() > 100
-					|| config.getScratchJudgeWindowRatePerfectGreat() > 100 || config.getScratchJudgeWindowRateGreat() > 100 || config.getScratchJudgeWindowRateGood() > 100)) {
+					|| config.getScratchJudgeWindowRatePerfectGreat() > 100 || config.getScratchJudgeWindowRateGreat() > 100 || config.getScratchJudgeWindowRateGood() > 100
+					|| config.getLongnoteMarginRate() > 100)) {
 				assist = Math.max(assist, 2);
 				score = false;
 			}
