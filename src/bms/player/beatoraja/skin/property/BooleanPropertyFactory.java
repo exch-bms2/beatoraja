@@ -18,6 +18,8 @@ import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.SongData;
 
+import java.util.function.Predicate;
+
 public class BooleanPropertyFactory {
 
 	private static final int ID_LENGTH = 65536;
@@ -42,25 +44,6 @@ public class BooleanPropertyFactory {
 				break;
 			}
 		}
-		
-		if (id >= OPTION_COURSE_STAGE1 && id <= OPTION_COURSE_STAGE4) {
-			int index = id - OPTION_COURSE_STAGE1;
-			result = new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
-				final CourseData course = state.resource.getCourseData();
-				final int courseIndex = state.resource.getCourseIndex();
-				return course != null && index == courseIndex && index != course.getSong().length - 1;
-			});
-		} else if (id == OPTION_COURSE_STAGE_FINAL) {
-			result = new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
-				final CourseData course = state.resource.getCourseData();
-				final int courseIndex = state.resource.getCourseIndex();
-				return course != null && courseIndex == course.getSong().length - 1;				
-			});
-		}
-
-		if (result == null) {
-			result = getBooleanProperty0(id);
-		}
 
 		if (result != null) {
 			if(optionid < 0) {
@@ -80,70 +63,37 @@ public class BooleanPropertyFactory {
 				pcache[id] = result;				
 			}
 		}
-		
+
 		return result;
 	}
-	
-	private static BooleanProperty getBooleanProperty0(int optionid) {
-		switch (optionid) {
-		case OPTION_TABLE_SONG:
-			return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-					(state) -> (state.resource.getTablename().length() != 0));
-		case OPTION_RANDOMSELECTBAR:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof ExecutableBar : false));
-		case OPTION_RANDOMCOURSEBAR:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof RandomCourseBar : false));
-		case OPTION_PLAYABLEBAR:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> {
-						if(state instanceof MusicSelector) {
-							Bar selected = ((MusicSelector) state).getSelectedBar();
-							return ((selected instanceof SongBar) && ((SongBar)selected).getSongData().getPath() != null) ||
-									((selected instanceof GradeBar) && ((GradeBar)selected).existsAllSongs()) ||
-									((selected instanceof RandomCourseBar) && ((RandomCourseBar)selected).existsAllSongs()) ||
-									(selected instanceof ExecutableBar);
-						}
-						return false;
-					});
-		case OPTION_NOT_COMPARE_RIVAL:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() == null : false));
-		case OPTION_COMPARE_RIVAL:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() != null : false));
-		case OPTION_SELECT_BAR_NOT_PLAYED:
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-					(state) -> {
-						if(state instanceof MusicSelector) {
-							Bar current = ((MusicSelector) state).getSelectedBar();
-							ScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
-							return (current instanceof SongBar || current instanceof GradeBar)
-									&& (score == null || (score != null && score.getClear() == NoPlay.id));
-						}
-						return false;
-					});
-		case OPTION_MODE_COURSE:
-			return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-					(state) -> (state.main.getPlayerResource().getCourseData() != null));
-		case OPTION_DISABLE_SAVE_SCORE:
-			// TODO select, decide時の実装
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (!state.main.getPlayerResource().isUpdateScore()));
-		case OPTION_ENABLE_SAVE_SCORE:
-			// TODO select, decide時の実装
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.main.getPlayerResource().isUpdateScore()));
-		case OPTION_NO_SAVE_CLEAR:
-			// TODO 未実装
-			return new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (state.main.getPlayerResource().isUpdateScore()));
 
+	public static BooleanProperty getBooleanProperty(String name) {
+		for(BooleanType t : BooleanType.values()) {
+			if(t.name().equals(name)) {
+				return t.property;
+			}
 		}
-		
 		return null;
 	}
-	
+
 	private static DrawProperty createCourseDataConstraintProperty(CourseData.CourseDataConstraint constraint) {
 		return new DrawProperty(DrawProperty.TYPE_NO_STATIC,(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(constraint) : false));
+	}
+
+	private static DrawProperty createCourseStageProperty(int index) {
+		return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
+			final CourseData course = state.resource.getCourseData();
+			final int courseIndex = state.resource.getCourseIndex();
+			return course != null && index == courseIndex && index != course.getSong().length - 1;
+		});
+	}
+
+	private static DrawProperty createCourseFinalStageProperty() {
+		return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
+			final CourseData course = state.resource.getCourseData();
+			final int courseIndex = state.resource.getCourseIndex();
+			return course != null && courseIndex == course.getSong().length - 1;
+		});
 	}
 
 	private static class DrawProperty extends DrawConditionProperty {
@@ -185,30 +135,28 @@ public class BooleanPropertyFactory {
 
 	}
 	
-	private static class NowJudgeDrawCondition extends DrawProperty {
-
-		public NowJudgeDrawCondition(final int player, final int type) {
-			super(TYPE_NO_STATIC, (state) -> {
-				if (state instanceof BMSPlayer) {
-					JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
-					if (type == 0) {
-						return judge.getNowJudge(player) == 1;
-					} else if (type == 1) {
-						return judge.getNowJudge(player) > 1 && judge.getRecentJudgeTiming(player) > 0;
-					} else {
-						return judge.getNowJudge(player) > 1 && judge.getRecentJudgeTiming(player) < 0;
-					}
+	private static DrawProperty createNowJudge(final int player, final int type) {
+		return new DrawProperty(DrawConditionProperty.TYPE_NO_STATIC, (state) -> {
+			if (state instanceof BMSPlayer) {
+				JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+				if (type == 0) {
+					return judge.getNowJudge(player) == 1;
+				} else if (type == 1) {
+					return judge.getNowJudge(player) > 1 && judge.getRecentJudgeTiming(player) > 0;
+				} else {
+					return judge.getNowJudge(player) > 1 && judge.getRecentJudgeTiming(player) < 0;
 				}
-				return false;				
-			});
-		}
+			}
+			return false;
+		});
+
 	}
 
 	private static class SongDataBooleanProperty extends DrawConditionProperty {
 
-		public final SProperty bool;
+		public final Predicate<SongData> bool;
 
-		public SongDataBooleanProperty(SProperty bool) {
+		public SongDataBooleanProperty(Predicate<SongData> bool) {
 			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
 			this.bool = bool;
 		}
@@ -216,13 +164,8 @@ public class BooleanPropertyFactory {
 		@Override
 		public boolean get(MainState state) {
 			final SongData model = state.resource.getSongdata();
-			return model != null && bool.isTrue(model);
+			return model != null && bool.test(model);
 		}
-
-	}
-
-	private interface SProperty {
-		public boolean isTrue(SongData model);
 	}
 
 	private static class SelectedBarClearDrawCondition extends DrawProperty {
@@ -238,44 +181,24 @@ public class BooleanPropertyFactory {
 		}
 	}
 
-	private static class NowRankDrawCondition extends DrawConditionProperty {
-
-		private final int low;
-		private final int high;
-
-		public NowRankDrawCondition(int rank) {
-			super(TYPE_STATIC_ON_RESULT);
-			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
-			low = values[rank];
-			high = values[rank + 1];
-		}
-
-		@Override
-		public boolean get(MainState state) {
+	private static DrawProperty createNowRank(int rank) {
+		final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
+		final int low = values[rank];
+		final int high = values[rank + 1];
+		return new DrawProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT, (state) -> {
 			final ScoreDataProperty score = state.getScoreDataProperty();
 			return score.qualifyNowRank(low) && (high > 27 ? true : !score.qualifyNowRank(high));
-		}
-
+		});
 	}
 
-	private static class BestRankDrawCondition extends DrawConditionProperty {
-
-		private final int low;
-		private final int high;
-
-		public BestRankDrawCondition(int rank) {
-			super(TYPE_STATIC_ON_RESULT);
-			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
-			low = values[rank];
-			high = values[rank + 1];
-		}
-
-		@Override
-		public boolean get(MainState state) {
+	private static DrawProperty createBestRank(int rank) {
+		final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
+		final int low = values[rank];
+		final int high = values[rank + 1];
+		return new DrawProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT, (state) -> {
 			final ScoreDataProperty score = state.getScoreDataProperty();
 			return score.qualifyBestRank(low) && (high > 27 ? true : !score.qualifyBestRank(high));
-		}
-
+		});
 	}
 
 	private static class GaugeDrawCondition extends DrawConditionProperty {
@@ -328,10 +251,51 @@ public class BooleanPropertyFactory {
 	}
 	
 	public enum BooleanType {
-		
-		bgaoff(40, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (!state.resource.getBMSResource().isBGAOn()))),
-		bgaon(41, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> (state.resource.getBMSResource().isBGAOn()))),
-		gauge_groove(42, new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+
+		table_song(OPTION_TABLE_SONG, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.resource.getTablename().length() != 0)),
+		randomselectbar(OPTION_RANDOMSELECTBAR, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof ExecutableBar : false)),
+		randomcoursebar(OPTION_RANDOMCOURSEBAR, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof RandomCourseBar : false)),
+		playablebar(OPTION_PLAYABLEBAR, DrawProperty.TYPE_NO_STATIC,
+				(state) -> {
+					if(state instanceof MusicSelector) {
+						Bar selected = ((MusicSelector) state).getSelectedBar();
+						return ((selected instanceof SongBar) && ((SongBar)selected).getSongData().getPath() != null) ||
+								((selected instanceof GradeBar) && ((GradeBar)selected).existsAllSongs()) ||
+								((selected instanceof RandomCourseBar) && ((RandomCourseBar)selected).existsAllSongs()) ||
+								(selected instanceof ExecutableBar);
+					}
+					return false;
+				}),
+		not_compare_rival(OPTION_NOT_COMPARE_RIVAL, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() == null : false)),
+		compare_rival(OPTION_COMPARE_RIVAL, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() != null : false)),
+		select_bar_not_played(OPTION_SELECT_BAR_NOT_PLAYED, DrawProperty.TYPE_NO_STATIC,
+				(state) -> {
+					if(state instanceof MusicSelector) {
+						Bar current = ((MusicSelector) state).getSelectedBar();
+						ScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+						return (current instanceof SongBar || current instanceof GradeBar)
+								&& (score == null || (score != null && score.getClear() == NoPlay.id));
+					}
+					return false;
+				}),
+		disable_save_score(OPTION_DISABLE_SAVE_SCORE, DrawProperty.TYPE_NO_STATIC,
+				// TODO select, decide時の実装
+				(state) -> (!state.main.getPlayerResource().isUpdateScore())),
+		enable_save_score(OPTION_ENABLE_SAVE_SCORE, DrawProperty.TYPE_NO_STATIC,
+				// TODO select, decide時の実装
+				(state) -> (state.main.getPlayerResource().isUpdateScore())),
+		no_save_clear(OPTION_NO_SAVE_CLEAR, DrawProperty.TYPE_NO_STATIC,
+				// TODO 未実装
+				(state) -> (state.main.getPlayerResource().isUpdateScore())),
+
+			bgaoff(40, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, state -> (!state.resource.getBMSResource().isBGAOn())),
+			bgaon(41, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, state -> (state.resource.getBMSResource().isBGAOn())),
+		gauge_groove(42, DrawProperty.TYPE_NO_STATIC, (state) -> {
 			int type = Integer.MIN_VALUE;
 			if (state instanceof BMSPlayer) {
 				type = ((BMSPlayer) state).getGauge().getType();
@@ -341,8 +305,8 @@ public class BooleanPropertyFactory {
 			if (type != Integer.MIN_VALUE)
 				return type <= 2;
 			return false;
-		})),
-		gauge_hard(43, new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
+		}),
+		gauge_hard(43, DrawProperty.TYPE_NO_STATIC, (state) -> {
 			int type = Integer.MIN_VALUE;
 			if (state instanceof BMSPlayer) {
 				type = ((BMSPlayer) state).getGauge().getType();
@@ -352,44 +316,44 @@ public class BooleanPropertyFactory {
 			if (type != Integer.MIN_VALUE)
 				return type >= 3;
 			return false;			
-		})),
-		autoplay_on(OPTION_AUTOPLAYON, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY : false))),
-		autoplay_off(OPTION_AUTOPLAYOFF, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode != BMSPlayerMode.Mode.AUTOPLAY : false))),
-		replay_off(OPTION_REPLAY_OFF, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY || ((BMSPlayer) state).main.getPlayerResource().getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE : false))),
-		replay_playing(OPTION_REPLAY_PLAYING, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.REPLAY : false))),
-		state_practice(OPTION_STATE_PRACTICE, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRACTICE : false))),
-		now_loading(OPTION_NOW_LOADING, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRELOAD : false))),
-		loaded(OPTION_LOADED, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() != BMSPlayer.STATE_PRELOAD : false))),
+		}),
+		autoplay_on(33, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY : false)),
+		autoplay_off(32, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode != BMSPlayerMode.Mode.AUTOPLAY : false)),
+		replay_off(82, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY || state.resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE : false)),
+		replay_playing(84, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? state.resource.getPlayMode().mode == BMSPlayerMode.Mode.REPLAY : false)),
+		state_practice(OPTION_STATE_PRACTICE, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRACTICE : false)),
+		now_loading(80, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRELOAD : false)),
+		loaded(81, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() != BMSPlayer.STATE_PRELOAD : false)),
 
-		song_no_text(OPTION_NO_TEXT, new SongDataBooleanProperty(model -> !model.hasDocument())),
-		song_text(OPTION_TEXT, new SongDataBooleanProperty(model -> model.hasDocument())),
-		chart_no_ln(OPTION_NO_LN, new SongDataBooleanProperty(model -> !model.hasAnyLongNote())),
-		chart_ln(OPTION_LN, new SongDataBooleanProperty(model -> model.hasAnyLongNote())),
-		song_no_bga(OPTION_NO_BGA, new SongDataBooleanProperty(model -> !model.hasBGA())),
-		song_bga(OPTION_BGA, new SongDataBooleanProperty(model -> model.hasBGA())),
-		chart_no_randomsequence(OPTION_NO_RANDOMSEQUENCE, new SongDataBooleanProperty(model -> !model.hasRandomSequence())),
-		chart_randomsequence(OPTION_RANDOMSEQUENCE, new SongDataBooleanProperty(model -> model.hasRandomSequence())),
-		chart_no_bpmchange(OPTION_NO_BPMCHANGE, new SongDataBooleanProperty(model -> model.getMinbpm() == model.getMaxbpm())),
-		chart_bpmchange(OPTION_BPMCHANGE, new SongDataBooleanProperty(model -> model.getMinbpm() < model.getMaxbpm())),
-		chart_bpmstop(OPTION_BPMSTOP, new SongDataBooleanProperty(model -> model.isBpmstop())),
-		chart_difficulty_0(OPTION_DIFFICULTY0, new SongDataBooleanProperty(model -> model.getDifficulty() <= 0 || model.getDifficulty() > 5)),
-		chart_difficulty_1(OPTION_DIFFICULTY1, new SongDataBooleanProperty(model -> model.getDifficulty() == 1)),
-		chart_difficulty_2(OPTION_DIFFICULTY2, new SongDataBooleanProperty(model -> model.getDifficulty() == 2)),
-		chart_difficulty_3(OPTION_DIFFICULTY3, new SongDataBooleanProperty(model -> model.getDifficulty() == 3)),
-		chart_difficulty_4(OPTION_DIFFICULTY4, new SongDataBooleanProperty(model -> model.getDifficulty() == 4)),
-		chart_difficulty_5(OPTION_DIFFICULTY5, new SongDataBooleanProperty(model -> model.getDifficulty() == 5)),
-		chart_judge_veryhard(OPTION_JUDGE_VERYHARD, new SongDataBooleanProperty(model -> model.getJudge() == 0 || (model.getJudge() >= 10 && model.getJudge() < 35))),
-		chart_judge_hard(OPTION_JUDGE_HARD, new SongDataBooleanProperty(model -> model.getJudge() == 1 || (model.getJudge() >= 35 && model.getJudge() < 60))),
-		chart_judge_normal(OPTION_JUDGE_NORMAL, new SongDataBooleanProperty(model -> model.getJudge() == 2 || (model.getJudge() >= 60 && model.getJudge() < 85))),
-		chart_judge_easy(OPTION_JUDGE_EASY, new SongDataBooleanProperty(model -> model.getJudge() == 3 || (model.getJudge() >= 85 && model.getJudge() < 110))),
-		chart_judge_veryeasy(OPTION_JUDGE_VERYEASY, new SongDataBooleanProperty(model -> model.getJudge() == 4 || model.getJudge() >= 110)),
+		song_no_text(174, new SongDataBooleanProperty(model -> !model.hasDocument())),
+		song_text(175, new SongDataBooleanProperty(model -> model.hasDocument())),
+		chart_no_ln(172, new SongDataBooleanProperty(model -> !model.hasAnyLongNote())),
+		chart_ln(173, new SongDataBooleanProperty(model -> model.hasAnyLongNote())),
+		song_no_bga(170, new SongDataBooleanProperty(model -> !model.hasBGA())),
+		song_bga(171, new SongDataBooleanProperty(model -> model.hasBGA())),
+		chart_no_randomsequence(178, new SongDataBooleanProperty(model -> !model.hasRandomSequence())),
+		chart_randomsequence(179, new SongDataBooleanProperty(model -> model.hasRandomSequence())),
+		chart_no_bpmchange(176, new SongDataBooleanProperty(model -> model.getMinbpm() == model.getMaxbpm())),
+		chart_bpmchange(177, new SongDataBooleanProperty(model -> model.getMinbpm() < model.getMaxbpm())),
+		chart_bpmstop(1177, new SongDataBooleanProperty(model -> model.isBpmstop())),
+		chart_difficulty_0(150, new SongDataBooleanProperty(model -> model.getDifficulty() <= 0 || model.getDifficulty() > 5)),
+		chart_difficulty_1(151, new SongDataBooleanProperty(model -> model.getDifficulty() == 1)),
+		chart_difficulty_2(152, new SongDataBooleanProperty(model -> model.getDifficulty() == 2)),
+		chart_difficulty_3(153, new SongDataBooleanProperty(model -> model.getDifficulty() == 3)),
+		chart_difficulty_4(154, new SongDataBooleanProperty(model -> model.getDifficulty() == 4)),
+		chart_difficulty_5(155, new SongDataBooleanProperty(model -> model.getDifficulty() == 5)),
+		chart_judge_veryhard(180, new SongDataBooleanProperty(model -> model.getJudge() == 0 || (model.getJudge() >= 10 && model.getJudge() < 35))),
+		chart_judge_hard(181, new SongDataBooleanProperty(model -> model.getJudge() == 1 || (model.getJudge() >= 35 && model.getJudge() < 60))),
+		chart_judge_normal(182, new SongDataBooleanProperty(model -> model.getJudge() == 2 || (model.getJudge() >= 60 && model.getJudge() < 85))),
+		chart_judge_easy(183, new SongDataBooleanProperty(model -> model.getJudge() == 3 || (model.getJudge() >= 85 && model.getJudge() < 110))),
+		chart_judge_veryeasy(184, new SongDataBooleanProperty(model -> model.getJudge() == 4 || model.getJudge() >= 110)),
 		
 		chart_7key(160, new SongDataBooleanProperty((model) -> (model.getMode() == Mode.BEAT_7K.id))),
 		chart_5key(161, new SongDataBooleanProperty((model) -> (model.getMode() == Mode.BEAT_5K.id))),
@@ -431,18 +395,18 @@ public class BooleanPropertyFactory {
 				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 3 : false))),
 
 
-		select_panel1(OPTION_PANEL1, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 1 : false))),
-		select_panel2(OPTION_PANEL2, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 2 : false))),
-		select_panel3(OPTION_PANEL3, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 3 : false))),
-		select_somgbar(OPTION_SONGBAR, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof SongBar : false))),
-		select_folderbar(OPTION_FOLDERBAR, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof DirectoryBar : false))),
-		select_coursebar(OPTION_GRADEBAR, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof GradeBar : false))),
+		select_panel1(21, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 1 : false)),
+		select_panel2(22, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 2 : false)),
+		select_panel3(23, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 3 : false)),
+		select_somgbar(2, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof SongBar : false)),
+		select_folderbar(1, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof DirectoryBar : false)),
+		select_coursebar(3, DrawProperty.TYPE_NO_STATIC,
+				(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof GradeBar : false)),
 
 		course_class(OPTION_GRADEBAR_CLASS,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.CLASS)),
 		course_mirror(OPTION_GRADEBAR_MIRROR,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.MIRROR)),
@@ -458,29 +422,36 @@ public class BooleanPropertyFactory {
 		course_ln(OPTION_GRADEBAR_LN,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.LN)),
 		course_cn(OPTION_GRADEBAR_CN,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.CN)),
 		course_hcn(OPTION_GRADEBAR_HCN,createCourseDataConstraintProperty(CourseData.CourseDataConstraint.HCN)),
+		course_stage1(OPTION_COURSE_STAGE1, createCourseStageProperty(0)),
+		course_stage2(OPTION_COURSE_STAGE2, createCourseStageProperty(1)),
+		course_stage3(OPTION_COURSE_STAGE3, createCourseStageProperty(2)),
+		course_stage4(OPTION_COURSE_STAGE4, createCourseStageProperty(3)),
+		course_stage_final(OPTION_COURSE_STAGE_FINAL, createCourseFinalStageProperty()),
+		mode_course(OPTION_MODE_COURSE, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getCourseData() != null)),
 
-		stagefile(OPTION_STAGEFILE, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, 
-				(state) -> (state.main.getPlayerResource().getBMSResource().getStagefile() != null))),
-		no_stagefile(OPTION_NO_STAGEFILE, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-				(state) -> (state.main.getPlayerResource().getBMSResource().getStagefile() == null))),
-		backbmp(OPTION_BACKBMP, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-				(state) -> (state.main.getPlayerResource().getBMSResource().getBackbmp() != null))),
-		no_backbmp(OPTION_NO_BACKBMP, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-				(state) -> (state.main.getPlayerResource().getBMSResource().getBackbmp() == null))),
-		banner(OPTION_BANNER, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-				(state) -> (state.main.getPlayerResource().getBMSResource().getBanner() != null))),
-		no_banner(OPTION_NO_BANNER, new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-				(state) -> (state.main.getPlayerResource().getBMSResource().getBanner() == null))),
+		stagefile(191, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getBMSResource().getStagefile() != null)),
+		no_stagefile(190, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getBMSResource().getStagefile() == null)),
+		backbmp(195, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getBMSResource().getBackbmp() != null)),
+		no_backbmp(194, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getBMSResource().getBackbmp() == null)),
+		banner(193, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getBMSResource().getBanner() != null)),
+		no_banner(192, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
+				(state) -> (state.main.getPlayerResource().getBMSResource().getBanner() == null)),
 
-		judge_1p_perfect(OPTION_1P_PERFECT, new NowJudgeDrawCondition(0, 0)),
-		judge_1p_early(OPTION_1P_EARLY, new NowJudgeDrawCondition(0, 1)),
-		judge_1p_late(OPTION_1P_LATE, new NowJudgeDrawCondition(0, 2)),
-		judge_2p_perfect(OPTION_2P_PERFECT, new NowJudgeDrawCondition(1, 0)),
-		judge_2p_early(OPTION_2P_EARLY, new NowJudgeDrawCondition(1, 1)),
-		judge_2p_late(OPTION_2P_LATE, new NowJudgeDrawCondition(1, 2)),
-		judge_3p_perfect(OPTION_3P_PERFECT, new NowJudgeDrawCondition(2, 0)),
-		judge_3p_early(OPTION_3P_EARLY, new NowJudgeDrawCondition(2, 1)),
-		judge_3p_late(OPTION_3P_LATE, new NowJudgeDrawCondition(2, 2)),
+		judge_1p_perfect(241, createNowJudge(0, 0)),
+		judge_1p_early(1242, createNowJudge(0, 1)),
+		judge_1p_late(1243, createNowJudge(0, 2)),
+		judge_2p_perfect(261, createNowJudge(1, 0)),
+		judge_2p_early(1262, createNowJudge(1, 1)),
+		judge_2p_late(1263, createNowJudge(1, 2)),
+		judge_3p_perfect(361, createNowJudge(2, 0)),
+		judge_3p_early(1362, createNowJudge(2, 1)),
+		judge_3p_late(1363, createNowJudge(2, 2)),
 		
 		judge_perfect_exist(OPTION_PERFECT_EXIST, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT,
 				(state) -> (state.getJudgeCount(0, true) + state.getJudgeCount(0, false) > 0))),
@@ -517,38 +488,38 @@ public class BooleanPropertyFactory {
 		gauge_1p_80_90(OPTION_1P_80_89, new GaugeDrawCondition(8)),
 		gauge_1p_90_100(OPTION_1P_90_99, new GaugeDrawCondition(9)),
 		gauge_1p_100(OPTION_1P_100, new GaugeDrawCondition(10)),
-		rank_1p_aaa(OPTION_1P_AAA, new NowRankDrawCondition(7)),
-		rank_1p_aa(OPTION_1P_AA, new NowRankDrawCondition(6)),
-		rank_1p_a(OPTION_1P_A, new NowRankDrawCondition(5)),
-		rank_1p_b(OPTION_1P_B, new NowRankDrawCondition(4)),
-		rank_1p_c(OPTION_1P_C, new NowRankDrawCondition(3)),
-		rank_1p_d(OPTION_1P_D, new NowRankDrawCondition(2)),
-		rank_1p_e(OPTION_1P_E, new NowRankDrawCondition(1)),
-		rank_1p_f(OPTION_1P_F, new NowRankDrawCondition(0)),
-		rank_result_1p_aaa(OPTION_RESULT_AAA_1P, new NowRankDrawCondition(7)),
-		rank_result_1p_aa(OPTION_RESULT_AA_1P, new NowRankDrawCondition(6)),
-		rank_result_1p_a(OPTION_RESULT_A_1P, new NowRankDrawCondition(5)),
-		rank_result_1p_b(OPTION_RESULT_B_1P, new NowRankDrawCondition(4)),
-		rank_result_1p_c(OPTION_RESULT_C_1P, new NowRankDrawCondition(3)),
-		rank_result_1p_d(OPTION_RESULT_D_1P, new NowRankDrawCondition(2)),
-		rank_result_1p_e(OPTION_RESULT_E_1P, new NowRankDrawCondition(1)),
-		rank_result_1p_f(OPTION_RESULT_F_1P, new NowRankDrawCondition(0)),
-		rank_now_1p_aaa(OPTION_NOW_AAA_1P, new NowRankDrawCondition(7)),
-		rank_now_1p_aa(OPTION_NOW_AA_1P, new NowRankDrawCondition(6)),
-		rank_now_1p_a(OPTION_NOW_A_1P, new NowRankDrawCondition(5)),
-		rank_now_1p_b(OPTION_NOW_B_1P, new NowRankDrawCondition(4)),
-		rank_now_1p_c(OPTION_NOW_C_1P, new NowRankDrawCondition(3)),
-		rank_now_1p_d(OPTION_NOW_D_1P, new NowRankDrawCondition(2)),
-		rank_now_1p_e(OPTION_NOW_E_1P, new NowRankDrawCondition(1)),
-		rank_now_1p_f(OPTION_NOW_F_1P, new NowRankDrawCondition(0)),
-		rank_best_1p_aaa(OPTION_BEST_AAA_1P, new BestRankDrawCondition(7)),
-		rank_best_1p_aa(OPTION_BEST_AA_1P, new BestRankDrawCondition(6)),
-		rank_best_1p_a(OPTION_BEST_A_1P, new BestRankDrawCondition(5)),
-		rank_best_1p_b(OPTION_BEST_B_1P, new BestRankDrawCondition(4)),
-		rank_best_1p_c(OPTION_BEST_C_1P, new BestRankDrawCondition(3)),
-		rank_best_1p_d(OPTION_BEST_D_1P, new BestRankDrawCondition(2)),
-		rank_best_1p_e(OPTION_BEST_E_1P, new BestRankDrawCondition(1)),
-		rank_best_1p_f(OPTION_BEST_F_1P, new BestRankDrawCondition(0)),
+		rank_1p_aaa(200, createNowRank(7)),
+		rank_1p_aa(201, createNowRank(6)),
+		rank_1p_a(202, createNowRank(5)),
+		rank_1p_b(203, createNowRank(4)),
+		rank_1p_c(204, createNowRank(3)),
+		rank_1p_d(205, createNowRank(2)),
+		rank_1p_e(206, createNowRank(1)),
+		rank_1p_f(207, createNowRank(0)),
+		rank_result_1p_aaa(OPTION_RESULT_AAA_1P, createNowRank(7)),
+		rank_result_1p_aa(OPTION_RESULT_AA_1P, createNowRank(6)),
+		rank_result_1p_a(OPTION_RESULT_A_1P, createNowRank(5)),
+		rank_result_1p_b(OPTION_RESULT_B_1P, createNowRank(4)),
+		rank_result_1p_c(OPTION_RESULT_C_1P, createNowRank(3)),
+		rank_result_1p_d(OPTION_RESULT_D_1P, createNowRank(2)),
+		rank_result_1p_e(OPTION_RESULT_E_1P, createNowRank(1)),
+		rank_result_1p_f(OPTION_RESULT_F_1P, createNowRank(0)),
+		rank_now_1p_aaa(340, createNowRank(7)),
+		rank_now_1p_aa(341, createNowRank(6)),
+		rank_now_1p_a(342, createNowRank(5)),
+		rank_now_1p_b(343, createNowRank(4)),
+		rank_now_1p_c(344, createNowRank(3)),
+		rank_now_1p_d(345, createNowRank(2)),
+		rank_now_1p_e(346, createNowRank(1)),
+		rank_now_1p_f(347, createNowRank(0)),
+		rank_best_1p_aaa(320, createBestRank(7)),
+		rank_best_1p_aa(321, createBestRank(6)),
+		rank_best_1p_a(322, createBestRank(5)),
+		rank_best_1p_b(323, createBestRank(4)),
+		rank_best_1p_c(324, createBestRank(3)),
+		rank_best_1p_d(325, createBestRank(2)),
+		rank_best_1p_e(326, createBestRank(1)),
+		rank_best_1p_f(327, createBestRank(0)),
 		rank_aaa(OPTION_AAA, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT, (state) -> (state.getScoreDataProperty().qualifyRank(24)))),
 		rank_aa(OPTION_AA, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT, (state) -> (state.getScoreDataProperty().qualifyRank(21)))),
 		rank_a(OPTION_A, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT, (state) -> (state.getScoreDataProperty().qualifyRank(18)))),
@@ -588,15 +559,15 @@ public class BooleanPropertyFactory {
 			final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
 			return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
 		})),
-		result_1pwin(OPTION_1PWIN,new DrawProperty(DrawProperty.TYPE_NO_STATIC, 
-				(state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore()))),
-		result_2pwin(OPTION_2PWIN,new DrawProperty(DrawProperty.TYPE_NO_STATIC, 
-				(state) -> (state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore()))),
-		result_draw(OPTION_DRAW,new DrawProperty(DrawProperty.TYPE_NO_STATIC, 
-				(state) -> (state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore()))),
+		result_1pwin(352,DrawProperty.TYPE_NO_STATIC,
+				(state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore())),
+		result_2pwin(353,DrawProperty.TYPE_NO_STATIC,
+				(state) -> (state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore())),
+		result_draw(354,DrawProperty.TYPE_NO_STATIC,
+				(state) -> (state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore())),
 
-		ir_offline(OPTION_OFFLINE, new DrawProperty(DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length == 0))),
-		ir_online(OPTION_ONLINE, new DrawProperty(DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length > 0))),
+		ir_offline(50, DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length == 0)),
+		ir_online(51, DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length > 0)),
 		ir_no_player(OPTION_IR_NOPLAYER, new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
 			if(state instanceof MusicSelector) {
 				final RankingData irc = ((MusicSelector)state).getCurrentRankingData();
@@ -681,5 +652,11 @@ public class BooleanPropertyFactory {
 			this.id = id;
 			this.property = property;
 		}
+
+		private BooleanType(int id, BProperty type, BProperty bool) {
+			this.id = id;
+			this.property = new DrawProperty(type, bool);
+		}
+
 	}
 }

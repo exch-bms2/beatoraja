@@ -93,7 +93,8 @@ public class JsonSkinSerializer {
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
 		}
 
-		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
+		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty,
+				BooleanPropertyFactory::getBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
 		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadIntegerProperty,
 				IntegerPropertyFactory::getIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
 		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatProperty,
