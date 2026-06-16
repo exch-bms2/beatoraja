@@ -305,6 +305,13 @@ public class IntegerPropertyFactory {
 		ir_player_max_rate(225, createIRClearRateProperty(10, false)),
 		ir_player_max_rate_afterdot(240, createIRClearRateProperty(10, true)),
 
+		lastplay_timestamp(NUMBER_LASTPLAY_TIMESTAMP, createLastPlayTimestampProperty()),
+		lastplay_year(NUMBER_LASTPLAY_YEAR, createLastPlayDateProperty(Calendar.YEAR)),
+		lastplay_month(NUMBER_LASTPLAY_MONTH, createLastPlayDateProperty(Calendar.MONTH)),
+		lastplay_day(NUMBER_LASTPLAY_DAY, createLastPlayDateProperty(Calendar.DATE)),
+		lastplay_hour(NUMBER_LASTPLAY_HOUR, createLastPlayDateProperty(Calendar.HOUR_OF_DAY)),
+		lastplay_minute(NUMBER_LASTPLAY_MINUTE, createLastPlayDateProperty(Calendar.MINUTE)),
+		lastplay_second(NUMBER_LASTPLAY_SECOND, createLastPlayDateProperty(Calendar.SECOND)),
 		rival_score(NUMBER_RIVAL_SCORE, (state) -> (state.getScoreDataProperty().getRivalScore())),
 		folder_totalsongs(NUMBER_FOLDER_TOTALSONGS, new FolderTotalClearCountProperty(new int[]{0,1,2,3,4,5,6,7,8,9,10})),
 		hispeed(NUMBER_HISPEED, createHispeedProperty(false, false)),
@@ -819,6 +826,36 @@ public class IntegerPropertyFactory {
 				}
 				return Integer.MIN_VALUE;
 			};
+		}
+
+		private static IntegerProperty createLastPlayTimestampProperty() {
+			return (state) -> {
+				ScoreData score = getCurrentScoreData(state);
+				long date = score != null ? score.getDate() : 0;
+				return date > 0 && date <= Integer.MAX_VALUE ? (int) date : Integer.MIN_VALUE;
+			};
+		}
+
+		private static IntegerProperty createLastPlayDateProperty(int field) {
+			return (state) -> {
+				ScoreData score = getCurrentScoreData(state);
+				long date = score != null ? score.getDate() : 0;
+				if (date <= 0) {
+					return Integer.MIN_VALUE;
+				}
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(date * 1000L);
+				int value = calendar.get(field);
+				return field == Calendar.MONTH ? value + 1 : value;
+			};
+		}
+
+		private static ScoreData getCurrentScoreData(MainState state) {
+			if (state instanceof MusicSelector selector) {
+				Bar selected = selector.getBarManager().getSelected();
+				return selected != null ? selected.getScore() : null;
+			}
+			return state.getScoreDataProperty().getScoreData();
 		}
 
 		private static IntegerProperty createFolderClearCountProperty(final int clearType) {
