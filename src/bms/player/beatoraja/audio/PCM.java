@@ -75,9 +75,7 @@ public abstract class PCM<T> {
 					pcm = ShortPCM.loadPCM(loader);					
 				}
 			} else {
-				// TODO BytePCMのバグが解消されたら切替
-//				pcm = BytePCM.loadPCM(loader);					
-				pcm = ShortPCM.loadPCM(loader);					
+				pcm = BytePCM.loadPCM(loader);
 			}
 			
 			// TODO PCMLoader側での逐次変換が実装されたら削除

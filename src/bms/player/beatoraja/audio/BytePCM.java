@@ -2,7 +2,6 @@ package bms.player.beatoraja.audio;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class BytePCM extends PCM<byte[]> {
 
@@ -18,12 +17,15 @@ public class BytePCM extends PCM<byte[]> {
 		
 		switch(loader.bitsPerSample) {
 		case 8:
-			sample = pcm.array();
+			sample = new byte[bytes];
+			for (int i = 0; i < sample.length; i++) {
+				sample[i] = (byte) ((pcm.get() & 0xff) - 128);
+			}
 			break;
 		case 16:
 			sample = new byte[bytes / 2];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = pcm.get(i * 2 + 1);
+				sample[i] = (byte) (pcm.getShort() / 256);
 			}
 			break;
 		case 24:

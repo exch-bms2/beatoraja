@@ -89,7 +89,7 @@ public final class TimeStretchProcessor {
 			byte[] src = b.sample;
 			float[] out = new float[b.len];
 			for (int i = 0; i < b.len; i++) {
-				out[i] = (src[b.start + i] - 128) / 128f;
+				out[i] = src[b.start + i] / 128f;
 			}
 			return out;
 		}
