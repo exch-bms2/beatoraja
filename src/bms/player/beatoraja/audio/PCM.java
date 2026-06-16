@@ -78,14 +78,6 @@ public abstract class PCM<T> {
 				pcm = BytePCM.loadPCM(loader);
 			}
 			
-			// TODO PCMLoader側での逐次変換が実装されたら削除
-			if(pcm != null && ((AbstractAudioDriver)driver).channels != 0 && pcm.channels != ((AbstractAudioDriver)driver).channels) {
-				pcm = pcm.changeChannels(((AbstractAudioDriver)driver).channels);
-			}
-			if(pcm != null && ((AbstractAudioDriver)driver).getSampleRate() != 0 && pcm.sampleRate != ((AbstractAudioDriver)driver).getSampleRate()) {
-				pcm = pcm.changeSampleRate(((AbstractAudioDriver)driver).getSampleRate());
-			}
-			
 			if(pcm.validate()) {
 				return pcm;
 			} else {
@@ -167,7 +159,6 @@ public abstract class PCM<T> {
 		};
 		
 		public void loadPCM(Path p) throws IOException {
-			// TODO prefferedSampleRate, prefferedChannelsを使って逐次変換し、メモリ確保のコストを減らす
 			// final long time = System.nanoTime();
 			pcm = null;
 
@@ -342,8 +333,106 @@ public abstract class PCM<T> {
 				throw new IOException(p.toString() + " : 0 sample rate");			
 			}
 			pcm.limit(bytes);
+			convertToDriverFormat();
 			
 //			System.out.println(p.getFileName().toString() + " - " + sampleRate + " Hz, " + bitsPerSample + " bits, " + channels + " channels");
+		}
+
+		private void convertToDriverFormat() {
+			if (!(driver instanceof AbstractAudioDriver<?> audioDriver)) {
+				return;
+			}
+
+			int preferredChannels = audioDriver.channels;
+			if (preferredChannels != 0 && preferredChannels != channels) {
+				pcm = changeChannels(pcm, channels, preferredChannels, bitsPerSample);
+				channels = preferredChannels;
+			}
+
+			int preferredSampleRate = audioDriver.getSampleRate();
+			if (preferredSampleRate != 0 && preferredSampleRate != sampleRate) {
+				pcm = changeSampleRate(pcm, channels, sampleRate, preferredSampleRate, bitsPerSample);
+				sampleRate = preferredSampleRate;
+			}
+		}
+
+		private static ByteBuffer changeChannels(ByteBuffer source, int sourceChannels, int targetChannels, int bitsPerSample) {
+			int bytesPerSample = bitsPerSample / 8;
+			int sourceFrames = source.limit() / (sourceChannels * bytesPerSample);
+			ByteBuffer output = allocatePCMBuffer(sourceFrames * targetChannels * bytesPerSample, bitsPerSample);
+
+			for (int frame = 0; frame < sourceFrames; frame++) {
+				double sample = readSample(source, frame * sourceChannels, bitsPerSample);
+				for (int channel = 0; channel < targetChannels; channel++) {
+					writeSample(output, frame * targetChannels + channel, bitsPerSample, sample);
+				}
+			}
+			return output;
+		}
+
+		private static ByteBuffer changeSampleRate(ByteBuffer source, int channels, int sourceSampleRate, int targetSampleRate, int bitsPerSample) {
+			int bytesPerSample = bitsPerSample / 8;
+			int sourceFrames = source.limit() / (channels * bytesPerSample);
+			int targetFrames = (int) (((long) sourceFrames) * targetSampleRate / sourceSampleRate);
+			ByteBuffer output = allocatePCMBuffer(targetFrames * channels * bytesPerSample, bitsPerSample);
+
+			for (long frame = 0; frame < targetFrames; frame++) {
+				long position = frame * sourceSampleRate / targetSampleRate;
+				long mod = (frame * sourceSampleRate) % targetSampleRate;
+				for (int channel = 0; channel < channels; channel++) {
+					double sample = readSample(source, (int) (position * channels + channel), bitsPerSample);
+					if (mod != 0 && (int) ((position + 1) * channels + channel) < sourceFrames * channels) {
+						double nextSample = readSample(source, (int) ((position + 1) * channels + channel), bitsPerSample);
+						sample = (sample * (targetSampleRate - mod) + nextSample * mod) / targetSampleRate;
+					}
+					writeSample(output, (int) (frame * channels + channel), bitsPerSample, sample);
+				}
+			}
+			return output;
+		}
+
+		private static ByteBuffer allocatePCMBuffer(int capacity, int bitsPerSample) {
+			return bitsPerSample == 16
+					? getDirectByteBuffer(capacity)
+					: ByteBuffer.allocate(capacity).order(ByteOrder.LITTLE_ENDIAN);
+		}
+
+		private static double readSample(ByteBuffer source, int sampleIndex, int bitsPerSample) {
+			int offset = sampleIndex * bitsPerSample / 8;
+			return switch (bitsPerSample) {
+				case 8 -> (source.get(offset) & 0xff) - 128;
+				case 16 -> source.getShort(offset);
+				case 24 -> read24BitSample(source, offset);
+				case 32 -> source.getFloat(offset);
+				default -> 0;
+			};
+		}
+
+		private static int read24BitSample(ByteBuffer source, int offset) {
+			int sample = (source.get(offset) & 0xff) | ((source.get(offset + 1) & 0xff) << 8) | ((source.get(offset + 2) & 0xff) << 16);
+			return (sample & 0x800000) != 0 ? sample | 0xff000000 : sample;
+		}
+
+		private static void writeSample(ByteBuffer output, int sampleIndex, int bitsPerSample, double sample) {
+			int offset = sampleIndex * bitsPerSample / 8;
+			switch (bitsPerSample) {
+				case 8 -> output.put(offset, (byte) (clamp((int) sample + 128, 0, 255) & 0xff));
+				case 16 -> output.putShort(offset, (short) clamp((int) sample, Short.MIN_VALUE, Short.MAX_VALUE));
+				case 24 -> write24BitSample(output, offset, clamp((int) sample, -0x800000, 0x7fffff));
+				case 32 -> output.putFloat(offset, (float) sample);
+				default -> {
+				}
+			}
+		}
+
+		private static void write24BitSample(ByteBuffer output, int offset, int sample) {
+			output.put(offset, (byte) (sample & 0xff));
+			output.put(offset + 1, (byte) ((sample >>> 8) & 0xff));
+			output.put(offset + 2, (byte) ((sample >>> 16) & 0xff));
+		}
+
+		private static int clamp(int value, int min, int max) {
+			return Math.max(min, Math.min(max, value));
 		}
 		
 	}
