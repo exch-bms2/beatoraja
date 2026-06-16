@@ -57,49 +57,34 @@ public enum BMSPlayerRule {
     public static void validate(BMSModel model) {
     	BMSPlayerRule rule = getBMSPlayerRule(model.getMode());
     	final int judgerank = model.getJudgerank();
-    	switch(model.getJudgerankType()) {
-    	case BMS_RANK:
-			model.setJudgerank(judgerank >= 0 && model.getJudgerank() < 5 ? rule.judge.windowrule.judgerank[judgerank] : rule.judge.windowrule.judgerank[2]);
-    		break;
-    	case BMS_DEFEXRANK:
-			model.setJudgerank(judgerank > 0 ? judgerank * rule.judge.windowrule.judgerank[2] / 100 : rule.judge.windowrule.judgerank[2]);
-    		break;
-    	case BMSON_JUDGERANK:
-			model.setJudgerank(judgerank > 0 ? judgerank : 100);
-    		break;
-    	}
+		// TODO ここでjudgerank変換をせず、JudgeWindow側で実施する
+    	model.setJudgerank(switch(model.getJudgerankType()) {
+			case BMS_RANK -> judgerank >= 0 && model.getJudgerank() < 5 ? rule.judge.windowrule.judgerank[judgerank][1] : rule.judge.windowrule.judgerank[2][1];
+			case BMS_DEFEXRANK -> judgerank > 0 ? judgerank * rule.judge.windowrule.judgerank[2][1] / 100 : rule.judge.windowrule.judgerank[2][1];
+			case BMSON_JUDGERANK -> judgerank > 0 ? judgerank : 100;
+    	});
     	model.setJudgerankType(BMSModel.JudgeRankType.BMSON_JUDGERANK);
 		
     	switch(model.getTotalType()) {
-    	case BMS:
-			// TOTAL未定義の場合
-			if (model.getTotal() <= 0.0) {
-				model.setTotal(calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
-			}			
-    		break;
-    	case BMSON:
-    		final double total = calculateDefaultTotal(model.getMode(), model.getTotalNotes());
-			model.setTotal(model.getTotal() > 0 ? model.getTotal() / 100.0 * total : total);
-    		break;
-    	}
+			case BMS -> {
+				// TOTAL未定義の場合
+				if (model.getTotal() <= 0.0) {
+					model.setTotal(calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
+				}
+			}
+			case BMSON -> {
+				final double total = calculateDefaultTotal(model.getMode(), model.getTotalNotes());
+				model.setTotal(model.getTotal() > 0 ? model.getTotal() / 100.0 * total : total);
+			}
+    	};
     	model.setTotalType(BMSModel.TotalType.BMS);
     }
     
 	private static double calculateDefaultTotal(Mode mode, int totalnotes) {
-		switch (mode) {
-		case BEAT_7K:
-		case BEAT_5K:
-		case BEAT_14K:
-		case BEAT_10K:
-		case POPN_9K:
-		case POPN_5K:
-			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-		case KEYBOARD_24K:
-		case KEYBOARD_24K_DOUBLE:
-			return Math.max(300.0, 7.605 * (totalnotes + 100) / (0.01 * totalnotes + 6.5));
-		default:
-			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-		}
+		return switch (mode) {
+			case BEAT_5K, BEAT_7K, BEAT_10K, BEAT_14K, POPN_5K, POPN_9K -> Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			case KEYBOARD_24K, KEYBOARD_24K_DOUBLE -> Math.max(300.0, 7.605 * (totalnotes + 100) / (0.01 * totalnotes + 6.5));
+		};
 	}
 }
 

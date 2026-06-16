@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play;
 
+import java.util.stream.IntStream;
+
 /**
  * 判定の設定値
  *
@@ -125,8 +127,12 @@ public enum JudgeProperty {
     	}
     	return mjudge;
     }
-    
-    public long[] getJudgeWindow(NoteType notetype, int judgerank, int[] judgeWindowRate) {
+
+	public long[] getJudgeWindow(NoteType notetype, int judgerank, int[] judgeWindowRate) {
+		return getJudgeWindow(notetype, windowrule.getJudgeRank(judgerank), judgeWindowRate);
+	}
+
+	public long[] getJudgeWindow(NoteType notetype, int[] judgerank, int[] judgeWindowRate) {
     	return switch(notetype) {
 			case NOTE -> windowrule.create(note, judgerank, judgeWindowRate);
 			case LONGNOTE_END -> windowrule.create(longnote, judgerank, judgeWindowRate);
@@ -155,7 +161,11 @@ public enum JudgeProperty {
          */
         private final long[] longscratch;
 
-        public JudgeWindow(JudgeProperty property, int judgerank, int[] judgeWindowRate) {
+		public JudgeWindow(JudgeProperty property, int judgerank, int[] judgeWindowRate) {
+			this(property, property.windowrule.getJudgeRank(judgerank), judgeWindowRate);
+		}
+
+        public JudgeWindow(JudgeProperty property, int[] judgerank, int[] judgeWindowRate) {
         	note = property.windowrule.create(property.note, judgerank, judgeWindowRate);
         	scratch = property.windowrule.create(property.scratch, judgerank, judgeWindowRate);
         	longnote = property.windowrule.create(property.longnote, judgerank, judgeWindowRate);
@@ -197,23 +207,31 @@ public enum JudgeProperty {
     }
     
     public enum JudgeWindowRule {
-    	NORMAL (new int[]{25, 50, 75, 100, 125}, new boolean[]{false, false, false, false, true}),
-    	PMS (new int[]{33, 50, 70, 100, 133}, new boolean[]{true, false, false, true, true});
+    	NORMAL (new int[][]{{25,25,25,25,100}, {50,50,50,50,100}, {75,75,75,75,100}, {100,100,100,100,100}, {125,125,125,125,100}}, new boolean[]{false, false, false, false, true}),
+    	PMS (new int[][]{{100,33,33,100,100}, {100,50,50,100,100}, {100,70,70,100,100}, {100,100,100,100,100}, {100,133,133,100,100}}, new boolean[]{true, false, false, true, true});
     	
     	/**
     	 * JUDGERANKの倍率(VERYHARD, HARD, NORMAL, EASY, VERYEASY)
     	 */
-    	public final int[] judgerank;
+    	public final int[][] judgerank;
         /**
          * 各判定幅をjudgerankによらず固定にするかどうか(PG, GR, GD, BD, MSの順)
          */
     	public final boolean[] fixjudge;
 
-        public long[] create(long[] org, int judgerank, int[] judgeWindowRate) {
+		public int[] getJudgeRank(int judgerank) {
+			return IntStream.range(0, fixjudge.length).map(i -> fixjudge[i] ? 100 : judgerank).toArray();
+		}
+
+		public long[] create(long[] org, int judgerank, int[] judgeWindowRate) {
+			return create(org, getJudgeRank(judgerank), judgeWindowRate);
+		}
+
+		public long[] create(long[] org, int[] judgerank, int[] judgeWindowRate) {
     		final long[] judge = new long[org.length];
     		for (int i = 0; i < judge.length / 2; i++) {
     			for(int j = 0;j < 2;j++) {
-					judge[i * 2 + j] = fixjudge[i] ? org[i * 2 + j] : org[i * 2 + j] * judgerank / 100;
+					judge[i * 2 + j] = fixjudge[i] ? org[i * 2 + j] : org[i * 2 + j] * judgerank[i] / 100;
     			}
     		}
 
@@ -257,7 +275,7 @@ public enum JudgeProperty {
     		return judge;
         }
         
-        private JudgeWindowRule(int[] judgerank, boolean[] fixjudge) {
+        private JudgeWindowRule(int[][] judgerank, boolean[] fixjudge) {
         	this.judgerank = judgerank;
         	this.fixjudge = fixjudge;
         }
