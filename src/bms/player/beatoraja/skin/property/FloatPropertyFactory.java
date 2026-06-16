@@ -14,6 +14,11 @@ import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.result.AbstractResult;
+import com.badlogic.gdx.utils.IntMap;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.ToIntFunction;
 
 /**
  * FloatProperty/FloatWriterのFactoryクラス
@@ -22,14 +27,27 @@ import bms.player.beatoraja.result.AbstractResult;
  */
 public class FloatPropertyFactory {
 	
-	private static RateType[] RateTypeValues = RateType.values();
-	private static FloatType[] FloatTypeValues = FloatType.values();
+	private static final IntMap<RateType> RATE_TYPES_BY_ID = new IntMap<>(RateType.values().length);
+	private static final IntMap<FloatType> FLOAT_TYPES_BY_ID = new IntMap<>(FloatType.values().length);
+	private static final Map<String, RateType> RATE_TYPES_BY_NAME = new HashMap<>();
+	private static final Map<String, FloatType> FLOAT_TYPES_BY_NAME = new HashMap<>();
 
 	private static final int PG = 0;
 	private static final int GR = 1;
 	private static final int GD = 2;
 	private static final int BD = 3;
 	private static final int PR = 4;
+
+	static {
+		for (RateType type : RateType.values()) {
+			RATE_TYPES_BY_ID.put(type.id, type);
+			RATE_TYPES_BY_NAME.put(type.name(), type);
+		}
+		for (FloatType type : FloatType.values()) {
+			FLOAT_TYPES_BY_ID.put(type.id, type);
+			FLOAT_TYPES_BY_NAME.put(type.name(), type);
+		}
+	}
 
 	/**
 	 * RateType IDに対応するFloatPropertyを返す
@@ -38,12 +56,8 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatProperty
 	 */
 	public static FloatProperty getRateProperty(int optionid) {
-		for(RateType t : RateTypeValues) {
-			if(t.id == optionid) {
-				return t.property;
-			}
-		}
-		return null;
+		RateType type = RATE_TYPES_BY_ID.get(optionid);
+		return type != null ? type.property : null;
 	}
 
 	/**
@@ -53,12 +67,8 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatProperty
 	 */
 	public static FloatProperty getRateProperty(String name) {
-		for(RateType t : RateTypeValues) {
-			if(t.name().equals(name)) {
-				return t.property;
-			}
-		}
-		return null;
+		RateType type = RATE_TYPES_BY_NAME.get(name);
+		return type != null ? type.property : null;
 	}
 
 	/**
@@ -68,12 +78,8 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatWriter
 	 */
 	public static FloatWriter getRateWriter(int id) {
-		for(RateType t : RateTypeValues) {
-			if(t.id == id) {
-				return t.writer;
-			}
-		}
-		return null;
+		RateType type = RATE_TYPES_BY_ID.get(id);
+		return type != null ? type.writer : null;
 	}
 	
 	/**
@@ -83,12 +89,8 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatWriter
 	 */
 	public static FloatWriter getRateWriter(String name) {
-		for(RateType t : RateTypeValues) {
-			if(t.name().equals(name)) {
-				return t.writer;
-			}
-		}
-		return null;
+		RateType type = RATE_TYPES_BY_NAME.get(name);
+		return type != null ? type.writer : null;
 	}
 
 	/**
@@ -99,17 +101,8 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatProperty
 	 */
 	public static FloatProperty getFloatProperty(int optionid) {
-		for(FloatType t : FloatTypeValues) {
-			if(t.id == optionid) {
-				return t.property;
-			}
-		}
-		for(RateType r : RateTypeValues) {
-			if(r.id == optionid) {
-				return r.property;
-			}
-		}
-		return null;
+		FloatType type = FLOAT_TYPES_BY_ID.get(optionid);
+		return type != null ? type.property : getRateProperty(optionid);
 	}
 
 	/**
@@ -120,35 +113,65 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatProperty
 	 */
 	public static FloatProperty getFloatProperty(String name) {
-		for(FloatType t : FloatTypeValues) {
-			if(t.name().equals(name)) {
-				return t.property;
-			}
-		}
-		for(RateType r : RateTypeValues) {
-			if(r.name().equals(name)) {
-				return r.property;
-			}
-		}
-		return null;
+		FloatType type = FLOAT_TYPES_BY_NAME.get(name);
+		return type != null ? type.property : getRateProperty(name);
 	}
 
 	private static FloatProperty createMusicProgress() {
 		return (state) -> {
-			if (state instanceof BMSPlayer) {
+			if (state instanceof BMSPlayer player) {
 				if (state.timer.isTimerOn(TIMER_PLAY)) {
-					return Math.min((float) state.timer.getNowTime(TIMER_PLAY) / ((BMSPlayer) state).getPlaytime(),
-							1);
+					return Math.min((float) state.timer.getNowTime(TIMER_PLAY) / player.getPlaytime(), 1);
 				}
 			}
 			return 0;
 		};
 	}
-	
-	public enum RateType {
-		
-		musicselect_position(1, 
-				(state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarManager().getSelectedPosition() : 0), 
+
+	private static FloatProperty createLanecover() {
+		return (state) -> {
+			if (state instanceof BMSPlayer player) {
+				final PlayConfig pc = player.getLanerender().getPlayConfig();
+				if (pc.isEnablelanecover()) {
+					float lane = pc.getLanecover();
+					if (pc.isEnablelift()) {
+						lane = lane * (1 - pc.getLift());
+					}
+					return lane;
+				}
+			}
+			return 0;
+		};
+	}
+
+	private static FloatProperty createSelectedScoreRate(ToIntFunction<ScoreData> scoreValue, boolean divideSongNotesByTwo) {
+		return (state) -> {
+			if (state instanceof MusicSelector selector) {
+				final Bar selected = selector.getBarManager().getSelected();
+				if (selected instanceof SongBar songbar) {
+					ScoreData score = selected.getScore();
+					return score != null
+							? ((float) scoreValue.applyAsInt(score)) / songbar.getSongData().getNotes() / (divideSongNotesByTwo ? 2 : 1)
+							: 0;
+				}
+				if (selected instanceof GradeBar gradebar) {
+					ScoreData score = selected.getScore();
+					if (score == null) return 0;
+					int notes = 0;
+					for (SongData songData : gradebar.getSongDatas()) {
+						notes += songData.getNotes();
+					}
+					return ((float) scoreValue.applyAsInt(score)) / notes;
+				}
+			}
+			return 0;
+		};
+		}
+
+		public enum RateType {
+
+		musicselect_position(1,
+				(state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarManager().getSelectedPosition() : 0),
 				(state, value) -> {
 					if(state instanceof MusicSelector) {
 						final MusicSelector select = (MusicSelector) state;
@@ -156,32 +179,8 @@ public class FloatPropertyFactory {
 						select.getBarManager().setSelectedPosition(value);
 					}
 				}),
-		lanecover(4, (state) -> {
-			if (state instanceof BMSPlayer) {
-				final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
-				if (pc.isEnablelanecover()) {
-					float lane = pc.getLanecover();
-					if (pc.isEnablelift()) {
-						lane = lane * (1 - pc.getLift());
-					}
-					return lane;
-				}
-			}
-			return 0;
-		}),
-		lanecover2(5, (state) -> {
-			if (state instanceof BMSPlayer) {
-				final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
-				if (pc.isEnablelanecover()) {
-					float lane = pc.getLanecover();
-					if (pc.isEnablelift()) {
-						lane = lane * (1 - pc.getLift());
-					}
-					return lane;
-				}
-			}
-			return 0;
-		}),
+		lanecover(4, createLanecover()),
+		lanecover2(5, createLanecover()),
 		music_progress(6, createMusicProgress()),
 		skinselect_position(7,
 				(state) -> ((state instanceof SkinConfiguration) ? ((SkinConfiguration) state).getSkinSelectPosition() : 0),
@@ -247,48 +246,8 @@ public class FloatPropertyFactory {
 		rate_good(142, createJudgeRate(2)),
 		rate_bad(143, createJudgeRate(3)),
 		rate_poor(144, createJudgeRate(4)),
-		rate_maxcombo(145, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) score.getCombo()) / ((SongBar) selected).getSongData().getNotes()
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) score.getCombo()) / notes;
-				}
-			}
-			return 0;
-		}),
-		rate_exscore(147, (state) -> {
-			if (state instanceof MusicSelector) {
-				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
-				if (selected instanceof SongBar) {
-					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) score.getExscore()) / ((SongBar) selected).getSongData().getNotes() / 2
-							: 0;
-				}
-				if (selected instanceof GradeBar) {
-					ScoreData score = selected.getScore();
-					if (score == null) return 0;
-					int notes = 0;
-					for (SongData songData : ((GradeBar) selected).getSongDatas()) {
-						notes += songData.getNotes();
-					}
-					return ((float) score.getExscore()) / notes;
-				}
-			}
-			return 0;
-		}),
+		rate_maxcombo(145, createSelectedScoreRate(ScoreData::getCombo, false)),
+		rate_exscore(147, createSelectedScoreRate(ScoreData::getExscore, true)),
 		;
 		
 		private final int id;

@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
+import bms.player.beatoraja.RandomStageData;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
@@ -45,12 +46,8 @@ public class StringPropertyFactory {
 	 * @return 対応するStringProperty
 	 */
 	public static StringProperty getStringProperty(final String name) {
-		for(StringType t : StringType.VALUES) {
-			if(t.name().equals(name)) {
-				return t.property;
-			}
-		}
-		return null;
+		StringType type = StringType.get(name);
+		return type != null ? type.property : null;
 	}
 	
 	public enum StringType {
@@ -288,16 +285,23 @@ public class StringPropertyFactory {
 		public static final List<StringType> VALUES = Collections.unmodifiableList(Arrays.asList(StringType.values()));
 
 		private static final IntMap<StringType> ID_MAP;
+		private static final Map<String, StringType> NAME_MAP;
 
 		static {
 			ID_MAP = new IntMap<>(VALUES.size());
+			NAME_MAP = new HashMap<>(VALUES.size());
 			for (StringType type : VALUES) {
 				ID_MAP.put(type.id, type);
+				NAME_MAP.put(type.name(), type);
 			}
 		}
 
 		public static StringType get(int id) {
 			return ID_MAP.get(id);
+		}
+
+		public static StringType get(String name) {
+			return NAME_MAP.get(name);
 		}
 		
 		private StringType(int id, StringProperty property) {
