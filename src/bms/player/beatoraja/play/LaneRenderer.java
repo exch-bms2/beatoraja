@@ -104,14 +104,16 @@ public class LaneRenderer {
 		List<TimeLine> tls = new ArrayList<TimeLine>();
 		double cbpm = model.getBpm();
 		double cscr = 1.0;
+		double cspd = 1.0;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			if (cbpm != tl.getBPM() || tl.getStop() > 0 || cscr != tl.getScroll() || tl.getSectionLine()) {
+			if (cbpm != tl.getBPM() || tl.getStop() > 0 || cscr != tl.getScroll() || cspd != tl.getSpeed() || tl.hasSpeedObj() || tl.getSectionLine()) {
 				tls.add(tl);
 			} else if (tl.existNote() || tl.existHiddenNote()) {
 				tls.add(tl);
 			}
 			cbpm = tl.getBPM();
 			cscr = tl.getScroll();
+			cspd = tl.getSpeed();
 		}
 		this.timelines = tls.toArray(new TimeLine[tls.size()]);
 		// Logger.getGlobal().info("省略したTimeLine数:" +
@@ -239,6 +241,41 @@ public class LaneRenderer {
 		return playconfig;
 	}
 
+	/**
+	 * 前後のSPEED値と時間の差から現在時間のSPEED値を計算する
+	 * 
+	 * @param microtime
+	 * @return speed value
+	 */
+	private double getCurrentSpeed(long microtime) {
+		double speed = 1.0;
+		TimeLine prev = null;
+		TimeLine next = null;
+		for (TimeLine tl : timelines) {
+			if (!tl.hasSpeedObj()) {
+				continue;
+			}
+			if (tl.getMicroTime() <= microtime) {
+				speed = tl.getSpeed();
+				prev = tl;
+			} else {
+				next = tl;
+				break;
+			}
+		}
+		if (next == null) {
+			return speed;
+		}
+		final long start = prev != null ? prev.getMicroTime() : 0;
+		final long end = next.getMicroTime();
+		if (end <= start) {
+			return next.getSpeed();
+		}
+		double progress = (double)(microtime - start) / (end - start);
+		progress = Math.max(0, Math.min(1, progress));
+		return speed + (next.getSpeed() - speed) * progress;
+	}
+
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, SkinOffset[] offsets) {
 		float offsetX = 0;
 		float offsetY = 0;
@@ -270,12 +307,14 @@ public class LaneRenderer {
 			nscroll = timelines[i].getScroll();
 		}
 		nowbpm = nbpm;
-		final double region = nscroll > 0 ? (240000 / nbpm / hispeed) / nscroll : 0;
+		final boolean enableConstant = playconfig.isEnableConstant() && (main.getState() != BMSPlayer.STATE_PRACTICE);
+		final double speed = enableConstant? 1.0 : getCurrentSpeed(microtime);
+		final double region = nscroll > 0 ? (240000 / nbpm / hispeed / speed) / nscroll : 0;
 		// double sect = (bpm / 60) * 4 * 1000;
 		// TODO hu,hlをレーン毎に変更
 		final double hu = lanes[0].region.y + lanes[0].region.height;
 		final double hl = playconfig.isEnablelift() ? lanes[0].region.y + lanes[0].region.height * playconfig.getLift() : lanes[0].region.y;
-		final double rxhs = (hu - hl) * hispeed;
+		final double rxhs = (hu - hl) * hispeed * speed;
 		double y = hl;
 
 		final float lanecover = playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0;
@@ -324,7 +363,6 @@ public class LaneRenderer {
 
 		// draw section line
 		final double orgy = y;
-		final boolean enableConstant = playconfig.isEnableConstant() && (main.getState() != BMSPlayer.STATE_PRACTICE);
 		final int baseduration = playconfig.getDuration();
 		final float alphaLimit =  playconfig.getConstantFadeinTime() * 1000;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
