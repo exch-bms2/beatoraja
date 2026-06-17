@@ -1,10 +1,16 @@
 package bms.player.beatoraja.skin.lua;
 
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.luaj.vm2.*;
+import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
@@ -24,6 +30,7 @@ import bms.player.beatoraja.SkinConfig;
 public class SkinLuaAccessor {
 	
 	private final Globals globals;
+	private Path sandboxRoot;
 
 	// 各機能のエクスポート先を globals にするかどうか
 	private final boolean isGlobal;
@@ -37,11 +44,224 @@ public class SkinLuaAccessor {
 		globals = JsePlatform.standardGlobals();
 		this.isGlobal = isGlobal;
 
+		initializeModules();
+	}
+
+	public SkinLuaAccessor(boolean isGlobal, Path sandboxRoot) {
+		this.isGlobal = isGlobal;
+		this.sandboxRoot = sandboxRoot != null ? normalizeSandboxRoot(sandboxRoot) : Path.of("").toAbsolutePath().normalize();
+		globals = createSandboxGlobals(this.sandboxRoot);
+
+		globals.finder = new SkinResourceFinder(this.sandboxRoot);
+		restrictPackageLoaders();
+		initializeModules();
+	}
+
+	private void initializeModules() {
 		if (!isGlobal) {
 			// ヘッダ読み込み時に require("main_state") だけでエラーになると面倒なので、空のテーブルを入れておく
 			globals.package_.setIsLoaded(MAIN_STATE, new LuaTable());
 			globals.package_.setIsLoaded(TIMER_UTIL, new LuaTable());
 			globals.package_.setIsLoaded(EVENT_UTIL, new LuaTable());
+		}
+	}
+
+	private static Globals createSandboxGlobals(Path sandboxRoot) {
+		Globals sandbox = new Globals();
+		sandbox.load(new BaseLib());
+		sandbox.load(new PackageLib());
+		sandbox.load(new Bit32Lib());
+		sandbox.load(new TableLib());
+		sandbox.load(new StringLib());
+		sandbox.load(new CoroutineLib());
+		sandbox.load(new MathLib());
+		sandbox.load(new SandboxIoLib(sandboxRoot));
+		LoadState.install(sandbox);
+		LuaC.install(sandbox);
+		return sandbox;
+	}
+
+	private void restrictPackageLoaders() {
+		globals.set("os", LuaValue.NIL);
+		globals.set("luajava", LuaValue.NIL);
+		globals.set("debug", LuaValue.NIL);
+
+		LuaTable pkg = globals.get("package").checktable();
+		pkg.set("loadlib", LuaValue.NIL);
+		pkg.set("cpath", "");
+		removePackageSearcher(pkg.get("searchers"));
+		removePackageSearcher(pkg.get("loaders"));
+	}
+
+	private void removePackageSearcher(LuaValue searchers) {
+		if (searchers.istable()) {
+			searchers.set(3, LuaValue.NIL);
+			searchers.set(4, LuaValue.NIL);
+		}
+	}
+
+	private static class SandboxIoLib extends IoLib {
+		private final Path root;
+
+		private SandboxIoLib(Path root) {
+			this.root = root;
+		}
+
+		@Override
+		protected File wrapStdin() {
+			return new SandboxFile(new byte[0]);
+		}
+
+		@Override
+		protected File wrapStdout() {
+			return new SandboxFile();
+		}
+
+		@Override
+		protected File wrapStderr() {
+			return new SandboxFile();
+		}
+
+		@Override
+		protected File openFile(String filename, boolean readMode, boolean appendMode, boolean updateMode, boolean binaryMode) throws IOException {
+			Path path = resolve(filename);
+			if (!path.startsWith(root)) {
+				throw new IOException("Lua sandbox access denied: " + filename);
+			}
+			if (readMode) {
+				if (!Files.isRegularFile(path)) {
+					throw new IOException("Lua sandbox file not found: " + filename);
+				}
+				return new SandboxFile(Files.readAllBytes(path));
+			}
+			return new SandboxFile();
+		}
+
+		@Override
+		protected File tmpFile() {
+			return new SandboxFile();
+		}
+
+		@Override
+		protected File openProgram(String prog, String mode) throws IOException {
+			throw new IOException("Lua sandbox popen is not allowed");
+		}
+
+		private Path resolve(String filename) {
+			Path path = Path.of(filename);
+			if (path.isAbsolute()) {
+				return path.normalize();
+			}
+
+			Path workingDirectoryPath = path.toAbsolutePath().normalize();
+			if (workingDirectoryPath.startsWith(root)) {
+				return workingDirectoryPath;
+			}
+			return root.resolve(path).toAbsolutePath().normalize();
+		}
+
+		private class SandboxFile extends File {
+			private byte[] data;
+			private int pos;
+			private boolean closed;
+			private final ByteArrayOutputStream output;
+
+			private SandboxFile() {
+				this.data = new byte[0];
+				this.output = new ByteArrayOutputStream();
+			}
+
+			private SandboxFile(byte[] data) {
+				this.data = data;
+				this.output = null;
+			}
+
+			@Override
+			public void write(LuaString string) throws IOException {
+				checkClosed();
+				if (output != null) {
+					output.write(string.m_bytes, string.m_offset, string.m_length);
+				}
+			}
+
+			@Override
+			public void flush() throws IOException {
+				checkClosed();
+			}
+
+			@Override
+			public boolean isstdfile() {
+				return false;
+			}
+
+			@Override
+			public void close() {
+				closed = true;
+			}
+
+			@Override
+			public boolean isclosed() {
+				return closed;
+			}
+
+			@Override
+			public int seek(String option, int bytecount) throws IOException {
+				checkClosed();
+				int base = switch (option) {
+					case "set" -> 0;
+					case "cur" -> pos;
+					case "end" -> data.length;
+					default -> throw new IOException("invalid seek option: " + option);
+				};
+				pos = Math.max(0, Math.min(data.length, base + bytecount));
+				return pos;
+			}
+
+			@Override
+			public void setvbuf(String mode, int size) {
+			}
+
+			@Override
+			public int remaining() throws IOException {
+				checkClosed();
+				return Math.max(0, data.length - pos);
+			}
+
+			@Override
+			public int peek() throws IOException, EOFException {
+				checkClosed();
+				if (pos >= data.length) {
+					throw new EOFException();
+				}
+				return data[pos] & 0xff;
+			}
+
+			@Override
+			public int read() throws IOException, EOFException {
+				checkClosed();
+				if (pos >= data.length) {
+					throw new EOFException();
+				}
+				return data[pos++] & 0xff;
+			}
+
+			@Override
+			public int read(byte[] bytes, int offset, int length) throws IOException {
+				checkClosed();
+				if (pos >= data.length) {
+					return -1;
+				}
+				int readLength = Math.min(length, data.length - pos);
+				System.arraycopy(data, pos, bytes, offset, readLength);
+				pos += readLength;
+				return readLength;
+			}
+
+			private void checkClosed() throws IOException {
+				if (closed) {
+					throw new IOException("file is closed");
+				}
+			}
 		}
 	}
 
@@ -257,17 +477,40 @@ public class SkinLuaAccessor {
 		};
 	}
 
+
 	public LuaValue exec(String script) {
 		return globals.load(script).call();
 	}
 
 	public LuaValue execFile(Path path) {
+		if (sandboxRoot != null) {
+			Path normalizedPath = normalizeSandboxRoot(path);
+			if (normalizedPath == null || !isInsideSandbox(normalizedPath) || !Files.isRegularFile(normalizedPath)) {
+				throw new LuaError("Lua sandbox access denied: " + path);
+			}
+			try (InputStream stream = Files.newInputStream(normalizedPath)) {
+				return globals.load(stream, "@" + normalizedPath, "bt", globals).call();
+			} catch (IOException e) {
+				throw new LuaError("Lua sandbox load failed: " + path + " : " + e.getMessage());
+			}
+		}
 		return globals.loadfile(path.toString()).call();
 	}
 
 	public void setDirectory(Path path) {
 		LuaTable pkg = globals.get("package").checktable();
-		pkg.set("path", pkg.get("path").tojstring() + ";" + path.toString() + "/?.lua");
+		Path normalizedPath = normalizeSandboxRoot(path);
+		if (sandboxRoot != null) {
+			if (normalizedPath == null) {
+				throw new LuaError("Lua sandbox directory is not specified");
+			}
+			if (!isInsideSandbox(normalizedPath)) {
+				throw new LuaError("Lua sandbox access denied: " + path);
+			}
+			pkg.set("path", normalizedPath + "/?.lua;" + normalizedPath + "/?/init.lua");
+		} else {
+			pkg.set("path", pkg.get("path").tojstring() + ";" + path.toString() + "/?.lua");
+		}
 	}
 
 	/**
@@ -373,5 +616,47 @@ public class SkinLuaAccessor {
 			offsets.set(ofs.name, offsetTable);			
 		}
 		table.set("offset", offsets);
+	}
+
+	private static Path normalizeSandboxRoot(Path path) {
+		return path != null ? path.toAbsolutePath().normalize() : null;
+	}
+
+	private boolean isInsideSandbox(Path path) {
+		return sandboxRoot == null || path.toAbsolutePath().normalize().startsWith(sandboxRoot);
+	}
+
+	private static class SkinResourceFinder implements ResourceFinder {
+		private final Path root;
+
+		private SkinResourceFinder(Path root) {
+			this.root = root;
+		}
+
+		@Override
+		public InputStream findResource(String filename) {
+			Path resolved = resolve(filename);
+			if (!resolved.startsWith(root) || !Files.isRegularFile(resolved)) {
+				return null;
+			}
+			try {
+				return Files.newInputStream(resolved);
+			} catch (IOException e) {
+				return null;
+			}
+		}
+
+		private Path resolve(String filename) {
+			Path path = Path.of(filename);
+			if (path.isAbsolute()) {
+				return path.normalize();
+			}
+
+			Path workingDirectoryPath = path.toAbsolutePath().normalize();
+			if (workingDirectoryPath.startsWith(root)) {
+				return workingDirectoryPath;
+			}
+			return root.resolve(path).toAbsolutePath().normalize();
+		}
 	}
 }

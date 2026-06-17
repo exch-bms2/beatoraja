@@ -64,6 +64,7 @@ public class Skin {
 	 */
 	private Array<SkinObject> objects = new Array<SkinObject>();
 	private SkinObject[] objectarray = new SkinObject[0];
+	private SkinTextInput textInput;
 	/**
 	 * 除外されているスキンオブジェクト
 	 */
@@ -314,9 +315,57 @@ public class Skin {
 		}
 	}
 
+	public void drawAllObjectsSafely(SpriteBatch sprite, MainState state) {
+		if(renderer == null) {
+			SkinOffset offsetAll = getOffsetAll(state);
+			Matrix4 transform = new Matrix4();
+			if(offsetAll != null) {
+				transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
+			} else {
+				transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
+			}
+			sprite.setTransformMatrix(transform);
+			renderer = new SkinObjectRenderer(sprite);
+		}
+
+		final long microtime = state.timer.getNowMicroTime();
+		if (nextpreparetime <= microtime) {
+			final long time = state.timer.getNowTime();
+			for (SkinObject obj : objectarray) {
+				try {
+					obj.prepare(time, state);
+				} catch (Throwable e) {
+					obj.draw = false;
+				}
+			}
+
+			nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
+		}
+
+		for (SkinObject obj : objectarray) {
+			if (obj.draw) {
+				try {
+					obj.draw(renderer);
+				} catch (Throwable e) {
+					obj.draw = false;
+				}
+			}
+		}
+	}
+
 	public void mousePressed(MainState state, int button, int x, int y) {
+		if (textInput != null) {
+			textInput.commitIfOutside(x, y);
+		}
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
+			if (obj instanceof SkinText text && text.isEditable() && text.draw && text.getInputBounds().contains(x, y)) {
+				if (textInput == null) {
+					textInput = new SkinTextInput();
+				}
+				textInput.focus(state, text);
+				break;
+			}
 			if (obj.draw && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
@@ -333,6 +382,10 @@ public class Skin {
 	}
 
 	public void dispose() {
+		if (textInput != null) {
+			textInput.dispose();
+			textInput = null;
+		}
 		for (SkinObject obj : objects) {
 			if(!obj.isDisposed()) {
 				obj.dispose();
@@ -433,6 +486,10 @@ public class Skin {
 
 			sprite.setShader(shaders[current]);
 			sprite.setColor(Color.WHITE);
+		}
+
+		public SpriteBatch getSpriteBatch() {
+			return sprite;
 		}
 
 		public void draw(BitmapFont font, String s, float x, float y, Color c) {

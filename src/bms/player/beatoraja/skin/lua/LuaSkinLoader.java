@@ -33,6 +33,15 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		super(new SkinLuaAccessor(false));
 	}
 
+	public LuaSkinLoader(Path sandboxRoot) {
+		super(new SkinLuaAccessor(false, sandboxRoot));
+	}
+
+	public static LuaSkinLoader sandboxed(Path skinPath) {
+		Path skinRoot = skinPath.toAbsolutePath().normalize().getParent();
+		return new LuaSkinLoader(skinRoot != null ? skinRoot : Path.of("").toAbsolutePath().normalize());
+	}
+
 	public LuaSkinLoader(MainState state, Config c) {
 		super(state, c, new SkinLuaAccessor(false));
 	}
