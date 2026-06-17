@@ -10,6 +10,7 @@ import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.BarSorter;
+import bms.player.beatoraja.select.ModeFilter;
 import bms.player.beatoraja.skin.SkinType;
 
 import bms.model.Mode;
@@ -87,6 +88,7 @@ public final class PlayerConfig {
      * 選曲時のモードフィルター
      */
 	private Mode mode = null;
+	private ModeFilter modeFilter = ModeFilter.ALL;
 	/**
 	 * 指定がない場合のミスレイヤー表示時間(ms)
 	 */
@@ -489,11 +491,23 @@ public final class PlayerConfig {
 	}
 
 	public void setMode(Mode m)  {
-		this.mode = m;
+		setModeFilter(ModeFilter.fromMode(m));
 	}
 
 	public Mode getMode()  {
-		return mode;
+		return getModeFilter().getPrimaryMode();
+	}
+
+	public void setModeFilter(ModeFilter modeFilter) {
+		this.modeFilter = modeFilter != null ? modeFilter : ModeFilter.ALL;
+		this.mode = this.modeFilter.getPrimaryMode();
+	}
+
+	public ModeFilter getModeFilter() {
+		if (modeFilter == null) {
+			modeFilter = ModeFilter.fromMode(mode);
+		}
+		return modeFilter;
 	}
 	
 	public int getSort() {
@@ -854,6 +868,11 @@ public final class PlayerConfig {
 		targetlist = targetlist != null ? targetlist : new String[0];
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
 		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
+		if (modeFilter == null || (mode != null && modeFilter == ModeFilter.ALL)) {
+			setModeFilter(ModeFilter.fromMode(mode));
+		} else {
+			setModeFilter(modeFilter);
+		}
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		keyJudgeWindowRatePerfectGreat = MathUtils.clamp(keyJudgeWindowRatePerfectGreat, 25, 400);
 		keyJudgeWindowRateGreat = MathUtils.clamp(keyJudgeWindowRateGreat, 0, 400);

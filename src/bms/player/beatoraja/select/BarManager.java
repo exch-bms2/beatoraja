@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.RandomCourseData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -19,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.CourseData.TrophyData;
@@ -331,16 +331,16 @@ public final class BarManager {
 		if (l.size > 0) {
 			final PlayerConfig config = select.resource.getPlayerConfig();
 			int modeIndex = 0;
-			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getMode();modeIndex++);
+			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getModeFilter();modeIndex++);
 			for(int trialCount = 0; trialCount < MusicSelector.MODE.length; trialCount++, modeIndex++) {
-				final Mode mode = MusicSelector.MODE[modeIndex % MusicSelector.MODE.length];
-				config.setMode(mode);
+				final ModeFilter mode = MusicSelector.MODE[modeIndex % MusicSelector.MODE.length];
+				config.setModeFilter(mode);
 				Array<Bar> remove = new Array<Bar>();
 				for (Bar b : l) {
 					if(b instanceof SongBar sb && sb.getSongData() != null) {
 						final SongData song = sb.getSongData();
 						if((!showInvisibleCharts && (song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
-								|| (mode != null && song.getMode() != 0 && song.getMode() != mode.id)) {
+								|| !mode.matches(song.getMode())) {
 							remove.add(b);
 						}
 					}

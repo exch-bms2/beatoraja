@@ -77,8 +77,8 @@ public class EventFactory {
 			if(state instanceof MusicSelector selector) {
 				int mode = 0;
 				PlayerConfig config = selector.resource.getPlayerConfig();
-				for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
-				config.setMode(MusicSelector.MODE[(mode + (arg1 >= 0 ? 1 : MusicSelector.MODE.length - 1)) % MusicSelector.MODE.length]);
+				for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getModeFilter();mode++);
+				config.setModeFilter(MusicSelector.MODE[(mode + (arg1 >= 0 ? 1 : MusicSelector.MODE.length - 1)) % MusicSelector.MODE.length]);
 				selector.getBarManager().updateBar();
 				selector.play(OPTION_CHANGE);
 			}
