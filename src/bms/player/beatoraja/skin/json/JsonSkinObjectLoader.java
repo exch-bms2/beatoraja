@@ -2,13 +2,13 @@ package bms.player.beatoraja.skin.json;
 
 import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
-import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinDistributionGraph;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.json.JSONSkinLoader.SourceData;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
+import bms.player.beatoraja.skin.property.StringWriter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -385,15 +385,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		// text
 		for (JsonSkin.Text text : sk.text) {
 			if (dst.id.equals(text.id)) {
-				if (text.ref == SkinProperty.STRING_SEARCHWORD) {
-					JsonSkin.Animation a = dst.dst[0];
-					Rectangle r = new Rectangle(a.x * ((float)loader.dstr.width / sk.w),
-							a.y * ((float)loader.dstr.height / sk.h), a.w * ((float)loader.dstr.width / sk.w),
-							a.h * ((float)loader.dstr.height / sk.h));
-					((MusicSelectSkin) skin).setSearchTextRegion(r);
-				} else {
-					obj = createText(text, p);
-				}
+				obj = createText(text, p);
 				return obj;
 			}
 		}
@@ -650,8 +642,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
 				}
 				skinText.setConstantText(text.constantText);
-				skinText.setEditable(text.editable);
-				skinText.setWriter(text.event);
+				StringWriter writer = text.event != null ? text.event : StringPropertyFactory.getStringWriter(text.ref);
+				skinText.setWriter(writer);
+				skinText.setEditable(text.editable || (text.event == null && writer != null));
 				skinText.setAlign(text.align);
 				skinText.setWrapping(text.wrapping);
 				skinText.setOverflow(text.overflow);

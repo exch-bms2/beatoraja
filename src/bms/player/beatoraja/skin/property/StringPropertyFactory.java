@@ -49,6 +49,16 @@ public class StringPropertyFactory {
 		StringType type = StringType.get(name);
 		return type != null ? type.property : null;
 	}
+
+	public static StringWriter getStringWriter(final int id) {
+		StringType type = StringType.get(id);
+		return type != null ? type.writer : null;
+	}
+
+	public static StringWriter getStringWriter(final String name) {
+		StringType type = StringType.get(name);
+		return type != null ? type.writer : null;
+	}
 	
 	public enum StringType {
 		
@@ -118,6 +128,11 @@ public class StringPropertyFactory {
 		key8(47, createKeyname(7)),
 		key9(48, createKeyname(8)),
 		key10(49, createKeyname(9)),
+		searchword(30, (state) -> "", (state, value) -> {
+			if (state instanceof MusicSelector selector) {
+				selector.search(value);
+			}
+		}),
 		sort(61, (state) -> state.resource.getPlayerConfig().getSortid()),
 
 		chartreplication(86, (state) -> state.resource.getPlayerConfig().getChartReplicationMode()),
@@ -281,6 +296,10 @@ public class StringPropertyFactory {
 		 * StringProperty
 		 */
 		private final StringProperty property;
+		/**
+		 * StringWriter
+		 */
+		private final StringWriter writer;
 
 		public static final List<StringType> VALUES = Collections.unmodifiableList(Arrays.asList(StringType.values()));
 
@@ -305,8 +324,13 @@ public class StringPropertyFactory {
 		}
 		
 		private StringType(int id, StringProperty property) {
+			this(id, property, null);
+		}
+
+		private StringType(int id, StringProperty property, StringWriter writer) {
 			this.id = id;
 			this.property = property;
+			this.writer = writer;
 		}
 		
 		private static StringProperty createSkincategory(final int index) {

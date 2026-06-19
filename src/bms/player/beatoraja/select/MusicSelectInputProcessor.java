@@ -73,10 +73,7 @@ public final class MusicSelectInputProcessor {
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
                 public void input(String text) {
-                    if (text.length() > 1) {
-                    	barManager.addSearch(new SearchWordBar(select, text));
-                    	barManager.updateBar(null);
-                    }
+                    select.search(text);
                 }
 
                 @Override

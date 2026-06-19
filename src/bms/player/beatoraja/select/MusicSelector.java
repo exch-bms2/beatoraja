@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
 import bms.player.beatoraja.*;
@@ -63,8 +62,6 @@ public final class MusicSelector extends MainState {
 	private final BarManager manager = new BarManager(this);
 	
 	private MusicSelectInputProcessor musicinput;
-
-	private SearchTextField search;
 
 	/**
 	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
@@ -184,17 +181,6 @@ public final class MusicSelector extends MainState {
 		manager.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
-
-		// search text field
-		Rectangle searchRegion = ((MusicSelectSkin) getSkin()).getSearchTextRegion();
-		if (searchRegion != null && (getStage() == null ||
-				(search != null && !searchRegion.equals(search.getSearchBounds())))) {
-			if(search != null) {
-				search.dispose();
-			}
-			search = new SearchTextField(this, resource.getConfig().getResolution());
-			setStage(search);
-		}
 	}
 
 	public void prepare() {
@@ -317,11 +303,20 @@ public final class MusicSelector extends MainState {
 
 	public void shutdown() {
 		preview.stop();
-		if (search != null) {
-			search.unfocus(this);
-		}
 		banners.disposeOld();
 		stagefiles.disposeOld();
+	}
+
+	public void search(String text) {
+		if (text == null || text.isBlank()) {
+			return;
+		}
+		SearchWordBar swb = new SearchWordBar(this, text);
+		if (swb.getChildren().length > 0) {
+			manager.addSearch(swb);
+			manager.updateBar(null);
+			manager.setSelected(swb);
+		}
 	}
 	
 	public void select(Bar current) {
@@ -548,10 +543,6 @@ public final class MusicSelector extends MainState {
 		bar.dispose();
 		banners.dispose();
 		stagefiles.dispose();
-		if (search != null) {
-			search.dispose();
-			search = null;
-		}
 	}
 
 	public int getPanelState() {

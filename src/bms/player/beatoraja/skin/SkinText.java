@@ -87,7 +87,10 @@ public abstract class SkinText extends SkinObject {
     public void prepare(long time, MainState state) {
     	super.prepare(time, state);
         currentText = ref != null ? ref.get(state) : (constantText != null ? constantText : null);
-        if(currentText == null || currentText.length() == 0) {
+        if(currentText == null) {
+            currentText = "";
+        }
+        if(currentText.length() == 0 && !(editable && writer != null)) {
         	draw = false;
             return;
         }
