@@ -115,6 +115,8 @@ public class LuaSkinLoader extends JSONSkinLoader {
 					serializeLuaScript(lv, lua::loadTimerProperty, lua::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
 			put(FloatWriter.class, lv ->
 					serializeLuaScript(lv, lua::loadFloatWriter, lua::loadFloatWriter, FloatPropertyFactory::getRateWriter));
+			put(StringWriter.class, lv ->
+					serializeLuaScript(lv, lua::loadStringWriter, lua::loadStringWriter, null));
 			put(Event.class, lv ->
 					serializeLuaScript(lv, lua::loadEvent, lua::loadEvent, EventFactory::getEvent));
 		}

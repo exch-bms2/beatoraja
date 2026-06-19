@@ -477,6 +477,28 @@ public class SkinLuaAccessor {
 		};
 	}
 
+	public StringWriter loadStringWriter(String script) {
+		try {
+			final LuaValue lv = globals.load(script);
+			return loadStringWriter(lv.checkfunction());
+		} catch (RuntimeException e) {
+			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
+		}
+		return null;
+	}
+
+	public StringWriter loadStringWriter(LuaFunction function) {
+		return new StringWriter() {
+			@Override
+			public void set(MainState state, String value) {
+				try{
+					function.call(LuaString.valueOf(value));
+				} catch (RuntimeException e) {
+					Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
+				}
+			}
+		};
+	}
 
 	public LuaValue exec(String script) {
 		return globals.load(script).call();

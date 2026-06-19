@@ -76,8 +76,8 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 			}
 			barobj.setBarImage(onimage, offimage);
 
-			((MusicSelectSkin) skin).setCenterBar(sk.songlist.center);
-			((MusicSelectSkin) skin).setClickableBar(sk.songlist.clickable);
+			skin.setCenterBar(sk.songlist.center);
+			skin.setClickableBar(sk.songlist.clickable);
 
 			// 選曲バーランプ
 			for (int i = 0; i < sk.songlist.lamp.length; i++) {
@@ -208,29 +208,21 @@ public class JsonSelectSkinObjectLoader extends JsonSkinObjectLoader<MusicSelect
 					if (img.type < 0) {
 						Texture tex = getTexture(img.src, p);
 						if(tex != null) {
-							TextureRegion[][] imgs = null;
-							if(tex != null) {
-								TextureRegion[] images = getSourceImage(tex, img.x, img.y, img.w, img.h,
-										img.divx, img.divy);
-								final int len = img.type == -1 ? 11 : 28;
-								imgs = new TextureRegion[len][images.length / len];
-								for(int j = 0 ;j < len;j++) {
-									for(int i = 0 ;i < imgs[j].length;i++) {
-										imgs[j][i] = images[i * len + j];
-									}
-								}
-							}
+                            TextureRegion[] images = getSourceImage(tex, img.x, img.y, img.w, img.h,
+                                    img.divx, img.divy);
+                            final int len = img.type == -1 ? 11 : 28;
+							TextureRegion[][] imgs = new TextureRegion[len][images.length / len];
+                            for(int j = 0 ;j < len;j++) {
+                                for(int i = 0 ;i < imgs[j].length;i++) {
+                                    imgs[j][i] = images[i * len + j];
+                                }
+                            }
 
-							final int graphtype = img.type == -1 ? 0 : 1;
+                            final int graphtype = img.type == -1 ? 0 : 1;
 
-							SkinDistributionGraph bargraph = null;
-							if(imgs != null) {
-								bargraph = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);
-							} else {
-								bargraph = new SkinDistributionGraph(graphtype);
-							}
+							SkinDistributionGraph bargraph = new SkinDistributionGraph(graphtype, imgs, img.timer, img.cycle);
 
-							setDestination(skin, bargraph, sk.songlist.graph);
+                            setDestination(skin, bargraph, sk.songlist.graph);
 							barobj.setGraph(bargraph);										
 						}
 					}

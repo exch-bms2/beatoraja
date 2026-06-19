@@ -4,8 +4,10 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
+import bms.player.beatoraja.skin.property.StringWriter;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 
@@ -33,6 +35,7 @@ public abstract class SkinText extends SkinObject {
     private String constantText;
 
     private boolean editable;
+    private StringWriter writer;
 
     private boolean wrapping;
     private int overflow;
@@ -43,6 +46,7 @@ public abstract class SkinText extends SkinObject {
     private float shadowSmoothness;
     
     private String currentText;
+    private final Rectangle inputBounds = new Rectangle();
 
     public SkinText(int id) {
     	ref = StringPropertyFactory.getStringProperty(id);
@@ -104,6 +108,27 @@ public abstract class SkinText extends SkinObject {
 
     public final void setEditable(boolean editable) {
         this.editable = editable;
+    }
+
+    public final StringWriter getWriter() {
+        return writer;
+    }
+
+    public final void setWriter(StringWriter writer) {
+        this.writer = writer;
+    }
+
+    public final String getCurrentText() {
+        return currentText != null ? currentText : text;
+    }
+
+    public final Rectangle getInputBounds() {
+        float x = switch (getAlign()) {
+            case ALIGN_RIGHT -> region.x - region.width;
+            case ALIGN_CENTER -> region.x - region.width / 2;
+            default -> region.x;
+        };
+        return inputBounds.set(x, region.y, region.width, region.height);
     }
 
     public final boolean isWrapping() {

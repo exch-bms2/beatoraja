@@ -650,6 +650,8 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
 				}
 				skinText.setConstantText(text.constantText);
+				skinText.setEditable(text.editable);
+				skinText.setWriter(text.event);
 				skinText.setAlign(text.align);
 				skinText.setWrapping(text.wrapping);
 				skinText.setOverflow(text.overflow);
