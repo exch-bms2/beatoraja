@@ -184,12 +184,13 @@ public final class MainController {
 
 		switch(config.getAudioConfig().getDriver()) {
 		case PortAudio:
-			try {
-				audio = new PortAudioDriver(config);
-			} catch(Throwable e) {
-				e.printStackTrace();
-				config.getAudioConfig().setDriver(DriverType.OpenAL);
-			}
+				try {
+					audio = new PortAudioDriver(config);
+				} catch(Throwable e) {
+					e.printStackTrace();
+					Logger.getGlobal().severe("PortAudioの初期化に失敗しました : " + PortAudioDriver.getUnavailableMessage(e));
+					config.getAudioConfig().setDriver(DriverType.OpenAL);
+				}
 			break;
 		}
 

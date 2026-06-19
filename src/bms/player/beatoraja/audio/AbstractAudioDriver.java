@@ -248,6 +248,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param stretchRate タイムストレッチ倍率(0.5 - 2.0, 1.0で無効)
 	 */
 	public synchronized void setModel(BMSModel model, float stretchRate) {
+		stop((Note) null);
 		this.timeStretchRate = stretchRate > 0f ? stretchRate : 1f;
 		Logger.getGlobal().info("音源ファイル読み込み開始。");
 		String[] wavlist = model.getWavList();

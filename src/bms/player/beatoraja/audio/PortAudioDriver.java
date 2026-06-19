@@ -2,8 +2,10 @@ package bms.player.beatoraja.audio;
 
 import java.nio.ByteBuffer;
 import java.nio.file.*;
+import java.util.logging.Logger;
 
 import com.portaudio.*;
+import bms.player.beatoraja.AudioConfig;
 import bms.player.beatoraja.Config;
 
 /**
@@ -33,29 +35,35 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	public static DeviceInfo[] getDevices() {
 		if(devices == null) {
 			PortAudio.initialize();
-			
+			Logger.getGlobal().info("PortAudio initialized : " + PortAudio.getVersionText());
+
 			devices = new DeviceInfo[PortAudio.getDeviceCount()];
 			for(int i = 0;i < devices.length;i++) {
 				devices[i] = PortAudio.getDeviceInfo(i);
 			}
+			logDevices(devices);
 		}
 		return devices;
+	}
+
+	public static String getUnavailableMessage(Throwable e) {
+		String message = e.getMessage() != null ? e.getMessage() : e.toString();
+		if(e instanceof UnsatisfiedLinkError || message.contains("jportaudio")) {
+			return message + "。macOSでPortAudioを使用するには natives/libjportaudio.dylib を配置し、"
+					+ "-Djava.library.path=./natives を指定してください。";
+		}
+		return message;
 	}
 
 	public PortAudioDriver(Config config) {
 		super(config.getSongResourceGen());
 		DeviceInfo[] devices = getDevices();
-		// Get the default device and setup the stream parameters.
-		int deviceId = 0;
-		for(int i = 0;i < devices.length;i++) {
-			if(devices[i].name.equals(config.getAudioConfig().getDriverName())) {
-				deviceId = i;
-				break;
-			}
-		}
+		AudioConfig audioConfig = config.getAudioConfig();
+		int deviceId = getDeviceId(audioConfig, devices);
 		DeviceInfo deviceInfo = devices[ deviceId ];
-		
-		setSampleRate(config.getAudioConfig().getSampleRate() <= 0 ? (int)deviceInfo.defaultSampleRate : config.getAudioConfig().getSampleRate());
+		logSelectedDevice(deviceId, deviceInfo);
+
+		setSampleRate(audioConfig.getSampleRate() <= 0 ? (int)deviceInfo.defaultSampleRate : audioConfig.getSampleRate());
 		channels = 2;
 //		System.out.println( "  deviceId    = " + deviceId );
 //		System.out.println( "  sampleRate  = " + sampleRate );
@@ -64,24 +72,216 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		StreamParameters streamParameters = new StreamParameters();
 		streamParameters.channelCount = channels;
 		streamParameters.device = deviceId;
-		int framesPerBuffer = config.getAudioConfig().getDeviceBufferSize();
-		streamParameters.suggestedLatency = ((double)framesPerBuffer) / getSampleRate();
+		streamParameters.sampleFormat = PortAudio.FORMAT_FLOAT_32;
+		int framesPerBuffer = audioConfig.getDeviceBufferSize();
+		streamParameters.suggestedLatency = getSuggestedLatency(deviceInfo, framesPerBuffer);
 //		System.out.println( "  suggestedLatency = " + streamParameters.suggestedLatency );
 
-		int flags = 0;
-		
+		int flags = PortAudio.FLAG_CLIP_OFF | PortAudio.FLAG_DITHER_OFF;
+
 		// Open a stream for output.
-		stream = PortAudio.openStream( null, streamParameters, getSampleRate(), framesPerBuffer, flags );
+		stream = openStream(streamParameters, deviceInfo, framesPerBuffer, flags);
 
 		stream.start();
 
-		mixer = new Thread(this);
+		mixer = new Thread(this, "PortAudio Mixer");
+		mixer.setPriority(Thread.MAX_PRIORITY);
 		buffer = new float[framesPerBuffer * channels];
-		inputs = new MixerInput[config.getAudioConfig().getDeviceSimultaneousSources()];
+		inputs = new MixerInput[audioConfig.getDeviceSimultaneousSources()];
 		for (int i = 0; i < inputs.length; i++) {
 			inputs[i] = new MixerInput();
 		}
 		mixer.start();
+	}
+
+	private static int getDeviceId(AudioConfig config, DeviceInfo[] devices) {
+		String driverName = config.getDriverName();
+		if(driverName != null && !driverName.isEmpty()) {
+			for(int i = 0;i < devices.length;i++) {
+				if(driverName.equals(devices[i].name) && devices[i].maxOutputChannels > 0) {
+					return i;
+				}
+			}
+		}
+
+		if(isMacOS()) {
+			int coreAudioDefault = getCoreAudioDefaultOutputDevice(devices);
+			if(coreAudioDefault >= 0) {
+				return coreAudioDefault;
+			}
+		}
+
+		int defaultOutput = PortAudio.getDefaultOutputDevice();
+		if(defaultOutput >= 0 && defaultOutput < devices.length && devices[defaultOutput].maxOutputChannels > 0) {
+			return defaultOutput;
+		}
+		return getFirstOutputDevice(devices);
+	}
+
+	private BlockingStream openStream(StreamParameters streamParameters, DeviceInfo deviceInfo, int framesPerBuffer, int flags) {
+		logStreamOpen(streamParameters, framesPerBuffer, flags, "primary");
+		try {
+			logFormatSupport(streamParameters, framesPerBuffer);
+			return PortAudio.openStream( null, streamParameters, getSampleRate(), framesPerBuffer, flags );
+		} catch(RuntimeException e) {
+			Logger.getGlobal().warning("PortAudio primary openStream failed : " + e.getMessage());
+		}
+
+		StreamParameters highLatencyParameters = copyParameters(streamParameters);
+		highLatencyParameters.suggestedLatency = deviceInfo.defaultHighOutputLatency > 0
+				? deviceInfo.defaultHighOutputLatency
+				: Math.max(streamParameters.suggestedLatency, 0.05);
+		logStreamOpen(highLatencyParameters, framesPerBuffer, flags, "high-latency fallback");
+		try {
+			logFormatSupport(highLatencyParameters, framesPerBuffer);
+			return PortAudio.openStream(null, highLatencyParameters, getSampleRate(), framesPerBuffer, flags);
+		} catch(RuntimeException e) {
+			Logger.getGlobal().warning("PortAudio high-latency fallback openStream failed : " + e.getMessage());
+		}
+
+		StreamParameters unspecifiedBufferParameters = copyParameters(highLatencyParameters);
+		int unspecifiedFramesPerBuffer = 0;
+		logStreamOpen(unspecifiedBufferParameters, unspecifiedFramesPerBuffer, flags, "unspecified-buffer fallback");
+		logFormatSupport(unspecifiedBufferParameters, unspecifiedFramesPerBuffer);
+		return PortAudio.openStream(null, unspecifiedBufferParameters, getSampleRate(), unspecifiedFramesPerBuffer, flags);
+	}
+
+	private double getSuggestedLatency(DeviceInfo deviceInfo, int framesPerBuffer) {
+		double bufferLatency = ((double)framesPerBuffer) / getSampleRate();
+		if(isCoreAudioLowLatency(deviceInfo) && deviceInfo.defaultLowOutputLatency > 0) {
+			return Math.min(bufferLatency, deviceInfo.defaultLowOutputLatency);
+		}
+		return bufferLatency;
+	}
+
+	private static StreamParameters copyParameters(StreamParameters source) {
+		StreamParameters copy = new StreamParameters();
+		copy.device = source.device;
+		copy.channelCount = source.channelCount;
+		copy.sampleFormat = source.sampleFormat;
+		copy.suggestedLatency = source.suggestedLatency;
+		return copy;
+	}
+
+	private void logFormatSupport(StreamParameters streamParameters, int framesPerBuffer) {
+		try {
+			int result = PortAudio.isFormatSupported(null, streamParameters, getSampleRate());
+			Logger.getGlobal().info("PortAudio format support"
+					+ " : result=" + result
+					+ ", device=" + streamParameters.device
+					+ ", channels=" + streamParameters.channelCount
+					+ ", sampleRate=" + getSampleRate()
+					+ ", framesPerBuffer=" + framesPerBuffer
+					+ ", suggestedLatency=" + streamParameters.suggestedLatency);
+		} catch(Throwable e) {
+			Logger.getGlobal().warning("PortAudio format support check failed : " + e.getMessage());
+		}
+	}
+
+	private void logStreamOpen(StreamParameters streamParameters, int framesPerBuffer, int flags, String label) {
+		Logger.getGlobal().info("PortAudio openStream " + label
+				+ " : device=" + streamParameters.device
+				+ ", channels=" + streamParameters.channelCount
+				+ ", sampleFormat=" + streamParameters.sampleFormat
+				+ ", sampleRate=" + getSampleRate()
+				+ ", framesPerBuffer=" + framesPerBuffer
+				+ ", suggestedLatency=" + streamParameters.suggestedLatency
+				+ ", flags=" + flags);
+	}
+
+	private static int getCoreAudioDefaultOutputDevice(DeviceInfo[] devices) {
+		try {
+			int coreAudioIndex = PortAudio.hostApiTypeIdToHostApiIndex(PortAudio.HOST_API_TYPE_COREAUDIO);
+			if(coreAudioIndex >= 0) {
+				HostApiInfo coreAudio = PortAudio.getHostApiInfo(coreAudioIndex);
+				if(coreAudio.defaultOutputDevice >= 0 && coreAudio.defaultOutputDevice < devices.length
+						&& devices[coreAudio.defaultOutputDevice].maxOutputChannels > 0) {
+					return coreAudio.defaultOutputDevice;
+				}
+			}
+		} catch(Throwable e) {
+			Logger.getGlobal().fine("Core Audio default output device is unavailable : " + e.getMessage());
+		}
+
+		for(int i = 0;i < devices.length;i++) {
+			if(devices[i].maxOutputChannels > 0 && isCoreAudioDevice(devices[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private static int getFirstOutputDevice(DeviceInfo[] devices) {
+		for(int i = 0;i < devices.length;i++) {
+			if(devices[i].maxOutputChannels > 0) {
+				return i;
+			}
+		}
+		throw new RuntimeException("PortAudio output device is not found");
+	}
+
+	private static boolean isCoreAudioDevice(DeviceInfo deviceInfo) {
+		try {
+			return PortAudio.getHostApiInfo(deviceInfo.hostApi).type == PortAudio.HOST_API_TYPE_COREAUDIO;
+		} catch(Throwable e) {
+			return false;
+		}
+	}
+
+	private static boolean isCoreAudioLowLatency(DeviceInfo deviceInfo) {
+		return isMacOS() && isCoreAudioDevice(deviceInfo);
+	}
+
+	private static boolean isMacOS() {
+		return System.getProperty("os.name", "").toLowerCase().contains("mac");
+	}
+
+	private static void logSelectedDevice(int deviceId, DeviceInfo deviceInfo) {
+		String hostApiName = "unknown";
+		int hostApiType = -1;
+		try {
+			HostApiInfo hostApi = PortAudio.getHostApiInfo(deviceInfo.hostApi);
+			hostApiName = hostApi.name;
+			hostApiType = hostApi.type;
+		} catch(Throwable e) {
+			Logger.getGlobal().fine("PortAudio host API information is unavailable : " + e.getMessage());
+		}
+
+		boolean coreAudio = hostApiType == PortAudio.HOST_API_TYPE_COREAUDIO;
+		Logger.getGlobal().info("PortAudio output device selected"
+				+ " : id=" + deviceId
+				+ ", name=" + deviceInfo.name
+				+ ", hostApi=" + hostApiName
+				+ ", coreAudio=" + coreAudio
+				+ ", lowLatencyMode=" + isCoreAudioLowLatency(deviceInfo)
+				+ ", defaultLowOutputLatency=" + deviceInfo.defaultLowOutputLatency
+				+ ", defaultHighOutputLatency=" + deviceInfo.defaultHighOutputLatency
+				+ ", defaultSampleRate=" + deviceInfo.defaultSampleRate);
+	}
+
+	private static void logDevices(DeviceInfo[] devices) {
+		for(int i = 0;i < devices.length;i++) {
+			DeviceInfo device = devices[i];
+			String hostApiName = "unknown";
+			int hostApiType = -1;
+			try {
+				HostApiInfo hostApi = PortAudio.getHostApiInfo(device.hostApi);
+				hostApiName = hostApi.name;
+				hostApiType = hostApi.type;
+			} catch(Throwable e) {
+				Logger.getGlobal().fine("PortAudio host API information is unavailable : " + e.getMessage());
+			}
+			Logger.getGlobal().info("PortAudio device"
+					+ " : id=" + i
+					+ ", name=" + device.name
+					+ ", hostApi=" + hostApiName
+					+ ", coreAudio=" + (hostApiType == PortAudio.HOST_API_TYPE_COREAUDIO)
+					+ ", maxInputChannels=" + device.maxInputChannels
+					+ ", maxOutputChannels=" + device.maxOutputChannels
+					+ ", defaultLowOutputLatency=" + device.defaultLowOutputLatency
+					+ ", defaultHighOutputLatency=" + device.defaultHighOutputLatency
+					+ ", defaultSampleRate=" + device.defaultSampleRate);
+		}
 	}
 
 	@Override
@@ -129,6 +329,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					input.id = idcount++;
 					input.channel = channel;
 					input.pos = 0;
+					input.posf = 0;
 					return input.id;
 				}
 			}
@@ -214,7 +415,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 								input.pos += 2 * inc;
 								input.posf -= (float)inc;
 							}
-							if (input.pos >= input.pcm.len) {
+							if (input.pos + 1 >= input.pcm.len) {
 								input.pos = input.loop ? 0 : -1;
 							}
 						}

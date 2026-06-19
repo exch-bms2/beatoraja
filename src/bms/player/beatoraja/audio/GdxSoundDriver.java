@@ -114,10 +114,13 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			mixer.put(pcm, channel, volume, getGlobalPitch() * pitch);
 		} else {
 			synchronized (lock) {
-				sounds[soundPos].sound = pcm;
-				sounds[soundPos].id = pcm.play(volume, getGlobalPitch() * pitch, 0);
-				sounds[soundPos].channel = channel;
-				soundPos = (soundPos + 1) % sounds.length;
+				long id = pcm.play(volume, getGlobalPitch() * pitch, 0);
+				if (id != -1) {
+					sounds[soundPos].sound = pcm;
+					sounds[soundPos].id = id;
+					sounds[soundPos].channel = channel;
+					soundPos = (soundPos + 1) % sounds.length;
+				}
 			}
 		}
 	}
@@ -154,7 +157,8 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			mixer.stop(id, 0);
 		} else {
 			synchronized (lock) {
-				id.stop();			
+				id.stop();
+				clearSoundInstances(id);
 			}			
 		}
 	}
@@ -192,7 +196,18 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 	@Override
 	protected void disposeKeySound(Sound pcm) {
+		stop(pcm);
 		pcm.dispose();
+	}
+
+	private void clearSoundInstances(Sound sound) {
+		for (SoundInstance instance : sounds) {
+			if (instance.sound == sound) {
+				instance.sound = null;
+				instance.id = -1;
+				instance.channel = -1;
+			}
+		}
 	}
 
 	class SoundMixer extends Thread {
