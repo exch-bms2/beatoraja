@@ -2,7 +2,8 @@ package bms.player.beatoraja.skin.lr2;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 

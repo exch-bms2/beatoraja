@@ -1,8 +1,10 @@
 package bms.player.beatoraja.skin.lr2;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 
@@ -17,16 +19,20 @@ import bms.player.beatoraja.skin.property.*;
  */
 public abstract class LR2SkinLoader extends SkinLoader {
 
-	private Array<Command> commands = new Array<Command>();
+	private final Map<String, Command<LR2SkinLoader>> commands = new HashMap<>();
 
 	protected IntIntMap op = new IntIntMap();
 
-	protected void addCommandWord(Command cm) {
-		commands.add(cm);
+	@SuppressWarnings("unchecked")
+	protected <T extends LR2SkinLoader> void addCommandWord(Command<T> cm) {
+		commands.putIfAbsent(cm.name().toUpperCase(Locale.ROOT), (Command<LR2SkinLoader>) cm);
 	}
 
-	protected void addCommandWord(Command... cm) {
-		commands.addAll(cm);
+	@SafeVarargs
+	protected final <T extends LR2SkinLoader> void addCommandWord(Command<T>... cm) {
+		for (Command<T> command : cm) {
+			addCommandWord(command);
+		}
 	}
 
 	boolean skip = false;
@@ -39,73 +45,13 @@ public abstract class LR2SkinLoader extends SkinLoader {
 		String[] str = line.split(",", -1);
 		if (str.length > 0) {
 			if (str[0].equalsIgnoreCase("#IF")) {
-				ifs = true;
-				for (int i = 1; i < str.length; i++) {
-					boolean b = false;
-					if (str[i].length() == 0) {
-						continue;
-					}
-					try {
-						int opt = Integer.parseInt(str[i].replace('!', '-').replaceAll("[^0-9-]", ""));
-						if(opt >=  0) {
-							if(op.get(opt, -1) == 1) {
-								b = true;
-							}
-						} else {
-							if(op.get(-opt, -1) == 0) {
-								b = true;
-							}
-						}
-						if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
-							BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
-							if(draw != null) {
-								b = draw.get(state);								
-							}
-						}
-						if (!b) {
-							ifs = false;
-							break;
-						}
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
-						break;
-					}
-				}
-
+				ifs = evaluateCondition(str, state, true);
 				skip = !ifs;
 			} else if (str[0].equalsIgnoreCase("#ELSEIF")) {
 				if (ifs) {
 					skip = true;
 				} else {
-					ifs = true;
-					for (int i = 1; i < str.length; i++) {
-						boolean b = false;
-						try {
-							int opt = Integer.parseInt(str[i].replace('!', '-').replaceAll("[^0-9-]", ""));
-							if(opt >=  0) {
-								if(op.get(opt, -1) == 1) {
-									b = true;
-								}
-							} else {
-								if(op.get(-opt, -1) == 0) {
-									b = true;
-								}
-							}
-							if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
-								BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
-								if(draw != null) {
-									b = draw.get(state);								
-								}
-							}
-							if (!b) {
-								ifs = false;
-								break;
-							}
-						} catch (NumberFormatException e) {
-							break;
-						}
-					}
-
+					ifs = evaluateCondition(str, state, false);
 					skip = !ifs;
 				}
 			} else if (str[0].equalsIgnoreCase("#ELSE")) {
@@ -120,13 +66,7 @@ public abstract class LR2SkinLoader extends SkinLoader {
 					op.put(index, Integer.parseInt(str[2]) >= 1 ? 1 : 0);
 				}
 
-				Command command = null;
-				for (Command cm : commands) {
-					if (str[0].substring(1).equalsIgnoreCase(cm.name())) {
-						command = cm;
-						break;
-					}
-				}
+				Command<LR2SkinLoader> command = commands.get(str[0].substring(1).toUpperCase(Locale.ROOT));
 				if(command != null) {
 					command.execute(this, str);					
 				}
@@ -136,6 +76,35 @@ public abstract class LR2SkinLoader extends SkinLoader {
 
 	public IntIntMap getOption() {
 		return op;
+	}
+
+	private boolean evaluateCondition(String[] str, MainState state, boolean logParseError) {
+		for (int i = 1; i < str.length; i++) {
+			if (str[i].isEmpty()) {
+				continue;
+			}
+			try {
+				if (!isConditionEnabled(str[i], state)) {
+					return false;
+				}
+			} catch (NumberFormatException e) {
+				if (logParseError) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isConditionEnabled(String value, MainState state) {
+		int opt = Integer.parseInt(value.replace('!', '-').replaceAll("[^0-9-]", ""));
+		boolean enabled = opt >= 0 ? op.get(opt, -1) == 1 : op.get(-opt, -1) == 0;
+		if (!enabled && !op.containsKey(Math.abs(opt)) && state != null) {
+			BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
+			enabled = draw != null && draw.get(state);
+		}
+		return enabled;
 	}
 	
 	protected static File getPath(String skinpath, String imagepath, ObjectMap<String, String> filemap) {

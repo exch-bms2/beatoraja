@@ -1,7 +1,9 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.BiConsumer;
@@ -16,6 +18,8 @@ import bms.player.beatoraja.skin.lr2.LR2SkinLoader.Command;
  * @author exch
  */
 public class LR2FontLoader extends LR2SkinLoader {
+	private static final Charset MS932 = Charset.forName("MS932");
+
 	/**
 	 * 生成するテキストイメージソース
 	 */
@@ -37,11 +41,9 @@ public class LR2FontLoader extends LR2SkinLoader {
 		this.path = p;
 
 //		long l = System.nanoTime();
-		try (Stream<String> lines = Files.lines(p, Charset.forName("MS932"))) {
-			lines.forEach(line -> {
-				processLine(line, null);				
-			});
-		};
+		try (Stream<String> lines = Files.lines(p, MS932)) {
+			lines.forEach(line -> processLine(line, null));
+		}
 //		System.out.println(p.toString() + " -> " + (System.nanoTime() - l));
 
 		return textimage;
@@ -52,8 +54,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 		for (int i = 1; i < result.length && i < s.length; i++) {
 			try {
 				result[i] = Integer.parseInt(s[i].replace('!', '-').replaceAll(" ", ""));
-			} catch (Exception e) {
-
+			} catch (NumberFormatException ignored) {
 			}
 		}
 		return result;
@@ -92,6 +93,8 @@ enum FontCommand implements Command<LR2FontLoader> {
 			e.printStackTrace();
 		}
 	});
+
+	private static final Charset SHIFT_JIS = Charset.forName("Shift_JIS");
 	
 	private static int[] mapCode(int code) {
 		int sjiscode = code;
@@ -115,16 +118,12 @@ enum FontCommand implements Command<LR2FontLoader> {
 			sjisbyte[0] = (byte) (sjiscode & 0xff);
 		}
 
-		try {
-			byte[] b = new String(sjisbyte, "Shift_JIS").getBytes("utf-16le");
-			int utfcode = 0;
-			for (int i = 0; i < b.length; i++) {
-				utfcode |= (b[i] & 0xff) << (8 * i);
-			}
-			return new int[]{utfcode};
-		} catch (UnsupportedEncodingException e) {
+		byte[] bytes = new String(sjisbyte, SHIFT_JIS).getBytes(StandardCharsets.UTF_16LE);
+		int utfcode = 0;
+		for (int i = 0; i < bytes.length; i++) {
+			utfcode |= (bytes[i] & 0xff) << (8 * i);
 		}
-		return new int[0];
+		return new int[]{utfcode};
 	}
 	
 	public final BiConsumer<LR2FontLoader, String[]> function;

@@ -28,11 +28,12 @@ import static bms.player.beatoraja.Resolution.*;
  * @author exch
  */
 public class LR2SkinHeaderLoader extends LR2SkinLoader {
+	private static final Charset MS932 = Charset.forName("MS932");
 	
 	SkinHeader header = new SkinHeader();
-	Array<CustomFile> files = new Array<CustomFile>();
-	Array<CustomOption> options = new Array<CustomOption>();
-	Array<CustomOffset> offsets = new Array<CustomOffset>();
+	Array<CustomFile> files = new Array<>();
+	Array<CustomOption> options = new Array<>();
+	Array<CustomOffset> offsets = new Array<>();
 	
 	final String skinpath;
 
@@ -54,7 +55,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 
 		header.setPath(f);
 
-		try (Stream<String> lines = Files.lines(f, Charset.forName("MS932"))) {
+		try (Stream<String> lines = Files.lines(f, MS932)) {
 			lines.forEach(line -> {
 				try {
 					processLine(line, state);				
@@ -86,13 +87,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 		loader.header.setName(str[2]);
 		loader.header.setAuthor(str[3]);
 		switch (loader.header.getSkinType()) {
-			case PLAY_5KEYS:
-			case PLAY_7KEYS:
-			case PLAY_9KEYS:
-			case PLAY_10KEYS:
-			case PLAY_14KEYS:
-			case PLAY_24KEYS:
-			case PLAY_24KEYS_DOUBLE:
+			case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE -> {
 				loader.options.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
 				loader.options.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
 				loader.options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
@@ -102,6 +97,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 				loader.offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false));
 				loader.offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
 				loader.offsets.add(new CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true));
+			}
 		}
 	}),
 	RESOLUTION ((loader, str) -> {
@@ -109,9 +105,9 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 		loader.header.setResolution(res[Integer.parseInt(str[1])]);
 	}),
 	CUSTOMOPTION ((loader, str) -> {
-		List<String> contents = new ArrayList<String>();
+		List<String> contents = new ArrayList<>();
 		for(int i = 3;i < str.length;i++) {
-			if(str[i] != null && str[i].length() > 0) {
+			if(str[i] != null && !str[i].isEmpty()) {
 				contents.add(str[i]);
 			}
 		}
@@ -119,7 +115,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 		for(int i = 0;i < op.length;i++) {
 			op[i] = Integer.parseInt(str[2]) + i;
 		}
-		loader.options.add(new CustomOption(str[1], op, contents.toArray(new String[contents.size()])));
+		loader.options.add(new CustomOption(str[1], op, contents.toArray(String[]::new)));
 	}),
 	CUSTOMFILE ((loader, str) -> {
 		loader.files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", loader.skinpath).replace("\\", "/"), str.length >= 4 ? str[3] : null));

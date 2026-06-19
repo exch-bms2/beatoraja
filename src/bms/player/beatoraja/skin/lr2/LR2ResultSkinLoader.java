@@ -1,6 +1,6 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.function.BiConsumer;
 
 import com.badlogic.gdx.math.Rectangle;
