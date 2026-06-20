@@ -48,6 +48,7 @@ public final class SkinTextFont extends SkinText {
     private int packedGlyphSequence;
     private static final int PRIVATE_USE_AREA_START = 0xe000;
     private static final int PRIVATE_USE_AREA_END = 0xf8ff;
+    private static final int[] MISSING_GLYPH_CANDIDATES = { 0x25a1, 0x25a2, 0x2610, 0x25a0, '?' }; // □, ▢, ☐, ■, ?
     
     private final Color shadowcolor = new Color();
 
@@ -231,13 +232,15 @@ public final class SkinTextFont extends SkinText {
     }
 
     private void ensureBmpFallbackGlyph(int codePoint) {
-        if (fallbackGenerators.length == 0 || activeBmpFallbackGlyphs.contains(codePoint)
-                || font.getData().getGlyph((char) codePoint) != null) {
+        if (activeBmpFallbackGlyphs.contains(codePoint) || font.getData().getGlyph((char) codePoint) != null) {
             return;
         }
 
         try {
             BitmapFont.Glyph glyph = createGlyph(codePoint, codePoint, true);
+            if (glyph == null) {
+                glyph = createMissingGlyph(codePoint);
+            }
             if (glyph != null) {
                 font.getData().setGlyph(codePoint, glyph);
                 activeBmpFallbackGlyphs.add(codePoint);
@@ -260,7 +263,10 @@ public final class SkinTextFont extends SkinText {
         try {
             BitmapFont.Glyph glyph = createGlyph(codePoint, mapped.charValue(), false);
             if (glyph == null) {
-                return null;
+                glyph = createMissingGlyph(mapped.charValue());
+            }
+            if (glyph == null) {
+            	return null;
             }
             font.getData().setGlyph(mapped.charValue(), glyph);
             activeSupplementaryGlyphMap.put(codePoint, mapped);
@@ -290,6 +296,63 @@ public final class SkinTextFont extends SkinText {
             }
         }
         return null;
+    }
+
+    private BitmapFont.Glyph createMissingGlyph(int mappedCodePoint) throws Exception {
+        for (int candidate : MISSING_GLYPH_CANDIDATES) {
+            BitmapFont.Glyph glyph = createGlyph(generator, candidate, mappedCodePoint);
+            if (glyph != null) {
+                return glyph;
+            }
+            for (FreeTypeFontGenerator fallbackGenerator : fallbackGenerators) {
+                glyph = createGlyph(fallbackGenerator, candidate, mappedCodePoint);
+                if (glyph != null) {
+                    return glyph;
+                }
+            }
+        }
+
+        PixmapPacker packer = getFontDataPacker();
+        if (packer == null) {
+            return null;
+        }
+
+        int height = Math.max(8, parameter.size);
+        int width = Math.max(6, Math.round(height * 0.75f));
+        int stroke = Math.max(1, height / 12);
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        try {
+            pixmap.setColor(0, 0, 0, 0);
+            pixmap.fill();
+            Color c = parameter.color != null ? parameter.color : Color.WHITE;
+            pixmap.setColor(c);
+            for (int i = 0; i < stroke; i++) {
+                pixmap.drawRectangle(i, i, width - i * 2, height - i * 2);
+            }
+
+            String glyphName = "missing-" + mappedCodePoint + "-" + packedGlyphSequence++;
+            Rectangle packed = packer.pack(glyphName, pixmap);
+            int page = packer.getPageIndex(glyphName);
+            if (page < 0) {
+                return null;
+            }
+            packer.updateTextureRegions(font.getRegions(), parameter.minFilter, parameter.magFilter, parameter.genMipMaps);
+
+            BitmapFont.Glyph glyph = new BitmapFont.Glyph();
+            glyph.id = mappedCodePoint;
+            glyph.srcX = (int) packed.x;
+            glyph.srcY = (int) packed.y;
+            glyph.width = width;
+            glyph.height = height;
+            glyph.xoffset = 0;
+            glyph.yoffset = -height;
+            glyph.xadvance = width + Math.max(1, stroke);
+            glyph.page = page;
+            font.getData().setGlyphRegion(glyph, font.getRegion(glyph.page));
+            return glyph;
+        } finally {
+            pixmap.dispose();
+        }
     }
 
     private BitmapFont.Glyph createGlyph(int codePoint, int mappedCodePoint, boolean fallbackOnly) throws Exception {

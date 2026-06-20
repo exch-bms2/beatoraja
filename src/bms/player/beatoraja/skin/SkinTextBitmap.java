@@ -185,6 +185,7 @@ public final class SkinTextBitmap extends SkinText {
 
 		private static final int PRIVATE_USE_AREA_START = 0xe000;
 		private static final int PRIVATE_USE_AREA_END = 0xf8ff;
+		private static final int[] MISSING_GLYPH_CANDIDATES = { 0x25a1, 0x25a2, 0x2610, 0x25a0, '?' }; // □, ▢, ☐, ■, ?
 
 		public SkinTextBitmapSource(Path fontPath, boolean usecim) {
 			this(fontPath, usecim, true);
@@ -430,6 +431,9 @@ public final class SkinTextBitmap extends SkinText {
 			}
 
 			BitmapFont.Glyph glyph = findFallbackGlyph(codePoint, codePoint, false);
+			if (glyph == null) {
+				glyph = findMissingGlyph(codePoint);
+			}
 			if (glyph != null && hasRegion(glyph.page)) {
 				fontData.setGlyphRegion(glyph, regions.get(glyph.page));
 				fontData.setGlyph(codePoint, glyph);
@@ -445,6 +449,9 @@ public final class SkinTextBitmap extends SkinText {
 					return null;
 				}
 				BitmapFont.Glyph glyph = findFallbackGlyph(codePoint, mapped.charValue(), true);
+				if (glyph == null) {
+					glyph = findMissingGlyph(mapped.charValue());
+				}
 				if (glyph == null || !hasRegion(glyph.page)) {
 					return null;
 				}
@@ -468,6 +475,34 @@ public final class SkinTextBitmap extends SkinText {
 					activePrivateUseGlyphMap.remove(slot);
 					activeSupplementaryGlyphMap.remove(activeCodePoint);
 					return slot;
+				}
+			}
+			return null;
+		}
+
+		private BitmapFont.Glyph findMissingGlyph(int mappedCodePoint) {
+			for (int candidate : MISSING_GLYPH_CANDIDATES) {
+				BitmapFont.Glyph glyph = fontData.getGlyph((char) candidate);
+				if (glyph != null && hasRegion(glyph.page)) {
+					return copyGlyph(glyph, mappedCodePoint, 0);
+				}
+			}
+
+			for (FallbackFont fallback : fallbackFonts) {
+				if (fallback == null || fallback.path == null) {
+					continue;
+				}
+				CacheableBitmapFont fallbackFont = BitmapFontCache.Get(fallback.path, fallback.type);
+				Integer pageOffset = fallbackPageOffsets.get(fallback);
+				if (fallbackFont == null || fallbackFont.fontData == null || fallbackFont.regions == null || pageOffset == null) {
+					continue;
+				}
+				for (int candidate : MISSING_GLYPH_CANDIDATES) {
+					BitmapFont.Glyph glyph = fallbackFont.fontData.getGlyph((char) candidate);
+					if (glyph != null && glyph.page >= 0 && glyph.page < fallbackFont.regions.size
+							&& hasRegion(glyph.page + pageOffset.intValue())) {
+						return copyGlyph(glyph, mappedCodePoint, pageOffset.intValue(), fallbackFont.glyphYOffset - glyphYOffset);
+					}
 				}
 			}
 			return null;
