@@ -120,6 +120,7 @@ public class FFmpegProcessor implements MovieProcessor {
 		private boolean eof = true;
 
 		private Pixmap pixmap;
+		private byte[] frameRow;
 		private final Object pixmapLock = new Object();
 
 		private String filepath;
@@ -233,19 +234,16 @@ public class FFmpegProcessor implements MovieProcessor {
 
 					if (!commands.isEmpty()) {
 						switch (commands.pollFirst()) {
-						case PLAY:
-							loop = false;
-							restart();
-							break;
-						case LOOP:
-							loop = true;
-							restart();
-							break;
-						case STOP:
-							eof = true;
-							break;
-						case HALT:
-							halt = true;
+							case PLAY -> {
+								loop = false;
+								restart();
+							}
+							case LOOP -> {
+								loop = true;
+								restart();
+							}
+							case STOP -> eof = true;
+							case HALT -> halt = true;
 						}
 					}
 				}
@@ -293,7 +291,7 @@ public class FFmpegProcessor implements MovieProcessor {
 			final int sourceStride = frame.imageStride > 0 ? frame.imageStride : frame.imageWidth * sourceChannels;
 			final int targetChannels = 3;
 			final int targetRowBytes = frame.imageWidth * targetChannels;
-			final byte[] row = new byte[targetRowBytes];
+			final byte[] row = getFrameRow(targetRowBytes);
 
 			pixels.clear();
 			for (int y = 0; y < frame.imageHeight; y++) {
@@ -312,6 +310,13 @@ public class FFmpegProcessor implements MovieProcessor {
 				pixels.put(row);
 			}
 			pixels.flip();
+		}
+
+		private byte[] getFrameRow(int targetRowBytes) {
+			if (frameRow == null || frameRow.length < targetRowBytes) {
+				frameRow = new byte[targetRowBytes];
+			}
+			return frameRow;
 		}
 
 		private void preparePixmapForDraw(Pixmap pixmap) {
