@@ -636,6 +636,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						SkinTextBitmap.SkinTextBitmapSource.FallbackFont[] fallbackFonts =
 								new SkinTextBitmap.SkinTextBitmapSource.FallbackFont[font.fallback.length];
 						for (int i = 0; i < font.fallback.length; i++) {
+							if (font.fallback[i] == null || font.fallback[i].path == null) {
+								continue;
+							}
 							fallbackFonts[i] = new SkinTextBitmap.SkinTextBitmapSource.FallbackFont(
 									skinPath.getParent().resolve(font.fallback[i].path), font.fallback[i].type);
 						}
@@ -647,6 +650,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				} else {
 					String[] fallbackPaths = new String[font.fallback.length];
 					for (int i = 0; i < font.fallback.length; i++) {
+						if (font.fallback[i] == null || font.fallback[i].path == null) {
+							continue;
+						}
 						fallbackPaths[i] = skinPath.getParent().resolve(font.fallback[i].path).toString();
 					}
 					skinText = new SkinTextFont(path.toString(), fallbackPaths, 0, text.size, 0, property);

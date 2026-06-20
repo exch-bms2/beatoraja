@@ -112,6 +112,9 @@ public class JsonSkinSerializer {
 	private class FontFallbackSerializer extends Json.ReadOnlySerializer<JsonSkin.FontFallback> {
 		public JsonSkin.FontFallback read(Json json, JsonValue jsonValue, Class cls) {
 			JsonSkin.FontFallback fallback = new JsonSkin.FontFallback();
+			if (jsonValue == null) {
+				return fallback;
+			}
 			if (jsonValue.isString()) {
 				fallback.path = jsonValue.asString();
 				fallback.type = 0;
@@ -119,9 +122,16 @@ public class JsonSkinSerializer {
 				JsonValue path = jsonValue.get("path");
 				if (path != null) {
 					fallback.path = path.asString();
+				} else if (jsonValue.has("value")) {
+					fallback.path = jsonValue.get("value").asString();
+				} else if (jsonValue.child != null && jsonValue.child.isString()) {
+					fallback.path = jsonValue.child.asString();
 				}
 				JsonValue type = jsonValue.get("type");
 				fallback.type = type != null ? type.asInt() : 0;
+			} else {
+				fallback.path = jsonValue.asString();
+				fallback.type = 0;
 			}
 			return fallback;
 		}
