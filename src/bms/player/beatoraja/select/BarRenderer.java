@@ -209,14 +209,16 @@ public final class BarRenderer {
 			
 			bartextCharset.clear();
 			for (Bar song : manager.currentsongs) {
-				for (char c : song.getTitle().toCharArray()) {
-					bartextCharset.add(c);
+				final String title = song.getTitle();
+				for (int index = 0; index < title.length();) {
+					final int codePoint = title.codePointAt(index);
+					bartextCharset.add(codePoint);
+					index += Character.charCount(codePoint);
 				}
 			}
-			char[] chars = new char[bartextCharset.size];
-			int i = 0;
+			StringBuilder chars = new StringBuilder(bartextCharset.size);
 			for (IntSetIterator iterator = bartextCharset.iterator();iterator.hasNext;) {
-				chars[i++] = (char) iterator.next();
+				chars.appendCodePoint(iterator.next());
 			}
 //			Arrays.fill(bartextCharset, false);
 //			int charCount = 0;
@@ -243,7 +245,7 @@ public final class BarRenderer {
 			
 			for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
 				if(baro.getText(index) != null) {
-					baro.getText(index).prepareFont(String.valueOf(chars));
+					baro.getText(index).prepareFont(chars.toString());
 				}				
 			}
 		}

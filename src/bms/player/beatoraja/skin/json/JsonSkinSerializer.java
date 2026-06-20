@@ -71,6 +71,7 @@ public class JsonSkinSerializer {
 				JsonSkin.Offset[].class,
 				JsonSkin.Source[].class,
 				JsonSkin.Font[].class,
+				JsonSkin.FontFallback[].class,
 				JsonSkin.Image[].class,
 				JsonSkin.ImageSet[].class,
 				JsonSkin.Value[].class,
@@ -93,6 +94,7 @@ public class JsonSkinSerializer {
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
 		}
 
+		json.setSerializer(JsonSkin.FontFallback.class, new FontFallbackSerializer());
 		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty,
 				BooleanPropertyFactory::getBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
 		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadIntegerProperty,
@@ -105,6 +107,24 @@ public class JsonSkinSerializer {
 		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getRateWriter));
 		json.setSerializer(StringWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadStringWriter, null));
 		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, EventFactory::getEvent));
+	}
+
+	private class FontFallbackSerializer extends Json.ReadOnlySerializer<JsonSkin.FontFallback> {
+		public JsonSkin.FontFallback read(Json json, JsonValue jsonValue, Class cls) {
+			JsonSkin.FontFallback fallback = new JsonSkin.FontFallback();
+			if (jsonValue.isString()) {
+				fallback.path = jsonValue.asString();
+				fallback.type = 0;
+			} else if (jsonValue.isObject()) {
+				JsonValue path = jsonValue.get("path");
+				if (path != null) {
+					fallback.path = path.asString();
+				}
+				JsonValue type = jsonValue.get("type");
+				fallback.type = type != null ? type.asInt() : 0;
+			}
+			return fallback;
+		}
 	}
 
 	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {

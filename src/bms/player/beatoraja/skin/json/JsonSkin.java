@@ -98,6 +98,12 @@ public class JsonSkin {
 	public static class Font {
 		public String id;
 		public String path;
+		public FontFallback[] fallback = new FontFallback[0];
+		public int type;
+	}
+
+	public static class FontFallback {
+		public String path;
 		public int type;
 	}
 

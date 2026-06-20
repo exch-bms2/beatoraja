@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.skin.*;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * 選曲スキン
@@ -17,6 +18,7 @@ public class MusicSelectSkin extends Skin {
 	 * クリック可能なBarのindex
 	 */
 	private int[] clickableBar = new int[0];
+	private Rectangle searchTextRegion = new Rectangle(0, 0, 1, 1);
 
 	public MusicSelectSkin(SkinHeader header) {
 		super(header);
@@ -36,6 +38,16 @@ public class MusicSelectSkin extends Skin {
 
 	public void setCenterBar(int centerBar) {
 		this.centerBar = centerBar;
+	}
+
+	public Rectangle getSearchTextRegion() {
+		return searchTextRegion;
+	}
+
+	public void setSearchTextRegion(Rectangle searchTextRegion) {
+		if (searchTextRegion != null) {
+			this.searchTextRegion = searchTextRegion;
+		}
 	}
 
 }

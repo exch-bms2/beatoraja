@@ -633,13 +633,23 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				}
 				if (path.toString().toLowerCase().endsWith(".fnt")) {
 					if (!loader.bitmapSourceMap.containsKey(font.id)) {
-						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, loader.usecim);
+						SkinTextBitmap.SkinTextBitmapSource.FallbackFont[] fallbackFonts =
+								new SkinTextBitmap.SkinTextBitmapSource.FallbackFont[font.fallback.length];
+						for (int i = 0; i < font.fallback.length; i++) {
+							fallbackFonts[i] = new SkinTextBitmap.SkinTextBitmapSource.FallbackFont(
+									skinPath.getParent().resolve(font.fallback[i].path), font.fallback[i].type);
+						}
+						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, fallbackFonts, loader.usecim);
 						source.setType(font.type);
 						loader.bitmapSourceMap.put(font.id, source);
 					}
 					skinText = new SkinTextBitmap(loader.bitmapSourceMap.get(font.id), text.size * ((float)loader.dstr.width / loader.sk.w), property);
 				} else {
-					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
+					String[] fallbackPaths = new String[font.fallback.length];
+					for (int i = 0; i < font.fallback.length; i++) {
+						fallbackPaths[i] = skinPath.getParent().resolve(font.fallback[i].path).toString();
+					}
+					skinText = new SkinTextFont(path.toString(), fallbackPaths, 0, text.size, 0, property);
 				}
 				skinText.setConstantText(text.constantText);
 				StringWriter writer = text.event != null ? text.event : StringPropertyFactory.getStringWriter(text.ref);
