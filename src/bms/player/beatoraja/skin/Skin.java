@@ -244,22 +244,13 @@ public class Skin {
 	}
 	
 	private SkinObjectRenderer renderer;
+	private final Matrix4 transform = new Matrix4();
 	
 	private long nextpreparetime;
 	private long prepareduration;
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
-		if(renderer == null) {
-			SkinOffset offsetAll = getOffsetAll(state);
-			Matrix4 transform = new Matrix4();
-			if(offsetAll != null) {
-				transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
-			} else {
-				transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
-			}
-			sprite.setTransformMatrix(transform);
-			renderer = new SkinObjectRenderer(sprite);
-		}
+		ensureRenderer(sprite, state);
 		
 		final long microtime = state.timer.getNowMicroTime();
 
@@ -316,17 +307,7 @@ public class Skin {
 	}
 
 	public void drawAllObjectsSafely(SpriteBatch sprite, MainState state) {
-		if(renderer == null) {
-			SkinOffset offsetAll = getOffsetAll(state);
-			Matrix4 transform = new Matrix4();
-			if(offsetAll != null) {
-				transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
-			} else {
-				transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
-			}
-			sprite.setTransformMatrix(transform);
-			renderer = new SkinObjectRenderer(sprite);
-		}
+		ensureRenderer(sprite, state);
 
 		final long microtime = state.timer.getNowMicroTime();
 		if (nextpreparetime <= microtime) {
@@ -351,6 +332,22 @@ public class Skin {
 				}
 			}
 		}
+	}
+
+	private void ensureRenderer(SpriteBatch sprite, MainState state) {
+		if(renderer != null) {
+			return;
+		}
+
+		SkinOffset offsetAll = getOffsetAll(state);
+		if(offsetAll != null) {
+			transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0,
+					(offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
+		} else {
+			transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
+		}
+		sprite.setTransformMatrix(transform);
+		renderer = new SkinObjectRenderer(sprite);
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
@@ -566,21 +563,15 @@ public class Skin {
 			}
 
 			switch (blend) {
-			case 2:
-				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-				break;
-			case 3:
+			case 2 -> sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+			case 3 -> {
 				// TODO 減算描画は難しいか？
-				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
-				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
-				break;
-			case 4:
-				sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
-				break;
-			case 9:
-				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
-				break;
+					Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
+					sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+					Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
+			}
+			case 4 -> sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
+			case 9 -> sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 			}
 
 			if(color != null) {
@@ -622,11 +613,17 @@ public class Skin {
 		}
 
 		public void setColor(Color color) {
-			this.color.set(color);
+			this.color.r = color.r;
+			this.color.g = color.g;
+			this.color.b = color.b;
+			this.color.a = color.a;
 		}
 		
 		public void setColor(float r, float g, float b, float a) {
-			this.color.set(r,g,b,a);
+			this.color.r = r;
+			this.color.g = g;
+			this.color.b = b;
+			this.color.a = a;
 		}
 	}
 
@@ -634,15 +631,8 @@ public class Skin {
 		SkinOffset offsetAll = null;
 		if(state instanceof BMSPlayer) {
 			switch(((BMSPlayer)state).getSkinType()) {
-			case PLAY_5KEYS:
-			case PLAY_7KEYS:
-			case PLAY_9KEYS:
-			case PLAY_10KEYS:
-			case PLAY_14KEYS:
-			case PLAY_24KEYS:
-			case PLAY_24KEYS_DOUBLE:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL);
-				break;
+				case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE ->
+					offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL);
 			}
 		}
 		return offsetAll;
