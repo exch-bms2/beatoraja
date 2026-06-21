@@ -105,9 +105,10 @@ public final class SkinTextBitmap extends SkinText {
 
 		float scaleX = font.getData().scaleX;
 		float scaleY = font.getData().scaleY;
+		float ascent = font.getData().ascent;
 		for (GlyphRun run : layout.runs) {
 			float glyphX = x + run.x;
-			float glyphY = y + run.y;
+			float glyphY = y + ascent + run.y;
 			for (int i = 0; i < run.glyphs.size; i++) {
 				Glyph glyph = run.glyphs.get(i);
 				glyphX += run.xAdvances.get(i);
