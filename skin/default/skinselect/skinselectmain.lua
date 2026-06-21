@@ -143,6 +143,9 @@ local function main()
 		{id = "preview-bg", dst = {
 			{x = 470, y = 350, w = 640, h = 360},
 		}},
+		{id = "skin-preview", dst = {
+			{x = 470, y = 350, w = 640, h = 360},
+		}},
 		{id = "skin-name", dst = {
 			{x = 790, y = 310, w = 640, h = 24},
 		}},
