@@ -147,17 +147,6 @@ public abstract class MainState {
 		return main.getOffset(id);
 	}
 
-	public final TextureRegion getImage(int imageid) {
-		return switch (imageid) {
-			case IMAGE_BACKBMP -> resource.getBMSResource().getBackbmp();
-			case IMAGE_STAGEFILE -> resource.getBMSResource().getStagefile();
-			case IMAGE_BANNER -> resource.getBMSResource().getBanner();
-			case IMAGE_BLACK -> main.black;
-			case IMAGE_WHITE -> main.white;
-			default -> null;
-		};
-	}
-
 	public final Stage getStage() {
 		return stage;
 	}

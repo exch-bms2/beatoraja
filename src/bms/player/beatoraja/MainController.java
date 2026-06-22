@@ -120,9 +120,6 @@ public final class MainController {
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
 
-	protected TextureRegion black;
-	protected TextureRegion white;
-
 	private final Array<MainStateListener> stateListener = new Array<MainStateListener>();
 
 	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated) {
@@ -367,14 +364,6 @@ public final class MainController {
 			targetlist.add("RIVAL_" + (i + 1));
 		}
 		TargetProperty.setTargets(targetlist.toArray(String.class), this);
-
-		Pixmap plainPixmap = new Pixmap(2,1, Pixmap.Format.RGBA8888);
-		plainPixmap.drawPixel(0,0, Color.toIntBits(255,0,0,0));
-		plainPixmap.drawPixel(1,0, Color.toIntBits(255,255,255,255));
-		Texture plainTexture = new Texture(plainPixmap);
-		black = new TextureRegion(plainTexture,0,0,1,1);
-		white = new TextureRegion(plainTexture,1,0,1,1);
-		plainPixmap.dispose();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 

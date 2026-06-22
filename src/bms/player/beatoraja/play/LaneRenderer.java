@@ -16,10 +16,12 @@ import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
@@ -44,6 +46,9 @@ public class LaneRenderer {
 	private final BMSPlayer main;
 
 	private BitmapFont font;
+
+	private JudgeAreaOverlay judgearea;
+
 	private final PlaySkin skin;
 
 	private final PlayerConfig config;
@@ -149,7 +154,11 @@ public class LaneRenderer {
 			basehispeed = playconfig.getHispeed();
 		}
 		this.hispeedmargin = playconfig.getHispeedMargin();
-	}
+
+		if (config.isShowjudgearea()) {
+			judgearea = new JudgeAreaOverlay();
+		}
+		}
 
 	public float getHispeed() {
 		return playconfig.getHispeed();
@@ -298,28 +307,8 @@ public class LaneRenderer {
 		}
 
 		// 判定エリア表示
-		if (config.isShowjudgearea()) {
-			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
-					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
-			for (int lane = 0; lane < lanes.length; lane++) {
-				final JudgeWindow window = main.getJudgeManager().getJudgeWindow();
-				final NoteType type = main.getJudgeManager().isScratch(lane) ? NoteType.SCRATCH : NoteType.NOTE;
-				for (int i = pos; i < timelines.length; i++) {
-					final TimeLine tl = timelines[i];
-					if (tl.getMicroTime() >= microtime) {
-						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * (i > 0 ? timelines[i - 1].getScroll() : 1.0) * rxhs
-								/ (tl.getMicroTime() - (i > 0
-										? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
-						for (int j = color.length - 1; j >= 0; j--) {
-							sprite.setColor(color[j]);
-							long nj = j > 0 ? window.getTime(type, j - 1, true) : 0;
-							sprite.draw(main.getImage(IMAGE_WHITE), lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
-									(float) ((window.getTime(type, j, true) - nj) * rate));
-						}
-						break;
-					}
-				}
-			}
+		if (judgearea != null) {
+			judgearea.draw(sprite, microtime, lanes, rxhs, hl);
 		}
 
 		// draw section line
@@ -701,9 +690,55 @@ public class LaneRenderer {
 	}
 
 	public void dispose() {
-		if (font != null) {
-			font.dispose();
-			font = null;
+		Optional.ofNullable(font).ifPresent(skin -> skin.dispose());
+		font = null;
+		Optional.ofNullable(judgearea).ifPresent(skin -> skin.dispose());
+		judgearea = null;
+
+	}
+
+	private class JudgeAreaOverlay implements Disposable {
+
+		private final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
+				Color.valueOf("ff800020"), Color.valueOf("ff000020") };
+
+		private static TextureRegion white;
+
+		public JudgeAreaOverlay() {
+			Pixmap plainPixmap = new Pixmap(1,1, Pixmap.Format.RGBA8888);
+			plainPixmap.drawPixel(0,0, Color.toIntBits(255,255,255,255));
+			Texture plainTexture = new Texture(plainPixmap);
+			white = new TextureRegion(plainTexture,0,0,1,1);
+			plainPixmap.dispose();
+
+		}
+
+		private void draw(SkinObjectRenderer sprite, long microtime, SkinLane[] lanes, double rxhs, double hl) {
+			for (int lane = 0; lane < lanes.length; lane++) {
+				final JudgeWindow window = main.getJudgeManager().getJudgeWindow();
+				final NoteType type = main.getJudgeManager().isScratch(lane) ? NoteType.SCRATCH : NoteType.NOTE;
+				for (int i = pos; i < timelines.length; i++) {
+					final TimeLine tl = timelines[i];
+					if (tl.getMicroTime() >= microtime) {
+						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * (i > 0 ? timelines[i - 1].getScroll() : 1.0) * rxhs
+								/ (tl.getMicroTime() - (i > 0
+								? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
+						for (int j = color.length - 1; j >= 0; j--) {
+							sprite.setColor(color[j]);
+							long nj = j > 0 ? window.getTime(type, j - 1, true) : 0;
+							sprite.draw(white, lanes[lane].region.x, (float) (hl + nj * rate), lanes[lane].region.width,
+									(float) ((window.getTime(type, j, true) - nj) * rate));
+						}
+						break;
+					}
+				}
+			}
+
+		}
+
+		@Override
+		public void dispose() {
+			white.getTexture().dispose();
 		}
 	}
 }
