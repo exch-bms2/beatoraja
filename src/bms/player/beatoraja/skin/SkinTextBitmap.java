@@ -27,6 +27,8 @@ public final class SkinTextBitmap extends SkinText {
 	private final BitmapFont font;
 	private final GlyphLayout layout;
 	private final float size;
+	private final Vector2 shadowOffsetUniform = new Vector2();
+	private final Color shadowDrawColor = new Color();
 
 	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
 		this(source, size, StringPropertyFactory.getStringProperty(-1));
@@ -68,13 +70,14 @@ public final class SkinTextBitmap extends SkinText {
 				shader.setUniformf("u_outlineColor", getOutlineColor());
 				shader.setUniformf("u_shadowColor", getShadowColor());
 				shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
-				shader.setUniformf("u_shadowOffset",
-						new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
+				shadowOffsetUniform.set(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight());
+				shader.setUniformf("u_shadowOffset", shadowOffsetUniform);
 			});
 		} else {
 			sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
 			if (!getShadowOffset().isZero()) {
-				setLayout(new Color(color.r / 2, color.g / 2, color.b / 2, color.a), region);
+				shadowDrawColor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
+				setLayout(shadowDrawColor, region);
 				sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
 			}
 			setLayout(color, region);
