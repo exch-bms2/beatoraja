@@ -24,7 +24,7 @@ public class JsonSkinConfigurationSkinObjectLoader extends JsonSkinObjectLoader<
 		if (obj != null) {
 			return obj;
 		}
-		return dst.id.equals("skin-preview") ? new SkinPreview() : null;
+		return sk.skinpreview != null && dst.id.equals(sk.skinpreview.id) ? new SkinPreview() : null;
 	}
 
 }

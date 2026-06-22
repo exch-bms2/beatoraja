@@ -39,6 +39,10 @@ local function main()
 		{id = 0, path = "../VL-Gothic-Regular.ttf"}
 	}
 
+	skin.skinpreview = {
+		id = "skin-preview"
+	}
+
 	skin.image = {
 		{id = "preview-bg", src = 0, x = 0, y = 664, w = 640, h = 360},
 		{id = "arrow-l", src = 0, x = 989, y = 0, w = 12, h = 12},

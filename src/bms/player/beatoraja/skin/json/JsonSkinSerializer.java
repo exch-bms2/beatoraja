@@ -53,6 +53,7 @@ public class JsonSkinSerializer {
 				JsonSkin.NoteSet.class,
 				JsonSkin.Gauge.class,
 				JsonSkin.BGA.class,
+				JsonSkin.SkinPreview.class,
 				JsonSkin.Judge.class,
 				JsonSkin.SongList.class,
 				JsonSkin.Destination.class,
