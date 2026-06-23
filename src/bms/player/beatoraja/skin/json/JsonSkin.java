@@ -463,6 +463,11 @@ public class JsonSkin {
 		public int w = Integer.MIN_VALUE;
 		public int h = Integer.MIN_VALUE;
 
+		public int clip_x = Integer.MIN_VALUE;
+		public int clip_y = Integer.MIN_VALUE;
+		public int clip_w = Integer.MIN_VALUE;
+		public int clip_h = Integer.MIN_VALUE;
+
 		public int acc = Integer.MIN_VALUE;
 
 		public int a = Integer.MIN_VALUE;

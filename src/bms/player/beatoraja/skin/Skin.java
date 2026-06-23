@@ -12,13 +12,17 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.property.TimerProperty;
 import bms.player.beatoraja.skin.property.TimerPropertyFactory;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntIntMap;
@@ -165,6 +169,10 @@ public class Skin {
 		object.setMouseRect(x * dw, y * dh, w * dw, h * dh);
 	}
 
+	public void setDestinationClip(SkinObject object, long time, float x, float y, float w, float h) {
+		object.setDestinationClip(time, new Rectangle(x * dw, y * dh, w * dw, h * dh));
+	}
+
 	public SkinObject[] getAllSkinObjects() {
 		return objects.toArray(SkinObject.class);
 	}
@@ -245,6 +253,7 @@ public class Skin {
 	
 	private SkinObjectRenderer renderer;
 	private final Matrix4 transform = new Matrix4();
+	private final OrthographicCamera scissorCamera = new OrthographicCamera();
 	
 	private long nextpreparetime;
 	private long prepareduration;
@@ -272,7 +281,7 @@ public class Skin {
 			for (SkinObject obj : objectarray) {
 				if (obj.draw) {
 					var objDraw = System.nanoTime();
-					obj.draw(renderer);
+					drawObject(obj);
 					tempmap.get(obj.getClass())[4] += (System.nanoTime() - objDraw);
 				}
 			}
@@ -300,7 +309,7 @@ public class Skin {
 
 			for (SkinObject obj : objectarray) {
 				if (obj.draw) {
-					obj.draw(renderer);
+					drawObject(obj);
 				}
 			}
 		}
@@ -326,10 +335,26 @@ public class Skin {
 		for (SkinObject obj : objectarray) {
 			if (obj.draw) {
 				try {
-					obj.draw(renderer);
+					drawObject(obj);
 				} catch (Throwable e) {
 					obj.draw = false;
 				}
+			}
+		}
+	}
+
+	private void drawObject(SkinObject obj) {
+		if (!obj.hasClip()) {
+			obj.draw(renderer);
+			return;
+		}
+
+		Rectangle clip = obj.getClip();
+		if (renderer.pushClip(clip.x, clip.y, clip.width, clip.height)) {
+			try {
+				obj.draw(renderer);
+			} finally {
+				renderer.popClip();
 			}
 		}
 	}
@@ -347,7 +372,8 @@ public class Skin {
 			transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
 		}
 		sprite.setTransformMatrix(transform);
-		renderer = new SkinObjectRenderer(sprite);
+		scissorCamera.setToOrtho(false, width, height);
+		renderer = new SkinObjectRenderer(sprite, scissorCamera);
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
@@ -454,6 +480,7 @@ public class Skin {
 	public static final class SkinObjectRenderer {
 		
 		private final SpriteBatch sprite;
+		private final Camera camera;
 		
 		private final ShaderProgram[] shaders = new ShaderProgram[6];
 		
@@ -473,9 +500,13 @@ public class Skin {
 		private final Color color = new Color(Color.WHITE);
 		
 		private Color orgcolor;
+
+		private final Rectangle clipBounds = new Rectangle();
+		private final Rectangle scissors = new Rectangle();
 		
-		public SkinObjectRenderer(SpriteBatch sprite) {
+		public SkinObjectRenderer(SpriteBatch sprite, Camera camera) {
 			this.sprite = sprite;
+			this.camera = camera;
 			shaders[TYPE_BILINEAR] = ShaderManager.getShader("bilinear");
 			shaders[TYPE_FFMPEG] = ShaderManager.getShader("ffmpeg");
 			shaders[TYPE_LAYER] = ShaderManager.getShader("layer");
@@ -487,6 +518,21 @@ public class Skin {
 
 		public SpriteBatch getSpriteBatch() {
 			return sprite;
+		}
+
+		public boolean pushClip(float x, float y, float width, float height) {
+			if (width <= 0 || height <= 0) {
+				return false;
+			}
+			sprite.flush();
+			clipBounds.set(x, y, width, height);
+			ScissorStack.calculateScissors(camera, sprite.getTransformMatrix(), clipBounds, scissors);
+			return ScissorStack.pushScissors(scissors);
+		}
+
+		public void popClip() {
+			sprite.flush();
+			ScissorStack.popScissors();
 		}
 
 		public void draw(BitmapFont font, String s, float x, float y, Color c) {

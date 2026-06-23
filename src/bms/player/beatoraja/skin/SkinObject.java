@@ -99,11 +99,14 @@ public abstract class SkinObject extends DisposableObject {
 
 	public boolean draw;
 	public Rectangle region = new Rectangle();
+	private boolean clip;
+	private Rectangle clipRegion = new Rectangle();
 	public Color color = new Color();
 	public int angle;
 	private SkinOffset[] off = new SkinOffset[0];
 
 	private Rectangle fixr = null;
+	private Rectangle fixclip = null;
 	private Color fixc = null;
 	private int fixa = Integer.MIN_VALUE;
 
@@ -176,15 +179,24 @@ public abstract class SkinObject extends DisposableObject {
 	
 	private void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, TimerProperty timer) {
-		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
+		setDestination(time, x, y, w, h, null, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
+	}
+
+	private void setDestination(long time, float x, float y, float w, float h, Rectangle clip, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, TimerProperty timer) {
+		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), clip, new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
 		if (dst.length == 0) {
 			fixr = obj.region;
+			fixclip = obj.clip;
 			fixc = obj.color;
 			fixa = obj.angle;
 		} else {
 			if (!obj.region.equals(fixr)) {
 				fixr = null;
+			}
+			if (fixclip != obj.clip && (fixclip == null || obj.clip == null || !obj.clip.equals(fixclip))) {
+				fixclip = null;
 			}
 			if (!obj.color.equals(fixc)) {
 				fixc = null;
@@ -230,6 +242,16 @@ public abstract class SkinObject extends DisposableObject {
 		dst = l.toArray(SkinObjectDestination.class);
 		starttime = dst[0].time;
 		endtime = dst[dst.length - 1].time;		
+	}
+
+	public void setDestinationClip(long time, Rectangle clip) {
+		for (SkinObjectDestination destination : dst) {
+			if (destination.time == time) {
+				destination.clip = clip;
+				fixclip = dst.length == 1 ? clip : null;
+				return;
+			}
+		}
 	}
 
 	public BooleanProperty[] getDrawCondition() {
@@ -298,6 +320,7 @@ public abstract class SkinObject extends DisposableObject {
 	 * @return 描画領域
 	 */
 	public void prepareRegion(long time, MainState state) {
+		clip = false;
 		final TimerProperty timer = dsttimer;
 
 		if (timer != null) {
@@ -381,6 +404,46 @@ public abstract class SkinObject extends DisposableObject {
 			}
 			return;
 		}
+	}
+
+	private void prepareClip(float offsetX, float offsetY) {
+		if (fixclip != null) {
+			clipRegion.set(fixclip);
+		} else {
+			getRate();
+			Rectangle clip1 = dst[index].clip;
+			if (clip1 == null) {
+				clip = false;
+				return;
+			}
+			if(rate == 0 || acc == 3) {
+				clipRegion.set(clip1);
+			} else {
+				Rectangle clip2 = dst[index + 1].clip;
+				if (clip2 == null) {
+					clipRegion.set(clip1);
+				} else {
+					clipRegion.x = clip1.x + (clip2.x - clip1.x) * rate;
+					clipRegion.y = clip1.y + (clip2.y - clip1.y) * rate;
+					clipRegion.width = clip1.width + (clip2.width - clip1.width) * rate;
+					clipRegion.height = clip1.height + (clip2.height - clip1.height) * rate;
+				}
+			}
+		}
+
+		for(SkinOffset off : this.off) {
+			if (off != null) {
+				if(!relative) {
+					clipRegion.x += off.x - off.w / 2;
+					clipRegion.y += off.y - off.h / 2;
+				}
+				clipRegion.width += off.w;
+				clipRegion.height += off.h;
+			}
+		}
+		clipRegion.x += offsetX;
+		clipRegion.y += offsetY;
+		clip = clipRegion.width > 0 && clipRegion.height > 0;
 	}
 	
 	public Rectangle getDestination(long time, MainState state) {
@@ -510,6 +573,7 @@ public abstract class SkinObject extends DisposableObject {
 		prepareRegion(time, state);
 		region.x += offsetX;
 		region.y += offsetY;
+		prepareClip(offsetX, offsetY);
 		if (mouseRect != null && !mouseRect.contains(state.main.getInputProcessor().getMouseX() -region.x,
 				state.main.getInputProcessor().getMouseY() - region.y)) {
 			draw = false;
@@ -521,6 +585,14 @@ public abstract class SkinObject extends DisposableObject {
 	}
 
 	public abstract void draw(SkinObjectRenderer sprite);
+
+	public boolean hasClip() {
+		return clip;
+	}
+
+	public Rectangle getClip() {
+		return clipRegion;
+	}
 
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image) {
 		if (color.a == 0f || image == null) {
@@ -649,13 +721,19 @@ public abstract class SkinObject extends DisposableObject {
 		 * 描画領域
 		 */
 		public final Rectangle region;
+		public Rectangle clip;
 		public final int acc;
 		public final Color color;
 		public final int angle;
 
 		public SkinObjectDestination(long time, Rectangle region, Color color, int angle, int acc) {
+			this(time, region, null, color, angle, acc);
+		}
+
+		public SkinObjectDestination(long time, Rectangle region, Rectangle clip, Color color, int angle, int acc) {
 			this.time = time;
 			this.region = region;
+			this.clip = clip;
 			this.color = color;
 			this.angle = angle;
 			this.acc = acc;

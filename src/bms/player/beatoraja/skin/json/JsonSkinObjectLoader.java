@@ -707,6 +707,10 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				a.r = (a.r == Integer.MIN_VALUE ? prev.r : a.r);
 				a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 				a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
+				a.clip_x = (a.clip_x == Integer.MIN_VALUE ? prev.clip_x : a.clip_x);
+				a.clip_y = (a.clip_y == Integer.MIN_VALUE ? prev.clip_y : a.clip_y);
+				a.clip_w = (a.clip_w == Integer.MIN_VALUE ? prev.clip_w : a.clip_w);
+				a.clip_h = (a.clip_h == Integer.MIN_VALUE ? prev.clip_h : a.clip_h);
 			}
 			if(dst.draw != null) {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
@@ -714,6 +718,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 			} else {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
 						a.angle, dst.center, dst.loop, dst.timer, dst.op);
+			}
+			if (a.clip_x != Integer.MIN_VALUE && a.clip_y != Integer.MIN_VALUE && a.clip_w != Integer.MIN_VALUE && a.clip_h != Integer.MIN_VALUE) {
+				skin.setDestinationClip(obj, a.time, a.clip_x, a.clip_y, a.clip_w, a.clip_h);
 			}
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
