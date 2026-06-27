@@ -63,6 +63,7 @@ public class SongData implements Validatable, IpfsInformation {
 	private String subartist = "";
 	private String fullartist;
 	private int favorite;
+	private SongReview songReview;
 	private List<String> path = new ArrayList<String>();
 	private String tag = "";
 	private String md5 = "";
@@ -222,6 +223,21 @@ public class SongData implements Validatable, IpfsInformation {
 	}
 	public void setFavorite(int favorite) {
 		this.favorite = favorite;
+	}
+	public SongReview getSongReview() {
+		if (songReview == null) {
+			songReview = new SongReview();
+		}
+		if ((songReview.getSha256() == null || songReview.getSha256().length() == 0) && getSha256().length() > 0) {
+			songReview.setSha256(getSha256());
+		}
+		return songReview;
+	}
+	public void setSongReview(SongReview songReview) {
+		this.songReview = songReview != null ? songReview : new SongReview();
+		if ((this.songReview.getSha256() == null || this.songReview.getSha256().length() == 0) && getSha256().length() > 0) {
+			this.songReview.setSha256(getSha256());
+		}
 	}
 	public String getPath() {
 		if(path.size() > 0) {
@@ -427,6 +443,9 @@ public class SongData implements Validatable, IpfsInformation {
 	}
 	public void setSha256(String sha256) {
 		this.sha256 = sha256;
+		if (songReview != null) {
+			songReview.setSha256(sha256);
+		}
 	}
 	public int getFeature() {
 		return feature;

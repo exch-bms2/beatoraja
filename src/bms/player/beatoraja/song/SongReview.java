@@ -16,7 +16,7 @@ public class SongReview {
 
 	private int favorite;
 
-	private double level;
+	private double levelreview;
 	
 	private String comment = "";
 
@@ -49,12 +49,12 @@ public class SongReview {
 		this.favorite = favorite;
 	}
 
-	public double getLevel() {
-		return level;
+	public double getLevelreview() {
+		return levelreview;
 	}
 
-	public void setLevel(double level) {
-		this.level = level;
+	public void setLevelreview(double levelreview) {
+		this.levelreview = levelreview;
 	}
 
 	public String getComment() {

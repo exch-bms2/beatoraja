@@ -41,13 +41,13 @@ public class MainLoader extends Application {
 
 	private static final boolean ALLOWS_32BIT_JAVA = false;
 
-	private static SongDatabaseAccessor songdb;
-
 	private static final Set<String> illegalSongs = new HashSet<String>();
 
 	private static Path bmsPath;
 
 	private static VersionChecker version;
+
+	private final SongDatabaseAccessorProvider songDatabaseAccessorProvider = new SongDatabaseAccessorProvider();
 
 	public static void main(String[] args) {
 
@@ -110,8 +110,17 @@ public class MainLoader extends Application {
 			config = Config.read();
 		}
 
-		for(SongData song : getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs)) {
-			MainLoader.putIllegalSong(song.getSha256());
+		SongDatabaseAccessor songdb;
+		try {
+			songdb = new SongDatabaseAccessorProvider().get(config,
+					player != null ? player.getId() : config.getPlayername());
+			for(SongData song : songdb.getSongDatas(SongUtils.illegalsongs)) {
+				MainLoader.putIllegalSong(song.getSha256());
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
+			return;
 		}
 		if(illegalSongs.size() > 0) {
 			JOptionPane.showMessageDialog(null, "This Application detects " + illegalSongs.size() + " illegal BMS songs. \n Remove them, update song database and restart.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -119,7 +128,7 @@ public class MainLoader extends Application {
 		}
 
 		try {
-			final MainController main = new MainController(f, config, player, auto, songUpdated);
+			final MainController main = new MainController(f, config, player, auto, songUpdated, songdb);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;
@@ -250,19 +259,6 @@ public class MainLoader extends Application {
 		return LwjglApplicationConfiguration.getDesktopDisplayMode();
 	}
 
-	public static SongDatabaseAccessor getScoreDatabaseAccessor() {
-		if(songdb == null) {
-			try {
-				Config config = Config.read();
-				Class.forName("org.sqlite.JDBC");
-				songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(), config.getBmsroot());
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-		return songdb;
-	}
-
 	public static VersionChecker getVersionChecker() {
 		if(version == null) {
 			version = new GithubVersionChecker();
@@ -304,6 +300,7 @@ public class MainLoader extends Application {
 			VBox stackPane = (VBox) loader.load();
 			PlayConfigurationView bmsinfo = (PlayConfigurationView) loader.getController();
 			bmsinfo.setBMSInformationLoader(this);
+			bmsinfo.setSongDatabaseAccessorResolver(songDatabaseAccessorProvider::get);
 			bmsinfo.update(config);
 			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 			primaryStage.setScene(scene);
@@ -317,6 +314,35 @@ public class MainLoader extends Application {
 		} catch (IOException e) {
 			Logger.getGlobal().severe(e.getMessage());
 			e.printStackTrace();
+		}
+	}
+
+	private static class SongDatabaseAccessorProvider {
+
+		private SongDatabaseAccessor songdb;
+
+		private String songpath;
+
+		private String reviewpath;
+
+		public synchronized SongDatabaseAccessor get(Config config) throws ClassNotFoundException {
+			return get(config, config.getPlayername());
+		}
+
+		public synchronized SongDatabaseAccessor get(Config config, String playername) throws ClassNotFoundException {
+			String nextSongpath = config.getSongpath();
+			String nextReviewpath = getSongReviewPath(config, playername);
+			if (songdb == null || !nextSongpath.equals(songpath) || !nextReviewpath.equals(reviewpath)) {
+				Class.forName("org.sqlite.JDBC");
+				songdb = new SQLiteSongDatabaseAccessor(nextSongpath, config.getBmsroot(), nextReviewpath);
+				songpath = nextSongpath;
+				reviewpath = nextReviewpath;
+			}
+			return songdb;
+		}
+
+		private String getSongReviewPath(Config config, String playername) {
+			return config.getPlayerpath() + File.separatorChar + playername + File.separatorChar + "songreview.db";
 		}
 	}
 

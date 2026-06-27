@@ -44,6 +44,10 @@ public interface SongDatabaseAccessor {
 
 	public void setSongDatas(SongData[] songs);
 
+	public default void setSongReviews(SongData[] songs) {
+		setSongDatas(songs);
+	}
+
 	public SongData[] getSongDatasByText(String text);
 
 	/**

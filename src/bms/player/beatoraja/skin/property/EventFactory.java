@@ -458,13 +458,13 @@ public class EventFactory {
 			final boolean next = arg1 >= 0;
 			final Consumer<SongData> changeFav = (sd) -> {
 				int type = 0;
-				if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+				if((sd.getSongReview().getFavorite() & SongData.INVISIBLE_CHART) != 0) {
 					type = 2;
-				} else if((sd.getFavorite() & SongData.FAVORITE_CHART) != 0) {
+				} else if((sd.getSongReview().getFavorite() & SongData.FAVORITE_CHART) != 0) {
 					type = 1;
 				}				
 				type = (type + (next ? 1 : 2)) % 3;
-				int favorite = sd.getFavorite();
+				int favorite = sd.getSongReview().getFavorite();
 				switch (type) {
 				case 0:
 					favorite &= 0xffffffff ^ (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART);
@@ -478,17 +478,17 @@ public class EventFactory {
 					favorite &= 0xffffffff ^ SongData.FAVORITE_CHART;
 					break;
 				}
-				sd.setFavorite(favorite);
-				state.main.getSongDatabase().setSongDatas(new SongData[]{sd});
+				sd.getSongReview().setFavorite(favorite);
+				state.main.getSongDatabase().setSongReviews(new SongData[]{sd});
 			};
 			if(state instanceof MusicSelector selector && selector.getSelectedBar() instanceof SongBar songbar) {
 				final SongData sd = songbar.getSongData();
 
 				if (sd != null && sd.getPath() != null) {
 					String message = next ? "Added to Invisible Chart" : "Removed from Favorite Chart";
-					if ((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
+					if ((sd.getSongReview().getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
 						message = next ? "Added to Favorite Chart" : "Added to Invisible Chart";
-					} else if ((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+					} else if ((sd.getSongReview().getFavorite() & SongData.INVISIBLE_CHART) != 0) {
 						message = next ? "Removed from Invisible Chart" : "Added to Favorite Chart";
 					}
 					
@@ -510,15 +510,15 @@ public class EventFactory {
 			final boolean next = arg1 >= 0;
 			final Consumer<SongData> changeFav = (sd) -> {
 				int type = 0;
-				if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+				if((sd.getSongReview().getFavorite() & SongData.INVISIBLE_SONG) != 0) {
 					type = 2;
-				} else if((sd.getFavorite() & SongData.FAVORITE_SONG) != 0) {
+				} else if((sd.getSongReview().getFavorite() & SongData.FAVORITE_SONG) != 0) {
 					type = 1;
 				}				
 				type = (type + (next ? 1 : 2)) % 3;
 				SongData[] songs = state.main.getSongDatabase().getSongDatas("folder", sd.getFolder());
 				for(SongData song : songs) {
-					int favorite = song.getFavorite();
+					int favorite = song.getSongReview().getFavorite();
 					switch (type) {
 						case 0:
 							favorite &= 0xffffffff ^ (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG);
@@ -532,18 +532,18 @@ public class EventFactory {
 							favorite &= 0xffffffff ^ SongData.FAVORITE_SONG;
 							break;
 					}
-					song.setFavorite(favorite);
+					song.getSongReview().setFavorite(favorite);
 				}
-				state.main.getSongDatabase().setSongDatas(songs);
+				state.main.getSongDatabase().setSongReviews(songs);
 			};
 
 			if(state instanceof MusicSelector selector && selector.getSelectedBar() instanceof SongBar songbar) {
 				final SongData sd = songbar.getSongData();
 				if(sd != null && sd.getPath() != null) {
 					String message = next ? "Added to Invisible Song" : "Removed from Favorite Song";
-					if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
+					if((sd.getSongReview().getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
 						message = next ? "Added to Favorite Song" : "Added to Invisible Song";
-					} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+					} else if((sd.getSongReview().getFavorite() & SongData.INVISIBLE_SONG) != 0) {
 						message =next ?  "Removed from Invisible Song" : "Added to Favorite Song";
 					}
 					changeFav.accept(sd);					

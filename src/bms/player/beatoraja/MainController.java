@@ -85,6 +85,8 @@ public final class MainController {
 	private BMSPlayerMode auto;
 	private boolean songUpdated;
 
+	private final SongDatabaseAccessor songdb;
+
 	private SongInformationAccessor infodb;
 
 	private IRStatus[] ir;
@@ -122,10 +124,12 @@ public final class MainController {
 
 	private final Array<MainStateListener> stateListener = new Array<MainStateListener>();
 
-	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated) {
+	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated,
+			SongDatabaseAccessor songdb) {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
+		this.songdb = songdb;
 
 		for(int i = 0;i < offset.length;i++) {
 			offset[i] = new SkinOffset();
@@ -204,7 +208,7 @@ public final class MainController {
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {
-		return MainLoader.getScoreDatabaseAccessor();
+		return songdb;
 	}
 
 	public SongInformationAccessor getInfoDatabase() {

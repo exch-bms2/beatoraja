@@ -1123,7 +1123,7 @@ public class IntegerPropertyFactory {
 		}),
 		
 		option_target1_1p(61, (state) -> {
-			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult) 
+			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult)
 					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
 			if(rival != null && rival.getOption() >= 0) {
 				return rival.getOption() % 10;
@@ -1131,7 +1131,7 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 		option_target1_2p(62, (state) -> {
-			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult) 
+			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult)
 					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
 			if(rival != null && rival.getOption() >= 0) {
 				return (rival.getOption() / 10) % 10;
@@ -1139,7 +1139,7 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 		option_target1_dp(63, (state) -> {
-			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult) 
+			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult)
 					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
 			if(rival != null && rival.getOption() >= 0) {
 				return (rival.getOption() / 100) % 10;
@@ -1165,9 +1165,9 @@ public class IntegerPropertyFactory {
 			final SongData sd = state.resource.getSongdata();
 			if(sd != null) {
 				int type = 1;
-				if((sd.getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
+				if((sd.getSongReview().getFavorite() & (SongData.FAVORITE_SONG | SongData.INVISIBLE_SONG)) == 0) {
 					type = 0;
-				} else if((sd.getFavorite() & SongData.INVISIBLE_SONG) != 0) {
+				} else if((sd.getSongReview().getFavorite() & SongData.INVISIBLE_SONG) != 0) {
 					type = 2;
 				}
 				return type;
@@ -1178,9 +1178,9 @@ public class IntegerPropertyFactory {
 			final SongData sd = state.resource.getSongdata();
 			if(sd != null) {
 				int type = 1;
-				if((sd.getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
+				if((sd.getSongReview().getFavorite() & (SongData.FAVORITE_CHART | SongData.INVISIBLE_CHART)) == 0) {
 					type = 0;
-				} else if((sd.getFavorite() & SongData.INVISIBLE_CHART) != 0) {
+				} else if((sd.getSongReview().getFavorite() & SongData.INVISIBLE_CHART) != 0) {
 					type = 2;
 				}
 				return type;
