@@ -265,6 +265,8 @@ public class PlayConfigurationView implements Initializable {
 
 	private MainLoader loader;
 
+	private SongDatabaseAccessorResolver songDatabaseAccessorResolver;
+
 	private boolean songUpdated = false;
 
 	private RequestToken requestToken = null;
@@ -357,6 +359,14 @@ public class PlayConfigurationView implements Initializable {
 		this.loader = loader;
 	}
 
+	public void setSongDatabaseAccessorResolver(SongDatabaseAccessorResolver songDatabaseAccessorResolver) {
+		this.songDatabaseAccessorResolver = songDatabaseAccessorResolver;
+	}
+
+	private SongDatabaseAccessor getSongDatabaseAccessor() throws ClassNotFoundException {
+		return songDatabaseAccessorResolver.get(config, players.getValue());
+	}
+
 	/**
 	 * ダイアログの項目を更新する
 	 */
@@ -391,8 +401,7 @@ public class PlayConfigurationView implements Initializable {
 		updatePlayer();
 
 		try {
-			Class.forName("org.sqlite.JDBC");
-			tableController.init(MainLoader.getScoreDatabaseAccessor());
+			tableController.init(getSongDatabaseAccessor());
 			tableController.update(Paths.get(config.getTablepath() + "/" + "default.json"));
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -402,6 +411,11 @@ public class PlayConfigurationView implements Initializable {
 	public void changePlayer() {
 		commitPlayer();
 		updatePlayer();
+		try {
+			tableController.init(getSongDatabaseAccessor());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void addPlayer() {
@@ -749,7 +763,7 @@ public class PlayConfigurationView implements Initializable {
 
         Runnable loadBMSRunnable = () -> {
             try {
-                SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
+                SongDatabaseAccessor songdb = getSongDatabaseAccessor();
                 SongInformationAccessor infodb = config.isUseSongInfo() ?
                         new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
                 Logger.getGlobal().info("song.db更新開始");
@@ -785,9 +799,8 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		try {
-			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = MainLoader.getScoreDatabaseAccessor();
 			String player = players.getValue();
+			SongDatabaseAccessor songdb = songDatabaseAccessorResolver.get(config, player);
 			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + File.separatorChar + player + File.separatorChar + "score.db");
 			scoredb.createTable();
 
@@ -850,6 +863,11 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		Platform.exit();
 		System.exit(0);
+	}
+
+	@FunctionalInterface
+	public interface SongDatabaseAccessorResolver {
+		public SongDatabaseAccessor get(Config config, String playername) throws ClassNotFoundException;
 	}
 
 	static class OptionListCell extends ListCell<Integer> {
