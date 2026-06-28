@@ -1,8 +1,15 @@
 package bms.player.beatoraja;
 
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.logging.Logger;
 
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.SQLiteConfig.SynchronousMode;
@@ -12,37 +19,43 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
  * 
  * @author exch
  */
-public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
+public final class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 
-	private SQLiteDataSource ds;
+	private static final String TABLE_NAME = "scorelog";
+	private static final Column[] SCORE_LOG_COLUMNS = {
+			new Column("sha256", "TEXT", 1, 0),
+			new Column("mode", "INTEGER"),
+			new Column("clear", "INTEGER"),
+			new Column("oldclear", "INTEGER"),
+			new Column("score", "INTEGER"),
+			new Column("oldscore", "INTEGER"),
+			new Column("combo", "INTEGER"),
+			new Column("oldcombo", "INTEGER"),
+			new Column("minbp", "INTEGER"),
+			new Column("oldminbp", "INTEGER"),
+			new Column("avgjudge", "INTEGER", 1, 0, String.valueOf(Long.MAX_VALUE)),
+			new Column("oldavgjudge", "INTEGER", 1, 0, String.valueOf(Long.MAX_VALUE)),
+			new Column("date", "INTEGER")
+	};
+
+	private final ResultSetHandler<List<Column>> columnHandler = new BeanListHandler<>(Column.class);
 
 	private final QueryRunner qr;
 
 	public ScoreLogDatabaseAccessor(String path) throws ClassNotFoundException {
-		super(	new Table("scorelog",
-						new Column("sha256", "TEXT", 1, 0),
-						new Column("mode", "INTEGER"),
-						new Column("clear", "INTEGER"),
-						new Column("oldclear", "INTEGER"),
-						new Column("score", "INTEGER"),
-						new Column("oldscore", "INTEGER"),
-						new Column("combo", "INTEGER"),
-						new Column("oldcombo", "INTEGER"),
-						new Column("minbp", "INTEGER"),
-						new Column("oldminbp", "INTEGER"),
-						new Column("date", "INTEGER")
-						));
+		super(new Table(TABLE_NAME, SCORE_LOG_COLUMNS));
 
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
 		conf.setSharedCache(true);
 		conf.setSynchronous(SynchronousMode.OFF);
 		// conf.setJournalMode(JournalMode.MEMORY);
-		ds = new SQLiteDataSource(conf);
+		var ds = new SQLiteDataSource(conf);
 		ds.setUrl("jdbc:sqlite:" + path);
 		qr = new QueryRunner(ds);
 		
 		try {
+			migrateLegacyPrimaryKey();
 			this.validate(qr);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -51,10 +64,50 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 
 	public void setScoreLog(ScoreLog log) {
 		try {
-			this.insert(qr, "scorelog", log);
+			this.insert(qr, TABLE_NAME, log);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void migrateLegacyPrimaryKey() throws SQLException {
+		if (!existsTable(TABLE_NAME)) {
+			return;
+		}
+
+		var columns = qr.query("PRAGMA table_info('" + TABLE_NAME + "');", columnHandler);
+		if (columns.stream().noneMatch(column -> column.getPk() == 1)) {
+			return;
+		}
+
+		var legacyTableName = TABLE_NAME + "_legacy_pk_" + System.currentTimeMillis();
+		Logger.getGlobal().info("scorelog.dbの旧PRIMARY KEYを解除します : " + legacyTableName);
+
+		qr.update("ALTER TABLE " + TABLE_NAME + " RENAME TO " + legacyTableName);
+		this.validate(qr);
+
+		var legacyColumnNames = new HashSet<String>();
+		for (var column : qr.query("PRAGMA table_info('" + legacyTableName + "');", columnHandler)) {
+			legacyColumnNames.add(column.getName());
+		}
+
+		var columnNames = new StringJoiner(",");
+		for (var column : SCORE_LOG_COLUMNS) {
+			if (legacyColumnNames.contains(column.getName())) {
+				columnNames.add(column.getName());
+			}
+		}
+
+		if (columnNames.length() > 0) {
+			var columnsSql = columnNames.toString();
+			qr.update("INSERT INTO " + TABLE_NAME + " (" + columnsSql + ") SELECT " + columnsSql + " FROM " + legacyTableName);
+		}
+		qr.update("DROP TABLE " + legacyTableName);
+	}
+
+	private boolean existsTable(String tableName) throws SQLException {
+		return qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';",
+				new MapListHandler(), tableName).size() > 0;
 	}
 	
 	/**
@@ -62,7 +115,7 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 	 * 
 	 * @author exch
 	 */
-	public static class ScoreLog implements Validatable {
+	public static final class ScoreLog implements Validatable {
 
 		/**
 		 * 譜面ハッシュ(SHA256)
@@ -104,6 +157,14 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		 * 旧ミスカウント
 		 */
 		private int oldminbp;
+		/**
+		 * 平均判定時間
+		 */
+		private long avgjudge = Long.MAX_VALUE;
+		/**
+		 * 旧平均判定時間
+		 */
+		private long oldavgjudge = Long.MAX_VALUE;
 		/**
 		 * スコア最終更新日時(unixtime, 秒単位)
 		 */
@@ -188,6 +249,22 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		public void setOldminbp(int oldminbp) {
 			this.oldminbp = oldminbp;
 		}
+
+		public long getAvgjudge() {
+			return avgjudge;
+		}
+
+		public void setAvgjudge(long avgjudge) {
+			this.avgjudge = avgjudge;
+		}
+
+		public long getOldavgjudge() {
+			return oldavgjudge;
+		}
+
+		public void setOldavgjudge(long oldavgjudge) {
+			this.oldavgjudge = oldavgjudge;
+		}
 		
 		public long getDate() {
 			return date;
@@ -200,7 +277,8 @@ public class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		@Override
 		public boolean validate() {
 			return mode >= 0 && clear >= 0 && clear <= ClearType.Max.id && oldclear >= 0 && oldclear<= clear &&
-					score >= 0 && oldscore <= score && combo >= 0 && oldcombo <= combo && minbp >= 0 && oldminbp >= minbp && date >= 0;
+					score >= 0 && oldscore <= score && combo >= 0 && oldcombo <= combo && minbp >= 0 && oldminbp >= minbp &&
+					avgjudge >= 0 && oldavgjudge >= avgjudge && date >= 0;
 		}
 	}
 }

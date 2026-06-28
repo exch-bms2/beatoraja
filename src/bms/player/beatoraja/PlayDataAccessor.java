@@ -303,32 +303,14 @@ public final class PlayDataAccessor {
 		int gauge = 0;
 		for (CourseData.CourseDataConstraint c : constraint) {
 			switch(c) {
-			case NO_SPEED:
-				hispeed = 1;
-				break;
-			case NO_GOOD:
-				judge = 1;
-				break;
-			case NO_GREAT:
-				judge = 2;
-				break;
-			case GAUGE_LR2:
-				gauge = 1;
-				break;
-			case GAUGE_5KEYS:
-				gauge = 2;
-				break;
-			case GAUGE_7KEYS:
-				gauge = 3;
-				break;
-			case GAUGE_9KEYS:
-				gauge = 4;
-				break;
-			case GAUGE_24KEYS:
-				gauge = 5;
-				break;
-			default:
-				break;
+				case NO_SPEED -> hispeed = 1;
+				case NO_GOOD -> judge = 1;
+				case NO_GREAT -> judge = 2;
+				case GAUGE_LR2 -> gauge = 1;
+				case GAUGE_5KEYS -> gauge = 2;
+				case GAUGE_7KEYS -> gauge = 3;
+				case GAUGE_9KEYS -> gauge = 4;
+				case GAUGE_24KEYS -> gauge = 5;
 			}
 		}
 		return scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
@@ -375,32 +357,14 @@ public final class PlayDataAccessor {
 		int gauge = 0;
 		for (CourseData.CourseDataConstraint c : constraint) {
 			switch(c) {
-			case NO_SPEED:
-				hispeed = 1;
-				break;
-			case NO_GOOD:
-				judge = 1;
-				break;
-			case NO_GREAT:
-				judge = 2;
-				break;
-			case GAUGE_LR2:
-				gauge = 1;
-				break;
-			case GAUGE_5KEYS:
-				gauge = 2;
-				break;
-			case GAUGE_7KEYS:
-				gauge = 3;
-				break;
-			case GAUGE_9KEYS:
-				gauge = 4;
-				break;
-			case GAUGE_24KEYS:
-				gauge = 5;
-				break;
-			default:
-				break;
+				case NO_SPEED -> hispeed = 1;
+				case NO_GOOD -> judge = 1;
+				case NO_GREAT -> judge = 2;
+				case GAUGE_LR2 -> gauge = 1;
+				case GAUGE_5KEYS -> gauge = 2;
+				case GAUGE_7KEYS -> gauge = 3;
+				case GAUGE_9KEYS -> gauge = 4;
+				case GAUGE_24KEYS -> gauge = 5;
 			}
 		}
 		ScoreData score = scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
@@ -475,6 +439,12 @@ public final class PlayDataAccessor {
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			log.setSha256(hash);
 			log.setMinbp(newscore.getMinbp());
+		}
+		log.setOldavgjudge(score.getAvgjudge());
+		log.setAvgjudge(score.getAvgjudge());
+		if (score.getAvgjudge() > newscore.getAvgjudge() && updateScore) {
+			log.setSha256(hash);
+			log.setAvgjudge(newscore.getAvgjudge());
 		}
 		log.setOldcombo(score.getCombo());
 		log.setCombo(score.getCombo());
