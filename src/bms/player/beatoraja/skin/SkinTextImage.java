@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
 
-import java.io.UnsupportedEncodingException;
 
 /**
  * イメージデータをソースとして持つスキン用テキスト
@@ -40,42 +39,20 @@ public final class SkinTextImage extends SkinText {
 
 	@Override
 	public void prepareFont(String text) {
-		try {
-			byte[] b = text.getBytes("utf-16le");
-			for (int i = 0; i < b.length;) {
-				int code = 0;
-				code |= (b[i++] & 0xff);
-				code |= (b[i++] & 0xff) << 8;
-				if (code >= 0xdc00 && code < 0xff00 && i < b.length) {
-					code |= (b[i++] & 0xff) << 16;
-					code |= (b[i++] & 0xff) << 24;
-				}
-				source.getImage(code);
-			}
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		for (int i = 0; i < text.length();) {
+			int code = text.codePointAt(i);
+			i += Character.charCount(code);
+			source.getImage(code);
 		}
 	}
 
 	@Override
 	protected void prepareText(String text) {
-		byte[] b = null;
-		try {
-			b = text.getBytes("utf-16le");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return;
-		}
 		textwidth = 0;
 		texts.clear();
-		for (int i = 0; i < b.length;) {
-			int code = 0;
-			code |= (b[i++] & 0xff);
-			code |= (b[i++] & 0xff) << 8;
-			if (code >= 0xdc00 && code < 0xff00 && i < b.length) {
-				code |= (b[i++] & 0xff) << 16;
-				code |= (b[i++] & 0xff) << 24;
-			}
+		for (int i = 0; i < text.length();) {
+			int code = text.codePointAt(i);
+			i += Character.charCount(code);
 			final TextureRegion ch = source.getImage(code);
 			if (ch != null) {
 				texts.add(ch);
