@@ -71,6 +71,19 @@ public class EventFactory {
 	public enum EventType {
 
 		/**
+		 * 次の難易度フィルター(BEGINNER, NORMAL, ...)へ移動
+		 */
+		difficulty(10, (state, arg1) -> {
+			if(state instanceof MusicSelector selector) {
+				int difficulty = 0;
+				PlayerConfig config = selector.resource.getPlayerConfig();
+				for(;difficulty < MusicSelector.DIFFICULTY.length && MusicSelector.DIFFICULTY[difficulty] != config.getDifficultyFilter();difficulty++);
+				config.setDifficultyFilter(MusicSelector.DIFFICULTY[(difficulty + (arg1 >= 0 ? 1 : MusicSelector.DIFFICULTY.length - 1)) % MusicSelector.DIFFICULTY.length]);
+				selector.getBarManager().updateBar();
+				selector.play(OPTION_CHANGE);
+			}
+		}),
+		/**
 		 * 次のMODEフィルター(5KEY, 7KEY, ...)へ移動
 		 */
 		mode(11, (state, arg1) -> {
@@ -160,7 +173,7 @@ public class EventFactory {
 				}
 			}
 		}),
-		
+
 	    /**
 	     * ゲージオプションの変更
 	     */

@@ -133,7 +133,10 @@ public class StringPropertyFactory {
 				selector.search(value);
 			}
 		}),
+		mode(60, (state) -> state.resource.getPlayerConfig().getModeFilter().getDisplayName()),
+
 		sort(61, (state) -> state.resource.getPlayerConfig().getSortid()),
+		difficulty(62, (state) -> state.resource.getPlayerConfig().getDifficultyFilter().getDisplayName()),
 
 		chartreplication(86, (state) -> state.resource.getPlayerConfig().getChartReplicationMode()),
 

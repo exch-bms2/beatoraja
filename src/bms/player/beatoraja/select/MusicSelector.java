@@ -41,6 +41,7 @@ public final class MusicSelector extends MainState {
 	private SongDatabaseAccessor songdb;
 
 	public static final ModeFilter[] MODE = ModeFilter.values();
+	public static final DifficultyFilter[] DIFFICULTY = DifficultyFilter.values();
 
 	/**
 	 * 保存可能な最大リプレイ数

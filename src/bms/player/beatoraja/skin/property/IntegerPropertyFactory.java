@@ -1052,7 +1052,13 @@ public class IntegerPropertyFactory {
 		gaugeautoshift(78, (state) -> (state.resource.getPlayerConfig().getGaugeAutoShift())),
 		bottomshiftablegauge(341, (state) -> (state.resource.getPlayerConfig().getBottomShiftableGauge())),
 		bga(72, (state) -> (state.resource.getConfig().getBga())),
-		
+
+		difficulty(10, (state) -> {
+			if (state instanceof MusicSelector) {
+				return state.main.getPlayerConfig().getDifficultyFilter().getSkinNumber();
+			}
+			return Integer.MIN_VALUE;
+		}),
 		mode(11, (state) -> {
 			if (state instanceof MusicSelector) {
 				return state.main.getPlayerConfig().getModeFilter().getSkinNumber();

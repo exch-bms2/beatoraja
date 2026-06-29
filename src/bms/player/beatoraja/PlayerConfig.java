@@ -10,6 +10,7 @@ import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.BarSorter;
+import bms.player.beatoraja.select.DifficultyFilter;
 import bms.player.beatoraja.select.ModeFilter;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -89,6 +90,10 @@ public final class PlayerConfig {
      */
 	private Mode mode = null;
 	private ModeFilter modeFilter = ModeFilter.ALL;
+	/**
+	 * 選曲時の難易度フィルター
+	 */
+	private DifficultyFilter difficultyFilter = DifficultyFilter.ALL;
 	/**
 	 * 指定がない場合のミスレイヤー表示時間(ms)
 	 */
@@ -509,6 +514,17 @@ public final class PlayerConfig {
 		}
 		return modeFilter;
 	}
+
+	public void setDifficultyFilter(DifficultyFilter difficultyFilter) {
+		this.difficultyFilter = difficultyFilter != null ? difficultyFilter : DifficultyFilter.ALL;
+	}
+
+	public DifficultyFilter getDifficultyFilter() {
+		if (difficultyFilter == null) {
+			difficultyFilter = DifficultyFilter.ALL;
+		}
+		return difficultyFilter;
+	}
 	
 	public int getSort() {
 		return this.sort ;
@@ -873,6 +889,7 @@ public final class PlayerConfig {
 		} else {
 			setModeFilter(modeFilter);
 		}
+		setDifficultyFilter(difficultyFilter);
 		lnmode = MathUtils.clamp(lnmode, 0, 2);
 		keyJudgeWindowRatePerfectGreat = MathUtils.clamp(keyJudgeWindowRatePerfectGreat, 25, 400);
 		keyJudgeWindowRateGreat = MathUtils.clamp(keyJudgeWindowRateGreat, 0, 400);

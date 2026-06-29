@@ -89,7 +89,7 @@ public final class BarRenderer {
 
 			Rectangle r = baro.getBarImages(on, i).getDestination(select.timer.getNowTime(), select);
 			if (r != null) {
-				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+				if (r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
 					if (button == 0) {
 						select.select(sd);
 					} else {
@@ -111,7 +111,7 @@ public final class BarRenderer {
 		}
 		this.time = time;		
 		final long timeMillis = System.currentTimeMillis();
-		boolean applyMovement = duration != 0 && duration > timeMillis;
+		final boolean applyMovement = duration != 0 && duration > timeMillis;
 		float angleLerp = 0;
 		if (applyMovement) {
 			angleLerp = angle < 0 ? ((float) (timeMillis - duration)) / angle
@@ -256,7 +256,7 @@ public final class BarRenderer {
 			manager.loader = null;
 		}
 
-		// draw song bar
+		// bar image
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			boolean on = (i == skin.getCenterBar());
@@ -276,12 +276,12 @@ public final class BarRenderer {
 			}
 		}
 
+		// folder graph
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			if(ba.value == -1) {
 				continue;
 			}
-			// folder graph
 			if (ba.sd instanceof DirectoryBar) {
 				final SkinDistributionGraph graph = baro.getGraph();
 				if (graph != null && graph.draw) {
@@ -290,6 +290,7 @@ public final class BarRenderer {
 			}
 		}
 
+		// bar title
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			if(ba.value == -1) {
@@ -302,6 +303,7 @@ public final class BarRenderer {
 			}
 		}
 
+		// bar trophy
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			if(ba.value == -1) {
@@ -324,6 +326,7 @@ public final class BarRenderer {
 			}
 		}
 
+		// bar lamp
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			if(ba.value == -1) {
@@ -347,6 +350,7 @@ public final class BarRenderer {
 			}
 		}
 
+		// bar level
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			if(ba.value == -1) {
@@ -387,13 +391,13 @@ public final class BarRenderer {
 				ln = select.main.getPlayerConfig().getLnmode();
 			}
 			if((flag & SongData.FEATURE_LONGNOTE) != 0) {
-				ln = ln > 0 ? ln : 0;
+				ln = Math.max(ln, 0);
 			}
 			if((flag & SongData.FEATURE_CHARGENOTE) != 0) {
-				ln = ln > 1 ? ln : 1;
+				ln = Math.max(ln, 1);
 			}
 			if((flag & SongData.FEATURE_HELLCHARGENOTE) != 0) {
-				ln = ln > 2 ? ln : 2;
+				ln = Math.max(ln, 2);
 			}
 
 			if(ln >= 0) {

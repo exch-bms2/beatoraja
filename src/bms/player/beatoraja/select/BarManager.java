@@ -332,22 +332,31 @@ public final class BarManager {
 			final PlayerConfig config = select.resource.getPlayerConfig();
 			int modeIndex = 0;
 			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getModeFilter();modeIndex++);
-			for(int trialCount = 0; trialCount < MusicSelector.MODE.length; trialCount++, modeIndex++) {
-				final ModeFilter mode = MusicSelector.MODE[modeIndex % MusicSelector.MODE.length];
-				config.setModeFilter(mode);
-				Array<Bar> remove = new Array<Bar>();
-				for (Bar b : l) {
-					if(b instanceof SongBar sb && sb.getSongData() != null) {
-						final SongData song = sb.getSongData();
-						if((!showInvisibleCharts && (song.getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
-								|| !mode.matches(song.getMode())) {
-							remove.add(b);
+			int difficultyIndex = 0;
+			for(;difficultyIndex < MusicSelector.DIFFICULTY.length && MusicSelector.DIFFICULTY[difficultyIndex] != config.getDifficultyFilter();difficultyIndex++);
+			boolean filtered = false;
+			for(int difficultyTrialCount = 0; difficultyTrialCount < MusicSelector.DIFFICULTY.length && !filtered; difficultyTrialCount++, difficultyIndex++) {
+				final DifficultyFilter difficulty = MusicSelector.DIFFICULTY[difficultyIndex % MusicSelector.DIFFICULTY.length];
+				for(int modeTrialCount = 0, trialModeIndex = modeIndex; modeTrialCount < MusicSelector.MODE.length; modeTrialCount++, trialModeIndex++) {
+					final ModeFilter mode = MusicSelector.MODE[trialModeIndex % MusicSelector.MODE.length];
+					Array<Bar> remove = new Array<Bar>();
+					for (Bar b : l) {
+						if(b instanceof SongBar sb && sb.getSongData() != null) {
+							final SongData song = sb.getSongData();
+							if((!showInvisibleCharts && (song.getSongReview().getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
+									|| !mode.matches(song.getMode())
+									|| !difficulty.matches(song.getDifficulty())) {
+								remove.add(b);
+							}
 						}
 					}
-				}
-				if(l.size != remove.size) {
-					l.removeAll(remove, true);
-					break;
+					if(l.size != remove.size) {
+						config.setModeFilter(mode);
+						config.setDifficultyFilter(difficulty);
+						l.removeAll(remove, true);
+						filtered = true;
+						break;
+					}
 				}
 			}
 
@@ -680,7 +689,7 @@ public final class BarManager {
 						Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
 						// System.out.println(bannerfile.getPath());
 						if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-							songbar.setBanner(select.getBannerResource().get(bannerfile.toString()));
+							songbar.setBanner(select.getBannerResource().getPixmap(bannerfile.toString()));
 						}
 					} catch (Exception e) {
 						Logger.getGlobal().warning("banner読み込み失敗 : " + song.getBanner());
@@ -689,7 +698,7 @@ public final class BarManager {
 						Path stagefilefile = Paths.get(song.getPath()).getParent().resolve(song.getStagefile());
 						// System.out.println(stagefilefile.getPath());
 						if (song.getStagefile().length() > 0 && Files.exists(stagefilefile)) {
-							songbar.setStagefile(select.getStagefileResource().get(stagefilefile.toString()));
+							songbar.setStagefile(select.getStagefileResource().getPixmap(stagefilefile.toString()));
 						}
 					} catch (Exception e) {
 						Logger.getGlobal().warning("stagefile読み込み失敗 : " + song.getStagefile());
