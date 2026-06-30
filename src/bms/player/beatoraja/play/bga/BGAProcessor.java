@@ -13,6 +13,7 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.SkinBGA;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.video.FFmpegProcessor;
+import bms.player.beatoraja.video.VideoFormat;
 import bms.player.beatoraja.video.VideoProcessor;
 
 import com.badlogic.gdx.Gdx;
@@ -36,8 +37,6 @@ public final class BGAProcessor {
 	private VideoProcessor[] movies = new VideoProcessor[0]; 
 	
 	private final ResourcePool<String, VideoProcessor> mpgresource;
-
-	public static final String[] mov_extension = { "mp4", "wmv", "m4v", "webm", "mpg", "mpeg", "m1v", "m2v", "avi"};
 
 	/**
 	 * 再生中のBGAID
@@ -132,9 +131,9 @@ public final class BGAProcessor {
 							fex = name.substring(index + 1).toLowerCase();
 						}
 						if (fex != null) {
-							if (Arrays.asList(mov_extension).contains(fex)){
+							if (Arrays.asList(VideoFormat.getAllExtensions()).contains(fex)){
 								name = name.substring(0, index);
-								for (String mov : mov_extension) {
+								for (String mov : VideoFormat.getAllExtensions()) {
 									final Path mpgfile = dpath.resolve(name + "." + mov);
 									if (Files.exists(mpgfile)) {
 										f = mpgfile;
@@ -160,7 +159,7 @@ public final class BGAProcessor {
 						if (index != -1) {
 							name = name.substring(0, index);
 						}
-						for (String mov : mov_extension) {
+						for (String mov : VideoFormat.getAllExtensions()) {
 							final Path mpgfile = dpath.resolve(name + "." + mov);
 							if (Files.exists(mpgfile)) {
 								f = mpgfile;
@@ -183,7 +182,7 @@ public final class BGAProcessor {
 
 				if (f != null) {
 					boolean isMovie = false;
-					for (String mov : mov_extension) {
+					for (String mov : VideoFormat.getAllExtensions()) {
 						if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
 							try {
 								VideoProcessor mm = mpgresource.get(f.toString());
