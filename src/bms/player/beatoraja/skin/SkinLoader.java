@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 import java.io.File;
 import java.nio.file.*;
+import java.util.Locale;
 
 /**
  * スキンローダー
@@ -65,7 +66,7 @@ public abstract class SkinLoader {
             } else {
                 LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(resource.getConfig());
                 SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperties());
-                LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
+                LR2SkinCSVLoader<?> dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
                 header.setSourceResolution(dloader.src);
                 header.setDestinationResolution(dloader.dst);
                 Skin skin = dloader.loadSkin(state, header, loader.getOption());
@@ -129,20 +130,21 @@ public abstract class SkinLoader {
     public static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
     	final PixmapResourcePool resource = SkinLoader.getResource();
         if(resource.exists(path)) {
-            return new Texture(resource.get(path), useMipMaps);
+            return new Texture(resource.getPixmap(path), useMipMaps);
         }
         try {
+            boolean usePixmapCache = usecim && !path.toLowerCase(Locale.ROOT).endsWith(".webp");
             long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
             String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
-            if(resource.exists(cim)) {
-                return new Texture(resource.get(cim), useMipMaps);
+            if(usePixmapCache && resource.exists(cim)) {
+                return new Texture(resource.getPixmap(cim), useMipMaps);
             }
 
-            if (Files.exists(Paths.get(cim))) {
-                Pixmap pixmap = resource.get(cim);
+            if (usePixmapCache && Files.exists(Paths.get(cim))) {
+                Pixmap pixmap = resource.getPixmap(cim);
                 return new Texture(pixmap, useMipMaps);
-            } else if(usecim){
-                Pixmap pixmap = resource.get(path);
+            } else if(usePixmapCache){
+                Pixmap pixmap = resource.getPixmap(path);
 
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(path).getParent())) {
                     for (Path p : paths) {
@@ -160,7 +162,7 @@ public abstract class SkinLoader {
                 Texture tex = new Texture(pixmap, useMipMaps);
                 return tex;
             } else {
-                Pixmap pixmap = resource.get(path);
+                Pixmap pixmap = resource.getPixmap(path);
                 return new Texture(pixmap, useMipMaps);
             }
         } catch (Throwable e) {
