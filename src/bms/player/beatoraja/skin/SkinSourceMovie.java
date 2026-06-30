@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.play.bga.FFmpegProcessor;
+import bms.player.beatoraja.video.FFmpegProcessor;
 
 /**
  * スキンのソースイメージ(ムービー)

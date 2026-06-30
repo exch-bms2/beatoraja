@@ -12,6 +12,8 @@ import bms.player.beatoraja.ResourcePool;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.SkinBGA;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.video.FFmpegProcessor;
+import bms.player.beatoraja.video.VideoProcessor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
@@ -24,16 +26,16 @@ import com.badlogic.gdx.utils.Array;
  *
  * @author exch
  */
-public class BGAProcessor {
+public final class BGAProcessor {
 	
 	// TODO イベントレイヤー対応(現状はミスレイヤーのみ)
 
 	private PlayerConfig player;
 	private float progress = 0;
 
-	private MovieProcessor[] movies = new MovieProcessor[0]; 
+	private VideoProcessor[] movies = new VideoProcessor[0]; 
 	
-	private final ResourcePool<String, MovieProcessor> mpgresource;
+	private final ResourcePool<String, VideoProcessor> mpgresource;
 
 	public static final String[] mov_extension = { "mp4", "wmv", "m4v", "webm", "mpg", "mpeg", "m1v", "m2v", "avi"};
 
@@ -79,16 +81,16 @@ public class BGAProcessor {
 		blanktex = new Texture(blank);
 		blank.dispose();
 
-		mpgresource = new ResourcePool<String, MovieProcessor>(Math.max(config.getSongResourceGen(), 1)) {
+		mpgresource = new ResourcePool<String, VideoProcessor>(Math.max(config.getSongResourceGen(), 1)) {
 			@Override
-			protected MovieProcessor load(String key) {
+			protected VideoProcessor load(String key) {
 				FFmpegProcessor mm = new FFmpegProcessor(config.getFrameskip());
 				mm.create(key);
 				return mm;
 			}
 
 			@Override
-			protected void dispose(MovieProcessor resource) {
+			protected void dispose(VideoProcessor resource) {
 				resource.dispose();
 			}
 		};
@@ -116,7 +118,7 @@ public class BGAProcessor {
 			// BMS格納ディレクトリ
 			Path dpath = Paths.get(model.getPath()).getParent();
 
-			movies = new MovieProcessor[model.getBgaList().length];
+			movies = new VideoProcessor[model.getBgaList().length];
 			for (String name : model.getBgaList()) {
 				if (progress == 1) {
 					break;
@@ -184,7 +186,7 @@ public class BGAProcessor {
 					for (String mov : mov_extension) {
 						if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
 							try {
-								MovieProcessor mm = mpgresource.get(f.toString());
+								VideoProcessor mm = mpgresource.get(f.toString());
 								movies[id] = mm;
 								isMovie = true;
 								break;
@@ -228,7 +230,7 @@ public class BGAProcessor {
 		if(cache != null) {
 			cache.prepare(timelines);			
 		}
-		for (MovieProcessor mp : movies) {
+		for (VideoProcessor mp : movies) {
 			if(mp != null) {
 				mp.stop();				
 			}
@@ -328,13 +330,8 @@ public class BGAProcessor {
 			final Texture playingbgatex = getBGAData(time, playingbgaid, rbga);
 			rbga = true;
 			if (playingbgatex != null) {
-				if (movies[playingbgaid] != null) {
-					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
-					drawBGAFixRatio(dst, sprite, r, playingbgatex);
-				} else {
-					sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
-					drawBGAFixRatio(dst, sprite, r, playingbgatex);
-				}
+				sprite.setType(movies[playingbgaid] != null ? SkinObjectRenderer.TYPE_FFMPEG : SkinObjectRenderer.TYPE_LINEAR);
+				drawBGAFixRatio(dst, sprite, r, playingbgatex);
 			} else {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			}
@@ -342,13 +339,8 @@ public class BGAProcessor {
 			final Texture playinglayertex = getBGAData(time, playinglayerid, rlayer);
 			rlayer = true;
 			if (playinglayertex != null) {
-				if (movies[playinglayerid] != null) {
-					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
-					drawBGAFixRatio(dst, sprite, r, playinglayertex);
-				} else {
-					sprite.setType(SkinObjectRenderer.TYPE_LAYER);
-					drawBGAFixRatio(dst, sprite, r, playinglayertex);
-				}
+				sprite.setType(movies[playinglayerid] != null ? SkinObjectRenderer.TYPE_FFMPEG : SkinObjectRenderer.TYPE_LAYER);
+				drawBGAFixRatio(dst, sprite, r, playinglayertex);
 			}
 		}
 	}
@@ -376,7 +368,7 @@ public class BGAProcessor {
 	}
 
 	public void stop() {
-		for (MovieProcessor mpg : movies) {
+		for (VideoProcessor mpg : movies) {
 			if (mpg != null) {
 				mpg.stop();
 			}
