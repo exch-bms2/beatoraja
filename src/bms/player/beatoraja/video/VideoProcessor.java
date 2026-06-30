@@ -1,9 +1,9 @@
-package bms.player.beatoraja.play.bga;
+package bms.player.beatoraja.video;
 
 import com.badlogic.gdx.graphics.Texture;
 
 
-public interface MovieProcessor {
+public interface VideoProcessor {
 
 	/**
 	 * 動画のフレームを取得する

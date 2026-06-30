@@ -1,10 +1,10 @@
-package bms.player.beatoraja.play.bga;
+package bms.player.beatoraja.video;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
-public class GdxVideoProcessor implements MovieProcessor {
+public class GdxVideoProcessor implements VideoProcessor {
 
 	@Override
 	public Texture getFrame(long time) {

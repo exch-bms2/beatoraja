@@ -1,4 +1,4 @@
-package bms.player.beatoraja.play.bga;
+package bms.player.beatoraja.video;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,7 +20,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
  *
  * @author exch
  */
-public class FFmpegProcessor implements MovieProcessor {
+public class FFmpegProcessor implements VideoProcessor {
 	private enum ProcessorStatus {
 		TEXTURE_INACTIVE,
 		TEXTURE_ACTIVE,
