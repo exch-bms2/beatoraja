@@ -54,7 +54,7 @@ public class BGImageProcessor {
 	}
 
 	public void put(int id, Path path) {
-		Pixmap pixmap = cache.get(path.toString());
+		Pixmap pixmap = cache.getPixmap(path.toString());
 		if(id >= bgamap.length) {
 			bgamap = Arrays.copyOf(bgamap, id + 1);
 		}
