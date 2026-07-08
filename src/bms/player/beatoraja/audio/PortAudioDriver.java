@@ -2,6 +2,7 @@ package bms.player.beatoraja.audio;
 
 import java.nio.ByteBuffer;
 import java.nio.file.*;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import com.portaudio.*;
@@ -49,8 +50,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	public static String getUnavailableMessage(Throwable e) {
 		String message = e.getMessage() != null ? e.getMessage() : e.toString();
 		if(e instanceof UnsatisfiedLinkError || message.contains("jportaudio")) {
-			return message + "。macOSでPortAudioを使用するには natives/libjportaudio.dylib を配置し、"
-					+ "-Djava.library.path=./natives を指定してください。";
+			return message + "。PortAudioを使用するには natives に libjportaudio.dylib(macOS) または "
+					+ "libjportaudio.so(Linux) を配置し、-Djava.library.path=./natives を指定してください。";
 		}
 		return message;
 	}
@@ -98,13 +99,35 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		String driverName = config.getDriverName();
 		if(driverName != null && !driverName.isEmpty()) {
 			for(int i = 0;i < devices.length;i++) {
-				if(driverName.equals(devices[i].name) && devices[i].maxOutputChannels > 0) {
+				if(driverName.equals(getDeviceDisplayName(devices[i])) && devices[i].maxOutputChannels > 0) {
 					return i;
 				}
 			}
+			int legacyDevice = getLegacyDeviceId(driverName, devices);
+			if(legacyDevice >= 0) {
+				return legacyDevice;
+			}
 		}
 
-		if(isMacOS()) {
+		int defaultDevice = getDefaultOutputDeviceId(devices);
+		if(defaultDevice >= 0) {
+			return defaultDevice;
+		}
+		return getFirstOutputDevice(devices);
+	}
+
+	public static String getDefaultOutputDeviceDisplayName(DeviceInfo[] devices) {
+		int deviceId = getDefaultOutputDeviceId(devices);
+		return deviceId >= 0 ? getDeviceDisplayName(devices[deviceId]) : getDeviceDisplayName(devices[getFirstOutputDevice(devices)]);
+	}
+
+	private static int getDefaultOutputDeviceId(DeviceInfo[] devices) {
+		if(isLinux()) {
+			int alsaDefault = getAlsaDefaultOutputDevice(devices);
+			if(alsaDefault >= 0) {
+				return alsaDefault;
+			}
+		} else if(isMacOS()) {
 			int coreAudioDefault = getCoreAudioDefaultOutputDevice(devices);
 			if(coreAudioDefault >= 0) {
 				return coreAudioDefault;
@@ -115,7 +138,25 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		if(defaultOutput >= 0 && defaultOutput < devices.length && devices[defaultOutput].maxOutputChannels > 0) {
 			return defaultOutput;
 		}
-		return getFirstOutputDevice(devices);
+		return -1;
+	}
+
+	private static int getLegacyDeviceId(String driverName, DeviceInfo[] devices) {
+		int firstMatch = -1;
+		for(int i = 0;i < devices.length;i++) {
+			if(driverName.equals(devices[i].name) && devices[i].maxOutputChannels > 0) {
+				if(isLinux() && isAlsaDevice(devices[i])) {
+					return i;
+				}
+				if(isMacOS() && isCoreAudioDevice(devices[i])) {
+					return i;
+				}
+				if(firstMatch < 0) {
+					firstMatch = i;
+				}
+			}
+		}
+		return firstMatch;
 	}
 
 	private BlockingStream openStream(StreamParameters streamParameters, DeviceInfo deviceInfo, int framesPerBuffer, int flags) {
@@ -148,7 +189,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	private double getSuggestedLatency(DeviceInfo deviceInfo, int framesPerBuffer) {
 		double bufferLatency = ((double)framesPerBuffer) / getSampleRate();
-		if(isCoreAudioLowLatency(deviceInfo) && deviceInfo.defaultLowOutputLatency > 0) {
+		if(isLowLatencyHostApiDevice(deviceInfo) && deviceInfo.defaultLowOutputLatency > 0) {
 			return Math.min(bufferLatency, deviceInfo.defaultLowOutputLatency);
 		}
 		return bufferLatency;
@@ -211,6 +252,28 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		return -1;
 	}
 
+	private static int getAlsaDefaultOutputDevice(DeviceInfo[] devices) {
+		try {
+			int alsaIndex = PortAudio.hostApiTypeIdToHostApiIndex(PortAudio.HOST_API_TYPE_ALSA);
+			if(alsaIndex >= 0) {
+				HostApiInfo alsa = PortAudio.getHostApiInfo(alsaIndex);
+				if(alsa.defaultOutputDevice >= 0 && alsa.defaultOutputDevice < devices.length
+						&& devices[alsa.defaultOutputDevice].maxOutputChannels > 0) {
+					return alsa.defaultOutputDevice;
+				}
+			}
+		} catch(Throwable e) {
+			Logger.getGlobal().fine("ALSA default output device is unavailable : " + e.getMessage());
+		}
+
+		for(int i = 0;i < devices.length;i++) {
+			if(devices[i].maxOutputChannels > 0 && isAlsaDevice(devices[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	private static int getFirstOutputDevice(DeviceInfo[] devices) {
 		for(int i = 0;i < devices.length;i++) {
 			if(devices[i].maxOutputChannels > 0) {
@@ -221,39 +284,77 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	}
 
 	private static boolean isCoreAudioDevice(DeviceInfo deviceInfo) {
-		try {
-			return PortAudio.getHostApiInfo(deviceInfo.hostApi).type == PortAudio.HOST_API_TYPE_COREAUDIO;
-		} catch(Throwable e) {
-			return false;
-		}
+		return getHostApiType(deviceInfo) == PortAudio.HOST_API_TYPE_COREAUDIO;
+	}
+
+	private static boolean isAlsaDevice(DeviceInfo deviceInfo) {
+		return getHostApiType(deviceInfo) == PortAudio.HOST_API_TYPE_ALSA;
 	}
 
 	private static boolean isCoreAudioLowLatency(DeviceInfo deviceInfo) {
 		return isMacOS() && isCoreAudioDevice(deviceInfo);
 	}
 
+	private static boolean isAlsaLowLatency(DeviceInfo deviceInfo) {
+		return isLinux() && isAlsaDevice(deviceInfo);
+	}
+
+	private static boolean isLowLatencyHostApiDevice(DeviceInfo deviceInfo) {
+		return isCoreAudioLowLatency(deviceInfo) || isAlsaLowLatency(deviceInfo);
+	}
+
 	private static boolean isMacOS() {
-		return System.getProperty("os.name", "").toLowerCase().contains("mac");
+		return getOSName().contains("mac");
+	}
+
+	private static boolean isLinux() {
+		return getOSName().contains("linux");
+	}
+
+	private static String getOSName() {
+		return System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+	}
+
+	private static int getHostApiType(DeviceInfo deviceInfo) {
+		try {
+			return PortAudio.getHostApiInfo(deviceInfo.hostApi).type;
+		} catch(Throwable e) {
+			return -1;
+		}
+	}
+
+	private static String getHostApiName(DeviceInfo deviceInfo) {
+		try {
+			return PortAudio.getHostApiInfo(deviceInfo.hostApi).name;
+		} catch(Throwable e) {
+			Logger.getGlobal().fine("PortAudio host API information is unavailable : " + e.getMessage());
+			return "unknown";
+		}
+	}
+
+	public static String getDeviceDisplayName(DeviceInfo deviceInfo) {
+		return getHostApiName(deviceInfo) + " : " + deviceInfo.name;
 	}
 
 	private static void logSelectedDevice(int deviceId, DeviceInfo deviceInfo) {
 		String hostApiName = "unknown";
 		int hostApiType = -1;
 		try {
-			HostApiInfo hostApi = PortAudio.getHostApiInfo(deviceInfo.hostApi);
-			hostApiName = hostApi.name;
-			hostApiType = hostApi.type;
+			hostApiName = getHostApiName(deviceInfo);
+			hostApiType = getHostApiType(deviceInfo);
 		} catch(Throwable e) {
 			Logger.getGlobal().fine("PortAudio host API information is unavailable : " + e.getMessage());
 		}
 
 		boolean coreAudio = hostApiType == PortAudio.HOST_API_TYPE_COREAUDIO;
+		boolean alsa = hostApiType == PortAudio.HOST_API_TYPE_ALSA;
 		Logger.getGlobal().info("PortAudio output device selected"
 				+ " : id=" + deviceId
 				+ ", name=" + deviceInfo.name
 				+ ", hostApi=" + hostApiName
 				+ ", coreAudio=" + coreAudio
-				+ ", lowLatencyMode=" + isCoreAudioLowLatency(deviceInfo)
+				+ ", alsa=" + alsa
+				+ ", lowLatencyMode=" + isLowLatencyHostApiDevice(deviceInfo)
 				+ ", defaultLowOutputLatency=" + deviceInfo.defaultLowOutputLatency
 				+ ", defaultHighOutputLatency=" + deviceInfo.defaultHighOutputLatency
 				+ ", defaultSampleRate=" + deviceInfo.defaultSampleRate);
@@ -265,9 +366,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			String hostApiName = "unknown";
 			int hostApiType = -1;
 			try {
-				HostApiInfo hostApi = PortAudio.getHostApiInfo(device.hostApi);
-				hostApiName = hostApi.name;
-				hostApiType = hostApi.type;
+				hostApiName = getHostApiName(device);
+				hostApiType = getHostApiType(device);
 			} catch(Throwable e) {
 				Logger.getGlobal().fine("PortAudio host API information is unavailable : " + e.getMessage());
 			}
@@ -276,6 +376,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					+ ", name=" + device.name
 					+ ", hostApi=" + hostApiName
 					+ ", coreAudio=" + (hostApiType == PortAudio.HOST_API_TYPE_COREAUDIO)
+					+ ", alsa=" + (hostApiType == PortAudio.HOST_API_TYPE_ALSA)
 					+ ", maxInputChannels=" + device.maxInputChannels
 					+ ", maxOutputChannels=" + device.maxOutputChannels
 					+ ", defaultLowOutputLatency=" + device.defaultLowOutputLatency
