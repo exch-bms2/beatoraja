@@ -316,9 +316,12 @@ public final class MainController {
 		case OpenAL:
 			audio = new GdxSoundDriver(config);
 			break;
-//		case AudioDevice:
-//			audio = new GdxAudioDeviceDriver(config);
-//			break;
+		case AudioDevice:
+			audio = new GdxAudioDeviceDriver(config);
+			break;
+		case PortAudio:
+			audio = new PortAudioDriver(config);
+			break;
 		}
 
 		resource = new PlayerResource(audio, config, player);
