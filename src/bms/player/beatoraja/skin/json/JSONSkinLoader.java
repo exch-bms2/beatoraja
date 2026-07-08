@@ -16,6 +16,7 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomItem;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
+import bms.player.beatoraja.video.VideoFormat;
 
 /**
  * JSONスキンローダー
@@ -437,7 +438,7 @@ public class JSONSkinLoader extends SkinLoader {
 		final File imagefile = getPath(p.getParent().toString() + "/" + data.path, filemap);
 		if (imagefile.exists()) {
 			boolean isMovie = false;
-			 for (String mov : BGAProcessor.mov_extension) {
+			 for (String mov : VideoFormat.getAllExtensions()) {
 				 if (imagefile.getName().toLowerCase().endsWith(mov)) {
 					 try {
 					 	SkinSourceMovie mm = new SkinSourceMovie(imagefile.getAbsolutePath());

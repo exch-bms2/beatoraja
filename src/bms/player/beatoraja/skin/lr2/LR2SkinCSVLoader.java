@@ -24,6 +24,7 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
 import bms.player.beatoraja.skin.json.JsonSkin;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
+import bms.player.beatoraja.video.VideoFormat;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -98,7 +99,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				final File imagefile = LR2SkinLoader.getPath(skinpath, str[1], filemap);
 				if (imagefile.exists()) {
 					boolean isMovie = false;
-					for (String mov : BGAProcessor.mov_extension) {
+					for (String mov : VideoFormat.getAllExtensions()) {
 						if (imagefile.getName().toLowerCase().endsWith(mov)) {
 							try {
 								SkinSourceMovie mm = new SkinSourceMovie(imagefile.getPath());
