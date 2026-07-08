@@ -188,9 +188,9 @@ public class AudioConfig implements Validatable {
 		 */
 		PortAudio,
 		/**
-		 * AudioDevice (libGDX AudioDevice, 未実装)
+		 * AudioDevice (libGDX AudioDevice)
 		 */
-//		AudioDevice,
+		AudioDevice,
 	}
 	
 	public enum FrequencyType {

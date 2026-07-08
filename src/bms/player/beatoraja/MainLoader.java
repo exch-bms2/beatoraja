@@ -153,10 +153,14 @@ public class MainLoader extends Application {
 			cfg.foregroundFPS = config.getMaxFramePerSecond();
 			cfg.title = MainController.getVersion();
 
-			cfg.audioDeviceBufferSize = config.getAudioConfig().getDeviceBufferSize();
+			if(config.getAudioConfig().getDriver() == DriverType.AudioDevice) {
+				cfg.audioDeviceBufferSize = Math.max(config.getAudioConfig().getDeviceBufferSize() * 2 * 2, 4096);
+			} else {
+				cfg.audioDeviceBufferSize = config.getAudioConfig().getDeviceBufferSize();
+			}
 			cfg.audioDeviceSimultaneousSources = config.getAudioConfig().getDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
-			if(config.getAudioConfig().getDriver() != DriverType.OpenAL) {
+			if(config.getAudioConfig().getDriver() == DriverType.PortAudio) {
 				LwjglApplicationConfiguration.disableAudio = true;
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
