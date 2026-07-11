@@ -189,6 +189,8 @@ public final class SkinTextBitmap extends SkinText {
 
 		private static final int PRIVATE_USE_AREA_START = 0xe000;
 		private static final int PRIVATE_USE_AREA_END = 0xf8ff;
+		private static final int WAVE_DASH = 0x301c;
+		private static final int FULLWIDTH_TILDE = 0xff5e;
 		private static final int[] MISSING_GLYPH_CANDIDATES = { 0x25a1, 0x25a2, 0x2610, 0x25a0, '?' }; // □, ▢, ☐, ■, ?
 
 		public SkinTextBitmapSource(Path fontPath, boolean usecim) {
@@ -436,6 +438,9 @@ public final class SkinTextBitmap extends SkinText {
 
 			BitmapFont.Glyph glyph = findFallbackGlyph(codePoint, codePoint, false);
 			if (glyph == null) {
+				glyph = findEquivalentBmpGlyph(codePoint, codePoint);
+			}
+			if (glyph == null) {
 				glyph = findMissingGlyph(codePoint);
 			}
 			if (glyph != null && hasRegion(glyph.page)) {
@@ -510,6 +515,45 @@ public final class SkinTextBitmap extends SkinText {
 				}
 			}
 			return null;
+		}
+
+		private BitmapFont.Glyph findEquivalentBmpGlyph(int codePoint, int mappedCodePoint) {
+			int equivalentCodePoint = getEquivalentBmpCodePoint(codePoint);
+			if (equivalentCodePoint == -1) {
+				return null;
+			}
+
+			BitmapFont.Glyph glyph = fontData.getGlyph((char) equivalentCodePoint);
+			if (glyph != null && hasRegion(glyph.page)) {
+				return copyGlyph(glyph, mappedCodePoint, 0);
+			}
+
+			for (FallbackFont fallback : fallbackFonts) {
+				if (fallback == null || fallback.path == null) {
+					continue;
+				}
+				CacheableBitmapFont fallbackFont = BitmapFontCache.Get(fallback.path, fallback.type);
+				Integer pageOffset = fallbackPageOffsets.get(fallback);
+				if (fallbackFont == null || fallbackFont.fontData == null || fallbackFont.regions == null || pageOffset == null) {
+					continue;
+				}
+				glyph = fallbackFont.fontData.getGlyph((char) equivalentCodePoint);
+				if (glyph != null && glyph.page >= 0 && glyph.page < fallbackFont.regions.size
+						&& hasRegion(glyph.page + pageOffset.intValue())) {
+					return copyGlyph(glyph, mappedCodePoint, pageOffset.intValue(), fallbackFont.glyphYOffset - glyphYOffset);
+				}
+			}
+			return null;
+		}
+
+		private int getEquivalentBmpCodePoint(int codePoint) {
+			if (codePoint == WAVE_DASH) {
+				return FULLWIDTH_TILDE;
+			}
+			if (codePoint == FULLWIDTH_TILDE) {
+				return WAVE_DASH;
+			}
+			return -1;
 		}
 
 		private BitmapFont.Glyph findFallbackGlyph(int codePoint, int mappedCodePoint, boolean supplementary) {
