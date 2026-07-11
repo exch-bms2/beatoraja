@@ -27,6 +27,8 @@ public final class SkinJudge extends SkinObject {
     
     private SkinImage nowJudge;
     private SkinNumber nowCount;
+    private float scaleX = 1f;
+    private float scaleY = 1f;
 
     public SkinJudge(int index, boolean shift) {
         this(null, null, index, shift);
@@ -69,9 +71,23 @@ public final class SkinJudge extends SkinObject {
     
     public void setJudgeCount(int index, SkinNumber count) {
     	if(index >= 0 && index < this.count.length) {
+			if(count != null) {
+				count.setSkinScale(scaleX, scaleY);
+			}
     		this.count[index] = count;
     	}
     }
+
+	@Override
+	public void setSkinScale(float scaleX, float scaleY) {
+		this.scaleX = scaleX;
+		this.scaleY = scaleY;
+		for(SkinNumber count : this.count) {
+			if(count != null) {
+				count.setSkinScale(scaleX, scaleY);
+			}
+		}
+	}
 
     public boolean isShift() {
     	return shift;

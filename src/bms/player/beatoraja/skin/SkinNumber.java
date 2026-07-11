@@ -38,6 +38,7 @@ public final class SkinNumber extends SkinObject {
 	public final int space;
 
 	public final int align;
+	private float spaceScale = 1f;
 
 	private int value = Integer.MIN_VALUE;
 	private int shiftbase;
@@ -121,6 +122,11 @@ public final class SkinNumber extends SkinObject {
 		this.offsets = offsets;
 	}
 
+	@Override
+	public void setSkinScale(float scaleX, float scaleY) {
+		spaceScale = scaleX;
+	}
+
 	public void prepare(long time, MainState state) {
 		prepare(time, state, 0, 0);
 	}
@@ -182,20 +188,26 @@ public final class SkinNumber extends SkinObject {
 				value /= 10;
 			}
 		}
-		length = (region.width + space) * (currentImages.length - shiftbase);
-		shift = align == 0 ? 0 : (align == 1 ? (region.width + space) * shiftbase : (region.width + space) * 0.5f * shiftbase);
+		float scaledSpace = getScaledSpace();
+		length = (region.width + scaledSpace) * (currentImages.length - shiftbase);
+		shift = align == 0 ? 0 : (align == 1 ? (region.width + scaledSpace) * shiftbase : (region.width + scaledSpace) * 0.5f * shiftbase);
 	}
 
 	public void draw(SkinObjectRenderer sprite) {
+		float scaledSpace = getScaledSpace();
 		for (int j = 0; j < currentImages.length; j++) {
 			if (currentImages[j] != null) {
 				if(offsets != null && j < offsets.length) {
-					draw(sprite, currentImages[j], region.x + (region.width + space) * j - shift + offsets[j].x, region.y + offsets[j].y, region.width + offsets[j].w, region.height + offsets[j].h);
+					draw(sprite, currentImages[j], region.x + (region.width + scaledSpace) * j - shift + offsets[j].x, region.y + offsets[j].y, region.width + offsets[j].w, region.height + offsets[j].h);
 				} else {
-					draw(sprite, currentImages[j], region.x + (region.width + space) * j - shift, region.y, region.width, region.height);
+					draw(sprite, currentImages[j], region.x + (region.width + scaledSpace) * j - shift, region.y, region.width, region.height);
 				}
 			}
 		}
+	}
+
+	private float getScaledSpace() {
+		return space * spaceScale;
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state, float offsetX, float offsetY) {

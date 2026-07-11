@@ -88,6 +88,8 @@ public final class SkinBar extends SkinObject {
     public static final int BARLAMP_COUNT = 11;
     
     private BarRenderer render;
+    private float scaleX = 1f;
+    private float scaleY = 1f;
     /**
      * 描画不可スキンオブジェクト
      */
@@ -298,7 +300,21 @@ public final class SkinBar extends SkinObject {
 
     public void setBarlevel(int id, SkinNumber barlevel) {
         if(id >= 0 && id < this.barlevel.length) {
+            if(barlevel != null) {
+                barlevel.setSkinScale(scaleX, scaleY);
+            }
             this.barlevel[id] = barlevel;
+        }
+    }
+
+    @Override
+    public void setSkinScale(float scaleX, float scaleY) {
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
+        for(SkinNumber barlevel : this.barlevel) {
+            if(barlevel != null) {
+                barlevel.setSkinScale(scaleX, scaleY);
+            }
         }
     }
 

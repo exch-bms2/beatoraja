@@ -262,6 +262,9 @@ public abstract class SkinObject extends DisposableObject {
 		return dstop;
 	}
 
+	public void setSkinScale(float scaleX, float scaleY) {
+	}
+
 	public void setOption(int[] dstop) {
 		this.dstop = dstop;
 	}
