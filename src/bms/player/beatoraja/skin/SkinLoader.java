@@ -59,8 +59,9 @@ public abstract class SkinLoader {
                 SkinLoader.resource.disposeOld();
                 return skin;
             } else if (sc.getPath().endsWith(".luaskin")) {
-                LuaSkinLoader loader = new LuaSkinLoader(state, resource.getConfig());
-                Skin skin = loader.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
+                Path skinPath = Paths.get(sc.getPath());
+                LuaSkinLoader loader = new LuaSkinLoader(state, resource.getConfig(), skinPath);
+                Skin skin = loader.loadSkin(skinPath, skinType, sc.getProperties());
                 SkinLoader.resource.disposeOld();
                 return skin;
             } else {
