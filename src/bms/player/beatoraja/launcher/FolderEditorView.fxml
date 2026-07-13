@@ -17,32 +17,27 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.CheckBox?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.FolderEditorView">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="editorWorkspace" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.FolderEditorView">
    <children>
       <HBox VBox.vgrow="ALWAYS">
          <children>
-            <VBox spacing="10.0">
+            <VBox prefWidth="280.0" spacing="10.0" styleClass="editorListPanel">
                <children>
-                  <HBox prefHeight="31.0" prefWidth="240.0">
+                  <VBox prefHeight="76.0" prefWidth="280.0" spacing="7.0" styleClass="editorListHeader">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                      <children>
-                        <Label text="FOLDER">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets right="30.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Button mnemonicParsing="false" onAction="#addTableFolder" text="＋" />
-                        <Button mnemonicParsing="false" onAction="#removeTableFolder" text="ー" />
-                        <Button mnemonicParsing="false" onAction="#moveTableFolderUp" text="↑" />
-                        <Button mnemonicParsing="false" onAction="#moveTableFolderDown" text="↓" />
+                        <Label styleClass="editorListTitle" text="FOLDERS" />
+                        <HBox spacing="6.0">
+                           <Button mnemonicParsing="false" onAction="#addTableFolder" styleClass="button,editorToolbarButton" text="Add" />
+                           <Button mnemonicParsing="false" onAction="#removeTableFolder" styleClass="button,editorToolbarButton" text="Del" />
+                           <Button mnemonicParsing="false" onAction="#moveTableFolderUp" styleClass="button,editorToolbarButton" text="Up" />
+                           <Button mnemonicParsing="false" onAction="#moveTableFolderDown" styleClass="button,editorToolbarButton" text="Down" />
+                        </HBox>
                      </children>
-                  </HBox>
-                  <ListView fx:id="folders" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
+                  </VBox>
+                  <ListView fx:id="folders" prefHeight="400.0" prefWidth="280.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
             <GridPane fx:id="folderPane" prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
@@ -133,6 +128,11 @@
                   <Label text="SEARCH" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
+            <VBox fx:id="folderEmptyState" alignment="CENTER" spacing="10.0" styleClass="editorEmptyState" HBox.hgrow="ALWAYS">
+               <Label styleClass="emptyStateTitle" text="No folders yet" />
+               <Label styleClass="emptyStateDescription" text="Create a folder to organize charts in this table." />
+               <Button mnemonicParsing="false" onAction="#addTableFolder" text="Create folder" />
+            </VBox>
          </children>
       </HBox>
    </children>
