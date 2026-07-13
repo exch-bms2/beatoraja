@@ -376,12 +376,9 @@
         <Tab fx:id="skinTab" closable="false" text="">
             <graphic><Label styleClass="sideTabLabel" text="%Skin" /></graphic>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <VBox prefHeight="280.0" prefWidth="740.0" spacing="10.0" styleClass="skinPage" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-               <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                  <children>
-                          <fx:include fx:id="skin" source="SkinConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  </children>
-               </AnchorPane>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <VBox prefWidth="740.0" spacing="10.0" styleClass="skinPage">
+                    <fx:include fx:id="skin" source="SkinConfigurationView.fxml" />
                     <HBox alignment="CENTER_LEFT" styleClass="pathRow">
                         <Label styleClass="settingLabel" text="%BGM_Path(LR2)" />
                         <Region HBox.hgrow="ALWAYS" />
@@ -394,7 +391,8 @@
                         <TextField fx:id="soundpath" prefWidth="480.0" />
                         <Button mnemonicParsing="false" onAction="#addSoundPath" styleClass="button,iconButton" text="..." />
                     </HBox>
-                </VBox>
+                  </VBox>
+                </ScrollPane>
             </AnchorPane>
         </Tab>
         <Tab fx:id="otherTab" closable="false" text="">

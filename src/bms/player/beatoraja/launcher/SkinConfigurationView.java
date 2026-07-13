@@ -37,7 +37,7 @@ public class SkinConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<SkinHeader> skinheaderSelector;
 	@FXML
-	private ScrollPane skinconfig;
+	private VBox skinconfig;
 
 	private PlayerConfig player;
 	private SkinType mode = null;
@@ -150,7 +150,7 @@ public class SkinConfigurationView implements Initializable {
 				for (SkinHeader header : skinheaderSelector.getItems()) {
 					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
 						skinheaderSelector.setValue(header);
-						skinconfig.setContent(create(skinheaderSelector.getValue(), skinconf.getProperties()));
+						setSkinConfig(create(skinheaderSelector.getValue(), skinconf.getProperties()));
 						break;
 					}
 				}
@@ -264,9 +264,16 @@ public class SkinConfigurationView implements Initializable {
 				}
 			}
 		}
-		skinconfig.setContent(create(header, property));
+		setSkinConfig(create(header, property));
     	
     }
+
+	private void setSkinConfig(VBox content) {
+		skinconfig.getChildren().clear();
+		if (content != null) {
+			skinconfig.getChildren().add(content);
+		}
+	}
     
     public void commitSkinHeader() {
 		// history保存

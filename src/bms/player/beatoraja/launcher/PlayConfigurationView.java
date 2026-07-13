@@ -193,6 +193,7 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox chartpreview;
 	@FXML
 	private CheckBox guidese;
+	@FXML
 	private CheckBox windowhold;
 	@FXML
 	private Spinner<Integer> extranotedepth;
