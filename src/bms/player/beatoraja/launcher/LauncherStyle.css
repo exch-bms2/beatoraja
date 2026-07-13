@@ -653,6 +653,31 @@
     -fx-background-color: #b7b7b7;
 }
 
+.skin-offset-spinner {
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-background-color: #202124;
+    -fx-background-radius: 6px;
+}
+
+.skin-offset-spinner .text-field {
+    -fx-padding: 0 9px;
+    -fx-alignment: center-right;
+    -fx-background-color: transparent;
+}
+
+.skin-offset-spinner .increment-arrow-button,
+.skin-offset-spinner .decrement-arrow-button {
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-min-height: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}
+
 .combo-box-popup .list-view {
     -fx-background-color: #27282b;
     -fx-control-inner-background: #27282b;
@@ -768,32 +793,57 @@
 }
 
 .check-box {
-    -fx-graphic-text-gap: 10px;
+    -fx-graphic-text-gap: 12px;
     -fx-cursor: hand;
 }
 
 .check-box .box {
-    -fx-min-width: 18px;
-    -fx-pref-width: 18px;
-    -fx-min-height: 18px;
-    -fx-pref-height: 18px;
-    -fx-background-color: #202124;
-    -fx-background-radius: 6px;
+    -fx-min-width: 40px;
+    -fx-pref-width: 40px;
+    -fx-max-width: 40px;
+    -fx-min-height: 22px;
+    -fx-pref-height: 22px;
+    -fx-max-height: 22px;
+    -fx-background-color: #3a3c41;
+    -fx-background-radius: 11px;
     -fx-border-color: transparent;
     -fx-border-width: 0;
-    -fx-padding: 4px;
+    -fx-padding: 0;
 }
 
 .check-box:hover .box {
-    -fx-background-color: #303136;
+    -fx-background-color: #45474d;
 }
 
 .check-box:selected .box {
-    -fx-background-color: #a8a8a8;
+    -fx-background-color: #74767d;
+}
+
+.check-box:selected:hover .box {
+    -fx-background-color: #82848b;
+}
+
+.check-box .mark {
+    -fx-min-width: 16px;
+    -fx-pref-width: 16px;
+    -fx-max-width: 16px;
+    -fx-min-height: 16px;
+    -fx-pref-height: 16px;
+    -fx-max-height: 16px;
+    -fx-background-color: #b5bac1;
+    -fx-background-radius: 999px;
+    -fx-shape: null;
+    -fx-scale-shape: false;
+    -fx-translate-x: -9px;
 }
 
 .check-box:selected .mark {
-    -fx-background-color: #181818;
+    -fx-background-color: #f5f5f5;
+    -fx-translate-x: 9px;
+}
+
+.check-box:disabled {
+    -fx-opacity: 0.5;
 }
 
 .slider .track {

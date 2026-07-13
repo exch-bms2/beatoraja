@@ -477,6 +477,7 @@ public class SkinConfigurationView implements Initializable {
 				Spinner<Integer>[] spinner = new Spinner[values.length];
 				for(int i = 0;i < spinner.length;i++) {
 					spinner[i] = new NumericSpinner();
+					spinner[i].getStyleClass().add("skin-offset-spinner");
 					spinner[i].setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-9999,9999,v[i],1));
 					spinner[i].setPrefWidth(80);
 					spinner[i].setEditable(true);
