@@ -17,7 +17,10 @@ import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -299,6 +302,7 @@ public class SkinConfigurationView implements Initializable {
 			property = new SkinConfig.Property();
 		}
 		VBox main = new VBox();
+		main.getStyleClass().add("skinOptionList");
 		
 		List items = new ArrayList();
 		List<CustomItem> otheritems = new ArrayList<CustomItem>();
@@ -330,7 +334,10 @@ public class SkinConfigurationView implements Initializable {
 				// Option項目生成
 				final CustomOption option = (CustomOption) item;
 				HBox hbox = new HBox();
+				hbox.setAlignment(Pos.CENTER_LEFT);
+				hbox.getStyleClass().add("settingRow");
 				ComboBox<String> combo = new ComboBox<String>();
+				combo.setPrefWidth(320);
 				combo.getItems().setAll(option.contents);
 				combo.getItems().add("Random");
 				combo.getSelectionModel().select(0);
@@ -363,8 +370,10 @@ public class SkinConfigurationView implements Initializable {
 				}
 
 				Label label = new Label(option.name);
-				label.setMinWidth(250.0);
-				hbox.getChildren().addAll(label, combo);
+				label.getStyleClass().add("settingLabel");
+				Region spacer = new Region();
+				HBox.setHgrow(spacer, Priority.ALWAYS);
+				hbox.getChildren().addAll(label, spacer, combo);
 				optionbox.put(option, combo);
 				main.getChildren().add(hbox);
 			}
@@ -388,7 +397,10 @@ public class SkinConfigurationView implements Initializable {
 				try (DirectoryStream<Path> paths = Files.newDirectoryStream(dirpath,
 						"{" + name.toLowerCase() + "," + name.toUpperCase() + "}")) {
 					HBox hbox = new HBox();
+					hbox.setAlignment(Pos.CENTER_LEFT);
+					hbox.getStyleClass().add("settingRow");
 					ComboBox<String> combo = new ComboBox<String>();
+					combo.setPrefWidth(320);
 					for (Path p : paths) {
 						combo.getItems().add(p.getFileName().toString());
 					}
@@ -422,8 +434,10 @@ public class SkinConfigurationView implements Initializable {
 					}
 
 					Label label = new Label(file.name);
-					label.setMinWidth(250.0);
-					hbox.getChildren().addAll(label, combo);
+					label.getStyleClass().add("settingLabel");
+					Region spacer = new Region();
+					HBox.setHgrow(spacer, Priority.ALWAYS);
+					hbox.getChildren().addAll(label, spacer, combo);
 					filebox.put(file, combo);
 					main.getChildren().add(hbox);
 				} catch (IOException e) {
@@ -435,8 +449,12 @@ public class SkinConfigurationView implements Initializable {
 				final CustomOffset option = (CustomOffset) item;
 				final String[] values = {"x","y","w","h","r","a"};
 				HBox hbox = new HBox();
+				hbox.setAlignment(Pos.CENTER_LEFT);
+				hbox.setSpacing(8);
+				hbox.getStyleClass().add("settingRow");
 				Label label = new Label(option.name);
-				label.setMinWidth(250.0);
+				label.setMinWidth(190.0);
+				label.getStyleClass().add("settingLabel");
 				hbox.getChildren().add(label);
 
 				final boolean[] b = {option.x, option.y, option.w, option.h, option.r, option.a};
@@ -465,7 +483,8 @@ public class SkinConfigurationView implements Initializable {
 			if(item instanceof String) {
 				HBox hbox = new HBox();
 				Label label = new Label(item.toString());
-				label.setStyle("-fx-font-size: " + (item.toString().length() > 0 ? 20 : 8) +"px;  -fx-text-fill: #0088ff; -fx-label-padding: 0 0 10px 20px;" );
+				hbox.getStyleClass().add("skinSectionHeader");
+				label.getStyleClass().add("cardTitle");
 				hbox.getChildren().add(label);
 				main.getChildren().add(hbox);
 			}

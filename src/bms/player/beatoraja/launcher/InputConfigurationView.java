@@ -97,6 +97,7 @@ public class InputConfigurationView implements Initializable {
     mouseScratchMode.getSelectionModel().select(conf.getKeyboardConfig().getMouseScratchConfig().getMouseScratchMode());
 
 	controller_tableView.setEditable(true);
+	controller_tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 	playsideCol.setEditable(false);
 	nameCol.setEditable(false);
 	playsideCol.setSortable(false);
