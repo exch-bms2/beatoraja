@@ -113,6 +113,44 @@ public class IRScoreData {
 	public final BMSPlayerRule rule;
 	
 	public final String skin;
+
+	public IRScoreData(String sha256, int lntype, String id, String player, ClearType clear, long date, int epg,
+			int lpg, int egr, int lgr, int egd, int lgd, int ebd, int lbd, int epr, int lpr, int ems, int lms,
+			long avgjudge, int maxcombo, int notes, int passnotes, int minbp, int option, long seed, int assist,
+			int gauge, BMSPlayerInputDevice.Type deviceType, JudgeAlgorithm judgeAlgorithm, BMSPlayerRule rule,
+			String skin) {
+		this.sha256 = sha256;
+		this.lntype = lntype;
+		this.id = id;
+		this.player = player;
+		this.clear = clear;
+		this.date = date;
+		this.epg = epg;
+		this.lpg = lpg;
+		this.egr = egr;
+		this.lgr = lgr;
+		this.egd = egd;
+		this.lgd = lgd;
+		this.ebd = ebd;
+		this.lbd = lbd;
+		this.epr = epr;
+		this.lpr = lpr;
+		this.ems = ems;
+		this.lms = lms;
+		this.avgjudge = avgjudge;
+		this.maxcombo = maxcombo;
+		this.notes = notes;
+		this.passnotes = passnotes;
+		this.minbp = minbp;
+		this.option = option;
+		this.seed = seed;
+		this.assist = assist;
+		this.gauge = gauge;
+		this.deviceType = deviceType;
+		this.judgeAlgorithm = judgeAlgorithm;
+		this.rule = rule;
+		this.skin = skin;
+	}
 	
 	public IRScoreData(ScoreData score) {
 		this.sha256 = score.getSha256();

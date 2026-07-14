@@ -70,6 +70,7 @@ public class IRChartData {
 	 * 判定幅(bmsonのjudgerank表記)
 	 */
 	public final int judge;
+
 	/**
 	 * 最小BPM
 	 */
@@ -112,6 +113,39 @@ public class IRChartData {
 	public final boolean hasStop;
 	
 	public final Map<String, String> values = new HashMap<String, String>();
+
+	public IRChartData(String md5, String sha256, String title, String subtitle, String genre, String artist,
+			String subartist, String url, String appendurl, int level, int total, Mode mode, int lntype, int judge,
+			int minbpm, int maxbpm, int notes, boolean hasUndefinedLN, boolean hasLN, boolean hasCN, boolean hasHCN,
+			boolean hasMine, boolean hasRandom, boolean hasStop, Map<String, String> values) {
+		this.md5 = md5;
+		this.sha256 = sha256;
+		this.title = title;
+		this.subtitle = subtitle;
+		this.genre = genre;
+		this.artist = artist;
+		this.subartist = subartist;
+		this.url = url;
+		this.appendurl = appendurl;
+		this.level = level;
+		this.total = total;
+		this.mode = mode;
+		this.lntype = lntype;
+		this.judge = judge;
+		this.minbpm = minbpm;
+		this.maxbpm = maxbpm;
+		this.notes = notes;
+		this.hasUndefinedLN = hasUndefinedLN;
+		this.hasLN = hasLN;
+		this.hasCN = hasCN;
+		this.hasHCN = hasHCN;
+		this.hasMine = hasMine;
+		this.hasRandom = hasRandom;
+		this.hasStop = hasStop;
+		if(values != null) {
+			this.values.putAll(values);
+		}
+	}
 	
 	public IRChartData(SongData song) {
 		this(song, song.getBMSModel() != null ? song.getBMSModel().getLntype() : 0);

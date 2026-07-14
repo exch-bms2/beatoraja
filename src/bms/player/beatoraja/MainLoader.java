@@ -24,7 +24,10 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 import bms.player.beatoraja.AudioConfig.DriverType;
+import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRConnectionManager;
+import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.IRVersionInfo;
 import bms.player.beatoraja.launcher.PlayConfigurationView;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
@@ -109,14 +112,14 @@ public class MainLoader extends Application {
 		if(config == null) {
 			config = Config.read();
 		}
+		if(player == null) {
+			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
+		}
 
 		SongDatabaseAccessor songdb;
 		try {
-			songdb = new SongDatabaseAccessorProvider().get(config,
-					player != null ? player.getId() : config.getPlayername());
-			for(SongData song : songdb.getSongDatas(SongUtils.illegalsongs)) {
-				MainLoader.putIllegalSong(song.getSha256());
-			}
+			songdb = new SongDatabaseAccessorProvider().get(config, player.getId());
+			detectIllegalSongs(songdb, player);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
@@ -265,7 +268,7 @@ public class MainLoader extends Application {
 
 	public static VersionChecker getVersionChecker() {
 		if(version == null) {
-			version = new GithubVersionChecker();
+			version = new CompositeVersionChecker();
 		}
 		return version;
 	}
@@ -290,6 +293,63 @@ public class MainLoader extends Application {
 
 	public static int getIllegalSongCount() {
 		return illegalSongs.size();
+	}
+
+	private static void detectIllegalSongs(SongDatabaseAccessor songdb, PlayerConfig player) {
+		illegalSongs.clear();
+
+		Set<String> hashes = new LinkedHashSet<>();
+		addIllegalSongHashes(hashes, SongUtils.illegalsongs);
+		for(IRConfig irconfig : player.getIrconfig()) {
+			if(irconfig == null || irconfig.getIrname() == null || irconfig.getIrname().length() == 0) {
+				continue;
+			}
+			IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
+			if(ir == null) {
+				continue;
+			}
+			try {
+				IRResponse<String[]> response = ir.getIllegalSongs();
+				if(response.isSucceeded()) {
+					addIllegalSongHashes(hashes, response.getData());
+				} else if(response.getMessage() != null && response.getMessage().length() > 0
+						&& !"Not supported".equals(response.getMessage())) {
+					Logger.getGlobal().warning("IR illegal song list取得失敗 - " + irconfig.getIrname() + " : "
+							+ response.getMessage());
+				}
+			} finally {
+				closeIRConnection(ir);
+			}
+		}
+
+		if(hashes.isEmpty()) {
+			return;
+		}
+		for(SongData song : songdb.getSongDatas(hashes.toArray(String[]::new))) {
+			if(song != null && song.getSha256() != null && song.getSha256().length() > 0) {
+				MainLoader.putIllegalSong(song.getSha256());
+			}
+		}
+	}
+
+	private static void addIllegalSongHashes(Set<String> hashes, String[] candidates) {
+		if(candidates == null) {
+			return;
+		}
+		for(String candidate : candidates) {
+			if(candidate != null && candidate.length() == 64) {
+				hashes.add(candidate);
+			}
+		}
+	}
+
+	private static void closeIRConnection(IRConnection ir) {
+		if(ir instanceof AutoCloseable closeable) {
+			try {
+				closeable.close();
+			} catch(Exception e) {
+			}
+		}
 	}
 
 	@Override
@@ -353,6 +413,77 @@ public class MainLoader extends Application {
 	public interface VersionChecker {
 		public String getMessage();
 		public String getDownloadURL();
+	}
+
+	private static class CompositeVersionChecker implements VersionChecker {
+
+		private String dlurl;
+		private String message;
+
+		public String getMessage() {
+			if(message == null) {
+				getInformation();
+			}
+			return message;
+		}
+
+		public String getDownloadURL() {
+			if(message == null) {
+				getInformation();
+			}
+			return dlurl;
+		}
+
+		private void getInformation() {
+			VersionChecker github = new GithubVersionChecker();
+			message = github.getMessage();
+			dlurl = github.getDownloadURL();
+
+			IRVersionInfo irVersion = getIRVersionInfo();
+			if(irVersion != null) {
+				message = getIRVersionMessage(irVersion);
+				dlurl = irVersion.downloadURL;
+			}
+		}
+
+		private IRVersionInfo getIRVersionInfo() {
+			Config config = Config.read();
+			PlayerConfig player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
+			for(IRConfig irconfig : player.getIrconfig()) {
+				if(irconfig == null || irconfig.getIrname() == null || irconfig.getIrname().length() == 0) {
+					continue;
+				}
+				IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
+				if(ir == null) {
+					continue;
+				}
+				try {
+					IRResponse<IRVersionInfo> response = ir.getVersionInfo(MainController.getVersion());
+					if(response.isSucceeded() && response.getData() != null) {
+						return response.getData();
+					}
+					if(response.getMessage() != null && response.getMessage().length() > 0
+							&& !"Not supported".equals(response.getMessage())) {
+						Logger.getGlobal().warning("IR version取得失敗 - " + irconfig.getIrname() + " : "
+								+ response.getMessage());
+					}
+				} finally {
+					closeIRConnection(ir);
+				}
+			}
+			return null;
+		}
+
+		private String getIRVersionMessage(IRVersionInfo version) {
+			if(version.message != null && version.message.length() > 0) {
+				return version.message;
+			}
+			if(version.version != null && version.version.length() > 0
+					&& !MainController.getVersion().contains(version.version)) {
+				return String.format("最新版[%s]を利用可能です。", version.version);
+			}
+			return "最新版を利用中です";
+		}
 	}
 
 	private static class GithubVersionChecker implements VersionChecker {

@@ -103,4 +103,30 @@ public interface IRConnection {
 	 */
 	public String getPlayerURL(IRPlayerData player);
 
+	/**
+	 * IRが提供するbeatorajaのバージョン情報を取得する。
+	 * <p>
+	 * 未対応のIR実装はデフォルトで失敗レスポンスを返す。
+	 * </p>
+	 *
+	 * @param currentVersion
+	 *            現在のbeatorajaバージョン
+	 * @return バージョン情報
+	 */
+	public default IRResponse<IRVersionInfo> getVersionInfo(String currentVersion) {
+		return new SimpleIRResponse<>(false, "Not supported", null);
+	}
+
+	/**
+	 * IRが起動拒否対象として扱うBMSのSHA256一覧を取得する。
+	 * <p>
+	 * 未対応のIR実装はデフォルトで失敗レスポンスを返す。
+	 * </p>
+	 *
+	 * @return 起動拒否対象のSHA256一覧
+	 */
+	public default IRResponse<String[]> getIllegalSongs() {
+		return new SimpleIRResponse<>(false, "Not supported", new String[0]);
+	}
+
 }
