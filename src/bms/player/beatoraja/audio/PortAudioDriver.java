@@ -2,7 +2,7 @@ package bms.player.beatoraja.audio;
 
 import java.nio.ByteBuffer;
 import java.nio.file.*;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.portaudio.*;
@@ -18,7 +18,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	private static DeviceInfo[] devices;
 	
-	private BlockingStream stream;
+	private volatile BlockingStream stream;
 
 	/**
 	 * ミキサー入力
@@ -27,7 +27,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	private long idcount;
 	
-	private boolean stop = false;
+	private volatile boolean stop = false;
 	
 	private final float[] buffer;
 	
@@ -60,28 +60,20 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		super(config.getSongResourceGen());
 		DeviceInfo[] devices = getDevices();
 		AudioConfig audioConfig = config.getAudioConfig();
-		int deviceId = getDeviceId(audioConfig, devices);
-		DeviceInfo deviceInfo = devices[ deviceId ];
-		logSelectedDevice(deviceId, deviceInfo);
-
-		setSampleRate(audioConfig.getSampleRate() <= 0 ? (int)deviceInfo.defaultSampleRate : audioConfig.getSampleRate());
 		channels = 2;
 //		System.out.println( "  deviceId    = " + deviceId );
 //		System.out.println( "  sampleRate  = " + sampleRate );
 //		System.out.println( "  device name = " + deviceInfo.name );
 
-		StreamParameters streamParameters = new StreamParameters();
-		streamParameters.channelCount = channels;
-		streamParameters.device = deviceId;
-		streamParameters.sampleFormat = PortAudio.FORMAT_FLOAT_32;
 		int framesPerBuffer = audioConfig.getDeviceBufferSize();
-		streamParameters.suggestedLatency = getSuggestedLatency(deviceInfo, framesPerBuffer);
 //		System.out.println( "  suggestedLatency = " + streamParameters.suggestedLatency );
 
 		int flags = PortAudio.FLAG_CLIP_OFF | PortAudio.FLAG_DITHER_OFF;
 
 		// Open a stream for output.
-		stream = openStream(streamParameters, deviceInfo, framesPerBuffer, flags);
+		int deviceId = getDeviceId(audioConfig, devices);
+		StreamOpenResult openResult = openStreamWithFallback(audioConfig, devices, deviceId, framesPerBuffer, flags);
+		stream = openResult.stream();
 
 		stream.start();
 
@@ -93,6 +85,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			inputs[i] = new MixerInput();
 		}
 		mixer.start();
+	}
+
+	private record StreamOpenResult(BlockingStream stream, int deviceId, DeviceInfo deviceInfo, int sampleRate) {
 	}
 
 	private static int getDeviceId(AudioConfig config, DeviceInfo[] devices) {
@@ -123,6 +118,10 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	private static int getDefaultOutputDeviceId(DeviceInfo[] devices) {
 		if(isLinux()) {
+			int preferredAlsa = getPreferredAlsaOutputDevice(devices);
+			if(preferredAlsa >= 0) {
+				return preferredAlsa;
+			}
 			int alsaDefault = getAlsaDefaultOutputDevice(devices);
 			if(alsaDefault >= 0) {
 				return alsaDefault;
@@ -157,6 +156,86 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 		}
 		return firstMatch;
+	}
+
+	private StreamOpenResult openStreamWithFallback(AudioConfig audioConfig, DeviceInfo[] devices, int preferredDeviceId, int framesPerBuffer, int flags) {
+		RuntimeException lastError = null;
+		for(int deviceId : getOutputDeviceCandidates(preferredDeviceId, devices)) {
+			DeviceInfo deviceInfo = devices[deviceId];
+			for(int sampleRate : getSampleRateCandidates(audioConfig, deviceInfo)) {
+				setSampleRate(sampleRate);
+				logSelectedDevice(deviceId, deviceInfo);
+				StreamParameters streamParameters = createOutputStreamParameters(deviceId, deviceInfo, framesPerBuffer);
+				try {
+					BlockingStream openedStream = openStream(streamParameters, deviceInfo, framesPerBuffer, flags);
+					if(deviceId != preferredDeviceId) {
+						Logger.getGlobal().info("PortAudio fallback output device selected"
+								+ " : requestedDevice=" + preferredDeviceId
+								+ ", fallbackDevice=" + deviceId
+								+ ", fallbackName=" + deviceInfo.name
+								+ ", sampleRate=" + sampleRate);
+					}
+					return new StreamOpenResult(openedStream, deviceId, deviceInfo, sampleRate);
+				} catch(RuntimeException e) {
+					lastError = e;
+					Logger.getGlobal().warning("PortAudio output device open failed"
+							+ " : device=" + deviceId
+							+ ", name=" + deviceInfo.name
+							+ ", sampleRate=" + sampleRate
+							+ ", message=" + e.getMessage());
+				}
+			}
+		}
+		throw lastError != null ? lastError : new RuntimeException("PortAudio output device is not available");
+	}
+
+	private StreamParameters createOutputStreamParameters(int deviceId, DeviceInfo deviceInfo, int framesPerBuffer) {
+		StreamParameters streamParameters = new StreamParameters();
+		streamParameters.channelCount = channels;
+		streamParameters.device = deviceId;
+		streamParameters.sampleFormat = PortAudio.FORMAT_FLOAT_32;
+		streamParameters.suggestedLatency = getSuggestedLatency(deviceInfo, framesPerBuffer);
+		return streamParameters;
+	}
+
+	private static int[] getOutputDeviceCandidates(int preferredDeviceId, DeviceInfo[] devices) {
+		LinkedHashSet<Integer> candidates = new LinkedHashSet<>();
+		addOutputDeviceCandidate(candidates, preferredDeviceId, devices);
+
+		if(isLinux()) {
+			addOutputDeviceCandidate(candidates, getPreferredAlsaOutputDevice(devices), devices);
+		}
+		addOutputDeviceCandidate(candidates, getDefaultOutputDeviceId(devices), devices);
+
+		if(isLinux()) {
+			for(int i = 0;i < devices.length;i++) {
+				if(isPreferredAlsaOutputDevice(devices[i])) {
+					addOutputDeviceCandidate(candidates, i, devices);
+				}
+			}
+		}
+		return candidates.stream().mapToInt(Integer::intValue).toArray();
+	}
+
+	private static void addOutputDeviceCandidate(Set<Integer> candidates, int deviceId, DeviceInfo[] devices) {
+		if(deviceId >= 0 && deviceId < devices.length && devices[deviceId].maxOutputChannels > 0) {
+			candidates.add(deviceId);
+		}
+	}
+
+	private static int[] getSampleRateCandidates(AudioConfig audioConfig, DeviceInfo deviceInfo) {
+		LinkedHashSet<Integer> sampleRates = new LinkedHashSet<>();
+		if(audioConfig.getSampleRate() > 0) {
+			sampleRates.add(audioConfig.getSampleRate());
+		}
+		if(deviceInfo.defaultSampleRate > 0) {
+			sampleRates.add((int)deviceInfo.defaultSampleRate);
+		}
+		if(isLinux()) {
+			sampleRates.add(48000);
+			sampleRates.add(44100);
+		}
+		return sampleRates.stream().mapToInt(Integer::intValue).toArray();
 	}
 
 	private BlockingStream openStream(StreamParameters streamParameters, DeviceInfo deviceInfo, int framesPerBuffer, int flags) {
@@ -272,6 +351,36 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 		}
 		return -1;
+	}
+
+	private static int getPreferredAlsaOutputDevice(DeviceInfo[] devices) {
+		int fallback = -1;
+		for(int i = 0;i < devices.length;i++) {
+			DeviceInfo device = devices[i];
+			if(device.maxOutputChannels <= 0 || !isAlsaDevice(device)) {
+				continue;
+			}
+			String name = device.name != null ? device.name.toLowerCase(Locale.ROOT) : "";
+			if(name.equals("default")) {
+				return i;
+			}
+			if(isPreferredAlsaOutputDevice(device) && fallback < 0) {
+				fallback = i;
+			}
+		}
+		return fallback;
+	}
+
+	private static boolean isPreferredAlsaOutputDevice(DeviceInfo deviceInfo) {
+		if(deviceInfo.maxOutputChannels <= 0 || !isAlsaDevice(deviceInfo)) {
+			return false;
+		}
+		String name = deviceInfo.name != null ? deviceInfo.name.toLowerCase(Locale.ROOT) : "";
+		return name.equals("default")
+				|| name.contains("pipewire")
+				|| name.contains("pulse")
+				|| name.contains("plug")
+				|| name.contains("dmix");
 	}
 
 	private static int getFirstOutputDevice(DeviceInfo[] devices) {
@@ -527,9 +636,18 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 			
 			try {
-				stream.write( buffer, buffer.length / 2);
+				BlockingStream currentStream = stream;
+				if(currentStream == null) {
+					stop = true;
+					break;
+				}
+				currentStream.write( buffer, buffer.length / 2);
 			} catch(Throwable e) {
-				e.printStackTrace();
+				if(!stop) {
+					Logger.getGlobal().warning("PortAudio stream write failed : " + e.getMessage());
+				}
+				stop = true;
+				break;
 			}
 			
 		}
@@ -537,16 +655,35 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	public void dispose() {
 		super.dispose();
-		if(stream != null) {
+		BlockingStream currentStream = stream;
+		if(currentStream != null) {
 			stop = true;
-			long l = System.currentTimeMillis();
-			while(mixer.isAlive() && System.currentTimeMillis() - l < 1000);
-			stream.stop();
-			stream.close();
-			
+			try {
+				currentStream.stop();
+			} catch(Throwable e) {
+				Logger.getGlobal().fine("PortAudio stream stop failed : " + e.getMessage());
+			}
+			try {
+				if(mixer != null && mixer.isAlive() && mixer != Thread.currentThread()) {
+					mixer.join(2000);
+				}
+			} catch(InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			try {
+				currentStream.close();
+			} catch(Throwable e) {
+				Logger.getGlobal().fine("PortAudio stream close failed : " + e.getMessage());
+			}
+
 			stream = null;
 
-			PortAudio.terminate();
+			try {
+				PortAudio.terminate();
+				devices = null;
+			} catch(Throwable e) {
+				Logger.getGlobal().fine("PortAudio terminate failed : " + e.getMessage());
+			}
 //			System.out.println( "JPortAudio test complete." );			
 		}
 	}
