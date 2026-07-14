@@ -1,8 +1,11 @@
 package bms.player.beatoraja.video;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
 
@@ -121,6 +124,7 @@ public class FFmpegProcessor implements VideoProcessor {
 
 		private Pixmap pixmap;
 		private byte[] frameRow;
+		private byte[] movieBytes;
 		private final Object pixmapLock = new Object();
 
 		private String filepath;
@@ -134,28 +138,13 @@ public class FFmpegProcessor implements VideoProcessor {
 
 		public void run() {
 			try {
-				grabber = new FFmpegFrameGrabber(filepath);
-				grabber.start();
-				while (grabber.getVideoBitrate() < 10) {
-					final int videoStream = grabber.getVideoStream();
-					try {
-						if (videoStream < 5) {
-							grabber.setVideoStream(videoStream + 1);
-							grabber.restart();
-						} else {
-							grabber.setVideoStream(-1);
-							grabber.restart();
-							break;
-						}
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
-				}
+				movieBytes = Files.readAllBytes(Paths.get(filepath));
+				openGrabber();
 				Logger.getGlobal()
 						.info("movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat()
 								+ " size : " + grabber.getImageWidth() + " x " + grabber.getImageHeight()
 								+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
-								+ grabber.getLengthInTime());
+								+ grabber.getLengthInTime() + " memory : " + movieBytes.length + " bytes");
 
 				offset = grabber.getTimestamp();
 				Frame frame = null;
@@ -257,11 +246,46 @@ public class FFmpegProcessor implements VideoProcessor {
 							pixmap = null;
 						}
 					}
-					grabber.stop();
-					grabber.close();
+					closeGrabber();
 					Logger.getGlobal().info("動画リソースの開放 : " + filepath);
 				} catch (Throwable e) {
 					e.printStackTrace();
+				}
+			}
+		}
+
+		private void openGrabber() throws Exception {
+			grabber = new FFmpegFrameGrabber(new ByteArrayInputStream(movieBytes));
+			grabber.start();
+			while (grabber.getVideoBitrate() < 10) {
+				final int videoStream = grabber.getVideoStream();
+				try {
+					if (videoStream < 5) {
+						grabber.setVideoStream(videoStream + 1);
+						grabber.restart();
+					} else {
+						grabber.setVideoStream(-1);
+						grabber.restart();
+						break;
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		private void reopenGrabber() throws Exception {
+			closeGrabber();
+			openGrabber();
+		}
+
+		private void closeGrabber() throws Exception {
+			if (grabber != null) {
+				try {
+					grabber.stop();
+				} finally {
+					grabber.close();
+					grabber = null;
 				}
 			}
 		}
@@ -271,12 +295,15 @@ public class FFmpegProcessor implements VideoProcessor {
 				try {
 					setVideoFrameNumber.invoke(grabber, 0);
 				} catch (IllegalAccessException | InvocationTargetException e) {
-					grabber.restart();
-					grabber.grabImage();
+					reopenGrabber();
 				}
 			} else {
-				grabber.restart();
-				grabber.grabImage();
+				try {
+					grabber.restart();
+					grabber.grabImage();
+				} catch (Throwable e) {
+					reopenGrabber();
+				}
 			}
 			eof = false;
 			offset = grabber.getTimestamp() - time * 1000;
