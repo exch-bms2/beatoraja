@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.skin.property.TimerProperty;
 import bms.player.beatoraja.play.PlaySkin;
@@ -20,6 +22,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class PomyuCharaLoader {
 
 	private final PlaySkin skin;
+
+	private static final int CHAR_BMP_INDEX = 0;
+	private static final int CHAR_TEX_INDEX = 2;
+	private static final int CHAR_FACE_INDEX = 4;
+	private static final int SELECT_CG_INDEX = 6;
+	private static final int PATTERN = 0;
+	private static final int TEXTURE = 1;
+	private static final int LAYER = 2;
+	private static final int MOTION_UNSPECIFIED = Integer.MIN_VALUE;
+	private static final int INCREASE_RATE_THRESHOLD = 17;
 
 	public static final int PLAY = 0;
 	public static final int BACKGROUND = 1;
@@ -51,39 +63,14 @@ public class PomyuCharaLoader {
 		try {
 			if(type < 0 || type > 15) return null;
 
-			File chp = null;
-			File chpdir = null;
-
-			if(imagefile.exists() && imagefile.getPath().substring(imagefile.getPath().length()-4,imagefile.getPath().length()).equalsIgnoreCase(".chp")) {
-				chp = new File(imagefile.getPath());
-			} else if (!imagefile.exists() && imagefile.getPath().substring(imagefile.getPath().length()-4,imagefile.getPath().length()).equalsIgnoreCase(".chp")) {
-				chpdir = new File(imagefile.getPath().substring(0, Math.max(imagefile.getPath().lastIndexOf('\\'), imagefile.getPath().lastIndexOf('/')) + 1));
-			} else {
-				if(imagefile.getPath().charAt(imagefile.getPath().length()-1) != '/' && imagefile.getPath().charAt(imagefile.getPath().length()-1) != '\\') chpdir = new File(imagefile.getPath()+"/");
-				else chpdir = new File(imagefile.getPath());
-			}
-			if(chp == null && chpdir != null) {
-				//chpファイルを探す
-				File[] filename = chpdir.listFiles();
-				for(int i = 0; i < filename.length; i++) {
-					if (filename[i].getPath().substring(filename[i].getPath().length()-4,filename[i].getPath().length()).equalsIgnoreCase(".chp")) {
-						chp = new File(filename[i].getPath());
-						break;
-					}
-				}
-			}
+			File chp = findChpFile(imagefile);
 			if(chp == null) return null;
+			final String chpBasePath = getParentPath(chp);
 
 			//画像データ 0:#CharBMP 1:#CharBMP2P 2:#CharTex 3:#CharTex2P 4:#CharFace 5:#CharFace2P 6:#SelectCG 7:#SelectCG2P
 			Texture[] CharBMP = new Texture[8];
-			Arrays.fill(CharBMP, null);
-			final int CharBMPIndex = 0;
-			final int CharTexIndex = 2;
-			final int CharFaceIndex = 4;
-			final int SelectCGIndex = 6;
 			//透過処理フラグ
 			boolean[] transparentFlag = new boolean[8];
-			Arrays.fill(transparentFlag, false);
 			//各パラメータ
 			int[][] xywh = new int[1296][4];
 			for(int[] i: xywh){
@@ -92,24 +79,19 @@ public class PomyuCharaLoader {
 			int[] charFaceUpperXywh = {0, 0, 256, 256};
 			int[] charFaceAllXywh = {320, 0, 320, 480};
 			int anime = 100;
-			int size[] = {0, 0};
-			int frame[] = new int[20];
+			int[] size = {0, 0};
+			int[] frame = new int[20];
 			Arrays.fill(frame, Integer.MIN_VALUE);
-			int loop[] = new int[20];
+			int[] loop = new int[20];
 			Arrays.fill(loop, -1);
 			//最終的な色
 			int setColor = 1;
-			//フレーム補間の基準の時間 60FPSの17ms
-			int increaseRateThreshold = 17;
 			//#Pattern,#Texture,#Layerのデータ
-			final int PATTERN = 0;
-			final int TEXTURE = 1;
-			final int LAYER = 2;
-			List<List<String>> patternData = new ArrayList<List<String>>();
-			for(int i = 0; i < 3; i++) patternData.add(new ArrayList<String>());
+			List<List<String>> patternData = new ArrayList<>();
+			for(int i = 0; i <= LAYER; i++) patternData.add(new ArrayList<>());
 
 			try (BufferedReader br = new BufferedReader(
-				new InputStreamReader(new FileInputStream(chp), "MS932"));) {
+				new InputStreamReader(new FileInputStream(chp), "MS932"))) {
 				String line;
 				while ((line = br.readLine()) != null) {
 					if (line.startsWith("#") ) {
@@ -118,37 +100,37 @@ public class PomyuCharaLoader {
 							List<String> data = PMparseStr(str);
 							if (str[0].equalsIgnoreCase("#CharBMP")) {
 								//#Pattern, #Layer用画像
-								if(data.size() > 1) CharBMP[CharBMPIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[CHAR_BMP_INDEX] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#CharBMP2P")) {
 								//#Pattern, #Layer用画像2P
-								if(data.size() > 1) CharBMP[CharBMPIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[CHAR_BMP_INDEX + 1] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#CharTex")) {
 								//#Texture用画像
-								if(data.size() > 1) CharBMP[CharTexIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[CHAR_TEX_INDEX] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#CharTex2P")) {
 								//#Texture用画像2P
-								if(data.size() > 1) CharBMP[CharTexIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[CHAR_TEX_INDEX + 1] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#CharFace")) {
 								//ハリアイ
-								if(data.size() > 1) CharBMP[CharFaceIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[CHAR_FACE_INDEX] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#CharFace2P")) {
 								//ハリアイ2P
-								if(data.size() > 1) CharBMP[CharFaceIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[CHAR_FACE_INDEX + 1] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#SelectCG")) {
 								//選択画面アイコン
-								if(data.size() > 1) CharBMP[SelectCGIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[SELECT_CG_INDEX] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#SelectCG2P")) {
 								//選択画面アイコン2P
-								if(data.size() > 1) CharBMP[SelectCGIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
+								if(data.size() > 1) CharBMP[SELECT_CG_INDEX + 1] = loadTexture(chpBasePath, data.get(1), usecim);
 							} else if(str[0].equalsIgnoreCase("#Patern") || str[0].equalsIgnoreCase("#Pattern")) {
 								//アニメーションデータ  表示優先度低  「ふぃーりんぐぽみゅ せかんど」ではスペルミスのtが一つ足りない#Paternが正式?
-								patternData.get(0).add(line);
+								patternData.get(PATTERN).add(line);
 							} else if(str[0].equalsIgnoreCase("#Texture")) {
 								//アニメーションデータ  表示優先度中
-								patternData.get(1).add(line);
+								patternData.get(TEXTURE).add(line);
 							} else if(str[0].equalsIgnoreCase("#Layer")) {
 								//アニメーションデータ  表示優先度高
-								patternData.get(2).add(line);
+								patternData.get(LAYER).add(line);
 							} else if(str[0].equalsIgnoreCase("#Flame") || str[0].equalsIgnoreCase("#Frame")) {
 								//アニメ速度 動き毎の1枚あたりの時間(ms) 「ふぃーりんぐぽみゅ せかんど」ではスペルミスの#Flameが正式?
 								if(data.size() > 2) {
@@ -193,25 +175,27 @@ public class PomyuCharaLoader {
 						}
 					}
 				}
-			} catch (IOException e) {}
+			} catch (IOException e) {
+				Logger.getGlobal().warning("PMchara読み込み失敗 : " + chp + " : " + e.getMessage());
+			}
 
 			//#CharBMPが無い時はreturn
-			if(CharBMP[CharBMPIndex] == null) return null;
+			if(CharBMP[CHAR_BMP_INDEX] == null) return null;
 			//#CharBMP2Pが存在し、かつ#Texture定義があるときは#CharTex2Pが存在するなら2Pカラーとする
-			if(color == 2 && CharBMP[CharBMPIndex+1] != null
-					&& (patternData.get(TEXTURE).size() == 0 || (patternData.get(TEXTURE).size() > 0 && CharBMP[CharTexIndex+1] != null))
+			if(color == 2 && CharBMP[CHAR_BMP_INDEX + 1] != null
+					&& (patternData.get(TEXTURE).isEmpty() || (patternData.get(TEXTURE).size() > 0 && CharBMP[CHAR_TEX_INDEX + 1] != null))
 					) setColor = 2;
 			//#Texture定義があるのに#CharTexが無い時はreturn
-			if(setColor == 1 && patternData.get(TEXTURE).size() > 0 && CharBMP[CharTexIndex] == null) return null;
+			if(setColor == 1 && patternData.get(TEXTURE).size() > 0 && CharBMP[CHAR_TEX_INDEX] == null) return null;
 
 			TextureRegion[] image = new TextureRegion[1];
 			Texture setBMP;
-			int setMotion = Integer.MIN_VALUE;
+			int setMotion = getMotionForType(type);
 			SkinImage PMcharaPart = null;
 			int setIndex = 0;
 			switch(type) {
 				case BACKGROUND:
-					setIndex = CharBMPIndex + setColor-1;
+					setIndex = CHAR_BMP_INDEX + setColor - 1;
 					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, xywh[1][0], xywh[1][1], xywh[1][2], xywh[1][3]);
@@ -219,7 +203,7 @@ public class PomyuCharaLoader {
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case NAME:
-					setIndex = CharBMPIndex + setColor-1;
+					setIndex = CHAR_BMP_INDEX + setColor - 1;
 					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, xywh[0][0], xywh[0][1], xywh[0][2], xywh[0][3]);
@@ -227,7 +211,7 @@ public class PomyuCharaLoader {
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case FACE_UPPER:
-					setIndex = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharFaceIndex + 1 : CharFaceIndex;
+					setIndex = setColor == 2 && CharBMP[CHAR_FACE_INDEX + 1] != null ? CHAR_FACE_INDEX + 1 : CHAR_FACE_INDEX;
 					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					if(setBMP == null) break;
 					image = new TextureRegion[1];
@@ -236,7 +220,7 @@ public class PomyuCharaLoader {
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case FACE_ALL:
-					setIndex = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharFaceIndex + 1 : CharFaceIndex;
+					setIndex = setColor == 2 && CharBMP[CHAR_FACE_INDEX + 1] != null ? CHAR_FACE_INDEX + 1 : CHAR_FACE_INDEX;
 					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					if(setBMP == null) break;
 					image = new TextureRegion[1];
@@ -245,44 +229,22 @@ public class PomyuCharaLoader {
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case SELECT_CG:
-					setBMP = setColor == 2 && CharBMP[SelectCGIndex + 1] != null ? CharBMP[SelectCGIndex + 1] : CharBMP[SelectCGIndex];
+					setBMP = setColor == 2 && CharBMP[SELECT_CG_INDEX + 1] != null ? CharBMP[SELECT_CG_INDEX + 1] : CharBMP[SELECT_CG_INDEX];
 					if(setBMP == null) break;
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, 0, 0, setBMP.getWidth(), setBMP.getHeight());
 					PMcharaPart = new SkinImage(image, 0, 0);
 					skin.add(PMcharaPart);
 					return PMcharaPart;
-				case NEUTRAL:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 1;
-				case FEVER:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 6;
-				case GREAT:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 7;
-				case GOOD:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 8;
-				case BAD:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 10;
-				case FEVERWIN:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 17;
-				case WIN:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 15;
-				case LOSE:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 16;
-				case OJAMA:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 3;
-				case DANCE:
-					if(setMotion == Integer.MIN_VALUE) setMotion = 14;
+				case NEUTRAL, FEVER, GREAT, GOOD, BAD, FEVERWIN, WIN, LOSE, OJAMA, DANCE:
 				case PLAY:
 					for(int i = 0; i < frame.length; i++) {
-						if(frame[i] == Integer.MIN_VALUE) frame[i] = anime;
+						if(frame[i] == MOTION_UNSPECIFIED) frame[i] = anime;
 						if(frame[i] < 1) frame[i] = 100;
 					}
-					//ダミー用
-					Pixmap pixmap = new Pixmap( 1, 1, Format.RGBA8888 );
-					Texture transparent = new Texture( pixmap );
 					SkinImage part = null;
 					//#Pattern,#Texture,#Layerの順に描画設定を行う
-					int[] setBMPIndex = {CharBMPIndex,CharTexIndex,CharBMPIndex};
+					int[] setBMPIndex = {CHAR_BMP_INDEX, CHAR_TEX_INDEX, CHAR_BMP_INDEX};
 					for(int patternIndex = 0; patternIndex < 3; patternIndex++) {
 						for(int patternDataIndex = 0; patternDataIndex < patternData.get(patternIndex).size(); patternDataIndex++) {
 							String[] str = patternData.get(patternIndex).get(patternDataIndex).split("\t", -1);
@@ -290,7 +252,7 @@ public class PomyuCharaLoader {
 								setIndex = setBMPIndex[patternIndex] + setColor-1;
 								CharBMP[setIndex] = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 								setBMP = CharBMP[setIndex];
-								int motion = Integer.MIN_VALUE;
+								int motion = MOTION_UNSPECIFIED;
 								String dst[] = new String[4];
 								Arrays.fill(dst, "");
 								List<String> data = PMparseStr(str);
@@ -298,14 +260,14 @@ public class PomyuCharaLoader {
 								for (int i = 0; i < dst.length; i++) {
 									if(data.size() > i + 2) dst[i] = data.get(i + 2).replaceAll("[^0-9a-zA-Z-]", "");
 								}
-								int timer = Integer.MIN_VALUE;
+								int timer = MOTION_UNSPECIFIED;
 								int op[] = {0,0,0};
-								if(setMotion != Integer.MIN_VALUE && setMotion == motion) {
+								if(setMotion != MOTION_UNSPECIFIED && setMotion == motion) {
 									timer = dsttimer;
 									op[0] = dstOp1;
 									op[1] = dstOp2;
 									op[2] = dstOp3;
-								} else if(setMotion == Integer.MIN_VALUE) {
+								} else if(setMotion == MOTION_UNSPECIFIED) {
 									if(side != 2) {
 										if(motion == 1) timer = TIMER_PM_CHARA_1P_NEUTRAL;
 										else if(motion == 6) timer = TIMER_PM_CHARA_1P_FEVER;
@@ -332,7 +294,7 @@ public class PomyuCharaLoader {
 										}
 									}
 								}
-								if(timer != Integer.MIN_VALUE
+								if(timer != MOTION_UNSPECIFIED
 										&& (dst[0].length() > 0 && dst[0].length() % 2 == 0)
 										&& (dst[1].length() == 0 || (dst[1].length() > 0 && dst[1].length() == dst[0].length()))
 										&& (dst[2].length() == 0 || (dst[2].length() > 0 && dst[2].length() == dst[0].length()))
@@ -342,7 +304,7 @@ public class PomyuCharaLoader {
 									else if(loop[motion] < -1) loop[motion] = -1;
 									int cycle = frame[motion] * dst[0].length() / 2;
 									int loopTime = frame[motion] * (loop[motion]+1);
-									if(setMotion == Integer.MIN_VALUE && timer >= TIMER_PM_CHARA_1P_NEUTRAL && timer < TIMER_MUSIC_END) {
+									if(setMotion == MOTION_UNSPECIFIED && timer >= TIMER_PM_CHARA_1P_NEUTRAL && timer < TIMER_MUSIC_END) {
 										skin.pomyu.setPMcharaTime(timer - TIMER_PM_CHARA_1P_NEUTRAL, cycle);
 									}
 									boolean hyphenFlag = false;
@@ -354,9 +316,9 @@ public class PomyuCharaLoader {
 									}
 									//ハイフンがある時はフレーム補間を行う 60FPSの17msが基準
 									int increaseRate = 1;
-									if(hyphenFlag && frame[motion] >= increaseRateThreshold) {
+									if(hyphenFlag && frame[motion] >= INCREASE_RATE_THRESHOLD) {
 										for(int i = 1; i <= frame[motion]; i++) {
-											if(frame[motion] / i < increaseRateThreshold && frame[motion] % i == 0) {
+											if(frame[motion] / i < INCREASE_RATE_THRESHOLD && frame[motion] % i == 0) {
 												increaseRate = i;
 												break;
 											}
@@ -444,7 +406,7 @@ public class PomyuCharaLoader {
 										for(int i = 0; i < (loop[motion]+1) * 2; i+=2) {
 											int index = PMparseInt(dst[0].substring(i, i+2), 36);
 											if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
-											else images[i/2] = new TextureRegion(transparent, 0, 0, 1, 1);
+											else images[i/2] = createTransparentRegion();
 										}
 										part = new SkinImage(images, timer, loopTime);
 										skin.add(part);
@@ -458,7 +420,7 @@ public class PomyuCharaLoader {
 									for(int i = (loop[motion]+1)  * 2; i < dst[0].length(); i+=2) {
 										int index = PMparseInt(dst[0].substring(i, i+2), 36);
 										if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2-(loop[motion]+1)] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
-										else images[i/2-(loop[motion]+1)] = new TextureRegion(transparent, 0, 0, 1, 1);
+										else images[i/2-(loop[motion]+1)] = createTransparentRegion();
 									}
 									part = new SkinImage(images, timer, cycle - loopTime);
 									skin.add(part);
@@ -475,6 +437,72 @@ public class PomyuCharaLoader {
 		} catch (Exception e) {}
 		return null;
 	}
+	private static File findChpFile(File imagefile) {
+		if (imagefile == null) {
+			return null;
+		}
+		if (isChpFile(imagefile) && imagefile.exists()) {
+			return imagefile;
+		}
+		File chpdir;
+		if (isChpFile(imagefile)) {
+			chpdir = imagefile.getParentFile();
+		} else {
+			chpdir = imagefile;
+		}
+		if (chpdir == null) {
+			return null;
+		}
+		File[] files = chpdir.listFiles();
+		if (files == null) {
+			return null;
+		}
+		for (File file : files) {
+			if (isChpFile(file)) {
+				return file;
+			}
+		}
+		return null;
+	}
+
+	private static boolean isChpFile(File file) {
+		return file.getName().toLowerCase(Locale.ROOT).endsWith(".chp");
+	}
+
+	private static String getParentPath(File file) {
+		File parent = file.getParentFile();
+		return parent != null ? parent.getPath().replace("\\", "/") + "/" : "";
+	}
+
+	private static Texture loadTexture(String basePath, String relativePath, boolean usecim) {
+		return SkinLoader.getTexture(basePath + relativePath.replace("\\", "/"), usecim);
+	}
+
+	private static TextureRegion createTransparentRegion() {
+		Pixmap pixmap = new Pixmap(1, 1, Format.RGBA8888);
+		try {
+			return new TextureRegion(new Texture(pixmap), 0, 0, 1, 1);
+		} finally {
+			pixmap.dispose();
+		}
+	}
+
+	private static int getMotionForType(int type) {
+		return switch (type) {
+			case NEUTRAL -> 1;
+			case FEVER -> 6;
+			case GREAT -> 7;
+			case GOOD -> 8;
+			case BAD -> 10;
+			case FEVERWIN -> 17;
+			case WIN -> 15;
+			case LOSE -> 16;
+			case OJAMA -> 3;
+			case DANCE -> 14;
+			default -> MOTION_UNSPECIFIED;
+		};
+	}
+
 	private int PMparseInt(String s) {
 		return Integer.parseInt(s.replaceAll("[^0-9-]", ""));
 	}
@@ -522,19 +550,31 @@ public class PomyuCharaLoader {
 		if(tex == null || flag[index]) {
 			return tex;
 		}
-		Pixmap pixmap = new Pixmap( tex.getWidth(), tex.getHeight(), Format.RGBA8888 );
-		int transparentColor = tex.getTextureData().consumePixmap().getPixel(tex.getWidth() - 1, tex.getHeight() - 1);
-		for(int x = 0; x < tex.getWidth(); x++) {
-			for(int y = 0; y < tex.getHeight(); y++) {
-				if(transparentColor != tex.getTextureData().consumePixmap().getPixel(x, y)) {
-					pixmap.drawPixel(x, y, tex.getTextureData().consumePixmap().getPixel(x, y));
+		TextureData data = tex.getTextureData();
+		if (!data.isPrepared()) {
+			data.prepare();
+		}
+		Pixmap source = data.consumePixmap();
+		Pixmap pixmap = new Pixmap(tex.getWidth(), tex.getHeight(), Format.RGBA8888);
+		try {
+			int transparentColor = source.getPixel(tex.getWidth() - 1, tex.getHeight() - 1);
+			for(int x = 0; x < tex.getWidth(); x++) {
+				for(int y = 0; y < tex.getHeight(); y++) {
+					int color = source.getPixel(x, y);
+					if(transparentColor != color) {
+						pixmap.drawPixel(x, y, color);
+					}
 				}
 			}
+			tex.dispose();
+			tex = new Texture(pixmap);
+			flag[index] = true;
+			return tex;
+		} finally {
+			pixmap.dispose();
+			if (data.disposePixmap()) {
+				source.dispose();
+			}
 		}
-		tex.dispose();
-		tex = new Texture( pixmap );
-		pixmap.dispose();
-		flag[index] = true;
-		return tex;
 	}
 }
