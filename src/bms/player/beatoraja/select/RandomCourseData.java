@@ -1,5 +1,7 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.select;
 
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.song.SongData;
 
 import java.io.File;

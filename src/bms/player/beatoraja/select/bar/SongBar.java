@@ -94,47 +94,34 @@ public class SongBar extends SelectableBar {
     }
 
     protected static SongBar[] toSongBarArray(SongData[] songs, SongData[] elements) {
-        // 重複除外
-        int count = songs.length;
-        int noexistscount = elements.length;
-        for(SongData element : elements) {
+        SongBar[] result = new SongBar[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            SongData element = elements[i];
             element.setPath(null);
-        }
 
-        for(int i = 0;i < songs.length;i++) {
-            if(songs[i] == null) {
-                continue;
-            }
-            for(int j = i + 1;j < songs.length;j++) {
-                if(songs[j] != null && songs[i].getSha256().equals(songs[j].getSha256())) {
-                    songs[j] = null;
-                    count--;
-                }
-            }
-            for(int j = 0;j < elements.length;j++) {
-                final SongData element = elements[j];
-                if(element.getPath() == null && (element.getMd5().length() > 0 && element.getMd5().equals(songs[i].getMd5()))
-                        || (element.getSha256().length() > 0 && element.getSha256().equals(songs[i].getSha256()))) {
-                    element.setPath(songs[i].getPath());
-                    songs[i].merge(element);
-                    noexistscount--;
-                    break;
-                }
-            }
-        }
-        SongBar[] result = new SongBar[count + noexistscount];
-        noexistscount--;
-        for(int i = 0;i < elements.length;i++) {
-            if(elements[i].getPath() == null) {
-                result[count + (noexistscount--)] = new SongBar(elements[i]);
-            }
-        }
-        count--;
-        for(SongData song : songs) {
-            if(song != null) {
-                result[count--] = new SongBar(song);
+            SongData song = findSongData(songs, element);
+            if (song != null) {
+                element.setPath(song.getPath());
+                song.merge(element);
+                result[i] = new SongBar(song);
+            } else {
+                result[i] = new SongBar(element);
             }
         }
         return result;
+    }
+
+    private static SongData findSongData(SongData[] songs, SongData element) {
+        for (SongData song : songs) {
+            if (song != null && matches(song, element)) {
+                return song;
+            }
+        }
+        return null;
+    }
+
+    private static boolean matches(SongData song, SongData element) {
+        return (element.getMd5().length() > 0 && element.getMd5().equals(song.getMd5()))
+                || (element.getSha256().length() > 0 && element.getSha256().equals(song.getSha256()));
     }
 }

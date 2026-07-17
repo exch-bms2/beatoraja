@@ -1,7 +1,7 @@
 package bms.player.beatoraja.select.bar;
 
-import bms.player.beatoraja.RandomCourseData;
-import bms.player.beatoraja.RandomStageData;
+import bms.player.beatoraja.select.RandomCourseData;
+import bms.player.beatoraja.select.RandomStageData;
 import bms.player.beatoraja.song.SongData;
 
 /**
