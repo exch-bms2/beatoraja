@@ -6,7 +6,9 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongData;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -35,6 +37,10 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 	private BMSModel model;
 	private SongData current;
 	private int[][] data = new int[0][0];
+	private TrackedNote[] trackedNotes = new TrackedNote[0];
+	private boolean trackedNotesInitialized;
+	private int dirtyStart = -1;
+	private int dirtyEnd = -1;
 
 	private static final Color[][] JGRAPH = {
 			{ Color.valueOf("44ff44"), Color.valueOf("228822"), Color.valueOf("ff4444"), Color.valueOf("4444ff"), Color.valueOf("222288"), Color.valueOf("cccccc"),
@@ -85,6 +91,22 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 	private float render;
 
 	private static final Color TRANSPARENT_COLOR = Color.valueOf("00000000");
+
+	private static final class TrackedNote {
+		private final Note note;
+		private final int second;
+		private int state;
+		private int playTime;
+		private int bucket;
+
+		private TrackedNote(Note note, int second, int bucket) {
+			this.note = note;
+			this.second = second;
+			this.state = note.getState();
+			this.playTime = note.getPlayTime();
+			this.bucket = bucket;
+		}
+	}
 
 	public SkinNoteDistributionGraph() {
 		this(TYPE_NORMAL, 500, 0, 0, 0, 0);
@@ -155,15 +177,17 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 		 * backtex更新は初回のみ
 		 */
 		if(model != null && state instanceof BMSPlayer) {
-			if(System.currentTimeMillis() > notesLastUpdateTime + 750) {
+			long now = System.currentTimeMillis();
+			if(now > notesLastUpdateTime + 750) {
 				if(type != TYPE_NORMAL && pastNotes != ((BMSPlayer)state).getPastNotes()) {
 					pastNotes = ((BMSPlayer)state).getPastNotes();
-					updateData();
-					updateTexture(false);
+					if(updateData()) {
+						updateTexture(false, dirtyStart, dirtyEnd + 1);
+					}
 				}
-				notesLastUpdateTime = System.currentTimeMillis();
+				notesLastUpdateTime = now;
 			}
-			if(System.currentTimeMillis() > cursorLastUpdateTime + 50) {
+			if(now > cursorLastUpdateTime + 50) {
 				final int oldw = cursor != null ? cursor.getWidth() : 0;
 				final int oldh = cursor != null ? cursor.getHeight() : 0;
 				final int w = data.length * 5;
@@ -201,7 +225,7 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 				} else {
 					cursortex.getTexture().draw(cursor, 0, 0);
 				}
-				cursorLastUpdateTime = System.currentTimeMillis();				
+				cursorLastUpdateTime = now;
 			}
 			draw(sprite, backtex, region.x, region.y + region.height, region.width, -region.height);
 			shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
@@ -223,6 +247,7 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 	}
 
 	private void updateGraph(int[][] distribution) {
+		resetTrackedNotes();
 		data = distribution;
 		max = 20;
 		for(int i = 0;i < distribution.length;i++) {
@@ -240,6 +265,7 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 
 	
 	private void updateGraph() {
+		resetTrackedNotes();
 		if (model == null) {
 			data = new int[0][DATA_LENGTH[type]];
 		} else {
@@ -251,13 +277,17 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 		updateTexture(true);
 	}
 	
-	private void updateData() {
+	private boolean updateData() {
+		if (type != TYPE_NORMAL && trackedNotesInitialized) {
+			return updateChangedData();
+		}
 		int pos = -1;
 		int count = 0;
 		max = 20;
 		for(int[] d : data) {
 			Arrays.fill(d, 0);				
 		}
+		List<TrackedNote> notes = type != TYPE_NORMAL ? new ArrayList<>() : null;
 
 		final Mode mode = model.getMode();
 		// #LNMODE is explicitly set to 1 (LN)
@@ -305,28 +335,98 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 						if (n instanceof MineNote || (ignoreLNEnd && n instanceof LongNote && ((LongNote) n).isEnd())) {
 							break;
 						}
-						data[index][st]++;
-						count++;
+						if (st >= 0 && st < data[index].length) {
+							data[index][st]++;
+							if (notes != null) {
+								notes.add(new TrackedNote(n, index, st));
+							}
+							count++;
+						}
 						break;
 					case TYPE_EARLYLATE:
 						if (n instanceof MineNote || (ignoreLNEnd && n instanceof LongNote && ((LongNote) n).isEnd())) {
 							break;
 						}
-						if (st <= 1) {
-							data[index][st]++;
-						} else {
-							data[index][t >= 0 ? st : st + 4]++;
+						int bucket = getJudgeBucket(n);
+						if (bucket >= 0 && bucket < data[index].length) {
+							data[index][bucket]++;
+							if (notes != null) {
+								notes.add(new TrackedNote(n, index, bucket));
+							}
+							count++;
 						}
-						count++;
 						break;
 					}							 
 				}
 			}
 		}
+		if (max < count) {
+			max = Math.min((count / 10) * 10 + 10, 100);
+		}
+		if (notes != null) {
+			trackedNotes = notes.toArray(TrackedNote[]::new);
+			trackedNotesInitialized = true;
+		} else {
+			trackedNotes = new TrackedNote[0];
+			trackedNotesInitialized = false;
+		}
+		dirtyStart = 0;
+		dirtyEnd = data.length - 1;
+		return true;
 
+	}
+
+	private void resetTrackedNotes() {
+		trackedNotes = new TrackedNote[0];
+		trackedNotesInitialized = false;
+		dirtyStart = -1;
+		dirtyEnd = -1;
+	}
+
+	private boolean updateChangedData() {
+		dirtyStart = data.length;
+		dirtyEnd = -1;
+		for (TrackedNote tracked : trackedNotes) {
+			int state = tracked.note.getState();
+			int playTime = tracked.note.getPlayTime();
+			if (state == tracked.state && playTime == tracked.playTime) {
+				continue;
+			}
+			int bucket = getJudgeBucket(tracked.note);
+			if (tracked.bucket >= 0 && tracked.bucket < data[tracked.second].length) {
+				data[tracked.second][tracked.bucket]--;
+			}
+			if (bucket >= 0 && bucket < data[tracked.second].length) {
+				data[tracked.second][bucket]++;
+			}
+			tracked.state = state;
+			tracked.playTime = playTime;
+			tracked.bucket = bucket;
+			dirtyStart = Math.min(dirtyStart, tracked.second);
+			dirtyEnd = Math.max(dirtyEnd, tracked.second);
+		}
+		return dirtyEnd >= dirtyStart;
+	}
+
+	private int getJudgeBucket(Note note) {
+		final int st = note.getState();
+		if (type == TYPE_JUDGE) {
+			return st;
+		}
+		if (type == TYPE_EARLYLATE) {
+			if (st <= 1) {
+				return st;
+			}
+			return note.getPlayTime() >= 0 ? st : st + 4;
+		}
+		return -1;
 	}
 	
 	private void updateTexture(boolean updateall) {
+		updateTexture(updateall, 0, data.length);
+	}
+
+	private void updateTexture(boolean updateall, int start, int end) {
 		final int oldw = shape != null ? shape.getWidth() : 0;
 		final int oldh = shape != null ? shape.getHeight() : 0;
 		final int w = data.length * 5;
@@ -355,8 +455,8 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 			refresh = true;
 		}
 
-		int start = 0;
-		int end = data.length;
+		start = Math.max(0, start);
+		end = Math.min(data.length, end);
 		if(updateall) {
 			if(!isBackTexOff) {
 				back.setColor(0, 0, 0, 0.8f);
@@ -396,6 +496,10 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 				backtex.getTexture().draw(back, 0, 0);
 			}
 			
+		}
+		if(!updateall) {
+			shape.setColor(TRANSPARENT_COLOR);
+			shape.fillRectangle(start * 5, 0, (end - start) * 5, h);
 		}
 
 		for (int i = start; i < end; i++) {
@@ -449,7 +553,16 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 		shapetex = null;
 		Optional.ofNullable(cursortex).ifPresent(t -> t.getTexture().dispose());
 		cursortex = null;
+		Optional.ofNullable(back).ifPresent(Pixmap::dispose);
+		back = null;
+		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
+		shape = null;
+		Optional.ofNullable(cursor).ifPresent(Pixmap::dispose);
+		cursor = null;
 		Optional.ofNullable(chips).ifPresent(t -> Stream.of(t).forEach(Pixmap::dispose));
+		chips = null;
+		trackedNotes = new TrackedNote[0];
+		trackedNotesInitialized = false;
 		setDisposed();
 	}
 
