@@ -64,7 +64,7 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		this.alpha = alpha;
 		this.ema = 0L;
 		this.emaMode = emaMode;
-		this.windowLength = windowLength < 100 ? windowLength : 100;
+		this.windowLength = MathUtils.clamp(windowLength, 1, 100);
 		this.judgeWidthRate = width / (float) (judgeWidthMillis * 2 + 1);
 		this.lineColor = Color.valueOf(colorStringValidation(lineColor));
 		this.centerColor = Color.valueOf(colorStringValidation(centerColor));
@@ -90,7 +90,9 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		final PlayerResource resource = state.resource;
 		if(resource.getBMSModel() != model) {
 			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);			
+			judgeArea = getJudgeArea(resource);
+			currentindex = -1;
+			ema = 0L;
 		}
 		
 		index = ((BMSPlayer)state).getJudgeManager().getRecentJudgesIndex();
@@ -106,6 +108,14 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 			shape = new Pixmap(width, windowLength * 2, Pixmap.Format.RGBA8888);
 		}
 
+		if (shapetex == null || currentindex != index) {
+			updateTexture();
+		}
+
+		draw(sprite, shapetex);
+	}
+
+	private void updateTexture() {
 		// Clear canvas
 		shape.setColor(Color.CLEAR);
 		shape.fill();
@@ -181,8 +191,7 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		} else {
 			shapetex.getTexture().draw(shape, 0, 0);
 		}
-
-		draw(sprite, shapetex);
+		currentindex = index;
 	}
 
 	static int[] getJudgeArea(PlayerResource resource) {
@@ -210,7 +219,9 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 	@Override
 	public void dispose() {
 		Optional.ofNullable(shapetex).ifPresent(t -> t.getTexture().dispose());
+		shapetex = null;
 		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
+		shape = null;
 	}
 
 	/**

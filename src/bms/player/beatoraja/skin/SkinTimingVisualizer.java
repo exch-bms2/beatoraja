@@ -85,7 +85,8 @@ public final class SkinTimingVisualizer extends SkinObject {
 
 		if(resource.getBMSModel() != model) {
 			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);	
+			judgeArea = getJudgeArea(resource);
+			Optional.ofNullable(backtex).ifPresent(t -> t.getTexture().dispose());
 
 			// BMSModel毎に背景テクスチャ生成
 			int pwidth = center * 2 + 1;
@@ -173,7 +174,9 @@ public final class SkinTimingVisualizer extends SkinObject {
 	@Override
 	public void dispose() {
 		Optional.ofNullable(backtex).ifPresent(t -> t.getTexture().dispose());
+		backtex = null;
 		Optional.ofNullable(line).ifPresent(t -> t.getTexture().dispose());
+		line = null;
 	}
 
 	/**
