@@ -27,6 +27,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.Disposable;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -68,6 +69,7 @@ public class Skin {
 	 */
 	private Array<SkinObject> objects = new Array<SkinObject>();
 	private SkinObject[] objectarray = new SkinObject[0];
+	private final Array<Disposable> resources = new Array<>();
 	private SkinTextInput textInput;
 	/**
 	 * 除外されているスキンオブジェクト
@@ -423,6 +425,16 @@ public class Skin {
 			if(!obj.isDisposed()) {
 				obj.dispose();
 			}
+		}
+		for (Disposable resource : resources) {
+			resource.dispose();
+		}
+		resources.clear();
+	}
+
+	public void addResource(Disposable resource) {
+		if (resource != null) {
+			resources.add(resource);
 		}
 	}
 

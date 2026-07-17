@@ -362,7 +362,16 @@ public class JSONSkinLoader extends SkinLoader {
 					skin.addCustomTimer(new CustomTimer(timer.id, timer.timer));
 				}
 			}
+
+			for (SkinTextBitmap.SkinTextBitmapSource source : bitmapSourceMap.values()) {
+				skin.addResource(source);
+			}
 		} catch (Throwable e) {
+			if (bitmapSourceMap != null) {
+				for (SkinTextBitmap.SkinTextBitmapSource source : bitmapSourceMap.values()) {
+					source.dispose();
+				}
+			}
 			e.printStackTrace();
 			return null;
 		}

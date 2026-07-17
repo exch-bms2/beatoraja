@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
@@ -22,6 +23,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.Glyph;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -36,9 +38,23 @@ public final class SkinTextBitmap extends SkinText {
 	private final SkinTextBitmapSource source;
 	private final BitmapFont font;
 	private final GlyphLayout layout;
+	private final GlyphLayout shadowLayout = new GlyphLayout();
 	private final float size;
 	private final Vector2 shadowOffsetUniform = new Vector2();
 	private final Color shadowDrawColor = new Color();
+	private final Color previousSpriteColor = new Color();
+	private final TextureRegion fallbackGlyphRegion = new TextureRegion();
+	private final Consumer<ShaderProgram> distanceFieldUniformSetter = this::setDistanceFieldUniforms;
+	private String layoutText;
+	private float layoutWidth = Float.NaN;
+	private float layoutScaleX;
+	private float layoutScaleY;
+	private long layoutGlyphRevision;
+	private int layoutAlign;
+	private int layoutOverflow;
+	private boolean layoutWrapping;
+	private boolean layoutHasShadow;
+	private boolean layoutValid;
 
 	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
 		this(source, size, StringPropertyFactory.getStringProperty(-1));
@@ -62,54 +78,124 @@ public final class SkinTextBitmap extends SkinText {
 
 	@Override
 	protected void prepareText(String text) {
+		invalidateLayout();
 	}
 
 	public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
 		if (font == null)
 			return;
 
-		float scale = this.size / source.getOriginalSize();
-		font.getData().setScale(scale);
+		updateLayout(region);
+		font.getData().setScale(layoutScaleX, layoutScaleY);
 		final float x = (getAlign() == 2 ? region.x - region.width : (getAlign() == 1 ? region.x - region.width / 2 : region.x));
 		if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD ||
 				source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
 			sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
-			setLayout(color, region);
-			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight(), shader -> {
-				shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
-				shader.setUniformf("u_outlineColor", getOutlineColor());
-				shader.setUniformf("u_shadowColor", getShadowColor());
-				shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
-				shadowOffsetUniform.set(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight());
-				shader.setUniformf("u_shadowOffset", shadowOffsetUniform);
-			});
-			drawFallbackColorGlyphs(sprite, x + offsetX, region.y + offsetY + region.getHeight());
+			applyColor(layout, color);
+			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight(), distanceFieldUniformSetter);
+			drawFallbackColorGlyphs(sprite, layout, x + offsetX, region.y + offsetY + region.getHeight());
 		} else {
 			sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
-			if (!getShadowOffset().isZero()) {
+			if (layoutHasShadow) {
 				shadowDrawColor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
-				setLayout(shadowDrawColor, region);
-				sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
+				applyColor(shadowLayout, shadowDrawColor);
+				sprite.draw(font, shadowLayout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
 			}
-			setLayout(color, region);
+			applyColor(layout, color);
 			sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight());
 		}
 		font.getData().setScale(1);
 	}
 
-	private void drawFallbackColorGlyphs(SkinObjectRenderer sprite, float x, float y) {
-		if (!source.hasFallbackColorGlyphs(layout)) {
+	@Override
+	public CachedTextLayout createCachedTextLayout(String text) {
+		if (font == null) {
+			return null;
+		}
+
+		float scale = size / source.getOriginalSize();
+		boolean hasShadow = !getShadowOffset().isZero();
+		String remappedText = source.remapSupplementaryGlyphs(text);
+		float scaleX = scale;
+		GlyphLayout cachedLayout = new GlyphLayout();
+		font.getData().setScale(scaleX, scale);
+		setLayout(cachedLayout, remappedText, region.width);
+		if (!isWrapping() && getOverflow() == OVERFLOW_SHRINK && cachedLayout.width > region.width) {
+			scaleX *= region.width / cachedLayout.width;
+			font.getData().setScale(scaleX, scale);
+			setLayout(cachedLayout, remappedText, region.width);
+		}
+		GlyphLayout cachedShadowLayout = null;
+		if (hasShadow) {
+			cachedShadowLayout = new GlyphLayout();
+			setLayout(cachedShadowLayout, remappedText, region.width);
+		}
+		return new BitmapTextLayout(cachedLayout, cachedShadowLayout, region.width, scaleX, scale,
+				source.getGlyphRevision(), getAlign(), getOverflow(), isWrapping());
+	}
+
+	@Override
+	public boolean isCachedTextLayoutValid(CachedTextLayout layout) {
+		if (!(layout instanceof BitmapTextLayout cached) || font == null) {
+			return false;
+		}
+		float scale = size / source.getOriginalSize();
+		return cached.width == region.width && cached.scaleY == scale && cached.glyphRevision == source.getGlyphRevision()
+				&& cached.align == getAlign() && cached.overflow == getOverflow() && cached.wrapping == isWrapping()
+				&& (cached.shadowLayout != null) == !getShadowOffset().isZero();
+	}
+
+	@Override
+	public boolean drawCachedTextLayout(SkinObjectRenderer sprite, CachedTextLayout layout, float offsetX, float offsetY) {
+		if (!(layout instanceof BitmapTextLayout cached) || !isCachedTextLayoutValid(cached)) {
+			return false;
+		}
+
+		font.getData().setScale(cached.scaleX, cached.scaleY);
+		final float x = getAlign() == 2 ? region.x - region.width : getAlign() == 1 ? region.x - region.width / 2 : region.x;
+		if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD
+				|| source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
+			sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
+			applyColor(cached.layout, color);
+			sprite.draw(font, cached.layout, x + offsetX, region.y + offsetY + region.getHeight(), distanceFieldUniformSetter);
+			drawFallbackColorGlyphs(sprite, cached.layout, x + offsetX, region.y + offsetY + region.getHeight());
+		} else {
+			sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
+			if (cached.shadowLayout != null) {
+				shadowDrawColor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
+				applyColor(cached.shadowLayout, shadowDrawColor);
+				sprite.draw(font, cached.shadowLayout, x + getShadowOffset().x + offsetX,
+						region.y - getShadowOffset().y + offsetY + region.getHeight());
+			}
+			applyColor(cached.layout, color);
+			sprite.draw(font, cached.layout, x + offsetX, region.y + offsetY + region.getHeight());
+		}
+		font.getData().setScale(1);
+		return true;
+	}
+
+	private void setDistanceFieldUniforms(ShaderProgram shader) {
+		shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth() / 2f));
+		shader.setUniformf("u_outlineColor", getOutlineColor());
+		shader.setUniformf("u_shadowColor", getShadowColor());
+		shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
+		shadowOffsetUniform.set(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight());
+		shader.setUniformf("u_shadowOffset", shadowOffsetUniform);
+	}
+
+	private void drawFallbackColorGlyphs(SkinObjectRenderer sprite, GlyphLayout target, float x, float y) {
+		if (!source.hasFallbackColorGlyphs(target)) {
 			return;
 		}
 
-		Color previous = new Color(sprite.getColor());
+		previousSpriteColor.set(sprite.getColor());
 		sprite.setColor(1, 1, 1, color.a);
 		sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
 
 		float scaleX = font.getData().scaleX;
 		float scaleY = font.getData().scaleY;
 		float ascent = font.getData().ascent;
-		for (GlyphRun run : layout.runs) {
+		for (GlyphRun run : target.runs) {
 			float glyphX = x + run.x;
 			float glyphY = y + ascent + run.y;
 			for (int i = 0; i < run.glyphs.size; i++) {
@@ -122,43 +208,106 @@ public final class SkinTextBitmap extends SkinText {
 				if (region == null) {
 					continue;
 				}
-				TextureRegion glyphRegion = new TextureRegion(region);
-				glyphRegion.setRegion(glyph.u, glyph.v2, glyph.u2, glyph.v);
-				sprite.draw(glyphRegion, glyphX + glyph.xoffset * scaleX, glyphY + glyph.yoffset * scaleY,
+				fallbackGlyphRegion.setRegion(region);
+				fallbackGlyphRegion.setRegion(glyph.u, glyph.v2, glyph.u2, glyph.v);
+				sprite.draw(fallbackGlyphRegion, glyphX + glyph.xoffset * scaleX, glyphY + glyph.yoffset * scaleY,
 						glyph.width * scaleX, glyph.height * scaleY);
 			}
 		}
 
 		sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
-		sprite.setColor(previous);
+		sprite.setColor(previousSpriteColor);
 	}
 
-	private void setLayout(Color c, Rectangle r) {
-		String text = source.remapSupplementaryGlyphs(getText());
+	private void updateLayout(Rectangle r) {
+		String text = getText();
+		float scale = size / source.getOriginalSize();
+		boolean hasShadow = !getShadowOffset().isZero();
+		long glyphRevision = source.getGlyphRevision();
+		if (layoutValid && text.equals(layoutText) && layoutWidth == r.width && layoutScaleY == scale
+				&& layoutGlyphRevision == glyphRevision && layoutAlign == getAlign() && layoutOverflow == getOverflow()
+				&& layoutWrapping == isWrapping() && layoutHasShadow == hasShadow) {
+			return;
+		}
+
+		String remappedText = source.remapSupplementaryGlyphs(text);
+		float scaleX = scale;
+		font.getData().setScale(scaleX, scale);
+		setLayout(layout, remappedText, r.width);
+		if (!isWrapping() && getOverflow() == OVERFLOW_SHRINK && layout.width > r.width) {
+			scaleX *= r.width / layout.width;
+			font.getData().setScale(scaleX, scale);
+			setLayout(layout, remappedText, r.width);
+		}
+		if (hasShadow) {
+			setLayout(shadowLayout, remappedText, r.width);
+		} else {
+			shadowLayout.reset();
+		}
+
+		layoutText = text;
+		layoutWidth = r.width;
+		layoutScaleX = scaleX;
+		layoutScaleY = scale;
+		layoutGlyphRevision = source.getGlyphRevision();
+		layoutAlign = getAlign();
+		layoutOverflow = getOverflow();
+		layoutWrapping = isWrapping();
+		layoutHasShadow = hasShadow;
+		layoutValid = true;
+	}
+
+	private void setLayout(GlyphLayout target, String text, float width) {
 		if (isWrapping()) {
-			layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], true);
+			target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], true);
 		} else {
 			switch (getOverflow()) {
-				case OVERFLOW_OVERFLOW -> {
-					layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], false);
-				}
-				case OVERFLOW_SHRINK -> {
-					layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], false);
-					float actualWidth = layout.width;
-					if (actualWidth > r.getWidth()) {
-						font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
-						layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], false);
-					}
-				}
-				case OVERFLOW_TRUNCATE -> {
-					layout.setText(font, text, 0, text.length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
-				}
+				case OVERFLOW_OVERFLOW, OVERFLOW_SHRINK -> target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], false);
+				case OVERFLOW_TRUNCATE -> target.setText(font, text, 0, text.length(), Color.WHITE, width, ALIGN[getAlign()], false, "");
 			}
 		}
 	}
 
+	private void applyColor(GlyphLayout target, Color color) {
+		for (GlyphRun run : target.runs) {
+			run.color.set(color);
+		}
+	}
+
+	private void invalidateLayout() {
+		layoutValid = false;
+	}
+
+	private static final class BitmapTextLayout implements CachedTextLayout {
+		private final GlyphLayout layout;
+		private final GlyphLayout shadowLayout;
+		private final float width;
+		private final float scaleX;
+		private final float scaleY;
+		private final long glyphRevision;
+		private final int align;
+		private final int overflow;
+		private final boolean wrapping;
+
+		private BitmapTextLayout(GlyphLayout layout, GlyphLayout shadowLayout, float width, float scaleX, float scaleY,
+				long glyphRevision, int align, int overflow, boolean wrapping) {
+			this.layout = layout;
+			this.shadowLayout = shadowLayout;
+			this.width = width;
+			this.scaleX = scaleX;
+			this.scaleY = scaleY;
+			this.glyphRevision = glyphRevision;
+			this.align = align;
+			this.overflow = overflow;
+			this.wrapping = wrapping;
+		}
+	}
+
 	public void dispose() {
-		source.dispose();
+		if (font != null) {
+			font.dispose();
+		}
+		setDisposed();
 	}
 
 	public static final class SkinTextBitmapSource implements Disposable {
@@ -184,8 +333,13 @@ public final class SkinTextBitmap extends SkinText {
 		private final Map<Integer, Character> activeSupplementaryGlyphMap = new HashMap<>();
 		private final Map<Character, Integer> activePrivateUseGlyphMap = new HashMap<>();
 		private final Set<Integer> activeBmpFallbackGlyphs = new HashSet<>();
+		private final Set<Integer> requiredSupplementaryGlyphs = new HashSet<>();
 		private final Map<FallbackFont, Integer> fallbackPageOffsets = new HashMap<>();
 		private final Set<Integer> activeFallbackPages = new HashSet<>();
+		private final Set<FallbackFont> acquiredFallbackFonts = new HashSet<>();
+		private boolean primaryFontAcquired;
+		private boolean disposed;
+		private long glyphRevision;
 
 		private static final int PRIVATE_USE_AREA_START = 0xe000;
 		private static final int PRIVATE_USE_AREA_END = 0xf8ff;
@@ -280,12 +434,10 @@ public final class SkinTextBitmap extends SkinText {
 		}
 
 		public BitmapFont getFont() {
-			if (!BitmapFontCache.Has(fontPath, type)) {
-				CacheableBitmapFont _newFont = createCacheableFont(fontPath, type);
-				BitmapFontCache.Set(fontPath, type, _newFont);
+			if (disposed) {
+				return null;
 			}
-
-			CacheableBitmapFont cached = BitmapFontCache.Get(fontPath, type);
+			CacheableBitmapFont cached = getPrimaryCacheableFont();
 
 			fontData = cached.fontData;
 			regions = cached.regions != null ? new Array<>(cached.regions) : new Array<>();
@@ -307,13 +459,21 @@ public final class SkinTextBitmap extends SkinText {
 			return font;
 		}
 
+		private CacheableBitmapFont getPrimaryCacheableFont() {
+			if (!primaryFontAcquired) {
+				primaryFontAcquired = true;
+				return BitmapFontCache.acquire(fontPath, type, () -> createCacheableFont(fontPath, type));
+			}
+			return BitmapFontCache.Get(fontPath, type);
+		}
+
 		public String remapSupplementaryGlyphs(String text) {
 			if (fontData == null) {
 				return text;
 			}
 
 			StringBuilder result = null;
-			Set<Integer> requiredCodePoints = new HashSet<>();
+			requiredSupplementaryGlyphs.clear();
 			for (int index = 0; index < text.length();) {
 				int codePoint = text.codePointAt(index);
 				if (codePoint > Character.MAX_VALUE) {
@@ -321,8 +481,8 @@ public final class SkinTextBitmap extends SkinText {
 						result = new StringBuilder(text.length());
 						result.append(text, 0, index);
 					}
-					requiredCodePoints.add(codePoint);
-					Character mapped = ensureSupplementaryGlyphMapped(codePoint, requiredCodePoints);
+					requiredSupplementaryGlyphs.add(codePoint);
+					Character mapped = ensureSupplementaryGlyphMapped(codePoint, requiredSupplementaryGlyphs);
 					if (mapped == null) {
 						index += Character.charCount(codePoint);
 						continue;
@@ -344,11 +504,7 @@ public final class SkinTextBitmap extends SkinText {
 				if (fallback == null || fallback.path == null || fallbackPageOffsets.containsKey(fallback)) {
 					continue;
 				}
-				if (!BitmapFontCache.Has(fallback.path, fallback.type)) {
-					CacheableBitmapFont fallbackFont = createCacheableFont(fallback.path, fallback.type);
-					BitmapFontCache.Set(fallback.path, fallback.type, fallbackFont);
-				}
-				CacheableBitmapFont fallbackFont = BitmapFontCache.Get(fallback.path, fallback.type);
+				CacheableBitmapFont fallbackFont = getFallbackCacheableFont(fallback);
 				if (fallbackFont == null || fallbackFont.fontData == null || fallbackFont.regions == null) {
 					continue;
 				}
@@ -366,6 +522,14 @@ public final class SkinTextBitmap extends SkinText {
 				}
 				fallbackPageOffsets.put(fallback, pageOffset);
 			}
+		}
+
+		private CacheableBitmapFont getFallbackCacheableFont(FallbackFont fallback) {
+			if (acquiredFallbackFonts.add(fallback)) {
+				return BitmapFontCache.acquire(fallback.path, fallback.type,
+						() -> createCacheableFont(fallback.path, fallback.type));
+			}
+			return BitmapFontCache.Get(fallback.path, fallback.type);
 		}
 
 		private RemappedFontFile createRemappedFontFile(FileHandle fontFile) {
@@ -442,6 +606,7 @@ public final class SkinTextBitmap extends SkinText {
 				fontData.setGlyphRegion(glyph, regions.get(glyph.page));
 				fontData.setGlyph(codePoint, glyph);
 				activeBmpFallbackGlyphs.add(codePoint);
+				glyphRevision++;
 			}
 		}
 
@@ -463,6 +628,7 @@ public final class SkinTextBitmap extends SkinText {
 				fontData.setGlyph(mapped.charValue(), glyph);
 				activeSupplementaryGlyphMap.put(codePoint, mapped);
 				activePrivateUseGlyphMap.put(mapped, codePoint);
+				glyphRevision++;
 			}
 			return mapped;
 		}
@@ -478,6 +644,7 @@ public final class SkinTextBitmap extends SkinText {
 					fontData.setGlyph(slot.charValue(), null);
 					activePrivateUseGlyphMap.remove(slot);
 					activeSupplementaryGlyphMap.remove(activeCodePoint);
+					glyphRevision++;
 					return slot;
 				}
 			}
@@ -700,12 +867,24 @@ public final class SkinTextBitmap extends SkinText {
 			return pageHeight;
 		}
 
+		private long getGlyphRevision() {
+			return glyphRevision;
+		}
+
 		@Override
 		public void dispose() {
-			if (font != null) {
-				font.dispose();
-				font = null;
+			if (disposed) {
+				return;
 			}
+			disposed = true;
+			font = null;
+			if (primaryFontAcquired) {
+				BitmapFontCache.release(fontPath, type);
+			}
+			for (FallbackFont fallback : acquiredFallbackFonts) {
+				BitmapFontCache.release(fallback.path, fallback.type);
+			}
+			acquiredFallbackFonts.clear();
 		}
 
 		private static final class RemappedFontFile {

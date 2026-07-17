@@ -18,6 +18,12 @@ import com.badlogic.gdx.utils.Align;
  */
 public abstract class SkinText extends SkinObject {
 
+    /**
+     * A text layout prepared for callers that render many independent values with one SkinText.
+     */
+    public interface CachedTextLayout {
+    }
+
     private int align = ALIGN_LEFT;
 	public static final int ALIGN_LEFT = 0;
     public static final int ALIGN_CENTER = 1;
@@ -82,6 +88,13 @@ public abstract class SkinText extends SkinObject {
 
     public abstract void prepareFont(String text);
 
+    /**
+     * Returns whether this text implementation needs the complete character set before rendering dynamic text.
+     */
+    public boolean requiresFontPreparation() {
+        return false;
+    }
+
     protected abstract void prepareText(String text);
     
     public void prepare(long time, MainState state) {
@@ -104,6 +117,27 @@ public abstract class SkinText extends SkinObject {
     }
 
     public abstract void draw(SkinObjectRenderer sprite, float offsetX, float offsetY);
+
+    /**
+     * Creates a reusable layout for a caller-managed text cache, or {@code null} when unsupported.
+     */
+    public CachedTextLayout createCachedTextLayout(String text) {
+        return null;
+    }
+
+    /**
+     * Returns whether a caller-managed cached layout still matches this text object's destination and style.
+     */
+    public boolean isCachedTextLayoutValid(CachedTextLayout layout) {
+        return false;
+    }
+
+    /**
+     * Draws a caller-managed cached layout. Returns {@code false} when the layout type is unsupported.
+     */
+    public boolean drawCachedTextLayout(SkinObjectRenderer sprite, CachedTextLayout layout, float offsetX, float offsetY) {
+        return false;
+    }
     
     public final boolean isEditable() {
         return editable;

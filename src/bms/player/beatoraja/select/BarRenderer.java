@@ -206,47 +206,37 @@ public final class BarRenderer {
 
 		if (bartextupdate) {
 			bartextupdate = false;
-			
-			bartextCharset.clear();
-			for (Bar song : manager.currentsongs) {
-				final String title = song.getTitle();
-				for (int index = 0; index < title.length();) {
-					final int codePoint = title.codePointAt(index);
-					bartextCharset.add(codePoint);
-					index += Character.charCount(codePoint);
+
+			boolean requiresFontPreparation = false;
+			for (int index = 0; index < SkinBar.BARTEXT_COUNT; index++) {
+				SkinText text = baro.getText(index);
+				if (text != null && text.requiresFontPreparation()) {
+					requiresFontPreparation = true;
+					break;
 				}
 			}
-			StringBuilder chars = new StringBuilder(bartextCharset.size);
-			for (IntSetIterator iterator = bartextCharset.iterator();iterator.hasNext;) {
-				chars.appendCodePoint(iterator.next());
-			}
-//			Arrays.fill(bartextCharset, false);
-//			int charCount = 0;
-//			for (Bar song : manager.currentsongs) {
-//				final String title = song.getTitle();
-//				for(int index = title.length() - 1;index >= 0;index--) {
-//					final char c = title.charAt(index);
-//					if(!bartextCharset[c]) {
-//						bartextCharset[c] = true;
-//						charCount++;
-//					}
-//				}
-//			}
-//			char[] chars = new char[charCount];
-//			int count = 0;
-//			for (char c = (char) (bartextCharset.length - 1) ;;c--) {
-//				if(bartextCharset[c]) {
-//					chars[count++] = c;
-//				}
-//				if(c == 0) {
-//					break;
-//				}
-//			}
+			if (requiresFontPreparation) {
+				bartextCharset.clear();
+				for (Bar song : manager.currentsongs) {
+					final String title = song.getTitle();
+					for (int index = 0; index < title.length();) {
+						final int codePoint = title.codePointAt(index);
+						bartextCharset.add(codePoint);
+						index += Character.charCount(codePoint);
+					}
+				}
+				StringBuilder chars = new StringBuilder(bartextCharset.size);
+				for (IntSetIterator iterator = bartextCharset.iterator();iterator.hasNext;) {
+					chars.appendCodePoint(iterator.next());
+				}
 			
-			for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
-				if(baro.getText(index) != null) {
-					baro.getText(index).prepareFont(chars.toString());
-				}				
+				for(int index = 0;index < SkinBar.BARTEXT_COUNT;index++) {
+					SkinText text = baro.getText(index);
+					if(text != null && text.requiresFontPreparation()) {
+						text.prepareFont(chars.toString());
+					}
+				}
+				baro.clearTextLayoutCache();
 			}
 		}
 
@@ -296,11 +286,7 @@ public final class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
-			final SkinText text = baro.getText(ba.text);
-			if(text != null) {
-				text.setText(ba.sd.getTitle());
-				text.draw(sprite, ba.x, ba.y);				
-			}
+			baro.drawText(sprite, ba.text, ba.sd.getTitle(), ba.x, ba.y);
 		}
 
 		// bar trophy

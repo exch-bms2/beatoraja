@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
@@ -37,12 +38,14 @@ public final class SkinTextFont extends SkinText {
     private BitmapFont font;
 
     private GlyphLayout layout;
+    private final GlyphLayout shadowLayout = new GlyphLayout();
 
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator[] fallbackGenerators = new FreeTypeFontGenerator[0];
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private String preparedFonts;
     private final Set<Integer> activeBmpFallbackGlyphs = new HashSet<>();
+    private final Set<Integer> requiredSupplementaryGlyphs = new HashSet<>();
     private final Map<Integer, Character> activeSupplementaryGlyphMap = new HashMap<>();
     private final Map<Character, Integer> activePrivateUseGlyphMap = new HashMap<>();
     private int packedGlyphSequence;
@@ -51,6 +54,16 @@ public final class SkinTextFont extends SkinText {
     private static final int[] MISSING_GLYPH_CANDIDATES = { 0x25a1, 0x25a2, 0x2610, 0x25a0, '?' }; // □, ▢, ☐, ■, ?
     
     private final Color shadowcolor = new Color();
+    private String layoutText;
+    private float layoutWidth = Float.NaN;
+    private float layoutScaleY = Float.NaN;
+    private float layoutScaleX;
+    private int layoutAlign;
+    private int layoutOverflow;
+    private boolean layoutWrapping;
+    private boolean layoutHasShadow;
+    private boolean layoutValid;
+    private long glyphRevision;
 
     public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
         this(fontpath, new String[0], cycle, size, shadow, StringPropertyFactory.getStringProperty(-1));
@@ -106,6 +119,11 @@ public final class SkinTextFont extends SkinText {
     	return super.validate();
     }
 
+    @Override
+    public boolean requiresFontPreparation() {
+        return true;
+    }
+
     public void prepareFont(String text) {
         if(font != null) {
             font.dispose();                	
@@ -119,6 +137,7 @@ public final class SkinTextFont extends SkinText {
             layout = new GlyphLayout(font, "");
             preparedFonts = text;
             clearSupplementaryGlyphs();
+            invalidateLayout();
         } catch (GdxRuntimeException e) {
     		Logger.getGlobal().warning("Font準備失敗 : " + text + " - " + e.getMessage());
     	}
@@ -126,6 +145,7 @@ public final class SkinTextFont extends SkinText {
 
 	@Override
 	protected void prepareText(String text) {
+        invalidateLayout();
         if(preparedFonts != null) {
         	return;
         }
@@ -147,40 +167,138 @@ public final class SkinTextFont extends SkinText {
 	
 	@Override
     public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
-        if(font != null) {
-            font.getData().setScale(region.height / parameter.size);
-            
-            sprite.setType(getFilter() != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
+        if (font == null || layout == null) {
+            return;
+        }
 
-            final float x = (getAlign() == 2 ? region.x - region.width : (getAlign() == 1 ? region.x - region.width / 2 : region.x));
-            if(!getShadowOffset().isZero()) {
-            	shadowcolor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
-                setLayout(shadowcolor, region);
-                sprite.draw(font, layout, x + getShadowOffset().x + offsetX, region.y - getShadowOffset().y + offsetY + region.getHeight());
+        updateLayout(region);
+        font.getData().setScale(layoutScaleX, layoutScaleY);
+        sprite.setType(getFilter() != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
+
+        final float x = getAlign() == 2 ? region.x - region.width : getAlign() == 1 ? region.x - region.width / 2 : region.x;
+        if (layoutHasShadow) {
+            shadowcolor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
+            applyColor(shadowLayout, shadowcolor);
+            sprite.draw(font, shadowLayout, x + getShadowOffset().x + offsetX,
+                    region.y - getShadowOffset().y + offsetY + region.getHeight());
+        }
+        applyColor(layout, color);
+        sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight());
+    }
+
+    @Override
+    public CachedTextLayout createCachedTextLayout(String text) {
+        if (font == null) {
+            return null;
+        }
+
+        float scaleY = region.height / parameter.size;
+        boolean hasShadow = !getShadowOffset().isZero();
+        String remappedText = remapMissingGlyphs(text);
+        float scaleX = scaleY;
+        GlyphLayout cachedLayout = new GlyphLayout();
+        font.getData().setScale(scaleX, scaleY);
+        setLayout(cachedLayout, remappedText, region.width);
+        if (!isWrapping() && getOverflow() == OVERFLOW_SHRINK && cachedLayout.width > region.width) {
+            scaleX *= region.width / cachedLayout.width;
+            font.getData().setScale(scaleX, scaleY);
+            setLayout(cachedLayout, remappedText, region.width);
+        }
+        GlyphLayout cachedShadowLayout = null;
+        if (hasShadow) {
+            cachedShadowLayout = new GlyphLayout();
+            setLayout(cachedShadowLayout, remappedText, region.width);
+        }
+        return new FontTextLayout(cachedLayout, cachedShadowLayout, region.width, scaleX, scaleY, glyphRevision,
+                getAlign(), getOverflow(), isWrapping());
+    }
+
+    @Override
+    public boolean isCachedTextLayoutValid(CachedTextLayout layout) {
+        if (!(layout instanceof FontTextLayout cached) || font == null) {
+            return false;
+        }
+        return cached.width == region.width && cached.scaleY == region.height / parameter.size
+                && cached.glyphRevision == glyphRevision && cached.align == getAlign()
+                && cached.overflow == getOverflow() && cached.wrapping == isWrapping()
+                && (cached.shadowLayout != null) == !getShadowOffset().isZero();
+    }
+
+    @Override
+    public boolean drawCachedTextLayout(SkinObjectRenderer sprite, CachedTextLayout layout, float offsetX, float offsetY) {
+        if (!(layout instanceof FontTextLayout cached) || !isCachedTextLayoutValid(cached)) {
+            return false;
+        }
+
+        font.getData().setScale(cached.scaleX, cached.scaleY);
+        sprite.setType(getFilter() != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
+        final float x = getAlign() == 2 ? region.x - region.width : getAlign() == 1 ? region.x - region.width / 2 : region.x;
+        if (cached.shadowLayout != null) {
+            shadowcolor.set(color.r / 2, color.g / 2, color.b / 2, color.a);
+            applyColor(cached.shadowLayout, shadowcolor);
+            sprite.draw(font, cached.shadowLayout, x + getShadowOffset().x + offsetX,
+                    region.y - getShadowOffset().y + offsetY + region.getHeight());
+        }
+        applyColor(cached.layout, color);
+        sprite.draw(font, cached.layout, x + offsetX, region.y + offsetY + region.getHeight());
+        return true;
+    }
+
+    private void updateLayout(Rectangle r) {
+        String text = getText();
+        float scaleY = r.height / parameter.size;
+        boolean hasShadow = !getShadowOffset().isZero();
+        if (layoutValid && text.equals(layoutText) && layoutWidth == r.width && layoutScaleY == scaleY
+                && layoutAlign == getAlign() && layoutOverflow == getOverflow() && layoutWrapping == isWrapping()
+                && layoutHasShadow == hasShadow) {
+            return;
+        }
+
+        String remappedText = remapMissingGlyphs(text);
+        float scaleX = scaleY;
+        font.getData().setScale(scaleX, scaleY);
+        setLayout(layout, remappedText, r.width);
+        if (!isWrapping() && getOverflow() == OVERFLOW_SHRINK && layout.width > r.width) {
+            scaleX *= r.width / layout.width;
+            font.getData().setScale(scaleX, scaleY);
+            setLayout(layout, remappedText, r.width);
+        }
+        if (hasShadow) {
+            setLayout(shadowLayout, remappedText, r.width);
+        } else {
+            shadowLayout.reset();
+        }
+
+        layoutText = text;
+        layoutWidth = r.width;
+        layoutScaleX = scaleX;
+        layoutScaleY = scaleY;
+        layoutAlign = getAlign();
+        layoutOverflow = getOverflow();
+        layoutWrapping = isWrapping();
+        layoutHasShadow = hasShadow;
+        layoutValid = true;
+    }
+
+    private void setLayout(GlyphLayout target, String text, float width) {
+        if (isWrapping()) {
+            target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], true);
+        } else {
+            switch (getOverflow()) {
+                case OVERFLOW_OVERFLOW, OVERFLOW_SHRINK -> target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], false);
+                case OVERFLOW_TRUNCATE -> target.setText(font, text, 0, text.length(), Color.WHITE, width, ALIGN[getAlign()], false, "");
             }
-            setLayout(color, region);
-            sprite.draw(font, layout, x + offsetX, region.y + offsetY + region.getHeight());
         }
     }
 
-    private void setLayout(Color c, Rectangle r) {
-        String text = remapMissingGlyphs(getText());
-        if (isWrapping()) {
-            layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], true);
-        } else {
-            switch (getOverflow()) {
-            	case OVERFLOW_OVERFLOW -> layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], false);
-            	case OVERFLOW_SHRINK -> {
-            		layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], false);
-            		float actualWidth = layout.width;
-            		if (actualWidth > r.getWidth()) {
-            			font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
-            			layout.setText(font, text, c, r.getWidth(), ALIGN[getAlign()], false);
-            		}
-            	}
-            	case OVERFLOW_TRUNCATE -> layout.setText(font, text, 0, text.length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
-            }
+    private void applyColor(GlyphLayout target, Color color) {
+        for (GlyphRun run : target.runs) {
+            run.color.set(color);
         }
+    }
+
+    private void invalidateLayout() {
+        layoutValid = false;
     }
 
     private String toBmpCharacters(String text) {
@@ -202,7 +320,7 @@ public final class SkinTextFont extends SkinText {
 
     private String remapMissingGlyphs(String text) {
         StringBuilder result = null;
-        Set<Integer> requiredCodePoints = null;
+        requiredSupplementaryGlyphs.clear();
         for (int index = 0; index < text.length();) {
             int codePoint = text.codePointAt(index);
             if (codePoint > Character.MAX_VALUE) {
@@ -210,11 +328,8 @@ public final class SkinTextFont extends SkinText {
                     result = new StringBuilder(text.length());
                     result.append(text, 0, index);
                 }
-                if (requiredCodePoints == null) {
-                    requiredCodePoints = new HashSet<>();
-                }
-                requiredCodePoints.add(codePoint);
-                Character mapped = ensureSupplementaryGlyphMapped(codePoint, requiredCodePoints);
+                requiredSupplementaryGlyphs.add(codePoint);
+                Character mapped = ensureSupplementaryGlyphMapped(codePoint, requiredSupplementaryGlyphs);
                 if (mapped == null) {
                     index += Character.charCount(codePoint);
                     continue;
@@ -244,6 +359,7 @@ public final class SkinTextFont extends SkinText {
             if (glyph != null) {
                 font.getData().setGlyph(codePoint, glyph);
                 activeBmpFallbackGlyphs.add(codePoint);
+                glyphRevision++;
             }
         } catch (Exception e) {
         }
@@ -271,6 +387,7 @@ public final class SkinTextFont extends SkinText {
             font.getData().setGlyph(mapped.charValue(), glyph);
             activeSupplementaryGlyphMap.put(codePoint, mapped);
             activePrivateUseGlyphMap.put(mapped, codePoint);
+            glyphRevision++;
             return mapped;
         } catch (Exception e) {
             return null;
@@ -292,6 +409,7 @@ public final class SkinTextFont extends SkinText {
                 font.getData().setGlyph(slot.charValue(), null);
                 activePrivateUseGlyphMap.remove(slot);
                 activeSupplementaryGlyphMap.remove(activeCodePoint);
+                glyphRevision++;
                 return slot;
             }
         }
@@ -438,6 +556,32 @@ public final class SkinTextFont extends SkinText {
         activeSupplementaryGlyphMap.clear();
         activePrivateUseGlyphMap.clear();
         packedGlyphSequence = 0;
+        glyphRevision++;
+    }
+
+    private static final class FontTextLayout implements CachedTextLayout {
+        private final GlyphLayout layout;
+        private final GlyphLayout shadowLayout;
+        private final float width;
+        private final float scaleX;
+        private final float scaleY;
+        private final long glyphRevision;
+        private final int align;
+        private final int overflow;
+        private final boolean wrapping;
+
+        private FontTextLayout(GlyphLayout layout, GlyphLayout shadowLayout, float width, float scaleX, float scaleY,
+                long glyphRevision, int align, int overflow, boolean wrapping) {
+            this.layout = layout;
+            this.shadowLayout = shadowLayout;
+            this.width = width;
+            this.scaleX = scaleX;
+            this.scaleY = scaleY;
+            this.glyphRevision = glyphRevision;
+            this.align = align;
+            this.overflow = overflow;
+            this.wrapping = wrapping;
+        }
     }
 
     public void dispose() {

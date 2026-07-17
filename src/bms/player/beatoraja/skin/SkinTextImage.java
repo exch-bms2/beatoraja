@@ -47,6 +47,11 @@ public final class SkinTextImage extends SkinText {
 	}
 
 	@Override
+	public boolean requiresFontPreparation() {
+		return true;
+	}
+
+	@Override
 	protected void prepareText(String text) {
 		textwidth = 0;
 		texts.clear();
@@ -65,22 +70,67 @@ public final class SkinTextImage extends SkinText {
 	}
 
 	public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
+		drawTextImage(sprite, texts, textwidth, offsetX, offsetY);
+	}
+
+	@Override
+	public CachedTextLayout createCachedTextLayout(String text) {
+		Array<TextureRegion> cachedTexts = new Array<>(text.length());
+		float cachedWidth = 0;
+		for (int i = 0; i < text.length();) {
+			int code = text.codePointAt(i);
+			i += Character.charCount(code);
+			TextureRegion ch = source.getImage(code);
+			if (ch != null) {
+				cachedTexts.add(ch);
+				cachedWidth += ch.getRegionWidth();
+			}
+		}
+		return new ImageTextLayout(cachedTexts, cachedWidth);
+	}
+
+	@Override
+	public boolean isCachedTextLayoutValid(CachedTextLayout layout) {
+		return layout instanceof ImageTextLayout;
+	}
+
+	@Override
+	public boolean drawCachedTextLayout(SkinObjectRenderer sprite, CachedTextLayout layout, float offsetX, float offsetY) {
+		if (!(layout instanceof ImageTextLayout cached)) {
+			return false;
+		}
+		drawTextImage(sprite, cached.texts, cached.width, offsetX, offsetY);
+		return true;
+	}
+
+	private void drawTextImage(SkinObjectRenderer sprite, Array<TextureRegion> textRegions, float baseWidth,
+			float offsetX, float offsetY) {
 		// System.out.println("SkinTextImage描画:" + text + " - " + x + " " +
 		// y +
 		// " " + w + " " + h);
-		float width = textwidth * region.height / source.getSize() + source.getMargin() * texts.size;
+		float width = baseWidth * region.height / source.getSize() + source.getMargin() * textRegions.size;
 
 		final float scale = region.width < width ? region.width / width : 1;
 		final float x = (getAlign() == 2 ? region.x - width * scale : (getAlign() == 1 ? region.x - width * scale / 2 : region.x));
 		float dx = 0;
-		for (int i = 0;i < texts.size;i++) {
-			final TextureRegion ch = texts.get(i);
+		for (int i = 0;i < textRegions.size;i++) {
+			final TextureRegion ch = textRegions.get(i);
 			final float tw = ch.getRegionWidth() * scale * region.height / source.getSize();
 			// System.out.println("SkinTextImage描画:" + text.charAt(i) +
 			// " -
 			// " + (x + dx) + " " + y + " " + tw + " " + h);
 			draw(sprite, ch, x + dx + offsetX, region.y + offsetY, tw, region.height, color, 0);
 			dx += tw + source.getMargin() * scale;
+		}
+	}
+
+	private static final class ImageTextLayout implements CachedTextLayout {
+		private final Array<TextureRegion> texts;
+		private final float width;
+
+		private ImageTextLayout(Array<TextureRegion> texts, float width) {
+			this.texts = texts;
+			this.width = width;
 		}
 	}
 

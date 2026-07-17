@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -22,6 +23,7 @@ public class BitmapFontCache {
         public int base;
         public int glyphYOffset;
         public Map<Integer, BitmapFont.Glyph> supplementaryGlyphs;
+        private int references;
     }
 
     static public boolean Has(Path path) {
@@ -41,6 +43,29 @@ public class BitmapFontCache {
 
     static public void Set(Path path, int type, CacheableBitmapFont font) {
         _cacheStore.put(new CacheKey(path, type), font);
+    }
+
+    static public CacheableBitmapFont acquire(Path path, int type, Supplier<CacheableBitmapFont> factory) {
+        CacheKey key = new CacheKey(path, type);
+        CacheableBitmapFont font = _cacheStore.get(key);
+        if (font == null) {
+            font = factory.get();
+            _cacheStore.put(key, font);
+        }
+        font.references++;
+        return font;
+    }
+
+    static public void release(Path path, int type) {
+        CacheKey key = new CacheKey(path, type);
+        CacheableBitmapFont font = _cacheStore.get(key);
+        if (font == null || --font.references > 0) {
+            return;
+        }
+        _cacheStore.remove(key);
+        if (font.font != null) {
+            font.font.dispose();
+        }
     }
 
     static public CacheableBitmapFont Get(Path path) {
