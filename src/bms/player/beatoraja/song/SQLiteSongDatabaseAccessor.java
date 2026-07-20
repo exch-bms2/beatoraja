@@ -4,10 +4,12 @@ import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -140,9 +142,16 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 						+ "FROM old_song GROUP BY path HAVING MAX(adddate)");
 				qr.update("DROP TABLE old_song");
 			}
+			createIndexes();
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
 		}
+	}
+
+	private void createIndexes() throws SQLException {
+		qr.update("CREATE INDEX IF NOT EXISTS idx_song_folder ON song(folder)");
+		qr.update("CREATE INDEX IF NOT EXISTS idx_song_sha256 ON song(sha256)");
+		qr.update("CREATE INDEX IF NOT EXISTS idx_folder_parent ON folder(parent)");
 	}
 
 	private void migrateLegacySongReviews() {
@@ -453,9 +462,10 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			if(info != null) {
 				info.startUpdate();
 			}
-			try (Connection conn = ds.getConnection()) {
+			try (Connection conn = ds.getConnection(); property) {
 				property.conn = conn;
 				conn.setAutoCommit(false);
+				property.prepareStatements();
 				// 楽曲のタグ,FAVORITEの保持
 				if (reviewdb != null) {
 					for (Map.Entry<String, SongReview> entry : getSongReviews().entrySet()) {
@@ -495,14 +505,15 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					qr.update(conn, "DELETE FROM song WHERE " + dsql.toString(), param);					
 				}
 
-				paths.parallel().forEach((p) -> {
+				paths.forEach((p) -> {
 					try {
-						BMSFolder folder = new BMSFolder(p, bmsroot);
+						BMSFolder folder = scanDirectory(p);
 						folder.processDirectory(property);
 					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
 						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 					}
 				});
+				property.flush();
 				conn.commit();
 			} catch (Exception e) {
 				Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
@@ -517,6 +528,45 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					+ (property.count.get() > 0 ? (nowtime - time) / property.count.get() : "不明"));
 		}
 
+		private BMSFolder scanDirectory(Path start) throws IOException {
+			Map<Path, BMSFolder> folders = new LinkedHashMap<>();
+			Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+					BMSFolder folder = new BMSFolder(dir, bmsroot, attrs.lastModifiedTime().toMillis() / 1000);
+					folders.put(dir, folder);
+
+					Path parent = dir.getParent();
+					BMSFolder parentFolder = parent != null ? folders.get(parent) : null;
+					if (parentFolder != null) {
+						parentFolder.dirs.add(folder);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+					BMSFolder parent = folders.get(file.getParent());
+					if (parent != null) {
+						parent.addFile(file, attrs.lastModifiedTime().toMillis() / 1000);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFileFailed(Path file, IOException e) {
+					Logger.getGlobal().warning("楽曲ファイル探索中の例外:" + file + " : " + e.getMessage());
+					return FileVisitResult.CONTINUE;
+				}
+			});
+
+			BMSFolder rootFolder = folders.get(start);
+			if (rootFolder == null) {
+				throw new IOException("楽曲フォルダを読み込めません : " + start);
+			}
+			return rootFolder;
+		}
+
 	}
 	
 	private class BMSFolder {
@@ -524,14 +574,33 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		public final Path path;
 		public boolean updateFolder = true;
 		private boolean txt = false;
-		private final List<Path> bmsfiles = new ArrayList<Path>();
+		private final List<ChartFile> bmsfiles = new ArrayList<ChartFile>();
 		private final List<BMSFolder> dirs = new ArrayList<BMSFolder>();
 		private String previewpath = null;
 		private final String[] bmsroot;
+		private final long lastModifiedTime;
 
 		public BMSFolder(Path path, String[] bmsroot) {
+			this(path, bmsroot, -1);
+		}
+
+		public BMSFolder(Path path, String[] bmsroot, long lastModifiedTime) {
 			this.path = path;
 			this.bmsroot = bmsroot;
+			this.lastModifiedTime = lastModifiedTime;
+		}
+
+		private void addFile(Path file, long lastModifiedTime) {
+			final String s = file.getFileName().toString().toLowerCase(Locale.ROOT);
+			if (!txt && s.endsWith(".txt")) {
+				txt = true;
+			}
+			if (previewpath == null && isPreviewFile(s)) {
+				previewpath = file.getFileName().toString();
+			}
+			if (isChartFile(s)) {
+				bmsfiles.add(new ChartFile(file, lastModifiedTime));
+			}
 		}
 		
 		private void processDirectory(SongDatabaseUpdaterProperty property)
@@ -540,32 +609,6 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					SongUtils.crc32(path.toString(), bmsroot, root.toString()));
 			final List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
 					folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
-			try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
-				for (Path p : paths) {
-					if(Files.isDirectory(p)) {
-						dirs.add(new BMSFolder(p, bmsroot));
-					} else {
-						final String s = p.getFileName().toString().toLowerCase();
-						if (!txt && s.endsWith(".txt")) {
-							txt = true;
-						}
-						if (previewpath == null) {
-							if(s.startsWith("preview") && (s.endsWith(".wav") ||
-															s.endsWith(".ogg") ||
-															s.endsWith(".mp3") ||
-															s.endsWith(".flac"))) {
-								previewpath = p.getFileName().toString();
-							}
-						}
-						if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
-								|| s.endsWith(".bmson")) {
-							bmsfiles.add(p);
-						}
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
 			final boolean containsBMS = bmsfiles.size() > 0;
 			property.count.addAndGet(this.processBMSFolder(records, property));
@@ -580,12 +623,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 //						long t = System.nanoTime();
 						folders.set(i, null);
 //						System.out.println(System.nanoTime() - t);
-						try {
-							if (record.getDate() == Files.getLastModifiedTime(bf.path).toMillis() / 1000) {
-								bf.updateFolder = false;
-							}
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+						if (record.getDate() == bf.getLastModifiedTime()) {
+							bf.updateFolder = false;
 						}
 						break;
 					}
@@ -593,7 +632,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			});
 
 			if(!containsBMS) {
-				dirs.parallelStream().forEach(bf -> {
+				dirs.forEach(bf -> {
 					try {
 						bf.processDirectory(property);
 					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
@@ -615,13 +654,16 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				folder.setTitle(path.getFileName().toString());
 				folder.setPath(s);
 				folder.setParent(SongUtils.crc32(parentpath.toString() , bmsroot, root.toString()));
-				folder.setDate((int) (Files.getLastModifiedTime(path).toMillis() / 1000));
+				folder.setDate((int) getLastModifiedTime());
 				folder.setAdddate((int) property.updatetime);
 				
-				SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "folder", folder);			
+				property.addFolder(folder);
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
-			folders.parallelStream().filter(Objects::nonNull).forEach(folder -> {
+			for (FolderData folder : folders) {
+				if (folder == null) {
+					continue;
+				}
 				try {
 					// System.out.println("Song Database : folder deleted - " +
 					// record.getPath());
@@ -630,23 +672,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				} catch (SQLException e) {
 					Logger.getGlobal().severe("ディレクトリ内に存在しないフォルダレコード削除の例外:" + e.getMessage());
 				}
-			});
+			}
 		}
 		
 		private int processBMSFolder(List<SongData> records, SongDatabaseUpdaterProperty property) {
-			int count = 0;
-			BMSDecoder bmsdecoder = null;
-			BMSONDecoder bmsondecoder = null;
+			record UpdateTarget(Path path, String pathname, long lastModifiedTime) {}
+			record DecodedSong(UpdateTarget target, BMSModel model, SongData song) {}
+
+			List<UpdateTarget> targets = new ArrayList<>();
 			final int len = records.size();
-			for (Path path : bmsfiles) {
-				long lastModifiedTime = -1;
-				try {
-					lastModifiedTime = Files.getLastModifiedTime(path).toMillis() / 1000;
-				} catch (IOException e) {
-//					throw new RuntimeException(e);
-				}
+			for (ChartFile chart : bmsfiles) {
+				Path chartPath = chart.path();
+				long lastModifiedTime = chart.lastModifiedTime();
 				boolean update = true;
-				final String pathname = (path.startsWith(root) ? root.relativize(path).toString() : path.toString());
+				final String pathname = (chartPath.startsWith(root) ? root.relativize(chartPath).toString() : chartPath.toString());
 				for (int i = 0;i < len;i++) {
 					final SongData record = records.get(i);
 					if (record != null && record.getPath().equals(pathname)) {
@@ -670,31 +709,21 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				if (!update) {
 					continue;
 				}
-				BMSModel model = null;
-				if (pathname.toLowerCase().endsWith(".bmson")) {
-					if (bmsondecoder == null) {
-						bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
-					}
-					try {
-						model = bmsondecoder.decode(path);
-					} catch (Exception e) {
-						Logger.getGlobal().severe("Error while decoding bmson at path: " + pathname + e.getMessage());
-					}
-				} else {
-					if (bmsdecoder == null) {
-						bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
-					}
-					try {
-						model = bmsdecoder.decode(path);
-					} catch (Exception e) {
-						Logger.getGlobal().severe("Error while decoding bms at path: " + pathname + e.getMessage());
-					}
-				}
+				targets.add(new UpdateTarget(chartPath, pathname, lastModifiedTime));
+			}
 
-				if (model == null) {
+			List<DecodedSong> decodedSongs = targets.parallelStream().map(target -> {
+				BMSModel model = decode(target.path(), target.pathname());
+				return new DecodedSong(target, model, model != null ? new SongData(model, txt) : null);
+			}).collect(Collectors.toList());
+
+			int count = 0;
+			for (DecodedSong decoded : decodedSongs) {
+				BMSModel model = decoded.model();
+				if (model == null || decoded.song() == null) {
 					continue;
 				}
-				final SongData sd = new SongData(model, txt);
+				final SongData sd = decoded.song();
 				if (sd.getNotes() != 0 || model.getWavList().length != 0) {
 					if (sd.getDifficulty() == 0) {
 						final String fulltitle = (sd.getTitle() + sd.getSubtitle()).toLowerCase();
@@ -746,14 +775,14 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					}
 
 					sd.setTag(tag != null ? tag : "");
-					sd.setPath(pathname);
-					sd.setFolder(SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()));
-					sd.setParent(SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()));
-					sd.setDate((int) lastModifiedTime);
+					sd.setPath(decoded.target().pathname());
+					sd.setFolder(SongUtils.crc32(decoded.target().path().getParent().toString(), bmsroot, root.toString()));
+					sd.setParent(SongUtils.crc32(decoded.target().path().getParent().getParent().toString(), bmsroot, root.toString()));
+					sd.setDate((int) decoded.target().lastModifiedTime());
 					sd.setFavorite(favorite != null ? favorite.intValue() : 0);
 					sd.setAdddate((int) property.updatetime);
 					try {
-						SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "song", sd);
+						property.addSong(sd);
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
@@ -763,38 +792,194 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 					count++;
 				} else {
 					try {
-						qr.update(property.conn, "DELETE FROM song WHERE path = ?", pathname);
+						qr.update(property.conn, "DELETE FROM song WHERE path = ?", decoded.target().pathname());
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 			}
 			// ディレクトリ内のファイルに存在しないレコードを削除
-			records.parallelStream().filter(Objects::nonNull).forEach(record -> {
+			for (SongData record : records) {
+				if (record == null) {
+					continue;
+				}
 				try {
 					qr.update(property.conn, "DELETE FROM song WHERE path = ?", record.getPath());
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
-			});
+			}
 
 			return count;
 		}
+
+		private BMSModel decode(Path path, String pathname) {
+			try {
+				if (pathname.toLowerCase(Locale.ROOT).endsWith(".bmson")) {
+					return new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE).decode(path);
+				}
+				return new BMSDecoder(BMSModel.LNTYPE_LONGNOTE).decode(path);
+			} catch (Exception e) {
+				Logger.getGlobal().severe("Error while decoding chart at path: " + pathname + e.getMessage());
+				return null;
+			}
+		}
+
+		private long getLastModifiedTime() {
+			if (lastModifiedTime >= 0) {
+				return lastModifiedTime;
+			}
+			try {
+				return Files.getLastModifiedTime(path).toMillis() / 1000;
+			} catch (IOException e) {
+				return -1;
+			}
+		}
+
+		private boolean isPreviewFile(String filename) {
+			return filename.startsWith("preview") && (filename.endsWith(".wav")
+					|| filename.endsWith(".ogg")
+					|| filename.endsWith(".mp3")
+					|| filename.endsWith(".flac"));
+		}
+
+		private boolean isChartFile(String filename) {
+			return filename.endsWith(".bms")
+					|| filename.endsWith(".bme")
+					|| filename.endsWith(".bml")
+					|| filename.endsWith(".pms")
+					|| filename.endsWith(".bmson");
+		}
 	}
+
+	private record ChartFile(Path path, long lastModifiedTime) {}
 	
-	private static class SongDatabaseUpdaterProperty {
+	private static class SongDatabaseUpdaterProperty implements AutoCloseable {
+		private static final int BATCH_SIZE = 500;
+
 		private final Map<String, String> tags = new HashMap<String, String>();
 		private final Map<String, Integer> favorites = new HashMap<String, Integer>();
 		private final SongInformationAccessor info;
 		private final long updatetime;
 		private final AtomicInteger count = new AtomicInteger();
 		private Connection conn;
+		private PreparedStatement folderInsertStatement;
+		private PreparedStatement songInsertStatement;
+		private int folderBatchCount;
+		private int songBatchCount;
 		
 		public SongDatabaseUpdaterProperty(long updatetime, SongInformationAccessor info) {
 			this.updatetime = updatetime;
 			this.info = info;
 		}
 
+		private void prepareStatements() throws SQLException {
+			folderInsertStatement = conn.prepareStatement("INSERT OR REPLACE INTO folder "
+					+ "(title,subtitle,command,path,banner,parent,type,date,adddate,max) "
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?)");
+			songInsertStatement = conn.prepareStatement("INSERT OR REPLACE INTO song "
+					+ "(md5,sha256,title,subtitle,genre,artist,subartist,tag,path,folder,stagefile,banner,backbmp,preview,parent,"
+					+ "level,difficulty,maxbpm,minbpm,length,mode,judge,feature,content,date,favorite,adddate,notes,charthash) "
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		}
+
+		private void addFolder(FolderData folder) throws SQLException {
+			folderInsertStatement.setString(1, folder.getTitle());
+			folderInsertStatement.setString(2, folder.getSubtitle());
+			folderInsertStatement.setString(3, folder.getCommand());
+			folderInsertStatement.setString(4, folder.getPath());
+			folderInsertStatement.setString(5, folder.getBanner());
+			folderInsertStatement.setString(6, folder.getParent());
+			folderInsertStatement.setInt(7, folder.getType());
+			folderInsertStatement.setInt(8, folder.getDate());
+			folderInsertStatement.setInt(9, folder.getAdddate());
+			folderInsertStatement.setInt(10, folder.getMax());
+			folderInsertStatement.addBatch();
+			if (++folderBatchCount >= BATCH_SIZE) {
+				flushFolders();
+			}
+		}
+
+		private void addSong(SongData song) throws SQLException {
+			songInsertStatement.setString(1, song.getMd5());
+			songInsertStatement.setString(2, song.getSha256());
+			songInsertStatement.setString(3, song.getTitle());
+			songInsertStatement.setString(4, song.getSubtitle());
+			songInsertStatement.setString(5, song.getGenre());
+			songInsertStatement.setString(6, song.getArtist());
+			songInsertStatement.setString(7, song.getSubartist());
+			songInsertStatement.setString(8, song.getTag());
+			songInsertStatement.setString(9, song.getPath());
+			songInsertStatement.setString(10, song.getFolder());
+			songInsertStatement.setString(11, song.getStagefile());
+			songInsertStatement.setString(12, song.getBanner());
+			songInsertStatement.setString(13, song.getBackbmp());
+			songInsertStatement.setString(14, song.getPreview());
+			songInsertStatement.setString(15, song.getParent());
+			songInsertStatement.setInt(16, song.getLevel());
+			songInsertStatement.setInt(17, song.getDifficulty());
+			songInsertStatement.setInt(18, song.getMaxbpm());
+			songInsertStatement.setInt(19, song.getMinbpm());
+			songInsertStatement.setInt(20, song.getLength());
+			songInsertStatement.setInt(21, song.getMode());
+			songInsertStatement.setInt(22, song.getJudge());
+			songInsertStatement.setInt(23, song.getFeature());
+			songInsertStatement.setInt(24, song.getContent());
+			songInsertStatement.setInt(25, song.getDate());
+			songInsertStatement.setInt(26, song.getFavorite());
+			songInsertStatement.setInt(27, song.getAdddate());
+			songInsertStatement.setInt(28, song.getNotes());
+			songInsertStatement.setString(29, song.getCharthash());
+			songInsertStatement.addBatch();
+			if (++songBatchCount >= BATCH_SIZE) {
+				flushSongs();
+			}
+		}
+
+		private void flush() throws SQLException {
+			flushFolders();
+			flushSongs();
+		}
+
+		private void flushFolders() throws SQLException {
+			if (folderBatchCount > 0) {
+				folderInsertStatement.executeBatch();
+				folderBatchCount = 0;
+			}
+		}
+
+		private void flushSongs() throws SQLException {
+			if (songBatchCount > 0) {
+				songInsertStatement.executeBatch();
+				songBatchCount = 0;
+			}
+		}
+
+		@Override
+		public void close() throws SQLException {
+			SQLException failure = null;
+			try {
+				if (folderInsertStatement != null) {
+					folderInsertStatement.close();
+				}
+			} catch (SQLException e) {
+				failure = e;
+			}
+			try {
+				if (songInsertStatement != null) {
+					songInsertStatement.close();
+				}
+			} catch (SQLException e) {
+				if (failure != null) {
+					failure.addSuppressed(e);
+				} else {
+					failure = e;
+				}
+			}
+			if (failure != null) {
+				throw failure;
+			}
+		}
 	}
 	
 	public static interface SongDatabaseAccessorPlugin {
