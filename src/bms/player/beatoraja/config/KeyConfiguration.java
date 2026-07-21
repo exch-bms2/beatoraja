@@ -146,7 +146,7 @@ public class KeyConfiguration extends MainState {
 		int[] keysa = KEYSA[mode];
 
 		if (keyinput) {
-			if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
+			if (keyinput && input.getKeyBoardInputProcesseor().getLibgdxLastPressedKey() != -1) {
 				setKeyboardKeyAssign(keysa[cursorpos]);
 				// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
 				keyinput = false;
@@ -235,7 +235,10 @@ public class KeyConfiguration extends MainState {
 				midiconfig.setKeyAssign(MODE_HINT[mode], true);
 			}
 
-			if (input.isControlKeyPressed(ControlKeys.ENTER)) {
+			// We get newly assigned keycodes via `getLibgdxLastPressedKey`. Since this
+			// function is incompatible with other keyboard relate functions, we cannot
+			// use `input.isControlKeyPressed` here. See `getLibgdxLastPressedKey` documentation.
+			if (input.getKeyBoardInputProcesseor().getLibgdxLastPressedKey() == ControlKeys.ENTER.keycode) {
 				setKeyAssignMode(cursorpos);
 			}
 
@@ -316,7 +319,7 @@ public class KeyConfiguration extends MainState {
 	}
 	
 	public void setKeyAssignMode(final int index) {
-		input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
+		input.getKeyBoardInputProcesseor().setLibgdxLastPresssedKey(-1);
 		input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
 		for (BMControllerInputProcessor bmc : controllers) {
 			bmc.setLastPressedButton(-1);
@@ -396,16 +399,16 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private void setKeyboardKeyAssign(int index) {
-		if (keyboard.isReservedKey(keyboard.getLastPressedKey())) {
+		if (keyboard.isReservedKey(keyboard.getLibgdxLastPressedKey())) {
 			return;
 		}
 		resetKeyAssign(index);
 		if (index >= 0) {
-			keyboardConfig.getKeyAssign()[index] = keyboard.getLastPressedKey();
+			keyboardConfig.getKeyAssign()[index] = keyboard.getLibgdxLastPressedKey();
 		} else if (index == -1) {
-			keyboardConfig.setStart(keyboard.getLastPressedKey());
+			keyboardConfig.setStart(keyboard.getLibgdxLastPressedKey());
 		} else if (index == -2) {
-			keyboardConfig.setSelect(keyboard.getLastPressedKey());
+			keyboardConfig.setSelect(keyboard.getLibgdxLastPressedKey());
 		}
 	}
 
