@@ -14,6 +14,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 public class CourseEditorView implements Initializable {
 
@@ -28,6 +29,8 @@ public class CourseEditorView implements Initializable {
 	private ListView<CourseData> courses;
 	@FXML
 	private GridPane coursePane;
+	@FXML
+	private VBox courseEmptyState;
 	@FXML
 	private TextField courseName;
 	@FXML
@@ -66,6 +69,8 @@ public class CourseEditorView implements Initializable {
 	private SongDatabaseAccessor songdb;
 	
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		coursePane.managedProperty().bind(coursePane.visibleProperty());
+		courseEmptyState.managedProperty().bind(courseEmptyState.visibleProperty());
 		gradeType.getItems().setAll(null, CLASS, MIRROR, RANDOM);
 		hispeedType.getItems().setAll(null, NO_SPEED);
 		judgeType.getItems().setAll(null, NO_GOOD, NO_GREAT);
@@ -173,9 +178,11 @@ public class CourseEditorView implements Initializable {
 		selectedCourse = course;
 		if(selectedCourse == null) {
 			coursePane.setVisible(false);
+			courseEmptyState.setVisible(true);
 			return;
 		} 
 		coursePane.setVisible(true);
+		courseEmptyState.setVisible(false);
 		
 		courseName.setText(selectedCourse.getName());
 		release.setSelected(selectedCourse.isRelease());
@@ -246,6 +253,8 @@ public class CourseEditorView implements Initializable {
 		trophy[2] = new CourseData.TrophyData("goldmedal", 2.5f, 85.0f);
 		course.setTrophy(trophy);
 		courses.getItems().add(course);
+		courses.getSelectionModel().select(course);
+		courses.scrollTo(course);
 	}
 
 	public void removeCourseData() {

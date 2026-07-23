@@ -1,95 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<?import javafx.geometry.Insets?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
-<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.InputConfigurationView">
-    <HBox prefHeight="23.0" prefWidth="740.0">
-        <VBox.margin>
-            <Insets left="10.0" top="30.0" />
-        </VBox.margin>
-        <Label prefHeight="24.0" prefWidth="68.0" text="%MODE" />
-        <ComboBox fx:id="inputconfig" onAction="#changeMode" prefWidth="150.0" />
-    </HBox>
-    <HBox prefHeight="22.0" prefWidth="740.0">
-        <VBox.margin>
-            <Insets left="10.0" top="10.0"  />
-        </VBox.margin>
-        <Label prefHeight="24.0" prefWidth="200.0" text="%MINIMUM_INPUT_DURATION" />
-        <NumericSpinner fx:id="inputduration" editable="true" prefWidth="80.0">
-            <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
-            </valueFactory>
-        </NumericSpinner>
-    </HBox>
-    <HBox prefHeight="37.0" prefWidth="723.0">
-        <VBox.margin>
-            <Insets left="10.0" top="10.0" />
-        </VBox.margin>
-        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="130.0" text="%JKOC_HACK">
-            <HBox.margin>
-                <Insets right="20.0" />
-            </HBox.margin>
-        </CheckBox>
-    </HBox>
-    <HBox prefHeight="74.0" prefWidth="723.0">
-        <VBox.margin>
-            <Insets left="10.0" top="10.0" />
-        </VBox.margin>
-	    <TableView fx:id="controller_tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-			<columns>
-				<TableColumn fx:id="playsideCol" prefWidth="40.0" text="" />
-				<TableColumn fx:id="nameCol" prefWidth="185.0" text="" />
-				<TableColumn fx:id="isAnalogCol" prefWidth="185.0" text="%ANALOG_SCRATCH" />
-				<TableColumn fx:id="analogThresholdCol" prefWidth="185.0" text="%ANALOG_SCRATCH_THRESHOLD" />
-				<TableColumn fx:id="analogModeCol" prefWidth="185.0" text="%ANALOG_SCRATCH_ALGORITHM" />
-			</columns>
-		</TableView>
-    </HBox>
-    <HBox prefHeight="24.0" prefWidth="740.0">
-        <VBox.margin>
-            <Insets left="10.0" top="10.0"  />
-        </VBox.margin>
-        <CheckBox fx:id="mouseScratch" contentDisplay="CENTER" prefHeight="24.0" prefWidth="280.0" text="%MOUSE_SCRATCH" textAlignment="CENTER">
-            <tooltip>
-                <Tooltip text="Use mouse to perform scratch." textAlignment="CENTER" />
-            </tooltip>
-        </CheckBox>
-        <Label prefHeight="24.0" prefWidth="150.0" text="%MOUSE_SCRATCH_ALGORITHM">
-            <HBox.margin>
-                <Insets left="10.0"/>
-            </HBox.margin>
-        </Label>
-        <ComboBox fx:id="mouseScratchMode" prefHeight="24.0" prefWidth="130.0">
-            <tooltip>
-                <Tooltip text="Choose Mouse Scratch Algorithm." textAlignment="CENTER" />
-            </tooltip>
-        </ComboBox>
-    </HBox>
-    <HBox prefHeight="24.0" prefWidth="740.0">
-        <VBox.margin>
-            <Insets left="10.0" top="10.0"  />
-        </VBox.margin>
-        <Label prefHeight="24.0" prefWidth="200.0" text="%MOUSE_SCRATCH_TIME_THRESHOLD" />
-        <NumericSpinner fx:id="mouseScratchTimeThreshold" editable="true" prefWidth="80.0">
-            <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="150" max="1000" min="1" />
-            </valueFactory>
-        </NumericSpinner>
-        <Label prefHeight="24.0" prefWidth="200.0" text="%MOUSE_SCRATCH_DISTANCE">
-            <HBox.margin>
-                <Insets left="10.0" />
-            </HBox.margin>
-        </Label>
-        <NumericSpinner fx:id="mouseScratchDistance" editable="true" prefWidth="80.0">
-            <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="12" max="1000" min="1" />
-            </valueFactory>
-        </NumericSpinner>
-    </HBox>
-</VBox>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.InputConfigurationView">
+    <VBox styleClass="pageContent">
+        <VBox spacing="4.0" styleClass="pageHeader">
+            <Label styleClass="pageTitle" text="Input" />
+            <Label styleClass="pageDescription" text="Configure controllers, response timing, and scratch input." />
+        </VBox>
+        <VBox styleClass="settingsCard">
+            <Label styleClass="cardTitle" text="General" />
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow"><Label styleClass="settingLabel" text="%MODE" /><Region HBox.hgrow="ALWAYS" /><ComboBox fx:id="inputconfig" onAction="#changeMode" prefWidth="230.0" /></HBox>
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow"><Label styleClass="settingLabel" text="%MINIMUM_INPUT_DURATION" /><Region HBox.hgrow="ALWAYS" /><NumericSpinner fx:id="inputduration" editable="true" prefWidth="230.0" presetValues="1,2,4,8,10,16,24,32"><valueFactory><SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" /></valueFactory></NumericSpinner></HBox>
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow,last"><CheckBox fx:id="jkoc_hack" mnemonicParsing="false" text="%JKOC_HACK" /></HBox>
+        </VBox>
+        <VBox styleClass="settingsCard">
+            <Label styleClass="cardTitle" text="Controllers" />
+            <TableView fx:id="controller_tableView" minHeight="108.0" prefHeight="108.0" maxHeight="108.0">
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="4.0">
+                        <Label styleClass="emptyStateTitle" text="No controllers detected" />
+                        <Label styleClass="emptyStateDescription" text="Connect a controller, then reopen Input settings." />
+                    </VBox>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="playsideCol" minWidth="60.0" prefWidth="60.0" text="SIDE" />
+                    <TableColumn fx:id="nameCol" minWidth="180.0" prefWidth="240.0" text="CONTROLLER" />
+                    <TableColumn fx:id="isAnalogCol" minWidth="100.0" prefWidth="150.0" text="ANALOG" />
+                    <TableColumn fx:id="analogThresholdCol" minWidth="150.0" prefWidth="210.0" text="THRESHOLD" />
+                    <TableColumn fx:id="analogModeCol" minWidth="180.0" prefWidth="220.0" text="ALGORITHM" />
+                </columns>
+            </TableView>
+        </VBox>
+        <VBox styleClass="settingsCard">
+            <Label styleClass="cardTitle" text="Mouse Scratch" />
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow"><CheckBox fx:id="mouseScratch" text="%MOUSE_SCRATCH"><tooltip><Tooltip text="Use mouse to perform scratch." textAlignment="CENTER" /></tooltip></CheckBox><Region HBox.hgrow="ALWAYS" /><ComboBox fx:id="mouseScratchMode" prefWidth="230.0"><tooltip><Tooltip text="Choose Mouse Scratch Algorithm." textAlignment="CENTER" /></tooltip></ComboBox></HBox>
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow"><Label styleClass="settingLabel" text="%MOUSE_SCRATCH_TIME_THRESHOLD" /><Region HBox.hgrow="ALWAYS" /><NumericSpinner fx:id="mouseScratchTimeThreshold" editable="true" prefWidth="230.0" presetValues="50,75,100,125,150,200,250,300"><valueFactory><SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="150" max="1000" min="1" /></valueFactory></NumericSpinner></HBox>
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow,last"><Label styleClass="settingLabel" text="%MOUSE_SCRATCH_DISTANCE" /><Region HBox.hgrow="ALWAYS" /><NumericSpinner fx:id="mouseScratchDistance" editable="true" prefWidth="230.0" presetValues="4,6,8,10,12,16,24,32"><valueFactory><SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="12" max="1000" min="1" /></valueFactory></NumericSpinner></HBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

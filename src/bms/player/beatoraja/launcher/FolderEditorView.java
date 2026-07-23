@@ -13,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 public class FolderEditorView implements Initializable {
 
@@ -28,6 +29,8 @@ public class FolderEditorView implements Initializable {
 	@FXML
 	private GridPane folderPane;	
 	@FXML
+	private VBox folderEmptyState;
+	@FXML
 	private TextField folderName;
 	@FXML
 	private TableView<SongData> folderSongs;
@@ -42,7 +45,9 @@ public class FolderEditorView implements Initializable {
 	
 	private CourseData[] courses;
 	
-	public void initialize(URL arg0, ResourceBundle arg1) {		
+	public void initialize(URL arg0, ResourceBundle arg1) {
+		folderPane.managedProperty().bind(folderPane.visibleProperty());
+		folderEmptyState.managedProperty().bind(folderEmptyState.visibleProperty());
 		folders.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
 			if(oldVal != newVal) {
 				updateTableFolder();				
@@ -110,9 +115,11 @@ public class FolderEditorView implements Initializable {
 		selectedFolder = course;
 		if(selectedFolder == null) {
 			folderPane.setVisible(false);
+			folderEmptyState.setVisible(true);
 			return;
 		}
 		folderPane.setVisible(true);
+		folderEmptyState.setVisible(false);
 		
 		folderName.setText(selectedFolder.getName());
 		folderSongs.getItems().setAll(course.getSong());
@@ -122,6 +129,8 @@ public class FolderEditorView implements Initializable {
 		TableFolder course = new TableFolder();
 		course.setName("New Folder");
 		folders.getItems().add(course);
+		folders.getSelectionModel().select(course);
+		folders.scrollTo(course);
 	}
 
 	public void removeTableFolder() {

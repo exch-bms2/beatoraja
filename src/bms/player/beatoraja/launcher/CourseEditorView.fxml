@@ -17,32 +17,27 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.CheckBox?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="editorWorkspace" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
    <children>
       <HBox VBox.vgrow="ALWAYS">
          <children>
-            <VBox spacing="10.0">
+            <VBox prefWidth="280.0" spacing="10.0" styleClass="editorListPanel">
                <children>
-                  <HBox prefHeight="31.0" prefWidth="240.0">
+                  <VBox prefHeight="76.0" prefWidth="280.0" spacing="7.0" styleClass="editorListHeader">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                      <children>
-                        <Label text="COURSE">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets right="30.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
-                        <Button mnemonicParsing="false" onAction="#removeCourseData" text="ー" />
-                        <Button mnemonicParsing="false" onAction="#moveCourseDataUp" text="↑" />
-                        <Button mnemonicParsing="false" onAction="#moveCourseDataDown" text="↓" />
+                        <Label styleClass="editorListTitle" text="COURSES" />
+                        <HBox spacing="6.0">
+                           <Button mnemonicParsing="false" onAction="#addCourseData" styleClass="button,editorToolbarButton" text="Add" />
+                           <Button mnemonicParsing="false" onAction="#removeCourseData" styleClass="button,editorToolbarButton" text="Del" />
+                           <Button mnemonicParsing="false" onAction="#moveCourseDataUp" styleClass="button,editorToolbarButton" text="Up" />
+                           <Button mnemonicParsing="false" onAction="#moveCourseDataDown" styleClass="button,editorToolbarButton" text="Down" />
+                        </HBox>
                      </children>
-                  </HBox>
-                  <ListView fx:id="courses" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
+                  </VBox>
+                  <ListView fx:id="courses" prefHeight="400.0" prefWidth="280.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
             <GridPane fx:id="coursePane" prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
@@ -143,32 +138,32 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                  		<NumericSpinner fx:id="bronzemiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+						<NumericSpinner fx:id="bronzemiss" editable="true" presetValues="0,10,20,30,40,50,60,75,90,100" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
                         </NumericSpinner>
-                  		<NumericSpinner fx:id="bronzescore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
+						<NumericSpinner fx:id="bronzescore" editable="true" presetValues="0,10,20,30,40,50,60,75,90,100" GridPane.columnIndex="2" GridPane.rowIndex="1">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
                         </NumericSpinner>
-                  		<NumericSpinner fx:id="silvermiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+						<NumericSpinner fx:id="silvermiss" editable="true" presetValues="0,10,20,30,40,50,60,75,90,100" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
                         </NumericSpinner>
-                  		<NumericSpinner fx:id="silverscore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2">
+						<NumericSpinner fx:id="silverscore" editable="true" presetValues="0,10,20,30,40,50,60,75,90,100" GridPane.columnIndex="2" GridPane.rowIndex="2">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
                         </NumericSpinner>
-                  		<NumericSpinner fx:id="goldmiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
+						<NumericSpinner fx:id="goldmiss" editable="true" presetValues="0,10,20,30,40,50,60,75,90,100" GridPane.columnIndex="1" GridPane.rowIndex="3">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
                         </NumericSpinner>
-                  		<NumericSpinner fx:id="goldscore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
+						<NumericSpinner fx:id="goldscore" editable="true" presetValues="0,10,20,30,40,50,60,75,90,100" GridPane.columnIndex="2" GridPane.rowIndex="3">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
@@ -216,6 +211,11 @@
                   <Label text="SEARCH" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
+            <VBox fx:id="courseEmptyState" alignment="CENTER" spacing="10.0" styleClass="editorEmptyState" HBox.hgrow="ALWAYS">
+               <Label styleClass="emptyStateTitle" text="No courses yet" />
+               <Label styleClass="emptyStateDescription" text="Create a course to add charts and constraints." />
+               <Button mnemonicParsing="false" onAction="#addCourseData" text="Create course" />
+            </VBox>
          </children>
       </HBox>
    </children>

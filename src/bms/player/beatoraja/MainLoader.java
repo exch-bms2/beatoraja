@@ -382,7 +382,6 @@ public class MainLoader extends Application {
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
 		Config config = Config.read();
-
 		try {
 //			final long t = System.currentTimeMillis();
 			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
@@ -395,6 +394,8 @@ public class MainLoader extends Application {
 			bmsinfo.update(config);
 			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 			primaryStage.setScene(scene);
+			primaryStage.setMinWidth(stackPane.getMinWidth());
+			primaryStage.setMinHeight(stackPane.getMinHeight());
 			primaryStage.setTitle(MainController.getVersion() + " configuration");
 			primaryStage.setOnCloseRequest((event) -> {
 				bmsinfo.exit();

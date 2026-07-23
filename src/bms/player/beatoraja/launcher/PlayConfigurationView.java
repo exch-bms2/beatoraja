@@ -55,7 +55,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private VBox root;
 	@FXML
-	private HBox playerPanel;
+	private VBox playerPanel;
 	@FXML
 	private Tab videoTab;
 	@FXML
@@ -76,6 +76,8 @@ public class PlayConfigurationView implements Initializable {
 	private Tab irTab;
 	@FXML
 	private Tab courseTab;
+	@FXML
+	private Tab tableTab;
 	@FXML
     private Tab streamTab;
 	@FXML
@@ -284,6 +286,22 @@ public class PlayConfigurationView implements Initializable {
 			combo.getItems().add(i);
 		}
 	}
+
+	private void showTab(Tab tab) {
+		tab.getTabPane().getSelectionModel().select(tab);
+	}
+
+	@FXML private void showVideoTab() { showTab(videoTab); }
+	@FXML private void showAudioTab() { showTab(audioTab); }
+	@FXML private void showInputTab() { showTab(inputTab); }
+	@FXML private void showResourceTab() { showTab(resourceTab); }
+	@FXML private void showMusicSelectTab() { showTab(musicselectTab); }
+	@FXML private void showPlayOptionTab() { showTab(optionTab); }
+	@FXML private void showSkinTab() { showTab(skinTab); }
+	@FXML private void showOtherTab() { showTab(otherTab); }
+	@FXML private void showIrTab() { showTab(irTab); }
+	@FXML private void showTableTab() { showTab(tableTab); }
+	@FXML private void showStreamTab() { showTab(streamTab); }
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		final long t = System.currentTimeMillis();
