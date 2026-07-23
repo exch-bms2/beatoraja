@@ -1,4 +1,5 @@
 /build/*
+/build-test/*
 /player/*
 /skin/*
 !/skin/default/

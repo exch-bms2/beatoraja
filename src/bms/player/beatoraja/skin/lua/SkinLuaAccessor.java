@@ -49,6 +49,7 @@ public class SkinLuaAccessor {
 		this.isGlobal = isGlobal;
 
 		restrictStandardGlobals();
+		LegacySkinLuaApi.install(globals);
 		initializeModules();
 	}
 
@@ -61,6 +62,7 @@ public class SkinLuaAccessor {
 
 		globals.finder = new SkinResourceFinder(this.sandboxRoot);
 		restrictPackageLoaders();
+		LegacySkinLuaApi.install(globals);
 		initializeModules();
 	}
 
@@ -110,13 +112,13 @@ public class SkinLuaAccessor {
 		sandbox.load(new CoroutineLib());
 		sandbox.load(new MathLib());
 		sandbox.load(new SandboxIoLib(sandboxRoot));
+		sandbox.load(new SafeOsLib());
 		LoadState.install(sandbox);
 		LuaC.install(sandbox);
 		return sandbox;
 	}
 
 	private void restrictPackageLoaders() {
-		globals.set("os", LuaValue.NIL);
 		globals.set("luajava", LuaValue.NIL);
 		globals.set("debug", LuaValue.NIL);
 

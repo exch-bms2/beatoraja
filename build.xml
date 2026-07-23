@@ -4,6 +4,8 @@
 	<property environment="env" />
 	<property name="build.src" value="src" />
 	<property name="build.dest" value="build" />
+	<property name="build.test" value="build-test" />
+	<property name="test.src" value="test" />
 	<property name="app.version" value="0.5.4"/>
 	<property name="dir.release" value="release" />
 	<property name="dir.release.windows" value="${dir.release}/windows" />
@@ -26,10 +28,27 @@
 	<target name="clean">
 		<delete dir="${build.dest}" />
 		<mkdir dir="${build.dest}" />
+		<delete dir="${build.test}" />
+		<mkdir dir="${build.test}" />
 		<delete dir="${dir.release}" />
 		<mkdir dir="${dir.release}" />
 		<mkdir dir="${dir.release}/windows" />
 		<mkdir dir="${dir.release}/linux" />
+	</target>
+
+	<target name="test" depends="compile">
+		<javac classpathref="build.lib" srcdir="${test.src}" debug="${debug}" destdir="${build.test}" encoding="UTF-8">
+			<classpath>
+				<pathelement location="${build.dest}" />
+			</classpath>
+		</javac>
+		<java classname="bms.player.beatoraja.skin.lua.SkinLuaCompatibilityTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.dest}" />
+				<pathelement location="${build.test}" />
+				<path refid="build.lib" />
+			</classpath>
+		</java>
 	</target>
 
 	<target name="compile" depends="clean">
