@@ -4,7 +4,17 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.ErrorManager;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -43,6 +53,8 @@ import jdk.jfr.StackTrace;
 public class MainLoader extends Application {
 
 	private static final boolean ALLOWS_32BIT_JAVA = false;
+	// Change to BATCHED after comparing songdata.db update performance on target environments.
+	private static final SQLiteSongDatabaseAccessor.SongUpdaterType SONG_UPDATER_TYPE = SQLiteSongDatabaseAccessor.SongUpdaterType.BATCHED;
 
 	private static final Set<String> illegalSongs = new HashSet<String>();
 
@@ -59,12 +71,7 @@ public class MainLoader extends Application {
 			System.exit(1);
 		}
 
-		Logger logger = Logger.getGlobal();
-		try {
-			logger.addHandler(new FileHandler("beatoraja_log.xml"));
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		configureLogger();
 
 		BMSPlayerMode auto = null;
 		for (String s : args) {
@@ -105,6 +112,26 @@ public class MainLoader extends Application {
 			play(bmsPath, auto, true, null, null, bmsPath != null);
 		} else {
 			launch(args);
+		}
+	}
+
+	private static void configureLogger() {
+		Logger logger = Logger.getGlobal();
+		try {
+			AsyncLogHandler consoleHandler = new AsyncLogHandler(new ConsoleHandler());
+			AsyncLogHandler fileHandler = new AsyncLogHandler(new FileHandler("beatoraja_log.xml"));
+			logger.setUseParentHandlers(false);
+			logger.addHandler(consoleHandler);
+			logger.addHandler(fileHandler);
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> closeLogHandlers(logger), "beatoraja-log-shutdown"));
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void closeLogHandlers(Logger logger) {
+		for (Handler handler : logger.getHandlers()) {
+			handler.close();
 		}
 	}
 
@@ -398,7 +425,7 @@ public class MainLoader extends Application {
 			String nextReviewpath = getSongReviewPath(config, playername);
 			if (songdb == null || !nextSongpath.equals(songpath) || !nextReviewpath.equals(reviewpath)) {
 				Class.forName("org.sqlite.JDBC");
-				songdb = new SQLiteSongDatabaseAccessor(nextSongpath, config.getBmsroot(), nextReviewpath);
+				songdb = new SQLiteSongDatabaseAccessor(nextSongpath, config.getBmsroot(), nextReviewpath, SONG_UPDATER_TYPE);
 				songpath = nextSongpath;
 				reviewpath = nextReviewpath;
 			}
@@ -527,6 +554,122 @@ public class MainLoader extends Application {
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	static class GithubLastestRelease{
 		public String name;
+	}
+
+	/**
+	 * Delegates log output to a background thread so caller threads do not wait for
+	 * console or file I/O.
+	 */
+	private static final class AsyncLogHandler extends Handler {
+
+		private static final int DEFAULT_CAPACITY = 8192;
+		private static final long CLOSE_TIMEOUT_MILLIS = 5000;
+
+		private final Handler delegate;
+		private final BlockingQueue<LogRecord> queue;
+		private final AtomicBoolean closed = new AtomicBoolean();
+		private final AtomicLong droppedRecords = new AtomicLong();
+		private final Thread worker;
+
+		private volatile boolean running = true;
+
+		private AsyncLogHandler(Handler delegate) {
+			this(delegate, Integer.getInteger("beatoraja.log.async.queue.size", DEFAULT_CAPACITY));
+		}
+
+		private AsyncLogHandler(Handler delegate, int capacity) {
+			this.delegate = delegate;
+			queue = new ArrayBlockingQueue<>(Math.max(1, capacity));
+			setLevel(delegate.getLevel());
+			setFilter(delegate.getFilter());
+			worker = new Thread(this::processQueue, "beatoraja-async-log");
+			worker.setDaemon(true);
+			worker.start();
+		}
+
+		@Override
+		public void publish(LogRecord record) {
+			if (closed.get() || !isLoggable(record)) {
+				return;
+			}
+
+			if (queue.offer(record)) {
+				return;
+			}
+
+			droppedRecords.incrementAndGet();
+			if (record.getLevel().intValue() >= Level.SEVERE.intValue()) {
+				queue.poll();
+				queue.offer(record);
+			}
+		}
+
+		@Override
+		public void flush() {
+			delegate.flush();
+		}
+
+		@Override
+		public void close() {
+			if (!closed.compareAndSet(false, true)) {
+				return;
+			}
+
+			running = false;
+			worker.interrupt();
+			try {
+				worker.join(CLOSE_TIMEOUT_MILLIS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+
+			drainQueue();
+			publishDroppedRecords();
+			delegate.flush();
+			delegate.close();
+		}
+
+		private void processQueue() {
+			while (running || !queue.isEmpty()) {
+				try {
+					LogRecord record = queue.poll(1, TimeUnit.SECONDS);
+					if (record != null) {
+						publishToDelegate(record);
+					}
+				} catch (InterruptedException e) {
+					if (!running) {
+						break;
+					}
+				}
+			}
+			drainQueue();
+		}
+
+		private void drainQueue() {
+			LogRecord record;
+			while ((record = queue.poll()) != null) {
+				publishToDelegate(record);
+			}
+		}
+
+		private void publishToDelegate(LogRecord record) {
+			try {
+				delegate.publish(record);
+			} catch (RuntimeException e) {
+				reportError(e.getMessage(), e, ErrorManager.WRITE_FAILURE);
+			}
+		}
+
+		private void publishDroppedRecords() {
+			long dropped = droppedRecords.get();
+			if (dropped == 0) {
+				return;
+			}
+
+			LogRecord record = new LogRecord(Level.WARNING, "Async logger dropped " + dropped + " log records.");
+			record.setLoggerName("global");
+			publishToDelegate(record);
+		}
 	}
 
 }

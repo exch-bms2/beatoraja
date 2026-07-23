@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileVisitResult;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,6 +37,11 @@ import bms.model.*;
  */
 public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implements SongDatabaseAccessor {
 
+	public enum SongUpdaterType {
+		BATCHED,
+		LEGACY
+	}
+
 	private SQLiteDataSource ds;
 
 	private final Path root;
@@ -49,6 +55,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 
 	private final String reviewpath;
 
+	private final SongUpdaterType songUpdaterType;
+
 	private Map<String, SongReview> songReviewCache = Collections.emptyMap();
 
 	private boolean songReviewCacheLoaded;
@@ -56,10 +64,15 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 	private List<SongDatabaseAccessorPlugin> plugins = new ArrayList();
 	
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot) throws ClassNotFoundException {
-		this(filepath, bmsroot, null);
+		this(filepath, bmsroot, null, SongUpdaterType.BATCHED);
 	}
 
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot, String reviewpath) throws ClassNotFoundException {
+		this(filepath, bmsroot, reviewpath, SongUpdaterType.BATCHED);
+	}
+
+	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot, String reviewpath,
+			SongUpdaterType songUpdaterType) throws ClassNotFoundException {
 		super(new Table("folder", 
 				new Column("title", "TEXT"),
 				new Column("subtitle", "TEXT"),
@@ -113,6 +126,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		ds.setUrl("jdbc:sqlite:" + filepath);
 		qr = new QueryRunner(ds);
 		this.reviewpath = reviewpath;
+		this.songUpdaterType = Objects.requireNonNullElse(songUpdaterType, SongUpdaterType.BATCHED);
 		reviewdb = reviewpath != null && reviewpath.length() > 0 ? new SongReviewAccessor(reviewpath) : null;
 		root = Paths.get(".");
 		createTable();
@@ -427,8 +441,16 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			Logger.getGlobal().warning("楽曲ルートフォルダが登録されていません");
 			return;
 		}
-		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll, bmsroot, info);
+		Logger.getGlobal().info("songdata.db updater : " + songUpdaterType);
+		SongUpdater updater = switch (songUpdaterType) {
+			case BATCHED -> new BatchedSongDatabaseUpdater(updateAll, bmsroot, info);
+			case LEGACY -> new LegacySongDatabaseUpdater(updateAll, bmsroot, info);
+		};
 		updater.updateSongDatas(path == null ? Stream.of(bmsroot).map(p -> Paths.get(p)) : Stream.of(Paths.get(path)));
+	}
+
+	private interface SongUpdater {
+		void updateSongDatas(Stream<Path> paths);
 	}
 	
 	/**
@@ -436,14 +458,14 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 	 * 
 	 * @author exch
 	 */
-	class SongDatabaseUpdater {
+	class BatchedSongDatabaseUpdater implements SongUpdater {
 
 		private final boolean updateAll;
 		private final String[] bmsroot;
 
 		private SongInformationAccessor info;
 
-		public SongDatabaseUpdater(boolean updateAll, String[] bmsroot, SongInformationAccessor info) {
+		public BatchedSongDatabaseUpdater(boolean updateAll, String[] bmsroot, SongInformationAccessor info) {
 			this.updateAll = updateAll;
 			this.bmsroot = bmsroot;
 			this.info = info;
@@ -569,6 +591,332 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 
 	}
 	
+	/**
+	 * Pre-batch updater retained for performance comparison. It intentionally preserves
+	 * the former directory traversal and parallel execution model.
+	 */
+	class LegacySongDatabaseUpdater implements SongUpdater {
+
+		private final boolean updateAll;
+		private final String[] bmsroot;
+		private final SongInformationAccessor info;
+
+		LegacySongDatabaseUpdater(boolean updateAll, String[] bmsroot, SongInformationAccessor info) {
+			this.updateAll = updateAll;
+			this.bmsroot = bmsroot;
+			this.info = info;
+		}
+
+		@Override
+		public void updateSongDatas(Stream<Path> paths) {
+			long time = System.currentTimeMillis();
+			SongDatabaseUpdaterProperty property = new SongDatabaseUpdaterProperty(
+					Calendar.getInstance().getTimeInMillis() / 1000, info);
+			if (info != null) {
+				info.startUpdate();
+			}
+			try (Connection conn = ds.getConnection()) {
+				property.conn = conn;
+				conn.setAutoCommit(false);
+				loadReviews(property);
+				deleteOutdatedRecords(conn, updateAll, bmsroot);
+
+				paths.parallel().forEach(path -> {
+					try {
+						new LegacyBMSFolder(path).processDirectory(property);
+					} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
+						Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
+					}
+				});
+				conn.commit();
+			} catch (Exception e) {
+				Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
+				e.printStackTrace();
+			}
+
+			if (info != null) {
+				info.endUpdate();
+			}
+			long nowtime = System.currentTimeMillis();
+			Logger.getGlobal().info("楽曲更新完了(legacy) : Time - " + (nowtime - time) + " 1曲あたりの時間 - "
+					+ (property.count.get() > 0 ? (nowtime - time) / property.count.get() : "不明"));
+		}
+
+		private final class LegacyBMSFolder {
+			private final Path path;
+			private boolean updateFolder = true;
+			private boolean txt;
+			private final List<Path> bmsfiles = new ArrayList<>();
+			private final List<LegacyBMSFolder> dirs = new ArrayList<>();
+			private String previewpath;
+
+			private LegacyBMSFolder(Path path) {
+				this.path = path;
+			}
+
+			private void processDirectory(SongDatabaseUpdaterProperty property)
+					throws IOException, SQLException, ReflectiveOperationException, IntrospectionException {
+				List<SongData> records = qr.query(property.conn, "SELECT path, date, preview FROM song WHERE folder = ?",
+						songhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
+				List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
+						folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
+				try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
+					for (Path child : paths) {
+						if (Files.isDirectory(child)) {
+							dirs.add(new LegacyBMSFolder(child));
+							continue;
+						}
+						String filename = child.getFileName().toString().toLowerCase();
+						if (!txt && filename.endsWith(".txt")) {
+							txt = true;
+						}
+						if (previewpath == null && filename.startsWith("preview") && (filename.endsWith(".wav")
+								|| filename.endsWith(".ogg") || filename.endsWith(".mp3") || filename.endsWith(".flac"))) {
+							previewpath = child.getFileName().toString();
+						}
+						if (filename.endsWith(".bms") || filename.endsWith(".bme") || filename.endsWith(".bml")
+								|| filename.endsWith(".pms") || filename.endsWith(".bmson")) {
+							bmsfiles.add(child);
+						}
+					}
+				}
+
+				boolean containsBMS = !bmsfiles.isEmpty();
+				property.count.addAndGet(processBMSFolder(records, property));
+				updateChildFolders(folders);
+
+				if (!containsBMS) {
+					dirs.parallelStream().forEach(folder -> {
+						try {
+							folder.processDirectory(property);
+						} catch (IOException | SQLException | IllegalArgumentException | ReflectiveOperationException | IntrospectionException e) {
+							Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
+						}
+					});
+				}
+
+				if (updateFolder) {
+					Path parentPath = path.getParent() != null ? path.getParent() : path.toAbsolutePath().getParent();
+					FolderData folder = new FolderData();
+					folder.setTitle(path.getFileName().toString());
+					folder.setPath(relativePath(path) + File.separatorChar);
+					folder.setParent(SongUtils.crc32(parentPath.toString(), bmsroot, root.toString()));
+					folder.setDate((int) (Files.getLastModifiedTime(path).toMillis() / 1000));
+					folder.setAdddate((int) property.updatetime);
+					SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "folder", folder);
+				}
+				folders.parallelStream().filter(Objects::nonNull).forEach(folder -> {
+					try {
+						qr.update(property.conn, "DELETE FROM folder WHERE path LIKE ?", folder.getPath() + "%");
+						qr.update(property.conn, "DELETE FROM song WHERE path LIKE ?", folder.getPath() + "%");
+					} catch (SQLException e) {
+						Logger.getGlobal().severe("ディレクトリ内に存在しないフォルダレコード削除の例外:" + e.getMessage());
+					}
+				});
+			}
+
+			private void updateChildFolders(List<FolderData> folders) {
+				for (LegacyBMSFolder child : dirs) {
+					String childPath = relativePath(child.path) + File.separatorChar;
+					for (int index = 0; index < folders.size(); index++) {
+						FolderData record = folders.get(index);
+						if (record == null || !record.getPath().equals(childPath)) {
+							continue;
+						}
+						folders.set(index, null);
+						try {
+							child.updateFolder = record.getDate() != Files.getLastModifiedTime(child.path).toMillis() / 1000;
+						} catch (IOException e) {
+							throw new IllegalStateException(e);
+						}
+						break;
+					}
+				}
+			}
+
+			private int processBMSFolder(List<SongData> records, SongDatabaseUpdaterProperty property) {
+				int count = 0;
+				BMSDecoder bmsdecoder = null;
+				BMSONDecoder bmsondecoder = null;
+				for (Path chartPath : bmsfiles) {
+					long lastModifiedTime = getLastModifiedTime(chartPath);
+					String pathname = relativePath(chartPath);
+					SongData record = removeRecord(records, pathname);
+					if (record != null && record.getDate() == lastModifiedTime) {
+						updatePreview(record, pathname, property);
+						continue;
+					}
+
+					BMSModel model;
+					try {
+						if (pathname.toLowerCase().endsWith(".bmson")) {
+							if (bmsondecoder == null) {
+								bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
+							}
+							model = bmsondecoder.decode(chartPath);
+						} else {
+							if (bmsdecoder == null) {
+								bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
+							}
+							model = bmsdecoder.decode(chartPath);
+						}
+					} catch (Exception e) {
+						Logger.getGlobal().severe("Error while decoding chart at path: " + pathname + e.getMessage());
+						continue;
+					}
+					if (model == null) {
+						continue;
+					}
+
+					SongData song = new SongData(model, txt);
+					if (song.getNotes() == 0 && model.getWavList().length == 0) {
+						deleteSong(pathname, property);
+						continue;
+					}
+					updateSong(song, model, chartPath, pathname, lastModifiedTime, property);
+					count++;
+				}
+				for (SongData record : records) {
+					if (record != null) {
+						deleteSong(record.getPath(), property);
+					}
+				}
+				return count;
+			}
+
+			private SongData removeRecord(List<SongData> records, String pathname) {
+				for (int index = 0; index < records.size(); index++) {
+					SongData record = records.get(index);
+					if (record != null && record.getPath().equals(pathname)) {
+						records.set(index, null);
+						return record;
+					}
+				}
+				return null;
+			}
+
+			private void updatePreview(SongData record, String pathname, SongDatabaseUpdaterProperty property) {
+				String oldPreview = record.getPreview() == null ? "" : record.getPreview();
+				String newPreview = previewpath == null ? "" : previewpath;
+				if (!oldPreview.equals(newPreview)) {
+					try {
+						qr.update(property.conn, "UPDATE song SET preview=? WHERE path=?", newPreview, pathname);
+					} catch (SQLException e) {
+						Logger.getGlobal().warning("Error while updating preview at " + pathname + ": " + e.getMessage());
+					}
+				}
+			}
+
+			private void updateSong(SongData song, BMSModel model, Path chartPath, String pathname, long lastModifiedTime,
+					SongDatabaseUpdaterProperty property) {
+				assignDifficulty(song);
+				if ((song.getPreview() == null || song.getPreview().isEmpty()) && previewpath != null) {
+					song.setPreview(previewpath);
+				}
+				for (SongDatabaseAccessorPlugin plugin : plugins) {
+					plugin.update(model, song);
+				}
+				song.setTag(property.tags.getOrDefault(song.getSha256(), ""));
+				song.setPath(pathname);
+				song.setFolder(SongUtils.crc32(chartPath.getParent().toString(), bmsroot, root.toString()));
+				song.setParent(SongUtils.crc32(chartPath.getParent().getParent().toString(), bmsroot, root.toString()));
+				song.setDate((int) lastModifiedTime);
+				song.setFavorite(property.favorites.getOrDefault(song.getSha256(), 0));
+				song.setAdddate((int) property.updatetime);
+				try {
+					SQLiteSongDatabaseAccessor.this.insert(qr, property.conn, "song", song);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				if (property.info != null) {
+					property.info.update(model);
+				}
+			}
+
+			private void assignDifficulty(SongData song) {
+				if (song.getDifficulty() != 0) {
+					return;
+				}
+				String fullTitle = (song.getTitle() + song.getSubtitle()).toLowerCase();
+				String diffName = song.getSubtitle().toLowerCase();
+				if (diffName.contains("beginner")) song.setDifficulty(1);
+				else if (diffName.contains("normal")) song.setDifficulty(2);
+				else if (diffName.contains("hyper")) song.setDifficulty(3);
+				else if (diffName.contains("another")) song.setDifficulty(4);
+				else if (diffName.contains("insane") || diffName.contains("leggendaria")) song.setDifficulty(5);
+				else if (fullTitle.contains("beginner")) song.setDifficulty(1);
+				else if (fullTitle.contains("normal")) song.setDifficulty(2);
+				else if (fullTitle.contains("hyper")) song.setDifficulty(3);
+				else if (fullTitle.contains("another")) song.setDifficulty(4);
+				else if (fullTitle.contains("insane") || fullTitle.contains("leggendaria")) song.setDifficulty(5);
+				else if (song.getNotes() < 250) song.setDifficulty(1);
+				else if (song.getNotes() < 600) song.setDifficulty(2);
+				else if (song.getNotes() < 1000) song.setDifficulty(3);
+				else if (song.getNotes() < 2000) song.setDifficulty(4);
+				else song.setDifficulty(5);
+			}
+
+			private void deleteSong(String pathname, SongDatabaseUpdaterProperty property) {
+				try {
+					qr.update(property.conn, "DELETE FROM song WHERE path = ?", pathname);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+			private long getLastModifiedTime(Path path) {
+				try {
+					return Files.getLastModifiedTime(path).toMillis() / 1000;
+				} catch (IOException e) {
+					return -1;
+				}
+			}
+
+			private String relativePath(Path path) {
+				return path.startsWith(root) ? root.relativize(path).toString() : path.toString();
+			}
+		}
+
+		private void loadReviews(SongDatabaseUpdaterProperty property) throws SQLException {
+			if (reviewdb != null) {
+				for (Map.Entry<String, SongReview> entry : getSongReviews().entrySet()) {
+					SongReview review = entry.getValue();
+					if (review.getTag() != null && !review.getTag().isEmpty()) {
+						property.tags.put(entry.getKey(), review.getTag());
+					}
+				}
+				return;
+			}
+			for (SongData record : qr.query(property.conn, "SELECT sha256, tag, favorite FROM song", songhandler)) {
+				if (record.getTag() != null && !record.getTag().isEmpty()) {
+					property.tags.put(record.getSha256(), record.getTag());
+				}
+				if (record.getFavorite() > 0) {
+					property.favorites.put(record.getSha256(), record.getFavorite());
+				}
+			}
+		}
+
+		private void deleteOutdatedRecords(Connection conn, boolean updateAll, String[] roots) throws SQLException {
+			if (updateAll) {
+				qr.update(conn, "DELETE FROM folder");
+				qr.update(conn, "DELETE FROM song");
+				return;
+			}
+			StringBuilder sql = new StringBuilder();
+			Object[] params = new Object[roots.length];
+			for (int index = 0; index < roots.length; index++) {
+				sql.append("path NOT LIKE ?");
+				params[index] = roots[index] + "%";
+				if (index < roots.length - 1) {
+					sql.append(" AND ");
+				}
+			}
+			qr.update(conn, "DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND " + sql, params);
+			qr.update(conn, "DELETE FROM song WHERE " + sql, params);
+		}
+	}
+
 	private class BMSFolder {
 		
 		public final Path path;
