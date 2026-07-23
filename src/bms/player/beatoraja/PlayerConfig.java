@@ -185,6 +185,11 @@ public final class PlayerConfig {
 	private boolean isGuideSE = false;
 
 	/**
+	 * Play visible-note key sounds at their chart timing instead of on key input.
+	 */
+	private boolean autoKeySound = false;
+
+	/**
 	 * Window Hold
 	 */
 	private boolean isWindowHold = false;
@@ -379,6 +384,14 @@ public final class PlayerConfig {
 
 	public boolean isMarkprocessednote() {
 		return markprocessednote;
+	}
+
+	public boolean isAutoKeySound() {
+		return autoKeySound;
+	}
+
+	public void setAutoKeySound(boolean autoKeySound) {
+		this.autoKeySound = autoKeySound;
 	}
 
 	public void setMarkprocessednote(boolean markprocessednote) {
