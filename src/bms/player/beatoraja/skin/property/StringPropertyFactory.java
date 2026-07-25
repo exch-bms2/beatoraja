@@ -8,6 +8,7 @@ import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.ir.IRScoreData;
 import bms.player.beatoraja.ir.RankingData;
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
@@ -20,6 +21,10 @@ import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.utils.IntMap;
 
 import java.util.*;
+import java.util.function.IntFunction;
+import java.util.function.IntUnaryOperator;
+
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * StringPropertyのFactoryクラス
@@ -35,6 +40,10 @@ public class StringPropertyFactory {
 	 * @return 対応するStringProperty
 	 */
 	public static StringProperty getStringProperty(final int id) {
+		StringProperty property = StringPropertyPattern.get(id);
+		if (property != null) {
+			return property;
+		}
 		StringType type = StringType.get(id);
 		return type != null ? type.property : null;
 	}
@@ -46,6 +55,10 @@ public class StringPropertyFactory {
 	 * @return 対応するStringProperty
 	 */
 	public static StringProperty getStringProperty(final String name) {
+		StringProperty property = StringPropertyPattern.get(name);
+		if (property != null) {
+			return property;
+		}
 		StringType type = StringType.get(name);
 		return type != null ? type.property : null;
 	}
@@ -58,6 +71,102 @@ public class StringPropertyFactory {
 	public static StringWriter getStringWriter(final String name) {
 		StringType type = StringType.get(name);
 		return type != null ? type.writer : null;
+	}
+
+	/**
+	 * Groups numbered String properties by their ID range and skin-facing name pattern.
+	 */
+	private enum StringPropertyPattern {
+		KEY_1_TO_10(40, 10, StringType::createKeyname, new NamePattern("key", "")),
+		KEY_11_TO_54(240, 44, index -> StringType.createKeyname(index + 10), new NamePattern("key", "", value -> value - 11)),
+		SKIN_CATEGORY(STRING_SKIN_CUSTOMIZE_CATEGORY1, 10, StringType::createSkincategory, new NamePattern("skincategory", "")),
+		SKIN_ITEM(STRING_SKIN_CUSTOMIZE_ITEM1, 10, StringType::createSkinitem, new NamePattern("skinitem", "")),
+		RANKING_NAME(STRING_RANKING1_NAME, 10, StringType::createRankingname, new NamePattern("rankingname", "")),
+		COURSE_TITLE(STRING_COURSE1_TITLE, 10, StringType::createCoursetitle, new NamePattern("coursetitle", "")),
+		TARGET_NAME_PREVIOUS(200, 10, index -> StringType.createTargetname(index - 10),
+				new NamePattern("targetnamep", "", value -> 10 - value)),
+		TARGET_NAME_NEXT(210, 10, index -> StringType.createTargetname(index + 1), new NamePattern("targetnamen", "")),
+		PRACTICE_ITEM(STRING_PRACTICE_ITEM1, 16,
+				index -> state -> state instanceof BMSPlayer player
+						? player.getPracticeConfiguration().getVisibleItemText(index) : "",
+				new NamePattern("practice_item", "")),
+		PRACTICE_ITEM_LABEL(STRING_PRACTICE_ITEM_LABEL1, 16,
+				index -> state -> state instanceof BMSPlayer player
+						? player.getPracticeConfiguration().getVisibleItemLabel(index) : "",
+				new NamePattern("practice_item", "_label"), new NamePattern("practice_item_label", "")),
+		PRACTICE_ITEM_VALUE(STRING_PRACTICE_ITEM_VALUE1, 16,
+				index -> state -> state instanceof BMSPlayer player
+						? player.getPracticeConfiguration().getVisibleItemValue(index) : "",
+				new NamePattern("practice_item", "_value"), new NamePattern("practice_item_value", ""));
+
+		private final int firstId;
+		private final StringProperty[] properties;
+		private final NamePattern[] namePatterns;
+
+		StringPropertyPattern(int firstId, int count, IntFunction<StringProperty> propertyFactory, NamePattern... namePatterns) {
+			this.firstId = firstId;
+			this.properties = new StringProperty[count];
+			for (int index = 0; index < count; index++) {
+				properties[index] = propertyFactory.apply(index);
+			}
+			this.namePatterns = namePatterns;
+		}
+
+		private StringProperty getById(int id) {
+			int index = id - firstId;
+			return index >= 0 && index < properties.length ? properties[index] : null;
+		}
+
+		private StringProperty getByName(String name) {
+			for (NamePattern namePattern : namePatterns) {
+				int index = namePattern.getIndex(name);
+				if (index >= 0 && index < properties.length) {
+					return properties[index];
+				}
+			}
+			return null;
+		}
+
+		private static StringProperty get(int id) {
+			for (StringPropertyPattern pattern : values()) {
+				StringProperty property = pattern.getById(id);
+				if (property != null) {
+					return property;
+				}
+			}
+			return null;
+		}
+
+		private static StringProperty get(String name) {
+			for (StringPropertyPattern pattern : values()) {
+				StringProperty property = pattern.getByName(name);
+				if (property != null) {
+					return property;
+				}
+			}
+			return null;
+		}
+
+		private record NamePattern(String prefix, String suffix, IntUnaryOperator indexMapper) {
+			private NamePattern(String prefix, String suffix) {
+				this(prefix, suffix, value -> value - 1);
+			}
+
+			private int getIndex(String name) {
+				if (name == null || !name.startsWith(prefix) || !name.endsWith(suffix)) {
+					return -1;
+				}
+				int end = name.length() - suffix.length();
+				if (end <= prefix.length()) {
+					return -1;
+				}
+				try {
+					return indexMapper.applyAsInt(Integer.parseInt(name.substring(prefix.length(), end)));
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		}
 	}
 	
 	public enum StringType {
@@ -118,16 +227,6 @@ public class StringPropertyFactory {
 			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getFullArtist() : "";
 		}),
-		key1(40, createKeyname(0)),
-		key2(41, createKeyname(1)),
-		key3(42, createKeyname(2)),
-		key4(43, createKeyname(3)),
-		key5(44, createKeyname(4)),
-		key6(45, createKeyname(5)),
-		key7(46, createKeyname(6)),
-		key8(47, createKeyname(7)),
-		key9(48, createKeyname(8)),
-		key10(49, createKeyname(9)),
 		searchword(30, (state) -> "", (state, value) -> {
 			if (state instanceof MusicSelector selector) {
 				selector.search(value);
@@ -139,51 +238,6 @@ public class StringPropertyFactory {
 		difficulty(62, (state) -> state.resource.getPlayerConfig().getDifficultyFilter().getDisplayName()),
 
 		chartreplication(86, (state) -> state.resource.getPlayerConfig().getChartReplicationMode()),
-
-		key11(240, createKeyname(10)),
-		key12(241, createKeyname(11)),
-		key13(242, createKeyname(12)),
-		key14(243, createKeyname(13)),
-		key15(244, createKeyname(14)),
-		key16(245, createKeyname(15)),
-		key17(246, createKeyname(16)),
-		key18(247, createKeyname(17)),
-		key19(248, createKeyname(18)),
-		key20(249, createKeyname(19)),
-		key21(250, createKeyname(20)),
-		key22(251, createKeyname(21)),
-		key23(252, createKeyname(22)),
-		key24(253, createKeyname(23)),
-		key25(254, createKeyname(24)),
-		key26(255, createKeyname(25)),
-		key27(256, createKeyname(26)),
-		key28(257, createKeyname(27)),
-		key29(258, createKeyname(28)),
-		key30(259, createKeyname(29)),
-		key31(260, createKeyname(30)),
-		key32(261, createKeyname(31)),
-		key33(262, createKeyname(32)),
-		key34(263, createKeyname(33)),
-		key35(264, createKeyname(34)),
-		key36(265, createKeyname(35)),
-		key37(266, createKeyname(36)),
-		key38(267, createKeyname(37)),
-		key39(268, createKeyname(38)),
-		key40(269, createKeyname(39)),
-		key41(270, createKeyname(40)),
-		key42(271, createKeyname(41)),
-		key43(272, createKeyname(42)),
-		key44(273, createKeyname(43)),
-		key45(274, createKeyname(44)),
-		key46(275, createKeyname(45)),
-		key47(276, createKeyname(46)),
-		key48(277, createKeyname(47)),
-		key49(278, createKeyname(48)),
-		key50(279, createKeyname(49)),
-		key51(280, createKeyname(50)),
-		key52(281, createKeyname(51)),
-		key53(282, createKeyname(52)),
-		key54(283, createKeyname(53)),
 
 		skinname(50, (state) -> {
 			if (state instanceof SkinConfiguration skinconfig) {
@@ -201,67 +255,6 @@ public class StringPropertyFactory {
 			}
 			return "";
 		}),
-		skincategory1(100, createSkincategory(0)),
-		skincategory2(101, createSkincategory(1)),
-		skincategory3(102, createSkincategory(2)),
-		skincategory4(103, createSkincategory(3)),
-		skincategory5(104, createSkincategory(4)),
-		skincategory6(105, createSkincategory(5)),
-		skincategory7(106, createSkincategory(6)),
-		skincategory8(107, createSkincategory(7)),
-		skincategory9(108, createSkincategory(8)),
-		skincategory10(109, createSkincategory(9)),
-		skinitem1(110, createSkinitem(0)),
-		skinitem2(111, createSkinitem(1)),
-		skinitem3(112, createSkinitem(2)),
-		skinitem4(113, createSkinitem(3)),
-		skinitem5(114, createSkinitem(4)),
-		skinitem6(115, createSkinitem(5)),
-		skinitem7(116, createSkinitem(6)),
-		skinitem8(117, createSkinitem(7)),
-		skinitem9(118, createSkinitem(8)),
-		skinitem10(119, createSkinitem(9)),
-		rankingname1(120, createRankingname(0)),
-		rankingname2(121, createRankingname(1)),
-		rankingname3(122, createRankingname(2)),
-		rankingname4(123, createRankingname(3)),
-		rankingname5(124, createRankingname(4)),
-		rankingname6(125, createRankingname(5)),
-		rankingname7(126, createRankingname(6)),
-		rankingname8(127, createRankingname(7)),
-		rankingname9(128, createRankingname(8)),
-		rankingname10(129, createRankingname(9)),
-		coursetitle1(150, createCoursetitle(0)),
-		coursetitle2(151, createCoursetitle(1)),
-		coursetitle3(152, createCoursetitle(2)),
-		coursetitle4(153, createCoursetitle(3)),
-		coursetitle5(154, createCoursetitle(4)),
-		coursetitle6(155, createCoursetitle(5)),
-		coursetitle7(156, createCoursetitle(6)),
-		coursetitle8(157, createCoursetitle(7)),
-		coursetitle9(158, createCoursetitle(8)),
-		coursetitle10(159, createCoursetitle(9)),
-		targetnamep10(200, createTargetname(-10)),
-		targetnamep9(201, createTargetname(-9)),
-		targetnamep8(202, createTargetname(-8)),
-		targetnamep7(203, createTargetname(-7)),
-		targetnamep6(204, createTargetname(-6)),
-		targetnamep5(205, createTargetname(-5)),
-		targetnamep4(206, createTargetname(-4)),
-		targetnamep3(207, createTargetname(-3)),
-		targetnamep2(208, createTargetname(-2)),
-		targetnamep1(209, createTargetname(-1)),
-		targetnamen1(210, createTargetname(1)),
-		targetnamen2(211, createTargetname(2)),
-		targetnamen3(212, createTargetname(3)),
-		targetnamen4(213, createTargetname(4)),
-		targetnamen5(214, createTargetname(5)),
-		targetnamen6(215, createTargetname(6)),
-		targetnamen7(216, createTargetname(7)),
-		targetnamen8(217, createTargetname(8)),
-		targetnamen9(218, createTargetname(9)),
-		targetnamen10(219, createTargetname(10)),
-
 		directory(1000, (state) -> ((state instanceof MusicSelector selector) ? selector.getBarManager().getDirectoryString() : "")),
 		tablename(1001, (state) -> (state.resource.getTablename())),
 		tablelevel(1002, (state) -> (state.resource.getTablelevel())),

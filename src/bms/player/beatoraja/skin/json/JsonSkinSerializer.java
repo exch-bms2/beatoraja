@@ -54,6 +54,7 @@ public class JsonSkinSerializer {
 				JsonSkin.Gauge.class,
 				JsonSkin.BGA.class,
 				JsonSkin.SkinPreview.class,
+				JsonSkin.Practice.class,
 				JsonSkin.Judge.class,
 				JsonSkin.SongList.class,
 				JsonSkin.Destination.class,

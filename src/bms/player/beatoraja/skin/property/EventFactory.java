@@ -42,6 +42,10 @@ public class EventFactory {
 	 * @return イベントオブジェクト
 	 */
 	public static Event getEvent(int eventId) {
+		Event patternEvent = EventPattern.get(eventId);
+		if (patternEvent != null) {
+			return patternEvent;
+		}
 		for(EventType t : EventType.values()) {
 			if(t.id == eventId) {
 				return t.event;
@@ -59,13 +63,104 @@ public class EventFactory {
 	 * @return イベントオブジェクト
 	 */
 	public static Event getEvent(String eventName) {
+		Event patternEvent = EventPattern.get(eventName);
+		if (patternEvent != null) {
+			return patternEvent;
+		}
 		for(EventType t : EventType.values()) {
 			if(t.name().equals(eventName)) {
 				return t.event;
 			}
 		}
-
 		return null;
+	}
+
+	/**
+	 * Groups numbered Events by their IDs and skin-facing name pattern.
+	 */
+	private enum EventPattern {
+		KEY_ASSIGN(keyAssignIds(), "keyassign",
+				(index, eventId) -> createZeroArgEvent(EventType.changeKeyAssign(index), eventId)),
+		PRACTICE_ITEM(numberedIds(SkinProperty.BUTTON_PRACTICE_ITEM1, 16), "practice_item",
+				(index, eventId) -> createTwoArgEvent((state, arg1, arg2) -> state.executeEvent(eventId, arg1, arg2), eventId));
+
+		private final int[] ids;
+		private final String namePrefix;
+		private final Event[] events;
+
+		EventPattern(int[] ids, String namePrefix, EventGenerator generator) {
+			this.ids = ids;
+			this.namePrefix = namePrefix;
+			this.events = new Event[ids.length];
+			for (int index = 0; index < ids.length; index++) {
+				events[index] = generator.create(index, ids[index]);
+			}
+		}
+
+		private Event getById(int eventId) {
+			for (int index = 0; index < ids.length; index++) {
+				if (ids[index] == eventId) {
+					return events[index];
+				}
+			}
+			return null;
+		}
+
+		private Event getByName(String name) {
+			if (name == null || !name.startsWith(namePrefix)) {
+				return null;
+			}
+			try {
+				int index = Integer.parseInt(name.substring(namePrefix.length())) - 1;
+				return index >= 0 && index < events.length ? events[index] : null;
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+		private static Event get(int eventId) {
+			for (EventPattern pattern : values()) {
+				Event event = pattern.getById(eventId);
+				if (event != null) {
+					return event;
+				}
+			}
+			return null;
+		}
+
+		private static Event get(String name) {
+			for (EventPattern pattern : values()) {
+				Event event = pattern.getByName(name);
+				if (event != null) {
+					return event;
+				}
+			}
+			return null;
+		}
+
+		private static int[] numberedIds(int firstId, int count) {
+			int[] ids = new int[count];
+			for (int index = 0; index < count; index++) {
+				ids[index] = firstId + index;
+			}
+			return ids;
+		}
+
+		private static int[] keyAssignIds() {
+			int[] ids = new int[54];
+			for (int index = 0; index < 39; index++) {
+				ids[index] = 101 + index;
+			}
+			for (int index = 39; index < ids.length; index++) {
+				ids[index] = 150 + index - 39;
+			}
+			return ids;
+		}
+	}
+
+	@FunctionalInterface
+	private interface EventGenerator {
+		Event create(int index, int eventId);
 	}
 
 	public enum EventType {
@@ -572,61 +667,6 @@ public class EventFactory {
 				}
 			}
 		}),
-		keyassign1(101, changeKeyAssign(0)),
-		keyassign2(102, changeKeyAssign(1)),
-		keyassign3(103, changeKeyAssign(2)),
-		keyassign4(104, changeKeyAssign(3)),
-		keyassign5(105, changeKeyAssign(4)),
-		keyassign6(106, changeKeyAssign(5)),
-		keyassign7(107, changeKeyAssign(6)),
-		keyassign8(108, changeKeyAssign(7)),
-		keyassign9(109, changeKeyAssign(8)),
-		keyassign10(110, changeKeyAssign(9)),
-		keyassign11(111, changeKeyAssign(10)),
-		keyassign12(112, changeKeyAssign(11)),
-		keyassign13(113, changeKeyAssign(12)),
-		keyassign14(114, changeKeyAssign(13)),
-		keyassign15(115, changeKeyAssign(14)),
-		keyassign16(116, changeKeyAssign(15)),
-		keyassign17(117, changeKeyAssign(16)),
-		keyassign18(118, changeKeyAssign(17)),
-		keyassign19(119, changeKeyAssign(18)),
-		keyassign20(120, changeKeyAssign(19)),
-		keyassign21(121, changeKeyAssign(20)),
-		keyassign22(122, changeKeyAssign(21)),
-		keyassign23(123, changeKeyAssign(22)),
-		keyassign24(124, changeKeyAssign(23)),
-		keyassign25(125, changeKeyAssign(24)),
-		keyassign26(126, changeKeyAssign(25)),
-		keyassign27(127, changeKeyAssign(26)),
-		keyassign28(128, changeKeyAssign(27)),
-		keyassign29(129, changeKeyAssign(28)),
-		keyassign30(130, changeKeyAssign(29)),
-		keyassign31(131, changeKeyAssign(30)),
-		keyassign32(132, changeKeyAssign(31)),
-		keyassign33(133, changeKeyAssign(32)),
-		keyassign34(134, changeKeyAssign(33)),
-		keyassign35(135, changeKeyAssign(34)),
-		keyassign36(136, changeKeyAssign(35)),
-		keyassign37(137, changeKeyAssign(36)),
-		keyassign38(138, changeKeyAssign(37)),
-		keyassign39(139, changeKeyAssign(38)),
-		keyassign40(150, changeKeyAssign(39)),
-		keyassign41(151, changeKeyAssign(40)),
-		keyassign42(152, changeKeyAssign(41)),
-		keyassign43(153, changeKeyAssign(42)),
-		keyassign44(154, changeKeyAssign(43)),
-		keyassign45(155, changeKeyAssign(44)),
-		keyassign46(156, changeKeyAssign(45)),
-		keyassign47(157, changeKeyAssign(46)),
-		keyassign48(158, changeKeyAssign(47)),
-		keyassign49(159, changeKeyAssign(48)),
-		keyassign50(160, changeKeyAssign(49)),
-		keyassign51(161, changeKeyAssign(50)),
-		keyassign52(162, changeKeyAssign(51)),
-		keyassign53(163, changeKeyAssign(52)),
-		keyassign54(164, changeKeyAssign(53)),
-
 	    /**
 	     * LNモードの変更
 	     */

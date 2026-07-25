@@ -45,6 +45,7 @@ public class JsonSkin {
 		public LiftCover[] liftCover = new LiftCover[0];
 		public BGA bga;
 		public SkinPreview skinpreview;
+		public Practice practice;
 		public Judge[] judge = new Judge[0];
 		public SongList songlist;
 		public PMchara[] pmchara = new PMchara[0];
@@ -412,6 +413,17 @@ public class JsonSkin {
 
 	public static class SkinPreview {
 		public String id;
+	}
+
+	/**
+	 * Practice mode configuration area in a play skin.
+	 *
+	 * <p>The visual contents are defined by the usual skin objects. This object
+	 * only enables the skin-based Practice UI and configures its visible row count.</p>
+	 */
+	public static class Practice {
+		public String id;
+		public int visibleItems = 10;
 	}
 
 	public static class Judge {

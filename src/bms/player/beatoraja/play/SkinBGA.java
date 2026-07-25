@@ -19,19 +19,15 @@ public class SkinBGA extends SkinObject {
 	
 	private BMSPlayer player;
 	private long time;
+	private final SkinPractice fallbackPractice = new SkinPractice(0);
 
 	public SkinBGA(int bgaExpand) {
-		switch (bgaExpand) {
-		case Config.BGAEXPAND_FULL:
-			setStretch(StretchType.STRETCH);
-			break;
-		case Config.BGAEXPAND_KEEP_ASPECT_RATIO:
-			setStretch(StretchType.KEEP_ASPECT_RATIO_FIT_INNER);
-			break;
-		case Config.BGAEXPAND_OFF:
-			setStretch(StretchType.KEEP_ASPECT_RATIO_NO_EXPANDING);
-			break;
-		}
+		setStretch(switch (bgaExpand) {
+			case Config.BGAEXPAND_FULL -> StretchType.STRETCH;
+			case Config.BGAEXPAND_KEEP_ASPECT_RATIO -> StretchType.KEEP_ASPECT_RATIO_FIT_INNER;
+			case Config.BGAEXPAND_OFF -> StretchType.KEEP_ASPECT_RATIO_NO_EXPANDING;
+			default -> StretchType.STRETCH;
+		});
 	}
 	
 	@Override
@@ -52,7 +48,10 @@ public class SkinBGA extends SkinObject {
 	public void draw(SkinObjectRenderer sprite) {
 		final PlayerResource resource = player.resource;
 		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE) {
-			player.getPracticeConfiguration().draw(region, sprite, time, player);
+			if (!((PlaySkin) player.getSkin()).hasPractice()) {
+				fallbackPractice.prepareFallback(time, player, region);
+				fallbackPractice.draw(sprite);
+			}
 		} else if (resource.getBGAManager() != null) {
 			resource.getBGAManager().drawBGA(this,sprite,region);
 		}		
@@ -60,6 +59,6 @@ public class SkinBGA extends SkinObject {
 
 	@Override
 	public void dispose() {
-
+		fallbackPractice.dispose();
 	}
 }

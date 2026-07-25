@@ -104,31 +104,42 @@ public class LuaSkinLoader extends JSONSkinLoader {
 			put(Float.class, LuaValue::tofloat);
 			put(String.class, LuaValue::tojstring);
 			put(BooleanProperty.class, lv ->
-					serializeLuaScript(lv, lua::loadBooleanProperty, lua::loadBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
+					serializeLuaScript(lv, lua::loadBooleanProperty, lua::loadBooleanProperty,
+							BooleanPropertyFactory::getBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
 			put(IntegerProperty.class, lv ->
-					serializeLuaScript(lv, lua::loadIntegerProperty, lua::loadIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
+					serializeLuaScript(lv, lua::loadIntegerProperty, lua::loadIntegerProperty,
+							IntegerPropertyFactory::getIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
 			put(FloatProperty.class, lv ->
-					serializeLuaScript(lv, lua::loadFloatProperty, lua::loadFloatProperty, FloatPropertyFactory::getRateProperty));
+					serializeLuaScript(lv, lua::loadFloatProperty, lua::loadFloatProperty,
+							FloatPropertyFactory::getRateProperty, FloatPropertyFactory::getRateProperty));
 			put(StringProperty.class, lv ->
-					serializeLuaScript(lv, lua::loadStringProperty, lua::loadStringProperty, StringPropertyFactory::getStringProperty));
+					serializeLuaScript(lv, lua::loadStringProperty, lua::loadStringProperty,
+							StringPropertyFactory::getStringProperty, StringPropertyFactory::getStringProperty));
 			put(TimerProperty.class, lv ->
-					serializeLuaScript(lv, lua::loadTimerProperty, lua::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
+					serializeLuaScript(lv, lua::loadTimerProperty, lua::loadTimerProperty,
+							TimerPropertyFactory::getTimerProperty, null));
 			put(FloatWriter.class, lv ->
-					serializeLuaScript(lv, lua::loadFloatWriter, lua::loadFloatWriter, FloatPropertyFactory::getRateWriter));
+					serializeLuaScript(lv, lua::loadFloatWriter, lua::loadFloatWriter,
+							FloatPropertyFactory::getRateWriter, FloatPropertyFactory::getRateWriter));
 			put(StringWriter.class, lv ->
-					serializeLuaScript(lv, lua::loadStringWriter, lua::loadStringWriter, null));
+					serializeLuaScript(lv, lua::loadStringWriter, lua::loadStringWriter,
+							null, StringPropertyFactory::getStringWriter));
 			put(Event.class, lv ->
-					serializeLuaScript(lv, lua::loadEvent, lua::loadEvent, EventFactory::getEvent));
+					serializeLuaScript(lv, lua::loadEvent, lua::loadEvent,
+							EventFactory::getEvent, EventFactory::getEvent));
 		}
 	};
 
-	private static <T> T serializeLuaScript(LuaValue lv, Function<LuaFunction, T> asFunction, Function<String, T> asScript, Function<Integer, T> byId) {
+	private static <T> T serializeLuaScript(LuaValue lv, Function<LuaFunction, T> asFunction, Function<String, T> asScript,
+			Function<Integer, T> byId, Function<String, T> byName) {
 		if (lv.isfunction()) {
 			return asFunction.apply(lv.checkfunction());
 		} else if (lv.isnumber() && byId != null) {
 			return byId.apply(lv.toint());
 		} else if (lv.isstring()) {
-			return asScript.apply(lv.tojstring());
+			String name = lv.tojstring();
+			T property = byName != null ? byName.apply(name) : null;
+			return property != null ? property : asScript.apply(name);
 		} else {
 			return null;
 		}

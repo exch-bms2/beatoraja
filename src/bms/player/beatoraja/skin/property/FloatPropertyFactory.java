@@ -101,6 +101,10 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatProperty
 	 */
 	public static FloatProperty getFloatProperty(int optionid) {
+		FloatProperty property = FloatPropertyPattern.get(optionid);
+		if (property != null) {
+			return property;
+		}
 		FloatType type = FLOAT_TYPES_BY_ID.get(optionid);
 		return type != null ? type.property : getRateProperty(optionid);
 	}
@@ -113,6 +117,10 @@ public class FloatPropertyFactory {
 	 * @return 対応するFloatProperty
 	 */
 	public static FloatProperty getFloatProperty(String name) {
+		FloatProperty property = FloatPropertyPattern.get(name);
+		if (property != null) {
+			return property;
+		}
 		FloatType type = FLOAT_TYPES_BY_NAME.get(name);
 		return type != null ? type.property : getRateProperty(name);
 	}
@@ -166,7 +174,50 @@ public class FloatPropertyFactory {
 			}
 			return 0;
 		};
+	}
+
+	/**
+	 * Groups related Float properties that use a shared property factory but non-contiguous IDs.
+	 */
+	private enum FloatPropertyPattern {
+		IR_CLEAR_RATE(
+				new int[] {203, 211, 205, 207, 213, 215, 217, 209, 219, 223, 225},
+				new String[] {"ir_player_noplay_rate", "ir_player_failed_rate", "ir_player_assist_rate",
+						"ir_player_lightassist_rate", "ir_player_easy_rate", "ir_player_normal_rate",
+						"ir_player_hard_rate", "ir_player_exhard_rate", "ir_player_fullcombo_rate",
+						"ir_player_perfect_rate", "ir_player_max_rate"});
+
+		private final IntMap<FloatProperty> propertiesById = new IntMap<>();
+		private final Map<String, FloatProperty> propertiesByName = new HashMap<>();
+
+		FloatPropertyPattern(int[] ids, String[] names) {
+			for (int index = 0; index < ids.length; index++) {
+				FloatProperty property = createIRClearRateProperty(index);
+				propertiesById.put(ids[index], property);
+				propertiesByName.put(names[index], property);
+			}
 		}
+
+		private static FloatProperty get(int id) {
+			for (FloatPropertyPattern pattern : values()) {
+				FloatProperty property = pattern.propertiesById.get(id);
+				if (property != null) {
+					return property;
+				}
+			}
+			return null;
+		}
+
+		private static FloatProperty get(String name) {
+			for (FloatPropertyPattern pattern : values()) {
+				FloatProperty property = pattern.propertiesByName.get(name);
+				if (property != null) {
+					return property;
+				}
+			}
+			return null;
+		}
+	}
 
 		public enum RateType {
 
@@ -221,6 +272,14 @@ public class FloatPropertyFactory {
 				(state) -> (state.resource.getConfig().getAudioConfig().getBgvolume()),
 				(state, value) -> {
 					state.resource.getConfig().getAudioConfig().setBgvolume(value);					
+				}),
+		practice_position(20,
+				state -> state instanceof BMSPlayer player
+						? player.getPracticeConfiguration().getItemScrollPosition() : 0,
+				(state, value) -> {
+					if (state instanceof BMSPlayer player) {
+						player.getPracticeConfiguration().setItemScrollPosition(value);
+					}
 				}),
 		music_progress_bar(101, createMusicProgress()),
 		load_progress(102, (state) -> {
@@ -433,17 +492,7 @@ public class FloatPropertyFactory {
 		}),
 		ir_totalclearrate(227, createIRTotalClearRateProperty(new int[]{2,3,4,5,6,7,8,9,10})),
 		ir_totalfullcomborate(229,createIRTotalClearRateProperty(new int[]{8,9,10})),
-		ir_player_noplay_rate(203, createIRClearRateProperty(0)),
-		ir_player_failed_rate(211, createIRClearRateProperty(1)),
-		ir_player_assist_rate(205, createIRClearRateProperty(2)),
-		ir_player_lightassist_rate(207, createIRClearRateProperty(3)),
-		ir_player_easy_rate(213, createIRClearRateProperty(4)),
-		ir_player_normal_rate(215, createIRClearRateProperty(5)),
-		ir_player_hard_rate(217, createIRClearRateProperty(6)),
-		ir_player_exhard_rate(209, createIRClearRateProperty(7)),
-		ir_player_fullcombo_rate(219, createIRClearRateProperty(8)),
-		ir_player_perfect_rate(223, createIRClearRateProperty(9)),
-		ir_player_max_rate(225, createIRClearRateProperty(10));
+		;
 
 		private final int id;
 		private final FloatProperty property;

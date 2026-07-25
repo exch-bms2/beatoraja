@@ -4,6 +4,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.function.IntFunction;
 
 import bms.model.Mode;
 import bms.player.beatoraja.pattern.Random;
@@ -38,13 +39,20 @@ public class IntegerPropertyFactory {
 		if(vcache[optionid] != null) {
 			return vcache[optionid];
 		}
-		IntegerProperty result = ValueType.getProperty(optionid);
+		IntegerProperty result = IntegerPropertyPattern.get(PropertyScope.VALUE, optionid);
+		if (result == null) {
+			result = ValueType.getProperty(optionid);
+		}
 		
 		vcache[optionid] = result;
 		return result;
 	}
 	
 	public static IntegerProperty getIntegerProperty(String name) {
+		IntegerProperty property = IntegerPropertyPattern.get(PropertyScope.VALUE, name);
+		if (property != null) {
+			return property;
+		}
 		for(ValueType t : ValueType.values()) {
 			if(t.name().equals(name)) {
 				return t.property;
@@ -252,18 +260,6 @@ public class IntegerPropertyFactory {
 		best_rate(NUMBER_BEST_RATE, (state) -> (state.getScoreDataProperty().getBestRateInt())),
 		best_rate_afterdot(NUMBER_BEST_RATE_AFTERDOT, (state) -> (state.getScoreDataProperty().getBestRateAfterDot())),
 		ir_totalplayer2(NUMBER_IR_TOTALPLAYER2, createIRTotalPlayerProperty()),
-		ir_player_noplay(202, createIRClearCountProperty(0)),
-		ir_player_failed(210, createIRClearCountProperty(1)),
-		ir_player_assist(204, createIRClearCountProperty(2)),
-		ir_player_lightassist(206, createIRClearCountProperty(3)),
-		ir_player_easy(212, createIRClearCountProperty(4)),
-		ir_player_normal(214, createIRClearCountProperty(5)),
-		ir_player_hard(216, createIRClearCountProperty(6)),
-		ir_player_exhard(208, createIRClearCountProperty(7)),
-		ir_player_fullcombo(218, createIRClearCountProperty(8)),
-		ir_player_perfect(222, createIRClearCountProperty(9)),
-		ir_player_max(224, createIRClearCountProperty(10)),
-		
 		ir_update_waiting(220, (state) -> {
 			if (state instanceof MusicSelector) {
 				final long dtime = ((MusicSelector) state).getCurrentRankingDuration();
@@ -281,29 +277,6 @@ public class IntegerPropertyFactory {
 		ir_totalfullcombo(228,createIRTotalClearCountProperty(new int[]{8,9,10})),
 		ir_totalfullcomborate(229,createIRTotalClearRateProperty(new int[]{8,9,10}, false)),
 		ir_totalfullcomborate_afterdot(242,createIRTotalClearRateProperty(new int[]{8,9,10}, true)),		
-
-		ir_player_noplay_rate(203, createIRClearRateProperty(0, false)),
-		ir_player_noplay_rate_afterdot(230, createIRClearRateProperty(0, true)),
-		ir_player_failed_rate(211, createIRClearRateProperty(1, false)),
-		ir_player_failed_rate_afterdot(234, createIRClearRateProperty(1, true)),
-		ir_player_assist_rate(205, createIRClearRateProperty(2, false)),
-		ir_player_assist_rate_afterdot(231, createIRClearRateProperty(2, true)),
-		ir_player_lightassist_rate(207, createIRClearRateProperty(3, false)),
-		ir_player_lightassist_rate_afterdot(232, createIRClearRateProperty(3, true)),
-		ir_player_easy_rate(213, createIRClearRateProperty(4, false)),
-		ir_player_easy_rate_afterdot(235, createIRClearRateProperty(4, true)),
-		ir_player_normal_rate(215, createIRClearRateProperty(5, false)),
-		ir_player_normal_rate_afterdot(236, createIRClearRateProperty(5, true)),
-		ir_player_hard_rate(217, createIRClearRateProperty(6, false)),
-		ir_player_hard_rate_afterdot(237, createIRClearRateProperty(6, true)),
-		ir_player_exhard_rate(209, createIRClearRateProperty(7, false)),
-		ir_player_exhard_rate_afterdot(233, createIRClearRateProperty(7, true)),
-		ir_player_fullcombo_rate(219, createIRClearRateProperty(8, false)),
-		ir_player_fullcombo_rate_afterdot(238, createIRClearRateProperty(8, true)),
-		ir_player_perfect_rate(223, createIRClearRateProperty(9, false)),
-		ir_player_perfect_rate_afterdot(239, createIRClearRateProperty(9, true)),
-		ir_player_max_rate(225, createIRClearRateProperty(10, false)),
-		ir_player_max_rate_afterdot(240, createIRClearRateProperty(10, true)),
 
 		lastplay_timestamp(243, createLastPlayTimestampProperty()),
 		lastplay_year(244, createLastPlayDateProperty(Calendar.YEAR)),
@@ -343,18 +316,6 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 
-		folder_noplay(320, createFolderClearCountProperty(0)),
-		folder_failed(321, createFolderClearCountProperty(1)),
-		folder_assist(322, createFolderClearCountProperty(2)),
-		folder_lightassist(323, createFolderClearCountProperty(3)),
-		folder_easy(324, createFolderClearCountProperty(4)),
-		folder_normal(325, createFolderClearCountProperty(5)),
-		folder_hard(326, createFolderClearCountProperty(6)),
-		folder_exhard(327, createFolderClearCountProperty(7)),
-		folder_fullcombo(328, createFolderClearCountProperty(8)),
-		folder_prefect(329, createFolderClearCountProperty(9)),
-		folder_max(330, createFolderClearCountProperty(10)),
-	
 		chart_totalnote_n(350, (state) -> {
 			final SongData song = state.resource.getSongdata();
 			if (song != null && song.getInformation() != null) {
@@ -477,28 +438,6 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
-
-		ranking_exscore1(380, createRankingexscore(0)),
-		ranking_exscore2(381, createRankingexscore(1)),
-		ranking_exscore3(382, createRankingexscore(2)),
-		ranking_exscore4(383, createRankingexscore(3)),
-		ranking_exscore5(384, createRankingexscore(4)),
-		ranking_exscore6(385, createRankingexscore(5)),
-		ranking_exscore7(386, createRankingexscore(6)),
-		ranking_exscore8(387, createRankingexscore(7)),
-		ranking_exscore9(388, createRankingexscore(8)),
-		ranking_exscore10(389, createRankingexscore(9)),
-
-		ranking_index1(390, createRankingindex(0)),
-		ranking_index2(391, createRankingindex(1)),
-		ranking_index3(392, createRankingindex(2)),
-		ranking_index4(393, createRankingindex(3)),
-		ranking_index5(394, createRankingindex(4)),
-		ranking_index6(395, createRankingindex(5)),
-		ranking_index7(396, createRankingindex(6)),
-		ranking_index8(397, createRankingindex(7)),
-		ranking_index9(398, createRankingindex(8)),
-		ranking_index10(399, createRankingindex(9)),
 
 		judgerank(400, (state) -> (state.resource.getSongdata() != null
 				? state.resource.getSongdata().getJudge() : Integer.MIN_VALUE)),
@@ -1005,6 +944,10 @@ public class IntegerPropertyFactory {
 		}
 		
 		if (result == null) {
+			result = IntegerPropertyPattern.get(PropertyScope.IMAGE_INDEX, optionid);
+		}
+
+		if (result == null) {
 			for(IndexType t : IndexType.values()) {
 				if(t.id == optionid) {
 					result = t.property;
@@ -1018,12 +961,128 @@ public class IntegerPropertyFactory {
 	}
 	
 	public static IntegerProperty getImageIndexProperty(String name) {
+		IntegerProperty property = IntegerPropertyPattern.get(PropertyScope.IMAGE_INDEX, name);
+		if (property != null) {
+			return property;
+		}
 		for(IndexType t : IndexType.values()) {
 			if(t.name().equals(name)) {
 				return t.property;
 			}
 		}
 		return null;
+	}
+
+	private enum PropertyScope {
+		VALUE,
+		IMAGE_INDEX,
+	}
+
+	/**
+	 * Groups numbered Integer properties by their ID range and skin-facing name pattern.
+	 */
+	private enum IntegerPropertyPattern {
+		RANKING_EXSCORE(PropertyScope.VALUE, numberedIds(380, 10), numberedNames("ranking_exscore", 10), ValueType::createRankingexscore),
+		RANKING_INDEX(PropertyScope.VALUE, numberedIds(390, 10), numberedNames("ranking_index", 10), ValueType::createRankingindex),
+		IR_CLEAR_COUNT(PropertyScope.VALUE,
+				new int[] {202, 210, 204, 206, 212, 214, 216, 208, 218, 222, 224}, irClearNames(""),
+				ValueType::createIRClearCountProperty),
+		IR_CLEAR_RATE(PropertyScope.VALUE,
+				new int[] {203, 211, 205, 207, 213, 215, 217, 209, 219, 223, 225}, irClearNames("_rate"),
+				index -> ValueType.createIRClearRateProperty(index, false)),
+		IR_CLEAR_RATE_AFTERDOT(PropertyScope.VALUE,
+				new int[] {230, 234, 231, 232, 235, 236, 237, 233, 238, 239, 240}, irClearNames("_rate_afterdot"),
+				index -> ValueType.createIRClearRateProperty(index, true)),
+		FOLDER_CLEAR_COUNT(PropertyScope.VALUE, numberedIds(320, 11),
+				new String[] {"folder_noplay", "folder_failed", "folder_assist", "folder_lightassist", "folder_easy",
+						"folder_normal", "folder_hard", "folder_exhard", "folder_fullcombo", "folder_prefect", "folder_max"},
+				ValueType::createFolderClearCountProperty),
+		RANKING_PLAYERTYPE(PropertyScope.IMAGE_INDEX, numberedIds(380, 10), numberedNames("playertype_ranking", 10),
+				IndexType::createRankingPlayertypeProperty),
+		RANKING_CLEARTYPE(PropertyScope.IMAGE_INDEX, numberedIds(390, 10), numberedNames("cleartype_ranking", 10),
+				IndexType::createRankinCleartypeProperty);
+
+		private final PropertyScope scope;
+		private final int[] ids;
+		private final String[] names;
+		private final IntegerProperty[] properties;
+
+		IntegerPropertyPattern(PropertyScope scope, int[] ids, String[] names, IntFunction<IntegerProperty> propertyFactory) {
+			this.scope = scope;
+			this.ids = ids;
+			this.names = names;
+			this.properties = new IntegerProperty[ids.length];
+			for (int index = 0; index < ids.length; index++) {
+				properties[index] = propertyFactory.apply(index);
+			}
+		}
+
+		private IntegerProperty getById(int id) {
+			for (int index = 0; index < ids.length; index++) {
+				if (ids[index] == id) {
+					return properties[index];
+				}
+			}
+			return null;
+		}
+
+		private IntegerProperty getByName(String name) {
+			if (name != null) {
+				for (int index = 0; index < names.length; index++) {
+					if (names[index].equals(name)) {
+						return properties[index];
+					}
+				}
+			}
+			return null;
+		}
+
+		private static IntegerProperty get(PropertyScope scope, int id) {
+			for (IntegerPropertyPattern pattern : values()) {
+				if (pattern.scope == scope) {
+					IntegerProperty property = pattern.getById(id);
+					if (property != null) {
+						return property;
+					}
+				}
+			}
+			return null;
+		}
+
+		private static IntegerProperty get(PropertyScope scope, String name) {
+			for (IntegerPropertyPattern pattern : values()) {
+				if (pattern.scope == scope) {
+					IntegerProperty property = pattern.getByName(name);
+					if (property != null) {
+						return property;
+					}
+				}
+			}
+			return null;
+		}
+
+		private static int[] numberedIds(int firstId, int count) {
+			int[] ids = new int[count];
+			for (int index = 0; index < count; index++) {
+				ids[index] = firstId + index;
+			}
+			return ids;
+		}
+
+		private static String[] numberedNames(String prefix, int count) {
+			String[] names = new String[count];
+			for (int index = 0; index < count; index++) {
+				names[index] = prefix + (index + 1);
+			}
+			return names;
+		}
+
+		private static String[] irClearNames(String suffix) {
+			return new String[] {"ir_player_noplay" + suffix, "ir_player_failed" + suffix,
+					"ir_player_assist" + suffix, "ir_player_lightassist" + suffix, "ir_player_easy" + suffix,
+					"ir_player_normal" + suffix, "ir_player_hard" + suffix, "ir_player_exhard" + suffix,
+					"ir_player_fullcombo" + suffix, "ir_player_perfect" + suffix, "ir_player_max" + suffix};
+		}
 	}
 
 	public enum IndexType {
@@ -1286,27 +1345,6 @@ public class IntegerPropertyFactory {
 			}
 			return Integer.MIN_VALUE;
 		}),
-		playertype_ranking1(380, createRankingPlayertypeProperty(0)),
-		playertype_ranking2(381, createRankingPlayertypeProperty(1)),
-		playertype_ranking3(382, createRankingPlayertypeProperty(2)),
-		playertype_ranking4(383, createRankingPlayertypeProperty(3)),
-		playertype_ranking5(384, createRankingPlayertypeProperty(4)),
-		playertype_ranking6(385, createRankingPlayertypeProperty(5)),
-		playertype_ranking7(386, createRankingPlayertypeProperty(6)),
-		playertype_ranking8(387, createRankingPlayertypeProperty(7)),
-		playertype_ranking9(388, createRankingPlayertypeProperty(8)),
-		playertype_ranking10(389, createRankingPlayertypeProperty(9)),
-		cleartype_ranking1(390, createRankinCleartypeProperty(0)),
-		cleartype_ranking2(391, createRankinCleartypeProperty(1)),
-		cleartype_ranking3(392, createRankinCleartypeProperty(2)),
-		cleartype_ranking4(393, createRankinCleartypeProperty(3)),
-		cleartype_ranking5(394, createRankinCleartypeProperty(4)),
-		cleartype_ranking6(395, createRankinCleartypeProperty(5)),
-		cleartype_ranking7(396, createRankinCleartypeProperty(6)),
-		cleartype_ranking8(397, createRankinCleartypeProperty(7)),
-		cleartype_ranking9(398, createRankinCleartypeProperty(8)),
-		cleartype_ranking10(399, createRankinCleartypeProperty(9)),
-
 		constant(400, (state) -> {
 			if (state instanceof MusicSelector selector) {
 				final PlayConfig playConfig = selector.getSelectedBarPlayConfig();

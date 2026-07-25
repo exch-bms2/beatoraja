@@ -3,26 +3,15 @@ package bms.player.beatoraja.play;
 import java.io.*;
 import java.nio.file.*;
 import java.util.function.*;
-import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
-import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
-import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.SerializationException;
 
@@ -34,9 +23,9 @@ import com.badlogic.gdx.utils.SerializationException;
 public final class PracticeConfiguration {
 
 
-	private BitmapFont titlefont;
-
 	private int cursorpos = 0;
+	private int itemOffset;
+	private int visibleItemCount = 10;
 
 	private BMSModel model;
 
@@ -45,6 +34,7 @@ public final class PracticeConfiguration {
 	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 	private static final String[] DPRANDOM = { "NORMAL", "FLIP" };
+	private static final String[] GRAPHTYPESTR = {"NOTETYPE", "JUDGE", "EARLYLATE"};
 
 	private PracticeProperty property = new PracticeProperty();
 
@@ -53,19 +43,13 @@ public final class PracticeConfiguration {
 		// TODO スキン定義がない場合のデフォルト配置の定義
 	}
 
-	private SkinNoteDistributionGraph[] graph = { 
-			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_NORMAL, 500, 0, 0, 0, 0),
-			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_JUDGE, 500, 0, 0, 0, 0),
-			new SkinNoteDistributionGraph(SkinNoteDistributionGraph.TYPE_EARLYLATE, 500, 0, 0, 0, 0),
-	};
-	
-	private static final String[] GRAPHTYPESTR = {"NOTETYPE", "JUDGE", "EARLYLATE"};
-
 	public static final PracticeElement[] elements = PracticeElement.values();
 
 	private PracticeModeControls controls = new PracticeModeControls();
 
 	public void create(BMSModel model, Config config) {
+		cursorpos = 0;
+		itemOffset = 0;
 		controls.initialize(config);
 		property.judgerank = model.getJudgerank();
 		property.endtime = model.getLastTime() + 1000;
@@ -86,20 +70,6 @@ public final class PracticeConfiguration {
 		if(property.total == 0) {
 			property.total = model.getTotal();
 		}
-		try {
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-					Gdx.files.internal(config.getSystemfontpath()));
-			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-			parameter.size = 18;
-			titlefont = generator.generateFont(parameter);
-			generator.dispose();
-		} catch (GdxRuntimeException e) {
-			Logger.getGlobal().warning("Practice Font読み込み失敗");
-		}
-		
-		for(int i = 0; i < graph.length; i++) {
-			graph[i].setDestination(0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
-		}
 	}
 
 	public void saveProperty() {
@@ -118,6 +88,124 @@ public final class PracticeConfiguration {
 
 	public PracticeProperty getPracticeProperty() {
 		return property;
+	}
+
+	/**
+	 * Configures how many Practice settings are exposed through the skin slots.
+	 */
+	public void setVisibleItemCount(int visibleItemCount) {
+		this.visibleItemCount = Math.max(1, Math.min(visibleItemCount, elements.length));
+		ensureCursorVisible();
+	}
+
+	public String getVisibleItemText(int index) {
+		PracticeElement element = getVisibleElement(index);
+		return element != null ? element.text.apply(property) : "";
+	}
+
+	public String getVisibleItemLabel(int index) {
+		return getVisibleItemTextPart(index, true);
+	}
+
+	public String getVisibleItemValue(int index) {
+		return getVisibleItemTextPart(index, false);
+	}
+
+	private String getVisibleItemTextPart(int index, boolean label) {
+		String text = getVisibleItemText(index);
+		int separator = text.indexOf(" : ");
+		if (separator < 0) {
+			return label ? text : "";
+		}
+		return label ? text.substring(0, separator) : text.substring(separator + 3);
+	}
+
+	public boolean isVisibleItemAvailable(int index) {
+		return getVisibleElement(index) != null;
+	}
+
+	public boolean isVisibleItemSelected(int index) {
+		return getVisibleElement(index) == elements[cursorpos];
+	}
+
+	public void selectVisibleItem(int index) {
+		PracticeElement element = getVisibleElement(index);
+		if (element != null) {
+			cursorpos = element.ordinal();
+		}
+	}
+
+	public void changeVisibleItem(int index, boolean increment) {
+		PracticeElement element = getVisibleElement(index);
+		if (element != null) {
+			cursorpos = element.ordinal();
+			element.action.run(this, increment, false, false);
+		}
+	}
+
+	public float getItemScrollPosition() {
+		int maxOffset = getMaxItemOffset();
+		return maxOffset > 0 ? (float) itemOffset / maxOffset : 0;
+	}
+
+	public void setItemScrollPosition(float position) {
+		itemOffset = Math.round(MathUtils.clamp(position, 0, 1) * getMaxItemOffset());
+		PracticeElement firstVisibleElement = getVisibleElement(0);
+		if (firstVisibleElement != null) {
+			cursorpos = firstVisibleElement.ordinal();
+		}
+	}
+
+	private PracticeElement getVisibleElement(int index) {
+		if (index < 0 || index >= visibleItemCount || model == null) {
+			return null;
+		}
+		int availableIndex = itemOffset + index;
+		for (PracticeElement element : elements) {
+			if (element.optionAvailable.test(this) && availableIndex-- == 0) {
+				return element;
+			}
+		}
+		return null;
+	}
+
+	private int getAvailableItemCount() {
+		if (model == null) {
+			return 0;
+		}
+		int count = 0;
+		for (PracticeElement element : elements) {
+			if (element.optionAvailable.test(this)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private int getMaxItemOffset() {
+		return Math.max(0, getAvailableItemCount() - visibleItemCount);
+	}
+
+	private void ensureCursorVisible() {
+		if (model == null) {
+			return;
+		}
+		int selectedIndex = 0;
+		for (PracticeElement element : elements) {
+			if (!element.optionAvailable.test(this)) {
+				continue;
+			}
+			if (element.ordinal() == cursorpos) {
+				if (selectedIndex < itemOffset) {
+					itemOffset = selectedIndex;
+				} else if (selectedIndex >= itemOffset + visibleItemCount) {
+					itemOffset = selectedIndex - visibleItemCount + 1;
+				}
+				itemOffset = Math.min(itemOffset, getMaxItemOffset());
+				return;
+			}
+			selectedIndex++;
+		}
 	}
 
 	public GrooveGauge getGauge(BMSModel model) {
@@ -143,6 +231,7 @@ public final class PracticeConfiguration {
 			} while(!elements[cursorpos].optionAvailable.test(this));
 			++yTicks;
 		}
+		ensureCursorVisible();
 
 		int nonAnalogXTicks = controls.extractNonAnalogXTicks();
 		if (nonAnalogXTicks != 0) {
@@ -162,58 +251,24 @@ public final class PracticeConfiguration {
 		}
 	}
 
-	public void draw(Rectangle r, SkinObjectRenderer sprite, long time, MainState state) {
-		final Color unfocusedColor = (controls != null && controls.isHorizontalMode()) ? Color.GRAY : Color.CYAN;
-		final Color focusedColor = (controls != null && controls.getInputTurbo()) ? Color.ORANGE : Color.YELLOW;
-		final int ySpacing = 22;
-		float x = r.x + r.width / 8;
-		float y = r.y + r.height * 7 / 8;
-		if(titlefont != null) {
-			for(int i = 0;i < elements.length;i++) {
-				if(elements[i].optionAvailable.test(this)) {
-					sprite.draw(titlefont, elements[i].text.apply(property), x, y - ySpacing * i, cursorpos == i ? focusedColor : unfocusedColor);
-				}
-			}
-
-			String helpLine1 = "";
-			String helpLine2 = "";
-			if (model.getMode() == Mode.POPN_9K) {
-				helpLine1 = "KEYS: 2/8=UP, 3/7=DOWN, 4=LEFT, 6=RIGHT,";
-				helpLine2 = "5=TURBO";
-			} else if (model.getMode() == Mode.KEYBOARD_24K || model.getMode() == Mode.KEYBOARD_24K_DOUBLE) {
-				helpLine1 = "KEYS: F#1/A#1=UP, G1/A1=DOWN, F1=LEFT,";
-				helpLine2 = "B1=RIGHT, D#1/G#1=TURBO";
-			} else {
-				helpLine1 = "KEYS: SCR=UP/DOWN, 2+SCR=LEFT/RIGHT, 4=TURBO";
-			}
-			if (state.resource.mediaLoadFinished()) {
-				if (helpLine2.length() > 0) {
-					helpLine2 += ". ";
-				}
-				if (model.getMode() == Mode.KEYBOARD_24K || model.getMode() == Mode.KEYBOARD_24K_DOUBLE) {
-					helpLine2 += "PRESS C1 TO PLAY";
-				} else {
-					helpLine2 += "PRESS 1KEY TO PLAY";
-				}
-			}
-			sprite.draw(titlefont, helpLine1, x, y - ySpacing*12 - 12, Color.ORANGE);
-			sprite.draw(titlefont, helpLine2, x, y - ySpacing*13 - 12, Color.ORANGE);
-
-			String[] judge = {"PGREAT :","GREAT  :","GOOD   :", "BAD    :", "POOR   :", "KPOOR  :"};
-			for(int i = 0; i < 6; i++) {
-				sprite.draw(titlefont, String.format("%s %d %d %d",judge[i], state.getJudgeCount(i, true) + state.getJudgeCount(i, false), state.getJudgeCount(i, true), state.getJudgeCount(i, false)), x + 250, y - (i * ySpacing), Color.WHITE);
-			}			
-		}
-
-		graph[property.graphtype].draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
-				property.endtime, property.freq / 100f);
+	BMSModel getModel() {
+		return model;
 	}
-	
-	public void dispose() {
-		if(titlefont != null) {
-			titlefont.dispose();
-			titlefont = null;
-		}
+
+	int getCursorPosition() {
+		return cursorpos;
+	}
+
+	boolean isElementAvailable(int index) {
+		return elements[index].optionAvailable.test(this);
+	}
+
+	boolean isHorizontalInputMode() {
+		return controls.isHorizontalMode();
+	}
+
+	boolean isInputTurbo() {
+		return controls.getInputTurbo();
 	}
 
 	private final class PracticeModeControls {

@@ -37,9 +37,9 @@ public class BooleanPropertyFactory {
 		if(optionid < 0 && npcache[id] != null) {
 			return npcache[id];
 		}
-		BooleanProperty result = null;
+		BooleanProperty result = BooleanPropertyPattern.get(id);
 		for(BooleanType t : BooleanType.values()) {
-			if(t.id == id) {
+			if(result == null && t.id == id) {
 				result = t.property;
 				break;
 			}
@@ -68,12 +68,90 @@ public class BooleanPropertyFactory {
 	}
 
 	public static BooleanProperty getBooleanProperty(String name) {
+		BooleanProperty property = BooleanPropertyPattern.get(name);
+		if (property != null) {
+			return property;
+		}
 		for(BooleanType t : BooleanType.values()) {
 			if(t.name().equals(name)) {
 				return t.property;
 			}
 		}
 		return null;
+	}
+
+	private static BooleanProperty createPracticeItemProperty(int index, boolean selected) {
+		return new DrawProperty(DrawProperty.TYPE_NO_STATIC, state -> {
+			if (state instanceof BMSPlayer player && player.getState() == BMSPlayer.STATE_PRACTICE) {
+				return selected ? player.getPracticeConfiguration().isVisibleItemSelected(index)
+						: player.getPracticeConfiguration().isVisibleItemAvailable(index);
+			}
+			return false;
+		});
+	}
+
+	/**
+	 * Groups numbered Boolean properties by their ID range and skin-facing name pattern.
+	 */
+	private enum BooleanPropertyPattern {
+		PRACTICE_ITEM(OPTION_PRACTICE_ITEM1, 16, "", false),
+		PRACTICE_ITEM_SELECTED(OPTION_PRACTICE_ITEM1_SELECTED, 16, "_selected", true);
+
+		private static final String PREFIX = "practice_item";
+
+		private final int firstId;
+		private final String suffix;
+		private final BooleanProperty[] properties;
+
+		BooleanPropertyPattern(int firstId, int count, String suffix, boolean selected) {
+			this.firstId = firstId;
+			this.suffix = suffix;
+			this.properties = new BooleanProperty[count];
+			for (int index = 0; index < count; index++) {
+				properties[index] = createPracticeItemProperty(index, selected);
+			}
+		}
+
+		private BooleanProperty getById(int id) {
+			int index = id - firstId;
+			return index >= 0 && index < properties.length ? properties[index] : null;
+		}
+
+		private BooleanProperty getByName(String name) {
+			if (name == null || !name.startsWith(PREFIX) || !name.endsWith(suffix)) {
+				return null;
+			}
+			int end = name.length() - suffix.length();
+			if (end <= PREFIX.length()) {
+				return null;
+			}
+			try {
+				int index = Integer.parseInt(name.substring(PREFIX.length(), end)) - 1;
+				return index >= 0 && index < properties.length ? properties[index] : null;
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+		private static BooleanProperty get(int id) {
+			for (BooleanPropertyPattern pattern : values()) {
+				BooleanProperty property = pattern.getById(id);
+				if (property != null) {
+					return property;
+				}
+			}
+			return null;
+		}
+
+		private static BooleanProperty get(String name) {
+			for (BooleanPropertyPattern pattern : values()) {
+				BooleanProperty property = pattern.getByName(name);
+				if (property != null) {
+					return property;
+				}
+			}
+			return null;
+		}
 	}
 
 	private static DrawProperty createCourseDataConstraintProperty(CourseData.CourseDataConstraint constraint) {

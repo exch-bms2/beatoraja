@@ -212,6 +212,12 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 				}
 			}
 		}
+		// practice configuration (playskin only)
+		if (sk.practice != null && dst.id.equals(sk.practice.id)) {
+			SkinPractice practice = new SkinPractice(sk.practice.visibleItems);
+			skin.setPractice(practice);
+			return practice;
+		}
 		// bga (playskin only)
 		if (sk.bga != null && dst.id.equals(sk.bga.id)) {
 			return new SkinBGA(loader.bgaExpand);

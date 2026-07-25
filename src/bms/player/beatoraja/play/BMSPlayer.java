@@ -975,12 +975,19 @@ public class BMSPlayer extends MainState {
 		for(PlayerProperty p : players) {
 			p.lanerender.dispose();			
 		}
-		practice.dispose();
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
 	public PracticeConfiguration getPracticeConfiguration() {
 		return practice;
+	}
+
+	@Override
+	public void executeEvent(int id, int arg1, int arg2) {
+		super.executeEvent(id, arg1, arg2);
+		if (state == STATE_PRACTICE && id >= BUTTON_PRACTICE_ITEM1 && id <= BUTTON_PRACTICE_ITEM16) {
+			practice.changeVisibleItem(id - BUTTON_PRACTICE_ITEM1, arg1 >= 0);
+		}
 	}
 
 	// TODO 廃止予定
