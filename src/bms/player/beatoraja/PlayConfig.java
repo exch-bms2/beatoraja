@@ -248,20 +248,24 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public void validate() {
-		hispeed = MathUtils.clamp(hispeed, HISPEED_MIN, HISPEED_MAX);
+		hispeed = clampFinite(hispeed, HISPEED_MIN, HISPEED_MAX, 1.0f);
 		duration = MathUtils.clamp(duration, DURATION_MIN, DURATION_MAX);
 		constantFadeinTime = MathUtils.clamp(constantFadeinTime, CONSTANT_FADEIN_MIN, CONSTANT_FADEIN_MAX);
-		hispeedmargin = MathUtils.clamp(hispeedmargin, HISPEEDMARGIN_MIN, HISPEEDMARGIN_MAX);
+		hispeedmargin = clampFinite(hispeedmargin, HISPEEDMARGIN_MIN, HISPEEDMARGIN_MAX, 0.25f);
 		fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
-		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
-		lift = MathUtils.clamp(lift, 0f, 1f);
-		hidden = MathUtils.clamp(hidden, 0f, 1f);
-		lanecovermarginlow = MathUtils.clamp(lanecovermarginlow, 0f, 1f);
-		lanecovermarginhigh = MathUtils.clamp(lanecovermarginhigh, 0f, 1f);
+		lanecover = clampFinite(lanecover, 0f, 1f, 0.2f);
+		lift = clampFinite(lift, 0f, 1f, 0.1f);
+		hidden = clampFinite(hidden, 0f, 1f, 0.1f);
+		lanecovermarginlow = clampFinite(lanecovermarginlow, 0f, 1f, 0.001f);
+		lanecovermarginhigh = clampFinite(lanecovermarginhigh, 0f, 1f, 0.01f);
 		lanecoverswitchduration = MathUtils.clamp(lanecoverswitchduration, 0, 1000000);
 		if(JudgeAlgorithm.getIndex(judgetype) == -1) {
 			judgetype = JudgeAlgorithm.Combo.name();
 		}
+	}
+
+	private static float clampFinite(float value, float min, float max, float defaultValue) {
+		return Float.isFinite(value) ? MathUtils.clamp(value, min, max) : defaultValue;
 	}
 
 	public PlayConfig clone() {

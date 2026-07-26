@@ -4,9 +4,11 @@ import static bms.player.beatoraja.Resolution.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
@@ -18,6 +20,10 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  * @author exch
  */
 public class Config implements Validatable {
+
+	private static final long MAX_CONFIG_FILE_SIZE = 1024 * 1024;
+	private static final int MAX_CONFIG_PATH_LENGTH = 4096;
+	private static final int MAX_CONFIG_LIST_ENTRIES = 128;
 	
 	/**
 	 * 旧コンフィグパス。そのうち削除
@@ -536,53 +542,84 @@ public class Config implements Validatable {
 
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
+		analogTicksPerScroll = MathUtils.clamp(analogTicksPerScroll, 1, 1000);
 		irSendCount = MathUtils.clamp(irSendCount, 1, 100);
+		frameskip = MathUtils.clamp(frameskip, 0, 10);
 
 		skinPixmapGen = MathUtils.clamp(skinPixmapGen, 0, 100);
 		stagefilePixmapGen = MathUtils.clamp(stagefilePixmapGen, 0, 100);
 		bannerPixmapGen = MathUtils.clamp(bannerPixmapGen, 0, 100);
 		songResourceGen = MathUtils.clamp(songResourceGen, 0, 100);
 
-		bmsroot = Validatable.removeInvalidElements(bmsroot);
-
-		if(tableURL == null) {
-			tableURL = DEFAULT_TABLEURL;
-		}
-		tableURL = Validatable.removeInvalidElements(tableURL);
+		bmsroot = sanitizePathList(bmsroot);
+		tableURL = sanitizeTextList(tableURL, DEFAULT_TABLEURL);
 
 		bga = MathUtils.clamp(bga, 0, 2);
 		bgaExpand = MathUtils.clamp(bgaExpand, 0, 2);
-		if (ipfsurl == null) {
+		if (ipfsurl == null || ipfsurl.isBlank() || ipfsurl.length() > MAX_CONFIG_PATH_LENGTH) {
 			ipfsurl = "https://gateway.ipfs.io/";
 		}
 
-		songpath = songpath != null ? songpath : SONGPATH_DEFAULT;
-		songinfopath = songinfopath != null ? songinfopath : SONGINFOPATH_DEFAULT;
-		tablepath = tablepath != null ? tablepath : TABLEPATH_DEFAULT;
-		playerpath = playerpath != null ? playerpath : PLAYERPATH_DEFAULT;
-		skinpath = skinpath != null ? skinpath : SKINPATH_DEFAULT;
+		songpath = sanitizePath(songpath, SONGPATH_DEFAULT);
+		songinfopath = sanitizePath(songinfopath, SONGINFOPATH_DEFAULT);
+		tablepath = sanitizePath(tablepath, TABLEPATH_DEFAULT);
+		playerpath = sanitizePath(playerpath, PLAYERPATH_DEFAULT);
+		skinpath = sanitizePath(skinpath, SKINPATH_DEFAULT);
+		bgmpath = sanitizeOptionalPath(bgmpath, "bgm");
+		soundpath = sanitizeOptionalPath(soundpath, "sound");
+		systemfontpath = sanitizePath(systemfontpath, "font/VL-Gothic-Regular.ttf");
+		messagefontpath = sanitizePath(messagefontpath, "font/VL-Gothic-Regular.ttf");
+		playername = PlayerConfig.isValidPlayerId(playername) ? playername : "player1";
 		return true;
+	}
+
+	static boolean isUsablePath(String value) {
+		if (value == null || value.isBlank() || value.length() > MAX_CONFIG_PATH_LENGTH) {
+			return false;
+		}
+		try {
+			Paths.get(value);
+			return true;
+		} catch (InvalidPathException e) {
+			return false;
+		}
+	}
+
+	private static String sanitizePath(String value, String defaultValue) {
+		return isUsablePath(value) ? value : defaultValue;
+	}
+
+	private static String sanitizeOptionalPath(String value, String defaultValue) {
+		return value != null && value.isEmpty() ? value : sanitizePath(value, defaultValue);
+	}
+
+	private static String[] sanitizePathList(String[] values) {
+		if (values == null) {
+			return new String[0];
+		}
+		return java.util.Arrays.stream(values)
+				.limit(MAX_CONFIG_LIST_ENTRIES)
+				.filter(Config::isUsablePath)
+				.toArray(String[]::new);
+	}
+
+	private static String[] sanitizeTextList(String[] values, String[] defaultValues) {
+		if (values == null) {
+			return defaultValues.clone();
+		}
+		return java.util.Arrays.stream(values)
+				.limit(MAX_CONFIG_LIST_ENTRIES)
+				.filter(value -> value != null && !value.isBlank() && value.length() <= MAX_CONFIG_PATH_LENGTH)
+				.toArray(String[]::new);
 	}
 
 	public static Config read() {
 		Config config = null;
 		if (Files.exists(configpath)) {
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			try (Reader reader = new InputStreamReader(new FileInputStream(configpath.toFile()), StandardCharsets.UTF_8)) {
-				config = json.fromJson(Config.class, reader);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			config = read(configpath, StandardCharsets.UTF_8);
 		} else if(Files.exists(configpath_old)) {
 			// 旧コンフィグ読み込み。そのうち削除
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			try (FileReader reader = new FileReader(configpath_old.toFile())) {
-				config = json.fromJson(Config.class, reader);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}			
+			config = read(configpath_old, StandardCharsets.UTF_8);
 		}
 		if(config == null) {
 			config = new Config();
@@ -594,7 +631,28 @@ public class Config implements Validatable {
 		return config;
 	}
 
+	private static Config read(Path path, java.nio.charset.Charset charset) {
+		try {
+			if (!Files.isRegularFile(path) || Files.size(path) > MAX_CONFIG_FILE_SIZE) {
+				Logger.getGlobal().warning("System config is not a regular file or exceeds " + MAX_CONFIG_FILE_SIZE + " bytes: " + path);
+				return null;
+			}
+			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
+			try (Reader reader = Files.newBufferedReader(path, charset)) {
+				return json.fromJson(Config.class, reader);
+			}
+		} catch (Exception e) {
+			Logger.getGlobal().warning("Failed to read system config " + path + ": " + e.getMessage());
+			return null;
+		}
+	}
+
 	public static void write(Config config) {
+		if (config == null) {
+			return;
+		}
+		config.validate();
 		Json json = new Json();
 		json.setUsePrototypes(false);
 		json.setOutputType(OutputType.json);

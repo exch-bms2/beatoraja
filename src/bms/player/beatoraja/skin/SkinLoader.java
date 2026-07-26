@@ -40,11 +40,14 @@ public abstract class SkinLoader {
      * @return
      */
     public static Skin load(MainState state, SkinType skinType) {
-        Skin skin = load(state, skinType, state.resource.getPlayerConfig().getSkin()[skinType.getId()]);
+        SkinConfig skinConfig = state.resource.getPlayerConfig().getSkin()[skinType.getId()];
+        Skin skin = skinConfig != null && skinConfig.validate() ? load(state, skinType, skinConfig) : null;
         if(skin == null) {
-            SkinConfig skinConfig = new SkinConfig();
-            skinConfig.setPath(SkinConfig.Default.get(skinType).path);
-            skinConfig.validate();
+            SkinConfig.Default defaultSkin = SkinConfig.Default.get(skinType);
+            if (defaultSkin == null) {
+                return null;
+            }
+            skinConfig = new SkinConfig(defaultSkin.path);
             skin = load(state, skinType, skinConfig);
         }
         return skin;
@@ -52,6 +55,9 @@ public abstract class SkinLoader {
 
     public static Skin load(MainState state, SkinType skinType, SkinConfig sc) {
         final PlayerResource resource = state.resource;
+        if (sc == null || !sc.validate()) {
+            return null;
+        }
         try {
             if (sc.getPath().endsWith(".json")) {
                 JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());

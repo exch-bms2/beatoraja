@@ -109,6 +109,11 @@ public class IRConfig implements Validatable{
 		if(irname == null || irname.length() == 0 || IRConnectionManager.getIRConnectionClass(irname) == null) {
 			return false;
 		}
+		userid = userid != null ? userid : "";
+		password = password != null ? password : "";
+		cuserid = cuserid != null ? cuserid : "";
+		cpassword = cpassword != null ? cpassword : "";
+		irsend = Math.max(IR_SEND_ALWAYS, Math.min(irsend, IR_SEND_UPDATE_SCORE));
 		
 		if(userid != null && userid.length() > 0) {
 			try {

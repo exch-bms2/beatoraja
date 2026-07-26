@@ -42,7 +42,7 @@ public class SkinConfig implements Validatable {
 	}
 	
 	public boolean validate() {
-		if(path == null || path.length() == 0) {
+		if(!Config.isUsablePath(path)) {
 			return false;
 		}
 		if(properties == null) {
@@ -141,7 +141,7 @@ public class SkinConfig implements Validatable {
 		
 		@Override
 		public boolean validate() {
-			return name != null && name.length() > 0 && path != null && path.length() > 0;
+			return name != null && !name.isBlank() && Config.isUsablePath(path);
 		}
 	}
 

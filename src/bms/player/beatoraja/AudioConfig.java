@@ -165,16 +165,21 @@ public class AudioConfig implements Validatable {
 		}
 		deviceBufferSize = MathUtils.clamp(deviceBufferSize, 4, 4096);
 		deviceSimultaneousSources = MathUtils.clamp(deviceSimultaneousSources, 16, 1024);
+		sampleRate = sampleRate == 0 ? 0 : MathUtils.clamp(sampleRate, 8000, 384000);
 		if(freqOption == null) {
 			freqOption = FrequencyType.FREQUENCY;
 		}
 		if(fastForward == null) {
 			fastForward = FrequencyType.FREQUENCY;
 		}
-		systemvolume = MathUtils.clamp(systemvolume, 0f, 1f);
-		keyvolume = MathUtils.clamp(keyvolume, 0f, 1f);
-		bgvolume = MathUtils.clamp(bgvolume, 0f, 1f);
+		systemvolume = clampVolume(systemvolume);
+		keyvolume = clampVolume(keyvolume);
+		bgvolume = clampVolume(bgvolume);
 		return true;
+	}
+
+	private static float clampVolume(float value) {
+		return Float.isFinite(value) ? MathUtils.clamp(value, 0f, 1f) : 0.5f;
 	}
 	
 	public enum DriverType {

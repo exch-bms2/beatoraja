@@ -79,16 +79,38 @@ public final class PlayModeConfig {
 		this.version = version;
 	}
 	
-    public void validate(int keys) {
+    public void validate(Mode mode) {
+        int keys = keyCount(mode);
         if(playconfig == null) {
             playconfig = new PlayConfig();
         }
 
         playconfig.validate();
 
+        if (keyboard == null) {
+            keyboard = new KeyboardConfig(mode, !isMidiMode(mode));
+        }
+        if (keyboard.mouseScratchConfig == null) {
+            keyboard.mouseScratchConfig = new MouseScratchConfig(mode);
+        }
+        if (controller == null || controller.length != mode.player) {
+            ControllerConfig[] repaired = new ControllerConfig[mode.player];
+            if (controller != null) {
+                System.arraycopy(controller, 0, repaired, 0, Math.min(controller.length, repaired.length));
+            }
+            controller = repaired;
+        }
+        for (int i = 0; i < controller.length; i++) {
+            if (controller[i] == null) {
+                controller[i] = new ControllerConfig(mode, i, false);
+            }
+        }
+        if (midi == null) {
+            midi = new MidiConfig(mode, isMidiMode(mode));
+        }
+
         if (keyboard.keys == null) {
-            keyboard.keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
-                    Keys.CONTROL_LEFT };
+            keyboard.setKeyAssign(mode, !isMidiMode(mode));
         }
         if (keyboard.keys.length != keys) {
             keyboard.keys = Arrays.copyOf(keyboard.keys, keys);
@@ -102,8 +124,13 @@ public final class PlayModeConfig {
         }
         mousescratch.mouseScratchDistance = MathUtils.clamp(mousescratch.mouseScratchDistance, 1, 10000);
         mousescratch.mouseScratchTimeThreshold = MathUtils.clamp(mousescratch.mouseScratchTimeThreshold, 1, 10000);
+        mousescratch.mouseScratchMode = MathUtils.clamp(mousescratch.mouseScratchMode, 0, 1);
+        mousescratch.start = sanitizeMouseScratchKey(mousescratch.start);
+        mousescratch.select = sanitizeMouseScratchKey(mousescratch.select);
+        for (int i = 0; i < mousescratch.keys.length; i++) {
+            mousescratch.keys[i] = sanitizeMouseScratchKey(mousescratch.keys[i]);
+        }
 
-        int index = 0;
         for (ControllerConfig c : controller) {
             if (c.keys == null) {
                 c.keys = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
@@ -112,12 +139,15 @@ public final class PlayModeConfig {
             if (c.keys.length != keys) {
                 int[] newkeys = new int[keys];
                 Arrays.fill(newkeys, -1);
-                for (int i = 0; i < c.keys.length && index < newkeys.length; i++, index++) {
-                    newkeys[index] = c.keys[i];
+                for (int i = 0; i < c.keys.length && i < newkeys.length; i++) {
+                    newkeys[i] = c.keys[i];
                 }
                 c.keys = newkeys;
             }
-            c.duration = MathUtils.clamp(c.duration, 0, 100);            
+            c.name = c.name != null ? c.name : "";
+            c.duration = MathUtils.clamp(c.duration, 0, 100);
+            c.analogScratchMode = MathUtils.clamp(c.analogScratchMode, 0, 1);
+            c.analogScratchThreshold = MathUtils.clamp(c.analogScratchThreshold, 1, 1000);
         }
         
 		// ボタsン数拡張(16->32)に伴う変換(0.8.1 -> 0.8.2)。あとで消す
@@ -133,7 +163,7 @@ public final class PlayModeConfig {
 		}
 
         if (midi.keys == null) {
-            midi.keys = new MidiConfig().keys;
+            midi.setKeyAssign(mode, isMidiMode(mode));
         }
         if (midi.keys.length != keys) {
             midi.keys = Arrays.copyOf(midi.keys, keys);
@@ -147,10 +177,59 @@ public final class PlayModeConfig {
         }
 
         for(int i = 0;i < midi.getKeys().length;i++) {
+            validateMidiInput(midi.getKeys()[i]);
             if(exclusive[i]) {
                 midi.getKeys()[i] = null;
             }
         }
+        validateMidiInput(midi.start);
+        validateMidiInput(midi.select);
+    }
+
+    /**
+     * Kept for callers compiled against the former API. New code should pass the mode so
+     * missing nested configuration can be rebuilt with the correct defaults.
+     */
+    public void validate(int keys) {
+        validate(switch (keys) {
+            case 7 -> Mode.BEAT_5K;
+            case 14 -> Mode.BEAT_10K;
+            case 18 -> Mode.BEAT_14K;
+            case 26 -> Mode.KEYBOARD_24K;
+            case 52 -> Mode.KEYBOARD_24K_DOUBLE;
+            default -> Mode.BEAT_7K;
+        });
+    }
+
+    private static int keyCount(Mode mode) {
+        return switch (mode) {
+            case BEAT_5K -> 7;
+            case BEAT_7K, POPN_5K, POPN_9K -> 9;
+            case BEAT_10K -> 14;
+            case BEAT_14K -> 18;
+            case KEYBOARD_24K -> 26;
+            case KEYBOARD_24K_DOUBLE -> 52;
+            default -> 9;
+        };
+    }
+
+    private static boolean isMidiMode(Mode mode) {
+        return mode == Mode.KEYBOARD_24K || mode == Mode.KEYBOARD_24K_DOUBLE;
+    }
+
+    private static int sanitizeMouseScratchKey(int key) {
+        return key >= -1 && key < 4 ? key : -1;
+    }
+
+    private static void validateMidiInput(MidiConfig.Input input) {
+        if (input == null) {
+            return;
+        }
+        input.type = input.type != null ? input.type : MidiConfig.Input.Type.NOTE;
+        input.value = switch (input.type) {
+            case NOTE, CONTROL_CHANGE -> MathUtils.clamp(input.value, 0, 127);
+            case PITCH_BEND -> Integer.compare(input.value, 0);
+        };
     }
 
     private void validate0(int[] keys, boolean[] exclusive) {
@@ -180,7 +259,7 @@ public final class PlayModeConfig {
         /**
          * マウス皿設定
          */
-        private final MouseScratchConfig mouseScratchConfig;
+        private MouseScratchConfig mouseScratchConfig;
 
         private int[] keys;
 
@@ -588,7 +667,7 @@ public final class PlayModeConfig {
             }
 
             public String toString() {
-                return switch (type) {
+                return switch (type != null ? type : Type.NOTE) {
                 	case NOTE -> "NOTE " + value;
                 	case PITCH_BEND -> "PITCH " + (value > 0 ? "+" : "-");
                 	case CONTROL_CHANGE -> "CC " + value;
