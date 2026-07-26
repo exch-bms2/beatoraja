@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.SerializationException;
  */
 public final class PracticeConfiguration {
 
+	public static final PracticeElement[] elements = PracticeElement.values();
 
 	private int cursorpos = 0;
 	private int itemOffset;
@@ -37,13 +38,14 @@ public final class PracticeConfiguration {
 	private static final String[] GRAPHTYPESTR = {"NOTETYPE", "JUDGE", "EARLYLATE"};
 
 	private PracticeProperty property = new PracticeProperty();
+	private final String[] cachedValues = new String[elements.length];
+	private final String[] cachedTexts = new String[elements.length];
+	private boolean textCacheDirty = true;
 
 	public PracticeConfiguration() {
 		// TODO 描画位置、使用テキスト等をスキン定義できるように
 		// TODO スキン定義がない場合のデフォルト配置の定義
 	}
-
-	public static final PracticeElement[] elements = PracticeElement.values();
 
 	private PracticeModeControls controls = new PracticeModeControls();
 
@@ -70,6 +72,7 @@ public final class PracticeConfiguration {
 		if(property.total == 0) {
 			property.total = model.getTotal();
 		}
+		invalidateTextCache();
 	}
 
 	public void saveProperty() {
@@ -100,24 +103,51 @@ public final class PracticeConfiguration {
 
 	public String getVisibleItemText(int index) {
 		PracticeElement element = getVisibleElement(index);
-		return element != null ? element.text.apply(property) : "";
+		return element != null ? getCachedText(element) : "";
 	}
 
 	public String getVisibleItemLabel(int index) {
-		return getVisibleItemTextPart(index, true);
+		PracticeElement element = getVisibleElement(index);
+		return element != null ? element.label : "";
 	}
 
 	public String getVisibleItemValue(int index) {
-		return getVisibleItemTextPart(index, false);
+		PracticeElement element = getVisibleElement(index);
+		return element != null ? getCachedValue(element) : "";
 	}
 
-	private String getVisibleItemTextPart(int index, boolean label) {
-		String text = getVisibleItemText(index);
-		int separator = text.indexOf(" : ");
-		if (separator < 0) {
-			return label ? text : "";
+	String getItemLabel(int index) {
+		return index >= 0 && index < elements.length ? elements[index].label : "";
+	}
+
+	String getItemValue(int index) {
+		return index >= 0 && index < elements.length ? getCachedValue(elements[index]) : "";
+	}
+
+	private String getCachedValue(PracticeElement element) {
+		updateTextCache();
+		return cachedValues[element.ordinal()];
+	}
+
+	private String getCachedText(PracticeElement element) {
+		updateTextCache();
+		return cachedTexts[element.ordinal()];
+	}
+
+	private void invalidateTextCache() {
+		textCacheDirty = true;
+	}
+
+	private void updateTextCache() {
+		if (!textCacheDirty) {
+			return;
 		}
-		return label ? text.substring(0, separator) : text.substring(separator + 3);
+		for (PracticeElement element : elements) {
+			String value = element.value.apply(property);
+			cachedValues[element.ordinal()] = value;
+			cachedTexts[element.ordinal()] = element.label + " : " + value;
+		}
+		textCacheDirty = false;
 	}
 
 	public boolean isVisibleItemAvailable(int index) {
@@ -140,6 +170,7 @@ public final class PracticeConfiguration {
 		if (element != null) {
 			cursorpos = element.ordinal();
 			element.action.run(this, increment, false, false);
+			invalidateTextCache();
 		}
 	}
 
@@ -234,12 +265,14 @@ public final class PracticeConfiguration {
 		ensureCursorVisible();
 
 		int nonAnalogXTicks = controls.extractNonAnalogXTicks();
+		boolean valuesChanged = false;
 		if (nonAnalogXTicks != 0) {
 			boolean inc = nonAnalogXTicks > 0;
 			nonAnalogXTicks = Math.abs(nonAnalogXTicks);
 			for (int i = 0; i < nonAnalogXTicks ; ++i) {
 				elements[cursorpos].action.run(this, inc, false, turbo);
 			}
+			valuesChanged = true;
 		} 
 		int analogXTicks = controls.extractAnalogXTicks(elements[cursorpos].useFineAnalogTicks);
 		if (analogXTicks != 0) {
@@ -248,6 +281,10 @@ public final class PracticeConfiguration {
 			for (int i = 0; i < analogXTicks ; ++i) {
 				elements[cursorpos].action.run(this, inc, true, turbo);
 			}
+			valuesChanged = true;
+		}
+		if (valuesChanged) {
+			invalidateTextCache();
 		}
 	}
 
@@ -503,7 +540,7 @@ public final class PracticeConfiguration {
 			} else {
 				property.starttime = Math.max(property.starttime - change, minStartTime);
 			}
-		}, true, property -> String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
+		}, true, "START TIME", property -> String.format("%2d:%02d.%1d", property.starttime / 60000,
 				(property.starttime / 1000) % 60, (property.starttime / 100) % 10)),
 		ENDTIME((practice, inc, isAnalog, turboSpeed) -> {
 			final TimeLine[] tl = practice.model.getAllTimeLines();
@@ -516,7 +553,7 @@ public final class PracticeConfiguration {
 			} else {
 				property.endtime = Math.max(property.endtime - change, minEndTime);
 			}
-		}, true, property -> String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
+		}, true, "END TIME", property -> String.format("%2d:%02d.%1d", property.endtime / 60000,
 				(property.endtime / 1000) % 60, (property.endtime / 100) % 10)),
 		GAUGETYPE((practice, inc, isAnalog, turboSpeed) -> {
 			final PracticeProperty property = practice.property;
@@ -524,7 +561,7 @@ public final class PracticeConfiguration {
 			if ((practice.model.getMode() == Mode.POPN_5K || practice.model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3 && property.startgauge > 100) {
 				property.startgauge = 100;
 			}
-		}, false, property -> "GAUGE TYPE : " + GAUGE[property.gaugetype]),
+		}, false, "GAUGE TYPE", property -> GAUGE[property.gaugetype]),
 		GAUGECATEGORY((practice, inc, isAnalog, turboSpeed) -> {
 			final PracticeProperty property = practice.property;
 			GaugeProperty[] categories = GaugeProperty.values();
@@ -535,7 +572,7 @@ public final class PracticeConfiguration {
 				}
 			}
 			property.startgauge = (int) property.gaugecategory.values[property.gaugetype].init;
-		}, false, property -> "GAUGE CATEGORY : " + property.gaugecategory.name()),
+		}, false, "GAUGE CATEGORY", property -> property.gaugecategory.name()),
 		GAUGEVALUE((practice, inc, isAnalog, turboSpeed) -> {
 			final PracticeProperty property = practice.property;
 			int change = turboSpeed ? 10 : 1;
@@ -545,7 +582,7 @@ public final class PracticeConfiguration {
 			} else {
 				property.startgauge = MathUtils.clamp(property.startgauge + (inc ? change : -change), 1, maxValue);
 			}
-		}, true, property -> "GAUGE VALUE : " + property.startgauge),
+		}, true, "GAUGE VALUE", property -> Integer.toString(property.startgauge)),
 		JUDGERANK((practice, inc, isAnalog, turboSpeed) -> {
 			final PracticeProperty property = practice.property;
 			int change = turboSpeed ? 25 : 1;
@@ -554,51 +591,56 @@ public final class PracticeConfiguration {
 			} else {
 				property.judgerank = MathUtils.clamp(property.judgerank + (inc ? change : -change), 1, 400);
 			}
-		}, true, property -> "JUDGERANK : " + property.judgerank),
+		}, true, "JUDGERANK", property -> Integer.toString(property.judgerank)),
 		TOTAL((practice, inc, isAnalog, turboSpeed) -> {
 			int change = turboSpeed ? 25 : 5;
 			if (isAnalog) {
 				change = turboSpeed ? 20 : 1;
 			}
 			practice.property.total = MathUtils.clamp(practice.property.total + (inc ? change : -change), 10, 5000);
-		}, true, property -> "TOTAL : " + (int)property.total),
+		}, true, "TOTAL", property -> Integer.toString((int) property.total)),
 		FREQ((practice, inc, isAnalog, turboSpeed) -> {
 			int change = turboSpeed ? 25 : 5;
 			if (isAnalog) {
 				change = turboSpeed ? 10 : 1;
 			}
 			practice.property.freq = MathUtils.clamp(practice.property.freq + (inc ? change : -change), 50, 200);
-		}, true, property -> "FREQUENCY : " + property.freq),
+		}, true, "FREQUENCY", property -> Integer.toString(property.freq)),
 		GRAPHTYPE((practice, inc, isAnalog, turboSpeed) -> {
 			practice.property.graphtype = (practice.property.graphtype + (inc ? 1 : 2)) % 3;
-		}, false, property -> "GRAPHTYPE : " + GRAPHTYPESTR[property.graphtype]),
+		}, false, "GRAPHTYPE", property -> GRAPHTYPESTR[property.graphtype]),
 		OPTION1P((practice, inc, isAnalog, turboSpeed) -> {
 			final int options = (practice.model.getMode() == Mode.POPN_5K || practice.model.getMode() == Mode.POPN_9K ? 7 : 10);
 			practice.property.random = (practice.property.random + (inc ? 1 : (options -1))) % options;
-		}, false, property -> "OPTION-1P : " + RANDOM[property.random]),
+		}, false, "OPTION-1P", property -> RANDOM[property.random]),
 		OPTION2P((practice, inc, isAnalog, turboSpeed) -> {
 			practice.property.random2 = (practice.property.random2 + (inc ? 1 : 9)) % 10;
-		}, false, property -> "OPTION-2P : " + RANDOM[property.random2], practice -> practice.model.getMode().player == 2),
+		}, false, "OPTION-2P", property -> RANDOM[property.random2], practice -> practice.model.getMode().player == 2),
 		OPTIONDP((practice, inc, isAnalog, turboSpeed) -> {
 			practice.property.doubleop = (practice.property.doubleop + 1) % 2;
-		}, false, property -> "OPTION-DP : " + DPRANDOM[property.doubleop], practice -> practice.model.getMode().player == 2);
+		}, false, "OPTION-DP", property -> DPRANDOM[property.doubleop], practice -> practice.model.getMode().player == 2);
 
 		public final PracticeAction action;
 
 		public final boolean useFineAnalogTicks;
 
-		public final Function<PracticeProperty, String> text;
+		public final String label;
+
+		public final Function<PracticeProperty, String> value;
 
 		public final Predicate<PracticeConfiguration> optionAvailable;
 
-		private PracticeElement(PracticeAction action, boolean useFineAnalogTicks, Function<PracticeProperty, String> text) {
-			this(action, useFineAnalogTicks, text, property -> true);
+		private PracticeElement(PracticeAction action, boolean useFineAnalogTicks, String label,
+				Function<PracticeProperty, String> value) {
+			this(action, useFineAnalogTicks, label, value, property -> true);
 		}
 
-		private PracticeElement(PracticeAction action, boolean useFineAnalogTicks, Function<PracticeProperty, String> text, Predicate<PracticeConfiguration> optionAvailable) {
+		private PracticeElement(PracticeAction action, boolean useFineAnalogTicks, String label,
+				Function<PracticeProperty, String> value, Predicate<PracticeConfiguration> optionAvailable) {
 			this.action = action;
 			this.useFineAnalogTicks = useFineAnalogTicks;
-			this.text = text;
+			this.label = label;
+			this.value = value;
 			this.optionAvailable = optionAvailable;
 		}
 	}

@@ -103,8 +103,10 @@ public final class SkinPractice extends SkinObject {
 		if (legacyFont != null) {
 			for (int i = 0; i < PracticeConfiguration.elements.length; i++) {
 				if (practice.isElementAvailable(i)) {
-					sprite.draw(legacyFont, PracticeConfiguration.elements[i].text.apply(practice.getPracticeProperty()), x,
-							y - ySpacing * i, practice.getCursorPosition() == i ? focusedColor : unfocusedColor);
+					Color color = practice.getCursorPosition() == i ? focusedColor : unfocusedColor;
+					float itemY = y - ySpacing * i;
+					sprite.draw(legacyFont, practice.getItemLabel(i), x, itemY, color);
+					sprite.draw(legacyFont, practice.getItemValue(i), x + 150, itemY, color);
 				}
 			}
 
