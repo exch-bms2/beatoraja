@@ -460,10 +460,41 @@ public class JsonSkin {
 		public int offset;
 		public int[] offsets = new int[0];
 		public int stretch = -1;
-		public int[] op = new int[0];
+		public DestinationOption[] op = new DestinationOption[0];
 		public BooleanProperty draw;
 		public Animation[] dst = new Animation[0];
 		public Rect mouseRect;
+
+		public int[] getOptionIds() {
+			return java.util.Arrays.stream(op != null ? op : new DestinationOption[0])
+					.filter(option -> option != null && option.property == null && option.id != 0)
+					.mapToInt(option -> option.id)
+					.toArray();
+		}
+
+		public BooleanProperty[] getDrawConditions() {
+			return java.util.Arrays.stream(op != null ? op : new DestinationOption[0])
+					.filter(option -> option != null && option.property != null)
+					.map(option -> option.property)
+					.toArray(BooleanProperty[]::new);
+		}
+	}
+
+	/** A destination condition represented by either a numeric option ID or a BooleanProperty. */
+	public static class DestinationOption {
+		public int id;
+		public BooleanProperty property;
+
+		public DestinationOption() {
+		}
+
+		public DestinationOption(int id) {
+			this.id = id;
+		}
+
+		public DestinationOption(BooleanProperty property) {
+			this.property = property;
+		}
 	}
 
 	public static class Rect {

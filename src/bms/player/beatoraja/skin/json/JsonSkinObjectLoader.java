@@ -6,6 +6,7 @@ import bms.player.beatoraja.select.SkinDistributionGraph;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.json.JSONSkinLoader.SourceData;
+import bms.player.beatoraja.skin.property.BooleanProperty;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.skin.property.StringWriter;
@@ -728,13 +729,13 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				a.clip_w = (a.clip_w == Integer.MIN_VALUE ? prev.clip_w : a.clip_w);
 				a.clip_h = (a.clip_h == Integer.MIN_VALUE ? prev.clip_h : a.clip_h);
 			}
-			if(dst.draw != null) {
-				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, dst.timer, dst.draw);
-			} else {
-				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, dst.timer, dst.op);
+			BooleanProperty[] draw = dst.getDrawConditions();
+			if (dst.draw != null) {
+				draw = java.util.Arrays.copyOf(draw, draw.length + 1);
+				draw[draw.length - 1] = dst.draw;
 			}
+			skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
+					a.angle, dst.center, dst.loop, dst.timer, dst.getOptionIds(), draw);
 			if (a.clip_x != Integer.MIN_VALUE && a.clip_y != Integer.MIN_VALUE && a.clip_w != Integer.MIN_VALUE && a.clip_h != Integer.MIN_VALUE) {
 				skin.setDestinationClip(obj, a.time, a.clip_x, a.clip_y, a.clip_w, a.clip_h);
 			}

@@ -68,6 +68,10 @@ public class BooleanPropertyFactory {
 	}
 
 	public static BooleanProperty getBooleanProperty(String name) {
+		if (name != null && name.startsWith("!")) {
+			BooleanProperty property = getBooleanProperty(name.substring(1));
+			return property != null ? negate(property) : null;
+		}
 		BooleanProperty property = BooleanPropertyPattern.get(name);
 		if (property != null) {
 			return property;
@@ -78,6 +82,20 @@ public class BooleanPropertyFactory {
 			}
 		}
 		return null;
+	}
+
+	private static BooleanProperty negate(BooleanProperty property) {
+		return new BooleanProperty() {
+			@Override
+			public boolean isStatic(MainState state) {
+				return property.isStatic(state);
+			}
+
+			@Override
+			public boolean get(MainState state) {
+				return !property.get(state);
+			}
+		};
 	}
 
 	private static BooleanProperty createPracticeItemProperty(int index, boolean selected) {

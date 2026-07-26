@@ -298,9 +298,10 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 				if(dst.dst.length > 0 && imagefile != null) {
 					int color = chara.color == 2 ? 2 : 1;
 					int side = chara.side == 2 ? 2 : 1;
+					int[] sourceOptions = dst.getOptionIds();
 					int[] option = new int[3];
 					for(int i = 0; i < option.length; i++) {
-						if(i < dst.op.length) option[i] = dst.op[i];
+						if(i < sourceOptions.length) option[i] = sourceOptions[i];
 						else option[i] = 0;
 					}
 					if(chara.type == 0) {

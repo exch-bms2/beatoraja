@@ -185,6 +185,7 @@ public class SkinProperty {
 	public static final int SLIDER_MASTER_VOLUME = 17;
 	public static final int SLIDER_KEY_VOLUME = 18;
 	public static final int SLIDER_BGM_VOLUME = 19;
+	public static final int SLIDER_PRACTICE_POSITION = 20;
 
 	public static final int BARGRAPH_MUSIC_PROGRESS = 101;
 	public static final int BARGRAPH_LOAD_PROGRESS = 102;
@@ -247,6 +248,12 @@ public class SkinProperty {
 	public static final int STRING_IR_USER_NAME = 1021;
 	public static final int STRING_SONG_HASH_MD5 = 1030;
 	public static final int STRING_SONG_HASH_SHA256 = 1031;
+	public static final int STRING_PRACTICE_ITEM1 = 1040;
+	public static final int STRING_PRACTICE_ITEM16 = 1055;
+	public static final int STRING_PRACTICE_ITEM_LABEL1 = 1060;
+	public static final int STRING_PRACTICE_ITEM_LABEL16 = 1075;
+	public static final int STRING_PRACTICE_ITEM_VALUE1 = 1080;
+	public static final int STRING_PRACTICE_ITEM_VALUE16 = 1095;
 
 	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_HISPEED = 310;
@@ -453,6 +460,13 @@ public class SkinProperty {
 	public static final int NUMBER_IR_PLAYER_MAX_RATE_AFTERDOT = 240;
 	public static final int NUMBER_IR_PLAYER_TOTAL_CLEAR_RATE_AFTERDOT = 241;
 	public static final int NUMBER_IR_PLAYER_TOTAL_FULLCOMBO_RATE_AFTERDOT = 242;
+	public static final int NUMBER_LASTPLAY_TIMESTAMP = 243;
+	public static final int NUMBER_LASTPLAY_YEAR = 244;
+	public static final int NUMBER_LASTPLAY_MONTH = 245;
+	public static final int NUMBER_LASTPLAY_DAY = 246;
+	public static final int NUMBER_LASTPLAY_HOUR = 247;
+	public static final int NUMBER_LASTPLAY_MINUTE = 248;
+	public static final int NUMBER_LASTPLAY_SECOND = 249;
 
 	public static final int NUMBER_RIVAL_SCORE = 271;
 	public static final int NUMBER_RIVAL_MAXSCORE = 272;
@@ -944,6 +958,10 @@ public class SkinProperty {
 	public static final int OFFSET_JUDGEDETAIL_3P = 33;
 
 	public static final int OPTION_CONSTANT = 400;
+	public static final int OPTION_PRACTICE_ITEM1 = 3000;
+	public static final int OPTION_PRACTICE_ITEM16 = 3015;
+	public static final int OPTION_PRACTICE_ITEM1_SELECTED = 3020;
+	public static final int OPTION_PRACTICE_ITEM16_SELECTED = 3035;
 
 	// オフセットのユーザー定義は40番以降を使用して下さい
 
@@ -1022,6 +1040,8 @@ public class SkinProperty {
 	public static final int BUTTON_LONGNOTEMODE = 353;
 	public static final int BUTTON_SEVENTONINE_PATTERN = 360;
 	public static final int BUTTON_SEVENTONINE_TYPE = 361;
+	public static final int BUTTON_PRACTICE_ITEM1 = 370;
+	public static final int BUTTON_PRACTICE_ITEM16 = 385;
 
 	public static final int BUTTON_SKINSELECT_24KEY = 386;
 	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;

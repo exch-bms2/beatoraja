@@ -127,6 +127,14 @@ public class LuaSkinLoader extends JSONSkinLoader {
 			put(Event.class, lv ->
 					serializeLuaScript(lv, lua::loadEvent, lua::loadEvent,
 							EventFactory::getEvent, EventFactory::getEvent));
+			put(JsonSkin.DestinationOption.class, lv -> {
+				if (lv.isnumber()) {
+					return new JsonSkin.DestinationOption(lv.toint());
+				}
+				BooleanProperty property = serializeLuaScript(lv, lua::loadBooleanProperty, lua::loadBooleanProperty,
+						BooleanPropertyFactory::getBooleanProperty, BooleanPropertyFactory::getBooleanProperty);
+				return new JsonSkin.DestinationOption(property);
+			});
 		}
 	};
 

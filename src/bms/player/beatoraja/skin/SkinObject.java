@@ -170,6 +170,16 @@ public abstract class SkinObject extends DisposableObject {
 			setDrawCondition(op);
 		}
 	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, TimerProperty timer, int[] op,
+			BooleanProperty[] draw) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
+		if (dstop.length == 0 && dstdraw.length == 0) {
+			setDrawCondition(op);
+			addDrawCondition(draw);
+		}
+	}
 	
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, TimerProperty timer, BooleanProperty draw) {
@@ -290,6 +300,19 @@ public abstract class SkinObject extends DisposableObject {
 	
 	public void setDrawCondition(BooleanProperty[] dstdraw) {
 		this.dstdraw = dstdraw;
+	}
+
+	private void addDrawCondition(BooleanProperty[] draw) {
+		if (draw == null || draw.length == 0) {
+			return;
+		}
+		Array<BooleanProperty> conditions = new Array<>(dstdraw);
+		for (BooleanProperty condition : draw) {
+			if (condition != null) {
+				conditions.add(condition);
+			}
+		}
+		dstdraw = conditions.toArray(BooleanProperty.class);
 	}
 
 	public final void setStretch(int stretch) {
