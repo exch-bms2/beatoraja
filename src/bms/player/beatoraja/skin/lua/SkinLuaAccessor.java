@@ -49,6 +49,7 @@ public class SkinLuaAccessor {
 		this.isGlobal = isGlobal;
 
 		restrictStandardGlobals();
+		LegacySkinLuaApi.install(globals, this::getSkinDirectory);
 		initializeModules();
 	}
 
