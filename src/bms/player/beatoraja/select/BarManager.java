@@ -335,8 +335,13 @@ public final class BarManager {
 			int difficultyIndex = 0;
 			for(;difficultyIndex < MusicSelector.DIFFICULTY.length && MusicSelector.DIFFICULTY[difficultyIndex] != config.getDifficultyFilter();difficultyIndex++);
 			boolean filtered = false;
+			boolean songInformationLoaded = false;
 			for(int difficultyTrialCount = 0; difficultyTrialCount < MusicSelector.DIFFICULTY.length && !filtered; difficultyTrialCount++, difficultyIndex++) {
 				final DifficultyFilter difficulty = MusicSelector.DIFFICULTY[difficultyIndex % MusicSelector.DIFFICULTY.length];
+				if (difficulty.requiresSongInformation() && !songInformationLoaded) {
+					loadSongInformation(l);
+					songInformationLoaded = true;
+				}
 				for(int modeTrialCount = 0, trialModeIndex = modeIndex; modeTrialCount < MusicSelector.MODE.length; modeTrialCount++, trialModeIndex++) {
 					final ModeFilter mode = MusicSelector.MODE[trialModeIndex % MusicSelector.MODE.length];
 					Array<Bar> remove = new Array<Bar>();
@@ -345,7 +350,7 @@ public final class BarManager {
 							final SongData song = sb.getSongData();
 							if((!showInvisibleCharts && (song.getSongReview().getFavorite() & (SongData.INVISIBLE_SONG | SongData.INVISIBLE_CHART)) != 0)
 									|| !mode.matches(song.getMode())
-									|| !difficulty.matches(song.getDifficulty())) {
+									|| !difficulty.matches(song)) {
 								remove.add(b);
 							}
 						}
@@ -462,6 +467,19 @@ public final class BarManager {
 		}
 		Logger.getGlobal().warning("楽曲がありません");
 		return false;
+	}
+
+	private void loadSongInformation(Array<Bar> bars) {
+		SongInformationAccessor informationAccessor = select.main.getInfoDatabase();
+		if (informationAccessor == null) {
+			return;
+		}
+		SongData[] songs = Stream.of(bars.toArray(Bar.class))
+				.filter(bar -> bar instanceof SongBar)
+				.map(bar -> ((SongBar) bar).getSongData())
+				.filter(Objects::nonNull)
+				.toArray(SongData[]::new);
+		informationAccessor.getInformation(songs);
 	}
 
 	public void close() {
