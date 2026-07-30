@@ -14,6 +14,9 @@ public final class SpinnerCell extends TableCell<ControllerConfigViewModel, Inte
         spinner = new NumericSpinner<>();
         spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initial, step));
         spinner.setEditable(true);
+        spinner.setPresetValues("10,25,50,75,100,150,200,300");
+        spinner.setMaxWidth(Double.MAX_VALUE);
+        spinner.getStyleClass().add("table-spinner");
         spinner.valueProperty().addListener((o, oldValue, newValue) -> {
             WritableValue<Integer> cellProperty = (WritableValue<Integer>)getTableColumn().getCellObservableValue((ControllerConfigViewModel)getTableRow().getItem());
             cellProperty.setValue(newValue);

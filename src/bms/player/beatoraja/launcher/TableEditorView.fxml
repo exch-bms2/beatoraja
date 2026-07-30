@@ -7,23 +7,22 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="bms.player.beatoraja.launcher.TableEditorView">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.TableEditorView">
+<VBox spacing="14.0" styleClass="pageContent">
+	<VBox spacing="4.0" styleClass="pageHeader"><Label styleClass="pageTitle" text="Table Editor" /><Label styleClass="pageDescription" text="Build local course and folder tables." /></VBox>
 
-	<HBox prefHeight="31.0" prefWidth="240.0">
-		<VBox.margin>
-			<Insets />
-		</VBox.margin>
+	<HBox alignment="CENTER_LEFT" styleClass="modeSelector">
 		<children>
-			<Label text="Table Name" />		
-			<TextField fx:id="tableName" prefWidth="400" />
-    <Button mnemonicParsing="false" onAction="#commit" text="Save" />
+			<Label styleClass="settingLabel" text="Table Name" />
+			<TextField fx:id="tableName" prefWidth="400" HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#commit" text="Save" />
 		</children>
 	</HBox>
-	<TabPane prefHeight="435.0" prefWidth="740.0"
+	<TabPane prefHeight="720.0" prefWidth="740.0" styleClass="editorTabs"
 		VBox.vgrow="ALWAYS">
 		<Tab closable="false" text="Course">
 			<AnchorPane minHeight="0.0" minWidth="0.0"
@@ -49,4 +48,4 @@
 		</Tab>
 	</TabPane>
 </VBox>
-
+</ScrollPane>

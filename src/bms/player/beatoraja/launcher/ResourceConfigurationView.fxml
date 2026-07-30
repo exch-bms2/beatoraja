@@ -1,135 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import bms.player.beatoraja.launcher.NumericSpinner?>
 <?import bms.player.beatoraja.launcher.EditableTableView?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.CheckBox?>
-
-<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.ResourceConfigurationView">
-	<HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-		<VBox.margin>
-			<Insets bottom="30.0" />
-		</VBox.margin>
-		<Label prefHeight="101.0" prefWidth="100.0" text="%BMS_Path"
-			HBox.hgrow="ALWAYS">
-			<HBox.margin>
-				<Insets left="10.0" />
-			</HBox.margin>
-		</Label>
-		<ListView fx:id="bmsroot"
-			onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver"
-			prefHeight="100.0" prefWidth="500.0" HBox.hgrow="ALWAYS">
-			<HBox.margin>
-				<Insets top="10.0" />
-			</HBox.margin>
-		</ListView>
-		<VBox prefHeight="162.0" prefWidth="100.0">
-			<Button mnemonicParsing="false" onAction="#addSongPath"
-				prefHeight="31.0" prefWidth="80.0" text="%+">
-				<VBox.margin>
-					<Insets left="10.0" right="10.0" top="10.0" />
-				</VBox.margin>
-			</Button>
-			<Button mnemonicParsing="false" onAction="#removeSongPath"
-				prefHeight="31.0" prefWidth="80.0" text="%-">
-				<VBox.margin>
-					<Insets left="10.0" right="10.0" top="10.0" />
-				</VBox.margin>
-			</Button>
-		</VBox>
-	</HBox>
-	<HBox prefHeight="100.0" prefWidth="200.0"
-		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-		VBox.vgrow="ALWAYS">
-		<Label prefHeight="166.0" prefWidth="100.0" text="%Table_URL"
-			HBox.hgrow="ALWAYS">
-			<HBox.margin>
-				<Insets left="10.0" />
-			</HBox.margin>
-		</Label>
-		<VBox prefHeight="100.0" prefWidth="536.0" HBox.hgrow="ALWAYS">
-			<HBox>
-				<TextField fx:id="url" prefHeight="28.0" prefWidth="500.0"
-					HBox.hgrow="ALWAYS" />
-				<Button mnemonicParsing="false" onAction="#addTableURL"
-					prefHeight="31.0" prefWidth="80.0" text="%+">
-					<HBox.margin>
-						<Insets left="10.0" right="10.0" />
-					</HBox.margin>
-				</Button>
-			</HBox>
-			<HBox VBox.vgrow="ALWAYS">
-				<EditableTableView fx:id="tableurl" prefHeight="167.0"
-					prefWidth="500.0" HBox.hgrow="ALWAYS">
-					<HBox.margin>
-						<Insets top="5.0" />
-					</HBox.margin>
-				</EditableTableView>
-				<VBox prefHeight="185.0" prefWidth="100.0">
-					<Button mnemonicParsing="false" onAction="#removeTableURL"
-						prefHeight="31.0" prefWidth="80.0" text="%-">
-						<VBox.margin>
-							<Insets left="10.0" right="10.0" top="10.0" />
-						</VBox.margin>
-					</Button>
-					<Button mnemonicParsing="false" onAction="#moveTableURLUp"
-						prefHeight="31.0" prefWidth="80.0" text="↑">
-						<VBox.margin>
-							<Insets left="10.0" right="10.0" top="10.0" />
-						</VBox.margin>
-					</Button>
-					<Button mnemonicParsing="false" onAction="#moveTableURLDown"
-						prefHeight="31.0" prefWidth="80.0" text="↓">
-						<VBox.margin>
-							<Insets left="10.0" right="10.0" top="10.0" />
-						</VBox.margin>
-					</Button>
-				</VBox>
-			</HBox>
-			<HBox>
-			    <Button mnemonicParsing="false" onAction="#refreshLocalTableInfo" prefHeight="25.0" prefWidth="190.0" text="%TABLES_CHECK_STATUS">
-			        <HBox.margin>
-			            <Insets right="10.0" />
-			        </HBox.margin>
-			    </Button>
-			    <Button mnemonicParsing="false" onAction="#loadNewTables" prefHeight="25.0" prefWidth="190.0" text="%TABLES_LOAD_NEW">
-			        <HBox.margin>
-			            <Insets right="10.0" />
-			        </HBox.margin>
-			    </Button>
-			    <Button mnemonicParsing="false" onAction="#loadSelectedTables" prefHeight="25.0" prefWidth="190.0" text="%TABLES_LOAD_SELECTED">
-			        <HBox.margin>
-			            <Insets right="10.0" />
-			        </HBox.margin>
-			    </Button>
-			    <Button mnemonicParsing="false" onAction="#loadAllTables" prefHeight="25.0" prefWidth="190.0" text="%TABLES_LOAD_ALL">
-			        <HBox.margin>
-			            <Insets right="10.0" />
-			        </HBox.margin>
-			    </Button>
-			</HBox>
-		</VBox>
-	</HBox>
-	<CheckBox fx:id="updatesong" mnemonicParsing="false"
-		prefHeight="25.0" prefWidth="300.0" text="%UPDATE_SONG">
-		<VBox.margin>
-			<Insets left="10.0" />
-		</VBox.margin>
-	</CheckBox>
-</VBox>
-
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.ResourceConfigurationView">
+    <VBox styleClass="pageContent">
+        <VBox spacing="4.0" styleClass="pageHeader">
+            <Label styleClass="pageTitle" text="Resource" />
+            <Label styleClass="pageDescription" text="Manage song folders and difficulty table sources." />
+        </VBox>
+        <VBox styleClass="settingsCard">
+            <HBox alignment="CENTER_LEFT" styleClass="cardHeaderRow">
+                <VBox spacing="2.0"><Label styleClass="cardTitle" text="Song Folders" /><Label styleClass="cardDescription" text="Drop a folder here or add it manually." /></VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#removeSongPath" styleClass="button,compactButton" text="%-" />
+                <Button mnemonicParsing="false" onAction="#addSongPath" styleClass="button,compactButton" text="%+" />
+            </HBox>
+            <ListView fx:id="bmsroot" minHeight="110.0" onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver" prefHeight="150.0" />
+            <HBox alignment="CENTER_LEFT" styleClass="settingRow,last"><CheckBox fx:id="updatesong" mnemonicParsing="false" text="%UPDATE_SONG" /></HBox>
+        </VBox>
+        <VBox styleClass="settingsCard">
+            <VBox spacing="2.0" styleClass="cardHeaderRow"><Label styleClass="cardTitle" text="Difficulty Tables" /><Label styleClass="cardDescription" text="Add, reorder, and refresh online table definitions." /></VBox>
+            <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="inlineEditor"><TextField fx:id="url" promptText="Table URL" HBox.hgrow="ALWAYS" /><Button mnemonicParsing="false" onAction="#addTableURL" styleClass="button,compactButton" text="%+" /></HBox>
+            <HBox spacing="8.0">
+                <EditableTableView fx:id="tableurl" minHeight="150.0" prefHeight="180.0" HBox.hgrow="ALWAYS" />
+                <VBox spacing="8.0">
+                    <Button mnemonicParsing="false" onAction="#moveTableURLUp" styleClass="button,iconButton" text="↑" />
+                    <Button mnemonicParsing="false" onAction="#moveTableURLDown" styleClass="button,iconButton" text="↓" />
+                    <Button mnemonicParsing="false" onAction="#removeTableURL" styleClass="button,iconButton" text="%-" />
+                </VBox>
+            </HBox>
+            <HBox spacing="8.0" styleClass="cardActions">
+                <Button mnemonicParsing="false" onAction="#refreshLocalTableInfo" text="%TABLES_CHECK_STATUS" />
+                <Button mnemonicParsing="false" onAction="#loadNewTables" text="%TABLES_LOAD_NEW" />
+                <Button mnemonicParsing="false" onAction="#loadSelectedTables" text="%TABLES_LOAD_SELECTED" />
+                <Button mnemonicParsing="false" onAction="#loadAllTables" text="%TABLES_LOAD_ALL" />
+            </HBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

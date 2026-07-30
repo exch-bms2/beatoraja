@@ -56,16 +56,17 @@ public class ResourceConfigurationView implements Initializable {
 		TableColumn<TableInfo,String> urlColumn = new TableColumn<TableInfo,String>("URL");
 		urlColumn.setCellValueFactory((p) -> p.getValue().urlProperty());
 		urlColumn.setSortable(false);
-		urlColumn.setMinWidth(560);
-		urlColumn.setMinWidth(0);
+		urlColumn.setMinWidth(320);
+		urlColumn.setPrefWidth(600);
 
 		TableColumn<TableInfo,String> nameColumn = new TableColumn<TableInfo,String>("STATUS/NAME");
 		nameColumn.setCellValueFactory((p) -> p.getValue().nameStatusProperty());
 		nameColumn.setSortable(false);
-		nameColumn.setMinWidth(200);
-		nameColumn.setMinWidth(0);
+		nameColumn.setMinWidth(160);
+		nameColumn.setPrefWidth(240);
 	  
- 		tableurl.getColumns().setAll(urlColumn, nameColumn);
+		tableurl.getColumns().setAll(urlColumn, nameColumn);
+		tableurl.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
  		tableurl.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 
