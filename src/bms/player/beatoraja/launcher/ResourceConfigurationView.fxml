@@ -131,5 +131,17 @@
 			<Insets left="10.0" />
 		</VBox.margin>
 	</CheckBox>
+	<CheckBox fx:id="scanSongArchives" mnemonicParsing="false"
+		prefHeight="25.0" prefWidth="300.0" text="%SCAN_SONG_ARCHIVES">
+		<VBox.margin>
+			<Insets left="10.0" />
+		</VBox.margin>
+	</CheckBox>
+	<HBox alignment="CENTER_LEFT" prefHeight="25.0" spacing="10.0">
+		<VBox.margin>
+			<Insets left="10.0" />
+		</VBox.margin>
+		<Label text="%SONG_ARCHIVE_EXTRACT" />
+		<ComboBox fx:id="songArchiveExtractMode" prefWidth="220.0" />
+	</HBox>
 </VBox>
-

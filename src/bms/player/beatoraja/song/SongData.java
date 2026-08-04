@@ -127,11 +127,22 @@ public class SongData implements Validatable, IpfsInformation {
 	}
 	
 	public SongData(BMSModel model, boolean containstxt) {
+		this(model, containstxt, true);
+	}
+
+	/**
+	 * @param createInformation whether to calculate derived song information now
+	 */
+	public SongData(BMSModel model, boolean containstxt, boolean createInformation) {
 		content = containstxt ? CONTENT_TEXT : 0;
-		setBMSModel(model);
+		setBMSModel(model, createInformation);
 	}
 
 	public void setBMSModel(BMSModel model) {
+		setBMSModel(model, true);
+	}
+
+	private void setBMSModel(BMSModel model, boolean createInformation) {
 		if(model == null) {
 			return;
 		}
@@ -205,7 +216,7 @@ public class SongData implements Validatable, IpfsInformation {
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
 		content |= length >= 30000 && model.getWavList().length <= (length / (50 * 1000)) + 3 ? CONTENT_NOKEYSOUND : 0;
 		
-		info = new SongInformation(model);
+		info = createInformation ? new SongInformation(model) : null;
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			charthash = BMSDecoder.convertHexString(md.digest(model.toChartString().getBytes()));

@@ -30,6 +30,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.StringConverter;
 
 public class ResourceConfigurationView implements Initializable {
 
@@ -41,6 +42,10 @@ public class ResourceConfigurationView implements Initializable {
 	private EditableTableView<TableInfo> tableurl;
 	@FXML
 	private CheckBox updatesong;
+	@FXML
+	private CheckBox scanSongArchives;
+	@FXML
+	private ComboBox<Config.SongArchiveExtractMode> songArchiveExtractMode;
 
 	private Config config;
 	
@@ -48,6 +53,19 @@ public class ResourceConfigurationView implements Initializable {
 
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		songArchiveExtractMode.getItems().setAll(Config.SongArchiveExtractMode.values());
+		songArchiveExtractMode.disableProperty().bind(scanSongArchives.selectedProperty().not());
+		songArchiveExtractMode.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(Config.SongArchiveExtractMode value) {
+				return value == null ? "" : arg1.getString("SONG_ARCHIVE_EXTRACT_" + value.name());
+			}
+
+			@Override
+			public Config.SongArchiveExtractMode fromString(String value) {
+				return Config.SongArchiveExtractMode.TEMPORARY;
+			}
+		});
 	}
 	
 	void init(PlayConfigurationView main) {
@@ -73,12 +91,16 @@ public class ResourceConfigurationView implements Initializable {
     	this.config = config;
 		bmsroot.getItems().setAll(config.getBmsroot());
 		updatesong.setSelected(config.isUpdatesong());
+		scanSongArchives.setSelected(config.isScanSongArchives());
+		songArchiveExtractMode.setValue(config.getSongArchiveExtractMode());
 		TableInfo.populateList(tableurl.getItems(), config.getTableURL());
 	}
 
 	public void commit() {
 		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
 		config.setUpdatesong(updatesong.isSelected());
+		config.setScanSongArchives(scanSongArchives.isSelected());
+		config.setSongArchiveExtractMode(songArchiveExtractMode.getValue());
 		config.setTableURL(TableInfo.toUrlArray(tableurl.getItems()));
 	}
 

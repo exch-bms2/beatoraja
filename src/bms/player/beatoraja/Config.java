@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 /**
@@ -156,6 +158,17 @@ public class Config implements Validatable {
 	private int frameskip = 1;
 
 	private boolean updatesong = false;
+
+	/**
+	 * Whether song database updates also scan charts stored in ZIP or RAR archives.
+	 */
+	private boolean scanSongArchives = false;
+
+	/**
+	 * Controls whether song archives stay temporary or are expanded into the song
+	 * library during a song database update.
+	 */
+	private SongArchiveExtractMode songArchiveExtractMode = SongArchiveExtractMode.TEMPORARY;
 
 	private int skinPixmapGen = 4;
 	private int stagefilePixmapGen = 2;
@@ -412,6 +425,22 @@ public class Config implements Validatable {
 		this.updatesong = updatesong;
 	}
 
+	public boolean isScanSongArchives() {
+		return scanSongArchives;
+	}
+
+	public void setScanSongArchives(boolean scanSongArchives) {
+		this.scanSongArchives = scanSongArchives;
+	}
+
+	public SongArchiveExtractMode getSongArchiveExtractMode() {
+		return songArchiveExtractMode;
+	}
+
+	public void setSongArchiveExtractMode(SongArchiveExtractMode songArchiveExtractMode) {
+		this.songArchiveExtractMode = songArchiveExtractMode;
+	}
+
 	public DisplayMode getDisplaymode() {
 		return displaymode;
 	}
@@ -538,7 +567,9 @@ public class Config implements Validatable {
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 50000);
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 0, 100000);
         maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
-        songPreview = (songPreview != null) ? songPreview : SongPreview.LOOP;
+		songPreview = (songPreview != null) ? songPreview : SongPreview.LOOP;
+		songArchiveExtractMode = (songArchiveExtractMode != null) ? songArchiveExtractMode
+				: SongArchiveExtractMode.TEMPORARY;
 
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
@@ -639,9 +670,12 @@ public class Config implements Validatable {
 			}
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
-			try (Reader reader = Files.newBufferedReader(path, charset)) {
-				return json.fromJson(Config.class, reader);
+			JsonValue values = new JsonReader().parse(Files.readString(path, charset));
+			Config config = json.readValue(Config.class, values);
+			if (!values.has("scanSongArchives") && values.has("zipSongArchives")) {
+				config.setScanSongArchives(values.getBoolean("zipSongArchives", false));
 			}
+			return config;
 		} catch (Exception e) {
 			Logger.getGlobal().warning("Failed to read system config " + path + ": " + e.getMessage());
 			return null;
@@ -686,5 +720,9 @@ public class Config implements Validatable {
 
 	public enum SongPreview {
 		NONE,ONCE,LOOP;
+	}
+
+	public enum SongArchiveExtractMode {
+		TEMPORARY,SONG_DIRECTORY;
 	}
 }

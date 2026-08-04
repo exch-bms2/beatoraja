@@ -2,7 +2,9 @@ package bms.player.beatoraja;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -16,6 +18,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
@@ -23,8 +27,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -416,6 +418,10 @@ public class MainLoader extends Application {
 
 		private String reviewpath;
 
+		private boolean scanSongArchives;
+
+		private Config.SongArchiveExtractMode songArchiveExtractMode;
+
 		public synchronized SongDatabaseAccessor get(Config config) throws ClassNotFoundException {
 			return get(config, config.getPlayername());
 		}
@@ -423,11 +429,16 @@ public class MainLoader extends Application {
 		public synchronized SongDatabaseAccessor get(Config config, String playername) throws ClassNotFoundException {
 			String nextSongpath = config.getSongpath();
 			String nextReviewpath = getSongReviewPath(config, playername);
-			if (songdb == null || !nextSongpath.equals(songpath) || !nextReviewpath.equals(reviewpath)) {
+			if (songdb == null || !nextSongpath.equals(songpath) || !nextReviewpath.equals(reviewpath)
+					|| config.isScanSongArchives() != scanSongArchives
+					|| config.getSongArchiveExtractMode() != songArchiveExtractMode) {
 				Class.forName("org.sqlite.JDBC");
-				songdb = new SQLiteSongDatabaseAccessor(nextSongpath, config.getBmsroot(), nextReviewpath, SONG_UPDATER_TYPE);
+				songdb = new SQLiteSongDatabaseAccessor(nextSongpath, config.getBmsroot(), nextReviewpath,
+						SONG_UPDATER_TYPE, config.isScanSongArchives(), config.getSongArchiveExtractMode());
 				songpath = nextSongpath;
 				reviewpath = nextReviewpath;
+				scanSongArchives = config.isScanSongArchives();
+				songArchiveExtractMode = config.getSongArchiveExtractMode();
 			}
 			return songdb;
 		}
@@ -514,6 +525,7 @@ public class MainLoader extends Application {
 	}
 
 	private static class GithubVersionChecker implements VersionChecker {
+		private static final Pattern RELEASE_NAME = Pattern.compile("\\\"name\\\"\\s*:\\s*\\\"((?:\\\\\\\\.|[^\\\"\\\\\\\\])*)\\\"");
 
 		private String dlurl;
 		private String message;
@@ -535,25 +547,39 @@ public class MainLoader extends Application {
 		private void getInformation() {
 			try {
 				URL url = new URL("https://api.github.com/repos/exch-bms2/beatoraja/releases/latest");
-				ObjectMapper mapper = new ObjectMapper();
-				GithubLastestRelease lastestData = mapper.readValue(url, GithubLastestRelease.class);
-				final String name = lastestData.name;
+				URLConnection connection = url.openConnection();
+				connection.setConnectTimeout(5000);
+				connection.setReadTimeout(5000);
+				connection.setRequestProperty("Accept", "application/vnd.github+json");
+				connection.setRequestProperty("User-Agent", "beatoraja-version-checker");
+				final String name = getReleaseName(connection);
 				if (MainController.getVersion().contains(name)) {
 					message = "最新版を利用中です";
 				} else {
 					message = String.format("最新版[%s]を利用可能です。", name);
 					dlurl = "https://mocha-repository.info/download/beatoraja" + name + ".zip";
 				}
-			} catch (Exception e) {
+			} catch (Exception | LinkageError e) {
 				Logger.getGlobal().warning("最新版URL取得時例外:" + e.getMessage());
 				message = "バージョン情報を取得できませんでした";
 			}
 		}
-	}
 
-	@JsonIgnoreProperties(ignoreUnknown=true)
-	static class GithubLastestRelease{
-		public String name;
+		private String getReleaseName(URLConnection connection) throws IOException {
+			StringBuilder response = new StringBuilder();
+			try (Reader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
+				char[] buffer = new char[4096];
+				for (int length; (length = reader.read(buffer)) >= 0;) {
+					response.append(buffer, 0, length);
+				}
+			}
+
+			Matcher matcher = RELEASE_NAME.matcher(response);
+			if (!matcher.find()) {
+				throw new IOException("GitHub release response does not contain a name");
+			}
+			return matcher.group(1).replace("\\\\\"", "\"").replace("\\\\\\\\", "\\");
+		}
 	}
 
 	/**

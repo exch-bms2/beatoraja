@@ -15,6 +15,7 @@ import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.archive.SongArchives;
 
 /**
  * プレイヤーのコンポーネント間でデータをやり取りするためのクラス
@@ -163,7 +164,7 @@ public final class PlayerResource {
 		}
 
 		orgmode = model.getMode();
-		bmsresource.setBMSFile(model, f, config, mode);
+		bmsresource.setBMSFile(model, Paths.get(model.getPath()), config, mode);
 		if(songdata != null) {
 			songdata.setBMSModel(model);
 		} else {
@@ -177,7 +178,12 @@ public final class PlayerResource {
 	}
 
 	public BMSModel loadBMSModel(Path f, int lnmode) {
-		return loadBMSModel(new ChartInformation(f, lnmode, null));
+		try {
+			return loadBMSModel(new ChartInformation(SongArchives.resolve(f), lnmode, null));
+		} catch (Exception e) {
+			Logger.getGlobal().warning("楽曲アーカイブ読み込み失敗:" + f + " : " + e.getMessage());
+			return null;
+		}
 	}
 
 	public BMSModel loadBMSModel(int[] selectedRandom) {

@@ -31,6 +31,7 @@ import bms.player.beatoraja.select.bar.ExecutableBar.RandomFolder;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongInformationAccessor;
+import bms.player.beatoraja.song.archive.SongArchives;
 
 /**
  * 楽曲バー管理用クラス
@@ -704,7 +705,7 @@ public final class BarManager {
 				if (bar instanceof SongBar songbar && songbar.existsSong()) {
 					SongData song = songbar.getSongData();
 					try {
-						Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
+						Path bannerfile = SongArchives.resolve(Paths.get(song.getPath()).getParent().resolve(song.getBanner()));
 						// System.out.println(bannerfile.getPath());
 						if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
 							songbar.setBanner(select.getBannerResource().getPixmap(bannerfile.toString()));
@@ -713,7 +714,7 @@ public final class BarManager {
 						Logger.getGlobal().warning("banner読み込み失敗 : " + song.getBanner());
 					}
 					try {
-						Path stagefilefile = Paths.get(song.getPath()).getParent().resolve(song.getStagefile());
+						Path stagefilefile = SongArchives.resolve(Paths.get(song.getPath()).getParent().resolve(song.getStagefile()));
 						// System.out.println(stagefilefile.getPath());
 						if (song.getStagefile().length() > 0 && Files.exists(stagefilefile)) {
 							songbar.setStagefile(select.getStagefileResource().getPixmap(stagefilefile.toString()));

@@ -114,10 +114,11 @@ public class SongInformationAccessor extends SQLiteDatabaseAccessor {
 		}
 	}
 
-	public void startUpdate() {
+	public boolean startUpdate() {
 		try {
 			conn = ds.getConnection();
 			conn.setAutoCommit(false);
+			return true;
 		} catch (SQLException e) {
 			if (conn != null) {
 				try {
@@ -127,32 +128,37 @@ public class SongInformationAccessor extends SQLiteDatabaseAccessor {
 				}
 			}
 			conn = null;
+			Logger.getGlobal().warning("楽曲情報データベース更新を開始できません : " + e.getMessage());
+			return false;
 		}
 	}
 
 	public void update(BMSModel model) {
-		SongInformation info = new SongInformation(model);
+		if (conn == null) {
+			return;
+		}
 		try {
+			SongInformation info = new SongInformation(model);
 			insert(qr, conn, "information", info);
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (SQLException | RuntimeException e) {
+			Logger.getGlobal().warning("楽曲情報の更新をスキップしました : " + model.getPath() + " : " + e.getMessage());
 		}
 	}
 
 	public void endUpdate() {
-		if (conn != null) {
+		Connection current = conn;
+		conn = null;
+		if (current != null) {
 			try {
-				conn.commit();
-				conn.close();
+				current.commit();
 			} catch (SQLException e) {
-				if (conn != null) {
-					try {
-						conn.close();
-					} catch (SQLException e1) {
-						e1.printStackTrace();
-					}
+				Logger.getGlobal().warning("楽曲情報データベース更新の確定に失敗しました : " + e.getMessage());
+			} finally {
+				try {
+					current.close();
+				} catch (SQLException e) {
+					Logger.getGlobal().warning("楽曲情報データベースを閉じられません : " + e.getMessage());
 				}
-				conn = null;
 			}
 		}
 	}

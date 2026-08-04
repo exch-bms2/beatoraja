@@ -15,6 +15,8 @@ import java.util.logging.Logger;
  * @author exch
  */
 public class SongInformation implements Validatable {
+
+	private static final int MAX_ANALYSIS_DURATION_MILLIS = 6 * 60 * 60 * 1000;
 	
 	/**
 	 * 譜面のハッシュ値
@@ -88,21 +90,34 @@ public class SongInformation implements Validatable {
 		s = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_SCRATCH);
 		ls = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_SCRATCH);
 		total = model.getTotal();
+		final TimeLine[] tls = model.getAllTimeLines();
+		final int lastTime = model.getLastTime();
+		if (lastTime < 0 || lastTime > MAX_ANALYSIS_DURATION_MILLIS) {
+			throw new IllegalArgumentException("譜面情報の解析可能時間を超えています : " + lastTime + "ms");
+		}
+		if (tls.length == 0) {
+			return;
+		}
 		
 		int[][] lanenotes = new int[model.getMode().key][3];
-		int[][] data = new int[model.getLastTime() / 1000 + 2][7];
+		int[][] data = new int[lastTime / 1000 + 2][7];
 		int pos = 0;
-		int border = (int) (model.getTotalNotes() * (1.0 - 100.0 / model.getTotal()));
+		int border = total > 0 ? (int) (model.getTotalNotes() * (1.0 - 100.0 / total)) : 0;
 		int borderpos = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			if (tl.getTime() / 1000 != pos) {
-				pos = tl.getTime() / 1000;
+			final int second = tl.getTime() / 1000;
+			if (second < 0 || second >= data.length) {
+				continue;
+			}
+			if (second != pos) {
+				pos = second;
 			}
 			for (int i = 0; i < model.getMode().key; i++) {
 				Note n = tl.getNote(i);
 				if (n != null) {
 					if(n instanceof LongNote && !((LongNote)n).isEnd()) {
-						for(int index = tl.getTime() / 1000;index <= ((LongNote)n).getPair().getTime() / 1000;index++) {
+						int endSecond = Math.min(((LongNote)n).getPair().getTime() / 1000, data.length - 1);
+						for(int index = second; index <= endSecond; index++) {
 							data[index][model.getMode().isScratchKey(i) ? 1 : 4]++;
 						}
 					}
@@ -110,16 +125,16 @@ public class SongInformation implements Validatable {
 					if(!((model.getLnmode() == 1 || (model.getLnmode() == 0 && model.getLntype() == BMSModel.LNTYPE_LONGNOTE))
 							&& n instanceof LongNote && ((LongNote) n).isEnd())){
 						if (n instanceof NormalNote) {
-							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 2 : 5]++;
+							data[second][model.getMode().isScratchKey(i) ? 2 : 5]++;
 							lanenotes[i][0]++;
 						}
 						if (n instanceof LongNote) {
-							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 0 : 3]++;
-							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 4]--;
+							data[second][model.getMode().isScratchKey(i) ? 0 : 3]++;
+							data[second][model.getMode().isScratchKey(i) ? 1 : 4]--;
 							lanenotes[i][1]++;
 						}
 						if (n instanceof MineNote) {
-							data[tl.getTime() / 1000][6]++;
+							data[second][6]++;
 							lanenotes[i][2]++;
 						}
 						
@@ -144,16 +159,20 @@ public class SongInformation implements Validatable {
 				count++;
 			}
 		}
-		density /= count;
+		if (count > 0) {
+			density /= count;
+		}
 
 		final int d = Math.min(5, data.length - borderpos - 1);
 		enddensity = 0;
-		for(int i = borderpos;i < data.length - d;i++) {
-			int notes = 0;
-			for(int j = 0;j < d;j++) {
-				notes += data[i + j][0] + data[i + j][1] + data[i + j][2] + data[i + j][3] + data[i + j][4] + data[i + j][5];
+		if (d > 0) {
+			for(int i = borderpos;i < data.length - d;i++) {
+				int notes = 0;
+				for(int j = 0;j < d;j++) {
+					notes += data[i + j][0] + data[i + j][1] + data[i + j][2] + data[i + j][3] + data[i + j][4] + data[i + j][5];
+				}
+				enddensity = Math.max(enddensity, ((double)notes) / d);
 			}
-			enddensity = Math.max(enddensity, ((double)notes) / d);
 		}
 		setDistributionValues(data);
 		
@@ -161,7 +180,6 @@ public class SongInformation implements Validatable {
 		Map<Double, Integer> bpmNoteCountMap = new HashMap<Double, Integer>();
 		double nowSpeed = model.getBpm();
 		speedList.add(new double[] {nowSpeed, 0.0});
-		final TimeLine[] tls = model.getAllTimeLines();
 		for (TimeLine tl : tls) {
 			int notecount = bpmNoteCountMap.containsKey(tl.getBPM()) ? bpmNoteCountMap.get(tl.getBPM()) : 0;
 			bpmNoteCountMap.put(tl.getBPM(), notecount + tl.getTotalNotes());
