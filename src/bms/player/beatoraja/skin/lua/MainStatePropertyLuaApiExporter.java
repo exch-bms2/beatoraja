@@ -10,10 +10,19 @@ import com.badlogic.gdx.Input;
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+
 final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 
 	private static final long TIMER_OFF_VALUE = Long.MIN_VALUE;
 	private final MainState state;
+	private final Map<String, BooleanProperty> booleanPropertiesByName = new HashMap<>();
+	private final Map<String, IntegerProperty> integerPropertiesByName = new HashMap<>();
+	private final Map<String, FloatProperty> floatPropertiesByName = new HashMap<>();
+	private final Map<String, StringProperty> stringPropertiesByName = new HashMap<>();
 
 	MainStatePropertyLuaApiExporter(MainState state) {
 		this.state = state;
@@ -28,11 +37,19 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		table.set("offset", new OffsetFunction());
 		table.set("timer", new TimerFunction());
 		table.set("timer_off_value", TIMER_OFF_VALUE);
+		table.set("timer_is_on", new TimerIsOnFunction());
+		table.set("timer_is_off", new TimerIsOffFunction());
+		table.set("timer_elapsed", new TimerElapsedFunction(1));
+		table.set("timer_elapsed_ms", new TimerElapsedFunction(1_000));
+		table.set("timer_elapsed_seconds", new TimerElapsedSecondsFunction());
 		table.set("time", new TimeFunction());
 		table.set("set_timer", new SetTimerFunction());
 		table.set("event_exec", new EventExecFunction());
 		table.set("event_index", new EventIndexFunction());
 		table.set("key_pressed", new KeyPressedFunction());
+		table.set("numbers", new NumbersFunction());
+		table.set("screen_width", zeroArg(() -> LuaInteger.valueOf(Gdx.graphics != null ? Gdx.graphics.getWidth() : 0)));
+		table.set("screen_height", zeroArg(() -> LuaInteger.valueOf(Gdx.graphics != null ? Gdx.graphics.getHeight() : 0)));
 
 		table.set("rate", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getNowRate())));
 		table.set("exscore", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getNowEXScore())));
@@ -99,35 +116,75 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		return LuaInteger.ZERO;
 	}
 
+	private static <T> T getProperty(LuaValue value, IntFunction<T> byId, Function<String, T> byName,
+			Map<String, T> namedProperties) {
+		if (value.isnumber()) {
+			return byId.apply(value.toint());
+		}
+		if (value.isstring()) {
+			String name = value.tojstring();
+			if (!namedProperties.containsKey(name)) {
+				namedProperties.put(name, byName.apply(name));
+			}
+			return namedProperties.get(name);
+		}
+		return null;
+	}
+
+	private BooleanProperty getBooleanProperty(LuaValue value) {
+		return getProperty(value, BooleanPropertyFactory::getBooleanProperty,
+				BooleanPropertyFactory::getBooleanProperty, booleanPropertiesByName);
+	}
+
+	private IntegerProperty getIntegerProperty(LuaValue value) {
+		return getProperty(value, IntegerPropertyFactory::getIntegerProperty,
+				IntegerPropertyFactory::getIntegerProperty, integerPropertiesByName);
+	}
+
+	private FloatProperty getFloatProperty(LuaValue value) {
+		return getProperty(value, FloatPropertyFactory::getFloatProperty,
+				FloatPropertyFactory::getFloatProperty, floatPropertiesByName);
+	}
+
+	private StringProperty getStringProperty(LuaValue value) {
+		return getProperty(value, StringPropertyFactory::getStringProperty,
+				StringPropertyFactory::getStringProperty, stringPropertiesByName);
+	}
+
+	private LuaValue getNumberValue(LuaValue value) {
+		IntegerProperty property = getIntegerProperty(value);
+		return LuaInteger.valueOf(property != null ? property.get(state) : 0);
+	}
+
 	private class OptionFunction extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
-			BooleanProperty prop = BooleanPropertyFactory.getBooleanProperty(luaValue.toint());
-			return LuaBoolean.valueOf(prop.get(state));
+			BooleanProperty property = getBooleanProperty(luaValue);
+			return LuaBoolean.valueOf(property != null && property.get(state));
 		}
 	}
 
 	private class NumberFunction extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
-			IntegerProperty prop = IntegerPropertyFactory.getIntegerProperty(luaValue.toint());
-			return LuaNumber.valueOf(prop.get(state));
+			return getNumberValue(luaValue);
 		}
 	}
 
 	private class FloatNumberFunction extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
-			FloatProperty prop = FloatPropertyFactory.getRateProperty(luaValue.toint());
-			return LuaDouble.valueOf(prop.get(state));
+			FloatProperty property = getFloatProperty(luaValue);
+			return LuaDouble.valueOf(property != null ? property.get(state) : 0f);
 		}
 	}
 
 	private class TextFunction extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
-			StringProperty prop = StringPropertyFactory.getStringProperty(luaValue.toint());
-			return LuaString.valueOf(prop.get(state));
+			StringProperty property = getStringProperty(luaValue);
+			String text = property != null ? property.get(state) : null;
+			return LuaString.valueOf(text != null ? text : "");
 		}
 	}
 
@@ -150,6 +207,43 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		@Override
 		public LuaValue call(LuaValue value) {
 			return LuaNumber.valueOf(state.timer.getMicroTimer(value.toint()));
+		}
+	}
+
+	private class TimerIsOnFunction extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			return LuaBoolean.valueOf(state.timer.isTimerOn(value.toint()));
+		}
+	}
+
+	private class TimerIsOffFunction extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			return LuaBoolean.valueOf(!state.timer.isTimerOn(value.toint()));
+		}
+	}
+
+	private class TimerElapsedFunction extends OneArgFunction {
+		private final long divisor;
+
+		private TimerElapsedFunction(long divisor) {
+			this.divisor = divisor;
+		}
+
+		@Override
+		public LuaValue call(LuaValue value) {
+			long timer = state.timer.getMicroTimer(value.toint());
+			return LuaNumber.valueOf(timer == TIMER_OFF_VALUE ? -1 : (state.timer.getNowMicroTime() - timer) / divisor);
+		}
+	}
+
+	private class TimerElapsedSecondsFunction extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			long timer = state.timer.getMicroTimer(value.toint());
+			return timer == TIMER_OFF_VALUE ? LuaInteger.valueOf(-1)
+					: LuaDouble.valueOf((state.timer.getNowMicroTime() - timer) / 1_000_000.0);
 		}
 	}
 
@@ -205,6 +299,17 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		public LuaValue call(LuaValue luaValue) {
 			IntegerProperty prop = IntegerPropertyFactory.getImageIndexProperty(luaValue.toint());
 			return LuaNumber.valueOf(prop.get(state));
+		}
+	}
+
+	private class NumbersFunction extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs arguments) {
+			LuaValue[] values = new LuaValue[arguments.narg()];
+			for (int index = 0; index < values.length; index++) {
+				values[index] = getNumberValue(arguments.arg(index + 1));
+			}
+			return LuaValue.varargsOf(values);
 		}
 	}
 
