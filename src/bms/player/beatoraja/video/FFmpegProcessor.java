@@ -1,11 +1,10 @@
 package bms.player.beatoraja.video;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
 
@@ -17,6 +16,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+
+import bms.player.beatoraja.song.SongResource;
+import bms.player.beatoraja.song.SongResources;
 
 /**
  * ffmpegを使用した動画表示用クラス
@@ -54,7 +56,12 @@ public class FFmpegProcessor implements VideoProcessor {
 	}
 
 	public void create(String filepath) {
-		movieseek = new MovieSeekThread(filepath);
+		create(SongResources.fromPath(java.nio.file.Path.of(filepath)));
+	}
+
+	/** Starts decoding from a resource without extracting its containing archive. */
+	public void create(SongResource resource) {
+		movieseek = new MovieSeekThread(resource);
 		movieseek.start();
 	}
 
@@ -127,18 +134,20 @@ public class FFmpegProcessor implements VideoProcessor {
 		private byte[] movieBytes;
 		private final Object pixmapLock = new Object();
 
-		private String filepath;
+		private final SongResource resource;
 		
 		private long offset;
 		private long framecount;
 
-		public MovieSeekThread(String filepath) {
-			this.filepath = filepath;
+		public MovieSeekThread(SongResource resource) {
+			this.resource = resource;
 		}
 
 		public void run() {
 			try {
-				movieBytes = Files.readAllBytes(Paths.get(filepath));
+				try (InputStream input = resource.openStream()) {
+					movieBytes = input.readAllBytes();
+				}
 				openGrabber();
 				Logger.getGlobal()
 						.info("movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat()
@@ -247,7 +256,7 @@ public class FFmpegProcessor implements VideoProcessor {
 						}
 					}
 					closeGrabber();
-					Logger.getGlobal().info("動画リソースの開放 : " + filepath);
+					Logger.getGlobal().info("動画リソースの開放 : " + resource.displayPath());
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}

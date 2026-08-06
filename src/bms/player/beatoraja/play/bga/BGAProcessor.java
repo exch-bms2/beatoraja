@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play.bga;
 
-import java.nio.file.*;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -15,6 +16,8 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.video.FFmpegProcessor;
 import bms.player.beatoraja.video.VideoFormat;
 import bms.player.beatoraja.video.VideoProcessor;
+import bms.player.beatoraja.song.SongResource;
+import bms.player.beatoraja.song.SongResources;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
@@ -37,6 +40,7 @@ public final class BGAProcessor {
 	private VideoProcessor[] movies = new VideoProcessor[0]; 
 	
 	private final ResourcePool<String, VideoProcessor> mpgresource;
+	private final java.util.concurrent.ConcurrentHashMap<String, SongResource> movieResources = new java.util.concurrent.ConcurrentHashMap<>();
 
 	/**
 	 * 再生中のBGAID
@@ -84,7 +88,12 @@ public final class BGAProcessor {
 			@Override
 			protected VideoProcessor load(String key) {
 				FFmpegProcessor mm = new FFmpegProcessor(config.getFrameskip());
-				mm.create(key);
+				SongResource resource = movieResources.get(key);
+				if (resource != null) {
+					mm.create(resource);
+				} else {
+					mm.create(key);
+				}
 				return mm;
 			}
 
@@ -98,6 +107,11 @@ public final class BGAProcessor {
 	}
 
 	public synchronized void setModel(BMSModel model) {
+		setModel(model, model != null ? SongResources.fromPath(Path.of(model.getPath())) : null);
+	}
+
+	/** Loads BGA files relative to the original song resource. */
+	public synchronized void setModel(BMSModel model, SongResource chartResource) {
 		progress = 0;
 
 		cache.clear();
@@ -115,16 +129,16 @@ public final class BGAProcessor {
 			}
 
 			// BMS格納ディレクトリ
-			Path dpath = Paths.get(model.getPath()).getParent();
+			SongResource directory = chartResource.parent();
 
 			movies = new VideoProcessor[model.getBgaList().length];
 			for (String name : model.getBgaList()) {
 				if (progress == 1) {
 					break;
 				}
-				Path f = null;
+				SongResource f = null;
 				try {
-					if (Files.exists(dpath.resolve(name))) {
+					if (directory.resolve(name).exists()) {
 						final int index = name.lastIndexOf('.');
 						String fex = null;
 						if (index != -1) {
@@ -134,8 +148,8 @@ public final class BGAProcessor {
 							if (Arrays.asList(VideoFormat.getAllExtensions()).contains(fex)){
 								name = name.substring(0, index);
 								for (String mov : VideoFormat.getAllExtensions()) {
-									final Path mpgfile = dpath.resolve(name + "." + mov);
-									if (Files.exists(mpgfile)) {
+									final SongResource mpgfile = directory.resolve(name + "." + mov);
+									if (mpgfile.exists()) {
 										f = mpgfile;
 										break;
 									}
@@ -143,14 +157,14 @@ public final class BGAProcessor {
 							}else if (Arrays.asList(BGImageProcessor.pic_extension).contains(fex)){
 								name = name.substring(0, index);
 								for (String pic : BGImageProcessor.pic_extension) {
-									final Path picfile = dpath.resolve(name + "." + pic);
-									if (Files.exists(picfile)) {
+									final SongResource picfile = directory.resolve(name + "." + pic);
+									if (picfile.exists()) {
 										f = picfile;
 										break;
 									}
 								}
 							}else{
-								f = dpath.resolve(name);
+								f = directory.resolve(name);
 							}
 						}
 					}
@@ -160,32 +174,33 @@ public final class BGAProcessor {
 							name = name.substring(0, index);
 						}
 						for (String mov : VideoFormat.getAllExtensions()) {
-							final Path mpgfile = dpath.resolve(name + "." + mov);
-							if (Files.exists(mpgfile)) {
+							final SongResource mpgfile = directory.resolve(name + "." + mov);
+							if (mpgfile.exists()) {
 								f = mpgfile;
 								break;
 							}
 						}
 						if (f == null) {
 							for (String mov : BGImageProcessor.pic_extension) {
-								final Path picfile = dpath.resolve(name + "." + mov);
-								if (Files.exists(picfile)) {
+								final SongResource picfile = directory.resolve(name + "." + mov);
+								if (picfile.exists()) {
 									f = picfile;
 									break;
 								}
 							}
 						}
 					}
-				} catch (InvalidPathException e) {
+				} catch (IOException | IllegalArgumentException e) {
 					Logger.getGlobal().warning(e.getMessage());
 				}
 
 				if (f != null) {
 					boolean isMovie = false;
 					for (String mov : VideoFormat.getAllExtensions()) {
-						if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
+						if (f.name().toLowerCase().endsWith(mov)) {
 							try {
-								VideoProcessor mm = mpgresource.get(f.toString());
+								movieResources.put(f.cacheKey(), f);
+								VideoProcessor mm = mpgresource.get(f.cacheKey());
 								movies[id] = mm;
 								isMovie = true;
 								break;

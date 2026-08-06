@@ -63,7 +63,7 @@ public class ResourceConfigurationView implements Initializable {
 
 			@Override
 			public Config.SongArchiveExtractMode fromString(String value) {
-				return Config.SongArchiveExtractMode.TEMPORARY;
+				return Config.SongArchiveExtractMode.NO_TEMPORARY_FILES;
 			}
 		});
 	}

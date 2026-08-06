@@ -1,7 +1,10 @@
 package bms.player.beatoraja;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,12 +24,16 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
+import bms.player.beatoraja.song.SongResource;
+import bms.player.beatoraja.song.SongResources;
+
 /**
  * Pixmapリソースプール
  * 
  * @author exch
  */
 public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.PixmapResource> {
+	private final java.util.concurrent.ConcurrentHashMap<String, SongResource> songResources = new java.util.concurrent.ConcurrentHashMap<>();
 
 	public static final class PixmapResource {
 		private final Pixmap pixmap;
@@ -88,7 +95,8 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 	
 	@Override
 	protected PixmapResource load(String path) {
-		final PixmapResource resource = loadPictureResource(path);
+		SongResource songResource = songResources.get(path);
+		final PixmapResource resource = songResource != null ? loadPictureResource(songResource) : loadPictureResource(path);
 		return resource != null ? convert(resource) : null;
 	}
 
@@ -99,6 +107,16 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 
 	public PixmapResource getPixmapResource(String path) {
 		return get(path);
+	}
+
+	public Pixmap getPixmap(SongResource resource) {
+		PixmapResource picture = getPixmapResource(resource);
+		return picture != null ? picture.getPixmap() : null;
+	}
+
+	public PixmapResource getPixmapResource(SongResource resource) {
+		songResources.put(resource.cacheKey(), resource);
+		return get(resource.cacheKey());
 	}
 
 	/**
@@ -140,6 +158,41 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 	 * @return イメージリソース。読めなかった場合またはpathがファイルでない場合はnullを返す
 	 */
 	public static PixmapResource loadPictureResource(String path) {
+		try {
+			return loadPictureResource(SongResources.fromPath(Path.of(path)));
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
+
+	/** Loads an image directly from a local, archive, or remote song resource. */
+	public static PixmapResource loadPictureResource(SongResource resource) {
+		if (resource.localPath().isPresent()) {
+			return loadLocalPictureResource(resource.localPath().get().toString());
+		}
+		try {
+			if (!resource.exists() || resource.isDirectory()) {
+				return null;
+			}
+			String lower = resource.name().toLowerCase(Locale.ROOT);
+			if (lower.endsWith(".webp")) {
+				return loadWebpWithFFmpeg(resource);
+			}
+			// libGDX supplies the decoder for these formats; cache only this entry.
+			if (lower.endsWith(".cim") || lower.endsWith(".tga")) {
+				return loadLocalPictureResource(resource.materialize().toString());
+			}
+			try (InputStream input = resource.openStream()) {
+				BufferedImage image = ImageIO.read(input);
+				return image != null ? new PixmapResource(toPixmap(image)) : null;
+			}
+		} catch (Throwable e) {
+			Logger.getGlobal().warning("BGAファイル読み込み失敗。" + resource.displayPath() + " : " + e.getMessage());
+			return null;
+		}
+	}
+
+	private static PixmapResource loadLocalPictureResource(String path) {
 		PixmapResource resource = null;
 		Pixmap tex = null;
 		File f = new File(path);
@@ -216,6 +269,35 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 		} catch (Throwable e) {
 			frames.forEach(Pixmap::dispose);
 			Logger.getGlobal().warning("WebPファイル読み込み失敗。" + e.getMessage());
+			return null;
+		}
+	}
+
+	private static PixmapResource loadWebpWithFFmpeg(SongResource resource) {
+		try (InputStream input = resource.openStream()) {
+			return loadWebpWithFFmpeg(input.readAllBytes(), resource.displayPath());
+		} catch (Throwable e) {
+			Logger.getGlobal().warning("WebPファイル読み込み失敗。" + e.getMessage());
+			return null;
+		}
+	}
+
+	private static PixmapResource loadWebpWithFFmpeg(byte[] bytes, String name) {
+		List<Pixmap> frames = new ArrayList<>();
+		try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(new ByteArrayInputStream(bytes))) {
+			grabber.start();
+			Java2DFrameConverter converter = new Java2DFrameConverter();
+			Frame frame;
+			while ((frame = grabber.grabImage()) != null) {
+				BufferedImage image = converter.convert(frame);
+				if (image != null) {
+					frames.add(toPixmap(image));
+				}
+			}
+			return toSpriteSheetPixmap(frames);
+		} catch (Throwable e) {
+			frames.forEach(Pixmap::dispose);
+			Logger.getGlobal().warning("WebPファイル読み込み失敗。" + name + " : " + e.getMessage());
 			return null;
 		}
 	}

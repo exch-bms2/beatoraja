@@ -43,6 +43,11 @@ public abstract class SongArchive {
 
 	public abstract List<String> listEntries(Path archive) throws IOException;
 
+	/** Opens one entry. Closing the returned stream must also close the archive. */
+	public abstract InputStream openEntry(Path archive, String entryName) throws IOException;
+
+	public abstract long entrySize(Path archive, String entryName) throws IOException;
+
 	public abstract byte[] readEntry(Path archive, String entryName) throws IOException;
 
 	public abstract void extract(Path archive, Path root) throws IOException;

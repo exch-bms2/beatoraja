@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import bms.model.TimeLine;
 import bms.player.beatoraja.PixmapResourcePool;
+import bms.player.beatoraja.song.SongResource;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -55,6 +56,15 @@ public class BGImageProcessor {
 
 	public void put(int id, Path path) {
 		Pixmap pixmap = cache.getPixmap(path.toString());
+		put(id, pixmap);
+	}
+
+	public void put(int id, SongResource resource) {
+		Pixmap pixmap = cache.getPixmap(resource);
+		put(id, pixmap);
+	}
+
+	private void put(int id, Pixmap pixmap) {
 		if(id >= bgamap.length) {
 			bgamap = Arrays.copyOf(bgamap, id + 1);
 		}

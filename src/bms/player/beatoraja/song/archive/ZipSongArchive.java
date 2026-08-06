@@ -1,6 +1,7 @@
 package bms.player.beatoraja.song.archive;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,12 +34,98 @@ public final class ZipSongArchive extends SongArchive {
 	}
 
 	@Override
+	public long entrySize(Path archive, String entryName) throws IOException {
+		try {
+			return entrySizeWithDefaultEncoding(archive, entryName);
+		} catch (ZipException e) {
+			return entrySizeWithLegacyEncoding(archive, entryName);
+		}
+	}
+
+	@Override
+	public InputStream openEntry(Path archive, String entryName) throws IOException {
+		try {
+			return openEntryWithDefaultEncoding(archive, entryName);
+		} catch (ZipException e) {
+			return openEntryWithLegacyEncoding(archive, entryName);
+		}
+	}
+
+	private long entrySizeWithDefaultEncoding(Path archive, String entryName) throws IOException {
+		try (ZipFile zip = new ZipFile(archive.toFile())) {
+			ZipEntry entry = zip.getEntry(entryName);
+			if (entry == null || entry.isDirectory()) {
+				throw new IOException("ZIP entry does not exist: " + entryName);
+			}
+			return entry.getSize();
+		}
+	}
+
+	private long entrySizeWithLegacyEncoding(Path archive, String entryName) throws IOException {
+		try (var zip = new org.apache.commons.compress.archivers.zip.ZipFile(archive.toFile(), LEGACY_ZIP_ENCODING)) {
+			var entry = zip.getEntry(entryName);
+			if (entry == null || entry.isDirectory()) {
+				throw new IOException("ZIP entry does not exist: " + entryName);
+			}
+			return entry.getSize();
+		}
+	}
+
+	@Override
 	public byte[] readEntry(Path archive, String entryName) throws IOException {
 		try {
 			return readEntryWithDefaultEncoding(archive, entryName);
 		} catch (ZipException e) {
 			return readEntryWithLegacyEncoding(archive, entryName);
 		}
+	}
+
+	private InputStream openEntryWithDefaultEncoding(Path archive, String entryName) throws IOException {
+		ZipFile zip = new ZipFile(archive.toFile());
+		try {
+			ZipEntry entry = zip.getEntry(entryName);
+			if (entry == null || entry.isDirectory()) {
+				throw new IOException("ZIP entry does not exist: " + entryName);
+			}
+			return closeArchiveWithStream(zip.getInputStream(entry), zip);
+		} catch (IOException | RuntimeException e) {
+			zip.close();
+			throw e;
+		}
+	}
+
+	private InputStream openEntryWithLegacyEncoding(Path archive, String entryName) throws IOException {
+		var zip = new org.apache.commons.compress.archivers.zip.ZipFile(archive.toFile(), LEGACY_ZIP_ENCODING);
+		try {
+			var entry = zip.getEntry(entryName);
+			if (entry == null || entry.isDirectory()) {
+				throw new IOException("ZIP entry does not exist: " + entryName);
+			}
+			return closeArchiveWithStream(zip.getInputStream(entry), zip);
+		} catch (IOException | RuntimeException e) {
+			zip.close();
+			throw e;
+		}
+	}
+
+	private InputStream closeArchiveWithStream(InputStream stream, AutoCloseable archive) {
+		return new FilterInputStream(stream) {
+			@Override
+			public void close() throws IOException {
+				try {
+					super.close();
+				} finally {
+					try {
+						archive.close();
+					} catch (Exception e) {
+						if (e instanceof IOException ioException) {
+							throw ioException;
+						}
+						throw new IOException(e);
+					}
+				}
+			}
+		};
 	}
 
 	@Override

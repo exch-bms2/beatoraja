@@ -1,6 +1,7 @@
 package bms.player.beatoraja.song.archive;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,6 +43,52 @@ public final class RarSongArchive extends SongArchive {
 			return entries;
 		} catch (RarException e) {
 			throw new IOException("Unable to read RAR archive: " + archive, e);
+		}
+	}
+
+	@Override
+	public long entrySize(Path archive, String entryName) throws IOException {
+		try (Archive rar = open(archive)) {
+			for (FileHeader header : rar.getFileHeaders()) {
+				validate(header, archive);
+				if (!header.isDirectory() && entryName.equals(normalizeEntryNameOrNull(header.getFileName()))) {
+					return header.getFullUnpackSize();
+				}
+			}
+			throw new IOException("RAR entry does not exist: " + entryName);
+		} catch (RarException e) {
+			throw new IOException("Unable to read RAR entry: " + entryName, e);
+		}
+	}
+
+	@Override
+	public InputStream openEntry(Path archive, String entryName) throws IOException {
+		try {
+			Archive rar = open(archive);
+			try {
+				for (FileHeader header : rar.getFileHeaders()) {
+					validate(header, archive);
+					if (!header.isDirectory() && entryName.equals(normalizeEntryNameOrNull(header.getFileName()))) {
+						return new FilterInputStream(rar.getInputStream(header)) {
+							@Override
+							public void close() throws IOException {
+								try {
+									super.close();
+								} finally {
+									rar.close();
+								}
+							}
+						};
+					}
+				}
+				rar.close();
+				throw new IOException("RAR entry does not exist: " + entryName);
+			} catch (IOException | RuntimeException e) {
+				rar.close();
+				throw e;
+			}
+		} catch (RarException e) {
+			throw new IOException("Unable to read RAR entry: " + entryName, e);
 		}
 	}
 

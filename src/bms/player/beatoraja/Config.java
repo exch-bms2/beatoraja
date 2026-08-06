@@ -165,10 +165,10 @@ public class Config implements Validatable {
 	private boolean scanSongArchives = false;
 
 	/**
-	 * Controls whether song archives stay temporary or are expanded into the song
+	 * Controls whether song archives are read directly or expanded into the song
 	 * library during a song database update.
 	 */
-	private SongArchiveExtractMode songArchiveExtractMode = SongArchiveExtractMode.TEMPORARY;
+	private SongArchiveExtractMode songArchiveExtractMode = SongArchiveExtractMode.NO_TEMPORARY_FILES;
 
 	private int skinPixmapGen = 4;
 	private int stagefilePixmapGen = 2;
@@ -569,7 +569,7 @@ public class Config implements Validatable {
         maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
 		songPreview = (songPreview != null) ? songPreview : SongPreview.LOOP;
 		songArchiveExtractMode = (songArchiveExtractMode != null) ? songArchiveExtractMode
-				: SongArchiveExtractMode.TEMPORARY;
+				: SongArchiveExtractMode.NO_TEMPORARY_FILES;
 
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
@@ -723,6 +723,6 @@ public class Config implements Validatable {
 	}
 
 	public enum SongArchiveExtractMode {
-		TEMPORARY,SONG_DIRECTORY;
+		NO_TEMPORARY_FILES, TEMPORARY, SONG_DIRECTORY;
 	}
 }

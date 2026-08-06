@@ -186,30 +186,11 @@ public class CourseEditorView implements Initializable {
 		lnType.setValue(null);
 		for(CourseData.CourseDataConstraint constraint : course.getConstraint()) {
 			switch(constraint) {
-			case CLASS:
-			case MIRROR:
-			case RANDOM:
-				gradeType.setValue(constraint);
-				break;
-			case NO_GREAT:
-			case NO_GOOD:
-				judgeType.setValue(constraint);
-				break;
-			case NO_SPEED:
-				hispeedType.setValue(constraint);
-				break;
-			case GAUGE_24KEYS:
-			case GAUGE_5KEYS:
-			case GAUGE_7KEYS:
-			case GAUGE_9KEYS:
-			case GAUGE_LR2:
-				gaugeType.setValue(constraint);
-				break;
-			case LN:
-			case CN:
-			case HCN:
-				lnType.setValue(constraint);
-				break;
+				case CLASS, MIRROR ,RANDOM -> gradeType.setValue(constraint);
+				case NO_GREAT, NO_GOOD -> judgeType.setValue(constraint);
+				case NO_SPEED -> hispeedType.setValue(constraint);
+				case GAUGE_24KEYS, GAUGE_5KEYS, GAUGE_7KEYS, GAUGE_9KEYS, GAUGE_LR2 -> gaugeType.setValue(constraint);
+				case LN, CN, HCN -> lnType.setValue(constraint);
 			}
 		}
 		for(CourseData.TrophyData trophy : course.getTrophy()) {

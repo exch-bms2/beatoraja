@@ -1,10 +1,7 @@
 package bms.player.beatoraja.select;
 
-import java.io.IOException;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Paths;
 import java.util.Deque;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
 
@@ -12,7 +9,8 @@ import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.archive.SongArchives;
+import bms.player.beatoraja.song.SongResource;
+import bms.player.beatoraja.song.SongResources;
 
 /**
  * プレビュー再生管理用クラス
@@ -23,7 +21,7 @@ public class PreviewMusicProcessor {
     /**
      * 音源読み込みタスク
      */
-    private Deque<String> commands = new ConcurrentLinkedDeque<String>();
+    private final Deque<PreviewCommand> commands = new ConcurrentLinkedDeque<>();
 
     private PreviewThread preview;
 
@@ -51,15 +49,19 @@ public class PreviewMusicProcessor {
         }
         current = song;
 
-        String previewPath = "";
+        SongResource previewResource = null;
         if (song != null && song.getPreview() != null && song.getPreview().length() > 0) {
             try {
-				previewPath = SongArchives.resolve(Paths.get(song.getPath()).getParent().resolve(song.getPreview())).toString();
-            } catch (InvalidPathException | IOException e) {
+                SongResource chartResource = SongResources.fromPath(java.nio.file.Path.of(song.getPath()));
+                SongResource candidate = chartResource.parent().resolve(song.getPreview());
+                if (candidate.exists()) {
+                    previewResource = candidate;
+                }
+            } catch (InvalidPathException | java.io.IOException e) {
                 Logger.getGlobal().warning(e.getMessage());
             }
         }
-        commands.add(previewPath);
+        commands.add(new PreviewCommand(previewResource));
     }
 
     public SongData getSongData() {
@@ -74,35 +76,36 @@ public class PreviewMusicProcessor {
     class PreviewThread extends Thread {
 
         private boolean stop;
-        private String playing;
+        private PreviewCommand playing;
         private float currentVolume;
 
         public void run() {
             audio.play(defaultMusic, config.getAudioConfig().getSystemvolume(), true);
-            playing = defaultMusic;
+            playing = new PreviewCommand(null);
             currentVolume = config.getAudioConfig().getSystemvolume();
             while(!stop) {
                 if(!commands.isEmpty()) {
-                    String path = commands.removeFirst();
-                    if(path.length() == 0) {
-                        path = defaultMusic;
-                    }
-                    if(!path.equals(playing)) {
+                    PreviewCommand command = commands.removeFirst();
+                    if(!command.equals(playing)) {
                         stopPreview(true);
-                        if(!path.equals(defaultMusic)) {
-                            audio.play(path, config.getAudioConfig().getSystemvolume(), config.getSongPreview() == SongPreview.LOOP);
+                        if(command.resource() != null) {
+                            audio.play(command.resource(), config.getAudioConfig().getSystemvolume(), config.getSongPreview() == SongPreview.LOOP);
                         } else {
                             audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
                         }
-                        playing = path;
+                        playing = command;
                     }
-                } else if(!Objects.equals(playing, defaultMusic) && !audio.isPlaying(playing)){
+                } else if(playing.resource() != null && !audio.isPlaying(playing.resource())){
                 	// プレビュー演奏終了後に選曲BGMに戻す
                     stopPreview(true);
                     audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
-                    playing = defaultMusic;
+                    playing = new PreviewCommand(null);
                 } else if(currentVolume != config.getAudioConfig().getSystemvolume()){
-                    audio.setVolume(playing, config.getAudioConfig().getSystemvolume());
+                    if (playing.resource() != null) {
+                        audio.setVolume(playing.resource(), config.getAudioConfig().getSystemvolume());
+                    } else {
+                        audio.setVolume(defaultMusic, config.getAudioConfig().getSystemvolume());
+                    }
                     currentVolume = config.getAudioConfig().getSystemvolume();
                 } else {
                     try {
@@ -115,14 +118,14 @@ public class PreviewMusicProcessor {
         }
 
         private void stopPreview(boolean pause) {
-            if(playing != null && playing.length() > 0) {
-                if(!playing.equals(defaultMusic)) {
-                    audio.stop(playing);
-                    audio.dispose(playing);
+            if(playing != null) {
+                if(playing.resource() != null) {
+                    audio.stop(playing.resource());
+                    audio.dispose(playing.resource());
                 } else if(pause) {
                 	for(int i = 10;i >= 0;i--) {
                 		float vol = i * 0.1f * config.getAudioConfig().getSystemvolume();
-                        audio.setVolume(playing, vol);
+                        audio.setVolume(defaultMusic, vol);
                         // TODO フェードアウトはAudioDriver側で実装したい
                         try {
 							sleep(15);
@@ -130,9 +133,12 @@ public class PreviewMusicProcessor {
 						}
                 	}
                 } else {
-                    audio.stop(playing);
+                    audio.stop(defaultMusic);
                 }
             }
         }
+    }
+
+    private record PreviewCommand(SongResource resource) {
     }
 }

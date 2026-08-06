@@ -31,7 +31,8 @@ import bms.player.beatoraja.select.bar.ExecutableBar.RandomFolder;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongInformationAccessor;
-import bms.player.beatoraja.song.archive.SongArchives;
+import bms.player.beatoraja.song.SongResource;
+import bms.player.beatoraja.song.SongResources;
 
 /**
  * 楽曲バー管理用クラス
@@ -701,24 +702,24 @@ public final class BarManager {
 			}
 			// loading banner
 			// loading stagefile
-			for (Bar bar : bars) {
-				if (bar instanceof SongBar songbar && songbar.existsSong()) {
-					SongData song = songbar.getSongData();
-					try {
-						Path bannerfile = SongArchives.resolve(Paths.get(song.getPath()).getParent().resolve(song.getBanner()));
-						// System.out.println(bannerfile.getPath());
-						if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-							songbar.setBanner(select.getBannerResource().getPixmap(bannerfile.toString()));
-						}
-					} catch (Exception e) {
+				for (Bar bar : bars) {
+					if (bar instanceof SongBar songbar && songbar.existsSong()) {
+						SongData song = songbar.getSongData();
+						try {
+							SongResource chartResource = SongResources.fromPath(Path.of(song.getPath()));
+							SongResource bannerResource = chartResource.parent().resolve(song.getBanner());
+							if (!song.getBanner().isEmpty() && bannerResource.exists()) {
+								songbar.setBanner(select.getBannerResource().getPixmap(bannerResource));
+							}
+						} catch (Exception e) {
 						Logger.getGlobal().warning("banner読み込み失敗 : " + song.getBanner());
-					}
-					try {
-						Path stagefilefile = SongArchives.resolve(Paths.get(song.getPath()).getParent().resolve(song.getStagefile()));
-						// System.out.println(stagefilefile.getPath());
-						if (song.getStagefile().length() > 0 && Files.exists(stagefilefile)) {
-							songbar.setStagefile(select.getStagefileResource().getPixmap(stagefilefile.toString()));
 						}
+						try {
+							SongResource chartResource = SongResources.fromPath(Path.of(song.getPath()));
+							SongResource stagefileResource = chartResource.parent().resolve(song.getStagefile());
+							if (!song.getStagefile().isEmpty() && stagefileResource.exists()) {
+								songbar.setStagefile(select.getStagefileResource().getPixmap(stagefileResource));
+							}
 					} catch (Exception e) {
 						Logger.getGlobal().warning("stagefile読み込み失敗 : " + song.getStagefile());
 					}

@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import com.portaudio.*;
 import bms.player.beatoraja.AudioConfig;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.song.SongResource;
 
 /**
  * PortAudioドライバ
@@ -497,6 +498,11 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	@Override
 	protected PCM getKeySound(Path p) {
 		return PCM.load(p.toString(), this);
+	}
+
+	@Override
+	protected PCM getKeySound(SongResource resource) {
+		return PCM.load(resource, this);
 	}
 
 	@Override

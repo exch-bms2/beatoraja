@@ -1,12 +1,12 @@
 package bms.player.beatoraja;
 
-import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.song.SongResource;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -63,13 +63,14 @@ public class BMSResource {
 		bga = new BGAProcessor(config, player);
 	}
 
-	public boolean setBMSFile(BMSModel model, final Path f, final Config config, BMSPlayerMode mode) {
+	public boolean setBMSFile(BMSModel model, final SongResource chartResource, final Config config, BMSPlayerMode mode) {
 		if(stagefile != null) {
 			stagefile.getTexture().dispose();
 			stagefile = null;
 		}
 		try {
-			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
+			PixmapResourcePool.PixmapResource picture = PixmapResourcePool.loadPictureResource(chartResource.parent().resolve(model.getStagefile()));
+			Pixmap pix = picture != null ? picture.getPixmap() : null;
 			if(pix != null) {
 				stagefile = new TextureRegion(new Texture(pix));
 				pix.dispose();
@@ -83,7 +84,8 @@ public class BMSResource {
 			backbmp = null;
 		}
 		try {
-			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
+			PixmapResourcePool.PixmapResource picture = PixmapResourcePool.loadPictureResource(chartResource.parent().resolve(model.getBackbmp()));
+			Pixmap pix = picture != null ? picture.getPixmap() : null;
 			if(pix != null) {
 				backbmp = new TextureRegion(new Texture(pix));
 				pix.dispose();
@@ -106,7 +108,7 @@ public class BMSResource {
 			Thread bgaloader = new Thread(() -> {
 				try {
 					bga.abort();
-					bga.setModel(bgamodel);
+					bga.setModel(bgamodel, chartResource);
 					bgaon = bgamodel != null;
 				} catch (Throwable e) {
 					Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
@@ -118,7 +120,7 @@ public class BMSResource {
 			Thread audioloader = new Thread(() -> {
 				try {
 					audio.abort();
-					audio.setModel(model);
+					audio.setModel(model, chartResource);
 				} catch (Throwable e) {
 					Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 					e.printStackTrace();

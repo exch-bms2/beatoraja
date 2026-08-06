@@ -9,6 +9,7 @@ import com.badlogic.gdx.audio.AudioDevice;
 
 import bms.player.beatoraja.AudioConfig;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.song.SongResource;
 
 /**
  * libGDX AudioDeviceドライバ
@@ -62,6 +63,11 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 	@Override
 	protected PCM getKeySound(Path p) {
 		return PCM.load(p.toString(), this);
+	}
+
+	@Override
+	protected PCM getKeySound(SongResource resource) {
+		return PCM.load(resource, this);
 	}
 
 	@Override

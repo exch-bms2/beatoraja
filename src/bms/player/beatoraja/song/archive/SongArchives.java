@@ -1,16 +1,17 @@
 package bms.player.beatoraja.song.archive;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import bms.player.beatoraja.song.SongResource;
+import bms.player.beatoraja.song.SongResources;
 
 /**
  * Registry and path-based facade for song archives. Add a {@link SongArchive}
@@ -20,18 +21,19 @@ public final class SongArchives {
 
 	private static final String ARCHIVE_STORAGE_DIRECTORY = ".beatoraja-archives";
 	private static final List<SongArchive> ARCHIVES = List.of(new ZipSongArchive(), new RarSongArchive());
-	private static final Map<Path, ExtractedArchive> EXTRACTED_ARCHIVES = new ConcurrentHashMap<>();
-
-	static {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> EXTRACTED_ARCHIVES.values().forEach(archive ->
-				deleteRecursively(archive.root())), "song archive cleanup"));
-	}
-
 	private SongArchives() {
 	}
 
 	public static boolean isSupportedArchive(Path path) {
 		return archiveFor(path) != null;
+	}
+
+	/** Converts a local or virtual archive path into a resource abstraction. */
+	public static SongResource resource(Path path) {
+		ArchivePath archivePath = parse(path);
+		return archivePath == null ? SongResources.local(path)
+				: new ArchiveSongResource(archivePath.archive(), archivePath.entryName(), archivePath.visibleRoot(),
+						archivePath.directory());
 	}
 
 	public static Path virtualPath(Path archive, String entryName) {
@@ -73,18 +75,17 @@ public final class SongArchives {
 		return archivePath != null ? archivePath.entryName() : null;
 	}
 
-	/** Returns an ordinary path for a regular path or an archive entry path. */
-	public static Path resolve(Path path) throws IOException {
+	public static InputStream openStream(Path path) throws IOException {
 		ArchivePath archivePath = parse(path);
-		if (archivePath == null) {
-			return path;
-		}
-		Path root = extractToTemporaryDirectory(archivePath.archive());
-		Path resolved = root.resolve(archivePath.entryName()).normalize();
-		if (!resolved.startsWith(root) || !Files.isRegularFile(resolved)) {
-			throw new IOException("Archive entry does not exist: " + archivePath.entryName());
-		}
-		return resolved;
+		return archivePath == null ? Files.newInputStream(path) : openEntry(archivePath.archive(), archivePath.entryName());
+	}
+
+	/**
+	 * Returns an ordinary path for a regular path or materializes one archive
+	 * entry. This deliberately never extracts an entire archive.
+	 */
+	public static Path resolve(Path path) throws IOException {
+		return resource(path).materialize();
 	}
 
 	/**
@@ -146,6 +147,40 @@ public final class SongArchives {
 		return archiveForRequired(archive).listEntries(archive);
 	}
 
+	static InputStream openEntry(Path archive, String entryName) throws IOException {
+		return archiveForRequired(archive).openEntry(archive, entryName);
+	}
+
+	static boolean hasEntry(Path archive, String entryName) throws IOException {
+		return listEntries(archive).contains(entryName);
+	}
+
+	static boolean hasDirectory(Path archive, String entryName) throws IOException {
+		String prefix = entryName.isEmpty() ? "" : entryName + "/";
+		return listEntries(archive).stream().anyMatch(candidate -> candidate.startsWith(prefix));
+	}
+
+	static long entrySize(Path archive, String entryName) throws IOException {
+		return archiveForRequired(archive).entrySize(archive, entryName);
+	}
+
+	static String archiveCacheKey(Path archive) {
+		try {
+			return archive.toAbsolutePath() + ":" + Files.size(archive) + ":" + Files.getLastModifiedTime(archive);
+		} catch (IOException e) {
+			return archive.toAbsolutePath().toString();
+		}
+	}
+
+	static String resolveEntryName(String base, String relativePath) {
+		String raw = (base.isEmpty() ? "" : base + "/") + relativePath.replace('\\', '/');
+		String normalized = normalizeEntryNameOrNull(raw);
+		if (normalized == null) {
+			throw new IllegalArgumentException("Unsafe archive entry: " + relativePath);
+		}
+		return normalized;
+	}
+
 	/** Inspects entries and identifies a single top-level content directory. */
 	public static ArchiveContents readContents(Path archive) throws IOException {
 		List<String> entries = listEntries(archive);
@@ -177,33 +212,6 @@ public final class SongArchives {
 		return archiveForRequired(archivePath.archive()).readEntry(archivePath.archive(), archivePath.entryName());
 	}
 
-	private static Path extractToTemporaryDirectory(Path archive) throws IOException {
-		Path normalizedArchive = archive.toAbsolutePath().normalize();
-		FileTime modifiedTime = Files.getLastModifiedTime(normalizedArchive);
-		long size = Files.size(normalizedArchive);
-		ExtractedArchive existing = EXTRACTED_ARCHIVES.get(normalizedArchive);
-		if (existing != null && existing.matches(modifiedTime, size)) {
-			return existing.root();
-		}
-
-		synchronized (EXTRACTED_ARCHIVES) {
-			existing = EXTRACTED_ARCHIVES.get(normalizedArchive);
-			if (existing != null && existing.matches(modifiedTime, size)) {
-				return existing.root();
-			}
-
-			Path root = Files.createTempDirectory("beatoraja-archive-");
-			try {
-				archiveForRequired(normalizedArchive).extract(normalizedArchive, root);
-				EXTRACTED_ARCHIVES.put(normalizedArchive, new ExtractedArchive(root, modifiedTime, size));
-				return root;
-			} catch (IOException | RuntimeException e) {
-				deleteRecursively(root);
-				throw e;
-			}
-		}
-	}
-
 	private static SongArchive archiveFor(Path path) {
 		return ARCHIVES.stream().filter(archive -> archive.supports(path)).findFirst().orElse(null);
 	}
@@ -226,18 +234,34 @@ public final class SongArchives {
 					continue;
 				}
 				int archiveEnd = marker + extension.length();
-				if (value.length() <= archiveEnd + 1 || value.charAt(archiveEnd) != '!') {
+				if (value.length() <= archiveEnd || value.charAt(archiveEnd) != '!') {
 					continue;
+				}
+				if (value.length() == archiveEnd + 1) {
+					return new ArchivePath(Path.of(value.substring(0, archiveEnd)), "", null, true);
 				}
 				char separator = value.charAt(archiveEnd + 1);
 				if (separator != '/' && separator != '\\' && separator != '-') {
 					continue;
 				}
-				String entryName = normalizeEntryNameOrNull(value.substring(archiveEnd + 2));
-				if (entryName != null) {
-					return new ArchivePath(Path.of(value.substring(0, archiveEnd)), entryName);
+				if (separator == '-') {
+					String rootAndEntry = value.substring(archiveEnd + 2).replace('\\', '/');
+					int rootEnd = rootAndEntry.indexOf('/');
+					String root = normalizeRootDirectory(rootEnd >= 0 ? rootAndEntry.substring(0, rootEnd) : rootAndEntry);
+					if (rootEnd < 0) {
+						return new ArchivePath(Path.of(value.substring(0, archiveEnd)), root, root, true);
+					}
+					String relativeEntry = normalizeEntryNameOrNull(rootAndEntry.substring(rootEnd + 1));
+					if (relativeEntry != null) {
+						return new ArchivePath(Path.of(value.substring(0, archiveEnd)), root + "/" + relativeEntry, root, false);
+					}
+				} else {
+					String entryName = normalizeEntryNameOrNull(value.substring(archiveEnd + 2));
+					if (entryName != null) {
+						return new ArchivePath(Path.of(value.substring(0, archiveEnd)), entryName, null, false);
+					}
 				}
-			}
+		}
 		}
 		return null;
 	}
@@ -326,15 +350,10 @@ public final class SongArchives {
 		}
 	}
 
-	private record ArchivePath(Path archive, String entryName) {
+	private record ArchivePath(Path archive, String entryName, String visibleRoot, boolean directory) {
 	}
 
 	public record ArchiveContents(List<String> entries, String rootDirectory) {
 	}
 
-	private record ExtractedArchive(Path root, FileTime modifiedTime, long size) {
-		private boolean matches(FileTime currentModifiedTime, long currentSize) {
-			return modifiedTime.equals(currentModifiedTime) && size == currentSize && Files.isDirectory(root);
-		}
-	}
 }

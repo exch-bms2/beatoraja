@@ -2,6 +2,7 @@ package bms.player.beatoraja.audio;
 
 import bms.model.BMSModel;
 import bms.model.Note;
+import bms.player.beatoraja.song.SongResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,9 @@ public interface AudioDriver extends Disposable {
 	 *            ループ再生するかどうか
 	 */
 	public void play(String path, float volume, boolean loop);
+
+	/** Plays an audio resource without requiring a local file path. */
+	public void play(SongResource resource, float volume, boolean loop);
 	
 	/**
 	 * 指定したパスの音源のボリュームを設定する
@@ -36,6 +40,9 @@ public interface AudioDriver extends Disposable {
 	 *            ボリューム
 	 */
 	public void setVolume(String path, float volume);
+
+	/** Sets the volume of an audio resource. */
+	public void setVolume(SongResource resource, float volume);
 	
 	/**
 	 * 指定したパスの音源がなっている場合はtrueを返す
@@ -44,6 +51,9 @@ public interface AudioDriver extends Disposable {
 	 *            音源のファイルパス
 	 */
 	public boolean isPlaying(String path);
+
+	/** Returns whether an audio resource is playing. */
+	public boolean isPlaying(SongResource resource);
 	
 	/**
 	 * 指定したパスの音源がなっている場合は止める
@@ -53,6 +63,9 @@ public interface AudioDriver extends Disposable {
 	 */
 	public void stop(String path);
 
+	/** Stops an audio resource. */
+	public void stop(SongResource resource);
+
 	/**
 	 * 指定したパスの音源を開放する
 	 * 
@@ -60,6 +73,9 @@ public interface AudioDriver extends Disposable {
 	 *            音源のファイルパス
 	 */
 	public void dispose(String path);
+
+	/** Releases an audio resource. */
+	public void dispose(SongResource resource);
 
 	/**
 	 * BMSの音源データを読み込む
@@ -79,6 +95,11 @@ public interface AudioDriver extends Disposable {
 	 */
 	default void setModel(BMSModel model) {
 		setModel(model, 1f);
+	}
+
+	/** Loads a model using its original song resource context. */
+	default void setModel(BMSModel model, SongResource resource) {
+		setModel(model);
 	}
 	
 	/**
@@ -177,5 +198,34 @@ public interface AudioDriver extends Disposable {
 		}
 		
 		return result.toArray(new Path[result.size()]);
+	}
+
+	/**
+	 * Finds existing audio resources, including the conventional same-name
+	 * extension fallback used by BMS #WAV definitions.
+	 */
+	public static SongResource[] getResources(SongResource resource) {
+		final String[] extensions = { ".wav", ".flac", ".ogg", ".mp3" };
+		List<SongResource> result = new ArrayList<>();
+		try {
+			if (resource.exists()) {
+				result.add(resource);
+			}
+			String filename = resource.name();
+			int index = filename.lastIndexOf('.');
+			String name = index < 0 ? filename : filename.substring(0, index);
+			String extension = index < 0 ? "" : filename.substring(index);
+			for (String candidateExtension : extensions) {
+				if (candidateExtension.equalsIgnoreCase(extension)) {
+					continue;
+				}
+				SongResource candidate = resource.parent().resolve(name + candidateExtension);
+				if (candidate.exists()) {
+					result.add(candidate);
+				}
+			}
+		} catch (Exception ignored) {
+		}
+		return result.isEmpty() ? new SongResource[] { resource } : result.toArray(new SongResource[0]);
 	}
 }

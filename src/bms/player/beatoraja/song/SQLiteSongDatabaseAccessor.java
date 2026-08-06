@@ -85,7 +85,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot, String reviewpath,
 			SongUpdaterType songUpdaterType, boolean scanSongArchives) throws ClassNotFoundException {
-		this(filepath, bmsroot, reviewpath, songUpdaterType, scanSongArchives, SongArchiveExtractMode.TEMPORARY);
+		this(filepath, bmsroot, reviewpath, songUpdaterType, scanSongArchives,
+				SongArchiveExtractMode.NO_TEMPORARY_FILES);
 	}
 
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot, String reviewpath,
@@ -146,7 +147,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		this.reviewpath = reviewpath;
 		this.songUpdaterType = Objects.requireNonNullElse(songUpdaterType, SongUpdaterType.BATCHED);
 		this.scanSongArchives = scanSongArchives;
-		this.songArchiveExtractMode = Objects.requireNonNullElse(songArchiveExtractMode, SongArchiveExtractMode.TEMPORARY);
+		this.songArchiveExtractMode = Objects.requireNonNullElse(songArchiveExtractMode,
+				SongArchiveExtractMode.NO_TEMPORARY_FILES);
 		reviewdb = reviewpath != null && reviewpath.length() > 0 ? new SongReviewAccessor(reviewpath) : null;
 		root = Paths.get(".");
 		createTable();
@@ -1317,8 +1319,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		private BMSModel decode(Path path, String pathname) {
 			try {
 				if (pathname.toLowerCase(Locale.ROOT).endsWith(".bmson")) {
-					path = SongArchives.resolve(path);
-					return new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE).decode(path);
+					SongResource resource = SongResources.fromPath(path);
+					ChartSource source = new ChartSource() {
+						@Override
+						public String location() {
+							return resource.displayPath();
+						}
+
+						@Override
+						public java.io.InputStream openStream() throws IOException {
+							return resource.openStream();
+						}
+					};
+					return new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE)
+							.decode(new ChartInformation(source, BMSModel.LNTYPE_LONGNOTE, null));
 				}
 				if (SongArchives.isVirtualPath(path)) {
 					return new BMSDecoder(BMSModel.LNTYPE_LONGNOTE).decode(SongArchives.readEntry(path), false, null);
