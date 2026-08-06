@@ -117,8 +117,8 @@ public class ScoreDataProperty {
             }
             nowbestscorerate = totalnotes == 0 ? 0 : (float) nowbestscore / (totalnotes * 2);
         } else {
-            nowbestscore = totalnotes == 0 ? 0 : bestscore * notes / totalnotes;
-            nowbestscorerate= totalnotes == 0 ? 0 : (float) (bestscore) * notes / (totalnotes * totalnotes * 2);
+            nowbestscore = totalnotes == 0 ? 0 : (int) ((long) bestscore * notes / totalnotes);
+            nowbestscorerate = totalnotes == 0 ? 0 : (float) nowbestscore / (totalnotes * 2);
         }
         if (useRivalGhost) {
             for (int i=previousNotes; i<notes; i++) {
@@ -126,8 +126,8 @@ public class ScoreDataProperty {
             }
             nowrivalscorerate = totalnotes == 0 ? 0 : (float) nowrivalscore / (totalnotes * 2);
         } else {
-            nowrivalscore = totalnotes == 0 ? 0 : rivalscore * notes / totalnotes;
-            nowrivalscorerate= totalnotes == 0 ? 0 : (float) (rivalscore) * notes / (totalnotes * totalnotes * 2);
+            nowrivalscore = totalnotes == 0 ? 0 : (int) ((long) rivalscore * notes / totalnotes);
+            nowrivalscorerate = totalnotes == 0 ? 0 : (float) nowrivalscore / (totalnotes * 2);
         }
         previousNotes = notes;
     }
