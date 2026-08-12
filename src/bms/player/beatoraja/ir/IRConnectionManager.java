@@ -1,14 +1,18 @@
 package bms.player.beatoraja.ir;
 
-import java.io.File;
+import java.io.IOException;
 import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * IRConnectionの管理用クラス
@@ -108,6 +112,7 @@ public class IRConnectionManager {
 	private static void loadFromJar(ClassLoader classLoader, URL url, List<Class<IRConnection>> classes) {
 		try {
 			JarURLConnection jarUrlConnection = (JarURLConnection) url.openConnection();
+			jarUrlConnection.setUseCaches(false);
 			try(JarFile jarFile = jarUrlConnection.getJarFile()) {
 				Enumeration<JarEntry> jarEntries = jarFile.entries();
 				while(jarEntries.hasMoreElements()) {
@@ -123,24 +128,32 @@ public class IRConnectionManager {
 	}
 
 	private static void loadFromDirectory(ClassLoader classLoader, URL url, List<Class<IRConnection>> classes) {
-		File dir = new File(url.getPath());
-		String[] paths = dir.list();
-		if(paths == null) {
-			return;
-		}
-		for(String path : paths) {
-			if(path.endsWith(".class")) {
-				addConnectionClass(classLoader, IR_PACKAGE + "." + path.substring(0, path.length() - 6), classes);
+		try {
+			Path directory = Path.of(url.toURI());
+			try(Stream<Path> paths = Files.walk(directory)) {
+				paths.filter(Files::isRegularFile)
+						.map(directory::relativize)
+						.map(Path::toString)
+						.map(path -> toClassName(IR_RESOURCE + "/" + path))
+						.filter(className -> className != null)
+						.forEach(className -> addConnectionClass(classLoader, className, classes));
 			}
+		} catch (IOException | URISyntaxException e) {
+			Logger.getGlobal().warning("ディレクトリ読み込み失敗 - " + url + " : " + e.getMessage());
 		}
 	}
 
 	private static String toClassName(String path) {
-		if(!path.startsWith(IR_RESOURCE + "/") || !path.endsWith(".class")) {
+		String normalizedPath = path.replace('\\', '/');
+		if(!normalizedPath.startsWith(IR_RESOURCE + "/") || !normalizedPath.endsWith(".class")) {
 			return null;
 		}
-		String simpleName = path.substring(path.lastIndexOf("/") + 1, path.length() - 6);
-		return IR_PACKAGE + "." + simpleName;
+		String className = normalizedPath.substring(0, normalizedPath.length() - 6).replace('/', '.');
+		String simpleName = className.substring(className.lastIndexOf('.') + 1);
+		if(simpleName.equals("module-info") || simpleName.equals("package-info") || simpleName.indexOf('$') >= 0) {
+			return null;
+		}
+		return className;
 	}
 
 	@SuppressWarnings("unchecked")
