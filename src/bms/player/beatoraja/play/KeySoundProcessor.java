@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.TIMER_PLAY;
 import com.badlogic.gdx.utils.Array;
 
 import bms.model.BMSModel;
+import bms.model.MineNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
@@ -51,17 +52,31 @@ public class KeySoundProcessor {
 		private boolean stop = false;
 
 		private final long starttime;
+		private final boolean autoKeySound;
+		private final int laneCount;
 		final TimeLine[] timelines;
 
 		public AutoplayThread(BMSModel model, long starttime) {
 			this.starttime = starttime;
+			this.autoKeySound = player.resource.getPlayerConfig().isAutoKeySound();
+			this.laneCount = model.getMode().key;
 			Array<TimeLine> tls = new Array<TimeLine>();
 			for(TimeLine tl : model.getAllTimeLines()) {
-				if(tl.getBackGroundNotes().length > 0) {
+				if(tl.getBackGroundNotes().length > 0 || (autoKeySound && hasPlayableNote(tl))) {
 					tls.add(tl);
 				}
 			}
 			timelines = tls.toArray(TimeLine.class);
+		}
+
+		private boolean hasPlayableNote(TimeLine timeline) {
+			for (int lane = 0; lane < laneCount; lane++) {
+				Note note = timeline.getNote(lane);
+				if (note != null && !(note instanceof MineNote)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		@Override
@@ -79,6 +94,14 @@ public class KeySoundProcessor {
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
 						audio.play(n, config.getAudioConfig().getBgvolume(), 0);
+					}
+					if (autoKeySound) {
+						for (int lane = 0; lane < laneCount; lane++) {
+							Note note = timelines[p].getNote(lane);
+							if (note != null && !(note instanceof MineNote)) {
+								audio.play(note, config.getAudioConfig().getKeyvolume(), 0);
+							}
+						}
 					}
 					p++;
 				}

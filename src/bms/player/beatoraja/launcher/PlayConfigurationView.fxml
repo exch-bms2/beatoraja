@@ -272,6 +272,11 @@
                                          <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                          <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+	                                     <CheckBox fx:id="autokeysound" mnemonicParsing="false" text="%AUTO_KEY_SOUND" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.columnSpan="2">
+	                                        <tooltip>
+	                                           <Tooltip text="%AUTO_KEY_SOUND_TOOLTIP" textAlignment="CENTER" />
+	                                        </tooltip>
+	                                     </CheckBox>
                                          <Label text="%EXTRA_NOTE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                          <NumericSpinner fx:id="extranotedepth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                              <valueFactory>

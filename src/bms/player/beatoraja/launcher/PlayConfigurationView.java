@@ -192,6 +192,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox guidese;
 	@FXML
+	private CheckBox autokeysound;
+	@FXML
 	private CheckBox windowhold;
 	@FXML
 	private Spinner<Integer> extranotedepth;
@@ -456,6 +458,7 @@ public class PlayConfigurationView implements Initializable {
 		exitpressduration.getValueFactory().setValue(player.getExitPressDuration());
 		chartpreview.setSelected(player.isChartPreview());
 		guidese.setSelected(player.isGuideSE());
+		autokeysound.setSelected(player.isAutoKeySound());
 		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
@@ -564,6 +567,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setExitPressDuration(getValue(exitpressduration));
 		player.setChartPreview(chartpreview.isSelected());
 		player.setGuideSE(guidese.isSelected());
+		player.setAutoKeySound(autokeysound.isSelected());
 		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
