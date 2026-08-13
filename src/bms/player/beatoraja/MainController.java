@@ -320,7 +320,9 @@ public final class MainController {
 			audio = new GdxAudioDeviceDriver(config);
 			break;
 		case PortAudio:
-			audio = new PortAudioDriver(config);
+			if (audio == null) {
+				audio = new PortAudioDriver(config);
+			}
 			break;
 		}
 
