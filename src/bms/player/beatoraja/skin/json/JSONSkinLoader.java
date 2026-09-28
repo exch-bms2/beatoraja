@@ -34,6 +34,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 	Map<String, SourceData> sourceMap;
 	Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
+	Map<String, SkinFontSource> fontSourceMap;
 
 	protected final SkinLuaAccessor lua;
 
@@ -262,6 +263,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 			sourceMap = new HashMap<>();
 			bitmapSourceMap = new HashMap<>();
+			fontSourceMap = new HashMap<>();
 
 			final JsonSkinObjectLoader objectLoader = switch(type) {
 				case MUSIC_SELECT ->  new JsonSelectSkinObjectLoader(this);
@@ -367,9 +369,17 @@ public class JSONSkinLoader extends SkinLoader {
 			for (SkinTextBitmap.SkinTextBitmapSource source : bitmapSourceMap.values()) {
 				skin.addResource(source);
 			}
+			for (SkinFontSource source : fontSourceMap.values()) {
+				skin.addResource(source);
+			}
 		} catch (Throwable e) {
 			if (bitmapSourceMap != null) {
 				for (SkinTextBitmap.SkinTextBitmapSource source : bitmapSourceMap.values()) {
+					source.dispose();
+				}
+			}
+			if (fontSourceMap != null) {
+				for (SkinFontSource source : fontSourceMap.values()) {
 					source.dispose();
 				}
 			}
@@ -377,6 +387,21 @@ public class JSONSkinLoader extends SkinLoader {
 			return null;
 		}
 		return skin;
+	}
+
+	SkinFontSource getFontSource(String fontPath, String[] fallbackFontPaths) {
+		var key = createFontSourceKey(fontPath, fallbackFontPaths);
+		return fontSourceMap.computeIfAbsent(key, ignored -> new SkinFontSource(fontPath, fallbackFontPaths));
+	}
+
+	private static String createFontSourceKey(String fontPath, String[] fallbackFontPaths) {
+		var key = new java.lang.StringBuilder(fontPath).append('\0');
+		if (fallbackFontPaths != null) {
+			for (var fallbackFontPath : fallbackFontPaths) {
+				key.append(fallbackFontPath == null ? "" : fallbackFontPath).append('\0');
+			}
+		}
+		return key.toString();
 	}
 
 	private void setDestination(Skin skin, SkinObject obj, JsonSkin.Destination dst) {

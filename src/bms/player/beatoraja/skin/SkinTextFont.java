@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -40,8 +39,8 @@ public final class SkinTextFont extends SkinText {
     private GlyphLayout layout;
     private final GlyphLayout shadowLayout = new GlyphLayout();
 
-    private FreeTypeFontGenerator generator;
-    private FreeTypeFontGenerator[] fallbackGenerators = new FreeTypeFontGenerator[0];
+    private final SkinFontSource source;
+    private final boolean ownsSource;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private String preparedFonts;
     private final Set<Integer> activeBmpFallbackGlyphs = new HashSet<>();
@@ -74,49 +73,31 @@ public final class SkinTextFont extends SkinText {
     }
 
     public SkinTextFont(String fontpath, String[] fallbackFontPaths, int cycle, int size, int shadow, StringProperty property) {
-    	super(property);
-    	try {
-            generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
-            fallbackGenerators = loadFallbackGenerators(fallbackFontPaths);
-            parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.characters = "";
-            parameter.incremental = true;
-//            this.setCycle(cycle);
-            parameter.size = size;
-            setShadowOffset(new Vector2(shadow, shadow));    		
-    	} catch (GdxRuntimeException e) {
-    		Logger.getGlobal().warning("Skin Font読み込み失敗");
-    	}
+        this(new SkinFontSource(fontpath, fallbackFontPaths), cycle, size, shadow, property, true);
     }
 
-    private FreeTypeFontGenerator[] loadFallbackGenerators(String[] fallbackFontPaths) {
-        if (fallbackFontPaths == null || fallbackFontPaths.length == 0) {
-            return new FreeTypeFontGenerator[0];
-        }
+    public SkinTextFont(SkinFontSource source, int cycle, int size, int shadow, StringProperty property) {
+        this(source, cycle, size, shadow, property, false);
+    }
 
-        FreeTypeFontGenerator[] generators = new FreeTypeFontGenerator[fallbackFontPaths.length];
-        int count = 0;
-        for (String fallbackFontPath : fallbackFontPaths) {
-            if (fallbackFontPath == null || fallbackFontPath.isEmpty()) {
-                continue;
-            }
-            try {
-                generators[count++] = new FreeTypeFontGenerator(Gdx.files.internal(fallbackFontPath));
-            } catch (GdxRuntimeException e) {
-                Logger.getGlobal().warning("Fallback Skin Font load failed: " + fallbackFontPath);
-            }
-        }
-
-        FreeTypeFontGenerator[] result = new FreeTypeFontGenerator[count];
-        System.arraycopy(generators, 0, result, 0, count);
-        return result;
+    private SkinTextFont(SkinFontSource source, int cycle, int size, int shadow, StringProperty property,
+            boolean ownsSource) {
+        super(property);
+        this.source = source;
+        this.ownsSource = ownsSource;
+        parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.characters = "";
+        parameter.incremental = true;
+//      this.setCycle(cycle);
+        parameter.size = size;
+        setShadowOffset(new Vector2(shadow, shadow));
     }
     
     public boolean validate() {
-    	if(generator == null) {
-    		return false;
-    	}
-    	return super.validate();
+        if (!source.isAvailable()) {
+            return false;
+        }
+        return super.validate();
     }
 
     @Override
@@ -130,6 +111,10 @@ public final class SkinTextFont extends SkinText {
             font = null;
         }
         
+        FreeTypeFontGenerator generator = source.getGenerator();
+        if (generator == null) {
+            return;
+        }
         try {
             parameter.characters = toBmpCharacters(text);
             font = generator.generateFont(parameter);
@@ -154,6 +139,10 @@ public final class SkinTextFont extends SkinText {
             font = null;
         }
         
+        FreeTypeFontGenerator generator = source.getGenerator();
+        if (generator == null) {
+            return;
+        }
         try {
             parameter.characters = toBmpCharacters(text);
             font = generator.generateFont(parameter);
@@ -417,12 +406,16 @@ public final class SkinTextFont extends SkinText {
     }
 
     private BitmapFont.Glyph createMissingGlyph(int mappedCodePoint) throws Exception {
+        FreeTypeFontGenerator generator = source.getGenerator();
+        if (generator == null) {
+            return null;
+        }
         for (int candidate : MISSING_GLYPH_CANDIDATES) {
             BitmapFont.Glyph glyph = createGlyph(generator, candidate, mappedCodePoint);
             if (glyph != null) {
                 return glyph;
             }
-            for (FreeTypeFontGenerator fallbackGenerator : fallbackGenerators) {
+            for (FreeTypeFontGenerator fallbackGenerator : source.getFallbackGenerators()) {
                 glyph = createGlyph(fallbackGenerator, candidate, mappedCodePoint);
                 if (glyph != null) {
                     return glyph;
@@ -474,13 +467,17 @@ public final class SkinTextFont extends SkinText {
     }
 
     private BitmapFont.Glyph createGlyph(int codePoint, int mappedCodePoint, boolean fallbackOnly) throws Exception {
+        FreeTypeFontGenerator generator = source.getGenerator();
+        if (generator == null) {
+            return null;
+        }
         if (!fallbackOnly) {
             BitmapFont.Glyph glyph = createGlyph(generator, codePoint, mappedCodePoint);
             if (glyph != null) {
                 return glyph;
             }
         }
-        for (FreeTypeFontGenerator fallbackGenerator : fallbackGenerators) {
+        for (FreeTypeFontGenerator fallbackGenerator : source.getFallbackGenerators()) {
             BitmapFont.Glyph glyph = createGlyph(fallbackGenerator, codePoint, mappedCodePoint);
             if (glyph != null) {
                 return glyph;
@@ -585,11 +582,10 @@ public final class SkinTextFont extends SkinText {
     }
 
     public void dispose() {
-    	Optional.ofNullable(generator).ifPresent(FreeTypeFontGenerator::dispose);
-        for (FreeTypeFontGenerator fallbackGenerator : fallbackGenerators) {
-            Optional.ofNullable(fallbackGenerator).ifPresent(FreeTypeFontGenerator::dispose);
-        }
     	Optional.ofNullable(font).ifPresent(BitmapFont::dispose);
+        if (ownsSource) {
+            source.dispose();
+        }
     	setDisposed();
     }
 }

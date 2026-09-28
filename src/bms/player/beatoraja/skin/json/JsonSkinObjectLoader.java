@@ -656,7 +656,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						}
 						fallbackPaths[i] = skinPath.getParent().resolve(font.fallback[i].path).toString();
 					}
-					skinText = new SkinTextFont(path.toString(), fallbackPaths, 0, text.size, 0, property);
+					skinText = new SkinTextFont(loader.getFontSource(path.toString(), fallbackPaths), 0, text.size, 0, property);
 				}
 				skinText.setConstantText(text.constantText);
 				StringWriter writer = text.event != null ? text.event : StringPropertyFactory.getStringWriter(text.ref);
