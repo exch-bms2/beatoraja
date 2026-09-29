@@ -586,6 +586,7 @@ public final class MainController {
 
 	public void dispose() {
 		saveConfig();
+		rivals.close();
 
 		Optional.ofNullable(bmsplayer).ifPresent(MainState::dispose);
 		Optional.ofNullable(selector).ifPresent(MainState::dispose);
