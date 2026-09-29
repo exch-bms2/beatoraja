@@ -50,6 +50,16 @@ public interface IRConnection {
 	 */
 	public IRResponse<IRScoreData[]> getPlayData(IRPlayerData player, IRChartData chart);
 
+	/**
+	 * Retrieves score changes after a server-issued revision cursor.
+	 * Implementations that do not support incremental synchronization retain the
+	 * existing full-score behavior and leave the cursor at {@code -1}.
+	 */
+	public default IRScoreDataSyncResponse getPlayDataSince(IRPlayerData player, long scoreRevision) {
+		IRResponse<IRScoreData[]> response = getPlayData(player, null);
+		return new IRScoreDataSyncResponse(response.isSucceeded(), response.getMessage(), response.getData(), -1, false);
+	}
+
 	public IRResponse<IRScoreData[]> getCoursePlayData(IRPlayerData player, IRCourseData course);
 
 	/**

@@ -59,9 +59,13 @@ public final class IRWorkerMain {
 				case METHOD_LOGIN -> playerResponse(connection.login(request.account.toIRAccount()));
 				case METHOD_GET_RIVALS -> playersResponse(connection.getRivals());
 				case METHOD_GET_TABLE_DATAS -> tablesResponse(connection.getTableDatas());
-				case METHOD_GET_PLAY_DATA -> scoresResponse(connection.getPlayData(
-						request.player != null ? request.player.toIRPlayerData() : null,
-						request.chart != null ? request.chart.toIRChartData() : null));
+				case METHOD_GET_PLAY_DATA -> request.chart != null
+						? scoresResponse(connection.getPlayData(
+								request.player != null ? request.player.toIRPlayerData() : null,
+								request.chart.toIRChartData()))
+						: scoresResponse(connection.getPlayDataSince(
+								request.player != null ? request.player.toIRPlayerData() : null,
+								request.scoreRevision));
 				case METHOD_GET_COURSE_PLAY_DATA -> scoresResponse(connection.getCoursePlayData(
 						request.player != null ? request.player.toIRPlayerData() : null,
 						request.course != null ? request.course.toIRCourseData() : null));
@@ -107,6 +111,13 @@ public final class IRWorkerMain {
 	private static Response scoresResponse(IRResponse<IRScoreData[]> irResponse) {
 		Response response = base(irResponse);
 		response.scores = fromScores(irResponse.getData());
+		return response;
+	}
+
+	private static Response scoresResponse(IRScoreDataSyncResponse irResponse) {
+		Response response = scoresResponse((IRResponse<IRScoreData[]>) irResponse);
+		response.scoreRevision = irResponse.getScoreRevision();
+		response.hasMore = irResponse.hasMore();
 		return response;
 	}
 

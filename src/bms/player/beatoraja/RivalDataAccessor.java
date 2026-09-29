@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.File;
 import java.nio.file.*;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -19,6 +20,8 @@ import bms.player.beatoraja.song.SongData;
  * @author exch
  */
 public final class RivalDataAccessor {
+
+	private static final int RIVAL_SYNC_CONCURRENCY = 2;
 
 	/**
 	 * ライバル情報
@@ -90,6 +93,7 @@ public final class RivalDataAccessor {
 					// ライバルキャッシュ作成
 					Array<PlayerInformation> rivals = new Array<PlayerInformation>();
 					Array<ScoreDataCache> rivalcaches = new Array<ScoreDataCache>();
+					Semaphore syncSlots = new Semaphore(RIVAL_SYNC_CONCURRENCY);
 					
 					if(main.getIRStatus()[0].config.isImportrival()) {
 						for(IRPlayerData irplayer : response.getData()) {
@@ -112,14 +116,47 @@ public final class RivalDataAccessor {
 								}
 							});
 							new Thread(() -> {
-								scoredb.createTable();
-								scoredb.setInformation(rival);
-								IRResponse<IRScoreData[]> scores = main.getIRStatus()[0].connection.getPlayData(irplayer, null);
-								if(scores.isSucceeded()) {
-									scoredb.setScoreData(convert(scores.getData()));
-									Logger.getGlobal().info("IRからのライバルスコア取得完了 : " + rival.getName());
-								} else {
-									Logger.getGlobal().warning("IRからのライバルスコア取得失敗 : " + scores.getMessage());
+								boolean acquired = false;
+								try {
+									syncSlots.acquire();
+									acquired = true;
+									scoredb.createTable();
+									PlayerInformation savedRival = scoredb.getInformation();
+									if(savedRival != null) {
+										rival.setSyncRevision(savedRival.getSyncRevision());
+									}
+									scoredb.setInformation(rival);
+
+									long revision = rival.getSyncRevision();
+									boolean hasMore;
+									do {
+										IRScoreDataSyncResponse scores = main.getIRStatus()[0].connection.getPlayDataSince(irplayer, revision);
+										if(!scores.isSucceeded()) {
+											Logger.getGlobal().warning("IRからのライバルスコア取得失敗 : " + scores.getMessage());
+											break;
+										}
+
+										scoredb.setScoreData(convert(scores.getData()));
+										long nextRevision = scores.getScoreRevision();
+										hasMore = scores.hasMore();
+										if(hasMore && nextRevision <= revision) {
+											Logger.getGlobal().warning("IRからのライバルスコア同期を中断 : リビジョンが進みません (" + rival.getName() + ")");
+											break;
+										}
+
+										revision = nextRevision;
+										rival.setSyncRevision(revision);
+										scoredb.setInformation(rival);
+									} while(hasMore);
+
+									Logger.getGlobal().info("IRからのライバルスコア同期完了 : " + rival.getName());
+								} catch (InterruptedException exception) {
+									Thread.currentThread().interrupt();
+									Logger.getGlobal().warning("IRからのライバルスコア同期を中断 : " + rival.getName());
+								} finally {
+									if(acquired) {
+										syncSlots.release();
+									}
 								}
 							}).start();
 						}

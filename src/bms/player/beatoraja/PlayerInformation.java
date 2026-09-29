@@ -19,6 +19,10 @@ public class PlayerInformation {
 	 * 段位
 	 */
 	private String rank;
+	/**
+	 * Last score activity revision synchronized from the IR server.
+	 */
+	private long syncRevision = -1;
 	
 	public String getId() {
 		return id;
@@ -42,5 +46,13 @@ public class PlayerInformation {
 	
 	public void setRank(String rank) {
 		this.rank = rank;
+	}
+
+	public long getSyncRevision() {
+		return syncRevision;
+	}
+
+	public void setSyncRevision(long syncRevision) {
+		this.syncRevision = syncRevision;
 	}
 }

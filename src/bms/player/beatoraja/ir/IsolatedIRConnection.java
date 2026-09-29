@@ -87,6 +87,16 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 	}
 
 	@Override
+	public IRScoreDataSyncResponse getPlayDataSince(IRPlayerData player, long scoreRevision) {
+		Request request = new Request();
+		request.method = METHOD_GET_PLAY_DATA;
+		request.player = Player.from(player);
+		request.scoreRevision = scoreRevision;
+		Response response = invoke(request);
+		return new IRScoreDataSyncResponse(response.succeeded, response.message, toIRScores(response.scores), response.scoreRevision, response.hasMore);
+	}
+
+	@Override
 	public IRResponse<IRScoreData[]> getCoursePlayData(IRPlayerData player, IRCourseData course) {
 		Request request = new Request();
 		request.method = METHOD_GET_COURSE_PLAY_DATA;

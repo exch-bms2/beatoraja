@@ -46,6 +46,7 @@ final class IRWorkerProtocol {
 		public Course course;
 		public Score score;
 		public String currentVersion;
+		public long scoreRevision = -1;
 	}
 
 	/**
@@ -61,6 +62,8 @@ final class IRWorkerProtocol {
 		public String text;
 		public Version version;
 		public String[] illegalSongs;
+		public long scoreRevision = -1;
+		public boolean hasMore;
 
 		/**
 		 * worker内で発生したエラーを通常のIR失敗レスポンスとして返す。

@@ -31,7 +31,8 @@ public class ScoreDatabaseAccessor extends SQLiteDatabaseAccessor {
 		super(new Table("info", 
 				new Column("id", "TEXT",1,1),
 				new Column("name", "TEXT",1,0),
-				new Column("rank", "TEXT")
+				new Column("rank", "TEXT"),
+				new Column("syncRevision", "INTEGER", 0, 0, "-1")
 				),
 				new Table("player", 
 						new Column("date", "INTEGER",0,1),
