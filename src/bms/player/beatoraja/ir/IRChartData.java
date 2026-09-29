@@ -5,7 +5,10 @@ import java.util.Map;
 
 import bms.model.BMSModel;
 import bms.model.BMSModelUtils;
+import bms.model.LongNote;
 import bms.model.Mode;
+import bms.model.Note;
+import bms.model.TimeLine;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -205,8 +208,9 @@ public class IRChartData {
 		this.length = song.getLength();
 		this.normalNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_KEY) : 0;
 		this.scratchNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_SCRATCH) : 0;
-		this.longNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_KEY) : 0;
-		this.longScratchNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_SCRATCH) : 0;
+		final int[] longNoteCounts = model != null ? countLongNotes(model) : new int[] {0, 0};
+		this.longNotes = longNoteCounts[0];
+		this.longScratchNotes = longNoteCounts[1];
 		this.hasScroll = song.hasScrollChange();
 		this.hasSpeed = song.getMinbpm() != song.getMaxbpm();
 		this.hasBga = song.hasBGA();
@@ -215,5 +219,30 @@ public class IRChartData {
 		if(model != null) {
 			values.putAll(model.getValues());			
 		}
+	}
+
+	/**
+	 * Counts long notes by their start objects only. CN and HCN end objects are
+	 * intentionally excluded so each long note is represented once.
+	 */
+	private static int[] countLongNotes(BMSModel model) {
+		int keyLongNotes = 0;
+		int scratchLongNotes = 0;
+
+		for (TimeLine timeline : model.getAllTimeLines()) {
+			for (int lane = 0; lane < model.getMode().key; lane++) {
+				Note note = timeline.getNote(lane);
+
+				if (note instanceof LongNote longNote && !longNote.isEnd()) {
+					if (model.getMode().isScratchKey(lane)) {
+						scratchLongNotes++;
+					} else {
+						keyLongNotes++;
+					}
+				}
+			}
+		}
+
+		return new int[] {keyLongNotes, scratchLongNotes};
 	}
 }
