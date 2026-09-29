@@ -2,7 +2,9 @@ package bms.player.beatoraja.play;
 
 import java.io.*;
 import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
 import java.util.function.*;
+import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.Mode;
@@ -53,16 +55,13 @@ public final class PracticeConfiguration {
 		cursorpos = 0;
 		itemOffset = 0;
 		controls.initialize(config);
+		property = new PracticeProperty();
 		property.judgerank = model.getJudgerank();
 		property.endtime = model.getLastTime() + 1000;
 		Path p = Paths.get("practice/" + model.getSHA256() + ".json");
-		if (Files.exists(p)) {
-			Json json = new Json();
-			try {
-				property = json.fromJson(PracticeProperty.class, new FileReader(p.toFile()));
-			} catch (FileNotFoundException | SerializationException e) {
-				e.printStackTrace();
-			}
+		PracticeProperty loadedProperty = loadPracticeProperty(p);
+		if (loadedProperty != null) {
+			property = loadedProperty;
 		}
 
 		if(property.gaugecategory == null) {
@@ -73,6 +72,23 @@ public final class PracticeConfiguration {
 			property.total = model.getTotal();
 		}
 		invalidateTextCache();
+	}
+
+	static PracticeProperty loadPracticeProperty(Path path) {
+		if (!Files.isRegularFile(path)) {
+			return null;
+		}
+		try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+			Json json = new Json();
+			PracticeProperty loadedProperty = json.fromJson(PracticeProperty.class, reader);
+			if (loadedProperty == null) {
+				Logger.getGlobal().warning("プラクティス設定がnullです : " + path);
+			}
+			return loadedProperty;
+		} catch (IOException | SerializationException e) {
+			Logger.getGlobal().warning("プラクティス設定の読み込み失敗 : " + path + " : " + e.getMessage());
+			return null;
+		}
 	}
 
 	public void saveProperty() {
