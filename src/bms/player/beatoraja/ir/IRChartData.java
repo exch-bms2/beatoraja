@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import bms.model.BMSModel;
+import bms.model.BMSModelUtils;
 import bms.model.Mode;
 import bms.player.beatoraja.song.SongData;
 
@@ -111,13 +112,27 @@ public class IRChartData {
 	 * ストップシーケンスが存在するかどうか
 	 */
 	public final boolean hasStop;
+	/**
+	 * 譜面の長さ(ms)
+	 */
+	public final int length;
+	public final int normalNotes;
+	public final int scratchNotes;
+	public final int longNotes;
+	public final int longScratchNotes;
+	public final boolean hasScroll;
+	public final boolean hasSpeed;
+	public final boolean hasBga;
+	public final boolean hasChartInfo;
 	
 	public final Map<String, String> values = new HashMap<String, String>();
 
 	public IRChartData(String md5, String sha256, String title, String subtitle, String genre, String artist,
 			String subartist, String url, String appendurl, int level, int total, Mode mode, int lntype, int judge,
 			int minbpm, int maxbpm, int notes, boolean hasUndefinedLN, boolean hasLN, boolean hasCN, boolean hasHCN,
-			boolean hasMine, boolean hasRandom, boolean hasStop, Map<String, String> values) {
+			boolean hasMine, boolean hasRandom, boolean hasStop, int length, int normalNotes, int scratchNotes,
+			int longNotes, int longScratchNotes, boolean hasScroll, boolean hasSpeed, boolean hasBga,
+			boolean hasChartInfo, Map<String, String> values) {
 		this.md5 = md5;
 		this.sha256 = sha256;
 		this.title = title;
@@ -142,6 +157,15 @@ public class IRChartData {
 		this.hasMine = hasMine;
 		this.hasRandom = hasRandom;
 		this.hasStop = hasStop;
+		this.length = length;
+		this.normalNotes = normalNotes;
+		this.scratchNotes = scratchNotes;
+		this.longNotes = longNotes;
+		this.longScratchNotes = longScratchNotes;
+		this.hasScroll = hasScroll;
+		this.hasSpeed = hasSpeed;
+		this.hasBga = hasBga;
+		this.hasChartInfo = hasChartInfo;
 		if(values != null) {
 			this.values.putAll(values);
 		}
@@ -178,6 +202,15 @@ public class IRChartData {
 		this.hasRandom = song.hasRandomSequence();
 		this.hasStop = song.isBpmstop();
 		this.lntype = lntype;
+		this.length = song.getLength();
+		this.normalNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_KEY) : 0;
+		this.scratchNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_SCRATCH) : 0;
+		this.longNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_KEY) : 0;
+		this.longScratchNotes = model != null ? BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_SCRATCH) : 0;
+		this.hasScroll = song.hasScrollChange();
+		this.hasSpeed = song.getMinbpm() != song.getMaxbpm();
+		this.hasBga = song.hasBGA();
+		this.hasChartInfo = model != null;
 
 		if(model != null) {
 			values.putAll(model.getValues());			

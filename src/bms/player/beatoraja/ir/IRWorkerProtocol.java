@@ -173,6 +173,15 @@ final class IRWorkerProtocol {
 		public boolean hasMine;
 		public boolean hasRandom;
 		public boolean hasStop;
+		public int length;
+		public int normalNotes;
+		public int scratchNotes;
+		public int longNotes;
+		public int longScratchNotes;
+		public boolean hasScroll;
+		public boolean hasSpeed;
+		public boolean hasBga;
+		public boolean hasChartInfo;
 		public HashMap<String, String> values;
 
 		static Chart from(IRChartData chart) {
@@ -204,6 +213,15 @@ final class IRWorkerProtocol {
 			dto.hasMine = chart.hasMine;
 			dto.hasRandom = chart.hasRandom;
 			dto.hasStop = chart.hasStop;
+			dto.length = chart.length;
+			dto.normalNotes = chart.normalNotes;
+			dto.scratchNotes = chart.scratchNotes;
+			dto.longNotes = chart.longNotes;
+			dto.longScratchNotes = chart.longScratchNotes;
+			dto.hasScroll = chart.hasScroll;
+			dto.hasSpeed = chart.hasSpeed;
+			dto.hasBga = chart.hasBga;
+			dto.hasChartInfo = chart.hasChartInfo;
 			dto.values = new HashMap<>(chart.values);
 			return dto;
 		}
@@ -211,7 +229,8 @@ final class IRWorkerProtocol {
 		IRChartData toIRChartData() {
 			return new IRChartData(md5, sha256, title, subtitle, genre, artist, subartist, url, appendurl, level, total,
 					mode, lntype, judge, minbpm, maxbpm, notes, hasUndefinedLN, hasLN, hasCN, hasHCN, hasMine, hasRandom,
-					hasStop, values);
+					hasStop, length, normalNotes, scratchNotes, longNotes, longScratchNotes, hasScroll, hasSpeed, hasBga,
+					hasChartInfo, values);
 		}
 	}
 
