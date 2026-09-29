@@ -531,7 +531,10 @@ public class SkinConfiguration extends MainState {
 	}
 
 	private void scanSkins(Path path, List<Path> paths) {
-		if (Files.isDirectory(path)) {
+		if (Files.isSymbolicLink(path)) {
+			return;
+		}
+		if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
 			try (Stream<Path> sub = Files.list(path)) {
 				sub.forEach((Path t) -> {
 					scanSkins(t, paths);

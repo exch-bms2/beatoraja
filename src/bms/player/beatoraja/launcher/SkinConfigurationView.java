@@ -219,11 +219,12 @@ public class SkinConfigurationView implements Initializable {
     }
     
 	private void scan(Path p, final List<Path> paths) {
-		if (Files.isDirectory(p)) {
+		if (Files.isSymbolicLink(p)) {
+			return;
+		}
+		if (Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS)) {
 			try (Stream<Path> sub = Files.list(p)) {
-				sub.forEach((t) -> {
-						scan(t, paths);
-				});
+				sub.forEach(t -> scan(t, paths));
 			} catch (IOException e) {
 			}
 		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
@@ -368,9 +369,8 @@ public class SkinConfigurationView implements Initializable {
 				optionbox.put(option, combo);
 				main.getChildren().add(hbox);
 			}
-			if(item instanceof CustomFile) {
+			if(item instanceof CustomFile file) {
 				// File項目生成
-				final CustomFile file = (CustomFile) item;
 				String name = file.path.substring(file.path.lastIndexOf('/') + 1);
 				if(file.path.contains("|")) {
 					if(file.path.length() > file.path.lastIndexOf('|') + 1) {
@@ -430,9 +430,8 @@ public class SkinConfigurationView implements Initializable {
 					e.printStackTrace();
 				}
 			}
-			if(item instanceof CustomOffset) {
+			if(item instanceof CustomOffset option) {
 				// Offset項目生成
-				final CustomOffset option = (CustomOffset) item;
 				final String[] values = {"x","y","w","h","r","a"};
 				HBox hbox = new HBox();
 				Label label = new Label(option.name);
