@@ -217,7 +217,12 @@ public class SongInformation implements Validatable {
 	}
 
 	public void setDistribution(String distribution) {
-		this.distribution = distribution;
+		this.distribution = distribution != null ? distribution : "";
+		distribution = this.distribution;
+		if (distribution.isEmpty()) {
+			distributionValues = new int[0][7];
+			return;
+		}
 		int[] index = {0,2,3,5,6};
 		if(distribution.startsWith("#")) {
 			index = new int[]{0,1,2,3,4,5,6};
