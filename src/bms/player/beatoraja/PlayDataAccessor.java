@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
@@ -499,23 +500,41 @@ public final class PlayDataAccessor {
 	 */
 	public ReplayData readReplayData(BMSModel model, int lnmode, int index) {
 		if (existsReplayData(model, lnmode, index)) {
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			try {
-				String path = this.getReplayDataFilePath(model, lnmode, index);
-				ReplayData result = null;
-				if (Files.exists(Paths.get(path + ".brd"))) {
-					result =  json.fromJson(ReplayData.class, new BufferedInputStream(
-							new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
-				}
-				if(result != null && result.validate()) {
-					return result;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			String path = this.getReplayDataFilePath(model, lnmode, index);
+			Path replayPath = Paths.get(path + ".brd");
+			ReplayData result = readReplayFile(replayPath, ReplayData.class);
+			if(isValidReplay(result, replayPath)) {
+				return result;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Reads a compressed replay without allowing malformed local replay data to
+	 * interrupt selection or play startup.
+	 */
+	static <T> T readReplayFile(Path path, Class<T> type) {
+		Json json = new Json();
+		json.setIgnoreUnknownFields(true);
+		try (InputStream input = new BufferedInputStream(new GZIPInputStream(Files.newInputStream(path)))) {
+			return json.fromJson(type, input);
+		} catch (IOException | RuntimeException e) {
+			Logger.getGlobal().warning("リプレイデータ読み込み失敗 : " + path + " : " + e.getMessage());
+			return null;
+		}
+	}
+
+	private static boolean isValidReplay(ReplayData replay, Path path) {
+		if (replay == null) {
+			return false;
+		}
+		try {
+			return replay.validate();
+		} catch (RuntimeException e) {
+			Logger.getGlobal().warning("リプレイデータ検証失敗 : " + path + " : " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -572,26 +591,16 @@ public final class PlayDataAccessor {
 	public ReplayData[] readReplayData(String[] hash, boolean ln, int lnmode, int index,
 			CourseData.CourseDataConstraint[] constraint) {
 		if (existsReplayData(hash, ln, lnmode, index, constraint)) {
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			try {
-				String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint);
-				ReplayData[] result = null;
-				if (Files.exists(Paths.get(path + ".brd"))) {
-					result = json.fromJson(ReplayData[].class, new BufferedInputStream(
-							new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
-				}
-				if(result != null) {
-					for(ReplayData rd : result) {
-						if(rd == null || !rd.validate()) {
-							return null;
-						}
+			String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint);
+			Path replayPath = Paths.get(path + ".brd");
+			ReplayData[] result = readReplayFile(replayPath, ReplayData[].class);
+			if(result != null) {
+				for(ReplayData rd : result) {
+					if(!isValidReplay(rd, replayPath)) {
+						return null;
 					}
-					return result;
 				}
-
-			} catch (IOException e) {
-				e.printStackTrace();
+				return result;
 			}
 		}
 		return null;
