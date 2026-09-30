@@ -13,6 +13,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.archive.SongArchives;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 
@@ -25,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -417,40 +419,36 @@ public class EventFactory {
 		open_with_explorer(212, state -> {
 			if(state instanceof MusicSelector selector) {
 				Bar current = selector.getBarManager().getSelected();
-				try {
-					if (Desktop.isDesktopSupported()) {
-						if (current instanceof SongBar songbar) {
-							if (songbar.existsSong()) {
-								Desktop.getDesktop().open(Paths.get(songbar.getSongData().getPath()).getParent().toFile());
-							} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
-								String[] md5 = songbar.getSongData().getOrg_md5()
-										.toArray(new String[songbar.getSongData().getOrg_md5().size()]);
-								SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
+				if (Desktop.isDesktopSupported()) {
+					if (current instanceof SongBar songbar) {
+						if (songbar.existsSong()) {
+							openWithExplorer(songbar.getSongData().getPath(), false);
+						} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
+							String[] md5 = songbar.getSongData().getOrg_md5()
+									.toArray(new String[songbar.getSongData().getOrg_md5().size()]);
+							SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
+							for (SongData sd : songdata) {
+								if (sd.getPath() != null) {
+									openWithExplorer(sd.getPath(), false);
+									break;
+								}
+							}
+						} else {
+							Matcher m = Pattern.compile(".[^\\(\\[～~]*").matcher(current.getTitle());
+							if (m.find()) {
+								SongData[] songdata = selector.getSongDatabase().getSongDatasByText(m.group());
 								for (SongData sd : songdata) {
 									if (sd.getPath() != null) {
-										Desktop.getDesktop().open(Paths.get(sd.getPath()).getParent().toFile());
+										openWithExplorer(sd.getPath(), false);
 										break;
 									}
 								}
-							} else {
-								Matcher m = Pattern.compile(".[^\\(\\[～~]*").matcher(current.getTitle());
-								if (m.find()) {
-									SongData[] songdata = selector.getSongDatabase().getSongDatasByText(m.group());
-									for (SongData sd : songdata) {
-										if (sd.getPath() != null) {
-											Desktop.getDesktop().open(Paths.get(sd.getPath()).getParent().toFile());
-											break;
-										}
-									}
-								}
 							}
-						} else if (current instanceof FolderBar) {
-							Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());
 						}
+					} else if (current instanceof FolderBar folderBar) {
+						openWithExplorer(folderBar.getFolderData().getPath(), true);
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}				
+				}
 			}
 		}),
 		/**
@@ -826,6 +824,24 @@ public class EventFactory {
 		private EventType(int id, TriConsumer<MainState, Integer, Integer> action) {
 			this.id = id;
 			this.event = createTwoArgEvent(action, id);
+		}
+
+		private static void openWithExplorer(String pathText, boolean directory) {
+			if (pathText == null) {
+				return;
+			}
+			try {
+				Path path = Paths.get(pathText);
+				Path archive = SongArchives.archivePath(path);
+				Path target = archive != null ? archive.getParent() : directory ? path : path.getParent();
+				if (target == null || !Files.isDirectory(target)) {
+					Logger.getGlobal().warning("エクスプローラーで開く対象が存在しません : " + pathText);
+					return;
+				}
+				Desktop.getDesktop().open(target.toFile());
+			} catch (IOException | RuntimeException e) {
+				Logger.getGlobal().warning("エクスプローラーで開く処理に失敗しました : " + pathText + " : " + e.getMessage());
+			}
 		}
 		
 	    private static BiConsumer<MainState, Integer> changeAutoSaveReplay(final int index) {

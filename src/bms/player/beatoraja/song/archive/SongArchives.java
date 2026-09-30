@@ -70,6 +70,12 @@ public final class SongArchives {
 		return parse(path) != null;
 	}
 
+	/** Returns the local archive file backing a virtual archive path, if any. */
+	public static Path archivePath(Path path) {
+		ArchivePath archivePath = parse(path);
+		return archivePath != null ? archivePath.archive() : null;
+	}
+
 	public static String entryName(Path path) {
 		ArchivePath archivePath = parse(path);
 		return archivePath != null ? archivePath.entryName() : null;
