@@ -920,7 +920,7 @@ public final class PlayerConfig {
 		mode24double.validate(Mode.KEYBOARD_24K_DOUBLE);
 
 		sort = MathUtils.clamp(sort, 0 , BarSorter.defaultSorter.length - 1);
-		if(sortid == null) {
+		if(!isKnownBarSorter(sortid)) {
 			sortid = BarSorter.defaultSorter[sort].name();
 		}
 
@@ -995,6 +995,18 @@ public final class PlayerConfig {
 
 		// --Stream
 		maxRequestCount = MathUtils.clamp(maxRequestCount, 0, 100);
+	}
+
+	private static boolean isKnownBarSorter(String sorterName) {
+		if (sorterName == null) {
+			return false;
+		}
+		for (BarSorter sorter : BarSorter.allSorter) {
+			if (sorter.name().equals(sorterName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static String sanitizePlayerName(String value) {
