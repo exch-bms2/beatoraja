@@ -97,10 +97,16 @@ public class JSONSkinLoader extends SkinLoader {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 			serializer.setSerializers(json, null, p);
-			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
+			try (Reader reader = new FileReader(p.toFile())) {
+				sk = json.fromJson(JsonSkin.Skin.class, reader);
+			}
+			if (sk == null) {
+				Logger.getGlobal().warning("JSONスキンファイルのルート値がnullです : " + p);
+				return null;
+			}
 			header = loadJsonSkinHeader(sk, p);
-		} catch (FileNotFoundException e) {
-			Logger.getGlobal().severe("JSONスキンファイルが見つかりません : " + p.toString());
+		} catch (IOException | SerializationException e) {
+			Logger.getGlobal().warning("JSONスキンファイルのヘッダ読み込み失敗 : " + p + " : " + e.getMessage());
 		}
 		return header;
 	}
