@@ -54,6 +54,10 @@ public class BitmapFontCache {
         CacheableBitmapFont font = _cacheStore.get(key);
         if (font == null) {
             font = factory.get();
+            // Fonts constructed with supplied regions do not own their textures by default.
+            if (font.font != null) {
+                font.font.setOwnsTexture(true);
+            }
             _cacheStore.put(key, font);
         }
         font.references++;

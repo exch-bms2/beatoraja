@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.skin.BitmapFontCache.CacheableBitmapFont;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.Glyph;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -393,7 +395,11 @@ public final class SkinTextBitmap extends SkinText {
 
 				_regions = new Array<>(_fontData.imagePaths.length);
 				for (int i = 0; i < _fontData.imagePaths.length; ++i) {
-					_regions.add(new TextureRegion(SkinLoader.getTexture(_fontData.imagePaths[i], usecim, useMipMaps)));
+					Texture texture = SkinLoader.getTexture(_fontData.imagePaths[i], usecim, useMipMaps);
+					if (texture == null) {
+						throw new IOException("Could not load bitmap font page: " + _fontData.imagePaths[i]);
+					}
+					_regions.add(new TextureRegion(texture));
 				}
 
 				_font = new BitmapFont(_fontData, _regions, true);
@@ -417,6 +423,13 @@ public final class SkinTextBitmap extends SkinText {
 					}
 				}
 			} catch (Exception e) {
+				if (_regions != null) {
+					for (TextureRegion region : _regions) {
+						region.getTexture().dispose();
+					}
+				}
+				_fontData = null;
+				_regions = null;
 				_font = null;
 			}
 
