@@ -31,6 +31,10 @@ import com.badlogic.gdx.utils.Array;
  * @author exch
  */
 public final class BGAProcessor {
+	/** Point-in-time estimate for BGA image and movie resources. */
+	public record MemoryStatistics(BGImageProcessor.MemoryStatistics images, int movieCount,
+			long retainedMovieBytes, int movieResourceCount) {
+	}
 	
 	// TODO イベントレイヤー対応(現状はミスレイヤーのみ)
 
@@ -235,6 +239,13 @@ public final class BGAProcessor {
 	public void disposeOld() {
 		cache.disposeOld();
 		Gdx.app.postRunnable(() -> mpgresource.disposeOld());
+	}
+
+	public MemoryStatistics getMemoryStatistics() {
+		ResourcePool.Statistics movies = mpgresource.getStatistics(video ->
+				video instanceof FFmpegProcessor processor ? processor.getRetainedMovieBytes() : 0);
+		return new MemoryStatistics(cache.getMemoryStatistics(), movies.resourceCount(), movies.estimatedBytes(),
+				movieResources.size());
 	}
 	/**
 	 * BGAの初期データをあらかじめキャッシュする

@@ -20,6 +20,10 @@ public final class SongResources {
 
 	private static final Map<String, Path> MATERIALIZED = new ConcurrentHashMap<>();
 
+	/** Point-in-time summary of archive/remote files materialized for Path-only APIs. */
+	public record MaterializedStatistics(int fileCount, long totalBytes) {
+	}
+
 	static {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> MATERIALIZED.values().forEach(path -> {
 			try {
@@ -73,6 +77,18 @@ public final class SongResources {
 			MATERIALIZED.put(resource.cacheKey(), target);
 			return target;
 		}
+	}
+
+	public static MaterializedStatistics getMaterializedStatistics() {
+		long totalBytes = 0;
+		for (Path path : MATERIALIZED.values()) {
+			try {
+				totalBytes += Files.size(path);
+			} catch (IOException ignored) {
+				// A concurrently cleaned temporary file does not invalidate the snapshot.
+			}
+		}
+		return new MaterializedStatistics(MATERIALIZED.size(), totalBytes);
 	}
 
 	private static String extensionSuffix(String name) {

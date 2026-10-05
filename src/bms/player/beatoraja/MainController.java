@@ -119,6 +119,8 @@ public final class MainController {
 	
 	private StreamController streamController;
 
+	private final MemoryDiagnostics memoryDiagnostics = new MemoryDiagnostics();
+
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
 
@@ -277,6 +279,7 @@ public final class MainController {
 			current = newState;
 			timer.setMainState(newState);
 			current.prepare();
+			memoryDiagnostics.capture(this, current.type.name());
 			updateMainStateListener(0);
 		}
 		if (current.getStage() != null) {
@@ -645,6 +648,14 @@ public final class MainController {
 
 	public MusicDownloadProcessor getMusicDownloadProcessor(){
 		return download;
+	}
+
+	public MusicSelector getMusicSelector() {
+		return selector;
+	}
+
+	public MemoryDiagnostics getMemoryDiagnostics() {
+		return memoryDiagnostics;
 	}
 
 	public MessageRenderer getMessageRenderer() {

@@ -175,6 +175,9 @@ public class Config implements Validatable {
 	private int bannerPixmapGen = 2;
 	private int songResourceGen = 1;
 
+	/** Enables low-frequency resource summaries at main-state transitions. */
+	private boolean memoryDiagnostics = false;
+
 	private boolean enableIpfs = true;
 	private String ipfsurl = "https://gateway.ipfs.io/";
 
@@ -479,6 +482,14 @@ public class Config implements Validatable {
 
 	public void setSongResourceGen(int songResourceGen) {
 		this.songResourceGen = songResourceGen;
+	}
+
+	public boolean isMemoryDiagnostics() {
+		return memoryDiagnostics;
+	}
+
+	public void setMemoryDiagnostics(boolean memoryDiagnostics) {
+		this.memoryDiagnostics = memoryDiagnostics;
 	}
 
 	public boolean isEnableIpfs() {

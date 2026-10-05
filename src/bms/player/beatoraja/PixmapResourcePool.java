@@ -35,6 +35,10 @@ import bms.player.beatoraja.song.SongResources;
 public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.PixmapResource> {
 	private final java.util.concurrent.ConcurrentHashMap<String, SongResource> songResources = new java.util.concurrent.ConcurrentHashMap<>();
 
+	/** Point-in-time estimate for native Pixmap memory retained by this pool. */
+	public record MemoryStatistics(int pixmapCount, long estimatedNativeBytes, int songResourceCount) {
+	}
+
 	public static final class PixmapResource {
 		private final Pixmap pixmap;
 		private final int frameCount;
@@ -117,6 +121,17 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 	public PixmapResource getPixmapResource(SongResource resource) {
 		songResources.put(resource.cacheKey(), resource);
 		return get(resource.cacheKey());
+	}
+
+	public MemoryStatistics getMemoryStatistics() {
+		Statistics statistics = getStatistics(resource -> estimatePixmapBytes(resource.getPixmap()));
+		return new MemoryStatistics(statistics.resourceCount(), statistics.estimatedBytes(), songResources.size());
+	}
+
+	private static long estimatePixmapBytes(Pixmap pixmap) {
+		// Pixmap formats used by skin/BGA resources are at most RGBA8888. Keep this
+		// deliberately conservative because libGDX does not expose native allocation size.
+		return (long) pixmap.getWidth() * pixmap.getHeight() * Integer.BYTES;
 	}
 
 	/**

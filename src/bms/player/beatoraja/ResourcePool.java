@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.ToLongFunction;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -15,6 +16,9 @@ import com.badlogic.gdx.utils.Disposable;
  * @param <V> リソース
  */
 public abstract class ResourcePool<K, V> implements Disposable {
+	/** Lightweight diagnostic information about resources currently retained by this pool. */
+	public record Statistics(int resourceCount, long estimatedBytes) {
+	}
 	/**
 	 * リソースの最大世代数
 	 */
@@ -87,6 +91,18 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 */
 	public int size() {
 		return resourceMap.size();
+	}
+
+	/**
+	 * Returns a point-in-time pool summary. This is intended for infrequent diagnostics,
+	 * not for frame-by-frame instrumentation.
+	 */
+	public Statistics getStatistics(ToLongFunction<? super V> sizeEstimator) {
+		long estimatedBytes = 0;
+		for (ResourceCacheElement<V> element : resourceMap.values()) {
+			estimatedBytes += Math.max(0, sizeEstimator.applyAsLong(element.resource));
+		}
+		return new Statistics(resourceMap.size(), estimatedBytes);
 	}
 	
 	public void dispose() {

@@ -12,6 +12,10 @@ import com.badlogic.gdx.utils.Array;
 public class BitmapFontCache {
     static private final Map<CacheKey, CacheableBitmapFont> _cacheStore = new HashMap<>();
 
+    /** Point-in-time estimate for bitmap-font texture pages owned by the cache. */
+    public record Statistics(int entryCount, int referenceCount, long estimatedTextureBytes) {
+    }
+
     static public class CacheableBitmapFont {
         public BitmapFont.BitmapFontData fontData;
         public Array<TextureRegion> regions;
@@ -74,6 +78,21 @@ public class BitmapFontCache {
 
     static public CacheableBitmapFont Get(Path path, int type) {
         return _cacheStore.get(new CacheKey(path, type));
+    }
+
+    public static Statistics getStatistics() {
+        int references = 0;
+        long bytes = 0;
+        for (CacheableBitmapFont font : _cacheStore.values()) {
+            references += font.references;
+            if (font.regions == null) {
+                continue;
+            }
+            for (TextureRegion region : font.regions) {
+                bytes += (long) region.getRegionWidth() * region.getRegionHeight() * Integer.BYTES;
+            }
+        }
+        return new Statistics(_cacheStore.size(), references, bytes);
     }
 
     static private final class CacheKey {

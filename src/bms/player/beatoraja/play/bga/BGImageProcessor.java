@@ -17,6 +17,10 @@ import com.badlogic.gdx.graphics.Texture;
  * @author exch
  */
 public class BGImageProcessor {
+	/** Point-in-time summary of BGA image resources. */
+	public record MemoryStatistics(int pixmapCount, long estimatedPixmapBytes, int textureCount,
+			long estimatedTextureBytes, int songResourceCount) {
+	}
 	
 	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png", "tga" };
 	/**
@@ -77,6 +81,20 @@ public class BGImageProcessor {
 	
 	public void disposeOld() {
 		cache.disposeOld();
+	}
+
+	public MemoryStatistics getMemoryStatistics() {
+		PixmapResourcePool.MemoryStatistics pixmaps = cache.getMemoryStatistics();
+		int textureCount = 0;
+		long textureBytes = 0;
+		for (Texture texture : bgacache) {
+			if (texture != null) {
+				textureCount++;
+				textureBytes += (long) texture.getWidth() * texture.getHeight() * Integer.BYTES;
+			}
+		}
+		return new MemoryStatistics(pixmaps.pixmapCount(), pixmaps.estimatedNativeBytes(), textureCount,
+				textureBytes, pixmaps.songResourceCount());
 	}
 
 	/**

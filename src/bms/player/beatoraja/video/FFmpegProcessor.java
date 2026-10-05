@@ -99,6 +99,12 @@ public class FFmpegProcessor implements VideoProcessor {
 		}
 	}
 
+	/** Returns the compressed movie bytes currently retained for stream-backed decoding. */
+	public long getRetainedMovieBytes() {
+		MovieSeekThread seekThread = movieseek;
+		return seekThread != null ? seekThread.getRetainedMovieBytes() : 0;
+	}
+
 	/**
 	 * 動画再生用スレッド
 	 *
@@ -131,7 +137,7 @@ public class FFmpegProcessor implements VideoProcessor {
 
 		private Pixmap pixmap;
 		private byte[] frameRow;
-		private byte[] movieBytes;
+		private volatile byte[] movieBytes;
 		private final Object pixmapLock = new Object();
 
 		private final SongResource resource;
@@ -353,6 +359,11 @@ public class FFmpegProcessor implements VideoProcessor {
 				frameRow = new byte[targetRowBytes];
 			}
 			return frameRow;
+		}
+
+		private long getRetainedMovieBytes() {
+			byte[] bytes = movieBytes;
+			return bytes != null ? bytes.length : 0;
 		}
 
 		private void preparePixmapForDraw(Pixmap pixmap) {
