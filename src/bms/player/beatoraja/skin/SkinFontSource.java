@@ -67,7 +67,8 @@ public final class SkinFontSource implements Disposable {
 				continue;
 			}
 			try {
-				generators[size++] = new FreeTypeFontGenerator(Gdx.files.internal(fallbackPath));
+				generators[size] = new FreeTypeFontGenerator(Gdx.files.internal(fallbackPath));
+				size++;
 			} catch (GdxRuntimeException e) {
 				Logger.getGlobal().warning("Fallback skin font load failed: " + fallbackPath + " - " + e.getMessage());
 			}

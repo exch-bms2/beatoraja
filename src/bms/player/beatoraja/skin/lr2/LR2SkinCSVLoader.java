@@ -104,6 +104,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							try {
 								SkinSourceMovie mm = new SkinSourceMovie(imagefile.getPath());
 								imagelist.add(mm);
+								skin.addResource(mm);
 								isMovie = true;
 								break;
 							} catch (Throwable e) {
@@ -114,7 +115,9 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 
 					if (!isMovie) {
-						imagelist.add(getTexture(imagefile.getPath(), usecim));
+						Texture texture = getTexture(imagefile.getPath(), usecim);
+						imagelist.add(texture);
+						skin.addResource(texture);
 					}
 				} else {
 					Logger.getGlobal()
@@ -136,6 +139,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					try {
 						SkinTextImage.SkinTextImageSource source = font.loadFont(imagefile.toPath());
 						fontlist.add(source);
+						skin.addResource(source);
 					} catch (IOException e) {
 						e.printStackTrace();
 						fontlist.add(null);
@@ -778,12 +782,20 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					e.printStackTrace();
 				}
 			});
-		};
+		} catch (IOException | RuntimeException | Error e) {
+			try {
+				skin.dispose();
+			} catch (RuntimeException cleanupFailure) {
+				e.addSuppressed(cleanupFailure);
+			}
+			throw e;
+		}
 
 		skin.setOption(option);
 
 		for (SkinObject obj : skin.getAllSkinObjects()) {
 			if (obj instanceof SkinImage && obj.getAllDestination().length == 0) {
+				skin.addResource(obj);
 				skin.removeSkinObject(obj);
 				Logger.getGlobal().warning("NO_DESTINATION : " + obj);
 			}

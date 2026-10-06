@@ -421,28 +421,47 @@ public class Skin {
 
 	public void dispose() {
 		if (textInput != null) {
-			textInput.dispose();
+			disposeResource(textInput::dispose);
 			textInput = null;
 		}
 		for (SkinObject obj : objects) {
 			if(!obj.isDisposed()) {
-				obj.dispose();
+				disposeResource(obj);
 			}
 		}
 		for (SkinObject obj : removes) {
 			if(!obj.isDisposed()) {
-				obj.dispose();
+				disposeResource(obj);
 			}
 		}
 		for (Disposable resource : resources) {
-			resource.dispose();
+			disposeResource(resource);
 		}
 		resources.clear();
 	}
 
+	private static void disposeResource(Disposable resource) {
+		try {
+			resource.dispose();
+		} catch (RuntimeException e) {
+			Logger.getGlobal().log(java.util.logging.Level.WARNING, "Skin resource disposal failed", e);
+		}
+	}
+
 	public void addResource(Disposable resource) {
-		if (resource != null) {
+		if (resource != null && !resources.contains(resource, true)) {
 			resources.add(resource);
+		}
+	}
+
+	/** Retains even unused loader textures; object disposal may already have deleted them. */
+	public void addResource(Texture texture) {
+		if (texture != null) {
+			addResource((Disposable) () -> {
+				if (texture.getTextureObjectHandle() != 0) {
+					texture.dispose();
+				}
+			});
 		}
 	}
 

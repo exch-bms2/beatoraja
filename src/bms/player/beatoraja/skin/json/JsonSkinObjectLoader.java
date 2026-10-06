@@ -574,6 +574,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		final File imagefile = SkinLoader.getPath(p.getParent().toString() + "/" + data.path, loader.filemap);
 		if (imagefile.exists()) {
 			data.data = getTexture(imagefile.getPath());
+			loader.registerResource((Texture) data.data);
 		}
 		data.loaded = true;
 		
@@ -646,6 +647,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, fallbackFonts, loader.usecim);
 						source.setType(font.type);
 						loader.bitmapSourceMap.put(font.id, source);
+						loader.registerResource(source);
 					}
 					skinText = new SkinTextBitmap(loader.bitmapSourceMap.get(font.id), text.size * ((float)loader.dstr.width / loader.sk.w), property);
 				} else {

@@ -25,6 +25,7 @@ import bms.player.beatoraja.video.VideoFormat;
  * @author exch
  */
 public class JSONSkinLoader extends SkinLoader {
+	private Skin loadingSkin;
 
 	protected Resolution dstr;
 	protected boolean usecim;
@@ -285,6 +286,7 @@ public class JSONSkinLoader extends SkinLoader {
 			header.setSourceResolution(src);
 			header.setDestinationResolution(dstr);
 			skin = objectLoader.getSkin(header);
+			loadingSkin = skin;
 			
 			IntIntMap op = new IntIntMap();
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {
@@ -328,8 +330,8 @@ public class JSONSkinLoader extends SkinLoader {
 				}
 
 				if (obj != null) {
-					setDestination(skin, obj, dst);
 					skin.add(obj);
+					setDestination(skin, obj, dst);
 				}
 			}
 
@@ -372,32 +374,39 @@ public class JSONSkinLoader extends SkinLoader {
 				}
 			}
 
-			for (SkinTextBitmap.SkinTextBitmapSource source : bitmapSourceMap.values()) {
-				skin.addResource(source);
-			}
-			for (SkinFontSource source : fontSourceMap.values()) {
-				skin.addResource(source);
-			}
 		} catch (Throwable e) {
-			if (bitmapSourceMap != null) {
-				for (SkinTextBitmap.SkinTextBitmapSource source : bitmapSourceMap.values()) {
-					source.dispose();
-				}
-			}
-			if (fontSourceMap != null) {
-				for (SkinFontSource source : fontSourceMap.values()) {
-					source.dispose();
+			if (skin != null) {
+				try {
+					skin.dispose();
+				} catch (Throwable cleanupFailure) {
+					e.addSuppressed(cleanupFailure);
 				}
 			}
 			e.printStackTrace();
 			return null;
+		} finally {
+			loadingSkin = null;
 		}
 		return skin;
 	}
 
 	SkinFontSource getFontSource(String fontPath, String[] fallbackFontPaths) {
 		var key = createFontSourceKey(fontPath, fallbackFontPaths);
-		return fontSourceMap.computeIfAbsent(key, ignored -> new SkinFontSource(fontPath, fallbackFontPaths));
+		return fontSourceMap.computeIfAbsent(key, ignored -> {
+			SkinFontSource source = new SkinFontSource(fontPath, fallbackFontPaths);
+			registerResource(source);
+			return source;
+		});
+	}
+
+	void registerResource(Disposable resource) {
+		if (loadingSkin != null) {
+			if (resource instanceof Texture texture) {
+				loadingSkin.addResource(texture);
+			} else {
+				loadingSkin.addResource(resource);
+			}
+		}
 	}
 
 	private static String createFontSourceKey(String fontPath, String[] fallbackFontPaths) {
@@ -490,6 +499,7 @@ public class JSONSkinLoader extends SkinLoader {
 					 try {
 					 	SkinSourceMovie mm = new SkinSourceMovie(imagefile.getAbsolutePath());
 					 	data.data = mm;
+						registerResource(mm);
 					 	isMovie = true;
 					 	break;
 					 } catch (Throwable e) {
@@ -501,6 +511,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 			if (!isMovie) {
 				data.data = getTexture(imagefile.getPath());
+				registerResource((Texture) data.data);
 			}
 		}
 		data.loaded = true;
