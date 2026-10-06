@@ -33,7 +33,6 @@ import bms.player.beatoraja.song.SongResources;
  * @author exch
  */
 public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.PixmapResource> {
-	private final java.util.concurrent.ConcurrentHashMap<String, SongResource> songResources = new java.util.concurrent.ConcurrentHashMap<>();
 
 	/** Point-in-time estimate for native Pixmap memory retained by this pool. */
 	public record MemoryStatistics(int pixmapCount, long estimatedNativeBytes, int songResourceCount) {
@@ -99,8 +98,7 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 	
 	@Override
 	protected PixmapResource load(String path) {
-		SongResource songResource = songResources.get(path);
-		final PixmapResource resource = songResource != null ? loadPictureResource(songResource) : loadPictureResource(path);
+		final PixmapResource resource = loadPictureResource(path);
 		return resource != null ? convert(resource) : null;
 	}
 
@@ -119,13 +117,15 @@ public class PixmapResourcePool extends ResourcePool<String, PixmapResourcePool.
 	}
 
 	public PixmapResource getPixmapResource(SongResource resource) {
-		songResources.put(resource.cacheKey(), resource);
-		return get(resource.cacheKey());
+		return get(resource.cacheKey(), () -> {
+			PixmapResource picture = loadPictureResource(resource);
+			return picture != null ? convert(picture) : null;
+		});
 	}
 
 	public MemoryStatistics getMemoryStatistics() {
 		Statistics statistics = getStatistics(resource -> estimatePixmapBytes(resource.getPixmap()));
-		return new MemoryStatistics(statistics.resourceCount(), statistics.estimatedBytes(), songResources.size());
+		return new MemoryStatistics(statistics.resourceCount(), statistics.estimatedBytes(), 0);
 	}
 
 	private static long estimatePixmapBytes(Pixmap pixmap) {

@@ -1,9 +1,10 @@
 package bms.player.beatoraja;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.ToLongFunction;
+import java.util.function.Supplier;
 
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
@@ -26,7 +27,9 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	/**
 	 * リソース
 	 */
-	private ConcurrentHashMap<K, ResourceCacheElement<V>> resourceMap = new ConcurrentHashMap<K, ResourceCacheElement<V>> ();
+	private final ConcurrentHashMap<K, ResourceCacheElement<V>> resourceMap = new ConcurrentHashMap<>();
+	// Loads may run concurrently, but eviction must wait until all loads have registered.
+	private final ReentrantReadWriteLock lifecycleLock = new ReentrantReadWriteLock();
 
 	public ResourcePool(int maxgen) {
 		this.maxgen = maxgen;
@@ -39,7 +42,12 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @return キーに対応するリソースが存在する場合はtrue
 	 */
 	public boolean exists(K key) {
-		return resourceMap.containsKey(key);
+		lifecycleLock.readLock().lock();
+		try {
+			return resourceMap.containsKey(key);
+		} finally {
+			lifecycleLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -50,38 +58,47 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @return リソース。読めなかった場合はnullを返す
 	 */
  	public V get(K key) {
- 		ResourceCacheElement<V> ie = resourceMap.get(key);
-		if(ie == null) {
-			V resource = load(key);
-			if(resource != null) {
-				ie = new ResourceCacheElement<V>(resource);
-				resourceMap.put(key, ie);
-			}
-		} else {
-			ie.gen = 0;
-		} 			
-		
-		return ie != null ? ie.resource : null;
+		return get(key, null);
 	}
- 	
- 	private final Array<K> removes = new Array<K>();
+
+	/** Loads a resource with a caller-supplied factory without retaining the factory in the pool. */
+	public V get(K key, Supplier<? extends V> factory) {
+		lifecycleLock.readLock().lock();
+		try {
+			ResourceCacheElement<V> element = resourceMap.get(key);
+			if (element == null) {
+				element = resourceMap.computeIfAbsent(key, k -> {
+					V resource = factory != null ? factory.get() : load(k);
+					return resource != null ? new ResourceCacheElement<>(resource) : null;
+				});
+			}
+			if (element != null) {
+				element.gen = 0;
+			}
+			return element != null ? element.resource : null;
+		} finally {
+			lifecycleLock.readLock().unlock();
+		}
+	}
 
  	/**
  	 * 世代数を進め、最大世代数を経過したリソースを開放する
  	 */
 	public void disposeOld() {
-		removes.clear();
-		resourceMap.forEach((key, value) -> {
-			if(value.gen == maxgen) {
-				dispose(value.resource);
-				removes.add(key);
-			} else {
-				value.gen++;
-			}			
-		});
-		
-		for(K key : removes) {
-			resourceMap.remove(key);
+		lifecycleLock.writeLock().lock();
+		try {
+			var iterator = resourceMap.values().iterator();
+			while (iterator.hasNext()) {
+				ResourceCacheElement<V> element = iterator.next();
+				if (element.gen == maxgen) {
+					iterator.remove();
+					dispose(element.resource);
+				} else {
+					element.gen++;
+				}
+			}
+		} finally {
+			lifecycleLock.writeLock().unlock();
 		}
 	}
 
@@ -90,7 +107,12 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @return リソースの
 	 */
 	public int size() {
-		return resourceMap.size();
+		lifecycleLock.readLock().lock();
+		try {
+			return resourceMap.size();
+		} finally {
+			lifecycleLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -98,18 +120,30 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * not for frame-by-frame instrumentation.
 	 */
 	public Statistics getStatistics(ToLongFunction<? super V> sizeEstimator) {
-		long estimatedBytes = 0;
-		for (ResourceCacheElement<V> element : resourceMap.values()) {
-			estimatedBytes += Math.max(0, sizeEstimator.applyAsLong(element.resource));
+		lifecycleLock.readLock().lock();
+		try {
+			long estimatedBytes = 0;
+			for (ResourceCacheElement<V> element : resourceMap.values()) {
+				estimatedBytes += Math.max(0, sizeEstimator.applyAsLong(element.resource));
+			}
+			return new Statistics(resourceMap.size(), estimatedBytes);
+		} finally {
+			lifecycleLock.readLock().unlock();
 		}
-		return new Statistics(resourceMap.size(), estimatedBytes);
 	}
 	
 	public void dispose() {
-		resourceMap.forEach((key, value) -> {
-			dispose(value.resource);			
-		});
-		resourceMap.clear();
+		lifecycleLock.writeLock().lock();
+		try {
+			var iterator = resourceMap.values().iterator();
+			while (iterator.hasNext()) {
+				ResourceCacheElement<V> element = iterator.next();
+				iterator.remove();
+				dispose(element.resource);
+			}
+		} finally {
+			lifecycleLock.writeLock().unlock();
+		}
 	}
 	
 	/**

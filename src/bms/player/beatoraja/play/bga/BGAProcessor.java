@@ -44,7 +44,7 @@ public final class BGAProcessor {
 	private VideoProcessor[] movies = new VideoProcessor[0]; 
 	
 	private final ResourcePool<String, VideoProcessor> mpgresource;
-	private final java.util.concurrent.ConcurrentHashMap<String, SongResource> movieResources = new java.util.concurrent.ConcurrentHashMap<>();
+	private final Config config;
 
 	/**
 	 * 再生中のBGAID
@@ -81,6 +81,7 @@ public final class BGAProcessor {
 
 	public BGAProcessor(Config config, PlayerConfig player) {
 		this.player = player;
+		this.config = config;
 
 		Pixmap blank = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		blank.setColor(Color.BLACK);
@@ -92,12 +93,7 @@ public final class BGAProcessor {
 			@Override
 			protected VideoProcessor load(String key) {
 				FFmpegProcessor mm = new FFmpegProcessor(config.getFrameskip());
-				SongResource resource = movieResources.get(key);
-				if (resource != null) {
-					mm.create(resource);
-				} else {
-					mm.create(key);
-				}
+				mm.create(key);
 				return mm;
 			}
 
@@ -203,8 +199,12 @@ public final class BGAProcessor {
 					for (String mov : VideoFormat.getAllExtensions()) {
 						if (f.name().toLowerCase().endsWith(mov)) {
 							try {
-								movieResources.put(f.cacheKey(), f);
-								VideoProcessor mm = mpgresource.get(f.cacheKey());
+								SongResource movieResource = f;
+								VideoProcessor mm = mpgresource.get(f.cacheKey(), () -> {
+									FFmpegProcessor processor = new FFmpegProcessor(config.getFrameskip());
+									processor.create(movieResource);
+									return processor;
+								});
 								movies[id] = mm;
 								isMovie = true;
 								break;
@@ -245,7 +245,7 @@ public final class BGAProcessor {
 		ResourcePool.Statistics movies = mpgresource.getStatistics(video ->
 				video instanceof FFmpegProcessor processor ? processor.getRetainedMovieBytes() : 0);
 		return new MemoryStatistics(cache.getMemoryStatistics(), movies.resourceCount(), movies.estimatedBytes(),
-				movieResources.size());
+				0);
 	}
 	/**
 	 * BGAの初期データをあらかじめキャッシュする

@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -44,12 +45,13 @@ public class FFmpegProcessor implements VideoProcessor {
 	 * 動画再生用スレッド
 	 */
 	private MovieSeekThread movieseek;
+	private final Object pixmapLock = new Object();
 
-	private long time;
+	private volatile long time;
 	/**
 	 * dispose()を呼び出した後にprocessorDisposedはtrueになる
 	 */
-	private ProcessorStatus processorStatus = ProcessorStatus.TEXTURE_INACTIVE;
+	private volatile ProcessorStatus processorStatus = ProcessorStatus.TEXTURE_INACTIVE;
 
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;
@@ -88,14 +90,18 @@ public class FFmpegProcessor implements VideoProcessor {
 
 	@Override
 	public void dispose() {
-		processorStatus = ProcessorStatus.DISPOSED;
-		if (movieseek != null) {
-			movieseek.exec(Command.HALT);
-			movieseek = null;
-		}
+		synchronized (pixmapLock) {
+			if (processorStatus == ProcessorStatus.DISPOSED) return;
+			processorStatus = ProcessorStatus.DISPOSED;
+			if (movieseek != null) {
+				movieseek.exec(Command.HALT);
+				movieseek = null;
+			}
 
-		if (showingtex != null) {
-			showingtex.dispose();
+			if (showingtex != null) {
+				showingtex.dispose();
+				showingtex = null;
+			}
 		}
 	}
 
@@ -134,11 +140,11 @@ public class FFmpegProcessor implements VideoProcessor {
 		private LinkedBlockingDeque<Command> commands = new LinkedBlockingDeque<>(4);
 
 		private boolean eof = true;
+		private volatile boolean haltRequested;
 
 		private Pixmap pixmap;
 		private byte[] frameRow;
 		private volatile byte[] movieBytes;
-		private final Object pixmapLock = new Object();
 
 		private final SongResource resource;
 		
@@ -151,9 +157,11 @@ public class FFmpegProcessor implements VideoProcessor {
 
 		public void run() {
 			try {
+				if (haltRequested) return;
 				try (InputStream input = resource.openStream()) {
 					movieBytes = input.readAllBytes();
 				}
+				if (haltRequested) return;
 				openGrabber();
 				Logger.getGlobal()
 						.info("movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat()
@@ -163,21 +171,23 @@ public class FFmpegProcessor implements VideoProcessor {
 
 				offset = grabber.getTimestamp();
 				Frame frame = null;
-				boolean halt = false;
 				boolean loop = false;
-				while (!halt) {
+				while (!haltRequested) {
+					Command command = null;
 					final long microtime = time * 1000 + offset;
 					if (eof) {
-						if (processorStatus != ProcessorStatus.DISPOSED) {
-							processorStatus = ProcessorStatus.TEXTURE_INACTIVE;
+						synchronized (pixmapLock) {
+							if (processorStatus != ProcessorStatus.DISPOSED) {
+								processorStatus = ProcessorStatus.TEXTURE_INACTIVE;
+							}
 						}
 						try {
-							sleep(3600000);
+							command = commands.pollFirst(1, TimeUnit.HOURS);
 						} catch (InterruptedException e) {
 
 						}
 					} else if (microtime >= grabber.getTimestamp()) {
-						while (microtime >= grabber.getTimestamp() || framecount % fpsd != 0) {
+						while (!haltRequested && (microtime >= grabber.getTimestamp() || framecount % fpsd != 0)) {
 							frame = grabber.grabImage();
 							if (frame == null) {
 								break;
@@ -236,8 +246,11 @@ public class FFmpegProcessor implements VideoProcessor {
 						}
 					}
 
-					if (!commands.isEmpty()) {
-						switch (commands.pollFirst()) {
+					if (command == null) {
+						command = commands.pollFirst();
+					}
+					if (!haltRequested && command != null) {
+						switch (command) {
 							case PLAY -> {
 								loop = false;
 								restart();
@@ -247,7 +260,7 @@ public class FFmpegProcessor implements VideoProcessor {
 								restart();
 							}
 							case STOP -> eof = true;
-							case HALT -> halt = true;
+							case HALT -> haltRequested = true;
 						}
 					}
 				}
@@ -261,10 +274,19 @@ public class FFmpegProcessor implements VideoProcessor {
 							pixmap = null;
 						}
 					}
-					closeGrabber();
-					Logger.getGlobal().info("動画リソースの開放 : " + resource.displayPath());
 				} catch (Throwable e) {
 					e.printStackTrace();
+				} finally {
+					try {
+						closeGrabber();
+					} catch (Throwable e) {
+						e.printStackTrace();
+					} finally {
+						movieBytes = null;
+						frameRow = null;
+						commands.clear();
+						Logger.getGlobal().info("動画リソースの開放 : " + resource.displayPath());
+					}
 				}
 			}
 		}
@@ -296,11 +318,12 @@ public class FFmpegProcessor implements VideoProcessor {
 
 		private void closeGrabber() throws Exception {
 			if (grabber != null) {
+				FFmpegFrameGrabber closing = grabber;
+				grabber = null;
 				try {
-					grabber.stop();
+					closing.stop();
 				} finally {
-					grabber.close();
-					grabber = null;
+					closing.close();
 				}
 			}
 		}
@@ -373,7 +396,13 @@ public class FFmpegProcessor implements VideoProcessor {
 		}
 
 		public void exec(Command com) {
-			commands.offerLast(com);
+			if (com == Command.HALT) {
+				// Shutdown must not depend on space in the bounded playback-command queue.
+				haltRequested = true;
+				commands.clear();
+			} else if (!haltRequested) {
+				commands.offerLast(com);
+			}
 			interrupt();
 		}
 	}
