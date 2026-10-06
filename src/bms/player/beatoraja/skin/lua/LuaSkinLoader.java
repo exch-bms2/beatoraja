@@ -103,6 +103,18 @@ public class LuaSkinLoader extends JSONSkinLoader {
 			put(float.class, LuaValue::tofloat);
 			put(Float.class, LuaValue::tofloat);
 			put(String.class, LuaValue::tojstring);
+			put(JsonSkin.FontFallback.class, lv -> {
+				JsonSkin.FontFallback fallback = new JsonSkin.FontFallback();
+				if (lv.isstring()) {
+					fallback.path = lv.tojstring();
+				} else if (lv.istable()) {
+					LuaValue path = lv.get("path");
+					LuaValue type = lv.get("type");
+					fallback.path = path.isstring() ? path.tojstring() : null;
+					fallback.type = type.isnumber() ? type.toint() : 0;
+				}
+				return fallback;
+			});
 			put(BooleanProperty.class, lv ->
 					serializeLuaScript(lv, lua::loadBooleanProperty, lua::loadBooleanProperty,
 							BooleanPropertyFactory::getBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
