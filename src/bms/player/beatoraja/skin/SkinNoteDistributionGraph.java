@@ -128,6 +128,11 @@ public final class SkinNoteDistributionGraph extends SkinObject {
 	}
 	
 	public void prepare(long time, MainState state) {
+		if (state instanceof BMSPlayer player && player.getState() == BMSPlayer.STATE_PRACTICE) {
+			var property = player.getPracticeConfiguration().getPracticeProperty();
+			prepare(time, state, null, property.starttime, property.endtime, property.freq / 100f);
+			return;
+		}
 		prepare(time, state, null, -1, -1, -1);
 	}
 
