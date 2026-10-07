@@ -7,12 +7,10 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.external.ScoreDataImporter;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
@@ -770,30 +768,30 @@ public class PlayConfigurationView implements Initializable {
         };
 
         Runnable loadBMSRunnable = () -> {
+            boolean updated = false;
             try {
                 SongDatabaseAccessor songdb = getSongDatabaseAccessor();
-                SongInformationAccessor infodb = config.isUseSongInfo() ?
-                        new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
+                SongInformationAccessor infodb = config.isUseSongInfo()
+                        ? new SongInformationAccessor(config.getSonginfopath()) : null;
                 Logger.getGlobal().info("song.db更新開始");
                 songdb.updateSongDatas(updatepath, config.getBmsroot(), updateAll, infodb);
                 Logger.getGlobal().info("song.db更新完了");
-                songUpdated = true;
-
-				// Once again, JavaFX UI code must be run inside a Platform context. Hide progress bar and resume
-				// normal launcher behaviour
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						loadingBarStage.hide();
-					}
-				});
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                updated = true;
+            } catch (Throwable e) {
+                Logger.getGlobal().log(Level.SEVERE, "song.db更新中の予期しない例外", e);
+            } finally {
+                final boolean completed = updated;
+                Platform.runLater(() -> {
+                    if (completed) {
+                        songUpdated = true;
+                    }
+                    loadingBarStage.hide();
+                });
             }
         };
 
-        new Thread(progressRunnable).start();
-        new Thread(loadBMSRunnable).start();
+        progressRunnable.run();
+        new Thread(loadBMSRunnable, "song database update").start();
 	}
 
 	private boolean checkIfLoadBMS() {
