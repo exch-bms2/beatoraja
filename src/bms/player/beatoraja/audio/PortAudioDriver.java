@@ -127,11 +127,34 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 	}
 
+	private static void logAsioBufferSizes(int deviceId, DeviceInfo deviceInfo) {
+		if (getHostApiType(deviceInfo) != PortAudio.HOST_API_TYPE_ASIO) return;
+		try {
+			if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows")) {
+				Logger.getGlobal().info("PortAudio ASIO buffer sizes unavailable : Windows-only diagnostic");
+				return;
+			}
+			var sizes = PortAudioAsioDiagnostics.getBufferSizes(deviceId);
+			Logger.getGlobal().info("PortAudio ASIO buffer sizes : device=" + deviceId
+					+ ", minFrames=" + sizes.minimum() + ", maxFrames=" + sizes.maximum()
+					+ ", preferredFrames=" + sizes.preferred() + ", granularity=" + sizes.granularity());
+		} catch (RuntimeException | LinkageError e) {
+			Logger.getGlobal().log(java.util.logging.Level.WARNING,
+					"PortAudio ASIO buffer sizes unavailable : device=" + deviceId, e);
+		}
+	}
+
 	/** Owns one native stream and releases PortAudio only after that stream is closed. */
 	static final class StreamLifecycle {
 		private final BlockingStream nativeStream;
 		private final Runnable release;
 		private boolean closed;
+		private boolean abortAttempted;
+		private long writeAttempts;
+		private long writesCompleted;
+		private long totalWriteNanos;
+		private long maxWriteNanos;
+		private long lastWriteNanos;
 
 		StreamLifecycle(BlockingStream nativeStream, Runnable release) {
 			this.nativeStream = nativeStream;
@@ -148,7 +171,38 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 
 		void write(float[] buffer, int frames) {
-			nativeStream.write(buffer, frames);
+			long attempt = ++writeAttempts;
+			int available = -1;
+			if (attempt <= 4) {
+				try {
+					available = nativeStream.getWriteAvailable();
+				} catch (RuntimeException | LinkageError ignored) {
+				}
+			}
+			boolean completed = false;
+			long started = System.nanoTime();
+			try {
+				nativeStream.write(buffer, frames);
+				writesCompleted++;
+				completed = true;
+			} finally {
+				lastWriteNanos = System.nanoTime() - started;
+				totalWriteNanos += lastWriteNanos;
+				maxWriteNanos = Math.max(maxWriteNanos, lastWriteNanos);
+				if (attempt <= 4 || !completed) {
+					Logger.getGlobal().info("PortAudio write : attempt=" + attempt + ", frames=" + frames
+							+ ", availableBefore=" + available + ", durationMs=" + lastWriteNanos / 1_000_000.0
+							+ ", completed=" + completed);
+				}
+			}
+		}
+
+		record WriteStatistics(long attempts, long completed, long failed, long totalNanos, long maxNanos, long lastNanos) {
+		}
+
+		WriteStatistics getWriteStatistics() {
+			return new WriteStatistics(writeAttempts, writesCompleted, writeAttempts - writesCompleted,
+					totalWriteNanos, maxWriteNanos, lastWriteNanos);
 		}
 
 		void logInfo(int deviceId) {
@@ -177,9 +231,18 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 
 		synchronized void abort() {
-			if (!closed) {
+			if (!closed && !abortAttempted) {
+				abortAttempted = true;
+				boolean stopped = false;
 				try {
-					nativeStream.abort();
+					stopped = nativeStream.isStopped();
+				} catch (RuntimeException | LinkageError e) {
+					Logger.getGlobal().fine("PortAudio stream status unavailable : " + e.getMessage());
+				}
+				try {
+					if (!stopped) {
+						nativeStream.abort();
+					}
 				} catch (Throwable e) {
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream abort failed", e);
 				}
@@ -199,6 +262,12 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					release.run();
 				} catch (Throwable e) {
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio terminate failed", e);
+				} finally {
+					Logger.getGlobal().info("PortAudio write summary : attempts=" + writeAttempts
+							+ ", completed=" + writesCompleted + ", failed=" + (writeAttempts - writesCompleted)
+							+ ", totalMs=" + totalWriteNanos / 1_000_000.0
+							+ ", maxMs=" + maxWriteNanos / 1_000_000.0
+							+ ", lastMs=" + lastWriteNanos / 1_000_000.0);
 				}
 			}
 		}
@@ -279,6 +348,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		RuntimeException lastError = null;
 		for(int deviceId : getOutputDeviceCandidates(preferredDeviceId, devices)) {
 			DeviceInfo deviceInfo = devices[deviceId];
+			logAsioBufferSizes(deviceId, deviceInfo);
 			for(int sampleRate : getSampleRateCandidates(audioConfig, deviceInfo)) {
 				setSampleRate(sampleRate);
 				logSelectedDevice(deviceId, deviceInfo);
