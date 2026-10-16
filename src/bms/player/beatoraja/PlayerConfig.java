@@ -242,6 +242,11 @@ public final class PlayerConfig {
 	private String sortid;
 
 	/**
+	 * Sort choices in cycling order. Numeric skin IDs remain unchanged.
+	 */
+	private BarSorter[] enabledBarSorters = BarSorter.defaultSorter.clone();
+
+	/**
 	 * 選曲時でのキー入力方式
 	 */
 	private int musicselectinput = 0;
@@ -577,6 +582,35 @@ public final class PlayerConfig {
 
 	public void setSortid(String sortid) {
 		this.sortid = sortid;
+	}
+
+	public BarSorter[] getEnabledBarSorters() {
+		return enabledBarSorters.clone();
+	}
+
+	public void setEnabledBarSorters(BarSorter[] sorters) {
+		enabledBarSorters = sanitizeBarSorters(sorters);
+	}
+
+	public void cycleBarSorter(int direction) {
+		int index = -1;
+		for (int i = 0; i < enabledBarSorters.length; i++) {
+			if (enabledBarSorters[i].name().equals(sortid)) {
+				index = i;
+				break;
+			}
+		}
+		int next = index < 0 ? (direction >= 0 ? 0 : enabledBarSorters.length - 1)
+				: Math.floorMod(index + (direction >= 0 ? 1 : -1), enabledBarSorters.length);
+		BarSorter selected = enabledBarSorters[next];
+		sortid = selected.name();
+		// Keep the legacy eight-choice numeric property independent of array order.
+		for (int i = 0; i < BarSorter.defaultSorter.length; i++) {
+			if (BarSorter.defaultSorter[i] == selected) {
+				sort = i;
+				break;
+			}
+		}
 	}
 
 
@@ -920,6 +954,7 @@ public final class PlayerConfig {
 		mode24double.validate(Mode.KEYBOARD_24K_DOUBLE);
 
 		sort = MathUtils.clamp(sort, 0 , BarSorter.defaultSorter.length - 1);
+		enabledBarSorters = sanitizeBarSorters(enabledBarSorters);
 		if(!isKnownBarSorter(sortid)) {
 			sortid = BarSorter.defaultSorter[sort].name();
 		}
@@ -995,6 +1030,19 @@ public final class PlayerConfig {
 
 		// --Stream
 		maxRequestCount = MathUtils.clamp(maxRequestCount, 0, 100);
+	}
+
+	private static BarSorter[] sanitizeBarSorters(BarSorter[] sorters) {
+		if (sorters == null || sorters.length == 0) {
+			return BarSorter.defaultSorter.clone();
+		}
+		Set<BarSorter> uniqueSorters = new LinkedHashSet<>();
+		for (BarSorter sorter : sorters) {
+			if (sorter != null) {
+				uniqueSorters.add(sorter);
+			}
+		}
+		return uniqueSorters.isEmpty() ? BarSorter.defaultSorter.clone() : uniqueSorters.toArray(BarSorter[]::new);
 	}
 
 	private static boolean isKnownBarSorter(String sorterName) {
