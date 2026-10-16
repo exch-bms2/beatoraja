@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import com.portaudio.*;
 import bms.player.beatoraja.AudioConfig;
@@ -146,12 +148,19 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	/** Owns one native stream and releases PortAudio only after that stream is closed. */
 	static final class StreamLifecycle {
+		private static final long STARTUP_WINDOW_NANOS = TimeUnit.SECONDS.toNanos(1);
+		private static final long STARTUP_WAIT_NANOS = TimeUnit.MILLISECONDS.toNanos(500);
+		private static final long WRITE_WAIT_NANOS = TimeUnit.MILLISECONDS.toNanos(100);
+		private static final long POLL_NANOS = TimeUnit.MICROSECONDS.toNanos(100);
 		private final BlockingStream nativeStream;
 		private final Runnable release;
-		private boolean closed;
-		private boolean abortAttempted;
+		private volatile boolean closed;
+		private volatile boolean abortAttempted;
 		private long writeAttempts;
 		private long writesCompleted;
+		private long writesCancelled;
+		private long firstWriteNanos;
+		private boolean outputProgressObserved;
 		private long totalWriteNanos;
 		private long maxWriteNanos;
 		private long lastWriteNanos;
@@ -170,38 +179,83 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 		}
 
-		void write(float[] buffer, int frames) {
+		boolean write(float[] buffer, int frames) {
 			long attempt = ++writeAttempts;
+			int availableBefore = -1;
 			int available = -1;
-			if (attempt <= 4) {
-				try {
-					available = nativeStream.getWriteAvailable();
-				} catch (RuntimeException | LinkageError ignored) {
-				}
-			}
 			boolean completed = false;
+			boolean cancelled = false;
 			long started = System.nanoTime();
+			if (attempt == 1) firstWriteNanos = started;
+			boolean startup = !outputProgressObserved && started - firstWriteNanos < STARTUP_WINDOW_NANOS;
+			long waitBudget = startup ? STARTUP_WAIT_NANOS : WRITE_WAIT_NANOS;
+			long nativeStarted = 0;
+			long waitNanos = 0;
 			try {
-				nativeStream.write(buffer, frames);
+				boolean waited = false;
+				while (true) {
+					if (abortAttempted || closed || Thread.currentThread().isInterrupted()) {
+						writesCancelled++;
+						cancelled = true;
+						return false;
+					}
+					available = nativeStream.getWriteAvailable();
+					if (availableBefore < 0) availableBefore = available;
+					if (available < 0) {
+						throw new IllegalStateException("PortAudio getWriteAvailable failed : result=" + available);
+					}
+					if (available >= frames) break;
+					long remaining = waitBudget - (System.nanoTime() - started);
+					if (remaining <= 0) {
+						throw new IllegalStateException("PortAudio write availability timed out : frames=" + frames
+								+ ", available=" + available + ", startup=" + startup);
+					}
+					waited = true;
+					LockSupport.parkNanos(Math.min(POLL_NANOS, remaining));
+				}
+				if (waited) outputProgressObserved = true;
+				if (abortAttempted || closed || Thread.currentThread().isInterrupted()) {
+					writesCancelled++;
+					cancelled = true;
+					return false;
+				}
+				nativeStarted = System.nanoTime();
+				waitNanos = nativeStarted - started;
+				try {
+					nativeStream.write(buffer, frames);
+				} catch (RuntimeException | Error e) {
+					if (abortAttempted || closed) {
+						writesCancelled++;
+						cancelled = true;
+						return false;
+					}
+					throw e;
+				}
 				writesCompleted++;
 				completed = true;
+				return true;
 			} finally {
-				lastWriteNanos = System.nanoTime() - started;
+				long ended = System.nanoTime();
+				lastWriteNanos = ended - started;
+				if (nativeStarted == 0) waitNanos = lastWriteNanos;
 				totalWriteNanos += lastWriteNanos;
 				maxWriteNanos = Math.max(maxWriteNanos, lastWriteNanos);
 				if (attempt <= 4 || !completed) {
 					Logger.getGlobal().info("PortAudio write : attempt=" + attempt + ", frames=" + frames
-							+ ", availableBefore=" + available + ", durationMs=" + lastWriteNanos / 1_000_000.0
-							+ ", completed=" + completed);
+							+ ", availableBefore=" + availableBefore + ", availableAtWrite=" + available
+							+ ", waitMs=" + waitNanos / 1_000_000.0
+							+ ", nativeWriteMs=" + (nativeStarted == 0 ? 0 : ended - nativeStarted) / 1_000_000.0
+							+ ", durationMs=" + lastWriteNanos / 1_000_000.0
+							+ ", completed=" + completed + ", cancelled=" + cancelled);
 				}
 			}
 		}
 
-		record WriteStatistics(long attempts, long completed, long failed, long totalNanos, long maxNanos, long lastNanos) {
+		record WriteStatistics(long attempts, long completed, long failed, long cancelled, long totalNanos, long maxNanos, long lastNanos) {
 		}
 
 		WriteStatistics getWriteStatistics() {
-			return new WriteStatistics(writeAttempts, writesCompleted, writeAttempts - writesCompleted,
+			return new WriteStatistics(writeAttempts, writesCompleted, writeAttempts - writesCompleted - writesCancelled, writesCancelled,
 					totalWriteNanos, maxWriteNanos, lastWriteNanos);
 		}
 
@@ -264,7 +318,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio terminate failed", e);
 				} finally {
 					Logger.getGlobal().info("PortAudio write summary : attempts=" + writeAttempts
-							+ ", completed=" + writesCompleted + ", failed=" + (writeAttempts - writesCompleted)
+							+ ", completed=" + writesCompleted + ", failed=" + (writeAttempts - writesCompleted - writesCancelled)
+							+ ", cancelled=" + writesCancelled
 							+ ", totalMs=" + totalWriteNanos / 1_000_000.0
 							+ ", maxMs=" + maxWriteNanos / 1_000_000.0
 							+ ", lastMs=" + lastWriteNanos / 1_000_000.0);
@@ -843,7 +898,10 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					stop = true;
 					break;
 				}
-				currentStream.write( buffer, buffer.length / 2);
+				if (!currentStream.write(buffer, buffer.length / 2)) {
+					stop = true;
+					break;
+				}
 			} catch(Throwable e) {
 				if(!stop) {
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream write failed : " + e.getMessage(), e);
