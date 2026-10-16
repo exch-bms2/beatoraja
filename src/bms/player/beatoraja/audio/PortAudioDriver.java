@@ -110,6 +110,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			StreamOpenResult openResult = openStreamWithFallback(audioConfig, devices, deviceId, framesPerBuffer, flags);
 			stream = new StreamLifecycle(openResult.stream(), PortAudioDriver::releasePortAudio);
 			stream.start();
+			stream.logInfo(openResult.deviceId());
 			mixer.start();
 		} catch (RuntimeException | Error e) {
 			stop = true;
@@ -148,6 +149,23 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 		void write(float[] buffer, int frames) {
 			nativeStream.write(buffer, frames);
+		}
+
+		void logInfo(int deviceId) {
+			try {
+				StreamInfo info = nativeStream.getInfo();
+				if (info == null) {
+					Logger.getGlobal().warning("PortAudio stream info unavailable : device=" + deviceId);
+					return;
+				}
+				Logger.getGlobal().info("PortAudio stream info : device=" + deviceId
+						+ ", outputLatencySeconds=" + info.outputLatency
+						+ ", outputLatencyMs=" + info.outputLatency * 1000.0
+						+ ", sampleRate=" + info.sampleRate);
+			} catch (RuntimeException | LinkageError e) {
+				Logger.getGlobal().log(java.util.logging.Level.WARNING,
+						"PortAudio stream info retrieval failed : device=" + deviceId, e);
+			}
 		}
 
 		void run(Runnable mixerLoop) {
