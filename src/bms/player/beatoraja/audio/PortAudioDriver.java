@@ -148,9 +148,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	/** Owns one native stream and releases PortAudio only after that stream is closed. */
 	static final class StreamLifecycle {
-		private static final long STARTUP_WINDOW_NANOS = TimeUnit.SECONDS.toNanos(1);
 		private static final long STARTUP_WAIT_NANOS = TimeUnit.MILLISECONDS.toNanos(500);
-		private static final long WRITE_WAIT_NANOS = TimeUnit.MILLISECONDS.toNanos(100);
 		private static final long POLL_NANOS = TimeUnit.MICROSECONDS.toNanos(100);
 		private final BlockingStream nativeStream;
 		private final Runnable release;
@@ -159,7 +157,6 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		private long writeAttempts;
 		private long writesCompleted;
 		private long writesCancelled;
-		private long firstWriteNanos;
 		private boolean outputProgressObserved;
 		private long totalWriteNanos;
 		private long maxWriteNanos;
@@ -185,15 +182,15 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			int available = -1;
 			boolean completed = false;
 			boolean cancelled = false;
+			boolean transitioned = false;
 			long started = System.nanoTime();
-			if (attempt == 1) firstWriteNanos = started;
-			boolean startup = !outputProgressObserved && started - firstWriteNanos < STARTUP_WINDOW_NANOS;
-			long waitBudget = startup ? STARTUP_WAIT_NANOS : WRITE_WAIT_NANOS;
+			boolean startup = !outputProgressObserved;
 			long nativeStarted = 0;
 			long waitNanos = 0;
 			try {
 				boolean waited = false;
-				while (true) {
+				// Only startup polls for space. Steady-state timing belongs to PortAudio.
+				while (startup) {
 					if (abortAttempted || closed || Thread.currentThread().isInterrupted()) {
 						writesCancelled++;
 						cancelled = true;
@@ -205,7 +202,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 						throw new IllegalStateException("PortAudio getWriteAvailable failed : result=" + available);
 					}
 					if (available >= frames) break;
-					long remaining = waitBudget - (System.nanoTime() - started);
+					long remaining = STARTUP_WAIT_NANOS - (System.nanoTime() - started);
 					if (remaining <= 0) {
 						throw new IllegalStateException("PortAudio write availability timed out : frames=" + frames
 								+ ", available=" + available + ", startup=" + startup);
@@ -213,14 +210,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					waited = true;
 					LockSupport.parkNanos(Math.min(POLL_NANOS, remaining));
 				}
-				if (waited) outputProgressObserved = true;
 				if (abortAttempted || closed || Thread.currentThread().isInterrupted()) {
 					writesCancelled++;
 					cancelled = true;
 					return false;
 				}
 				nativeStarted = System.nanoTime();
-				waitNanos = nativeStarted - started;
+				waitNanos = startup ? nativeStarted - started : 0;
 				try {
 					nativeStream.write(buffer, frames);
 				} catch (RuntimeException | Error e) {
@@ -233,15 +229,23 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 				}
 				writesCompleted++;
 				completed = true;
+				if (startup && waited) {
+					outputProgressObserved = true;
+					transitioned = true;
+				}
 				return true;
 			} finally {
 				long ended = System.nanoTime();
 				lastWriteNanos = ended - started;
-				if (nativeStarted == 0) waitNanos = lastWriteNanos;
+				if (nativeStarted == 0 && startup) waitNanos = lastWriteNanos;
 				totalWriteNanos += lastWriteNanos;
 				maxWriteNanos = Math.max(maxWriteNanos, lastWriteNanos);
+				if (transitioned) {
+					Logger.getGlobal().info("PortAudio startup complete : switching to native blocking writes");
+				}
 				if (attempt <= 4 || !completed) {
 					Logger.getGlobal().info("PortAudio write : attempt=" + attempt + ", frames=" + frames
+							+ ", mode=" + (startup ? "STARTUP" : "NATIVE_BLOCKING")
 							+ ", availableBefore=" + availableBefore + ", availableAtWrite=" + available
 							+ ", waitMs=" + waitNanos / 1_000_000.0
 							+ ", nativeWriteMs=" + (nativeStarted == 0 ? 0 : ended - nativeStarted) / 1_000_000.0
