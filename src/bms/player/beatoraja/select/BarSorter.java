@@ -267,6 +267,16 @@ public enum BarSorter {
 	public final Comparator<Bar> sorter;
 
 	private BarSorter(Comparator<Bar> sorter) {
-		this.sorter = sorter;
+		this.sorter = (first, second) -> {
+			boolean firstMissing = first instanceof SongBar song && !song.existsSong();
+			boolean secondMissing = second instanceof SongBar song && !song.existsSong();
+			if (firstMissing && secondMissing) {
+				return first.getTitle().compareToIgnoreCase(second.getTitle());
+			}
+			if (firstMissing != secondMissing) {
+				return firstMissing ? 1 : -1;
+			}
+			return sorter.compare(first, second);
+		};
 	}
 }
