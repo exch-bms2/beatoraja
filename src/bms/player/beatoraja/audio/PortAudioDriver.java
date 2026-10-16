@@ -101,7 +101,6 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 		mixer = new Thread(this, "PortAudio Mixer");
 		mixer.setPriority(Thread.MAX_PRIORITY);
-		buffer = new float[framesPerBuffer * channels];
 		inputs = new MixerInput[audioConfig.getDeviceSimultaneousSources()];
 		for (int i = 0; i < inputs.length; i++) {
 			inputs[i] = new MixerInput();
@@ -111,6 +110,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			int deviceId = getDeviceId(audioConfig, devices);
 			StreamOpenResult openResult = openStreamWithFallback(audioConfig, devices, deviceId, framesPerBuffer, flags);
 			stream = new StreamLifecycle(openResult.stream(), PortAudioDriver::releasePortAudio);
+			buffer = new float[openResult.framesPerBuffer() * channels];
 			stream.start();
 			stream.logInfo(openResult.deviceId());
 			mixer.start();
@@ -129,21 +129,33 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 	}
 
-	private static void logAsioBufferSizes(int deviceId, DeviceInfo deviceInfo) {
-		if (getHostApiType(deviceInfo) != PortAudio.HOST_API_TYPE_ASIO) return;
+	private static PortAudioAsioDiagnostics.BufferSizes getAsioBufferSizes(int deviceId, DeviceInfo deviceInfo) {
+		if (getHostApiType(deviceInfo) != PortAudio.HOST_API_TYPE_ASIO) return null;
 		try {
 			if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows")) {
 				Logger.getGlobal().info("PortAudio ASIO buffer sizes unavailable : Windows-only diagnostic");
-				return;
+				return null;
 			}
 			var sizes = PortAudioAsioDiagnostics.getBufferSizes(deviceId);
 			Logger.getGlobal().info("PortAudio ASIO buffer sizes : device=" + deviceId
 					+ ", minFrames=" + sizes.minimum() + ", maxFrames=" + sizes.maximum()
 					+ ", preferredFrames=" + sizes.preferred() + ", granularity=" + sizes.granularity());
+			return sizes;
 		} catch (RuntimeException | LinkageError e) {
 			Logger.getGlobal().log(java.util.logging.Level.WARNING,
 					"PortAudio ASIO buffer sizes unavailable : device=" + deviceId, e);
+			return null;
 		}
+	}
+
+	static int adjustAsioBufferSize(int deviceId, int requestedFrames, PortAudioAsioDiagnostics.BufferSizes sizes) {
+		if (sizes != null && sizes.minimum() > requestedFrames) {
+			Logger.getGlobal().info("PortAudio ASIO buffer size adjusted : device=" + deviceId
+					+ ", requestedFrames=" + requestedFrames + ", effectiveFrames=" + sizes.minimum()
+					+ ", reason=below ASIO minimum");
+			return sizes.minimum();
+		}
+		return requestedFrames;
 	}
 
 	/** Owns one native stream and releases PortAudio only after that stream is closed. */
@@ -332,7 +344,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 	}
 
-	private record StreamOpenResult(BlockingStream stream, int deviceId, DeviceInfo deviceInfo, int sampleRate) {
+	private record StreamOpenResult(BlockingStream stream, int deviceId, DeviceInfo deviceInfo, int sampleRate, int framesPerBuffer) {
 	}
 
 	private static int getDeviceId(AudioConfig config, DeviceInfo[] devices) {
@@ -407,13 +419,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		RuntimeException lastError = null;
 		for(int deviceId : getOutputDeviceCandidates(preferredDeviceId, devices)) {
 			DeviceInfo deviceInfo = devices[deviceId];
-			logAsioBufferSizes(deviceId, deviceInfo);
+			int effectiveFrames = adjustAsioBufferSize(deviceId, framesPerBuffer, getAsioBufferSizes(deviceId, deviceInfo));
 			for(int sampleRate : getSampleRateCandidates(audioConfig, deviceInfo)) {
 				setSampleRate(sampleRate);
 				logSelectedDevice(deviceId, deviceInfo);
-				StreamParameters streamParameters = createOutputStreamParameters(deviceId, deviceInfo, framesPerBuffer);
+				StreamParameters streamParameters = createOutputStreamParameters(deviceId, deviceInfo, effectiveFrames);
 				try {
-					BlockingStream openedStream = openStream(streamParameters, deviceInfo, framesPerBuffer, flags);
+					BlockingStream openedStream = openStream(streamParameters, deviceInfo, effectiveFrames, flags);
 					if(deviceId != preferredDeviceId) {
 						Logger.getGlobal().info("PortAudio fallback output device selected"
 								+ " : requestedDevice=" + preferredDeviceId
@@ -421,7 +433,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 								+ ", fallbackName=" + deviceInfo.name
 								+ ", sampleRate=" + sampleRate);
 					}
-					return new StreamOpenResult(openedStream, deviceId, deviceInfo, sampleRate);
+					return new StreamOpenResult(openedStream, deviceId, deviceInfo, sampleRate, effectiveFrames);
 				} catch(RuntimeException e) {
 					lastError = e;
 					Logger.getGlobal().warning("PortAudio output device open failed"
