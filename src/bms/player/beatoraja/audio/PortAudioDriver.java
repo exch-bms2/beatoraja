@@ -18,8 +18,9 @@ import bms.player.beatoraja.song.SongResource;
 public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnable {
 
 	private static DeviceInfo[] devices;
+	private static int activeDrivers;
 	
-	private volatile BlockingStream stream;
+	private volatile StreamLifecycle stream;
 
 	/**
 	 * ミキサー入力
@@ -34,18 +35,44 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	
 	private final Thread mixer;
 
-	public static DeviceInfo[] getDevices() {
+	public static synchronized DeviceInfo[] getDevices() {
 		if(devices == null) {
 			PortAudio.initialize();
-			Logger.getGlobal().info("PortAudio initialized : " + PortAudio.getVersionText());
+			try {
+				Logger.getGlobal().info("PortAudio initialized : " + PortAudio.getVersionText());
 
-			devices = new DeviceInfo[PortAudio.getDeviceCount()];
-			for(int i = 0;i < devices.length;i++) {
-				devices[i] = PortAudio.getDeviceInfo(i);
+				devices = new DeviceInfo[PortAudio.getDeviceCount()];
+				for(int i = 0;i < devices.length;i++) {
+					devices[i] = PortAudio.getDeviceInfo(i);
+				}
+				logDevices(devices);
+			} catch (RuntimeException | Error e) {
+				devices = null;
+				try {
+					PortAudio.terminate();
+				} catch (Throwable cleanupFailure) {
+					e.addSuppressed(cleanupFailure);
+				}
+				throw e;
 			}
-			logDevices(devices);
 		}
 		return devices;
+	}
+
+	private static synchronized DeviceInfo[] acquireDevices() {
+		DeviceInfo[] result = getDevices();
+		activeDrivers++;
+		return result;
+	}
+
+	private static synchronized void releasePortAudio() {
+		if (--activeDrivers == 0) {
+			try {
+				PortAudio.terminate();
+			} finally {
+				devices = null;
+			}
+		}
 	}
 
 	public static String getUnavailableMessage(Throwable e) {
@@ -59,7 +86,6 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	public PortAudioDriver(Config config) {
 		super(config.getSongResourceGen());
-		DeviceInfo[] devices = getDevices();
 		AudioConfig audioConfig = config.getAudioConfig();
 		channels = 2;
 //		System.out.println( "  deviceId    = " + deviceId );
@@ -71,13 +97,6 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 		int flags = PortAudio.FLAG_CLIP_OFF | PortAudio.FLAG_DITHER_OFF;
 
-		// Open a stream for output.
-		int deviceId = getDeviceId(audioConfig, devices);
-		StreamOpenResult openResult = openStreamWithFallback(audioConfig, devices, deviceId, framesPerBuffer, flags);
-		stream = openResult.stream();
-
-		stream.start();
-
 		mixer = new Thread(this, "PortAudio Mixer");
 		mixer.setPriority(Thread.MAX_PRIORITY);
 		buffer = new float[framesPerBuffer * channels];
@@ -85,7 +104,86 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		for (int i = 0; i < inputs.length; i++) {
 			inputs[i] = new MixerInput();
 		}
-		mixer.start();
+		DeviceInfo[] devices = acquireDevices();
+		try {
+			int deviceId = getDeviceId(audioConfig, devices);
+			StreamOpenResult openResult = openStreamWithFallback(audioConfig, devices, deviceId, framesPerBuffer, flags);
+			stream = new StreamLifecycle(openResult.stream(), PortAudioDriver::releasePortAudio);
+			stream.start();
+			mixer.start();
+		} catch (RuntimeException | Error e) {
+			stop = true;
+			if (stream != null) {
+				stream.close();
+			} else {
+				try {
+					releasePortAudio();
+				} catch (Throwable cleanupFailure) {
+					e.addSuppressed(cleanupFailure);
+				}
+			}
+			throw e;
+		}
+	}
+
+	/** Owns one native stream and releases PortAudio only after that stream is closed. */
+	static final class StreamLifecycle {
+		private final BlockingStream nativeStream;
+		private final Runnable release;
+		private boolean closed;
+
+		StreamLifecycle(BlockingStream nativeStream, Runnable release) {
+			this.nativeStream = nativeStream;
+			this.release = release;
+		}
+
+		void start() {
+			try {
+				nativeStream.start();
+			} catch (RuntimeException | Error e) {
+				close();
+				throw e;
+			}
+		}
+
+		void write(float[] buffer, int frames) {
+			nativeStream.write(buffer, frames);
+		}
+
+		void run(Runnable mixerLoop) {
+			try {
+				mixerLoop.run();
+			} finally {
+				close();
+			}
+		}
+
+		synchronized void abort() {
+			if (!closed) {
+				try {
+					nativeStream.abort();
+				} catch (Throwable e) {
+					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream abort failed", e);
+				}
+			}
+		}
+
+		synchronized void close() {
+			if (closed) return;
+			abort();
+			closed = true;
+			try {
+				nativeStream.close();
+			} catch (Throwable e) {
+				Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream close failed", e);
+			} finally {
+				try {
+					release.run();
+				} catch (Throwable e) {
+					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio terminate failed", e);
+				}
+			}
+		}
 	}
 
 	private record StreamOpenResult(BlockingStream stream, int deviceId, DeviceInfo deviceInfo, int sampleRate) {
@@ -600,6 +698,16 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	}
 
 	public void run() {
+		try {
+			stream.run(this::runMixer);
+		} catch (Throwable e) {
+			Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio mixer failed", e);
+		} finally {
+			stop = true;
+		}
+	}
+
+	private void runMixer() {
 		while(!stop) {
 			final float gpitch = getGlobalPitch();
 			synchronized (inputs) {
@@ -642,7 +750,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 			
 			try {
-				BlockingStream currentStream = stream;
+				StreamLifecycle currentStream = stream;
 				if(currentStream == null) {
 					stop = true;
 					break;
@@ -650,7 +758,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 				currentStream.write( buffer, buffer.length / 2);
 			} catch(Throwable e) {
 				if(!stop) {
-					Logger.getGlobal().warning("PortAudio stream write failed : " + e.getMessage());
+					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream write failed : " + e.getMessage(), e);
 				}
 				stop = true;
 				break;
@@ -660,15 +768,10 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	}		
 
 	public void dispose() {
-		super.dispose();
-		BlockingStream currentStream = stream;
+		stop = true;
+		StreamLifecycle currentStream = stream;
 		if(currentStream != null) {
-			stop = true;
-			try {
-				currentStream.stop();
-			} catch(Throwable e) {
-				Logger.getGlobal().fine("PortAudio stream stop failed : " + e.getMessage());
-			}
+			currentStream.abort();
 			try {
 				if(mixer != null && mixer.isAlive() && mixer != Thread.currentThread()) {
 					mixer.join(2000);
@@ -676,22 +779,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			} catch(InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			try {
+			if (!mixer.isAlive()) {
 				currentStream.close();
-			} catch(Throwable e) {
-				Logger.getGlobal().fine("PortAudio stream close failed : " + e.getMessage());
+			} else {
+				Logger.getGlobal().warning("PortAudio mixer is still stopping; stream cleanup deferred until it exits");
 			}
-
-			stream = null;
-
-			try {
-				PortAudio.terminate();
-				devices = null;
-			} catch(Throwable e) {
-				Logger.getGlobal().fine("PortAudio terminate failed : " + e.getMessage());
-			}
-//			System.out.println( "JPortAudio test complete." );			
 		}
+		super.dispose();
 	}
 
 	static class MixerInput {

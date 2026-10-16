@@ -323,7 +323,7 @@ public final class MainController {
 			audio = new GdxAudioDeviceDriver(config);
 			break;
 		case PortAudio:
-			audio = new PortAudioDriver(config);
+			// Already initialized before the backend starts, so OpenAL fallback remains possible.
 			break;
 		}
 
