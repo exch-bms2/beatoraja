@@ -4,6 +4,8 @@
 <?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.control.Spinner?>
+<?import bms.player.beatoraja.Config?>
+<?import bms.player.beatoraja.PlayerConfig?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
 
 <?import java.lang.String?>
@@ -28,7 +30,10 @@
         <Label text="%MAXFPS" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="optionLabel"/>
         <NumericSpinner fx:id="maxFps" editable="true" GridPane.rowIndex="4" GridPane.columnIndex="1">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0"/>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60">
+                    <min><Config fx:constant="MAX_FPS_MIN" /></min>
+                    <max><Config fx:constant="MAX_FPS_MAX" /></max>
+                </SpinnerValueFactory.IntegerSpinnerValueFactory>
             </valueFactory>
         </NumericSpinner>
 
@@ -52,7 +57,10 @@
         </Label>
         <NumericSpinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="7" GridPane.columnIndex="1">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="10000" min="0"/>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500">
+                    <min><PlayerConfig fx:constant="MISS_LAYER_DURATION_MIN" /></min>
+                    <max><PlayerConfig fx:constant="MISS_LAYER_DURATION_MAX" /></max>
+                </SpinnerValueFactory.IntegerSpinnerValueFactory>
             </valueFactory>
         </NumericSpinner>
 

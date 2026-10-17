@@ -14,6 +14,12 @@ import com.badlogic.gdx.math.MathUtils;
  * @author exch
  */
 public final class PlayModeConfig {
+    public static final int INPUT_DURATION_MIN = 0;
+    public static final int INPUT_DURATION_MAX = 100;
+    public static final int MOUSE_SCRATCH_DISTANCE_MIN = 1;
+    public static final int MOUSE_SCRATCH_DISTANCE_MAX = 10000;
+    public static final int MOUSE_SCRATCH_TIME_THRESHOLD_MIN = 1;
+    public static final int MOUSE_SCRATCH_TIME_THRESHOLD_MAX = 10000;
 
     private PlayConfig playconfig = new PlayConfig();
     /**
@@ -115,15 +121,15 @@ public final class PlayModeConfig {
         if (keyboard.keys.length != keys) {
             keyboard.keys = Arrays.copyOf(keyboard.keys, keys);
         }
-        keyboard.duration = MathUtils.clamp(keyboard.duration, 0, 100);
+        keyboard.duration = MathUtils.clamp(keyboard.duration, INPUT_DURATION_MIN, INPUT_DURATION_MAX);
 
         MouseScratchConfig mousescratch = keyboard.mouseScratchConfig;
         if (mousescratch.keys == null || mousescratch.keys.length != keys) {
             mousescratch.keys = new int[keys];
             Arrays.fill(mousescratch.keys, -1);
         }
-        mousescratch.mouseScratchDistance = MathUtils.clamp(mousescratch.mouseScratchDistance, 1, 10000);
-        mousescratch.mouseScratchTimeThreshold = MathUtils.clamp(mousescratch.mouseScratchTimeThreshold, 1, 10000);
+        mousescratch.mouseScratchDistance = MathUtils.clamp(mousescratch.mouseScratchDistance, MOUSE_SCRATCH_DISTANCE_MIN, MOUSE_SCRATCH_DISTANCE_MAX);
+        mousescratch.mouseScratchTimeThreshold = MathUtils.clamp(mousescratch.mouseScratchTimeThreshold, MOUSE_SCRATCH_TIME_THRESHOLD_MIN, MOUSE_SCRATCH_TIME_THRESHOLD_MAX);
         mousescratch.mouseScratchMode = MathUtils.clamp(mousescratch.mouseScratchMode, 0, 1);
         mousescratch.start = sanitizeMouseScratchKey(mousescratch.start);
         mousescratch.select = sanitizeMouseScratchKey(mousescratch.select);
@@ -145,7 +151,7 @@ public final class PlayModeConfig {
                 c.keys = newkeys;
             }
             c.name = c.name != null ? c.name : "";
-            c.duration = MathUtils.clamp(c.duration, 0, 100);
+            c.duration = MathUtils.clamp(c.duration, INPUT_DURATION_MIN, INPUT_DURATION_MAX);
             c.analogScratchMode = MathUtils.clamp(c.analogScratchMode, 0, 1);
             c.analogScratchThreshold = MathUtils.clamp(c.analogScratchThreshold, 1, 1000);
         }

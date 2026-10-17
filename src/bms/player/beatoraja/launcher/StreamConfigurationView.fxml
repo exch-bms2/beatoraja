@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import bms.player.beatoraja.PlayerConfig?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -26,7 +27,10 @@
         <Label prefHeight="24.0" prefWidth="150.0" text="%MAX_REQUEST_COUNT"/>
         <NumericSpinner fx:id="maxRequestCount" editable="true" prefWidth="80.0">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="3" max="100" min="1" />
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="3">
+                    <min><PlayerConfig fx:constant="MAX_REQUEST_COUNT_MIN" /></min>
+                    <max><PlayerConfig fx:constant="MAX_REQUEST_COUNT_MAX" /></max>
+                </SpinnerValueFactory.IntegerSpinnerValueFactory>
             </valueFactory>
         </NumericSpinner>
     </HBox>

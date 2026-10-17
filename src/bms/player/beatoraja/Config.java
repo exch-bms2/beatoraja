@@ -22,6 +22,12 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  * @author exch
  */
 public class Config implements Validatable {
+	public static final int MAX_FPS_MIN = 0;
+	public static final int MAX_FPS_MAX = 50000;
+	public static final int SCROLL_DURATION_LOW_MIN = 2;
+	public static final int SCROLL_DURATION_LOW_MAX = 1000;
+	public static final int ANALOG_TICKS_PER_SCROLL_MIN = 1;
+	public static final int ANALOG_TICKS_PER_SCROLL_MAX = 1000;
 
 	private static final long MAX_CONFIG_FILE_SIZE = 1024 * 1024;
 	private static final int MAX_CONFIG_PATH_LENGTH = 4096;
@@ -575,16 +581,16 @@ public class Config implements Validatable {
 			audio = new AudioConfig();
 		}
 		audio.validate();
-		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 50000);
+		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, MAX_FPS_MIN, MAX_FPS_MAX);
 		prepareFramePerSecond = MathUtils.clamp(prepareFramePerSecond, 0, 100000);
         maxSearchBarCount = MathUtils.clamp(maxSearchBarCount, 1, 100);
 		songPreview = (songPreview != null) ? songPreview : SongPreview.LOOP;
 		songArchiveExtractMode = (songArchiveExtractMode != null) ? songArchiveExtractMode
 				: SongArchiveExtractMode.NO_TEMPORARY_FILES;
 
-		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
+		scrolldurationlow = MathUtils.clamp(scrolldurationlow, SCROLL_DURATION_LOW_MIN, SCROLL_DURATION_LOW_MAX);
 		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
-		analogTicksPerScroll = MathUtils.clamp(analogTicksPerScroll, 1, 1000);
+		analogTicksPerScroll = MathUtils.clamp(analogTicksPerScroll, ANALOG_TICKS_PER_SCROLL_MIN, ANALOG_TICKS_PER_SCROLL_MAX);
 		irSendCount = MathUtils.clamp(irSendCount, 1, 100);
 		frameskip = MathUtils.clamp(frameskip, 0, 10);
 

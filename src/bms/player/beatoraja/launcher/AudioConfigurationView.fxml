@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import bms.player.beatoraja.AudioConfig?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -41,7 +42,10 @@
 			prefWidth="150.0">
 			<valueFactory>
 				<SpinnerValueFactory.IntegerSpinnerValueFactory
-					amountToStepBy="1" initialValue="384" max="1024" min="16" />
+					amountToStepBy="1" initialValue="384">
+				    <min><AudioConfig fx:constant="DEVICE_BUFFER_SIZE_MIN" /></min>
+				    <max><AudioConfig fx:constant="DEVICE_BUFFER_SIZE_MAX" /></max>
+				</SpinnerValueFactory.IntegerSpinnerValueFactory>
 			</valueFactory>
 		</NumericSpinner>
 		<Label prefHeight="23.0" prefWidth="150.0"
@@ -54,7 +58,10 @@
 			prefWidth="150.0">
 			<valueFactory>
 				<SpinnerValueFactory.IntegerSpinnerValueFactory
-					amountToStepBy="1" initialValue="64" max="1024" min="8" />
+					amountToStepBy="1" initialValue="64">
+				    <min><AudioConfig fx:constant="DEVICE_SIMULTANEOUS_SOURCES_MIN" /></min>
+				    <max><AudioConfig fx:constant="DEVICE_SIMULTANEOUS_SOURCES_MAX" /></max>
+				</SpinnerValueFactory.IntegerSpinnerValueFactory>
 			</valueFactory>
 		</NumericSpinner>
 		<Label prefHeight="23.0" prefWidth="150.0"

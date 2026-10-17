@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
+<?import bms.player.beatoraja.PlayModeConfig?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.InputConfigurationView">
     <HBox prefHeight="23.0" prefWidth="740.0">
@@ -23,7 +24,10 @@
         <Label prefHeight="24.0" prefWidth="200.0" text="%MINIMUM_INPUT_DURATION" />
         <NumericSpinner fx:id="inputduration" editable="true" prefWidth="80.0">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10">
+                    <min><PlayModeConfig fx:constant="INPUT_DURATION_MIN" /></min>
+                    <max><PlayModeConfig fx:constant="INPUT_DURATION_MAX" /></max>
+                </SpinnerValueFactory.IntegerSpinnerValueFactory>
             </valueFactory>
         </NumericSpinner>
     </HBox>
@@ -78,7 +82,10 @@
         <Label prefHeight="24.0" prefWidth="200.0" text="%MOUSE_SCRATCH_TIME_THRESHOLD" />
         <NumericSpinner fx:id="mouseScratchTimeThreshold" editable="true" prefWidth="80.0">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="150" max="1000" min="1" />
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="150">
+                    <min><PlayModeConfig fx:constant="MOUSE_SCRATCH_TIME_THRESHOLD_MIN" /></min>
+                    <max><PlayModeConfig fx:constant="MOUSE_SCRATCH_TIME_THRESHOLD_MAX" /></max>
+                </SpinnerValueFactory.IntegerSpinnerValueFactory>
             </valueFactory>
         </NumericSpinner>
         <Label prefHeight="24.0" prefWidth="200.0" text="%MOUSE_SCRATCH_DISTANCE">
@@ -88,7 +95,10 @@
         </Label>
         <NumericSpinner fx:id="mouseScratchDistance" editable="true" prefWidth="80.0">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="12" max="1000" min="1" />
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="12">
+                    <min><PlayModeConfig fx:constant="MOUSE_SCRATCH_DISTANCE_MIN" /></min>
+                    <max><PlayModeConfig fx:constant="MOUSE_SCRATCH_DISTANCE_MAX" /></max>
+                </SpinnerValueFactory.IntegerSpinnerValueFactory>
             </valueFactory>
         </NumericSpinner>
     </HBox>

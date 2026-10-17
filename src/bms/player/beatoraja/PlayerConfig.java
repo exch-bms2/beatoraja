@@ -27,6 +27,16 @@ import com.badlogic.gdx.utils.SerializationException;
  * @author exch
  */
 public final class PlayerConfig {
+	public static final int MISS_LAYER_DURATION_MIN = 0;
+	public static final int MISS_LAYER_DURATION_MAX = 5000;
+	public static final int HRAN_THRESHOLD_BPM_MIN = 1;
+	public static final int HRAN_THRESHOLD_BPM_MAX = 1000;
+	public static final int EXIT_PRESS_DURATION_MIN = 0;
+	public static final int EXIT_PRESS_DURATION_MAX = 100000;
+	public static final int EXTRA_NOTE_DEPTH_MIN = 0;
+	public static final int EXTRA_NOTE_DEPTH_MAX = 100;
+	public static final int MAX_REQUEST_COUNT_MIN = 0;
+	public static final int MAX_REQUEST_COUNT_MAX = 100;
 	private static final long MAX_PLAYER_CONFIG_FILE_SIZE = 1024 * 1024;
 	private static final int MAX_SKIN_HISTORY_ENTRIES = 256;
 	private static final int MAX_TARGET_LIST_ENTRIES = 64;
@@ -970,7 +980,7 @@ public final class PlayerConfig {
 		targetid = targetid != null && !targetid.isBlank() ? targetid : "MAX";
 		targetlist = sanitizeTargetList(targetlist);
 		judgetiming = MathUtils.clamp(judgetiming, JUDGETIMING_MIN, JUDGETIMING_MAX);
-		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
+		misslayerDuration = MathUtils.clamp(misslayerDuration, MISS_LAYER_DURATION_MIN, MISS_LAYER_DURATION_MAX);
 		if (modeFilter == null || (mode != null && modeFilter == ModeFilter.ALL)) {
 			setModeFilter(ModeFilter.fromMode(mode));
 		} else {
@@ -987,7 +997,7 @@ public final class PlayerConfig {
 		scratchJudgeWindowRateGreat = MathUtils.clamp(scratchJudgeWindowRateGreat, 0, 400);
 		scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
 		longnoteMarginRate = MathUtils.clamp(longnoteMarginRate, 0, 400);
-		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
+		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, HRAN_THRESHOLD_BPM_MIN, HRAN_THRESHOLD_BPM_MAX);
 		
 		if(autosavereplay == null) {
 			autosavereplay = new int[4];
@@ -997,7 +1007,7 @@ public final class PlayerConfig {
 		}
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
-		exitPressDuration = MathUtils.clamp(exitPressDuration, 0, 100000);
+		exitPressDuration = MathUtils.clamp(exitPressDuration, EXIT_PRESS_DURATION_MIN, EXIT_PRESS_DURATION_MAX);
 
 		scrollMode = MathUtils.clamp(scrollMode, 0, ScrollSpeedModifier.Mode.values().length);
 		scrollSection = MathUtils.clamp(scrollSection, 1, 1024);
@@ -1005,7 +1015,7 @@ public final class PlayerConfig {
 		longnoteMode = MathUtils.clamp(longnoteMode, 0, LongNoteModifier.Mode.values().length);
 		longnoteRate = clampFinite(longnoteRate, 0.0, 1.0, 1.0);
 		mineMode = MathUtils.clamp(mineMode, 0, MineNoteModifier.Mode.values().length);
-		extranoteDepth = MathUtils.clamp(extranoteDepth, 0, 100);
+		extranoteDepth = MathUtils.clamp(extranoteDepth, EXTRA_NOTE_DEPTH_MIN, EXTRA_NOTE_DEPTH_MAX);
 
 		if(irconfig == null || irconfig.length == 0) {
 			String[] irnames = IRConnectionManager.getAllAvailableIRConnectionName();
@@ -1029,7 +1039,7 @@ public final class PlayerConfig {
 		irconfig = Validatable.removeInvalidElements(irconfig);
 
 		// --Stream
-		maxRequestCount = MathUtils.clamp(maxRequestCount, 0, 100);
+		maxRequestCount = MathUtils.clamp(maxRequestCount, MAX_REQUEST_COUNT_MIN, MAX_REQUEST_COUNT_MAX);
 	}
 
 	private static BarSorter[] sanitizeBarSorters(BarSorter[] sorters) {

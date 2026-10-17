@@ -8,6 +8,10 @@ import com.badlogic.gdx.math.MathUtils;
  * @author exch
  */
 public class AudioConfig implements Validatable {
+	public static final int DEVICE_BUFFER_SIZE_MIN = 4;
+	public static final int DEVICE_BUFFER_SIZE_MAX = 4096;
+	public static final int DEVICE_SIMULTANEOUS_SOURCES_MIN = 16;
+	public static final int DEVICE_SIMULTANEOUS_SOURCES_MAX = 1024;
 
 	/**
 	 * オーディオドライバー
@@ -163,8 +167,8 @@ public class AudioConfig implements Validatable {
 		if(driver == null) {
 			driver = DriverType.OpenAL;
 		}
-		deviceBufferSize = MathUtils.clamp(deviceBufferSize, 4, 4096);
-		deviceSimultaneousSources = MathUtils.clamp(deviceSimultaneousSources, 16, 1024);
+		deviceBufferSize = MathUtils.clamp(deviceBufferSize, DEVICE_BUFFER_SIZE_MIN, DEVICE_BUFFER_SIZE_MAX);
+		deviceSimultaneousSources = MathUtils.clamp(deviceSimultaneousSources, DEVICE_SIMULTANEOUS_SOURCES_MIN, DEVICE_SIMULTANEOUS_SOURCES_MAX);
 		sampleRate = sampleRate == 0 ? 0 : MathUtils.clamp(sampleRate, 8000, 384000);
 		if(freqOption == null) {
 			freqOption = FrequencyType.FREQUENCY;

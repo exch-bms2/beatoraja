@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import bms.player.beatoraja.PlayConfig?>
+<?import bms.player.beatoraja.PlayerConfig?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -112,13 +114,19 @@
                                          <Label prefHeight="18.0" prefWidth="78.0" text="%HI-SPEED" />
                                          <NumericSpinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0" max="9.9" min="1.0" />
+                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0">
+                                                     <min><PlayConfig fx:constant="HISPEED_MIN" /></min>
+                                                     <max><PlayConfig fx:constant="HISPEED_MAX" /></max>
+                                                 </SpinnerValueFactory.DoubleSpinnerValueFactory>
                                              </valueFactory>
                                          </NumericSpinner>
                                          <Label text="%GVALUE" GridPane.columnIndex="2" />
                                          <NumericSpinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="5000" min="1" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500">
+                                                     <min><PlayConfig fx:constant="DURATION_MIN" /></min>
+                                                     <max><PlayConfig fx:constant="DURATION_MAX" /></max>
+                                                 </SpinnerValueFactory.IntegerSpinnerValueFactory>
                                              </valueFactory>
                                          </NumericSpinner>
                                          <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="%ENABLE_LANECOVER" GridPane.rowIndex="1" />
@@ -169,7 +177,10 @@
                                          <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                          <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
+                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25">
+                                                     <min><PlayConfig fx:constant="HISPEEDMARGIN_MIN" /></min>
+                                                     <max><PlayConfig fx:constant="HISPEEDMARGIN_MAX" /></max>
+                                                 </SpinnerValueFactory.DoubleSpinnerValueFactory>
                                              </valueFactory>
                                          </NumericSpinner>
                                          <CheckBox fx:id="hispeedautoadjust" mnemonicParsing="false" text="%HISPEED_AUTO_ADJUST" GridPane.columnIndex="4" GridPane.rowIndex="5" GridPane.columnSpan="8">
@@ -240,7 +251,10 @@
                                          <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="9" />
                                          <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="9">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120">
+                                                     <min><PlayerConfig fx:constant="HRAN_THRESHOLD_BPM_MIN" /></min>
+                                                     <max><PlayerConfig fx:constant="HRAN_THRESHOLD_BPM_MAX" /></max>
+                                                 </SpinnerValueFactory.IntegerSpinnerValueFactory>
                                              </valueFactory>
                                          </NumericSpinner>
                                          <CheckBox fx:id="enableConstant" mnemonicParsing="false" text="%ENABLE_CONSTANT" GridPane.rowIndex="12" />
@@ -275,7 +289,10 @@
                                          <Label text="%EXTRA_NOTE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                          <NumericSpinner fx:id="extranotedepth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="3" min="0" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0">
+                                                     <min><PlayerConfig fx:constant="EXTRA_NOTE_DEPTH_MIN" /></min>
+                                                     <max><PlayerConfig fx:constant="EXTRA_NOTE_DEPTH_MAX" /></max>
+                                                 </SpinnerValueFactory.IntegerSpinnerValueFactory>
                                              </valueFactory>
                                          </NumericSpinner>
                                          <Label text="%MINE_MODE" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -323,7 +340,10 @@
                                          <Label text="%EXIT_PRESS_DURATION" GridPane.columnIndex="0" GridPane.rowIndex="5" />
                                          <NumericSpinner fx:id="exitpressduration" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="1000" max="2000" min="0" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="1000">
+                                                     <min><PlayerConfig fx:constant="EXIT_PRESS_DURATION_MIN" /></min>
+                                                     <max><PlayerConfig fx:constant="EXIT_PRESS_DURATION_MAX" /></max>
+                                                 </SpinnerValueFactory.IntegerSpinnerValueFactory>
                                              </valueFactory>
                                          </NumericSpinner>
                                          <CheckBox fx:id="chartpreview"  GridPane.columnIndex="2" GridPane.rowIndex="5" mnemonicParsing="false" text="%CHART_PREVIEW" />
