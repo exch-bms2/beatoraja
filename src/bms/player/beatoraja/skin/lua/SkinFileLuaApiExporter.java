@@ -13,13 +13,29 @@ import org.luaj.vm2.lib.*;
 final class SkinFileLuaApiExporter implements LuaApiExporter {
 
 	private final SkinLuaPathResolver pathResolver;
+	private final boolean allowDelete;
 
 	SkinFileLuaApiExporter(SkinLuaPathResolver pathResolver) {
+		this(pathResolver, true);
+	}
+
+	SkinFileLuaApiExporter(SkinLuaPathResolver pathResolver, boolean allowDelete) {
 		this.pathResolver = pathResolver;
+		this.allowDelete = allowDelete;
 	}
 
 	@Override
 	public void export(LuaTable table) {
+		table.set("file_delete", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue path) {
+				if (!allowDelete) return LuaValue.FALSE;
+				try {
+					Path resolved = pathResolver.resolve(path.checkjstring());
+					return LuaValue.valueOf(Files.isRegularFile(resolved, LinkOption.NOFOLLOW_LINKS)
+							&& Files.deleteIfExists(resolved));
+				} catch (IOException | RuntimeException e) { return LuaValue.FALSE; }
+			}
+		});
 		table.set("file_exists", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue path) {

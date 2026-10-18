@@ -28,7 +28,8 @@ import bms.player.beatoraja.SkinConfig;
  * 
  * @author excln
  */
-public class SkinLuaAccessor {
+public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
+	private MainStateAccessor mainStateAccessor;
 	
 	private final Globals globals;
 	private Path sandboxRoot;
@@ -878,7 +879,9 @@ public class SkinLuaAccessor {
 	 * @param state MainState
 	 */
 	public void exportMainStateAccessor(MainState state) {
-		MainStateAccessor accessor = new MainStateAccessor(state, this::getSkinDirectory);
+		if (mainStateAccessor != null) mainStateAccessor.dispose();
+		MainStateAccessor accessor = new MainStateAccessor(state, this::getSkinDirectory, sandboxRoot == null);
+		mainStateAccessor = accessor;
 		if (isGlobal) {
 			accessor.export(globals);
 		} else {
@@ -886,6 +889,10 @@ public class SkinLuaAccessor {
 			accessor.export(mainStateTable);
 			globals.package_.setIsLoaded(MAIN_STATE, mainStateTable);
 		}
+	}
+
+	@Override public void dispose() {
+		if (mainStateAccessor != null) mainStateAccessor.dispose();
 	}
 
 	private Path getSkinDirectory() {

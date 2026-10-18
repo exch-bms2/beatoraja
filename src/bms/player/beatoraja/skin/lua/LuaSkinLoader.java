@@ -70,6 +70,7 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		Skin skin = null;
 		SkinHeader header = loadHeader(p);
 		if(header == null) {
+			lua.dispose();
 			return null;
 		}
 		header.setSkinConfigProperty(property);
@@ -91,6 +92,7 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		if (skin == null) lua.dispose();
 		return skin;
 	}
 

@@ -214,6 +214,7 @@ public class JSONSkinLoader extends SkinLoader {
 		Skin skin = null;
 		SkinHeader header = loadHeader(p);
 		if(header == null) {
+			if (lua != null) lua.dispose();
 			return null;
 		}
 		header.setSkinConfigProperty(property);
@@ -246,6 +247,7 @@ public class JSONSkinLoader extends SkinLoader {
 			Logger.getGlobal().severe("何らかの原因でJSONスキンファイルの読み込みに失敗しました");
 			e.printStackTrace();
 		}
+		if (skin == null && lua != null) lua.dispose();
 		return skin;
 	}
 
@@ -287,6 +289,7 @@ public class JSONSkinLoader extends SkinLoader {
 			header.setDestinationResolution(dstr);
 			skin = objectLoader.getSkin(header);
 			loadingSkin = skin;
+			if (lua != null) skin.addResource(lua);
 			
 			IntIntMap op = new IntIntMap();
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {

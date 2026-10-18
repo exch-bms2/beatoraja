@@ -2,16 +2,12 @@ package bms.player.beatoraja.skin.lua;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.luaj.vm2.Globals;
@@ -43,8 +39,6 @@ final class LegacySkinLuaApi {
 	}
 
 	private static final String CLASS_NAME = "__legacy_class";
-	private static final int HTTP_MAX_LINES = 1024;
-	private static final int HTTP_MAX_CHARS = 65536;
 	private static final int HTTP_DEFAULT_TIMEOUT_MS = 1000;
 	private static final int HTTP_MAX_TIMEOUT_MS = 5000;
 
@@ -53,7 +47,7 @@ final class LegacySkinLuaApi {
 		LuaTable luajava = new LuaTable();
 		luajava.set("bindClass", new BindClassFunction());
 		luajava.set("new", new NewFunction(pathResolver));
-		luajava.set("newInstance", new NewInstanceFunction());
+		luajava.set("newInstance", new NewInstanceFunction(pathResolver));
 		globals.set("luajava", luajava);
 		globals.package_.setIsLoaded("luajava", luajava);
 
@@ -104,9 +98,16 @@ final class LegacySkinLuaApi {
 	}
 
 	private static final class NewInstanceFunction extends VarArgFunction {
+		private final SkinLuaPathResolver pathResolver;
+
+		private NewInstanceFunction(SkinLuaPathResolver pathResolver) {
+			this.pathResolver = pathResolver;
+		}
+
 		@Override
 		public Varargs invoke(Varargs arguments) {
 			return switch (arguments.checkjstring(1)) {
+				case "java.io.File" -> fileFacade(pathResolver, arguments.checkjstring(2));
 				case "java.net.URL" -> urlFacade(arguments.checkjstring(2));
 				case "java.io.InputStreamReader" -> arguments.arg(2);
 				case "java.io.BufferedReader" -> bufferedReaderFacade(arguments.arg(2));
@@ -118,11 +119,32 @@ final class LegacySkinLuaApi {
 	private static LuaTable fileFacade(SkinLuaPathResolver pathResolver, String pathText) {
 		Path path = pathResolver.resolve(pathText);
 		LuaTable facade = new LuaTable();
+		LuaTable metatable = new LuaTable();
+		metatable.set("__tostring", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue ignored) {
+				return LuaValue.valueOf(path.toString().replace('\\', '/'));
+			}
+		});
+		facade.setmetatable(metatable);
+		facade.set("getName", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue ignored) { return LuaValue.valueOf(path.getFileName().toString()); }
+		});
+		facade.set("getPath", metatable.get("__tostring"));
+		facade.set("isFile", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue ignored) {
+				return LuaValue.valueOf(Files.isRegularFile(pathResolver.resolve(path.toString())));
+			}
+		});
+		facade.set("isDirectory", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue ignored) {
+				return LuaValue.valueOf(Files.isDirectory(pathResolver.resolve(path.toString())));
+			}
+		});
 		facade.set("mkdir", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue ignored) {
 				try {
-					Files.createDirectory(path);
+					Files.createDirectory(pathResolver.resolve(path.toString()));
 					return LuaValue.TRUE;
 				} catch (IOException | RuntimeException e) {
 					return LuaValue.FALSE;
@@ -133,10 +155,11 @@ final class LegacySkinLuaApi {
 			@Override
 			public LuaValue call(LuaValue ignored) {
 				LuaTable files = new LuaTable();
-				try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+				try (DirectoryStream<Path> stream = Files.newDirectoryStream(pathResolver.resolve(path.toString()))) {
 					int index = 1;
 					for (Path file : stream) {
-						files.set(index++, file.toString().replace('\\', '/'));
+						if (index > 4096) throw new IOException("Too many skin directory entries");
+						if (!Files.isSymbolicLink(file)) files.set(index++, fileFacade(pathResolver, file.toString()));
 					}
 				} catch (IOException | RuntimeException e) {
 					return LuaValue.NIL;
@@ -161,6 +184,12 @@ final class LegacySkinLuaApi {
 
 	private static LuaTable connectionFacade(LegacyHttpConnection connection) {
 		LuaTable facade = new LuaTable();
+		facade.set("setResponseLimitBytes", new TwoArgFunction() {
+			@Override public LuaValue call(LuaValue ignored, LuaValue limit) {
+				connection.maxBytes = SkinHttpBody.checkedLimit(limit.checkdouble());
+				return LuaValue.NIL;
+			}
+		});
 		facade.set("setRequestMethod", new TwoArgFunction() {
 			@Override
 			public LuaValue call(LuaValue ignored, LuaValue method) {
@@ -191,7 +220,7 @@ final class LegacySkinLuaApi {
 		facade.set("getInputStream", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue ignored) {
-				return linesFacade(connection.readLines());
+				return linesFacade(connection.readBody());
 			}
 		});
 		return facade;
@@ -204,13 +233,28 @@ final class LegacySkinLuaApi {
 		return input.checktable();
 	}
 
-	private static LuaTable linesFacade(List<String> lines) {
+	private static LuaTable linesFacade(byte[] body) {
 		LuaTable facade = new LuaTable();
-		final int[] position = { 0 };
+		final BufferedReader[] reader = { SkinHttpBody.reader(body) };
+		facade.set("close", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue ignored) {
+				if (reader[0] != null) {
+					try { reader[0].close(); } catch (IOException e) { }
+					reader[0] = null;
+				}
+				return LuaValue.NIL;
+			}
+		});
 		facade.set("readLine", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue ignored) {
-				return position[0] < lines.size() ? LuaValue.valueOf(lines.get(position[0]++)) : LuaValue.NIL;
+				if (reader[0] == null) return LuaValue.NIL;
+				try {
+					String line = reader[0].readLine();
+					if (line != null) return LuaValue.valueOf(line);
+					facade.get("close").call();
+					return LuaValue.NIL;
+				} catch (IOException e) { throw new LuaError("Legacy Lua skin HTTP read failed: " + e.getMessage()); }
 			}
 		});
 		return facade;
@@ -220,6 +264,7 @@ final class LegacySkinLuaApi {
 		private final String urlText;
 		private String method = "GET";
 		private int timeout = HTTP_DEFAULT_TIMEOUT_MS;
+		private int maxBytes = SkinHttpBody.DEFAULT_MAX_BYTES;
 		private HttpURLConnection connection;
 
 		private LegacyHttpConnection(String urlText) {
@@ -267,23 +312,10 @@ final class LegacySkinLuaApi {
 			}
 		}
 
-		private List<String> readLines() {
+		private byte[] readBody() {
 			connect();
-			List<String> lines = new ArrayList<>();
-			int characters = 0;
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-				for (int i = 0; i < HTTP_MAX_LINES; i++) {
-					String line = reader.readLine();
-					if (line == null) {
-						break;
-					}
-					characters += line.length();
-					if (characters > HTTP_MAX_CHARS) {
-						throw new IOException("response is too large");
-					}
-					lines.add(line);
-				}
-				return lines;
+			try {
+				return SkinHttpBody.read(connection, maxBytes);
 			} catch (IOException e) {
 				throw new LuaError("Legacy Lua skin HTTP read failed: " + e.getMessage());
 			} finally {
@@ -313,9 +345,26 @@ final class LegacySkinLuaApi {
 		input.set("isKeyPressed", new VarArgFunction() {
 			@Override
 			public Varargs invoke(Varargs arguments) {
-				return LuaValue.valueOf(Gdx.input != null && Gdx.input.isKeyPressed(lastArgument(arguments).checkint()));
+				int key = lastArgument(arguments).checkint();
+				return LuaValue.valueOf(Gdx.input != null && key >= -1 && key <= 255 && Gdx.input.isKeyPressed(key));
 			}
 		});
+		input.set("isKeyJustPressed", new VarArgFunction() {
+			@Override public Varargs invoke(Varargs args) {
+				int key = lastArgument(args).checkint();
+				return LuaValue.valueOf(Gdx.input != null && key >= 0 && key <= 255 && Gdx.input.isKeyJustPressed(key));
+			}
+		});
+		input.set("isButtonPressed", new VarArgFunction() {
+			@Override public Varargs invoke(Varargs args) {
+				int button = lastArgument(args).checkint();
+				return LuaValue.valueOf(Gdx.input != null && button >= 0 && button <= 4 && Gdx.input.isButtonPressed(button));
+			}
+		});
+		input.set("getX", inputNumber(Input::getX));
+		input.set("getY", inputNumber(Input::getY));
+		input.set("getDeltaX", inputNumber(Input::getDeltaX));
+		input.set("getDeltaY", inputNumber(Input::getDeltaY));
 		facade.set("input", input);
 		return facade;
 	}
@@ -328,15 +377,32 @@ final class LegacySkinLuaApi {
 			@Override
 			public LuaValue call(LuaValue table, LuaValue key) {
 				try {
-					return LuaValue.valueOf(Input.Keys.valueOf(key.checkjstring()));
-				} catch (IllegalArgumentException e) {
-					return LuaValue.NIL;
+					// Legacy skins use Java constant names (UP, Enter), not libGDX display labels.
+					return LuaValue.valueOf(Input.Keys.class.getField(key.checkjstring().toUpperCase(java.util.Locale.ROOT)).getInt(null));
+				} catch (ReflectiveOperationException | IllegalArgumentException e) {
+					int code = Input.Keys.valueOf(key.checkjstring());
+					return code >= 0 ? LuaValue.valueOf(code) : LuaValue.NIL;
 				}
 			}
 		});
 		keys.setmetatable(metatable);
 		facade.set("Keys", keys);
+		LuaTable buttons = new LuaTable();
+		buttons.set("LEFT", Input.Buttons.LEFT);
+		buttons.set("RIGHT", Input.Buttons.RIGHT);
+		buttons.set("MIDDLE", Input.Buttons.MIDDLE);
+		buttons.set("BACK", Input.Buttons.BACK);
+		buttons.set("FORWARD", Input.Buttons.FORWARD);
+		facade.set("Buttons", buttons);
 		return facade;
+	}
+
+	private static LuaValue inputNumber(java.util.function.ToIntFunction<Input> getter) {
+		return new OneArgFunction() {
+			@Override public LuaValue call(LuaValue ignored) {
+				return LuaValue.valueOf(Gdx.input != null ? getter.applyAsInt(Gdx.input) : 0);
+			}
+		};
 	}
 
 	private static LuaTable controllersFacade() {

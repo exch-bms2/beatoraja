@@ -10,7 +10,7 @@ import org.luaj.vm2.LuaTable;
 /**
  * 実行時にスキンからMainStateの数値などにアクセスできる関数を提供する
  */
-public class MainStateAccessor {
+public class MainStateAccessor implements com.badlogic.gdx.utils.Disposable {
 
 	private final List<LuaApiExporter> exporters;
 
@@ -19,10 +19,15 @@ public class MainStateAccessor {
 	}
 
 	public MainStateAccessor(MainState state, Supplier<Path> skinDirectorySupplier) {
+		this(state, skinDirectorySupplier, true);
+	}
+
+	MainStateAccessor(MainState state, Supplier<Path> skinDirectorySupplier, boolean allowExternalEffects) {
 		SkinLuaPathResolver pathResolver = new SkinLuaPathResolver(skinDirectorySupplier);
 		exporters = List.of(
 				new MainStatePropertyLuaApiExporter(state),
-				new SkinFileLuaApiExporter(pathResolver),
+				new SkinFileLuaApiExporter(pathResolver, allowExternalEffects),
+				new SkinRuntimeLuaApiExporter(allowExternalEffects),
 				new SkinHttpLuaApiExporter(),
 				new SkinAudioLuaApiExporter(state, pathResolver)
 		);
@@ -31,6 +36,12 @@ public class MainStateAccessor {
 	public void export(LuaTable table) {
 		for(LuaApiExporter exporter : exporters) {
 			exporter.export(table);
+		}
+	}
+
+	@Override public void dispose() {
+		for (LuaApiExporter exporter : exporters) {
+			if (exporter instanceof com.badlogic.gdx.utils.Disposable disposable) disposable.dispose();
 		}
 	}
 }
