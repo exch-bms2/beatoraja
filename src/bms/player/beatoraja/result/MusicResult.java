@@ -373,6 +373,7 @@ public class MusicResult extends AbstractResult {
 			if (cscore == null) {
 				cscore = new ScoreData();
 				cscore.setMinbp(0);
+				cscore.setPlaytime(0);
 				int notes = 0;
 				for (BMSModel mo : resource.getCourseBMSModels()) {
 					notes += mo.getTotalNotes();
@@ -399,6 +400,7 @@ public class MusicResult extends AbstractResult {
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
 			cscore.setTotalDuration(cscore.getTotalDuration() + newscore.getTotalDuration());
+			cscore.addPlaytime(newscore.getPlaytime());
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
 				if (resource.getAssist() > 0) {
 					if(resource.getAssist() == 1 && cscore.getClear() != ClearType.AssistEasy.id) cscore.setClear(ClearType.LightAssistEasy.id);

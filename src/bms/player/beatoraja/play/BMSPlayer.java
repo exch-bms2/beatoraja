@@ -38,6 +38,7 @@ public class BMSPlayer extends MainState {
 
 
 	private int playtime;
+	private final PlayTimeTracker playTimeTracker = new PlayTimeTracker();
 
 	/**
 	 * キー入力用スレッド
@@ -607,6 +608,7 @@ public class BMSPlayer extends MainState {
 					replayConfig = players[0].lanerender.getPlayConfig().clone();
 					state = STATE_PLAY;
 					timer.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
+					playTimeTracker.start(micronow, starttimeoffset * 1000, (long) (playtime - TIME_MARGIN) * 1000);
 					timer.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 					input.setStartTime(micronow + timer.getStartMicroTime() - starttimeoffset * 1000);
@@ -623,6 +625,7 @@ public class BMSPlayer extends MainState {
 				PracticeProperty property = practice.getPracticeProperty();
 				timer.setMicroTimer(TIMER_PLAY, timer.getMicroTimer(TIMER_PLAY) + deltaplay);
 				final long ptime = timer.getNowTime(TIMER_PLAY);
+				playTimeTracker.update(micronow, timer.getNowMicroTime(TIMER_PLAY));
 
 				for(PlayerProperty p : players) {
 					rhythm.update(this, deltatime, p.lanerender.getNowBPM(), property.freq);
@@ -653,6 +656,7 @@ public class BMSPlayer extends MainState {
 						case PlayerConfig.GAUGEAUTOSHIFT_NONE:
 							// FAILED移行
 							state = STATE_FAILED;
+							playTimeTracker.stop(micronow, timer.getNowMicroTime(TIMER_PLAY));
 							timer.setTimerOn(TIMER_FAILED);
 							if (resource.mediaLoadFinished()) {
 								main.getAudioProcessor().stop((Note) null);
@@ -678,6 +682,7 @@ public class BMSPlayer extends MainState {
 				// System.out.println("playing time : " + time);
 				if (playtime < ptime) {
 					state = STATE_FINISHED;
+					playTimeTracker.stop(micronow, timer.getNowMicroTime(TIMER_PLAY));
 					timer.setTimerOn(TIMER_MUSIC_END);
 					for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
 						timer.setTimerOff(i);
@@ -855,6 +860,7 @@ public class BMSPlayer extends MainState {
 		final GrooveGauge gauge = players[player].gauge;
 		final PlayerConfig config = resource.getPlayerConfig();
 		ScoreData score = judge.getScoreData();
+		score.setPlaytime(playTimeTracker.getPlaytime());
 		if (resource.getCourseBMSModels() == null
 				&& (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0)) {
 			return null;
@@ -950,6 +956,7 @@ public class BMSPlayer extends MainState {
 		if (timer.isTimerOn(TIMER_FAILED) || timer.isTimerOn(TIMER_FADEOUT)) {
 			return;
 		}
+		playTimeTracker.stop(timer.getNowMicroTime(), timer.getNowMicroTime(TIMER_PLAY));
 		if (state != STATE_FINISHED && 
 				(getPastNotes() == resource.getSongdata().getNotes()
 				|| resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY)) {
@@ -1075,6 +1082,46 @@ public class BMSPlayer extends MainState {
 		return rhythm != null ? rhythm.getNowQuarterNoteTime() : 0;
 	}
 	
+	/** Measures real elapsed microseconds, independently of the speed-adjusted chart timer. */
+	static final class PlayTimeTracker {
+		private long startedAt = -1;
+		private long previousTime;
+		private long previousChartTime;
+		private long chartEnd;
+		private long elapsed = -1;
+
+		void start(long now, long chartTime, long chartEnd) {
+			startedAt = now;
+			previousTime = now;
+			previousChartTime = chartTime;
+			this.chartEnd = chartEnd;
+			elapsed = chartTime >= chartEnd ? 0 : -1;
+		}
+
+		void update(long now, long chartTime) {
+			if (startedAt < 0 || elapsed >= 0) return;
+			if (chartTime >= chartEnd) {
+				// Interpolate a frame crossing the final note; do not charge its margin portion.
+				double fraction = chartTime > previousChartTime
+						? (double) (chartEnd - previousChartTime) / (chartTime - previousChartTime) : 0;
+				long endedAt = previousTime + (long) ((now - previousTime) * Math.max(0, Math.min(1, fraction)));
+				elapsed = Math.max(0, endedAt - startedAt);
+			}
+			previousTime = now;
+			previousChartTime = chartTime;
+		}
+
+		void stop(long now, long chartTime) {
+			update(now, chartTime);
+			if (startedAt >= 0 && elapsed < 0) elapsed = Math.max(0, now - startedAt);
+		}
+
+		/** Milliseconds; -1 means playback has not started. */
+		long getPlaytime() {
+			return startedAt < 0 ? -1 : (elapsed >= 0 ? elapsed : Math.max(0, previousTime - startedAt)) / 1000;
+		}
+	}
+
 	public static class PlayerProperty {
 		
 		public final  LaneRenderer lanerender;

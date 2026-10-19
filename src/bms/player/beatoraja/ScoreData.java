@@ -38,6 +38,8 @@ public final class ScoreData implements Validatable {
 	 * スコア最終取得日時(unixtime, 秒単位)
 	 */
 	private long date = 0;	
+	/** Real performance duration in milliseconds, excluding ending margin/animations; -1 if unknown. */
+	private long playtime = -1;
 	/**
 	 * 総プレイ回数
 	 */
@@ -148,6 +150,20 @@ public final class ScoreData implements Validatable {
 	
 	public void setDate(long date) {
 		this.date = date;
+	}
+
+	public long getPlaytime() {
+		return playtime;
+	}
+
+	public void setPlaytime(long playtime) {
+		this.playtime = Math.max(-1, playtime);
+	}
+
+	/** Adds one course stage; an unknown duration makes the aggregate unknown. */
+	public void addPlaytime(long stagePlaytime) {
+		playtime = playtime < 0 || stagePlaytime < 0 || Long.MAX_VALUE - playtime < stagePlaytime
+				? -1 : playtime + stagePlaytime;
 	}
 	
 	public int getPlaycount() {
@@ -587,7 +603,7 @@ public final class ScoreData implements Validatable {
 
 	@Override
 	public boolean validate() {
-		return mode >= 0 && clear >= 0 && clear <= ClearType.Max.id &&
+		return playtime >= -1 && mode >= 0 && clear >= 0 && clear <= ClearType.Max.id &&
 				epg >= 0 && lpg >= 0 && egr >= 0 && lgr >= 0 && egd >= 0 && lgd >= 0 &&
 				ebd >= 0 && lbd >= 0 && epr >= 0 && lpr >= 0 && ems >= 0 && lms >= 0 &&
 				clearcount >= 0 && playcount >= clearcount && maxcombo >= 0 && notes > 0 && passnotes >= 0 && passnotes <= notes &&minbp >= 0 &&

@@ -299,6 +299,7 @@ final class IRWorkerProtocol {
 		public String player;
 		public ClearType clear;
 		public long date;
+		public long playtime = -1;
 		public int epg;
 		public int lpg;
 		public int egr;
@@ -336,6 +337,7 @@ final class IRWorkerProtocol {
 			dto.player = score.player;
 			dto.clear = score.clear;
 			dto.date = score.date;
+			dto.playtime = score.playtime;
 			dto.epg = score.epg;
 			dto.lpg = score.lpg;
 			dto.egr = score.egr;
@@ -367,7 +369,7 @@ final class IRWorkerProtocol {
 		IRScoreData toIRScoreData() {
 			return new IRScoreData(sha256, lntype, id, player, clear, date, epg, lpg, egr, lgr, egd, lgd, ebd, lbd,
 					epr, lpr, ems, lms, avgjudge, maxcombo, notes, passnotes, minbp, option, seed, assist, gauge,
-					deviceType, judgeAlgorithm, rule, skin);
+					deviceType, judgeAlgorithm, rule, skin, playtime);
 		}
 	}
 
