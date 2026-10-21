@@ -29,25 +29,39 @@ sourceSets {
     }
 }
 
-// Deliberately no repositories or dependency upgrades in the first migration.
+repositories {
+    mavenCentral()
+}
+
+// Keep custom/native bundles local; migrate only byte-identical Central artifacts.
 val bundledJars = listOf(
-    "commons-compress-1.16.1.jar", "commons-dbutils.jar",
-    "ffmpeg-linux-x86.jar", "ffmpeg-linux-x86_64.jar", "ffmpeg-macosx-x86_64.jar",
-    "ffmpeg-windows-x86.jar", "ffmpeg-windows-x86_64.jar", "ffmpeg-platform.jar", "ffmpeg.jar",
     "gdx-backend-lwjgl-natives.jar", "gdx-backend-lwjgl.jar",
     "gdx-controllers-desktop-natives.jar", "gdx-controllers-desktop.jar", "gdx-controllers.jar",
     "gdx-freetype-natives.jar", "gdx-freetype.jar", "gdx-natives.jar", "gdx.jar",
-    "java-discord-rpc-2.0.1-all.jar", "javacpp.jar", "javacv-platform.jar", "javacv.jar",
+    "java-discord-rpc-2.0.1-all.jar",
     "jbms-parser.jar", "jbmstable-parser.jar", "jflac-codec-1.5.3.jar", "jportaudio.jar",
-    "junrar.jar", "sqlite-jdbc.jar", "tarsosdsp-latest.jar"
+    "tarsosdsp-latest.jar"
 )
 val luaJar = listOf("luaj-jse-3.0.2-custom.jar", "luaj-jse.jar")
     .firstOrNull { file("lib/$it").isFile } ?: "luaj-jse-3.0.2-custom.jar"
 val localLibraries = (bundledJars + luaJar).map { file("lib/$it") }
 dependencies {
     implementation(files(localLibraries))
-    // Needed by the newer locally supplied SQLite JAR, but not by every checkout.
-    if (file("lib/slf4j-api-1.7.36.jar").isFile) runtimeOnly(files("lib/slf4j-api-1.7.36.jar"))
+    // Preserve the existing runtime set instead of importing new transitive dependencies.
+    implementation("org.apache.commons:commons-compress:1.16.1") { isTransitive = false }
+    implementation("commons-dbutils:commons-dbutils:1.6") { isTransitive = false }
+    implementation("org.xerial:sqlite-jdbc:3.46.1.0") { isTransitive = false }
+    runtimeOnly("org.slf4j:slf4j-api:1.7.36") { isTransitive = false }
+    implementation("com.github.junrar:junrar:7.6.0") { isTransitive = false }
+    implementation("org.bytedeco:javacpp:1.3.3") { isTransitive = false }
+    implementation("org.bytedeco:javacv:1.3.3") { isTransitive = false }
+    runtimeOnly("org.bytedeco:javacv-platform:1.3.3") { isTransitive = false }
+    implementation("org.bytedeco.javacpp-presets:ffmpeg:3.2.1-1.3") { isTransitive = false }
+    runtimeOnly("org.bytedeco.javacpp-presets:ffmpeg-platform:3.2.1-1.3") { isTransitive = false }
+    // Match the existing native set, not the platform POM's broader dependency graph.
+    for (classifier in listOf("linux-x86", "linux-x86_64", "macosx-x86_64", "windows-x86", "windows-x86_64")) {
+        runtimeOnly("org.bytedeco.javacpp-presets:ffmpeg:3.2.1-1.3:$classifier") { isTransitive = false }
+    }
 }
 
 val java17 = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) }
@@ -120,7 +134,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
     "bms.player.beatoraja.skin.lua.SkinHttpLimitsTest",
-    "bms.player.beatoraja.song.archive.SongArchivesTest"
+    "bms.player.beatoraja.song.archive.SongArchivesTest",
+    "bms.player.beatoraja.song.archive.RarSongArchiveTest"
 )
 val regressionTasks = regressionClasses.map { className ->
     tasks.register<JavaExec>("regression${className.substringAfterLast('.')}") {
@@ -186,11 +201,12 @@ tasks.named<Zip>("distZip") {
 val distributionSmokeTest by tasks.registering(JavaExec::class) {
     group = "verification"
     description = "Verify installed JARs/resources and start a Java 17 packaged-runtime probe."
-    dependsOn(tasks.installDist, tasks.testClasses)
+    dependsOn(tasks.installDist, tasks.distZip, tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.build.DistributionSmokeTest")
     args(layout.buildDirectory.dir("install/beatoraja").get().asFile.absolutePath,
-        sourceSets.test.get().output.classesDirs.asPath, java17.get().executablePath.asFile.absolutePath)
+        sourceSets.test.get().output.classesDirs.asPath, java17.get().executablePath.asFile.absolutePath,
+        tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath)
     workingDir(projectDir)
 }
 tasks.check { dependsOn(distributionSmokeTest) }
