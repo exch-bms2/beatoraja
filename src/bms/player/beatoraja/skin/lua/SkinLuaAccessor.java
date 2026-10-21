@@ -389,12 +389,23 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			if (!resolved.startsWith(root)) {
 				throw new IOException("Lua skin file access denied: " + filename);
 			}
+			// Check components even when the final file does not exist (write/append).
+			Path component = root;
+			for (Path name : root.relativize(resolved)) {
+				component = component.resolve(name);
+				if (Files.isSymbolicLink(component)) {
+					throw new IOException("Lua skin symbolic link access denied: " + filename);
+				}
+			}
 			return resolved;
 		}
 
 		private Path requireRoot() throws IOException {
 			if (root == null) {
 				throw new IOException("Lua skin directory is not specified");
+			}
+			if (Files.isSymbolicLink(root)) {
+				throw new IOException("Lua skin symbolic link access denied: " + root);
 			}
 			return root;
 		}
