@@ -48,6 +48,29 @@ Timer values are microseconds.
 | API | Return | Description |
 | --- | --- | --- |
 | `main_state.key_pressed(key)` | boolean | Returns whether a libGDX key is pressed. `key` may be a keycode number or key name such as `"LEFT"`, `"RIGHT"`, `"UP"`, `"DOWN"`. |
+| `main_state.key_just_pressed(key)` | boolean | True during the frame in which the keyboard key was pressed. Accepts the same keys as `key_pressed`. |
+| `main_state.input_pressed(index)` | boolean | Assigned lane input state from `BMSPlayerInputProcessor`. Indices are **zero-based**, matching its key-state indices; keyboard, controller and MIDI assignments are handled by the player. |
+| `main_state.start_pressed()` | boolean | Assigned START input state. |
+| `main_state.select_pressed()` | boolean | Assigned SELECT input state. |
+| `main_state.mouse_pressed(button)` | boolean | Physical mouse button state: 0 = left, 1 = right, 2 = middle, 3 = back, 4 = forward. |
+| `main_state.mouse_just_pressed(button)` | boolean | True during the frame following a mouse-down event, including a click released before rendering. Uses the same button numbers as `mouse_pressed`. |
+| `main_state.mouse_x()` | number | Pointer X in the current skin's definition coordinates. |
+| `main_state.mouse_y()` | number | Pointer Y in the current skin's definition coordinates, with the origin at the bottom left. |
+
+Input queries are read-only and do not consume the player's input. Repeated `just_pressed` queries in a frame return the same result. Unavailable inputs or invalid indices return false. Mouse coordinates return 0 without an input/graphics context; without a loaded skin they use window coordinates with a bottom-left origin. Coordinates are not clamped when the pointer is outside the window.
+
+For example, a SELECT toggle can compare `select_pressed()` against its previous value:
+
+```lua
+local previousSelect = false
+local function updatePanel()
+    local pressed = main_state.select_pressed()
+    if pressed and not previousSelect then
+        -- Toggle the panel here.
+    end
+    previousSelect = pressed
+end
+```
 
 ## Volume
 

@@ -1,6 +1,8 @@
 package bms.player.beatoraja.skin.lua;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
@@ -12,6 +14,7 @@ import org.luaj.vm2.lib.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
@@ -46,7 +49,21 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		table.set("set_timer", new SetTimerFunction());
 		table.set("event_exec", new EventExecFunction());
 		table.set("event_index", new EventIndexFunction());
-		table.set("key_pressed", new KeyPressedFunction());
+		table.set("key_pressed", new KeyPressedFunction(false));
+		table.set("key_just_pressed", new KeyPressedFunction(true));
+		table.set("input_pressed", new OneArgFunction() {
+			@Override public LuaValue call(LuaValue value) {
+				BMSPlayerInputProcessor input = getInput();
+				int index = inputIndex(value, BMSPlayerInputProcessor.KEYSTATE_SIZE - 1);
+				return LuaBoolean.valueOf(input != null && index >= 0 && input.getKeyState(index));
+			}
+		});
+		table.set("start_pressed", zeroArg(() -> LuaBoolean.valueOf(getInput() != null && getInput().startPressed())));
+		table.set("select_pressed", zeroArg(() -> LuaBoolean.valueOf(getInput() != null && getInput().isSelectPressed())));
+		table.set("mouse_pressed", new MousePressedFunction(false));
+		table.set("mouse_just_pressed", new MousePressedFunction(true));
+		table.set("mouse_x", zeroArg(() -> mousePosition(false)));
+		table.set("mouse_y", zeroArg(() -> mousePosition(true)));
 		table.set("numbers", new NumbersFunction());
 		table.set("screen_width", zeroArg(() -> LuaInteger.valueOf(Gdx.graphics != null ? Gdx.graphics.getWidth() : 0)));
 		table.set("screen_height", zeroArg(() -> LuaInteger.valueOf(Gdx.graphics != null ? Gdx.graphics.getHeight() : 0)));
@@ -313,19 +330,79 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		}
 	}
 
+	private BMSPlayerInputProcessor getInput() {
+		return state != null && state.main != null ? state.main.getInputProcessor() : null;
+	}
+
+	private static int inputIndex(LuaValue value, int maximum) {
+		if (!value.isnumber()) return -1;
+		double number = value.todouble();
+		return number >= 0 && number <= maximum && number == (int) number ? (int) number : -1;
+	}
+
+	private LuaValue mousePosition(boolean vertical) {
+		if (Gdx.input == null || Gdx.graphics == null) return LuaInteger.ZERO;
+		int screenSize = vertical ? Gdx.graphics.getHeight() : Gdx.graphics.getWidth();
+		if (screenSize <= 0) return LuaInteger.ZERO;
+		double position = vertical ? screenSize - Gdx.input.getY() : Gdx.input.getX();
+		Skin skin = state != null ? state.getSkin() : null;
+		if (skin != null) {
+			double scale = vertical ? skin.getScaleY() : skin.getScaleX();
+			if (scale > 0) position *= (vertical ? skin.getHeight() : skin.getWidth()) / scale / screenSize;
+		}
+		return LuaDouble.valueOf(position);
+	}
+
+	private class MousePressedFunction extends OneArgFunction {
+		private final boolean justPressed;
+
+		MousePressedFunction(boolean justPressed) {
+			this.justPressed = justPressed;
+		}
+
+		@Override public LuaValue call(LuaValue value) {
+			int button = inputIndex(value, Input.Buttons.FORWARD);
+			if (button < 0) return LuaBoolean.FALSE;
+			BMSPlayerInputProcessor input = getInput();
+			return LuaBoolean.valueOf(justPressed ? input != null && input.isSkinMouseJustPressed(button)
+					: Gdx.input != null && Gdx.input.isButtonPressed(button));
+		}
+	}
+
 	private static class KeyPressedFunction extends OneArgFunction {
+		private static final Map<String, Integer> KEY_CODES = createKeyCodes();
+		private final boolean justPressed;
+
+		KeyPressedFunction(boolean justPressed) {
+			this.justPressed = justPressed;
+		}
+
+		private static Map<String, Integer> createKeyCodes() {
+			Map<String, Integer> codes = new HashMap<>();
+			for (int code = 0; code <= 255; code++) {
+				String name = Input.Keys.toString(code);
+				if (name != null) codes.put(name.toUpperCase(Locale.ROOT), code);
+			}
+			for (var field : Input.Keys.class.getFields()) {
+				if (field.getType() == int.class) {
+					try {
+						codes.put(field.getName(), field.getInt(null));
+					} catch (IllegalAccessException e) {
+						throw new ExceptionInInitializerError(e);
+					}
+				}
+			}
+			return codes;
+		}
 		@Override
 		public LuaValue call(LuaValue value) {
 			if(Gdx.input == null) {
 				return LuaBoolean.FALSE;
 			}
-			int keycode;
-			try {
-				keycode = value.isnumber() ? value.toint() : Input.Keys.valueOf(value.tojstring());
-			} catch(IllegalArgumentException e) {
-				return LuaBoolean.FALSE;
-			}
-			return LuaBoolean.valueOf(keycode >= 0 && Gdx.input.isKeyPressed(keycode));
+			int keycode = value.isnumber() ? inputIndex(value, 255)
+					: KEY_CODES.getOrDefault(value.tojstring().toUpperCase(Locale.ROOT), -1);
+			return LuaBoolean.valueOf(keycode >= 0 && keycode <= 255
+					&& (justPressed ? Gdx.input.isKeyJustPressed(keycode) : Gdx.input.isKeyPressed(keycode)));
 		}
 	}
 

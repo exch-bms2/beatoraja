@@ -283,9 +283,9 @@ public final class MainController {
 			updateMainStateListener(0);
 		}
 		if (current.getStage() != null) {
-			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
+			Gdx.input.setInputProcessor(new InputMultiplexer(input.getSkinMouseInput(), current.getStage(), input.getKeyBoardInputProcesseor()));
 		} else {
-			Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());
+			Gdx.input.setInputProcessor(new InputMultiplexer(input.getSkinMouseInput(), input.getKeyBoardInputProcesseor()));
 		}
 	}
 
@@ -400,6 +400,7 @@ public final class MainController {
 
 	public void render() {
 //		input.poll();
+		input.beginSkinInputFrame();
 		timer.update();
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

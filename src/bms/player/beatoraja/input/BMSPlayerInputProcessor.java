@@ -13,6 +13,8 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -120,6 +122,41 @@ public class BMSPlayerInputProcessor {
 
 	private boolean startPressed;
 	private boolean selectPressed;
+	private final SkinMouseInput skinMouseInput = new SkinMouseInput();
+
+	/** Observes mouse presses without consuming events handled by the skin or Stage. */
+	public InputProcessor getSkinMouseInput() {
+		return skinMouseInput;
+	}
+
+	/** Publishes mouse press edges once per render frame. */
+	public void beginSkinInputFrame() {
+		skinMouseInput.beginFrame();
+	}
+
+	public boolean isSkinMouseJustPressed(int button) {
+		return skinMouseInput.isJustPressed(button);
+	}
+
+	static final class SkinMouseInput extends InputAdapter {
+		private final boolean[] pending = new boolean[5];
+		private final boolean[] justPressed = new boolean[5];
+
+		@Override
+		public boolean touchDown(int x, int y, int pointer, int button) {
+			if (button >= 0 && button < pending.length) pending[button] = true;
+			return false;
+		}
+
+		void beginFrame() {
+			System.arraycopy(pending, 0, justPressed, 0, pending.length);
+			Arrays.fill(pending, false);
+		}
+
+		boolean isJustPressed(int button) {
+			return button >= 0 && button < justPressed.length && justPressed[button];
+		}
+	}
 
 	private Type type = Type.KEYBOARD;
 
