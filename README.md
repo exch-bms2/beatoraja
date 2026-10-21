@@ -38,3 +38,7 @@ On JRE 32bit, maximum heap memory size is limited to 1.4G-1.6G. See http://www.o
 
 # License
 - GNU General Public License v3
+
+# Building
+- [Gradle build, tests, launch and distribution](docs/gradle-build.md)
+- The existing Ant build remains available in `build.xml`.

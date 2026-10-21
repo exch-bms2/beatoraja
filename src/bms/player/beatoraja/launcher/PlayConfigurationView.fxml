@@ -10,7 +10,6 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
@@ -432,36 +431,6 @@
                            <TextField fx:id="ipfsurl" prefHeight="25.0" prefWidth="200.0" />
                         </children>
                      </HBox>
-               <VBox prefHeight="150.0" prefWidth="100.0" visible="false">
-                  <children>
-                     <HBox prefHeight="31.0" prefWidth="780.0">
-                        <children>
-                           <Label prefHeight="35.0" prefWidth="195.0" text="%TWITTER_CONNECTION" />
-                           <Label fx:id="txtTwitterAuthenticated" prefHeight="34.0" prefWidth="88.0" text="%TWITTER_AUTHENTICATED" />
-                        </children>
-                     </HBox>
-                     <HBox prefHeight="25.0" prefWidth="350.0">
-                        <children>
-                           <Label prefHeight="18.0" prefWidth="100.0" text="%TWITTER_CONSUMER_KEY" />
-                           <TextField fx:id="txtTwitterConsumerKey" prefHeight="25.0" prefWidth="200.0" />
-                        </children>
-                     </HBox>
-                     <HBox prefHeight="25.0" prefWidth="350.0">
-                        <children>
-                           <Label prefHeight="25.0" prefWidth="100.0" text="%TWITTER_CONSUMER_SECRET" />
-                           <PasswordField fx:id="txtTwitterConsumerSecret" prefHeight="25.0" prefWidth="200.0" />
-                        </children>
-                     </HBox>
-                     <Button fx:id="twitterAuthButton" mnemonicParsing="false" onAction="#startTwitterAuth" prefHeight="25.0" prefWidth="134.0" text="%TWITTER_AUTHENTICATION" />
-                     <HBox prefHeight="50.0" prefWidth="200.0">
-                        <children>
-                           <Label prefHeight="25.0" prefWidth="31.0" text="PIN" />
-                           <TextField fx:id="txtTwitterPIN" prefHeight="25.0" prefWidth="100.0" />
-                           <Button fx:id="twitterPINButton" mnemonicParsing="false" onAction="#startPINAuth" text="%TWITTER_AUTH_VERIFY" />
-                        </children>
-                     </HBox>
-                  </children>
-               </VBox>
                 </VBox>
             </AnchorPane>
         </Tab>

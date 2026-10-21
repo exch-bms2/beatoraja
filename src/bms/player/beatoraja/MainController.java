@@ -563,20 +563,6 @@ public final class MainController {
                 }
             }
 
-            if (input.isActivated(KeyCommand.POST_TWITTER)) {
-                if (screenshot == null || !screenshot.isAlive()) {
-            		final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight(), false);
-                    screenshot = new Thread(() -> {
-                		// 全ピクセルのアルファ値を255にする(=透明色を無くす)
-                		for(int i = 3;i < pixels.length;i+=4) {
-                			pixels[i] = (byte) 0xff;
-                		}
-                    	new ScreenShotTwitterExporter(player).send(current, pixels);
-                    });
-                    screenshot.start();
-                }
-            }
-
 			if (download != null && download.getDownloadpath() != null) {
             	this.updateSong(download.getDownloadpath());
             	download.setDownloadpath(null);

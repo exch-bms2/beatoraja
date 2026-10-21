@@ -4,6 +4,8 @@
 	<property environment="env" />
 	<property name="build.src" value="src" />
 	<property name="build.dest" value="build" />
+	<property name="build.test.src" value="test" />
+	<property name="build.test.dest" value="build-test" />
 	<property name="app.version" value="0.5.4"/>
 	<property name="dir.release" value="release" />
 	<property name="dir.release.windows" value="${dir.release}/windows" />
@@ -23,6 +25,11 @@
 		<fileset dir="lib" includes="*.jar" />
 	</path>
 
+	<path id="test.classpath">
+		<pathelement location="${build.dest}" />
+		<path refid="build.lib" />
+	</path>
+
 	<target name="clean">
 		<delete dir="${build.dest}" />
 		<mkdir dir="${build.dest}" />
@@ -34,6 +41,123 @@
 
 	<target name="compile" depends="clean">
 		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" encoding="UTF-8" />
+	</target>
+
+	<target name="test-compile" depends="compile">
+		<delete dir="${build.test.dest}" />
+		<mkdir dir="${build.test.dest}" />
+		<javac classpathref="test.classpath" srcdir="${build.test.src}" debug="${debug}" destdir="${build.test.dest}" encoding="UTF-8" />
+	</target>
+
+	<target name="test" depends="test-compile">
+		<java classname="bms.player.beatoraja.play.PlayTimeTrackerTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.ir.IRScorePlaytimeTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.lua.SkinHttpLimitsTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.launcher.ConfigurationRangeTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.select.BarSorterTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.audio.PortAudioStreamLifecycleTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.lr2.LR2SkinResourceLifecycleTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.video.FFmpegProcessorLifecycleTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.SkinResourceLifecycleTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.json.JSONSkinResourceLifecycleTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.ResourcePoolTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.ir.IRConnectionManagerTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.select.ModeFilterTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.select.BarSorterConfigurationTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.CourseDataAccessorTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.play.PracticeConfigurationTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.launcher.SkinConfigurationViewTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.json.JSONSkinLoaderTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.song.archive.SongArchivesTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.json.SkinFontSourceCacheTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.BitmapFontCacheTest" fork="true" failonerror="true">
+			<classpath>
+				<pathelement location="${build.test.dest}" />
+				<path refid="test.classpath" />
+			</classpath>
+		</java>
+		<java classname="bms.player.beatoraja.input.SkinMouseInputTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
+		<java classname="bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest" fork="true" failonerror="true">
+			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
+		</java>
 	</target>
 
 	<target name="create_run_jar" depends="compile">
@@ -67,7 +191,6 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl-natives.jar" />
-			<zipfileset excludes="META-INF/*.SF" src="./lib/twitter4j-core-4.0.4.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/jflac-codec-1.5.3.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/luaj-jse-3.0.2-custom.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-compress-1.16.1.jar" />

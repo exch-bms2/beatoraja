@@ -263,14 +263,6 @@ public final class PlayerConfig {
 
 	private IRConfig[] irconfig;
 	
-	private String twitterConsumerKey;
-
-	private String twitterConsumerSecret;
-
-	private String twitterAccessToken;
-
-	private String twitterAccessTokenSecret;
-
 	// -- Stream
 	private boolean enableRequest = false;
 	private boolean notifyRequest = false;
@@ -856,37 +848,6 @@ public final class PlayerConfig {
 		this.showpastnote = showpastnote;
 	}
 
-	public String getTwitterConsumerKey() {
-		return twitterConsumerKey;
-	}
-
-	public void setTwitterConsumerKey(String twitterConsumerKey) {
-		this.twitterConsumerKey = twitterConsumerKey;
-	}
-
-	public String getTwitterConsumerSecret() {
-		return twitterConsumerSecret;
-	}
-
-	public void setTwitterConsumerSecret(String twitterConsumerSecret) {
-		this.twitterConsumerSecret = twitterConsumerSecret;
-	}
-
-	public String getTwitterAccessToken() {
-		return twitterAccessToken;
-	}
-
-	public void setTwitterAccessToken(String twitterAccessToken) {
-		this.twitterAccessToken = twitterAccessToken;
-	}
-
-	public String getTwitterAccessTokenSecret() {
-		return twitterAccessTokenSecret;
-	}
-
-	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
-		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
-	}
 	
 	// --Stream
 	public boolean getRequestEnable() {

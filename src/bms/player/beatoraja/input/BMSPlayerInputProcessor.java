@@ -444,8 +444,6 @@ public class BMSPlayerInputProcessor {
 			return isControlKeyPressed(ControlKeys.F4);
 		case SAVE_SCREENSHOT:
 			return isControlKeyPressed(ControlKeys.F6);
-		case POST_TWITTER:
-			return isControlKeyPressed(ControlKeys.F7);
 		case ADD_FAVORITE_SONG:
 			return isControlKeyPressed(ControlKeys.F8);
 		case ADD_FAVORITE_CHART:
