@@ -1,0 +1,196 @@
+import org.gradle.api.tasks.application.CreateStartScripts
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.Zip
+
+plugins {
+    application
+}
+
+group = "bms.player"
+version = providers.gradleProperty("releaseVersion").getOrElse("0.9.0-SNAPSHOT")
+
+// Ant owns build/ and release/. Neither build system cleans the other's output.
+layout.buildDirectory.set(layout.projectDirectory.dir("build-gradle"))
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+sourceSets {
+    main {
+        java.setSrcDirs(listOf("src"))
+        resources.setSrcDirs(listOf("src"))
+        resources.exclude("**/*.java", "**/*.class", "META-INF/MANIFEST.MF", "**/.DS_Store")
+    }
+    test {
+        java.setSrcDirs(listOf("test"))
+        resources.setSrcDirs(emptyList<String>())
+    }
+}
+
+// Deliberately no repositories or dependency upgrades in the first migration.
+val bundledJars = listOf(
+    "commons-compress-1.16.1.jar", "commons-dbutils.jar",
+    "ffmpeg-linux-x86.jar", "ffmpeg-linux-x86_64.jar", "ffmpeg-macosx-x86_64.jar",
+    "ffmpeg-windows-x86.jar", "ffmpeg-windows-x86_64.jar", "ffmpeg-platform.jar", "ffmpeg.jar",
+    "gdx-backend-lwjgl-natives.jar", "gdx-backend-lwjgl.jar",
+    "gdx-controllers-desktop-natives.jar", "gdx-controllers-desktop.jar", "gdx-controllers.jar",
+    "gdx-freetype-natives.jar", "gdx-freetype.jar", "gdx-natives.jar", "gdx.jar",
+    "java-discord-rpc-2.0.1-all.jar", "javacpp.jar", "javacv-platform.jar", "javacv.jar",
+    "jbms-parser.jar", "jbmstable-parser.jar", "jflac-codec-1.5.3.jar", "jportaudio.jar",
+    "junrar.jar", "sqlite-jdbc.jar", "tarsosdsp-latest.jar"
+)
+val luaJar = listOf("luaj-jse-3.0.2-custom.jar", "luaj-jse.jar")
+    .firstOrNull { file("lib/$it").isFile } ?: "luaj-jse-3.0.2-custom.jar"
+val localLibraries = (bundledJars + luaJar).map { file("lib/$it") }
+dependencies {
+    implementation(files(localLibraries))
+    // Needed by the newer locally supplied SQLite JAR, but not by every checkout.
+    if (file("lib/slf4j-api-1.7.36.jar").isFile) runtimeOnly(files("lib/slf4j-api-1.7.36.jar"))
+}
+
+val java17 = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) }
+val verifyBuildEnvironment by tasks.registering {
+    group = "verification"
+    description = "Verify the existing local libraries and JavaFX-enabled JDK 17."
+    doLast {
+        val missing = localLibraries.filterNot { it.isFile }
+        check(missing.isEmpty()) { "Missing bundled JARs: ${missing.joinToString()}. Restore lib/ before building." }
+        val home = java17.get().metadata.installationPath.asFile
+        check(home.resolve("jmods/javafx.controls.jmod").isFile && home.resolve("jmods/javafx.fxml.jmod").isFile) {
+            "A JavaFX-enabled JDK 17 is required (for example Liberica Full JDK 17). " +
+                "Set JAVA_HOME and, if necessary, -Dorg.gradle.java.installations.paths=<JDK home>. Selected: $home"
+        }
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    dependsOn(verifyBuildEnvironment)
+    options.encoding = "UTF-8"
+    options.release.set(17)
+}
+tasks.withType<JavaExec>().configureEach {
+    javaLauncher.set(java17)
+}
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
+application {
+    mainClass.set("bms.player.beatoraja.MainLoader")
+    applicationName = "beatoraja"
+    applicationDefaultJvmArgs = listOf("-Xms1g", "-Xmx4g", "-Djava.library.path=./natives")
+}
+tasks.named<JavaExec>("run") {
+    dependsOn(verifyBuildEnvironment)
+    workingDir(providers.gradleProperty("runWorkingDir").getOrElse(projectDir.absolutePath))
+    standardInput = System.`in`
+}
+tasks.named<Jar>("jar") {
+    manifest.attributes("Main-Class" to application.mainClass.get())
+}
+
+// The existing regression tests are standalone Java programs, not JUnit tests.
+val regressionClasses = listOf(
+    "bms.player.beatoraja.ResourcePoolTest",
+    "bms.player.beatoraja.InputDataValidationTest",
+    "bms.player.beatoraja.TwitterIntegrationRemovalTest",
+    "bms.player.beatoraja.CourseDataAccessorTest",
+    "bms.player.beatoraja.play.PracticeConfigurationTest",
+    "bms.player.beatoraja.play.PlayTimeTrackerTest",
+    "bms.player.beatoraja.ir.IRScorePlaytimeTest",
+    "bms.player.beatoraja.ir.IRConnectionManagerTest",
+    "bms.player.beatoraja.select.BarSorterTest",
+    "bms.player.beatoraja.select.BarSorterConfigurationTest",
+    "bms.player.beatoraja.select.ModeFilterTest",
+    "bms.player.beatoraja.audio.PortAudioStreamLifecycleTest",
+    "bms.player.beatoraja.video.FFmpegProcessorLifecycleTest",
+    "bms.player.beatoraja.launcher.ConfigurationRangeTest",
+    "bms.player.beatoraja.launcher.SkinConfigurationViewTest",
+    "bms.player.beatoraja.skin.SkinResourceLifecycleTest",
+    "bms.player.beatoraja.skin.BitmapFontCacheTest",
+    "bms.player.beatoraja.skin.lr2.LR2SkinResourceLifecycleTest",
+    "bms.player.beatoraja.skin.json.JSONSkinResourceLifecycleTest",
+    "bms.player.beatoraja.skin.json.JSONSkinLoaderTest",
+    "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
+    "bms.player.beatoraja.input.SkinMouseInputTest",
+    "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
+    "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
+    "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
+    "bms.player.beatoraja.skin.lua.SkinHttpLimitsTest",
+    "bms.player.beatoraja.song.archive.SongArchivesTest"
+)
+val regressionTasks = regressionClasses.map { className ->
+    tasks.register<JavaExec>("regression${className.substringAfterLast('.')}") {
+        group = "verification"
+        description = "Run $className."
+        dependsOn(tasks.testClasses)
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set(className)
+        workingDir(projectDir)
+        enableAssertions = true
+        maxHeapSize = "1g"
+        systemProperty("java.awt.headless", "true")
+    }
+}
+val regressionTest by tasks.registering {
+    group = "verification"
+    description = "Run all standalone regression tests (fail on any non-zero exit)."
+    dependsOn(regressionTasks)
+}
+tasks.named<Test>("test") {
+    // Do not silently skip the main()-based tests or require a new test dependency.
+    exclude("**/*")
+    dependsOn(regressionTest)
+}
+
+// Both launchers must resolve relative config/skin/native paths from the install root.
+tasks.named<CreateStartScripts>("startScripts") {
+    doLast {
+        val unixMarker = "exec \"\$JAVACMD\" \"\$@\""
+        val unixText = unixScript.readText()
+        check(unixText.contains(unixMarker)) { "Gradle Unix launcher template changed" }
+        unixScript.writeText(unixText.replace(unixMarker, "cd \"\$APP_HOME\" || exit 1\n\n$unixMarker"))
+        val windowsMarker = ":execute"
+        val windowsText = windowsScript.readText()
+        check(windowsText.contains(windowsMarker)) { "Gradle Windows launcher template changed" }
+        windowsScript.writeText(windowsText.replace(windowsMarker, "$windowsMarker\r\ncd /d \"%APP_HOME%\"\r\nif errorlevel 1 exit /b 1"))
+    }
+}
+
+// Explicit allowlist: never ship local DBs/configs, private skins, caches or test videos.
+val distributionFiles = file("gradle/distribution-files.txt").readLines()
+    .map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
+val prepareRuntimeDirectories by tasks.registering {
+    val directories = layout.buildDirectory.dir("runtime-directories")
+    outputs.dir(directories)
+    doLast {
+        // The launcher writes table/default.json on first exit; no local table data is copied.
+        check(directories.get().dir("table").asFile.mkdirs() || directories.get().dir("table").asFile.isDirectory)
+    }
+}
+distributions {
+    main {
+        contents {
+            from(projectDir) { include(distributionFiles) }
+            from(prepareRuntimeDirectories)
+        }
+    }
+}
+tasks.named<Zip>("distZip") {
+    dependsOn(verifyBuildEnvironment)
+}
+
+val distributionSmokeTest by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Verify installed JARs/resources and start a Java 17 packaged-runtime probe."
+    dependsOn(tasks.installDist, tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.DistributionSmokeTest")
+    args(layout.buildDirectory.dir("install/beatoraja").get().asFile.absolutePath,
+        sourceSets.test.get().output.classesDirs.asPath, java17.get().executablePath.asFile.absolutePath)
+    workingDir(projectDir)
+}
+tasks.check { dependsOn(distributionSmokeTest) }
