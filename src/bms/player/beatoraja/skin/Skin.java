@@ -37,7 +37,6 @@ import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import org.lwjgl.opengl.GL11;
 
 /**
  * スキン
@@ -653,15 +652,15 @@ public class Skin {
 			}
 
 			switch (blend) {
-			case 2 -> sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+			case 2 -> sprite.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 			case 3 -> {
 				// TODO 減算描画は難しいか？
 					Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
-					sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+					sprite.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 					Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
 			}
-			case 4 -> sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
-			case 9 -> sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
+			case 4 -> sprite.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
+			case 9 -> sprite.setBlendFunction(GL20.GL_ONE_MINUS_DST_COLOR, GL20.GL_ZERO);
 			}
 
 			if(color != null) {
@@ -678,7 +677,7 @@ public class Skin {
 			}
 
 			if (blend >= 2) {
-				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				sprite.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 			}
 		}
 

@@ -5,7 +5,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
-import org.lwjgl.input.Mouse;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import org.lwjgl.glfw.GLFW;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
@@ -512,7 +513,10 @@ public final class MainController {
             	input.setMouseMoved(false);
             	mouseMovedTime = time;
 			}
-			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000 && Mouse.isInsideWindow());
+			var window = ((Lwjgl3Graphics) Gdx.graphics).getWindow();
+			boolean catchCursor = current == bmsplayer && time > mouseMovedTime + 5000 && window.isFocused()
+					&& (Gdx.input.isCursorCatched() || GLFW.glfwGetWindowAttrib(window.getWindowHandle(), GLFW.GLFW_HOVERED) == GLFW.GLFW_TRUE);
+			if (Gdx.input.isCursorCatched() != catchCursor) Gdx.input.setCursorCatched(catchCursor);
 
 			// FPS表示切替
             if (input.isActivated(KeyCommand.SHOW_FPS)) {
@@ -601,7 +605,6 @@ public final class MainController {
 	public void resize(int width, int height) {
 		current.resize(width, height);
 	}
-
 	public void resume() {
 		current.resume();
 	}

@@ -2,6 +2,7 @@ package bms.player.beatoraja.launcher;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
@@ -659,18 +660,15 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void start() {
 		commit();
-		playerPanel.setDisable(true);
-		videoTab.setDisable(true);
-		audioTab.setDisable(true);
-		inputTab.setDisable(true);
-		resourceTab.setDisable(true);
-		optionTab.setDisable(true);
-		otherTab.setDisable(true);
-		irTab.setDisable(true);
-		streamTab.setDisable(true);
-		controlPanel.setDisable(true);
-
-		MainLoader.play(null, bms.player.beatoraja.BMSPlayerMode.PLAY, true, config, player, songUpdated);
+		try {
+			bms.player.beatoraja.DesktopLauncher.startGame(songUpdated
+					? new String[]{"-s", "--song-updated"} : new String[]{"-s"});
+			Platform.exit();
+			System.exit(0);
+		} catch (IOException e) {
+			Logger.getGlobal().log(java.util.logging.Level.SEVERE, "Game process launch failed", e);
+			new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK).showAndWait();
+		}
 	}
 
     @FXML

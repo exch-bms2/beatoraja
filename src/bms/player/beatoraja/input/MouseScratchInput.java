@@ -103,6 +103,7 @@ public class MouseScratchInput {
         this.control = new int[] { msconfig.getStart(), msconfig.getSelect() };
 
         this.mouseScratchEnabled = msconfig.isMouseScratchEnabled();
+        if (Gdx.input instanceof PollingLwjgl3Input input) input.setMouseScratchEnabled(mouseScratchEnabled);
         this.mouseScratchTimeThreshold = msconfig.getMouseScratchTimeThreshold();
         this.mouseScratchDistance = msconfig.getMouseScratchDistance();
         if (mouseScratchEnabled) {
@@ -168,9 +169,17 @@ public class MouseScratchInput {
         }
 
         public void update() {
-            int xDistanceMoved = Gdx.input.getX() - Gdx.graphics.getWidth() / 2;
-            int yDistanceMoved = Gdx.input.getY() - Gdx.graphics.getHeight() / 2;
-            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            int xDistanceMoved;
+            int yDistanceMoved;
+            if (Gdx.input instanceof PollingLwjgl3Input input) {
+                long delta = input.consumeMouseScratchDelta();
+                xDistanceMoved = (int) (delta >> 32);
+                yDistanceMoved = (int) delta;
+            } else {
+                xDistanceMoved = Gdx.input.getX() - Gdx.graphics.getWidth() / 2;
+                yDistanceMoved = Gdx.input.getY() - Gdx.graphics.getHeight() / 2;
+                Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            }
 
             totalXDistanceMoved = ((totalXDistanceMoved+xDistanceMoved)%domain + domain)%domain;
             totalYDistanceMoved = ((totalYDistanceMoved+yDistanceMoved)%domain + domain)%domain;

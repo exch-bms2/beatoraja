@@ -33,7 +33,7 @@ repositories {
     mavenCentral()
 }
 
-// Retain unrelated custom libraries; controllers use the 2.2.4 API with our LWJGL2 raw manager.
+// Retain unrelated custom libraries; controllers use the 2.2.4 API with direct JInput polling.
 val bundledJars = listOf(
     "java-discord-rpc-2.0.1-all.jar",
     "jbms-parser.jar", "jbmstable-parser.jar", "jflac-codec-1.5.3.jar", "jportaudio.jar",
@@ -46,14 +46,26 @@ dependencies {
     implementation(files(localLibraries))
     implementation("com.badlogicgames.gdx:gdx:1.14.2")
     implementation("com.badlogicgames.gdx:gdx-freetype:1.14.2")
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl:1.14.2")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.14.2") { isTransitive = false }
+    implementation("com.badlogicgames.jlayer:jlayer:1.0.1-gdx") { isTransitive = false }
+    implementation("org.jcraft:jorbis:0.0.17") { isTransitive = false }
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.4")
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.4")
+    implementation("net.java.jinput:jinput:2.0.5")
+    // Regression oracle only: never include LWJGL2 in the application or distribution.
+    testImplementation("org.lwjgl.lwjgl:lwjgl:2.9.3") { isTransitive = false }
+    // Match the LWJGL3 version required by libGDX 1.14.2; keep native modules aligned.
+    for (module in listOf("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb")) {
+        implementation("org.lwjgl:$module:3.3.3") { isTransitive = false }
+        for (platform in listOf("windows", "linux", "macos", "macos-arm64")) {
+            runtimeOnly("org.lwjgl:$module:3.3.3:natives-$platform") { isTransitive = false }
+        }
+    }
     runtimeOnly("com.badlogicgames.gdx:gdx-platform:1.14.2:natives-desktop") { isTransitive = false }
     runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:1.14.2:natives-desktop") { isTransitive = false }
-    // Keep LWJGL2; use the version required by this backend, never LWJGL3.
+    // JInput remains independent from the rendering backend.
     for (platform in listOf("linux", "windows", "osx")) {
-        runtimeOnly("org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-$platform") { isTransitive = false }
+        runtimeOnly("net.java.jinput:jinput-platform:2.0.5:natives-$platform") { isTransitive = false }
     }
     // Preserve the existing runtime set instead of importing new transitive dependencies.
     implementation("org.apache.commons:commons-compress:1.16.1") { isTransitive = false }
@@ -101,7 +113,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 }
 
 application {
-    mainClass.set("bms.player.beatoraja.MainLoader")
+    mainClass.set("bms.player.beatoraja.DesktopLauncher")
     applicationName = "beatoraja"
     applicationDefaultJvmArgs = listOf("-Xms1g", "-Xmx4g", "-Djava.library.path=./natives")
 }
@@ -118,6 +130,7 @@ tasks.named<Jar>("jar") {
 val regressionClasses = listOf(
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
+    "bms.player.beatoraja.Lwjgl3MigrationTest",
     "bms.player.beatoraja.TwitterIntegrationRemovalTest",
     "bms.player.beatoraja.CourseDataAccessorTest",
     "bms.player.beatoraja.play.PracticeConfigurationTest",
@@ -139,7 +152,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.JSONSkinLoaderTest",
     "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
     "bms.player.beatoraja.input.SkinMouseInputTest",
-    "bms.player.beatoraja.input.Lwjgl2ControllerCompatibilityTest",
+    "bms.player.beatoraja.input.JInputControllerCompatibilityTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
@@ -220,3 +233,20 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     workingDir(projectDir)
 }
 tasks.check { dependsOn(distributionSmokeTest) }
+
+tasks.register<JavaExec>("lwjgl3WindowSmokeTest") {
+    group = "verification"
+    description = "Open an isolated LWJGL3 test window and verify real GL pixels and resizing."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3WindowSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3LauncherSmokeTest") {
+    group = "verification"
+    description = "Verify JavaFX Launcher and a separate real LWJGL3 game process."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3LauncherProcessSmokeTest")
+}
