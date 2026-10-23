@@ -1,7 +1,6 @@
 package bms.player.beatoraja.launcher;
 
-import java.awt.Desktop;
-import java.net.URI;
+import bms.player.beatoraja.external.DesktopActions;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
@@ -115,16 +114,7 @@ public class IRConfigurationView implements Initializable {
 		
     	String homeurl = IRConnectionManager.getHomeURL(irname.getValue());
 		irhome.setText(homeurl);
-		irhome.setOnAction((event) -> {
-            Desktop desktop = Desktop.getDesktop();
-            URI uri;
-            try {
-                uri = new URI(homeurl);
-                desktop.browse(uri);
-            } catch (Exception e) {
-                Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
-            }
-        });
+		irhome.setOnAction(event -> DesktopActions.openUri(homeurl));
 		
 		if(!irmap.containsKey(irname.getValue())) {
 			IRConfig ir = new IRConfig();

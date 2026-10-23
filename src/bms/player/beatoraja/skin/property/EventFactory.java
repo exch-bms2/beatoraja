@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.KeyConfiguration;
+import bms.player.beatoraja.external.DesktopActions;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.JudgeAlgorithm;
@@ -18,9 +19,6 @@ import com.badlogic.gdx.math.MathUtils;
 
 import static bms.player.beatoraja.SystemSoundManager.SoundType.OPTION_CHANGE;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -246,17 +244,10 @@ public class EventFactory {
 		 * 楽曲ファイルのドキュメントをOS既定のドキュメントビューアーで開く
 		 */
 		open_document(17, (state) -> {
-			if (!Desktop.isDesktopSupported()) {
-				return;
-			}
 			if(state instanceof MusicSelector selector && selector.getBarManager().getSelected() instanceof SongBar songbar && songbar.existsSong()) {
 				try (Stream<Path> paths = Files.list(Paths.get(songbar.getSongData().getPath()).getParent())) {
 					paths.filter(p -> !Files.isDirectory(p) && p.toString().toLowerCase().endsWith(".txt")).forEach(p -> {
-						try {
-							Desktop.getDesktop().open(p.toFile());
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						DesktopActions.openPath(p);
 					});
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -381,12 +372,7 @@ public class EventFactory {
 	            url = ir.getCourseURL(new IRCourseData(state.resource.getCourseData()));
 			}
 			if (url != null) {
-				try {
-					URI uri = new URI(url);
-					Desktop.getDesktop().browse(uri);
-				} catch (Throwable e) {
-					e.printStackTrace();
-				}
+				DesktopActions.openUri(url);
 			}
 		}),
 		/**
@@ -413,35 +399,33 @@ public class EventFactory {
 		open_with_explorer(212, state -> {
 			if(state instanceof MusicSelector selector) {
 				Bar current = selector.getBarManager().getSelected();
-				if (Desktop.isDesktopSupported()) {
-					if (current instanceof SongBar songbar) {
-						if (songbar.existsSong()) {
-							openWithExplorer(songbar.getSongData().getPath(), false);
-						} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
-							String[] md5 = songbar.getSongData().getOrg_md5()
-									.toArray(new String[songbar.getSongData().getOrg_md5().size()]);
-							SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
+				if (current instanceof SongBar songbar) {
+					if (songbar.existsSong()) {
+						openWithExplorer(songbar.getSongData().getPath(), false);
+					} else if (songbar.getSongData() != null && songbar.getSongData().getOrg_md5() != null) {
+						String[] md5 = songbar.getSongData().getOrg_md5()
+								.toArray(new String[songbar.getSongData().getOrg_md5().size()]);
+						SongData[] songdata = selector.getSongDatabase().getSongDatas(md5);
+						for (SongData sd : songdata) {
+							if (sd.getPath() != null) {
+								openWithExplorer(sd.getPath(), false);
+								break;
+							}
+						}
+					} else {
+						Matcher m = Pattern.compile(".[^\\(\\[～~]*").matcher(current.getTitle());
+						if (m.find()) {
+							SongData[] songdata = selector.getSongDatabase().getSongDatasByText(m.group());
 							for (SongData sd : songdata) {
 								if (sd.getPath() != null) {
 									openWithExplorer(sd.getPath(), false);
 									break;
 								}
 							}
-						} else {
-							Matcher m = Pattern.compile(".[^\\(\\[～~]*").matcher(current.getTitle());
-							if (m.find()) {
-								SongData[] songdata = selector.getSongDatabase().getSongDatasByText(m.group());
-								for (SongData sd : songdata) {
-									if (sd.getPath() != null) {
-										openWithExplorer(sd.getPath(), false);
-										break;
-									}
-								}
-							}
 						}
-					} else if (current instanceof FolderBar folderBar) {
-						openWithExplorer(folderBar.getFolderData().getPath(), true);
 					}
+				} else if (current instanceof FolderBar folderBar) {
+					openWithExplorer(folderBar.getFolderData().getPath(), true);
 				}
 			}
 		}),
@@ -455,21 +439,11 @@ public class EventFactory {
 					final SongData song = ((SongBar) current).getSongData();
 					if (song != null) {
 						if (song.getUrl() != null && song.getUrl().length() > 0) {
-							try {
-								URI uri = new URI(song.getUrl());
-								Desktop.getDesktop().browse(uri);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
+							DesktopActions.openUri(song.getUrl());
 						}
 						if (song.getAppendurl() != null && song.getAppendurl().length() > 0
 								&& !song.getAppendurl().equals(song.getUrl())) {
-							try {
-								URI uri = new URI(song.getAppendurl());
-								Desktop.getDesktop().browse(uri);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
+							DesktopActions.openUri(song.getAppendurl());
 						}
 					}
 				}				
@@ -832,8 +806,8 @@ public class EventFactory {
 					Logger.getGlobal().warning("エクスプローラーで開く対象が存在しません : " + pathText);
 					return;
 				}
-				Desktop.getDesktop().open(target.toFile());
-			} catch (IOException | RuntimeException e) {
+				DesktopActions.openPath(target);
+			} catch (RuntimeException e) {
 				Logger.getGlobal().warning("エクスプローラーで開く処理に失敗しました : " + pathText + " : " + e.getMessage());
 			}
 		}

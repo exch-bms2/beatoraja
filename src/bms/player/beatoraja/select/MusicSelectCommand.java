@@ -11,9 +11,7 @@ import java.util.stream.Collectors;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 
-import java.awt.datatransfer.StringSelection;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
+import bms.player.beatoraja.external.DesktopActions;
 
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.graphics.Color;
@@ -65,10 +63,7 @@ public enum MusicSelectCommand {
 			final SongData song = songbar.getSongData();
 			if (song != null) {
 				String hash = song.getMd5();
-				if (hash != null && hash.length() > 0) {
-					StringSelection stringSelection = new StringSelection(hash);
-					Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-					clipboard.setContents(stringSelection, null);
+				if (hash != null && hash.length() > 0 && DesktopActions.copyText(hash)) {
 					selector.main.getMessageRenderer().addMessage("MD5 hash copied : " + hash, 2000, Color.GOLD, 0);
 				}
 			}
@@ -82,10 +77,7 @@ public enum MusicSelectCommand {
 			final SongData song = songbar.getSongData();
 			if (song != null) {
 				String hash = song.getSha256();
-				if (hash != null && hash.length() > 0) {
-					StringSelection stringSelection = new StringSelection(hash);
-					Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-					clipboard.setContents(stringSelection, null);
+				if (hash != null && hash.length() > 0 && DesktopActions.copyText(hash)) {
 					selector.main.getMessageRenderer().addMessage("SHA256 hash copied : " + hash, 2000, Color.GOLD, 0);
 				}
 			}

@@ -1,7 +1,7 @@
 package bms.player.beatoraja.launcher;
 
-import java.awt.Desktop;
-import java.io.IOException;
+import bms.player.beatoraja.external.DesktopActions;
+import bms.player.beatoraja.song.archive.SongArchives;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -155,10 +155,10 @@ public class TableEditorView implements Initializable {
 			String songPath = song.getPath();
 			openFolderButton.setOnAction((actionEvent) -> {
 				try {
-					if (Desktop.isDesktopSupported()) {
-						Desktop.getDesktop().open(Paths.get(songPath).getParent().toFile());
-					}
-				} catch (IOException|IllegalArgumentException e) {
+					var path = Paths.get(songPath).toAbsolutePath();
+					var archive = SongArchives.archivePath(path);
+					DesktopActions.openPath((archive != null ? archive : path).getParent());
+				} catch (RuntimeException e) {
 					e.printStackTrace();
 				}
 			});

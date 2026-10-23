@@ -128,6 +128,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
     "bms.player.beatoraja.Lwjgl3MigrationTest",

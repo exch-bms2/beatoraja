@@ -1,6 +1,6 @@
 package bms.player.beatoraja.skin.lua;
 
-import java.awt.Desktop;
+import bms.player.beatoraja.external.DesktopActions;
 import java.net.URI;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -24,10 +24,7 @@ final class SkinRuntimeLuaApiExporter implements LuaApiExporter, Disposable {
         this(enabled, new SkinAsyncHttp(), () -> Gdx.input != null && (Gdx.input.justTouched()
                 || Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)),
                 uri -> {
-                    try {
-                        if (!Desktop.isDesktopSupported()) throw new IllegalStateException("Browser unavailable");
-                        Desktop.getDesktop().browse(uri);
-                    } catch (Exception e) { throw new IllegalStateException("Browser launch failed", e); }
+                    if (!DesktopActions.openUri(uri.toString())) throw new IllegalStateException("Browser launch failed");
                 });
     }
 

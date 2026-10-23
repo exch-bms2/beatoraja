@@ -1,9 +1,8 @@
 package bms.player.beatoraja.launcher;
 
-import java.awt.Desktop;
+import bms.player.beatoraja.external.DesktopActions;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
@@ -319,14 +318,7 @@ public class PlayConfigurationView implements Initializable {
 
 						@Override
 						public void handle(ActionEvent event) {
-							Desktop desktop = Desktop.getDesktop();
-							URI uri;
-							try {
-								uri = new URI(downloadURL);
-								desktop.browse(uri);
-							} catch (Exception e) {
-								Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
-							}
+							DesktopActions.openUri(downloadURL);
 						}
 					});
 				}
