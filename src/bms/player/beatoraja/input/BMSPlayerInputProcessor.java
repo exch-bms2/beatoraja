@@ -14,6 +14,7 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Array;
 
@@ -232,7 +233,10 @@ public class BMSPlayerInputProcessor {
 	 * @return キー状態の変更時間。変更されていない場合はLong.MIN_VALUE
 	 */
 	public long getKeyChangedTime(int id) {
-		return id >= 0 && id < time.length ? time[id] : Long.MIN_VALUE;		
+		long result = id >= 0 && id < time.length ? time[id] : Long.MIN_VALUE;
+		if (result != Long.MIN_VALUE && Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+			input.getDiagnostics().gameRead(id, System.nanoTime());
+		return result;
 	}
 
 	/**
@@ -243,6 +247,8 @@ public class BMSPlayerInputProcessor {
 	public boolean resetKeyChangedTime(int id) {
 		if(id >= 0 && id < time.length) {
 			boolean result = time[id] != Long.MIN_VALUE;
+			if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+				input.getDiagnostics().gameReset(id);
 			time[id] = Long.MIN_VALUE;
 			return result;
 		}
@@ -255,6 +261,8 @@ public class BMSPlayerInputProcessor {
 	public void resetAllKeyState() {
 		Arrays.fill(keystate, false);
 		Arrays.fill(time, Long.MIN_VALUE);
+		if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+			input.getDiagnostics().clearGameSlots();
 	}
 
 	/**
@@ -262,6 +270,8 @@ public class BMSPlayerInputProcessor {
 	 */
 	public void resetAllKeyChangedTime() {
 		Arrays.fill(time, Long.MIN_VALUE);
+		if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+			input.getDiagnostics().clearGameSlots();
 	}
 
 	public BMSPlayerInputDevice getLastKeyChangedDevice() {
@@ -359,6 +369,8 @@ public class BMSPlayerInputProcessor {
 			return;
 		}
 		if (keystate[i] != pressed) {
+			if (device == kbinput && Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+				input.getDiagnostics().gameWrite(i, time[i] != Long.MIN_VALUE, System.nanoTime());
 			keystate[i] = pressed;
 			time[i] = presstime;
 			lastKeyDevice = device;
@@ -527,6 +539,8 @@ public class BMSPlayerInputProcessor {
 	static public volatile Runnable controllerPollRunner = null;
 
 	public void poll() {
+		if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+			input.getDiagnostics().poll(System.nanoTime());
 		final long now = System.nanoTime() / 1000 - starttime;
 		kbinput.poll(now);
 

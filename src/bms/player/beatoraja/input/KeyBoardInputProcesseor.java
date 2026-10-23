@@ -99,12 +99,15 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void poll(final long microtime) {
+		final InputDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input ? input.getDiagnostics() : null;
 		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
 				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
+				if (diagnostics != null && pressed != keystate[keys[i]])
+					diagnostics.keyboardDecision(keys[i], microtime >= keytime[keys[i]] + duration * 1000, System.nanoTime());
 				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = microtime;

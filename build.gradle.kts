@@ -121,6 +121,12 @@ tasks.named<JavaExec>("run") {
     dependsOn(verifyBuildEnvironment)
     workingDir(providers.gradleProperty("runWorkingDir").getOrElse(projectDir.absolutePath))
     standardInput = System.`in`
+    providers.gradleProperty("inputDiagnostics").orNull?.let {
+        systemProperty("beatoraja.inputDiagnostics", it)
+    }
+    providers.gradleProperty("inputDiagnosticsIntervalMillis").orNull?.let {
+        systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
+    }
 }
 tasks.named<Jar>("jar") {
     manifest.attributes("Main-Class" to application.mainClass.get())
@@ -128,6 +134,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.input.InputDiagnosticsTest",
     "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
@@ -250,4 +257,13 @@ tasks.register<JavaExec>("lwjgl3LauncherSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.Lwjgl3LauncherProcessSmokeTest")
+}
+
+tasks.register<JavaExec>("lwjgl3InputDiagnosticsSmokeTest") {
+    group = "verification"
+    description = "Open an isolated GLFW window to verify opt-in input callback diagnostics."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3InputDiagnosticsSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

@@ -16,14 +16,26 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private volatile int x, y;
     private final MouseDeltas scratch = new MouseDeltas();
     private volatile boolean scratchEnabled;
+    private final InputDiagnostics diagnostics = InputDiagnostics.createIfEnabled();
+    private Lwjgl3InputDiagnosticCallbacks diagnosticCallbacks;
 
     public PollingLwjgl3Input(Lwjgl3Window window) {
         super(window);
         this.window = window;
+        if (diagnostics != null)
+            diagnosticCallbacks = new Lwjgl3InputDiagnosticCallbacks(window.getWindowHandle(), this, diagnostics);
     }
 
     @Override public void update() {
         super.update();
+        if (diagnostics == null) publishState();
+        else synchronized (diagnostics) {
+            publishState();
+            diagnostics.publish(keys, buttons, window.isFocused(), System.nanoTime());
+        }
+    }
+
+    private void publishState() {
         int count = 0;
         boolean focused = window.isFocused();
         for (int i = 0; i < keys.length(); i++) {
@@ -39,6 +51,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             int centerX = Gdx.graphics.getWidth() / 2;
             int centerY = Gdx.graphics.getHeight() / 2;
             scratch.add(x - centerX, y - centerY);
+            if (diagnostics != null) diagnostics.scratchPublished(x - centerX, y - centerY, System.nanoTime());
             super.setCursorPosition(centerX, centerY);
             x = centerX;
             y = centerY;
@@ -47,12 +60,24 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     @Override public boolean isKeyPressed(int key) {
         if (Thread.currentThread() == owner) return super.isKeyPressed(key);
-        return key == -1 ? pressedCount > 0 : key >= 0 && key < keys.length() && keys.get(key) != 0;
+        if (diagnostics == null || key < 0 || key >= keys.length())
+            return key == -1 ? pressedCount > 0 : key >= 0 && key < keys.length() && keys.get(key) != 0;
+        synchronized (diagnostics) {
+            boolean down = keys.get(key) != 0;
+            diagnostics.read(key, down, System.nanoTime());
+            return down;
+        }
     }
 
     @Override public boolean isButtonPressed(int button) {
         if (Thread.currentThread() == owner) return super.isButtonPressed(button);
-        return button >= 0 && button < buttons.length() && buttons.get(button) != 0;
+        if (diagnostics == null || button < 0 || button >= buttons.length())
+            return button >= 0 && button < buttons.length() && buttons.get(button) != 0;
+        synchronized (diagnostics) {
+            boolean down = buttons.get(button) != 0;
+            diagnostics.read(InputDiagnostics.KEY_COUNT + button, down, System.nanoTime());
+            return down;
+        }
     }
 
     @Override public int getX() { return Thread.currentThread() == owner ? super.getX() : x; }
@@ -61,9 +86,41 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     public void setMouseScratchEnabled(boolean enabled) {
         scratchEnabled = enabled;
         scratch.drain();
+        if (diagnostics != null) diagnostics.resetScratch();
     }
 
-    public long consumeMouseScratchDelta() { return scratch.drain(); }
+    public long consumeMouseScratchDelta() {
+        if (diagnostics == null) return scratch.drain();
+        synchronized (diagnostics) {
+            long delta = scratch.drain();
+            diagnostics.scratchConsumed(System.nanoTime());
+            return delta;
+        }
+    }
+
+    public InputDiagnostics getDiagnostics() { return diagnostics; }
+
+    @Override public void windowHandleChanged(long handle) {
+        // Called by the superclass constructor before our fields are initialized.
+        if (diagnosticCallbacks != null) {
+            diagnosticCallbacks.close(diagnosticCallbacks.handle == handle);
+            diagnosticCallbacks = null;
+        }
+        super.windowHandleChanged(handle);
+        if (diagnostics != null) diagnosticCallbacks = new Lwjgl3InputDiagnosticCallbacks(handle, this, diagnostics);
+    }
+
+    @Override public void dispose() {
+        try {
+            if (diagnosticCallbacks != null) {
+                diagnosticCallbacks.close(true);
+                diagnosticCallbacks = null;
+            }
+        } finally {
+            if (diagnostics != null) diagnostics.close();
+            super.dispose();
+        }
+    }
 
     /** Accumulates render-thread motion until consumed once by the input thread. */
     public static final class MouseDeltas {
