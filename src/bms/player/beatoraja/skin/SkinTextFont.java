@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
@@ -280,9 +279,10 @@ public final class SkinTextFont extends SkinText {
         }
     }
 
-    private void applyColor(GlyphLayout target, Color color) {
-        for (GlyphRun run : target.runs) {
-            run.color.set(color);
+    private static void applyColor(GlyphLayout target, Color color) {
+        int packedColor = color.toIntBits();
+        for (int i = 1; i < target.colors.size; i += 2) {
+            target.colors.set(i, packedColor);
         }
     }
 
@@ -442,7 +442,7 @@ public final class SkinTextFont extends SkinText {
             }
 
             String glyphName = "missing-" + mappedCodePoint + "-" + packedGlyphSequence++;
-            Rectangle packed = packer.pack(glyphName, pixmap);
+            var packed = packer.pack(glyphName, pixmap);
             int page = packer.getPageIndex(glyphName);
             if (page < 0) {
                 return null;
@@ -451,8 +451,8 @@ public final class SkinTextFont extends SkinText {
 
             BitmapFont.Glyph glyph = new BitmapFont.Glyph();
             glyph.id = mappedCodePoint;
-            glyph.srcX = (int) packed.x;
-            glyph.srcY = (int) packed.y;
+            glyph.srcX = packed.getX();
+            glyph.srcY = packed.getY();
             glyph.width = width;
             glyph.height = height;
             glyph.xoffset = 0;
@@ -501,7 +501,7 @@ public final class SkinTextFont extends SkinText {
                 return null;
             }
             String glyphName = "fallback-" + mappedCodePoint + "-" + codePoint + "-" + packedGlyphSequence++;
-            Rectangle packed = packer.pack(glyphName, pixmap);
+            var packed = packer.pack(glyphName, pixmap);
             int page = packer.getPageIndex(glyphName);
             if (page < 0) {
                 return null;
@@ -510,8 +510,8 @@ public final class SkinTextFont extends SkinText {
 
             BitmapFont.Glyph glyph = copyGlyph(glyphAndBitmap.glyph, mappedCodePoint);
             glyph.page = page;
-            glyph.srcX = (int) packed.x;
-            glyph.srcY = (int) packed.y;
+            glyph.srcX = packed.getX();
+            glyph.srcY = packed.getY();
             font.getData().setGlyphRegion(glyph, font.getRegion(glyph.page));
             return glyph;
         } finally {

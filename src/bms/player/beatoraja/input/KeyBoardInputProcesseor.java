@@ -224,6 +224,13 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return false;
 	}
 
+	@Override
+	public boolean touchCancelled(int x, int y, int pointer, int button) {
+		this.bmsPlayerInputProcessor.mousepressed = false;
+		this.bmsPlayerInputProcessor.mousedragged = false;
+		return false;
+	}
+
 	public int getLastPressedKey() {
 		return lastPressedKey;
 	}

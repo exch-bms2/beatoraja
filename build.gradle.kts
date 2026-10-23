@@ -33,11 +33,9 @@ repositories {
     mavenCentral()
 }
 
-// Keep custom/native bundles local; migrate only byte-identical Central artifacts.
+// Retain the legacy controllers and unrelated custom libraries.
 val bundledJars = listOf(
-    "gdx-backend-lwjgl-natives.jar", "gdx-backend-lwjgl.jar",
     "gdx-controllers-desktop-natives.jar", "gdx-controllers-desktop.jar", "gdx-controllers.jar",
-    "gdx-freetype-natives.jar", "gdx-freetype.jar", "gdx-natives.jar", "gdx.jar",
     "java-discord-rpc-2.0.1-all.jar",
     "jbms-parser.jar", "jbmstable-parser.jar", "jflac-codec-1.5.3.jar", "jportaudio.jar",
     "tarsosdsp-latest.jar"
@@ -47,6 +45,15 @@ val luaJar = listOf("luaj-jse-3.0.2-custom.jar", "luaj-jse.jar")
 val localLibraries = (bundledJars + luaJar).map { file("lib/$it") }
 dependencies {
     implementation(files(localLibraries))
+    implementation("com.badlogicgames.gdx:gdx:1.14.2")
+    implementation("com.badlogicgames.gdx:gdx-freetype:1.14.2")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl:1.14.2")
+    runtimeOnly("com.badlogicgames.gdx:gdx-platform:1.14.2:natives-desktop") { isTransitive = false }
+    runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:1.14.2:natives-desktop") { isTransitive = false }
+    // Keep LWJGL2; use the version required by this backend, never LWJGL3.
+    for (platform in listOf("linux", "windows", "osx")) {
+        runtimeOnly("org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-$platform") { isTransitive = false }
+    }
     // Preserve the existing runtime set instead of importing new transitive dependencies.
     implementation("org.apache.commons:commons-compress:1.16.1") { isTransitive = false }
     implementation("commons-dbutils:commons-dbutils:1.6") { isTransitive = false }
@@ -125,6 +132,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.launcher.SkinConfigurationViewTest",
     "bms.player.beatoraja.skin.SkinResourceLifecycleTest",
     "bms.player.beatoraja.skin.BitmapFontCacheTest",
+    "bms.player.beatoraja.skin.LibGdxCompatibilityTest",
     "bms.player.beatoraja.skin.lr2.LR2SkinResourceLifecycleTest",
     "bms.player.beatoraja.skin.json.JSONSkinResourceLifecycleTest",
     "bms.player.beatoraja.skin.json.JSONSkinLoaderTest",

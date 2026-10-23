@@ -47,7 +47,7 @@ class SkinTextInput {
 		textField.setVisible(true);
 		stage.setKeyboardFocus(textField);
 		textField.setCursorPosition(textField.getText().length());
-		textField.getOnscreenKeyboard().show(true);
+		textField.getOnscreenKeyboard().show(textField);
 		state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(true);
 	}
 
@@ -60,7 +60,7 @@ class SkinTextInput {
 			target.getWriter().set(state, textField.getText());
 			target.setText(textField.getText());
 			textField.setVisible(false);
-			textField.getOnscreenKeyboard().show(false);
+			textField.getOnscreenKeyboard().close();
 			Stage stage = state != null ? state.getStage() : null;
 			if (stage != null && stage.getKeyboardFocus() == textField) {
 				stage.setKeyboardFocus(null);

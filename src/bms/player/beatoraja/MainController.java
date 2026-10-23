@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.utils.StringBuilder;
 
 import bms.player.beatoraja.AudioConfig.DriverType;
 import bms.player.beatoraja.MainState.MainStateType;

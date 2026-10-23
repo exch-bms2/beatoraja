@@ -270,9 +270,10 @@ public final class SkinTextBitmap extends SkinText {
 		}
 	}
 
-	private void applyColor(GlyphLayout target, Color color) {
-		for (GlyphRun run : target.runs) {
-			run.color.set(color);
+	private static void applyColor(GlyphLayout target, Color color) {
+		int packedColor = color.toIntBits();
+		for (int i = 1; i < target.colors.size; i += 2) {
+			target.colors.set(i, packedColor);
 		}
 	}
 
