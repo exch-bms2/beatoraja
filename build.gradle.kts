@@ -33,9 +33,8 @@ repositories {
     mavenCentral()
 }
 
-// Retain the legacy controllers and unrelated custom libraries.
+// Retain unrelated custom libraries; controllers use the 2.2.4 API with our LWJGL2 raw manager.
 val bundledJars = listOf(
-    "gdx-controllers-desktop-natives.jar", "gdx-controllers-desktop.jar", "gdx-controllers.jar",
     "java-discord-rpc-2.0.1-all.jar",
     "jbms-parser.jar", "jbmstable-parser.jar", "jflac-codec-1.5.3.jar", "jportaudio.jar",
     "tarsosdsp-latest.jar"
@@ -48,6 +47,8 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx:1.14.2")
     implementation("com.badlogicgames.gdx:gdx-freetype:1.14.2")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl:1.14.2")
+    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.4")
+    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.4")
     runtimeOnly("com.badlogicgames.gdx:gdx-platform:1.14.2:natives-desktop") { isTransitive = false }
     runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:1.14.2:natives-desktop") { isTransitive = false }
     // Keep LWJGL2; use the version required by this backend, never LWJGL3.
@@ -138,6 +139,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.JSONSkinLoaderTest",
     "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
     "bms.player.beatoraja.input.SkinMouseInputTest",
+    "bms.player.beatoraja.input.Lwjgl2ControllerCompatibilityTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",

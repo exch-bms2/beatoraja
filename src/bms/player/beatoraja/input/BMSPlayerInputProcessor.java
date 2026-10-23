@@ -2,7 +2,7 @@ package bms.player.beatoraja.input;
 
 import bms.player.beatoraja.*;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -43,13 +43,7 @@ public class BMSPlayerInputProcessor {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
 			// FIXME:前回終了時のModeからコントローラ設定を復元
 			ControllerConfig controllerConfig = Stream.of(player.getMode7().getController())
-				.filter(m -> {
-				    try {
-					return m.getName().equals(new String(controller.getName().getBytes("EUC_JP"), "UTF-8"));
-				    } catch (UnsupportedEncodingException e) {
-					return false;
-				    }
-				}).findFirst()
+				.filter(m -> matchesControllerName(m.getName(), controller.getName())).findFirst()
 				.orElse(new ControllerConfig());
 			// デバイス名のユニーク化
 			int index = 1;
@@ -175,7 +169,7 @@ public class BMSPlayerInputProcessor {
 				if(configs[i].getName() == null || configs[i].getName().length() == 0) {
 					configs[i].setName(controller.getName());
 				}
-				if(controller.getName().equals(configs[i].getName())) {
+				if(matchesControllerName(configs[i].getName(), controller.getName())) {
 					controller.setConfig(configs[i]);
 					controller.setEnable(true);
 					b[i] = true;
@@ -530,14 +524,15 @@ public class BMSPlayerInputProcessor {
 		scrollX = scrollY = 0;
 	}
 
-	static public Runnable controllerPollRunner = null;
+	static public volatile Runnable controllerPollRunner = null;
 
 	public void poll() {
 		final long now = System.nanoTime() / 1000 - starttime;
 		kbinput.poll(now);
 
-		if (controllerPollRunner != null) {
-			controllerPollRunner.run();
+		Runnable controllerPoll = controllerPollRunner;
+		if (controllerPoll != null) {
+			controllerPoll.run();
 		}
 
 		for (BMControllerInputProcessor controller : bminput) {
@@ -547,6 +542,12 @@ public class BMSPlayerInputProcessor {
 
 	public void dispose() {
 		midiinput.close();
+	}
+
+	static boolean matchesControllerName(String configured, String detected) {
+		if (configured == null || detected == null) return false;
+		return configured.equals(detected) || configured.equals(new String(
+				detected.getBytes(java.nio.charset.Charset.forName("EUC_JP")), StandardCharsets.UTF_8));
 	}
 	
 	/**

@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
-import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.Lwjgl2ControllerManager;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
@@ -160,6 +160,7 @@ public class MainLoader extends Application {
 		}
 
 		try {
+			Lwjgl2ControllerManager.configure();
 			final MainController main = new MainController(f, config, player, auto, songUpdated, songdb);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
@@ -223,32 +224,7 @@ public class MainLoader extends Application {
 				public void create() {
 					main.create();
 				}
-			}, cfg) {
-				// This is some kind of hack. Refer to com.badlogic.gdx.controllers.desktop.OisControllers code.
-				// OisControllers creates a runnable that polls the controller input. It polls the input every frame via
-				// `Gdx.app.postRunnable` function.
-				//
-				// We want it to poll the input on every poll thread's interval. Be it 1000Hz or 8000Hz.
-				// To achieve that, we *intercept* the runnable, store it somewhere else, and call that runnable
-				// directly on the polling thread. (BMSPlayerInputProcessor.poll). Further postRunnable for that
-				// runnable will be prohibited.
-				private Runnable oisRunnable = null;
-				@Override
-				public void postRunnable(Runnable runnable) {
-					if (oisRunnable == null) {
-						StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-						if (stackTrace.length >= 3) {
-							if (stackTrace[2].getClassName().startsWith("com.badlogic.gdx.controllers.desktop.OisControllers")) {
-								oisRunnable = runnable;
-								BMSPlayerInputProcessor.controllerPollRunner = runnable;
-							}
-						}
-					}
-					else if (runnable == oisRunnable) return;
-
-					super.postRunnable(runnable);
-				}
-			};
+			}, cfg);
 
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //

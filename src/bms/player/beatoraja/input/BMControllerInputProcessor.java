@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.PovDirection;
 
 /**
  * 専用コントローラー入力処理用クラス
@@ -129,31 +128,15 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	
 		// AXISの更新
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
-			axis[i] = controller.getAxis(i);
+			axis[i] = i < controller.getAxisCount() ? controller.getAxis(i) : 0;
 		}
 
 		for (int button = 0; button < buttonstate.length; button++) {
 			if (microtime >= buttontime[button] + duration * 1000) {
 				final boolean prev = buttonstate[button];
-				if (button <= BMKeys.BUTTON_28) {
-					buttonstate[button] = controller.getButton(button);
-				} else if (button <= BMKeys.HAT1_BOTTOM){
-					PovDirection pov = controller.getPov((button - BMKeys.HAT1_LEFT) / 4);
-					switch ((button - BMKeys.HAT1_LEFT) % 4) {
-						case 0:  // Left
-							buttonstate[button] = (pov == PovDirection.west || pov == PovDirection.northWest || pov == PovDirection.southWest);
-							break;
-						case 1:  // Top
-							buttonstate[button] = (pov == PovDirection.north || pov == PovDirection.northEast || pov == PovDirection.northWest);
-							break;
-						case 2:  // Right
-							buttonstate[button] = (pov == PovDirection.east || pov == PovDirection.northEast || pov == PovDirection.southEast);
-							break;
-						case 3:  // bottom
-							buttonstate[button] = (pov == PovDirection.south || pov == PovDirection.southEast || pov == PovDirection.southWest);
-							break;
-					}
-                    buttonstate[button] |= controller.getButton(button);
+				if (button <= BMKeys.HAT1_BOTTOM) {
+					buttonstate[button] = button >= controller.getMinButtonIndex()
+							&& button <= controller.getMaxButtonIndex() && controller.getButton(button);
 				} else {
 					if (jkoc) {
 						if (button == BMKeys.AXIS1_PLUS) {
@@ -211,7 +194,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
         // assume isAnalog(button) == true.
         int axis_index = (button - BMKeys.AXIS1_PLUS)/2;
         boolean plus = (button - BMKeys.AXIS1_PLUS)%2 == 0;
-        float value = controller.getAxis(axis_index);
+        float value = axis[axis_index];
         return plus ? value : -value;
     }
 
