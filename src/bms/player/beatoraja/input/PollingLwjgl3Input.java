@@ -17,17 +17,23 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private final MouseDeltas scratch = new MouseDeltas();
     private volatile boolean scratchEnabled;
     private final InputDiagnostics diagnostics = InputDiagnostics.createIfEnabled();
-    private Lwjgl3InputDiagnosticCallbacks diagnosticCallbacks;
+    private Lwjgl3InputCallbacks callbacks;
+    private final KeyboardEventQueue keyboardEvents = new KeyboardEventQueue(diagnostics != null);
+    private boolean overflowReported;
 
     public PollingLwjgl3Input(Lwjgl3Window window) {
         super(window);
         this.window = window;
-        if (diagnostics != null)
-            diagnosticCallbacks = new Lwjgl3InputDiagnosticCallbacks(window.getWindowHandle(), this, diagnostics);
+        callbacks = new Lwjgl3InputCallbacks(window.getWindowHandle(), this, diagnostics);
     }
 
     @Override public void update() {
         super.update();
+        if (keyboardEvents.isOverflowed() && !overflowReported) {
+            overflowReported = true;
+            java.util.logging.Logger.getGlobal().severe("Keyboard event queue overflow; stopping to avoid lost releases or invalid scores");
+            Gdx.app.exit();
+        }
         if (diagnostics == null) publishState();
         else synchronized (diagnostics) {
             publishState();
@@ -45,6 +51,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         }
         pressedCount = count;
         for (int i = 0; i < buttons.length(); i++) buttons.set(i, focused && super.isButtonPressed(i) ? 1 : 0);
+        keyboardEvents.publish(focused, keys);
         x = super.getX();
         y = super.getY();
         if (scratchEnabled && focused) {
@@ -99,22 +106,25 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     public InputDiagnostics getDiagnostics() { return diagnostics; }
+    public KeyboardEventQueue getKeyboardEvents() { return keyboardEvents; }
+    public void configureKeyboardEvents(int[] assignments) { keyboardEvents.configure(assignments, keys); }
+    public void resetKeyboardEvents() { keyboardEvents.reset(keys); }
 
     @Override public void windowHandleChanged(long handle) {
         // Called by the superclass constructor before our fields are initialized.
-        if (diagnosticCallbacks != null) {
-            diagnosticCallbacks.close(diagnosticCallbacks.handle == handle);
-            diagnosticCallbacks = null;
+        if (callbacks != null) {
+            callbacks.close(callbacks.handle == handle);
+            callbacks = null;
         }
         super.windowHandleChanged(handle);
-        if (diagnostics != null) diagnosticCallbacks = new Lwjgl3InputDiagnosticCallbacks(handle, this, diagnostics);
+        if (keyboardEvents != null) callbacks = new Lwjgl3InputCallbacks(handle, this, diagnostics);
     }
 
     @Override public void dispose() {
         try {
-            if (diagnosticCallbacks != null) {
-                diagnosticCallbacks.close(true);
-                diagnosticCallbacks = null;
+            if (callbacks != null) {
+                callbacks.close(true);
+                callbacks = null;
             }
         } finally {
             if (diagnostics != null) diagnostics.close();

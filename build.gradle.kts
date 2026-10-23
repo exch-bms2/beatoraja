@@ -134,6 +134,8 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
+    "bms.player.beatoraja.input.KeyboardEventQueueTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
     "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
@@ -265,5 +267,14 @@ tasks.register<JavaExec>("lwjgl3InputDiagnosticsSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3InputDiagnosticsSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3KeyboardQueueSmokeTest") {
+    group = "verification"
+    description = "Verify queued keyboard edges and poll timestamps through real GLFW callbacks."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3KeyboardQueueSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

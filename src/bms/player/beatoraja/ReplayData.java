@@ -43,6 +43,8 @@ public final class ReplayData implements Validatable {
 	public KeyInputLog[] keylog = KeyInputLog.EMPTYARRAY;
 	
 	public String keyinput;
+	/** Null for legacy replays; logical keys recorded through the lossless keyboard judgment stream. */
+	public int[] keyboardEventKeys;
 	/**
 	 * ゲージの種類
 	 */
@@ -106,6 +108,9 @@ public final class ReplayData implements Validatable {
 
 	@Override
 	public boolean validate() {
+		if (keyboardEventKeys != null && keyboardEventKeys.length > 256) return false;
+		if (keyboardEventKeys != null) keyboardEventKeys = java.util.Arrays.stream(keyboardEventKeys)
+				.filter(key -> key >= 0 && key < 256).distinct().toArray();
 		if (keyinput != null) {
 			try {
 				InputStream input = new ByteArrayInputStream(keyinput.getBytes());

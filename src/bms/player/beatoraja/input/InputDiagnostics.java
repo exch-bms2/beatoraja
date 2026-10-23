@@ -160,6 +160,12 @@ public final class InputDiagnostics implements AutoCloseable {
         }
     }
 
+    synchronized void keyboardEventRead(int key, long callbackTime, long publicationTime, long now) {
+        readCallbackAt[key] = callbackTime == 0 ? Long.MIN_VALUE : callbackTime;
+        if (callbackTime != 0) callbackToRead.add(now - callbackTime);
+        if (publicationTime != 0) snapshotToRead.add(now - publicationTime);
+    }
+
     synchronized void scratchPublished(int dx, int dy, long now) {
         if (closed || (dx == 0 && dy == 0)) return;
         if (!scratchPending) scratchSince = now;

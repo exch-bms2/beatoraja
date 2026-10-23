@@ -84,3 +84,4 @@ skin/default/system.png
 skin/default/trophy.png
 docs/gradle-build.md
 docs/input-diagnostics.md
+docs/keyboard-events.md

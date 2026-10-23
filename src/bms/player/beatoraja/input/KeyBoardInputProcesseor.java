@@ -57,6 +57,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 * キーの最少入力間隔(ms)
 	 */
 	private int duration;
+	private int[] queuedGameKeys = new int[0];
+	private final long[] keyboardEventTimes = new long[256];
 
 	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
 		super(bmsPlayerInputProcessor, Type.KEYBOARD);
@@ -68,13 +70,19 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		Arrays.stream(ControlKeys.values()).forEach(keys -> reserved.add(keys.keycode));
 		
 		Arrays.fill(keytime, Long.MIN_VALUE);
+		Arrays.fill(keyboardEventTimes, Long.MIN_VALUE);
 	}
 
-	public void setConfig(KeyboardConfig config) {
+	public synchronized void setConfig(KeyboardConfig config) {
 		this.keys = config.getKeyAssign().clone();
 		this.duration = config.getDuration();
 		this.control = new int[] { config.getStart(), config.getSelect() };
 		mouseScratchInput.setConfig(config);
+		var mouse = config.getMouseScratchConfig();
+		queuedGameKeys = java.util.stream.IntStream.range(0, keys.length)
+				.filter(i -> keys[i] >= 0 && (!mouse.isMouseScratchEnabled()
+						|| i >= mouse.getKeyAssign().length || mouse.getKeyAssign()[i] < 0)).toArray();
+		if (Gdx.input instanceof PollingLwjgl3Input input) input.configureKeyboardEvents(textmode ? new int[0] : keys);
 	}
 
 	public boolean keyDown(int keycode) {
@@ -90,19 +98,39 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return true;
 	}
 
-	public void clear() {
+	public synchronized void clear() {
 		// Arrays.fill(keystate, false);
 		Arrays.fill(keytime, Long.MIN_VALUE);
+		Arrays.fill(keyboardEventTimes, Long.MIN_VALUE);
 		Arrays.fill(suppressedTextControlKeys, false);
 		lastPressedKey = -1;
 		mouseScratchInput.clear();
+		if (Gdx.input instanceof PollingLwjgl3Input input) input.resetKeyboardEvents();
 	}
 
-	public void poll(final long microtime) {
+	public synchronized void poll(final long microtime) {
 		final InputDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input ? input.getDiagnostics() : null;
 		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
+					continue;
+				}
+				if (Gdx.input instanceof PollingLwjgl3Input input) {
+					int value;
+					while ((value = input.getKeyboardEvents().pollReady(keys[i], keystate[keys[i]], microtime,
+							keyboardEventTimes[keys[i]], duration)) >= 0) {
+						if (diagnostics != null) {
+							diagnostics.keyboardEventRead(keys[i], input.getKeyboardEvents().callbackTime(keys[i]),
+									input.getKeyboardEvents().publicationTime(keys[i]), System.nanoTime());
+							diagnostics.keyboardDecision(keys[i], true, System.nanoTime());
+						}
+						keystate[keys[i]] = value != 0;
+						keytime[keys[i]] = microtime;
+						keyboardEventTimes[keys[i]] = microtime;
+						bmsPlayerInputProcessor.keyboardKeyChanged(microtime, i, value != 0);
+						bmsPlayerInputProcessor.setAnalogState(i, false, 0);
+					}
+					if (value == -2 && diagnostics != null) diagnostics.keyboardDecision(keys[i], false, System.nanoTime());
 					continue;
 				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
@@ -116,12 +144,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
-			final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
+			final boolean startpressed = controlState(control[0]);
 			if (startpressed != keystate[control[0]]) {
 				keystate[control[0]] = startpressed;
 				this.bmsPlayerInputProcessor.startChanged(startpressed);
 			}
-			final boolean selectpressed = Gdx.input.isKeyPressed(control[1]);
+			final boolean selectpressed = controlState(control[1]);
 			if (selectpressed != keystate[control[1]]) {
 				keystate[control[1]] = selectpressed;
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
@@ -129,7 +157,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		}
 		
 		for (ControlKeys key : ControlKeys.values()) {
-			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
+			final boolean pressed = controlState(key.keycode);
 			if (suppressedTextControlKeys[key.keycode]) {
 				if (!pressed) {
 					suppressedTextControlKeys[key.keycode] = false;
@@ -146,6 +174,16 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		}
 		
 		mouseScratchInput.poll(microtime);
+	}
+
+	synchronized void poll(long microtime, long origin) {
+		if (origin == bmsPlayerInputProcessor.getStartTime()) poll(microtime);
+	}
+
+	private boolean controlState(int key) {
+		if (Gdx.input instanceof PollingLwjgl3Input)
+			for (int assigned : keys) if (assigned == key) return keystate[key];
+		return Gdx.input.isKeyPressed(key);
 	}
 
 	private int currentlyHeldModifiers() {
@@ -246,7 +284,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return mouseScratchInput;
 	}
 
-	public void setTextInputMode(boolean textmode) {
+	public synchronized void setTextInputMode(boolean textmode) {
 		if (this.textmode && !textmode) {
 			for (ControlKeys key : ControlKeys.values()) {
 				if (key.text && Gdx.input.isKeyPressed(key.keycode)) {
@@ -257,6 +295,11 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			}
 		}
 		this.textmode = textmode;
+		if (Gdx.input instanceof PollingLwjgl3Input input) input.configureKeyboardEvents(textmode ? new int[0] : keys);
+	}
+
+	public synchronized int[] getQueuedGameKeys() {
+		return Gdx.input instanceof PollingLwjgl3Input ? queuedGameKeys.clone() : new int[0];
 	}
 	
 	public boolean isReservedKey(int key) {

@@ -43,6 +43,11 @@ class KeyInputProccessor {
 	}
 
 	public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime) {
+		startJudge(model, keylog, milliMarginTime, null);
+	}
+
+	public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime, int[] keyboardKeys) {
+		player.main.getInputProcessor().beginKeyboardJudge(keyboardKeys, keylog != null);
 		judge = new JudgeThread(model.getAllTimeLines(), keylog, milliMarginTime);
 		judge.start();
 		isJudgeStarted = true;
@@ -126,6 +131,10 @@ class KeyInputProccessor {
 			keyBeamStop = true;
 			isJudgeStarted = false;
 			judge.stop = true;
+			judge.interrupt();
+			try { judge.join(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+			if (judge.isAlive()) throw new IllegalStateException("Judgment thread did not stop");
+			player.main.getInputProcessor().endKeyboardJudge();
 			judge = null;
 		}
 	}
@@ -142,7 +151,7 @@ class KeyInputProccessor {
 		// TODO 判定処理スレッドはJudgeManagerに渡した方がいいかも
 
 		private final TimeLine[] timelines;
-		private boolean stop = false;
+		private volatile boolean stop = false;
 		/**
 		 * 自動入力するキー入力ログ
 		 */

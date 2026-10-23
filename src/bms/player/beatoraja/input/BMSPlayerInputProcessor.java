@@ -26,6 +26,9 @@ import com.badlogic.gdx.utils.Array;
 public class BMSPlayerInputProcessor {
 	
 	private boolean enable = true;
+	private final KeyboardJudgeQueue keyboardJudgeQueue = new KeyboardJudgeQueue();
+	private int[] keyboardReplayKeys = new int[0];
+	private boolean keyboardQueueFaultReported;
 
 	private KeyBoardInputProcesseor kbinput;
 
@@ -102,7 +105,7 @@ public class BMSPlayerInputProcessor {
 	private BMSPlayerInputDevice lastKeyDevice;
 	private Array<BMSPlayerInputDevice> devices;
 
-	private long starttime;
+	private volatile long starttime;
 	private long microMarginTime;
 
 	int mousex;
@@ -185,13 +188,14 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setStartTime(long starttime) {
-		this.starttime = starttime;
-		if (starttime != 0) {
-			resetAllKeyChangedTime();
-			keylog.clear();
-			kbinput.clear();
-			for (BMControllerInputProcessor bm : bminput) {
-				bm.clear();
+		synchronized (kbinput) {
+			this.starttime = starttime;
+			keyboardJudgeQueue.synchronizeHeld(keystate);
+			if (starttime != 0) {
+				resetAllKeyChangedTime();
+				keylog.clear();
+				kbinput.clear();
+				for (BMControllerInputProcessor bm : bminput) bm.clear();
 			}
 		}
 		midiinput.setStartTime(starttime);
@@ -224,6 +228,8 @@ public class BMSPlayerInputProcessor {
 		if(id >= 0 && id < keystate.length) {
 			keystate[id] = pressed;
 			this.time[id] = time;
+			keyboardJudgeQueue.offer(id, pressed, time);
+			checkKeyboardQueueOverflow();
 		}
 	}
 	
@@ -261,6 +267,7 @@ public class BMSPlayerInputProcessor {
 	public void resetAllKeyState() {
 		Arrays.fill(keystate, false);
 		Arrays.fill(time, Long.MIN_VALUE);
+		keyboardJudgeQueue.clear();
 		if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
 			input.getDiagnostics().clearGameSlots();
 	}
@@ -349,6 +356,52 @@ public class BMSPlayerInputProcessor {
 			for (BMSPlayerInputDevice device : devices) {
 				device.clear();
 			}
+		}
+	}
+
+	public void beginKeyboardJudge(int[] replayKeys, boolean replay) {
+		int[] assigned = replay ? replayKeys : enable ? kbinput.getQueuedGameKeys() : new int[0];
+		synchronized (keyboardJudgeQueue) {
+			boolean[] initial = keystate.clone();
+			if (!replay && assigned != null)
+				for (int key : assigned) if (time[key] != Long.MIN_VALUE) initial[key] = !keystate[key];
+			keyboardJudgeQueue.begin(assigned, initial);
+			keyboardReplayKeys = keyboardJudgeQueue.configuredKeys();
+			if (!replay)
+				for (int key : keyboardReplayKeys) if (time[key] != Long.MIN_VALUE)
+					keyboardJudgeQueue.offer(key, keystate[key], time[key]);
+		}
+	}
+
+	public void endKeyboardJudge() { keyboardJudgeQueue.end(); }
+	public KeyboardJudgeQueue getKeyboardJudgeQueue() { return keyboardJudgeQueue; }
+	public int[] getKeyboardReplayKeys() { return keyboardReplayKeys.clone(); }
+
+	public boolean getJudgeKeyState(int key) {
+		return keyboardJudgeQueue.isQueued(key) ? keyboardJudgeQueue.held(key) : getKeyState(key);
+	}
+
+	void keyboardKeyChanged(long presstime, int key, boolean pressed) {
+		synchronized (keyboardJudgeQueue) {
+			if (enable && keystate[key] != pressed) {
+				keyChanged(kbinput, presstime, key, pressed);
+				keyboardJudgeQueue.offer(key, pressed, presstime);
+				checkKeyboardQueueOverflow();
+			}
+		}
+	}
+
+	private void checkKeyboardQueueOverflow() {
+		if (keyboardJudgeQueue.isOverflowed() && !keyboardQueueFaultReported) {
+			keyboardQueueFaultReported = true;
+			Logger.getGlobal().severe("Keyboard judgment queue overflow; stopping to avoid invalid scores");
+			if (Gdx.app != null) Gdx.app.exit();
+		}
+	}
+
+	public void clearQueuedKeyboardTime(int key, long eventTime, boolean pressed) {
+		synchronized (keyboardJudgeQueue) {
+			if (time[key] == eventTime && keystate[key] == pressed) resetKeyChangedTime(key);
 		}
 	}
 	
@@ -541,8 +594,9 @@ public class BMSPlayerInputProcessor {
 	public void poll() {
 		if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
 			input.getDiagnostics().poll(System.nanoTime());
-		final long now = System.nanoTime() / 1000 - starttime;
-		kbinput.poll(now);
+		final long origin = starttime;
+		final long now = System.nanoTime() / 1000 - origin;
+		kbinput.poll(now, origin);
 
 		Runnable controllerPoll = controllerPollRunner;
 		if (controllerPoll != null) {
@@ -591,7 +645,7 @@ public class BMSPlayerInputProcessor {
 		 * @param keycode キーコード
 		 * @param pressed 押されたかどうか
 		 */
-		public void add(long presstime, int keycode, boolean pressed) {
+		public synchronized void add(long presstime, int keycode, boolean pressed) {
 			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
 			poolindex++;
 			log.setData(presstime, keycode, pressed);
@@ -601,7 +655,7 @@ public class BMSPlayerInputProcessor {
 		/**
 		 * キーログをクリアする
 		 */
-		public void clear() {
+		public synchronized void clear() {
 			keylog.clear();
 			for(int i = 0;i < logpool.length;i++) {
 				logpool[i] = new KeyInputLog();
@@ -612,7 +666,7 @@ public class BMSPlayerInputProcessor {
 		 * 
 		 * @return
 		 */
-		public KeyInputLog[] toArray() {
+		public synchronized KeyInputLog[] toArray() {
 			return keylog.toArray(KeyInputLog.class);
 		}
 	}

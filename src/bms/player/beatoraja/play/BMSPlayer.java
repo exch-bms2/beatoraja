@@ -611,9 +611,13 @@ public class BMSPlayer extends MainState {
 					playTimeTracker.start(micronow, starttimeoffset * 1000, (long) (playtime - TIME_MARGIN) * 1000);
 					timer.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
-					input.setStartTime(micronow + timer.getStartMicroTime() - starttimeoffset * 1000);
-					input.setKeyLogMarginTime(resource.getMarginTime());
-					keyinput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime());
+					// Change the clock origin and start the queue before another keyboard poll can run.
+					synchronized (input.getKeyBoardInputProcesseor()) {
+						input.setStartTime(micronow + timer.getStartMicroTime() - starttimeoffset * 1000);
+						input.setKeyLogMarginTime(resource.getMarginTime());
+						keyinput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime(),
+								replay != null ? replay.keyboardEventKeys : null);
+					}
 					keysound.startBGPlay(model, starttimeoffset * 1000);
 					Logger.getGlobal().info("STATE_PLAYに移行");
 				}
@@ -899,6 +903,7 @@ public class BMSPlayer extends MainState {
 		replay.mode = config.getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = main.getInputProcessor().getKeyInputLog();
+		replay.keyboardEventKeys = main.getInputProcessor().getKeyboardReplayKeys();
 //		replay.pattern = playinfo.pattern;
 		replay.laneShufflePattern = playinfo.laneShufflePattern;
 		replay.rand = playinfo.rand;
@@ -978,6 +983,7 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public void dispose() {
+		if (keyinput != null) keyinput.stopJudge();
 		super.dispose();
 		for(PlayerProperty p : players) {
 			p.lanerender.dispose();			

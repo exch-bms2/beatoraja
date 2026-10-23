@@ -11,6 +11,7 @@ import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyboardJudgeQueue;
 import bms.player.beatoraja.play.JudgeProperty.JudgeWindow;
 import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 import bms.player.beatoraja.play.JudgeProperty.NoteType;
@@ -98,6 +99,8 @@ public final class JudgeManager {
 	private boolean[] judgeVanish;
 
 	private long prevmtime;
+	private boolean passingAdvanced;
+	private final KeyboardJudgeQueue.Batch keyboardBatch = new KeyboardJudgeQueue.Batch();
 
 	private boolean autoplay = false;
 	private long[] auto_presstime;
@@ -126,6 +129,7 @@ public final class JudgeManager {
 	public void init(BMSModel model, PlayerResource resource) {
 		final Mode orgmode = resource.getOriginalMode();
 		prevmtime = 0;
+		passingAdvanced = false;
 		final int  judgeregion = main.getSkin() instanceof PlaySkin ? ((PlaySkin) main.getSkin()).getJudgeregion() : 0;
 		judgenow = new int[judgeregion];
 		judgecombo = new int[judgeregion];
@@ -210,6 +214,36 @@ public final class JudgeManager {
 	}
 
 	public void update(final long mtime) {
+		final BMSPlayerInputProcessor input = main.main.getInputProcessor();
+		final KeyboardJudgeQueue queue = input.getKeyboardJudgeQueue();
+		queue.drain(keyboardBatch);
+		for (int from = 0; from < keyboardBatch.size;) {
+			int to = from + 1;
+			while (to < keyboardBatch.size && keyboardBatch.times[to] == keyboardBatch.times[from]) to++;
+			for (int i = from; i < to; i++) queue.apply(keyboardBatch.keys[i], keyboardBatch.pressed[i]);
+			long checkpoint = Math.min(mtime, Math.max(prevmtime, keyboardBatch.times[from]));
+			advancePassing(checkpoint);
+			for (int i = from; i < to; i++) {
+				processKeyEvent(keyboardBatch.keys[i], keyboardBatch.times[i], keyboardBatch.pressed[i], checkpoint);
+				input.clearQueuedKeyboardTime(keyboardBatch.keys[i], keyboardBatch.times[i], keyboardBatch.pressed[i]);
+			}
+			finishTime(checkpoint);
+			from = to;
+		}
+		advancePassing(mtime);
+		for (int key = 0; key < keyassign.length; key++) {
+			if (queue.isQueued(key)) continue;
+			long pmtime = input.getKeyChangedTime(key);
+			if (pmtime == Long.MIN_VALUE || keyassign[key] == -1) continue;
+			processKeyEvent(key, pmtime, input.getKeyState(key), mtime);
+			input.resetKeyChangedTime(key);
+		}
+		finishTime(mtime);
+	}
+
+	private void advancePassing(final long mtime) {
+		if (passingAdvanced && mtime == prevmtime) return;
+		passingAdvanced = true;
 		final MainController mc = main.main;
 		final TimerManager timer = main.timer;
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
@@ -221,7 +255,7 @@ public final class JudgeManager {
 			boolean next_inclease = false;
 			boolean pressed = false;
 			for (int key : state.laneassign) {
-				if (input.getKeyState(key)) {
+				if (input.getJudgeKeyState(key)) {
 					pressed = true;
 					break;
 				}
@@ -337,20 +371,19 @@ public final class JudgeManager {
 			}
 		}
 		prevmtime = mtime;
+	}
 
-		for (int key = 0; key < keyassign.length; key++) {
+	private void processKeyEvent(int key, long pmtime, boolean pressed, long mtime) {
+		final Config config = main.resource.getConfig();
+		if (key >= 0 && key < keyassign.length) {
 			final int lane = keyassign[key];
 			if (lane == -1) {
-				continue;
-			}
-			final long pmtime = input.getKeyChangedTime(key);
-			if (pmtime == Long.MIN_VALUE) {
-				continue;
+				return;
 			}
 			final LaneState state = states[lane];
 			state.lanemodel.reset();
 			final int sc = state.sckey;
-			if (input.getKeyState(key)) {
+			if (pressed) {
 				// キーが押されたときの処理
 				if (state.processing != null) {
 					if (((lntype != BMSModel.LNTYPE_LONGNOTE && state.processing.getType() == LongNote.TYPE_UNDEFINED)
@@ -367,14 +400,16 @@ public final class JudgeManager {
 							state.processing = null;
 							state.releasetime = Long.MIN_VALUE;
 							state.lnendJudge = Integer.MIN_VALUE;
-							sckey[sc] = 0;							
+							sckey[sc] = 0;
 						} else {
 							// 押し直し処理
 							state.releasetime = Long.MIN_VALUE;
+							state.lnendJudge = Integer.MIN_VALUE;
 						}
 					} else {
 						// 押し直し処理
 						state.releasetime = Long.MIN_VALUE;
+						state.lnendJudge = Integer.MIN_VALUE;
 					}
 				} else {
 					final NoteType noteType = sc >= 0 ? NoteType.SCRATCH : NoteType.NOTE;
@@ -535,9 +570,9 @@ public final class JudgeManager {
 							if (Math.abs(state.lnstartDuration) > Math.abs(dmtime)) {
 								dmtime = state.lnstartDuration;
 							}
-							if(judge >= 3 && dmtime > 0) {
-								state.releasetime = mtime;								
-								state.lnendJudge = 3;
+							if(dmtime > 0) {
+								state.releasetime = pmtime;
+								state.lnendJudge = judge >= 3 ? 3 : judge;
 							} else {
 								this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime, true);
 								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
@@ -550,9 +585,12 @@ public final class JudgeManager {
 					}
 				}
 			}
-			input.resetKeyChangedTime(key);
 		}
+	}
 
+	private void finishTime(long mtime) {
+		final TimerManager timer = main.timer;
+		final Config config = main.resource.getConfig();
 		// ノート通過系判定
 		for (LaneState state : states) {
 			final NoteType noteType = state.sckey >= 0 ? NoteType.SCRATCH : NoteType.NOTE;
@@ -562,7 +600,7 @@ public final class JudgeManager {
 			if (state.processing != null) {
 				if((lntype == BMSModel.LNTYPE_LONGNOTE && state.processing.getType() == LongNote.TYPE_UNDEFINED)
 					|| state.processing.getType() == LongNote.TYPE_LONGNOTE) {
-					if(state.releasetime != Long.MIN_VALUE && state.releasetime + releasemargin <= mtime) {
+					if(state.releasetime != Long.MIN_VALUE && state.lnendJudge >= 3 && state.releasetime + releasemargin <= mtime) {
 						keysound.setVolume(state.processing.getPair(), 0.0f);
 						this.updateMicro(state, state.processing.getPair(), mtime, state.lnendJudge, state.processing.getMicroTime() - state.releasetime, true);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
@@ -570,9 +608,11 @@ public final class JudgeManager {
 						state.releasetime = Long.MIN_VALUE;
 						state.lnendJudge = Integer.MIN_VALUE;
 					} else if(state.processing.getMicroTime() < mtime) {
-						this.updateMicro(state, state.processing.getPair(), mtime, state.lnstartJudge, state.lnstartDuration, true);
+						final int judge = state.lnendJudge != Integer.MIN_VALUE ? state.lnendJudge : state.lnstartJudge;
+						final long duration = state.lnendJudge != Integer.MIN_VALUE ? state.processing.getMicroTime() - state.releasetime : state.lnstartDuration;
+						this.updateMicro(state, state.processing.getPair(), mtime, judge, duration, true);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
-						state.processing = null;						
+						state.processing = null;
 						state.releasetime = Long.MIN_VALUE;
 						state.lnendJudge = Integer.MIN_VALUE;
 					}
