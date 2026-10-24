@@ -545,7 +545,8 @@ public class Skin {
 		private Color orgcolor;
 
 		private final Rectangle clipBounds = new Rectangle();
-		private final Rectangle scissors = new Rectangle();
+		private final Array<Rectangle> scissors = new Array<>(false, 2);
+		private int clipDepth;
 		
 		public SkinObjectRenderer(SpriteBatch sprite, Camera camera) {
 			this.sprite = sprite;
@@ -569,13 +570,19 @@ public class Skin {
 			}
 			sprite.flush();
 			clipBounds.set(x, y, width, height);
-			ScissorStack.calculateScissors(camera, sprite.getTransformMatrix(), clipBounds, scissors);
-			return ScissorStack.pushScissors(scissors);
+			// ScissorStack retains the rectangle reference until pop; nested clips need distinct instances.
+			if (scissors.size == clipDepth) scissors.add(new Rectangle());
+			Rectangle next = scissors.get(clipDepth);
+			ScissorStack.calculateScissors(camera, sprite.getTransformMatrix(), clipBounds, next);
+			if (!ScissorStack.pushScissors(next)) return false;
+			clipDepth++;
+			return true;
 		}
 
 		public void popClip() {
 			sprite.flush();
 			ScissorStack.popScissors();
+			clipDepth--;
 		}
 
 		public void draw(BitmapFont font, String s, float x, float y, Color c) {

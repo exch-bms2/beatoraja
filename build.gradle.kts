@@ -121,6 +121,9 @@ tasks.named<JavaExec>("run") {
     dependsOn(verifyBuildEnvironment)
     workingDir(providers.gradleProperty("runWorkingDir").getOrElse(projectDir.absolutePath))
     standardInput = System.`in`
+    providers.gradleProperty("windowDiagnostics").orNull?.let {
+        systemProperty("beatoraja.windowDiagnostics", it)
+    }
     providers.gradleProperty("inputDiagnostics").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics", it)
     }
@@ -134,6 +137,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.input.WindowDiagnosticsTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
     "bms.player.beatoraja.input.KeyboardEventQueueTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
@@ -254,6 +258,17 @@ tasks.register<JavaExec>("lwjgl3WindowSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.Lwjgl3WindowSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3HiDpiSmokeTest") {
+    group = "verification"
+    description = "Verify logical coordinates, clipping pixels and repeated resizes in a real GLFW window."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3HiDpiSmokeTest")
+    systemProperty("beatoraja.windowDiagnostics", "true")
+    systemProperty("beatoraja.hidpiTest.fullscreen", providers.gradleProperty("hidpiTestFullscreen").getOrElse("false"))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

@@ -301,6 +301,8 @@ public final class MainController {
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
+		bms.player.beatoraja.input.WindowDiagnostics.describeSkinProjection(sprite,
+				config.getResolution().width, config.getResolution().height);
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 		try {
@@ -526,12 +528,19 @@ public final class MainController {
             if (input.isActivated(KeyCommand.SWITCH_SCREEN_MODE)) {
                 boolean fullscreen = Gdx.graphics.isFullscreen();
                 Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+                boolean switched;
                 if (fullscreen) {
-                    Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
+                    switched = Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
                 } else {
-                    Gdx.graphics.setFullscreenMode(currentMode);
+                    switched = Gdx.graphics.setFullscreenMode(currentMode);
                 }
-                config.setDisplaymode(fullscreen ? Config.DisplayMode.WINDOW : Config.DisplayMode.FULLSCREEN);
+                if (Boolean.getBoolean("beatoraja.windowDiagnostics") || !switched) {
+                    Logger.getGlobal().log(switched ? java.util.logging.Level.INFO : java.util.logging.Level.WARNING,
+                            "Window mode switch : requestedFullscreen=" + !fullscreen + ", success=" + switched
+                            + ", actualFullscreen=" + Gdx.graphics.isFullscreen()
+                            + ", requestedSize=" + currentMode.width + "x" + currentMode.height);
+                }
+                if (switched) config.setDisplaymode(Gdx.graphics.isFullscreen() ? Config.DisplayMode.FULLSCREEN : Config.DisplayMode.WINDOW);
             }
 
             // if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {

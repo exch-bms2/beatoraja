@@ -22,6 +22,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private final KeyboardEventQueue keyboardEvents = new KeyboardEventQueue(diagnostics != null);
     private boolean overflowReported;
     private boolean scratchOverflowReported;
+    private final WindowDiagnostics windowDiagnostics = WindowDiagnostics.createIfEnabled();
 
     public PollingLwjgl3Input(Lwjgl3Window window) {
         super(window);
@@ -31,6 +32,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     @Override public void update() {
         super.update();
+        if (windowDiagnostics != null) windowDiagnostics.sample();
         if (keyboardEvents.isOverflowed() && !overflowReported) {
             overflowReported = true;
             java.util.logging.Logger.getGlobal().severe("Keyboard event queue overflow; stopping to avoid lost releases or invalid scores");
