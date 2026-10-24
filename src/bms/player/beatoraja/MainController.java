@@ -301,6 +301,7 @@ public final class MainController {
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
+		sprite.setProjectionMatrix(skinProjection(config.getResolution().width, config.getResolution().height));
 		bms.player.beatoraja.input.WindowDiagnostics.describeSkinProjection(sprite,
 				config.getResolution().width, config.getResolution().height);
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
@@ -399,6 +400,11 @@ public final class MainController {
 	private long prevtime;
 
 	private final StringBuilder message = new StringBuilder();
+
+	/** Keeps the skin's configured coordinate system independent of the actual window and framebuffer. */
+	static com.badlogic.gdx.math.Matrix4 skinProjection(int width, int height) {
+		return new com.badlogic.gdx.math.Matrix4().setToOrtho2D(0, 0, width, height);
+	}
 
 	public void render() {
 //		input.poll();
