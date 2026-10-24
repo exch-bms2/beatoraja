@@ -137,6 +137,8 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.WindowModeControllerTest",
+    "bms.player.beatoraja.SkinProjectionTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
     "bms.player.beatoraja.input.KeyboardEventQueueTest",
@@ -266,9 +268,10 @@ tasks.register<JavaExec>("lwjgl3HiDpiSmokeTest") {
     description = "Verify logical coordinates, clipping pixels and repeated resizes in a real GLFW window."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.Lwjgl3HiDpiSmokeTest")
+    mainClass.set("bms.player.beatoraja.Lwjgl3HiDpiSmokeTest")
     systemProperty("beatoraja.windowDiagnostics", "true")
     systemProperty("beatoraja.hidpiTest.fullscreen", providers.gradleProperty("hidpiTestFullscreen").getOrElse("false"))
+    systemProperty("beatoraja.hidpiTest.startFullscreen", providers.gradleProperty("hidpiTestStartFullscreen").getOrElse("false"))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

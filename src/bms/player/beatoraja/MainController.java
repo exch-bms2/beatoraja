@@ -96,6 +96,7 @@ public final class MainController {
 	private RankingDataCache ircache = new RankingDataCache();
 
 	private SpriteBatch sprite;
+	private WindowModeController windowMode;
 	/**
 	 * 1曲プレイで指定したBMSファイル
 	 */
@@ -301,6 +302,7 @@ public final class MainController {
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
+		windowMode = WindowModeController.create((Lwjgl3Graphics) Gdx.graphics, config.getResolution());
 		sprite.setProjectionMatrix(skinProjection(config.getResolution().width, config.getResolution().height));
 		bms.player.beatoraja.input.WindowDiagnostics.describeSkinProjection(sprite,
 				config.getResolution().width, config.getResolution().height);
@@ -407,6 +409,7 @@ public final class MainController {
 	}
 
 	public void render() {
+		if (windowMode != null && windowMode.isSwitching()) return;
 //		input.poll();
 		input.beginSkinInputFrame();
 		timer.update();
@@ -532,21 +535,7 @@ public final class MainController {
             }
             // fullscrees - windowed
             if (input.isActivated(KeyCommand.SWITCH_SCREEN_MODE)) {
-                boolean fullscreen = Gdx.graphics.isFullscreen();
-                Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-                boolean switched;
-                if (fullscreen) {
-                    switched = Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
-                } else {
-                    switched = Gdx.graphics.setFullscreenMode(currentMode);
-                }
-                if (Boolean.getBoolean("beatoraja.windowDiagnostics") || !switched) {
-                    Logger.getGlobal().log(switched ? java.util.logging.Level.INFO : java.util.logging.Level.WARNING,
-                            "Window mode switch : requestedFullscreen=" + !fullscreen + ", success=" + switched
-                            + ", actualFullscreen=" + Gdx.graphics.isFullscreen()
-                            + ", requestedSize=" + currentMode.width + "x" + currentMode.height);
-                }
-                if (switched) config.setDisplaymode(Gdx.graphics.isFullscreen() ? Config.DisplayMode.FULLSCREEN : Config.DisplayMode.WINDOW);
+                if (windowMode.toggle()) config.setDisplaymode(Gdx.graphics.isFullscreen() ? Config.DisplayMode.FULLSCREEN : Config.DisplayMode.WINDOW);
             }
 
             // if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
