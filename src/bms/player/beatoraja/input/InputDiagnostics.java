@@ -255,7 +255,7 @@ public final class InputDiagnostics implements AutoCloseable {
         }
     }
 
-    private static final class Histogram {
+    static final class Histogram {
         private static final long[] LIMIT_US = {100, 250, 500, 1000, 2000, 4000, 8000, 16000,
                 32000, 64000, 128000, 256000, 1000000, Long.MAX_VALUE};
         private final long[] buckets = new long[LIMIT_US.length];

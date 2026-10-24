@@ -125,6 +125,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 	public void poll(final long microtime) {
 		if (!enabled) return;
+		ControllerInputDiagnostics diagnostics = getDiagnostics();
+		int gated = 0, accepted = 0, forwarded = 0;
+		if (diagnostics != null) diagnostics.beginBm(System.nanoTime());
 	
 		// AXISの更新
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
@@ -152,12 +155,15 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 				}
 
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
+					accepted++;
 					buttontime[button] = microtime;
 				}
 
 				if (!prev && buttonstate[button]) {
 					setLastPressedButton(button);
 				}
+			} else {
+				gated++;
 			}
 		}
 
@@ -165,6 +171,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 			final int button = buttons[i];
 			if (button >= 0 && button < BMKeys.MAXID && buttonchanged[button]) {
 				this.bmsPlayerInputProcessor.keyChanged(this, microtime, i, buttonstate[button]);
+				forwarded++;
 				buttonchanged[button] = false;
 			}
 		}
@@ -188,6 +195,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
                 this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
             }
         }
+		if (diagnostics != null) diagnostics.endBm(System.nanoTime(), gated, accepted, forwarded);
 	}
 
     private float getAnalogValue(int button) {
@@ -196,6 +204,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
         boolean plus = (button - BMKeys.AXIS1_PLUS)%2 == 0;
         float value = axis[axis_index];
         return plus ? value : -value;
+    }
+
+    ControllerInputDiagnostics getDiagnostics() {
+        return controller instanceof JInputControllerManager.RawController raw ? raw.diagnostics : null;
     }
 
     public static int computeAnalogDiff(float oldValue, float newValue) {

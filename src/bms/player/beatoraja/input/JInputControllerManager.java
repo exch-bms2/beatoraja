@@ -171,6 +171,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
         if (BMSPlayerInputProcessor.controllerPollRunner == pollRunner) BMSPlayerInputProcessor.controllerPollRunner = null;
         for (Controller controller : controllers) {
             RawController raw = (RawController) controller;
+            if (raw.diagnostics != null) raw.diagnostics.close();
             raw.connected = false;
             raw.device = null;
             Arrays.fill(raw.buttonComponents, null);
@@ -204,6 +205,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             BMControllerInputProcessor.BMKeys.HAT1_LEFT, BMControllerInputProcessor.BMKeys.HAT1_RIGHT) { };
 
     final class RawController implements Controller {
+        final ControllerInputDiagnostics diagnostics;
         private net.java.games.input.Controller device;
         private final String name;
         private final String id;
@@ -253,6 +255,12 @@ public final class JInputControllerManager implements ControllerManager, Disposa
                 axisIndices.put(axisComponents[i], i);
                 axisValues[i] = axisComponents[i].getPollData();
             }
+            diagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics")
+                    ? new ControllerInputDiagnostics(Integer.toString(index), rawButtonCount, axes.length, true) : null;
+            if (diagnostics != null) {
+                for (int i = 0; i < rawButtonCount; i++) diagnostics.seed(i, rawButtons[i] ? 1 : 0);
+                for (int i = 0; i < axes.length; i++) diagnostics.seed(rawButtonCount + i, axisValues[i]);
+            }
             Logger.getGlobal().info("Controller backend=JInput direct, name=" + name + ", buttons="
                     + rawButtonCount + ", axes=" + axes.length
                     + "; legacy key IDs retained; verify assignments after OIS migration");
@@ -260,7 +268,9 @@ public final class JInputControllerManager implements ControllerManager, Disposa
 
         void poll() {
             if (device == null) return;
+            if (diagnostics != null) diagnostics.beginPoll(System.nanoTime());
             if (!device.poll()) {
+                if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), false);
                 boolean wasConnected = connected;
                 connected = false;
                 Arrays.fill(buttons, false);
@@ -275,11 +285,17 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             while (queue.getNextEvent(event)) {
                 Component component = event.getComponent();
                 Integer button = buttonIndices.get(component);
-                if (button != null) rawButtons[button] = event.getValue() != 0;
-                else if (component == pov) povValue = event.getValue();
+                if (button != null) {
+                    if (diagnostics != null) diagnostics.event(button, event.getValue() != 0 ? 1 : 0);
+                    rawButtons[button] = event.getValue() != 0;
+                } else if (component == pov) {
+                    if (diagnostics != null) diagnostics.event(rawButtonCount + axes.length, event.getValue());
+                    povValue = event.getValue();
+                }
                 else {
                     Integer axis = axisIndices.get(component);
                     if (axis != null) {
+                        if (diagnostics != null) diagnostics.event(rawButtonCount + axis, event.getValue());
                         float value = component.getPollData();
                         if (!Float.isFinite(value)) value = 0;
                         if (Math.abs(value) < component.getDeadZone()) value = 0;
@@ -317,6 +333,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
                 }
             }
             connected = true; // Publish the updated polling snapshot to rendering/Lua readers.
+            if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), true);
         }
 
         private void notifyChange(int index, boolean button, boolean pressed, float value) {

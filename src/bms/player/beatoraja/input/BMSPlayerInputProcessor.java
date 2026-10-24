@@ -422,6 +422,8 @@ public class BMSPlayerInputProcessor {
 			return;
 		}
 		if (keystate[i] != pressed) {
+			if (device instanceof BMControllerInputProcessor controller && controller.getDiagnostics() != null)
+				controller.getDiagnostics().gameWrite(time[i] != Long.MIN_VALUE);
 			if (device == kbinput && Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
 				input.getDiagnostics().gameWrite(i, time[i] != Long.MIN_VALUE, System.nanoTime());
 			keystate[i] = pressed;

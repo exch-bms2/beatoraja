@@ -137,6 +137,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
     "bms.player.beatoraja.input.KeyboardEventQueueTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
+    "bms.player.beatoraja.input.ControllerInputDiagnosticsTest",
     "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
