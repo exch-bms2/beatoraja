@@ -47,7 +47,12 @@ class KeyInputProccessor {
 	}
 
 	public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime, int[] keyboardKeys) {
-		player.main.getInputProcessor().beginKeyboardJudge(keyboardKeys, keylog != null);
+        startJudge(model, keylog, milliMarginTime, keyboardKeys, null);
+    }
+
+    public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime,
+            int[] keyboardKeys, int[] controllerKeys) {
+		player.main.getInputProcessor().beginInputJudge(keyboardKeys, controllerKeys, keylog != null);
 		judge = new JudgeThread(model.getAllTimeLines(), keylog, milliMarginTime);
 		judge.start();
 		isJudgeStarted = true;
@@ -134,7 +139,7 @@ class KeyInputProccessor {
 			judge.interrupt();
 			try { judge.join(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 			if (judge.isAlive()) throw new IllegalStateException("Judgment thread did not stop");
-			player.main.getInputProcessor().endKeyboardJudge();
+			player.main.getInputProcessor().endInputJudge();
 			judge = null;
 		}
 	}

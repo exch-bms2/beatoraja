@@ -28,6 +28,7 @@ public class BMSPlayerInputProcessor {
 	private boolean enable = true;
 	private final KeyboardJudgeQueue keyboardJudgeQueue = new KeyboardJudgeQueue();
 	private int[] keyboardReplayKeys = new int[0];
+    private int[] controllerReplayKeys = new int[0];
 	private boolean keyboardQueueFaultReported;
 
 	private KeyBoardInputProcesseor kbinput;
@@ -163,21 +164,23 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setControllerConfig(ControllerConfig[] configs) {
-		boolean[] b = new boolean[configs.length];
-		for (BMControllerInputProcessor controller : bminput) {
-			controller.setEnable(false);
-			for(int i = 0;i < configs.length;i++) {
-				if(b[i]) {
-					continue;
-				}
-				if(configs[i].getName() == null || configs[i].getName().length() == 0) {
-					configs[i].setName(controller.getName());
-				}
-				if(matchesControllerName(configs[i].getName(), controller.getName())) {
-					controller.setConfig(configs[i]);
-					controller.setEnable(true);
-					b[i] = true;
-					break;
+		synchronized (kbinput) {
+			boolean[] b = new boolean[configs.length];
+			for (BMControllerInputProcessor controller : bminput) {
+				controller.setEnable(false);
+				for(int i = 0;i < configs.length;i++) {
+					if(b[i]) {
+						continue;
+					}
+					if(configs[i].getName() == null || configs[i].getName().length() == 0) {
+						configs[i].setName(controller.getName());
+					}
+					if(matchesControllerName(configs[i].getName(), controller.getName())) {
+						controller.setConfig(configs[i]);
+						controller.setEnable(true);
+						b[i] = true;
+						break;
+					}
 				}
 			}
 		}
@@ -225,11 +228,13 @@ public class BMSPlayerInputProcessor {
 	 * @param time キー状態の変更時間
 	 */
 	public void setKeyState(int id, boolean pressed, long time) {
-		if(id >= 0 && id < keystate.length) {
-			keystate[id] = pressed;
-			this.time[id] = time;
-			keyboardJudgeQueue.offer(id, pressed, time);
-			checkKeyboardQueueOverflow();
+		synchronized (keyboardJudgeQueue) {
+			if(id >= 0 && id < keystate.length) {
+				keystate[id] = pressed;
+				this.time[id] = time;
+				keyboardJudgeQueue.offer(id, pressed, time);
+				checkKeyboardQueueOverflow();
+			}
 		}
 	}
 	
@@ -350,41 +355,68 @@ public class BMSPlayerInputProcessor {
 	}
 	
 	public void setEnable(boolean enable) {
-		this.enable = enable;
-		if(!enable) {
-			resetAllKeyState();
-			for (BMSPlayerInputDevice device : devices) {
-				device.clear();
+		synchronized (kbinput) {
+			this.enable = enable;
+			if(!enable) {
+				resetAllKeyState();
+				for (BMSPlayerInputDevice device : devices) {
+					device.clear();
+				}
 			}
 		}
 	}
 
 	public void beginKeyboardJudge(int[] replayKeys, boolean replay) {
-		int[] assigned = replay ? replayKeys : enable ? kbinput.getQueuedGameKeys() : new int[0];
+        beginInputJudge(replayKeys, null, replay);
+    }
+
+    public void beginInputJudge(int[] keyboardKeys, int[] controllerKeys, boolean replay) {
+        int[] assignedKeyboard = replay ? keyboardKeys : enable ? kbinput.getQueuedGameKeys() : new int[0];
+        int[] assignedController = replay ? controllerKeys : enable
+                ? Arrays.stream(bminput).flatMapToInt(c -> Arrays.stream(c.getQueuedGameKeys())).toArray() : new int[0];
+        int[] assigned = mergeEventKeys(assignedKeyboard, assignedController);
 		synchronized (keyboardJudgeQueue) {
 			boolean[] initial = keystate.clone();
 			if (!replay && assigned != null)
 				for (int key : assigned) if (time[key] != Long.MIN_VALUE) initial[key] = !keystate[key];
 			keyboardJudgeQueue.begin(assigned, initial);
-			keyboardReplayKeys = keyboardJudgeQueue.configuredKeys();
+            keyboardReplayKeys = mergeEventKeys(assignedKeyboard, null);
+            controllerReplayKeys = mergeEventKeys(assignedController, null);
 			if (!replay)
-				for (int key : keyboardReplayKeys) if (time[key] != Long.MIN_VALUE)
+				for (int key : assigned) if (time[key] != Long.MIN_VALUE)
 					keyboardJudgeQueue.offer(key, keystate[key], time[key]);
 		}
 	}
 
-	public void endKeyboardJudge() { keyboardJudgeQueue.end(); }
+    private static int[] mergeEventKeys(int[] first, int[] second) {
+        return java.util.stream.IntStream.concat(first == null ? java.util.stream.IntStream.empty() : Arrays.stream(first),
+                second == null ? java.util.stream.IntStream.empty() : Arrays.stream(second))
+                .filter(key -> key >= 0 && key < 256).distinct().sorted().toArray();
+    }
+
+	public void endKeyboardJudge() { endInputJudge(); }
+    public void endInputJudge() { keyboardJudgeQueue.end(); }
 	public KeyboardJudgeQueue getKeyboardJudgeQueue() { return keyboardJudgeQueue; }
+    public JudgeEventQueue getJudgeEventQueue() { return keyboardJudgeQueue; }
 	public int[] getKeyboardReplayKeys() { return keyboardReplayKeys.clone(); }
+    public int[] getControllerReplayKeys() { return controllerReplayKeys.clone(); }
 
 	public boolean getJudgeKeyState(int key) {
 		return keyboardJudgeQueue.isQueued(key) ? keyboardJudgeQueue.held(key) : getKeyState(key);
 	}
 
 	void keyboardKeyChanged(long presstime, int key, boolean pressed) {
+        queuedKeyChanged(kbinput, presstime, key, pressed);
+    }
+
+    void controllerKeyChanged(BMControllerInputProcessor device, long presstime, int key, boolean pressed) {
+        queuedKeyChanged(device, presstime, key, pressed);
+    }
+
+    private void queuedKeyChanged(BMSPlayerInputDevice device, long presstime, int key, boolean pressed) {
 		synchronized (keyboardJudgeQueue) {
 			if (enable && keystate[key] != pressed) {
-				keyChanged(kbinput, presstime, key, pressed);
+				keyChanged(device, presstime, key, pressed);
 				keyboardJudgeQueue.offer(key, pressed, presstime);
 				checkKeyboardQueueOverflow();
 			}
@@ -394,12 +426,16 @@ public class BMSPlayerInputProcessor {
 	private void checkKeyboardQueueOverflow() {
 		if (keyboardJudgeQueue.isOverflowed() && !keyboardQueueFaultReported) {
 			keyboardQueueFaultReported = true;
-			Logger.getGlobal().severe("Keyboard judgment queue overflow; stopping to avoid invalid scores");
+			Logger.getGlobal().severe("Input judgment queue overflow; stopping to avoid invalid scores");
 			if (Gdx.app != null) Gdx.app.exit();
 		}
 	}
 
 	public void clearQueuedKeyboardTime(int key, long eventTime, boolean pressed) {
+        clearQueuedInputTime(key, eventTime, pressed);
+    }
+
+    public void clearQueuedInputTime(int key, long eventTime, boolean pressed) {
 		synchronized (keyboardJudgeQueue) {
 			if (time[key] == eventTime && keystate[key] == pressed) resetKeyChangedTime(key);
 		}
@@ -594,19 +630,21 @@ public class BMSPlayerInputProcessor {
 	static public volatile Runnable controllerPollRunner = null;
 
 	public void poll() {
-		if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
-			input.getDiagnostics().poll(System.nanoTime());
-		final long origin = starttime;
-		final long now = System.nanoTime() / 1000 - origin;
-		kbinput.poll(now, origin);
+		synchronized (kbinput) {
+			if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+				input.getDiagnostics().poll(System.nanoTime());
+			final long origin = starttime;
+			final long now = System.nanoTime() / 1000 - origin;
+			kbinput.poll(now, origin);
 
-		Runnable controllerPoll = controllerPollRunner;
-		if (controllerPoll != null) {
-			controllerPoll.run();
-		}
+			Runnable controllerPoll = controllerPollRunner;
+			if (controllerPoll != null) {
+				controllerPoll.run();
+			}
 
-		for (BMControllerInputProcessor controller : bminput) {
-			controller.poll(now);
+			for (BMControllerInputProcessor controller : bminput) {
+				controller.poll(now);
+			}
 		}
 	}
 

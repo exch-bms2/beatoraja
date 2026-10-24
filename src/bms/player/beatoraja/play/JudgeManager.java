@@ -11,7 +11,7 @@ import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyboardJudgeQueue;
+import bms.player.beatoraja.input.JudgeEventQueue;
 import bms.player.beatoraja.play.JudgeProperty.JudgeWindow;
 import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 import bms.player.beatoraja.play.JudgeProperty.NoteType;
@@ -100,7 +100,7 @@ public final class JudgeManager {
 
 	private long prevmtime;
 	private boolean passingAdvanced;
-	private final KeyboardJudgeQueue.Batch keyboardBatch = new KeyboardJudgeQueue.Batch();
+	private final JudgeEventQueue.Batch eventBatch = new JudgeEventQueue.Batch();
 
 	private boolean autoplay = false;
 	private long[] auto_presstime;
@@ -215,17 +215,17 @@ public final class JudgeManager {
 
 	public void update(final long mtime) {
 		final BMSPlayerInputProcessor input = main.main.getInputProcessor();
-		final KeyboardJudgeQueue queue = input.getKeyboardJudgeQueue();
-		queue.drain(keyboardBatch);
-		for (int from = 0; from < keyboardBatch.size;) {
+		final JudgeEventQueue queue = input.getJudgeEventQueue();
+		queue.drain(eventBatch);
+		for (int from = 0; from < eventBatch.size;) {
 			int to = from + 1;
-			while (to < keyboardBatch.size && keyboardBatch.times[to] == keyboardBatch.times[from]) to++;
-			for (int i = from; i < to; i++) queue.apply(keyboardBatch.keys[i], keyboardBatch.pressed[i]);
-			long checkpoint = Math.min(mtime, Math.max(prevmtime, keyboardBatch.times[from]));
+			while (to < eventBatch.size && eventBatch.times[to] == eventBatch.times[from]) to++;
+			for (int i = from; i < to; i++) queue.apply(eventBatch.keys[i], eventBatch.pressed[i]);
+			long checkpoint = Math.min(mtime, Math.max(prevmtime, eventBatch.times[from]));
 			advancePassing(checkpoint);
 			for (int i = from; i < to; i++) {
-				processKeyEvent(keyboardBatch.keys[i], keyboardBatch.times[i], keyboardBatch.pressed[i], checkpoint);
-				input.clearQueuedKeyboardTime(keyboardBatch.keys[i], keyboardBatch.times[i], keyboardBatch.pressed[i]);
+				processKeyEvent(eventBatch.keys[i], eventBatch.times[i], eventBatch.pressed[i], checkpoint);
+				input.clearQueuedInputTime(eventBatch.keys[i], eventBatch.times[i], eventBatch.pressed[i]);
 			}
 			finishTime(checkpoint);
 			from = to;

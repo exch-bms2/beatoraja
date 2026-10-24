@@ -63,6 +63,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * 最後に押したボタン
 	 */
 	private int lastPressedButton = -1;
+    private long inputGeneration = -1;
+    private int gatedSamples, acceptedEdges, forwardedEdges;
 	/**
 	 * JKOC_HACK (UP,DOWNの誤反応対策用？)
  	 */
@@ -87,7 +89,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.setConfig(controllerConfig);
 	}
 
-	public void setConfig(ControllerConfig controllerConfig) {
+	public synchronized void setConfig(ControllerConfig controllerConfig) {
 		this.buttons = controllerConfig.getKeyAssign().clone();
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
@@ -111,22 +113,24 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		} else {
 			this.analogScratchAlgorithm = null;
 		}
+        resetEvents();
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void clear() {
+	public synchronized void clear() {
 		Arrays.fill(buttonchanged, false);
 		Arrays.fill(buttontime, Long.MIN_VALUE);
 		lastPressedButton = -1;
+        resetEvents();
 	}
 
-	public void poll(final long microtime) {
+	public synchronized void poll(final long microtime) {
 		if (!enabled) return;
 		ControllerInputDiagnostics diagnostics = getDiagnostics();
-		int gated = 0, accepted = 0, forwarded = 0;
+        gatedSamples = acceptedEdges = forwardedEdges = 0;
 		if (diagnostics != null) diagnostics.beginBm(System.nanoTime());
 	
 		// AXISの更新
@@ -134,7 +138,23 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 			axis[i] = i < controller.getAxisCount() ? controller.getAxis(i) : 0;
 		}
 
+        var raw = rawController();
+        if (raw != null) {
+            long generation = raw.inputGeneration();
+            if (inputGeneration != generation) {
+                inputGeneration = generation;
+                Arrays.fill(buttontime, Long.MIN_VALUE);
+            }
+            if (raw.events.isOverflowed()) return;
+            Arrays.fill(buttonchanged, 0, 32, false);
+            int event;
+            while ((event = raw.events.pollNext(buttonstate, buttontime, microtime, duration)) >= 0)
+                forwardButtonEvent(event / 2, event % 2 != 0, microtime);
+            gatedSamples += raw.events.deferredCount(buttonstate, buttontime, microtime, duration);
+        }
+
 		for (int button = 0; button < buttonstate.length; button++) {
+            if (raw != null && button < 32) continue;
 			if (microtime >= buttontime[button] + duration * 1000) {
 				final boolean prev = buttonstate[button];
 				if (button <= BMKeys.HAT1_BOTTOM) {
@@ -155,7 +175,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 				}
 
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
-					accepted++;
+					acceptedEdges++;
 					buttontime[button] = microtime;
 				}
 
@@ -163,15 +183,15 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 					setLastPressedButton(button);
 				}
 			} else {
-				gated++;
+				gatedSamples++;
 			}
 		}
 
 		for (int i = 0; i < buttons.length; i++) {
 			final int button = buttons[i];
 			if (button >= 0 && button < BMKeys.MAXID && buttonchanged[button]) {
-				this.bmsPlayerInputProcessor.keyChanged(this, microtime, i, buttonstate[button]);
-				forwarded++;
+				this.bmsPlayerInputProcessor.controllerKeyChanged(this, microtime, i, buttonstate[button]);
+				forwardedEdges++;
 				buttonchanged[button] = false;
 			}
 		}
@@ -195,8 +215,37 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
                 this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
             }
         }
-		if (diagnostics != null) diagnostics.endBm(System.nanoTime(), gated, accepted, forwarded);
+		if (diagnostics != null) diagnostics.endBm(System.nanoTime(), gatedSamples, acceptedEdges, forwardedEdges);
 	}
+
+    private void forwardButtonEvent(int button, boolean down, long time) {
+        buttonstate[button] = down;
+        buttontime[button] = time;
+        acceptedEdges++;
+        if (down) setLastPressedButton(button);
+        for (int i = 0; i < buttons.length; i++) if (buttons[i] == button) {
+            bmsPlayerInputProcessor.controllerKeyChanged(this, time, i, down);
+            forwardedEdges++;
+            return;
+        }
+        if (start == button) bmsPlayerInputProcessor.startChanged(down);
+        else if (select == button) bmsPlayerInputProcessor.setSelectPressed(down);
+    }
+
+    private JInputControllerManager.RawController rawController() {
+        return controller instanceof JInputControllerManager.RawController raw ? raw : null;
+    }
+
+    private void resetEvents() {
+        var raw = rawController();
+        if (raw != null) raw.resetEvents(enabled);
+    }
+
+    synchronized int[] getQueuedGameKeys() {
+        if (!enabled || rawController() == null) return new int[0];
+        return java.util.stream.IntStream.range(0, buttons.length)
+                .filter(i -> buttons[i] >= 0 && buttons[i] < BMKeys.MAXID).toArray();
+    }
 
     private float getAnalogValue(int button) {
         // assume isAnalog(button) == true.
@@ -244,8 +293,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		this.lastPressedButton = lastPressedButton;
 	}
 
-	public void setEnable(boolean enabled) {
+	public synchronized void setEnable(boolean enabled) {
 		this.enabled = enabled;
+        resetEvents();
 	}
 
 	public static class BMKeys {

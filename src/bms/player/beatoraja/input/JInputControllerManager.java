@@ -171,6 +171,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
         if (BMSPlayerInputProcessor.controllerPollRunner == pollRunner) BMSPlayerInputProcessor.controllerPollRunner = null;
         for (Controller controller : controllers) {
             RawController raw = (RawController) controller;
+            raw.releaseEvents();
             if (raw.diagnostics != null) raw.diagnostics.close();
             raw.connected = false;
             raw.device = null;
@@ -206,6 +207,10 @@ public final class JInputControllerManager implements ControllerManager, Disposa
 
     final class RawController implements Controller {
         final ControllerInputDiagnostics diagnostics;
+        final ControllerEventQueue events = new ControllerEventQueue();
+        private boolean captureEvents;
+        private boolean overflowReported;
+        private long inputGeneration;
         private net.java.games.input.Controller device;
         private final String name;
         private final String id;
@@ -266,7 +271,36 @@ public final class JInputControllerManager implements ControllerManager, Disposa
                     + "; legacy key IDs retained; verify assignments after OIS migration");
         }
 
-        void poll() {
+        synchronized void resetEvents(boolean active) {
+            captureEvents = active;
+            events.reset(active, buttons);
+            inputGeneration++;
+        }
+
+        synchronized void releaseEvents() {
+            Arrays.fill(buttons, false);
+            Arrays.fill(axes, 0);
+            connected = false;
+            resetEvents(captureEvents);
+        }
+
+        synchronized long inputGeneration() { return inputGeneration; }
+
+        private boolean buttonPressed(int i) {
+            return (i < rawButtonCount && rawButtons[i]) || switch (i) {
+                case BMControllerInputProcessor.BMKeys.HAT1_LEFT -> povValue == Component.POV.LEFT
+                        || povValue == Component.POV.UP_LEFT || povValue == Component.POV.DOWN_LEFT;
+                case BMControllerInputProcessor.BMKeys.HAT1_TOP -> povValue == Component.POV.UP
+                        || povValue == Component.POV.UP_LEFT || povValue == Component.POV.UP_RIGHT;
+                case BMControllerInputProcessor.BMKeys.HAT1_RIGHT -> povValue == Component.POV.RIGHT
+                        || povValue == Component.POV.UP_RIGHT || povValue == Component.POV.DOWN_RIGHT;
+                case BMControllerInputProcessor.BMKeys.HAT1_BOTTOM -> povValue == Component.POV.DOWN
+                        || povValue == Component.POV.DOWN_LEFT || povValue == Component.POV.DOWN_RIGHT;
+                default -> false;
+            };
+        }
+
+        synchronized void poll() {
             if (device == null) return;
             if (diagnostics != null) diagnostics.beginPoll(System.nanoTime());
             if (!device.poll()) {
@@ -275,6 +309,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
                 connected = false;
                 Arrays.fill(buttons, false);
                 Arrays.fill(axes, 0);
+                if (wasConnected) resetEvents(captureEvents);
                 if (current == this) current = null;
                 if (wasConnected) Logger.getGlobal().warning("JInput controller polling failed; retrying: " + name);
                 return;
@@ -282,15 +317,18 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             // Preserve LWJGL2's event-driven normalization, without allocating its
             // per-poll Event and per-change ControllerEvent objects.
             var queue = device.getEventQueue();
+            boolean continuous = connected;
             while (queue.getNextEvent(event)) {
                 Component component = event.getComponent();
                 Integer button = buttonIndices.get(component);
                 if (button != null) {
                     if (diagnostics != null) diagnostics.event(button, event.getValue() != 0 ? 1 : 0);
                     rawButtons[button] = event.getValue() != 0;
+                    if (continuous && button < 32) events.offer(button, buttonPressed(button));
                 } else if (component == pov) {
                     if (diagnostics != null) diagnostics.event(rawButtonCount + axes.length, event.getValue());
                     povValue = event.getValue();
+                    if (continuous) for (int i = 28; i < 32; i++) events.offer(i, buttonPressed(i));
                 }
                 else {
                     Integer axis = axisIndices.get(component);
@@ -314,26 +352,22 @@ public final class JInputControllerManager implements ControllerManager, Disposa
                 }
             }
             for (int i = 0; i < buttons.length; i++) {
-                boolean pressed = i < rawButtonCount && rawButtons[i];
-                pressed |= switch (i) {
-                    case BMControllerInputProcessor.BMKeys.HAT1_LEFT -> povValue == Component.POV.LEFT
-                            || povValue == Component.POV.UP_LEFT || povValue == Component.POV.DOWN_LEFT;
-                    case BMControllerInputProcessor.BMKeys.HAT1_TOP -> povValue == Component.POV.UP
-                            || povValue == Component.POV.UP_LEFT || povValue == Component.POV.UP_RIGHT;
-                    case BMControllerInputProcessor.BMKeys.HAT1_RIGHT -> povValue == Component.POV.RIGHT
-                            || povValue == Component.POV.UP_RIGHT || povValue == Component.POV.DOWN_RIGHT;
-                    case BMControllerInputProcessor.BMKeys.HAT1_BOTTOM -> povValue == Component.POV.DOWN
-                            || povValue == Component.POV.DOWN_LEFT || povValue == Component.POV.DOWN_RIGHT;
-                    default -> false;
-                };
+                boolean pressed = buttonPressed(i);
+                if (continuous && i < 32) events.offer(i, pressed);
                 if (buttons[i] != pressed) {
                     buttons[i] = pressed;
                     current = this;
                     notifyChange(i, true, pressed, 0);
                 }
             }
+            if (!continuous) resetEvents(captureEvents);
             connected = true; // Publish the updated polling snapshot to rendering/Lua readers.
             if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), true);
+            if (events.isOverflowed() && !overflowReported) {
+                overflowReported = true;
+                Logger.getGlobal().severe("Controller input queue overflow; stopping to avoid invalid scores");
+                if (Gdx.app != null) Gdx.app.exit();
+            }
         }
 
         private void notifyChange(int index, boolean button, boolean pressed, float value) {

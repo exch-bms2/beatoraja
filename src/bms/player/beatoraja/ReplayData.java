@@ -45,6 +45,8 @@ public final class ReplayData implements Validatable {
 	public String keyinput;
 	/** Null for legacy replays; logical keys recorded through the lossless keyboard judgment stream. */
 	public int[] keyboardEventKeys;
+    /** Null in legacy/keyboard-only replays; logical controller keys using ordered judgment events. */
+    public int[] controllerEventKeys;
 	/**
 	 * ゲージの種類
 	 */
@@ -108,6 +110,9 @@ public final class ReplayData implements Validatable {
 
 	@Override
 	public boolean validate() {
+        if (controllerEventKeys != null && controllerEventKeys.length > 256) return false;
+        if (controllerEventKeys != null) controllerEventKeys = java.util.Arrays.stream(controllerEventKeys)
+                .filter(key -> key >= 0 && key < 256).distinct().toArray();
 		if (keyboardEventKeys != null && keyboardEventKeys.length > 256) return false;
 		if (keyboardEventKeys != null) keyboardEventKeys = java.util.Arrays.stream(keyboardEventKeys)
 				.filter(key -> key >= 0 && key < 256).distinct().toArray();
