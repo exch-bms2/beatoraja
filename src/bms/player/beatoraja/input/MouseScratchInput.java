@@ -56,6 +56,10 @@ public class MouseScratchInput {
 		final long presstime = microtime / 1000;
         // MOUSEの更新
         if (mouseScratchEnabled) {
+            MouseScratchDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null
+                    ? input.getDiagnostics().mouseScratch() : null;
+            long started = diagnostics != null ? System.nanoTime() : 0;
+            int edges = 0, forwards = 0;
             mouseToAnalog.update();
             for (int i=0; i<mouseScratchAlgorithm.length; i++) {
                 mouseScratchAlgorithm[i].update(presstime);
@@ -65,6 +69,7 @@ public class MouseScratchInput {
                 final boolean prev = mouseScratchState[mouseInput];
                 mouseScratchState[mouseInput] = mouseScratchAlgorithm[mouseInput/2].isScratchActive(mouseInput%2 == 0);
                 if (prev != mouseScratchState[mouseInput]) {
+                    edges++;
                     mouseScratchChanged[mouseInput] = true;
                     if (!prev) this.lastMouseScratch = mouseInput;
                 }
@@ -74,6 +79,7 @@ public class MouseScratchInput {
                 final int axis = keys[i];
                 if (axis >= 0 && mouseScratchChanged[axis]) {
                     this.bmsPlayerInputProcessor.keyChanged(keyboardInputProcessor, microtime, i, mouseScratchState[axis]);
+                    forwards++;
                     mouseScratchChanged[axis] = false;
                 }
             }
@@ -93,6 +99,7 @@ public class MouseScratchInput {
                     this.bmsPlayerInputProcessor.setAnalogState(i, true, getMouseAnalogValue(keys[i]));
                 }
             }
+            if (diagnostics != null) diagnostics.algorithm(started, System.nanoTime(), edges, forwards);
         }
     }
 
@@ -106,6 +113,8 @@ public class MouseScratchInput {
         if (Gdx.input instanceof PollingLwjgl3Input input) input.setMouseScratchEnabled(mouseScratchEnabled);
         this.mouseScratchTimeThreshold = msconfig.getMouseScratchTimeThreshold();
         this.mouseScratchDistance = msconfig.getMouseScratchDistance();
+        if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+            input.getDiagnostics().mouseScratch().configure(msconfig.getMouseScratchMode(), mouseScratchDistance, mouseScratchTimeThreshold);
         if (mouseScratchEnabled) {
             this.mouseToAnalog = new MouseToAnalog(mouseScratchDistance);
             for (int i=0; i<mouseScratchAlgorithm.length; i++) {
@@ -181,8 +190,12 @@ public class MouseScratchInput {
                 Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
             }
 
+            int beforeX = totalXDistanceMoved, beforeY = totalYDistanceMoved;
             totalXDistanceMoved = ((totalXDistanceMoved+xDistanceMoved)%domain + domain)%domain;
             totalYDistanceMoved = ((totalYDistanceMoved+yDistanceMoved)%domain + domain)%domain;
+            if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
+                input.getDiagnostics().mouseScratch().applied(xDistanceMoved, yDistanceMoved,
+                        beforeX, beforeY, totalXDistanceMoved, totalYDistanceMoved, domain);
         }
 
         public int getScratchDistance() {

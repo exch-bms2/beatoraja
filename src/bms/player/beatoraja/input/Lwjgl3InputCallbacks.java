@@ -37,7 +37,9 @@ final class Lwjgl3InputCallbacks {
             if (originalButton != null) originalButton.invoke(window, code, action, mods);
         });
         cursor = diagnostics == null ? null : GLFWCursorPosCallback.create((window, x, y) -> {
-            diagnostics.cursorCallback(System.nanoTime());
+            long now = System.nanoTime();
+            diagnostics.cursorCallback(now);
+            diagnostics.mouseScratch().cursor(x, y, now);
             if (originalCursor != null) originalCursor.invoke(window, x, y);
         });
         originalKey = GLFW.glfwSetKeyCallback(handle, key);

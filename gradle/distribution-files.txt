@@ -86,3 +86,4 @@ docs/gradle-build.md
 docs/input-diagnostics.md
 docs/keyboard-events.md
 docs/controller-events.md
+docs/mouse-scratch-diagnostics.md

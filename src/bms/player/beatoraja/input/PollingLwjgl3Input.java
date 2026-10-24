@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import com.badlogic.gdx.backends.lwjgl3.DefaultLwjgl3Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.Gdx;
 
 /** Publishes GLFW input to the polling thread without calling GLFW from that thread. */
@@ -54,11 +55,16 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         keyboardEvents.publish(focused, keys);
         x = super.getX();
         y = super.getY();
+        if (diagnostics != null) diagnostics.mouseScratch().sample(scratchEnabled, focused, x, y,
+                ((Lwjgl3Graphics) Gdx.graphics).getLogicalWidth(), ((Lwjgl3Graphics) Gdx.graphics).getLogicalHeight(),
+                Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Gdx.graphics.getBackBufferWidth(),
+                Gdx.graphics.getBackBufferHeight(), System.nanoTime());
         if (scratchEnabled && focused) {
             int centerX = Gdx.graphics.getWidth() / 2;
             int centerY = Gdx.graphics.getHeight() / 2;
             scratch.add(x - centerX, y - centerY);
             if (diagnostics != null) diagnostics.scratchPublished(x - centerX, y - centerY, System.nanoTime());
+            if (diagnostics != null) diagnostics.mouseScratch().warp(centerX, centerY);
             super.setCursorPosition(centerX, centerY);
             x = centerX;
             y = centerY;
@@ -92,8 +98,12 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     public void setMouseScratchEnabled(boolean enabled) {
         scratchEnabled = enabled;
-        scratch.drain();
-        if (diagnostics != null) diagnostics.resetScratch();
+        if (diagnostics == null) scratch.drain();
+        else synchronized (diagnostics) {
+            scratch.drain();
+            diagnostics.resetScratch();
+            diagnostics.mouseScratch().reset();
+        }
     }
 
     public long consumeMouseScratchDelta() {
@@ -101,6 +111,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         synchronized (diagnostics) {
             long delta = scratch.drain();
             diagnostics.scratchConsumed(System.nanoTime());
+            diagnostics.mouseScratch().consumed((int) (delta >> 32), (int) delta, System.nanoTime());
             return delta;
         }
     }
@@ -117,6 +128,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             callbacks = null;
         }
         super.windowHandleChanged(handle);
+        if (diagnostics != null) diagnostics.mouseScratch().resetCallbacks();
         if (keyboardEvents != null) callbacks = new Lwjgl3InputCallbacks(handle, this, diagnostics);
     }
 

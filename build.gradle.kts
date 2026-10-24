@@ -139,6 +139,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.InputDiagnosticsTest",
     "bms.player.beatoraja.input.ControllerInputDiagnosticsTest",
     "bms.player.beatoraja.input.ControllerEventQueueTest",
+    "bms.player.beatoraja.input.MouseScratchDiagnosticsTest",
     "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
@@ -278,5 +279,14 @@ tasks.register<JavaExec>("lwjgl3KeyboardQueueSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3KeyboardQueueSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3MouseScratchDiagnosticsSmokeTest") {
+    group = "verification"
+    description = "Verify mouse scratch observations through real GLFW callbacks and worker consumption."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3MouseScratchDiagnosticsSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

@@ -42,6 +42,9 @@ public final class InputDiagnostics implements AutoCloseable {
     private boolean cursorPending;
     private boolean haveUpdate, havePoll, scratchPending, focused, closed;
     private final ScheduledExecutorService reporter;
+    private final MouseScratchDiagnostics mouseScratch = new MouseScratchDiagnostics();
+
+    MouseScratchDiagnostics mouseScratch() { return mouseScratch; }
 
     /** No arrays, callback hooks or worker are allocated unless this property is enabled. */
     static InputDiagnostics createIfEnabled() {
@@ -242,12 +245,15 @@ public final class InputDiagnostics implements AutoCloseable {
         s.timings.forEach((name, timing) -> Logger.getGlobal().info("  " + name
                 + " count=" + timing.count + ", meanUs=" + timing.meanUs + ", maxUs=" + timing.maxUs
                 + ", p95UpperUs=" + timing.p95UpperUs));
+        Logger.getGlobal().info("Mouse scratch diagnostics [cumulative, coordinatesNotLogged=true, hardwareLatencyMeasured=false] "
+                + mouseScratch.snapshot());
     }
 
     @Override public void close() {
         synchronized (this) {
             if (closed) return;
             closed = true;
+            mouseScratch.close();
         }
         if (reporter != null) {
             reporter.shutdownNow();
