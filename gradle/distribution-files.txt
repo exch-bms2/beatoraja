@@ -87,3 +87,4 @@ docs/input-diagnostics.md
 docs/keyboard-events.md
 docs/controller-events.md
 docs/mouse-scratch-diagnostics.md
+docs/mouse-scratch-events.md

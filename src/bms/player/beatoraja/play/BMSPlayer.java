@@ -617,7 +617,8 @@ public class BMSPlayer extends MainState {
 						input.setKeyLogMarginTime(resource.getMarginTime());
 						keyinput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime(),
 								replay != null ? replay.keyboardEventKeys : null,
-                                replay != null ? replay.controllerEventKeys : null);
+                                replay != null ? replay.controllerEventKeys : null,
+                                replay != null ? replay.mouseScratchEventKeys : null);
 					}
 					keysound.startBGPlay(model, starttimeoffset * 1000);
 					Logger.getGlobal().info("STATE_PLAYに移行");
@@ -906,6 +907,7 @@ public class BMSPlayer extends MainState {
 		replay.keylog = main.getInputProcessor().getKeyInputLog();
 		replay.keyboardEventKeys = main.getInputProcessor().getKeyboardReplayKeys();
         replay.controllerEventKeys = main.getInputProcessor().getControllerReplayKeys();
+        replay.mouseScratchEventKeys = main.getInputProcessor().getMouseScratchReplayKeys();
 //		replay.pattern = playinfo.pattern;
 		replay.laneShufflePattern = playinfo.laneShufflePattern;
 		replay.rand = playinfo.rand;

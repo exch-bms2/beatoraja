@@ -47,6 +47,8 @@ public final class ReplayData implements Validatable {
 	public int[] keyboardEventKeys;
     /** Null in legacy/keyboard-only replays; logical controller keys using ordered judgment events. */
     public int[] controllerEventKeys;
+    /** Null in older replays; logical keys recorded through the mouse-scratch judgment FIFO. */
+    public int[] mouseScratchEventKeys;
 	/**
 	 * ゲージの種類
 	 */
@@ -110,6 +112,9 @@ public final class ReplayData implements Validatable {
 
 	@Override
 	public boolean validate() {
+        if (mouseScratchEventKeys != null && mouseScratchEventKeys.length > 256) return false;
+        if (mouseScratchEventKeys != null) mouseScratchEventKeys = java.util.Arrays.stream(mouseScratchEventKeys)
+                .filter(key -> key >= 0 && key < 256).distinct().toArray();
         if (controllerEventKeys != null && controllerEventKeys.length > 256) return false;
         if (controllerEventKeys != null) controllerEventKeys = java.util.Arrays.stream(controllerEventKeys)
                 .filter(key -> key >= 0 && key < 256).distinct().toArray();

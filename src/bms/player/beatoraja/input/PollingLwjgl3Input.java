@@ -21,6 +21,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private Lwjgl3InputCallbacks callbacks;
     private final KeyboardEventQueue keyboardEvents = new KeyboardEventQueue(diagnostics != null);
     private boolean overflowReported;
+    private boolean scratchOverflowReported;
 
     public PollingLwjgl3Input(Lwjgl3Window window) {
         super(window);
@@ -63,6 +64,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             int centerX = Gdx.graphics.getWidth() / 2;
             int centerY = Gdx.graphics.getHeight() / 2;
             scratch.add(x - centerX, y - centerY);
+            checkMouseScratchOverflow();
             if (diagnostics != null) diagnostics.scratchPublished(x - centerX, y - centerY, System.nanoTime());
             if (diagnostics != null) diagnostics.mouseScratch().warp(centerX, centerY);
             super.setCursorPosition(centerX, centerY);
@@ -98,14 +100,39 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     public void setMouseScratchEnabled(boolean enabled) {
         scratchEnabled = enabled;
-        if (diagnostics == null) scratch.drain();
+        resetMouseScratchDeltas();
+    }
+
+    public void resetMouseScratchDeltas() {
+        if (diagnostics == null) scratch.clear();
         else synchronized (diagnostics) {
-            scratch.drain();
+            scratch.clear();
             diagnostics.resetScratch();
             diagnostics.mouseScratch().reset();
         }
     }
 
+    public void consumeMouseScratchDeltas(MouseMotionQueue.Batch batch) {
+        if (diagnostics == null) scratch.drain(batch);
+        else synchronized (diagnostics) {
+            scratch.drain(batch);
+            diagnostics.scratchConsumed(System.nanoTime());
+            diagnostics.mouseScratch().consumedQueue(batch, System.nanoTime());
+        }
+        checkMouseScratchOverflow();
+    }
+
+    public boolean isMouseScratchBatchCurrent(MouseMotionQueue.Batch batch) { return scratch.isCurrent(batch); }
+
+    private synchronized void checkMouseScratchOverflow() {
+        if (scratch.isOverflowed() && !scratchOverflowReported) {
+            scratchOverflowReported = true;
+            java.util.logging.Logger.getGlobal().severe("Mouse scratch motion queue overflow; stopping to avoid invalid scores");
+            if (Gdx.app != null) Gdx.app.exit();
+        }
+    }
+
+    /** Legacy aggregate diagnostic probe; gameplay must consume the FIFO batch instead. */
     public long consumeMouseScratchDelta() {
         if (diagnostics == null) return scratch.drain();
         synchronized (diagnostics) {
@@ -128,12 +155,14 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             callbacks = null;
         }
         super.windowHandleChanged(handle);
+        if (scratch != null) resetMouseScratchDeltas();
         if (diagnostics != null) diagnostics.mouseScratch().resetCallbacks();
         if (keyboardEvents != null) callbacks = new Lwjgl3InputCallbacks(handle, this, diagnostics);
     }
 
     @Override public void dispose() {
         try {
+            resetMouseScratchDeltas();
             if (callbacks != null) {
                 callbacks.close(true);
                 callbacks = null;
@@ -144,14 +173,6 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         }
     }
 
-    /** Accumulates render-thread motion until consumed once by the input thread. */
-    public static final class MouseDeltas {
-        private int dx, dy;
-        public synchronized void add(int x, int y) { dx += x; dy += y; }
-        public synchronized long drain() {
-            long result = ((long) dx << 32) | (dy & 0xffffffffL);
-            dx = dy = 0;
-            return result;
-        }
-    }
+    /** Compatibility name for existing aggregate probes and test fixtures. */
+    public static final class MouseDeltas extends MouseMotionQueue { }
 }

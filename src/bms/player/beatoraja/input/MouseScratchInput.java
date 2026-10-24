@@ -29,6 +29,8 @@ public class MouseScratchInput {
      * 最後に押されたマウス皿
      */
     private int lastMouseScratch = -1;
+    private MouseMotionQueue.Batch motionBatch;
+    private int pollEdges, pollForwards;
     /**
      * キーの最少入力感覚
      */
@@ -53,53 +55,77 @@ public class MouseScratchInput {
     }
 
     public void poll(final long microtime) {
-		final long presstime = microtime / 1000;
-        // MOUSEの更新
-        if (mouseScratchEnabled) {
-            MouseScratchDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null
-                    ? input.getDiagnostics().mouseScratch() : null;
-            long started = diagnostics != null ? System.nanoTime() : 0;
-            int edges = 0, forwards = 0;
+        if (!mouseScratchEnabled) return;
+        final long presstime = microtime / 1000;
+        MouseScratchDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null
+                ? input.getDiagnostics().mouseScratch() : null;
+        long started = diagnostics != null ? System.nanoTime() : 0;
+        pollEdges = pollForwards = 0;
+        if (Gdx.input instanceof PollingLwjgl3Input input) {
+            input.consumeMouseScratchDeltas(motionBatch);
+            if (!input.isMouseScratchBatchCurrent(motionBatch)) return;
+            if (motionBatch.size == 0) {
+                mouseToAnalog.update(0, 0);
+                updateScratch(presstime, microtime, true, true);
+            } else {
+                boolean hasX = false, hasY = false;
+                for (int i = 0; i < motionBatch.size; i++) {
+                    hasX |= motionBatch.dx[i] != 0;
+                    hasY |= motionBatch.dy[i] != 0;
+                }
+                for (int i = 0; i < motionBatch.size; i++) {
+                    if (!input.isMouseScratchBatchCurrent(motionBatch)) return;
+                    mouseToAnalog.update(motionBatch.dx[i], motionBatch.dy[i]);
+                    // Idle axes advance once; moving axes see elapsed time on their first motion only.
+                    updateScratch(presstime, microtime, motionBatch.dx[i] != 0 || (!hasX && i == 0),
+                            motionBatch.dy[i] != 0 || (!hasY && i == 0));
+                }
+            }
+        } else {
             mouseToAnalog.update();
-            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
-                mouseScratchAlgorithm[i].update(presstime);
-            }
+            updateScratch(presstime, microtime, true, true);
+        }
+        if (diagnostics != null) diagnostics.algorithm(started, System.nanoTime(), pollEdges, pollForwards);
+    }
 
-            for (int mouseInput=0; mouseInput<mouseScratchState.length; mouseInput++) {
-                final boolean prev = mouseScratchState[mouseInput];
-                mouseScratchState[mouseInput] = mouseScratchAlgorithm[mouseInput/2].isScratchActive(mouseInput%2 == 0);
-                if (prev != mouseScratchState[mouseInput]) {
-                    edges++;
-                    mouseScratchChanged[mouseInput] = true;
-                    if (!prev) this.lastMouseScratch = mouseInput;
-                }
-            }
+    private void updateScratch(long presstime, long microtime, boolean updateX, boolean updateY) {
+        for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+            if (i == 0 ? updateX : updateY) mouseScratchAlgorithm[i].update(presstime);
+        }
 
-            for (int i=0; i<keys.length; i++) {
-                final int axis = keys[i];
-                if (axis >= 0 && mouseScratchChanged[axis]) {
-                    this.bmsPlayerInputProcessor.keyChanged(keyboardInputProcessor, microtime, i, mouseScratchState[axis]);
-                    forwards++;
-                    mouseScratchChanged[axis] = false;
-                }
+        for (int mouseInput=0; mouseInput<mouseScratchState.length; mouseInput++) {
+            final boolean prev = mouseScratchState[mouseInput];
+            mouseScratchState[mouseInput] = mouseScratchAlgorithm[mouseInput/2].isScratchActive(mouseInput%2 == 0);
+            if (prev != mouseScratchState[mouseInput]) {
+                pollEdges++;
+                mouseScratchChanged[mouseInput] = true;
+                if (!prev) this.lastMouseScratch = mouseInput;
             }
+        }
 
-            if (control[0] >= 0 && mouseScratchChanged[control[0]]) {
-                this.bmsPlayerInputProcessor.startChanged(mouseScratchState[control[0]]);
-                mouseScratchChanged[control[0]] = false;
+        for (int i=0; i<keys.length; i++) {
+            final int axis = keys[i];
+            if (axis >= 0 && mouseScratchChanged[axis]) {
+                this.bmsPlayerInputProcessor.mouseScratchKeyChanged(keyboardInputProcessor, microtime, i, mouseScratchState[axis]);
+                pollForwards++;
+                mouseScratchChanged[axis] = false;
             }
+        }
 
-            if (control[1] >= 0 && mouseScratchChanged[control[1]]) {
-                this.bmsPlayerInputProcessor.setSelectPressed(mouseScratchState[control[1]]);
-                mouseScratchChanged[control[1]] = false;
-            }
+        if (control[0] >= 0 && mouseScratchChanged[control[0]]) {
+            this.bmsPlayerInputProcessor.startChanged(mouseScratchState[control[0]]);
+            mouseScratchChanged[control[0]] = false;
+        }
 
-            for (int i=0; i<keys.length; i++) {
-                if (keys[i] >= 0) {
-                    this.bmsPlayerInputProcessor.setAnalogState(i, true, getMouseAnalogValue(keys[i]));
-                }
+        if (control[1] >= 0 && mouseScratchChanged[control[1]]) {
+            this.bmsPlayerInputProcessor.setSelectPressed(mouseScratchState[control[1]]);
+            mouseScratchChanged[control[1]] = false;
+        }
+
+        for (int i=0; i<keys.length; i++) {
+            if (keys[i] >= 0) {
+                this.bmsPlayerInputProcessor.setAnalogState(i, true, getMouseAnalogValue(keys[i]));
             }
-            if (diagnostics != null) diagnostics.algorithm(started, System.nanoTime(), edges, forwards);
         }
     }
 
@@ -116,6 +142,7 @@ public class MouseScratchInput {
         if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
             input.getDiagnostics().mouseScratch().configure(msconfig.getMouseScratchMode(), mouseScratchDistance, mouseScratchTimeThreshold);
         if (mouseScratchEnabled) {
+            if (motionBatch == null) motionBatch = new MouseMotionQueue.Batch();
             this.mouseToAnalog = new MouseToAnalog(mouseScratchDistance);
             for (int i=0; i<mouseScratchAlgorithm.length; i++) {
                 boolean xAxis = (i == 0);
@@ -137,6 +164,7 @@ public class MouseScratchInput {
     }
 
     public void clear() {
+        if (Gdx.input instanceof PollingLwjgl3Input input) input.resetMouseScratchDeltas();
         //Arrays.fill(keytime, -duration);
         for (int i=0; i<mouseScratchAlgorithm.length; i++) {
             if (mouseScratchAlgorithm[i] != null) {
@@ -144,6 +172,11 @@ public class MouseScratchInput {
             }
         }
         lastMouseScratch = -1;
+    }
+
+    int[] getQueuedGameKeys() {
+        if (!mouseScratchEnabled || !(Gdx.input instanceof PollingLwjgl3Input)) return new int[0];
+        return java.util.stream.IntStream.range(0, keys.length).filter(i -> keys[i] >= 0 && keys[i] < 4).toArray();
     }
 
     private float getMouseAnalogValue(int mouseInput) {
@@ -190,6 +223,10 @@ public class MouseScratchInput {
                 Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
             }
 
+            update(xDistanceMoved, yDistanceMoved);
+        }
+
+        public void update(int xDistanceMoved, int yDistanceMoved) {
             int beforeX = totalXDistanceMoved, beforeY = totalYDistanceMoved;
             totalXDistanceMoved = ((totalXDistanceMoved+xDistanceMoved)%domain + domain)%domain;
             totalYDistanceMoved = ((totalYDistanceMoved+yDistanceMoved)%domain + domain)%domain;

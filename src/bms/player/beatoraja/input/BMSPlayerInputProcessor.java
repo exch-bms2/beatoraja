@@ -29,6 +29,7 @@ public class BMSPlayerInputProcessor {
 	private final KeyboardJudgeQueue keyboardJudgeQueue = new KeyboardJudgeQueue();
 	private int[] keyboardReplayKeys = new int[0];
     private int[] controllerReplayKeys = new int[0];
+    private int[] mouseScratchReplayKeys = new int[0];
 	private boolean keyboardQueueFaultReported;
 
 	private KeyBoardInputProcesseor kbinput;
@@ -371,10 +372,15 @@ public class BMSPlayerInputProcessor {
     }
 
     public void beginInputJudge(int[] keyboardKeys, int[] controllerKeys, boolean replay) {
+        beginInputJudge(keyboardKeys, controllerKeys, null, replay);
+    }
+
+    public void beginInputJudge(int[] keyboardKeys, int[] controllerKeys, int[] mouseScratchKeys, boolean replay) {
         int[] assignedKeyboard = replay ? keyboardKeys : enable ? kbinput.getQueuedGameKeys() : new int[0];
         int[] assignedController = replay ? controllerKeys : enable
                 ? Arrays.stream(bminput).flatMapToInt(c -> Arrays.stream(c.getQueuedGameKeys())).toArray() : new int[0];
-        int[] assigned = mergeEventKeys(assignedKeyboard, assignedController);
+        int[] assignedMouse = replay ? mouseScratchKeys : enable ? kbinput.getQueuedMouseScratchGameKeys() : new int[0];
+        int[] assigned = mergeEventKeys(mergeEventKeys(assignedKeyboard, assignedController), assignedMouse);
 		synchronized (keyboardJudgeQueue) {
 			boolean[] initial = keystate.clone();
 			if (!replay && assigned != null)
@@ -382,6 +388,7 @@ public class BMSPlayerInputProcessor {
 			keyboardJudgeQueue.begin(assigned, initial);
             keyboardReplayKeys = mergeEventKeys(assignedKeyboard, null);
             controllerReplayKeys = mergeEventKeys(assignedController, null);
+            mouseScratchReplayKeys = mergeEventKeys(assignedMouse, null);
 			if (!replay)
 				for (int key : assigned) if (time[key] != Long.MIN_VALUE)
 					keyboardJudgeQueue.offer(key, keystate[key], time[key]);
@@ -400,6 +407,7 @@ public class BMSPlayerInputProcessor {
     public JudgeEventQueue getJudgeEventQueue() { return keyboardJudgeQueue; }
 	public int[] getKeyboardReplayKeys() { return keyboardReplayKeys.clone(); }
     public int[] getControllerReplayKeys() { return controllerReplayKeys.clone(); }
+    public int[] getMouseScratchReplayKeys() { return mouseScratchReplayKeys.clone(); }
 
 	public boolean getJudgeKeyState(int key) {
 		return keyboardJudgeQueue.isQueued(key) ? keyboardJudgeQueue.held(key) : getKeyState(key);
@@ -410,6 +418,10 @@ public class BMSPlayerInputProcessor {
     }
 
     void controllerKeyChanged(BMControllerInputProcessor device, long presstime, int key, boolean pressed) {
+        queuedKeyChanged(device, presstime, key, pressed);
+    }
+
+    void mouseScratchKeyChanged(KeyBoardInputProcesseor device, long presstime, int key, boolean pressed) {
         queuedKeyChanged(device, presstime, key, pressed);
     }
 

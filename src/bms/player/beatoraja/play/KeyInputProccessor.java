@@ -52,7 +52,12 @@ class KeyInputProccessor {
 
     public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime,
             int[] keyboardKeys, int[] controllerKeys) {
-		player.main.getInputProcessor().beginInputJudge(keyboardKeys, controllerKeys, keylog != null);
+        startJudge(model, keylog, milliMarginTime, keyboardKeys, controllerKeys, null);
+    }
+
+    public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime,
+            int[] keyboardKeys, int[] controllerKeys, int[] mouseScratchKeys) {
+		player.main.getInputProcessor().beginInputJudge(keyboardKeys, controllerKeys, mouseScratchKeys, keylog != null);
 		judge = new JudgeThread(model.getAllTimeLines(), keylog, milliMarginTime);
 		judge.start();
 		isJudgeStarted = true;

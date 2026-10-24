@@ -140,6 +140,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.ControllerInputDiagnosticsTest",
     "bms.player.beatoraja.input.ControllerEventQueueTest",
     "bms.player.beatoraja.input.MouseScratchDiagnosticsTest",
+    "bms.player.beatoraja.input.MouseMotionQueueTest",
     "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
@@ -288,5 +289,14 @@ tasks.register<JavaExec>("lwjgl3MouseScratchDiagnosticsSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3MouseScratchDiagnosticsSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3MouseScratchQueueSmokeTest") {
+    group = "verification"
+    description = "Verify sampled mouse motion FIFO through real GLFW and the mapped judgment stream."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3MouseScratchQueueSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

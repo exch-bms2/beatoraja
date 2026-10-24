@@ -11,7 +11,7 @@ final class MouseScratchDiagnostics {
         WARP_REQUESTS, WARP_TARGET_MATCHES, BASELINE_CALLBACKS, FRACTIONAL_CALLBACKS, INVALID_CALLBACKS,
         GEOMETRY_CHANGES, FOCUS_CHANGES, ENABLE_CHANGES, WRAPPED_CONSUMES, CONSUME_MISMATCHES,
         EDGE_SAMPLES, OUTSIDE_SAMPLES,
-        ALGORITHM_POLLS, ALGORITHM_EDGES, FORWARD_ATTEMPTS
+        ALGORITHM_POLLS, ALGORITHM_EDGES, FORWARD_ATTEMPTS, FIFO_RECORDS
     }
     private final long[] counts = new long[Counter.values().length];
     private final Axis x = new Axis(), y = new Axis();
@@ -147,6 +147,19 @@ final class MouseScratchDiagnostics {
         y.applied(dy, beforeY, afterY, domain);
     }
 
+    synchronized void consumedQueue(MouseMotionQueue.Batch batch, long now) {
+        if (closed) return;
+        int sumX = 0, sumY = 0;
+        for (int i = 0; i < batch.size; i++) {
+            sumX += batch.dx[i];
+            sumY += batch.dy[i];
+            x.deliveredPath += Math.abs((long) batch.dx[i]);
+            y.deliveredPath += Math.abs((long) batch.dy[i]);
+        }
+        counts[Counter.FIFO_RECORDS.ordinal()] += batch.size;
+        consumed(sumX, sumY, now);
+    }
+
     synchronized void algorithm(long started, long ended, int edges, int forwards) {
         if (closed) return;
         count(Counter.ALGORITHM_POLLS);
@@ -199,12 +212,13 @@ final class MouseScratchDiagnostics {
     record AxisSnapshot(double callbackPath, double callbackCancellation, long callbackReversals,
             long integerZeroSteps, double boundaryPath, long sampledPath, long consumedPath,
             long betweenSampleCancellation, long discardedPath, long pendingNet, long pendingPath,
-            long aliasReads, long additionOverflowCandidates) { }
+            long aliasReads, long additionOverflowCandidates, long deliveredPath) { }
 
     private static final class Axis {
         double callbackPath, callbackCancellation, framePath, frameNet, boundaryPath;
         long callbackReversals, frameReversals, integerZeroSteps, sampledPath, consumedPath;
         long betweenSampleCancellation, discardedPath, pendingNet, pendingPath, aliasReads, additionOverflowCandidates;
+        long deliveredPath;
         int direction;
         void callback(double delta, long integerDelta) {
             framePath += Math.abs(delta);
@@ -248,7 +262,7 @@ final class MouseScratchDiagnostics {
         AxisSnapshot snapshot() {
             return new AxisSnapshot(callbackPath, callbackCancellation, callbackReversals, integerZeroSteps,
                     boundaryPath, sampledPath, consumedPath, betweenSampleCancellation, discardedPath,
-                    pendingNet, pendingPath, aliasReads, additionOverflowCandidates);
+                    pendingNet, pendingPath, aliasReads, additionOverflowCandidates, deliveredPath);
         }
     }
 }

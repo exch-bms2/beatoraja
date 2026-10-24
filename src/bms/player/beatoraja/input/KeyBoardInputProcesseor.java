@@ -108,6 +108,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		if (Gdx.input instanceof PollingLwjgl3Input input) input.resetKeyboardEvents();
 	}
 
+    synchronized int[] getQueuedMouseScratchGameKeys() { return mouseScratchInput.getQueuedGameKeys(); }
+
 	public synchronized void poll(final long microtime) {
 		final InputDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input ? input.getDiagnostics() : null;
 		if (!textmode) {
