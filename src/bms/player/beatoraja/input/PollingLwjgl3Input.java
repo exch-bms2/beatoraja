@@ -6,6 +6,7 @@ import com.badlogic.gdx.backends.lwjgl3.DefaultLwjgl3Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.Gdx;
+import org.lwjgl.glfw.GLFW;
 
 /** Publishes GLFW input to the polling thread without calling GLFW from that thread. */
 public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
@@ -23,6 +24,9 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private boolean overflowReported;
     private boolean scratchOverflowReported;
     private final WindowDiagnostics windowDiagnostics = WindowDiagnostics.createIfEnabled();
+    private final MouseScratchGeometry scratchGeometry = new MouseScratchGeometry();
+    private final int[] scratchWindowX = new int[1], scratchWindowY = new int[1];
+    private final float[] scratchScaleX = new float[1], scratchScaleY = new float[1];
 
     public PollingLwjgl3Input(Lwjgl3Window window) {
         super(window);
@@ -58,16 +62,31 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         keyboardEvents.publish(focused, keys);
         x = super.getX();
         y = super.getY();
+        boolean deliver = false;
+        boolean drawable = Gdx.graphics.getWidth() > 0 && Gdx.graphics.getHeight() > 0
+                && Gdx.graphics.getBackBufferWidth() > 0 && Gdx.graphics.getBackBufferHeight() > 0;
+        if (scratchEnabled) {
+            long handle = window.getWindowHandle();
+            GLFW.glfwGetWindowPos(handle, scratchWindowX, scratchWindowY);
+            GLFW.glfwGetWindowContentScale(handle, scratchScaleX, scratchScaleY);
+            boolean iconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) != 0;
+            drawable &= !iconified;
+            deliver = scratchGeometry.sample(handle, GLFW.glfwGetWindowMonitor(handle),
+                    Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
+                    Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
+                    scratchWindowX[0], scratchWindowY[0], scratchScaleX[0], scratchScaleY[0], focused, iconified);
+        }
         if (diagnostics != null) diagnostics.mouseScratch().sample(scratchEnabled, focused, x, y,
                 ((Lwjgl3Graphics) Gdx.graphics).getLogicalWidth(), ((Lwjgl3Graphics) Gdx.graphics).getLogicalHeight(),
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Gdx.graphics.getBackBufferWidth(),
-                Gdx.graphics.getBackBufferHeight(), System.nanoTime());
-        if (scratchEnabled && focused) {
+                Gdx.graphics.getBackBufferHeight(), System.nanoTime(), deliver);
+        if (scratchEnabled && focused && drawable) {
             int centerX = Gdx.graphics.getWidth() / 2;
             int centerY = Gdx.graphics.getHeight() / 2;
-            scratch.add(x - centerX, y - centerY);
+            // Already queued samples are real pre-transition movement; do not clear or reinterpret them.
+            if (deliver) scratch.add(x - centerX, y - centerY);
             checkMouseScratchOverflow();
-            if (diagnostics != null) diagnostics.scratchPublished(x - centerX, y - centerY, System.nanoTime());
+            if (deliver && diagnostics != null) diagnostics.scratchPublished(x - centerX, y - centerY, System.nanoTime());
             if (diagnostics != null) diagnostics.mouseScratch().warp(centerX, centerY);
             super.setCursorPosition(centerX, centerY);
             x = centerX;
@@ -102,7 +121,13 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     public void setMouseScratchEnabled(boolean enabled) {
         scratchEnabled = enabled;
+        invalidateMouseScratchCenter();
         resetMouseScratchDeltas();
+    }
+
+    /** No GLFW calls, queue clearing, algorithm reset or judgment events. Safe for configuration callers. */
+    public void invalidateMouseScratchCenter() {
+        if (scratchGeometry != null) scratchGeometry.invalidate();
     }
 
     public void resetMouseScratchDeltas() {
@@ -158,6 +183,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         }
         super.windowHandleChanged(handle);
         if (scratch != null) resetMouseScratchDeltas();
+        invalidateMouseScratchCenter();
         if (diagnostics != null) diagnostics.mouseScratch().resetCallbacks();
         if (keyboardEvents != null) callbacks = new Lwjgl3InputCallbacks(handle, this, diagnostics);
     }

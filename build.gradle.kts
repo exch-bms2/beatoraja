@@ -137,6 +137,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.input.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.SkinProjectionTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
@@ -316,5 +317,16 @@ tasks.register<JavaExec>("lwjgl3MouseScratchQueueSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3MouseScratchQueueSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3MouseScratchGeometrySmokeTest") {
+    group = "verification"
+    description = "Verify scratch center rebasing through real GLFW resize, position and optional fullscreen transitions."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3MouseScratchGeometrySmokeTest")
+    systemProperty("beatoraja.hidpiTest.fullscreen", providers.gradleProperty("hidpiTestFullscreen").getOrElse("false"))
+    providers.gradleProperty("inputDiagnostics").orNull?.let { systemProperty("beatoraja.inputDiagnostics", it) }
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

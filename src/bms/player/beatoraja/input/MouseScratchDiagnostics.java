@@ -11,7 +11,7 @@ final class MouseScratchDiagnostics {
         WARP_REQUESTS, WARP_TARGET_MATCHES, BASELINE_CALLBACKS, FRACTIONAL_CALLBACKS, INVALID_CALLBACKS,
         GEOMETRY_CHANGES, FOCUS_CHANGES, ENABLE_CHANGES, WRAPPED_CONSUMES, CONSUME_MISMATCHES,
         EDGE_SAMPLES, OUTSIDE_SAMPLES,
-        ALGORITHM_POLLS, ALGORITHM_EDGES, FORWARD_ATTEMPTS, FIFO_RECORDS
+        ALGORITHM_POLLS, ALGORITHM_EDGES, FORWARD_ATTEMPTS, FIFO_RECORDS, RECENTER_SAMPLES
     }
     private final long[] counts = new long[Counter.values().length];
     private final Axis x = new Axis(), y = new Axis();
@@ -62,6 +62,11 @@ final class MouseScratchDiagnostics {
 
     synchronized void sample(boolean enabled, boolean focused, int px, int py,
             int lw, int lh, int iw, int ih, int bw, int bh, long now) {
+        sample(enabled, focused, px, py, lw, lh, iw, ih, bw, bh, now, true);
+    }
+
+    synchronized void sample(boolean enabled, boolean focused, int px, int py,
+            int lw, int lh, int iw, int ih, int bw, int bh, long now, boolean deliver) {
         if (closed) return;
         boolean geometryChanged = haveContext && (logicalWidth != lw || logicalHeight != lh
                 || inputWidth != iw || inputHeight != ih || bufferWidth != bw || bufferHeight != bh);
@@ -95,6 +100,11 @@ final class MouseScratchDiagnostics {
         if (haveSample) sampleGap.add(now - lastSample);
         haveSample = true;
         lastSample = now;
+        if (!deliver) {
+            count(Counter.RECENTER_SAMPLES);
+            baseline = warpPending = false;
+            return;
+        }
         int dx = px - iw / 2, dy = py - ih / 2;
         if (px <= 0 || py <= 0 || px >= iw - 1 || py >= ih - 1) count(Counter.EDGE_SAMPLES);
         if (px < 0 || py < 0 || px >= iw || py >= ih) count(Counter.OUTSIDE_SAMPLES);

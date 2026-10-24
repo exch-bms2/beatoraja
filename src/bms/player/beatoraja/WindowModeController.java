@@ -123,9 +123,25 @@ final class WindowModeController {
                 return new Bounds(window.getPositionX(), window.getPositionY(),
                         graphics.getLogicalWidth(), graphics.getLogicalHeight());
             }
-            public boolean enterFullscreen() { return graphics.setFullscreenMode(graphics.getDisplayMode()); }
-            public boolean windowed(int width, int height) { return graphics.setWindowedMode(width, height); }
-            public void position(int x, int y) { graphics.getWindow().setPosition(x, y); }
+            private void invalidateScratch() {
+                if (com.badlogic.gdx.Gdx.input instanceof bms.player.beatoraja.input.PollingLwjgl3Input input)
+                    input.invalidateMouseScratchCenter();
+            }
+            public boolean enterFullscreen() {
+                invalidateScratch();
+                try { return graphics.setFullscreenMode(graphics.getDisplayMode()); }
+                finally { invalidateScratch(); }
+            }
+            public boolean windowed(int width, int height) {
+                invalidateScratch();
+                try { return graphics.setWindowedMode(width, height); }
+                finally { invalidateScratch(); }
+            }
+            public void position(int x, int y) {
+                invalidateScratch();
+                try { graphics.getWindow().setPosition(x, y); }
+                finally { invalidateScratch(); }
+            }
             public Area[] workAreas() {
                 var monitors = GLFW.glfwGetMonitors();
                 if (monitors == null) return new Area[0];
