@@ -89,3 +89,4 @@ docs/controller-events.md
 docs/mouse-scratch-diagnostics.md
 docs/mouse-scratch-events.md
 docs/window-hidpi-diagnostics.md
+docs/audio-diagnostics.md

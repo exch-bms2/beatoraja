@@ -28,10 +28,12 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 	private SoundInstance[] sounds = new SoundInstance[256];
 	private int soundPos = 0;
+	private final AudioDiagnostics diagnostics;
 
 	public GdxSoundDriver(Config config) {
 		super(config.getSongResourceGen());
 		channels = 2;
+		diagnostics = AudioDiagnostics.createIfEnabled("OpenAL Sound", config.getAudioConfig(), 0, channels, 0);
 		for (int i = 0; i < sounds.length; i++) {
 			sounds[i] = new SoundInstance();
 		}
@@ -39,6 +41,10 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		if(soundthread) {
 			mixer = new SoundMixer();
 			mixer.start();
+		}
+		if (diagnostics != null) {
+			AudioDiagnostics.openALInfo();
+			diagnostics.start();
 		}
 	}
 
@@ -123,14 +129,25 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		if(soundthread) {
 			mixer.put(pcm, channel, volume, getGlobalPitch() * pitch);
 		} else {
-			synchronized (lock) {
-				long id = pcm.play(volume, getGlobalPitch() * pitch, 0);
-				if (id != -1) {
-					sounds[soundPos].sound = pcm;
-					sounds[soundPos].id = id;
-					sounds[soundPos].channel = channel;
-					soundPos = (soundPos + 1) % sounds.length;
+			long started = diagnostics != null ? System.nanoTime() : 0;
+			long observedId = -1;
+			boolean threw = true;
+			float observedPitch = 1;
+			try {
+				synchronized (lock) {
+					observedPitch = getGlobalPitch() * pitch;
+					long id = pcm.play(volume, observedPitch, 0);
+					observedId = id;
+					threw = false;
+					if (id != -1) {
+						sounds[soundPos].sound = pcm;
+						sounds[soundPos].id = id;
+						sounds[soundPos].channel = channel;
+						soundPos = (soundPos + 1) % sounds.length;
+					}
 				}
+			} finally {
+				if (diagnostics != null) diagnostics.sound(started, System.nanoTime(), observedId, threw, observedPitch);
 			}
 		}
 	}
@@ -140,12 +157,19 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		if(soundthread) {
 			mixer.put(id.audio, volume, loop);
 		} else {
-			synchronized (lock) {
-				if(loop) {
-					id.id = id.audio.loop(volume);
-				} else {
-					id.id = id.audio.play(volume);
-				}				
+			long started = diagnostics != null ? System.nanoTime() : 0;
+			boolean threw = true;
+			try {
+				synchronized (lock) {
+					if(loop) {
+						id.id = id.audio.loop(volume);
+					} else {
+						id.id = id.audio.play(volume);
+					}
+					threw = false;
+				}
+			} finally {
+				if (diagnostics != null) diagnostics.sound(started, System.nanoTime(), id.id, threw, 1);
 			}
 		}
 	}
@@ -208,6 +232,12 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	protected void disposeKeySound(Sound pcm) {
 		stop(pcm);
 		pcm.dispose();
+	}
+
+	@Override
+	public void dispose() {
+		try { super.dispose(); }
+		finally { if (diagnostics != null) diagnostics.close(); }
 	}
 
 	private void clearSoundInstances(Sound sound) {

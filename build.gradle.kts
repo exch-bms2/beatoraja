@@ -121,6 +121,10 @@ tasks.named<JavaExec>("run") {
     dependsOn(verifyBuildEnvironment)
     workingDir(providers.gradleProperty("runWorkingDir").getOrElse(projectDir.absolutePath))
     standardInput = System.`in`
+    providers.gradleProperty("audioDiagnostics").orNull?.let { systemProperty("beatoraja.audioDiagnostics", it) }
+    providers.gradleProperty("audioDiagnosticsIntervalMillis").orNull?.let {
+        systemProperty("beatoraja.audioDiagnostics.intervalMillis", it)
+    }
     providers.gradleProperty("windowDiagnostics").orNull?.let {
         systemProperty("beatoraja.windowDiagnostics", it)
     }
@@ -137,6 +141,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.audio.AudioDiagnosticsTest",
     "bms.player.beatoraja.input.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.SkinProjectionTest",
@@ -254,6 +259,15 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     workingDir(projectDir)
 }
 tasks.check { dependsOn(distributionSmokeTest) }
+
+tasks.register<JavaExec>("lwjgl3AudioDiagnosticsSmokeTest") {
+    group = "verification"
+    description = "Verify Sound/AudioDevice diagnostics with real OpenAL and silent PCM at 44100/48000 Hz."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.audio.Lwjgl3AudioDiagnosticsSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
 
 tasks.register<JavaExec>("lwjgl3WindowSmokeTest") {
     group = "verification"

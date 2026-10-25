@@ -24,6 +24,7 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 	private AudioDevice device;
 	private long idcount;
 	private boolean stop;
+	private final AudioDiagnostics diagnostics;
 
 	public GdxAudioDeviceDriver(Config config) {
 		super(config.getSongResourceGen());
@@ -50,10 +51,20 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 				+ ", framesPerBuffer=" + framesPerBuffer
 				+ ", simultaneousSources=" + inputs.length
 				+ ", latency=" + device.getLatency());
+		diagnostics = AudioDiagnostics.createIfEnabled("GdxAudioDevice/" + device.getClass().getSimpleName(),
+				audioConfig, getSampleRate(), channels, framesPerBuffer);
+		if (diagnostics != null) {
+			AudioDiagnostics.openALInfo();
+			int latencyFrames = device.getLatency();
+			Logger.getGlobal().info("Audio diagnostics AudioDevice : apiLatencyFrames=" + latencyFrames
+					+ ", nominalQueueMs=" + AudioDiagnostics.latencyMillis(latencyFrames, getSampleRate())
+					+ ", hardwareLatencyMeasured=false");
+		}
 
 		mixer = new Thread(this, "GdxAudioDevice Mixer");
 		mixer.setPriority(Thread.MAX_PRIORITY);
 		mixer.start();
+		if (diagnostics != null) diagnostics.start();
 	}
 
 	private static int getFramesPerBuffer(int configuredFrames) {
@@ -171,14 +182,23 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 
 	@Override
 	public void run() {
-		while (!stop) {
-			mix();
-			try {
-				device.writeSamples(buffer, 0, buffer.length);
-			} catch (Throwable e) {
-				Logger.getGlobal().warning("GdxAudioDevice writeSamples failed : " + e.getMessage());
+		try {
+			while (!stop) {
+				long started = diagnostics != null ? System.nanoTime() : 0;
+				mix();
+				long writeStarted = diagnostics != null ? System.nanoTime() : 0;
+				boolean returned = false;
+				try {
+					device.writeSamples(buffer, 0, buffer.length);
+					returned = true;
+				} catch (Throwable e) {
+					Logger.getGlobal().warning("GdxAudioDevice writeSamples failed : " + e.getMessage());
+				} finally {
+					if (diagnostics != null) diagnostics.stream(started, writeStarted, System.nanoTime(), buffer.length / channels,
+							returned ? AudioDiagnostics.RETURNED : AudioDiagnostics.FAILED, getGlobalPitch(), getTimeStretchRate());
+				}
 			}
-		}
+		} finally { if (diagnostics != null) diagnostics.close(); }
 	}
 
 	private void mix() {
@@ -264,6 +284,7 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 			device.dispose();
 			device = null;
 		}
+		if (diagnostics != null) diagnostics.close();
 	}
 
 	private static class MixerInput {

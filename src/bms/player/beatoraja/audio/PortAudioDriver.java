@@ -36,6 +36,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	private final float[] buffer;
 	
 	private final Thread mixer;
+	private AudioDiagnostics diagnostics;
 
 	public static synchronized DeviceInfo[] getDevices() {
 		if(devices == null) {
@@ -113,9 +114,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			buffer = new float[openResult.framesPerBuffer() * channels];
 			stream.start();
 			stream.logInfo(openResult.deviceId());
+			diagnostics = AudioDiagnostics.createIfEnabled("PortAudio", audioConfig, getSampleRate(), channels,
+					openResult.framesPerBuffer());
 			mixer.start();
+			if (diagnostics != null) diagnostics.start();
 		} catch (RuntimeException | Error e) {
 			stop = true;
+			if (diagnostics != null) diagnostics.close();
 			if (stream != null) {
 				stream.close();
 			} else {
@@ -863,11 +868,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio mixer failed", e);
 		} finally {
 			stop = true;
+			if (diagnostics != null) diagnostics.close();
 		}
 	}
 
 	private void runMixer() {
 		while(!stop) {
+			long started = diagnostics != null ? System.nanoTime() : 0;
 			final float gpitch = getGlobalPitch();
 			synchronized (inputs) {
 				for (int i = 0; i < buffer.length; i+=2) {
@@ -908,22 +915,30 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 				}						
 			}
 			
+			long writeStarted = diagnostics != null ? System.nanoTime() : 0;
+			int outcome = AudioDiagnostics.FAILED;
 			try {
 				StreamLifecycle currentStream = stream;
 				if(currentStream == null) {
+					outcome = AudioDiagnostics.CANCELLED;
 					stop = true;
 					break;
 				}
 				if (!currentStream.write(buffer, buffer.length / 2)) {
+					outcome = AudioDiagnostics.CANCELLED;
 					stop = true;
 					break;
 				}
+				outcome = AudioDiagnostics.RETURNED;
 			} catch(Throwable e) {
 				if(!stop) {
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream write failed : " + e.getMessage(), e);
 				}
 				stop = true;
 				break;
+			} finally {
+				if (diagnostics != null) diagnostics.stream(started, writeStarted, System.nanoTime(), buffer.length / 2,
+						outcome, gpitch, getTimeStretchRate());
 			}
 			
 		}
