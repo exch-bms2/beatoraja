@@ -29,6 +29,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	private SoundInstance[] sounds = new SoundInstance[256];
 	private int soundPos = 0;
 	private final AudioDiagnostics diagnostics;
+	private boolean disposed;
 
 	public GdxSoundDriver(Config config) {
 		super(config.getSongResourceGen());
@@ -135,6 +136,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			float observedPitch = 1;
 			try {
 				synchronized (lock) {
+					if (disposed) return;
 					observedPitch = getGlobalPitch() * pitch;
 					long id = pcm.play(volume, observedPitch, 0);
 					observedId = id;
@@ -161,6 +163,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			boolean threw = true;
 			try {
 				synchronized (lock) {
+					if (disposed) return;
 					if(loop) {
 						id.id = id.audio.loop(volume);
 					} else {
@@ -202,10 +205,10 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		if (soundthread) {
 			mixer.stop(id, channel);
 		} else {
-			for (int i = 0; i < sounds.length; i++) {
-				if (sounds[i].sound == id && sounds[i].channel == channel) {
-					synchronized (lock) {
-						sounds[i].sound.stop(sounds[i].id);						
+			synchronized (lock) {
+				for (int i = 0; i < sounds.length; i++) {
+					if (sounds[i].sound == id && sounds[i].channel == channel) {
+						sounds[i].sound.stop(sounds[i].id);
 						sounds[i].sound = null;
 					}
 				}
@@ -218,10 +221,10 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		if (soundthread) {
 			mixer.setVolume(id, channel, volume);
 		} else {
-			for (int i = 0; i < sounds.length; i++) {
-				if (sounds[i].sound == id && sounds[i].channel == channel) {
-					synchronized (lock) {
-						sounds[i].sound.setVolume(sounds[i].id, volume);						
+			synchronized (lock) {
+				for (int i = 0; i < sounds.length; i++) {
+					if (sounds[i].sound == id && sounds[i].channel == channel) {
+						sounds[i].sound.setVolume(sounds[i].id, volume);
 					}
 				}
 			}
@@ -230,14 +233,30 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 	@Override
 	protected void disposeKeySound(Sound pcm) {
-		stop(pcm);
-		pcm.dispose();
+		synchronized (lock) {
+			try { stop(pcm); }
+			finally {
+				clearSoundInstances(pcm);
+				pcm.dispose();
+			}
+		}
 	}
 
 	@Override
 	public void dispose() {
-		try { super.dispose(); }
-		finally { if (diagnostics != null) diagnostics.close(); }
+		synchronized (lock) {
+			if (disposed) return;
+			disposed = true;
+			try { super.dispose(); }
+			finally {
+				for (SoundInstance instance : sounds) {
+					instance.sound = null;
+					instance.id = -1;
+					instance.channel = -1;
+				}
+				if (diagnostics != null) diagnostics.close();
+			}
+		}
 	}
 
 	private void clearSoundInstances(Sound sound) {

@@ -3,7 +3,10 @@ package bms.player.beatoraja.audio;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.logging.Logger;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.AudioDevice;
 
@@ -23,48 +26,61 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 	private final Thread mixer;
 	private AudioDevice device;
 	private long idcount;
-	private boolean stop;
-	private final AudioDiagnostics diagnostics;
+	private volatile boolean stop;
+	private AudioDiagnostics diagnostics;
+	private final AtomicBoolean resourcesReleased = new AtomicBoolean();
 
 	public GdxAudioDeviceDriver(Config config) {
+		this(config, Gdx.audio, task -> new Thread(task, "GdxAudioDevice Mixer"));
+	}
+
+	GdxAudioDeviceDriver(Config config, Audio audio, ThreadFactory threads) {
 		super(config.getSongResourceGen());
 		AudioConfig audioConfig = config.getAudioConfig();
 		setSampleRate(audioConfig.getSampleRate() > 0 ? audioConfig.getSampleRate() : 44100);
 		channels = 2;
 
-		if (Gdx.audio == null) {
+		if (audio == null) {
 			throw new IllegalStateException("GdxAudioDeviceDriver requires libGDX audio to be enabled.");
 		}
-		device = Gdx.audio.newAudioDevice(getSampleRate(), channels == 1);
-		channels = device.isMono() ? 1 : 2;
-		int framesPerBuffer = getFramesPerBuffer(audioConfig.getDeviceBufferSize());
-		buffer = new short[framesPerBuffer * channels];
-		inputs = new MixerInput[audioConfig.getDeviceSimultaneousSources()];
-		for (int i = 0; i < inputs.length; i++) {
-			inputs[i] = new MixerInput();
-		}
+		device = audio.newAudioDevice(getSampleRate(), channels == 1);
+		try {
+			channels = device.isMono() ? 1 : 2;
+			int framesPerBuffer = getFramesPerBuffer(audioConfig.getDeviceBufferSize());
+			buffer = new short[framesPerBuffer * channels];
+			inputs = new MixerInput[audioConfig.getDeviceSimultaneousSources()];
+			for (int i = 0; i < inputs.length; i++) {
+				inputs[i] = new MixerInput();
+			}
 
-		Logger.getGlobal().info("GdxAudioDevice opened"
-				+ " : sampleRate=" + getSampleRate()
-				+ ", channels=" + channels
-				+ ", deviceClass=" + device.getClass().getName()
-				+ ", framesPerBuffer=" + framesPerBuffer
-				+ ", simultaneousSources=" + inputs.length
-				+ ", latency=" + device.getLatency());
-		diagnostics = AudioDiagnostics.createIfEnabled("GdxAudioDevice/" + device.getClass().getSimpleName(),
-				audioConfig, getSampleRate(), channels, framesPerBuffer);
-		if (diagnostics != null) {
-			AudioDiagnostics.openALInfo();
-			int latencyFrames = device.getLatency();
-			Logger.getGlobal().info("Audio diagnostics AudioDevice : apiLatencyFrames=" + latencyFrames
-					+ ", nominalQueueMs=" + AudioDiagnostics.latencyMillis(latencyFrames, getSampleRate())
-					+ ", hardwareLatencyMeasured=false");
-		}
+			Logger.getGlobal().info("GdxAudioDevice opened"
+					+ " : sampleRate=" + getSampleRate()
+					+ ", channels=" + channels
+					+ ", deviceClass=" + device.getClass().getName()
+					+ ", framesPerBuffer=" + framesPerBuffer
+					+ ", simultaneousSources=" + inputs.length
+					+ ", latency=" + device.getLatency());
+			diagnostics = AudioDiagnostics.createIfEnabled("GdxAudioDevice/" + device.getClass().getSimpleName(),
+					audioConfig, getSampleRate(), channels, framesPerBuffer);
+			if (diagnostics != null) {
+				AudioDiagnostics.openALInfo();
+				int latencyFrames = device.getLatency();
+				Logger.getGlobal().info("Audio diagnostics AudioDevice : apiLatencyFrames=" + latencyFrames
+						+ ", nominalQueueMs=" + AudioDiagnostics.latencyMillis(latencyFrames, getSampleRate())
+						+ ", hardwareLatencyMeasured=false");
+			}
 
-		mixer = new Thread(this, "GdxAudioDevice Mixer");
-		mixer.setPriority(Thread.MAX_PRIORITY);
-		mixer.start();
-		if (diagnostics != null) diagnostics.start();
+			mixer = threads.newThread(this);
+			mixer.setPriority(Thread.MAX_PRIORITY);
+			if (diagnostics != null) diagnostics.start();
+			mixer.start();
+		} catch (RuntimeException | Error e) {
+			stop = true;
+			if (diagnostics != null) diagnostics.close();
+			try { device.dispose(); }
+			catch (Throwable cleanupFailure) { e.addSuppressed(cleanupFailure); }
+			throw e;
+		}
 	}
 
 	private static int getFramesPerBuffer(int configuredFrames) {
@@ -118,6 +134,7 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 		}
 		pcm = convertToDeviceFormat(pcm);
 		synchronized (inputs) {
+			if (stop) return -1;
 			for (MixerInput input : inputs) {
 				if (input.pos == -1) {
 					input.pcm = pcm;
@@ -186,19 +203,27 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 			while (!stop) {
 				long started = diagnostics != null ? System.nanoTime() : 0;
 				mix();
+				if (stop) break;
 				long writeStarted = diagnostics != null ? System.nanoTime() : 0;
 				boolean returned = false;
 				try {
 					device.writeSamples(buffer, 0, buffer.length);
 					returned = true;
 				} catch (Throwable e) {
-					Logger.getGlobal().warning("GdxAudioDevice writeSamples failed : " + e.getMessage());
+					if (!stop) Logger.getGlobal().log(java.util.logging.Level.WARNING,
+							"GdxAudioDevice writeSamples failed; stopping mixer", e);
+					stop = true;
 				} finally {
 					if (diagnostics != null) diagnostics.stream(started, writeStarted, System.nanoTime(), buffer.length / channels,
 							returned ? AudioDiagnostics.RETURNED : AudioDiagnostics.FAILED, getGlobalPitch(), getTimeStretchRate());
 				}
 			}
-		} finally { if (diagnostics != null) diagnostics.close(); }
+		} catch (Throwable e) {
+			if (!stop) Logger.getGlobal().log(java.util.logging.Level.WARNING, "GdxAudioDevice mixer failed", e);
+		} finally {
+			stop = true;
+			releaseResources();
+		}
 	}
 
 	private void mix() {
@@ -274,17 +299,29 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver<PCM> implements Ru
 
 	@Override
 	public void dispose() {
-		super.dispose();
 		stop = true;
-		long start = System.currentTimeMillis();
-		while (mixer.isAlive() && System.currentTimeMillis() - start < 1000) {
-			Thread.yield();
+		mixer.interrupt();
+		try {
+			if (mixer != Thread.currentThread()) mixer.join(1000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
-		if (device != null) {
-			device.dispose();
-			device = null;
+		if (!mixer.isAlive()) releaseResources();
+		else Logger.getGlobal().warning("GdxAudioDevice mixer is still stopping; cleanup deferred until it exits");
+	}
+
+	private void releaseResources() {
+		if (!resourcesReleased.compareAndSet(false, true)) return;
+		// AudioDevice has no abort API. Never dispose it concurrently with writeSamples.
+		try { device.dispose(); }
+		catch (Throwable e) { Logger.getGlobal().log(java.util.logging.Level.WARNING, "GdxAudioDevice dispose failed", e); }
+		synchronized (inputs) {
+			for (MixerInput input : inputs) { input.pcm = null; input.pos = -1; }
 		}
-		if (diagnostics != null) diagnostics.close();
+		try { super.dispose(); }
+		finally {
+			if (diagnostics != null) diagnostics.close();
+		}
 	}
 
 	private static class MixerInput {

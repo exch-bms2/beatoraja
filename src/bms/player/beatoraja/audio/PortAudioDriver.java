@@ -116,8 +116,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			stream.logInfo(openResult.deviceId());
 			diagnostics = AudioDiagnostics.createIfEnabled("PortAudio", audioConfig, getSampleRate(), channels,
 					openResult.framesPerBuffer());
-			mixer.start();
 			if (diagnostics != null) diagnostics.start();
+			mixer.start();
 		} catch (RuntimeException | Error e) {
 			stop = true;
 			if (diagnostics != null) diagnostics.close();
@@ -171,6 +171,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		private final Runnable release;
 		private volatile boolean closed;
 		private volatile boolean abortAttempted;
+		private boolean closeRequested;
+		private int activeOperations;
 		private long writeAttempts;
 		private long writesCompleted;
 		private long writesCancelled;
@@ -185,15 +187,24 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 
 		void start() {
+			if (!beginOperation()) throw new IllegalStateException("PortAudio stream is closing");
 			try {
 				nativeStream.start();
 			} catch (RuntimeException | Error e) {
 				close();
 				throw e;
+			} finally {
+				endOperation();
 			}
 		}
 
 		boolean write(float[] buffer, int frames) {
+			if (!beginOperation()) return false;
+			try { return writeOpenStream(buffer, frames); }
+			finally { endOperation(); }
+		}
+
+		private boolean writeOpenStream(float[] buffer, int frames) {
 			long attempt = ++writeAttempts;
 			int availableBefore = -1;
 			int available = -1;
@@ -281,6 +292,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 
 		void logInfo(int deviceId) {
+			if (!beginOperation()) return;
 			try {
 				StreamInfo info = nativeStream.getInfo();
 				if (info == null) {
@@ -294,6 +306,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			} catch (RuntimeException | LinkageError e) {
 				Logger.getGlobal().log(java.util.logging.Level.WARNING,
 						"PortAudio stream info retrieval failed : device=" + deviceId, e);
+			} finally {
+				endOperation();
 			}
 		}
 
@@ -305,13 +319,17 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 		}
 
-		synchronized void abort() {
-			if (!closed && !abortAttempted) {
+		void abort() {
+			synchronized (this) {
+				if (closed || abortAttempted) return;
 				abortAttempted = true;
+				activeOperations++;
+			}
+			try {
 				boolean stopped = false;
 				try {
 					stopped = nativeStream.isStopped();
-				} catch (RuntimeException | LinkageError e) {
+				} catch (Throwable e) {
 					Logger.getGlobal().fine("PortAudio stream status unavailable : " + e.getMessage());
 				}
 				try {
@@ -321,13 +339,37 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 				} catch (Throwable e) {
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream abort failed", e);
 				}
+			} finally {
+				endOperation();
 			}
 		}
 
-		synchronized void close() {
-			if (closed) return;
+		void close() {
+			synchronized (this) {
+				if (closed) return;
+				closeRequested = true;
+			}
 			abort();
-			closed = true;
+			finishCloseIfIdle();
+		}
+
+		private synchronized boolean beginOperation() {
+			if (closed || closeRequested || abortAttempted) return false;
+			activeOperations++;
+			return true;
+		}
+
+		private void endOperation() {
+			synchronized (this) { activeOperations--; }
+			finishCloseIfIdle();
+		}
+
+		private void finishCloseIfIdle() {
+			synchronized (this) {
+				if (!closeRequested || !abortAttempted || closed || activeOperations != 0) return;
+				closed = true;
+			}
+			// Abort may unblock a native write, but close/terminate must wait for its return.
 			try {
 				nativeStream.close();
 			} catch (Throwable e) {
@@ -798,6 +840,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	private long put(PCM pcm, int channel, float volume, float pitch, boolean loop) {
 		synchronized (inputs) {
+			if (stop) return -1;
 			for (MixerInput input : inputs) {
 				if (input.pos == -1) {
 					input.pcm = pcm;
@@ -868,6 +911,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio mixer failed", e);
 		} finally {
 			stop = true;
+			synchronized (inputs) {
+				for (MixerInput input : inputs) { input.pcm = null; input.pos = -1; }
+			}
 			if (diagnostics != null) diagnostics.close();
 		}
 	}

@@ -650,7 +650,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	public void dispose() {
 		for (AudioElement<T> sound : soundmap.values()) {
 			if (sound != null) {
-				disposeKeySound(sound.audio);
+				try { disposeKeySound(sound.audio); }
+				catch (Throwable e) {
+					Logger.getGlobal().log(java.util.logging.Level.WARNING, "Audio resource dispose failed", e);
+				}
 			}
 		}
 		soundmap.clear();
