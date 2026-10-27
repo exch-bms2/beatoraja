@@ -24,6 +24,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * コントローラー使用してる
 	 */
 	private boolean enabled = false;
+    private boolean windowActive = true, windowBaseline;
 	/**
 	 * ボタンキーアサイン
 	 */
@@ -128,7 +129,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	}
 
 	public synchronized void poll(final long microtime) {
-		if (!enabled) return;
+		if (!enabled || !windowActive) return;
 		ControllerInputDiagnostics diagnostics = getDiagnostics();
         gatedSamples = acceptedEdges = forwardedEdges = 0;
 		if (diagnostics != null) diagnostics.beginBm(System.nanoTime());
@@ -137,6 +138,32 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
 			axis[i] = i < controller.getAxisCount() ? controller.getAxis(i) : 0;
 		}
+
+        if (windowBaseline) {
+            windowBaseline = false;
+            if (analogScratchAlgorithm != null)
+                for (int i = 0; i < AXIS_LENGTH; i++) analogScratchAlgorithm[i].reset(axis[i]);
+            for (int button = 0; button < buttonstate.length; button++) {
+                if (button <= BMKeys.HAT1_BOTTOM) buttonstate[button] = controller.getButton(button);
+                else if (jkoc) buttonstate[button] = switch (button) {
+                    case BMKeys.AXIS1_PLUS -> axis[0] > 0.9 || axis[3] > 0.9;
+                    case BMKeys.AXIS1_MINUS -> axis[0] < -0.9 || axis[3] < -0.9;
+                    default -> false;
+                };
+                else buttonstate[button] = scratchInput((button - BMKeys.AXIS1_PLUS) / 2, button % 2 == 0);
+            }
+            Arrays.fill(buttonchanged, false);
+            resetEvents();
+            for (int i = 0; i < buttons.length; i++) {
+                int button = buttons[i];
+                if (button >= BMKeys.AXIS1_PLUS && button < BMKeys.MAXID && !jkoc && analogScratchAlgorithm != null) {
+                    bmsPlayerInputProcessor.setAnalogState(i, true, getAnalogValue(button));
+                    bmsPlayerInputProcessor.resetAnalogInput(i);
+                }
+            }
+            if (diagnostics != null) diagnostics.endBm(System.nanoTime(), 0, 0, 0);
+            return;
+        }
 
         var raw = rawController();
         if (raw != null) {
@@ -238,7 +265,14 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
     private void resetEvents() {
         var raw = rawController();
-        if (raw != null) raw.resetEvents(enabled);
+        if (raw != null) raw.resetEvents(enabled && windowActive && !windowBaseline);
+    }
+
+    synchronized void setWindowActive(boolean active) {
+        windowActive = active;
+        windowBaseline = true;
+        Arrays.fill(buttonstate, false);
+        clear();
     }
 
     synchronized int[] getQueuedGameKeys() {
@@ -373,9 +407,13 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
     private static interface AnalogScratchAlgorithm {
         public boolean analogScratchInput(float currentScratchX, boolean plus);
+        void reset(float position);
     }
 
     private static final class AnalogScratchAlgorithmVersion1 implements AnalogScratchAlgorithm {
+        @Override public void reset(float position) {
+            oldScratchX = position; counter = 1; scratchActive = rightMoveScratching = false;
+        }
         /**
          * アナログ皿の閾値
          */
@@ -457,6 +495,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
     }
 
     private static final class AnalogScratchAlgorithmVersion2 implements AnalogScratchAlgorithm {
+        @Override public void reset(float position) {
+            oldScratchX = position; counter = 1; analogScratchTickCounter = 0;
+            scratchActive = rightMoveScratching = false;
+        }
         /**
          * アナログ皿の閾値
          */

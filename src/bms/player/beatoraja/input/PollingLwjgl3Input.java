@@ -20,6 +20,10 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private volatile int x, y;
     private final MouseDeltas scratch = new MouseDeltas();
     private volatile boolean scratchEnabled;
+    private volatile boolean windowInputActive = true;
+    private boolean iconified;
+    private final boolean[] suppressedKeys = new boolean[256];
+    private volatile java.util.function.Consumer<Boolean> activityListener;
     private final InputDiagnostics diagnostics = InputDiagnostics.createIfEnabled();
     private Lwjgl3InputCallbacks callbacks;
     private final KeyboardEventQueue keyboardEvents = new KeyboardEventQueue(diagnostics != null);
@@ -38,12 +42,16 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         super(window);
         this.frameDiagnostics = frameDiagnostics;
         this.window = window;
+        windowInputActive = window.isFocused();
         callbacks = new Lwjgl3InputCallbacks(window.getWindowHandle(), this, diagnostics);
     }
 
     @Override public void update() {
         long started = frameDiagnostics != null ? System.nanoTime() : 0;
+        if (callbacks != null) callbacks.attachWindowCallbacks();
         super.update();
+        // Never invoke the listener while holding diagnostics: polling takes keyboard -> diagnostics.
+        windowActivity(window.isFocused(), iconified);
         if (windowDiagnostics != null) windowDiagnostics.sample();
         if (keyboardEvents.isOverflowed() && !overflowReported) {
             overflowReported = true;
@@ -60,9 +68,10 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     private void publishState() {
         int count = 0;
-        boolean focused = window.isFocused();
+        boolean focused = windowInputActive;
         for (int i = 0; i < keys.length(); i++) {
-            int pressed = focused && super.isKeyPressed(i) ? 1 : 0;
+            if (!super.isKeyPressed(i)) suppressedKeys[i] = false;
+            int pressed = focused && !suppressedKeys[i] && super.isKeyPressed(i) ? 1 : 0;
             keys.set(i, pressed);
             count += pressed;
         }
@@ -101,6 +110,41 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             x = centerX;
             y = centerY;
         }
+    }
+
+    public boolean isWindowInputActive() { return windowInputActive; }
+
+    synchronized void setActivityListener(java.util.function.Consumer<Boolean> listener) { activityListener = listener; }
+    synchronized void clearActivityListener(java.util.function.Consumer<Boolean> listener) {
+        if (activityListener == listener) activityListener = null;
+    }
+
+    /** Called on the GLFW owner thread, including loss/regain within one event-loop iteration. */
+    void windowActivity(boolean focused, boolean minimized) {
+        iconified = minimized;
+        boolean active = focused && !minimized;
+        if (active == windowInputActive) return;
+        windowInputActive = active;
+        for (int i = 0; i < keys.length(); i++) {
+            suppressedKeys[i] = super.isKeyPressed(i);
+            keys.set(i, 0);
+        }
+        for (int i = 0; i < buttons.length(); i++) buttons.set(i, 0);
+        pressedCount = 0;
+        keyboardEvents.reset(keys);
+        resetMouseScratchDeltas();
+        invalidateMouseScratchCenter();
+        var listener = activityListener;
+        if (listener != null) listener.accept(active);
+    }
+
+    void windowFocus(boolean focused) { windowActivity(focused, iconified); }
+    void windowIconified(boolean minimized) { windowActivity(window.isFocused(), minimized); }
+
+    void keyboardEdge(int key, boolean down, long time) {
+        if (key < 0 || key >= suppressedKeys.length) return;
+        if (!down) suppressedKeys[key] = false;
+        if (windowInputActive && !suppressedKeys[key]) keyboardEvents.offer(key, down, time);
     }
 
     @Override public boolean isKeyPressed(int key) {
@@ -200,6 +244,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     @Override public void dispose() {
         try {
+            activityListener = null;
             resetMouseScratchDeltas();
             if (callbacks != null) {
                 callbacks.close(true);

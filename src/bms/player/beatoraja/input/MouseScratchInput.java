@@ -31,6 +31,7 @@ public class MouseScratchInput {
     private int lastMouseScratch = -1;
     private MouseMotionQueue.Batch motionBatch;
     private int pollEdges, pollForwards;
+    private boolean windowBaseline;
     /**
      * キーの最少入力感覚
      */
@@ -84,6 +85,10 @@ public class MouseScratchInput {
         } else {
             mouseToAnalog.update();
             updateScratch(presstime, microtime, true, true);
+        }
+        if (windowBaseline) {
+            windowBaseline = false;
+            for (int i = 0; i < keys.length; i++) if (keys[i] >= 0) bmsPlayerInputProcessor.resetAnalogInput(i);
         }
         if (diagnostics != null) diagnostics.algorithm(started, System.nanoTime(), pollEdges, pollForwards);
     }
@@ -172,6 +177,14 @@ public class MouseScratchInput {
             }
         }
         lastMouseScratch = -1;
+    }
+
+    void resetWindowInput() {
+        clear();
+        for (var algorithm : mouseScratchAlgorithm) if (algorithm != null) algorithm.resetForWindow();
+        windowBaseline = true;
+        java.util.Arrays.fill(mouseScratchState, false);
+        java.util.Arrays.fill(mouseScratchChanged, false);
     }
 
     int[] getQueuedGameKeys() {
@@ -265,6 +278,8 @@ public class MouseScratchInput {
             lastpresstime = -1;
         }
 
+        public void resetForWindow() { reset(); }
+
         protected long getTimeDiff(final long presstime) {
             if (lastpresstime < 0) {
                 lastpresstime = presstime;
@@ -285,6 +300,12 @@ public class MouseScratchInput {
         private int remainingTime;
 
         private int currentScratch;
+
+        @Override public void resetForWindow() {
+            super.resetForWindow();
+            prevPosition = mouseToAnalog.getDistanceMoved(xAxis);
+            remainingTime = currentScratch = 0;
+        }
 
         public boolean isScratchActive(boolean positive) {
             return positive ? currentScratch > 0 : currentScratch < 0;
@@ -336,6 +357,12 @@ public class MouseScratchInput {
 
         private int positiveDistance = 0;
         private int negativeDistance = 0;
+
+        @Override public void resetForWindow() {
+            super.resetForWindow();
+            prevPosition = mouseToAnalog.getDistanceMoved(xAxis);
+            currentScratch = positiveNoMovementTime = negativeNoMovementTime = positiveDistance = negativeDistance = 0;
+        }
 
         public boolean isScratchActive(boolean positive) {
             return positive ? currentScratch > 0 : currentScratch < 0;

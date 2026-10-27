@@ -27,6 +27,10 @@ public class BMSPlayerInputProcessor {
 	
 	private volatile boolean enable = true;
 	private volatile boolean closing;
+	private boolean windowInputActive = true;
+    private boolean replayInput;
+    private PollingLwjgl3Input windowInput;
+    private final java.util.function.Consumer<Boolean> windowActivityListener = this::windowActivityChanged;
 	private InputPollingThread polling;
 	private JInputControllerManager controllerManager;
 	private final java.util.concurrent.atomic.AtomicBoolean devicesReleased = new java.util.concurrent.atomic.AtomicBoolean();
@@ -91,6 +95,11 @@ public class BMSPlayerInputProcessor {
 			this.analogScroll = config.isAnalogScroll();
 			polling = new InputPollingThread(this::poll, this::releaseDevices);
 			if (controllerManager != null) controllerManager.setPollingShutdown(this::stopPolling);
+			if (Gdx.input instanceof PollingLwjgl3Input input) {
+				windowInput = input;
+				input.setActivityListener(windowActivityListener);
+				windowActivityChanged(input.isWindowInputActive());
+			}
 		} catch (RuntimeException | Error e) {
 			releaseDevices();
 			throw e;
@@ -393,6 +402,7 @@ public class BMSPlayerInputProcessor {
     }
 
     public void beginInputJudge(int[] keyboardKeys, int[] controllerKeys, int[] mouseScratchKeys, boolean replay) {
+        replayInput = replay;
         int[] assignedKeyboard = replay ? keyboardKeys : enable ? kbinput.getQueuedGameKeys() : new int[0];
         int[] assignedController = replay ? controllerKeys : enable
                 ? Arrays.stream(bminput).flatMapToInt(c -> Arrays.stream(c.getQueuedGameKeys())).toArray() : new int[0];
@@ -419,7 +429,7 @@ public class BMSPlayerInputProcessor {
     }
 
 	public void endKeyboardJudge() { endInputJudge(); }
-    public void endInputJudge() { keyboardJudgeQueue.end(); }
+    public void endInputJudge() { keyboardJudgeQueue.end(); replayInput = false; }
 	public KeyboardJudgeQueue getKeyboardJudgeQueue() { return keyboardJudgeQueue; }
     public JudgeEventQueue getJudgeEventQueue() { return keyboardJudgeQueue; }
 	public int[] getKeyboardReplayKeys() { return keyboardReplayKeys.clone(); }
@@ -667,16 +677,38 @@ public class BMSPlayerInputProcessor {
 			}
 			final long origin = starttime;
 			final long now = System.nanoTime() / 1000 - origin;
-			kbinput.poll(now, origin);
+			if (windowInputActive) kbinput.poll(now, origin);
 
 			Runnable controllerPoll = controllerPollRunner;
 			if (controllerPoll != null) {
 				controllerPoll.run();
 			}
 
+			if (!windowInputActive) return;
 			for (BMControllerInputProcessor controller : bminput) {
 				controller.poll(now);
 			}
+		}
+	}
+
+	/** Serialize boundaries with polling; accepted judgment/replay events retain their order and clocks. */
+	void windowActivityChanged(boolean active) {
+		synchronized (kbinput) {
+			if (closing || active == windowInputActive) return;
+			windowInputActive = active;
+			if (!active && !replayInput) {
+				long now = System.nanoTime() / 1000 - starttime;
+				for (int key = 0; key < keystate.length; key++)
+					if (keystate[key]) queuedKeyChanged(kbinput, now, key, false);
+				startPressed = selectPressed = mousepressed = mousedragged = false;
+				mouseMoved = false;
+				scrollX = scrollY = 0;
+				Arrays.fill(isAnalog, false);
+				Arrays.fill(currentAnalogValue, 0);
+				Arrays.fill(lastAnalogValue, 0);
+			}
+			kbinput.resetWindowInput();
+			for (BMControllerInputProcessor controller : bminput) controller.setWindowActive(active);
 		}
 	}
 
@@ -696,6 +728,7 @@ public class BMSPlayerInputProcessor {
 	private void releaseDevices() {
 		if (!devicesReleased.compareAndSet(false, true)) return;
 		closing = true;
+		if (windowInput != null) windowInput.clearActivityListener(windowActivityListener);
 		try {
 			if (midiinput != null) midiinput.close();
 		} finally {
