@@ -411,6 +411,8 @@ public final class MainController {
 
 		final Stage stage = current.getStage();
 		if (stage != null) {
+			current.updateStageViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+			stage.getViewport().apply();
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 			stage.draw();
 		}

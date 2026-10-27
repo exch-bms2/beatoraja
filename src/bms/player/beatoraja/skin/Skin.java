@@ -574,6 +574,26 @@ public class Skin {
 			// ScissorStack retains the rectangle reference until pop; nested clips need distinct instances.
 			if (scissors.size == clipDepth) scissors.add(new Rectangle());
 			Rectangle next = scissors.get(clipDepth);
+			SkinRenderTarget target = SkinRenderTarget.current();
+			if (target != null) {
+				ScissorStack.calculateScissors(camera, 0, 0, target.width(), target.height(), sprite.getTransformMatrix(), clipBounds, next);
+				if (next.width < 0) { next.x += next.width; next.width = -next.width; }
+				if (next.height < 0) { next.y += next.height; next.height = -next.height; }
+				float left = Math.max(0, Math.round(next.x)), bottom = Math.max(0, Math.round(next.y));
+				float right = Math.min(target.width(), Math.round(next.x) + Math.round(next.width));
+				float top = Math.min(target.height(), Math.round(next.y) + Math.round(next.height));
+				if (clipDepth > 0) {
+					Rectangle parent = scissors.get(clipDepth - 1);
+					left = Math.max(left, parent.x); bottom = Math.max(bottom, parent.y);
+					right = Math.min(right, parent.x + parent.width); top = Math.min(top, parent.y + parent.height);
+				}
+				if (right <= left || top <= bottom) return false;
+				next.set(left, bottom, right - left, top - bottom);
+				Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
+				Gdx.gl.glScissor((int)left, (int)bottom, (int)next.width, (int)next.height);
+				clipDepth++;
+				return true;
+			}
 			ScissorStack.calculateScissors(camera, sprite.getTransformMatrix(), clipBounds, next);
 			if (!ScissorStack.pushScissors(next)) return false;
 			clipDepth++;
@@ -582,6 +602,14 @@ public class Skin {
 
 		public void popClip() {
 			sprite.flush();
+			if (SkinRenderTarget.current() != null) {
+				if (--clipDepth == 0) Gdx.gl.glDisable(GL20.GL_SCISSOR_TEST);
+				else {
+					Rectangle clip = scissors.get(clipDepth - 1);
+					Gdx.gl.glScissor((int)clip.x, (int)clip.y, (int)clip.width, (int)clip.height);
+				}
+				return;
+			}
 			ScissorStack.popScissors();
 			clipDepth--;
 		}

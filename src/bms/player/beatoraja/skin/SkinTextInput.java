@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
 import com.badlogic.gdx.scenes.scene2d.utils.FocusListener.FocusEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 class SkinTextInput {
 
@@ -112,10 +112,12 @@ class SkinTextInput {
 		Stage stage = state.getStage();
 		if (stage == null) {
 			var resolution = state.main.getConfig().getResolution();
-			stage = new Stage(new FitViewport(resolution.width, resolution.height));
+			stage = new Stage(new StretchViewport(resolution.width, resolution.height));
 			state.setStage(stage);
 		}
-		Gdx.input.setInputProcessor(new InputMultiplexer(stage, state.main.getInputProcessor().getKeyBoardInputProcesseor()));
+		state.updateStageViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		Gdx.input.setInputProcessor(new InputMultiplexer(state.main.getInputProcessor().getSkinMouseInput(), stage,
+				state.main.getInputProcessor().getKeyBoardInputProcesseor()));
 		return stage;
 	}
 

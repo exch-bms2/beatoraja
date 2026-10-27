@@ -151,6 +151,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
     "bms.player.beatoraja.input.MidiInputLifecycleTest",
@@ -285,6 +286,17 @@ tasks.register<JavaExec>("lwjgl3BgaSkinIntegrationTest") {
     timeout.set(Duration.ofMinutes(10))
     args(layout.buildDirectory.dir("gl-integration").get().asFile.absolutePath)
     systemProperty("beatoraja.glIntegration.cycles", providers.gradleProperty("glIntegrationCycles").getOrElse("8"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3StageFramebufferTest") {
+    group = "verification"
+    description = "Verify Scene2D text hitboxes and nested preview framebuffer/scissor state across resizing."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.skin.Lwjgl3StageFramebufferTest")
+    timeout.set(Duration.ofMinutes(3))
+    systemProperty("beatoraja.viewportTest.fullscreen", providers.gradleProperty("viewportFullscreen").getOrElse("false"))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

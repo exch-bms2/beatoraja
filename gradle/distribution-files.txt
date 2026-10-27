@@ -86,6 +86,7 @@ docs/gradle-build.md
 docs/input-diagnostics.md
 docs/input-shutdown.md
 docs/window-input-lifecycle.md
+docs/stage-framebuffer-hidpi.md
 docs/keyboard-events.md
 docs/controller-events.md
 docs/mouse-scratch-diagnostics.md

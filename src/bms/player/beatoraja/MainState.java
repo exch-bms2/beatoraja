@@ -69,7 +69,14 @@ public abstract class MainState {
 	}
 
 	public void resize(int width, int height) {
+		updateStageViewport(width, height);
+	}
 
+	public final void updateStageViewport(int width, int height) {
+		if (stage == null || width <= 0 || height <= 0) return;
+		var viewport = stage.getViewport();
+		if (viewport.getScreenWidth() != width || viewport.getScreenHeight() != height)
+			viewport.update(width, height, true);
 	}
 
 	public void dispose() {
