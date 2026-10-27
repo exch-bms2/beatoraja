@@ -186,7 +186,8 @@ public class MainLoader extends Application {
 			final MainController main = new MainController(f, config, player, auto, songUpdated, songdb);
 
 			Lwjgl3ApplicationConfiguration cfg = createApplicationConfiguration(config);
-			new Lwjgl3Application(new ApplicationListener() {
+			FramePacingDiagnostics frames = FramePacingDiagnostics.createIfEnabled(config);
+			new Lwjgl3Application(FramePacingDiagnostics.wrap(new ApplicationListener() {
 				
 				public void resume() {
 					main.resume();
@@ -211,8 +212,8 @@ public class MainLoader extends Application {
 				public void create() {
 					main.create();
 				}
-			}, cfg) {
-				@Override public Lwjgl3Input createInput(Lwjgl3Window window) { return new PollingLwjgl3Input(window); }
+			}, frames, () -> main.getCurrentState() != null ? main.getCurrentState().type.name() : "STARTUP"), cfg) {
+				@Override public Lwjgl3Input createInput(Lwjgl3Window window) { return new PollingLwjgl3Input(window, frames); }
 			};
 			if (forceExit) System.exit(0);
 		} catch (Throwable e) {

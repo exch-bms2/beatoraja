@@ -6,11 +6,13 @@ import com.badlogic.gdx.backends.lwjgl3.DefaultLwjgl3Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.Gdx;
+import bms.player.beatoraja.FramePacingDiagnostics;
 import org.lwjgl.glfw.GLFW;
 
 /** Publishes GLFW input to the polling thread without calling GLFW from that thread. */
 public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private final Thread owner = Thread.currentThread();
+    private final FramePacingDiagnostics frameDiagnostics;
     private final Lwjgl3Window window;
     private final AtomicIntegerArray keys = new AtomicIntegerArray(pressedKeys.length);
     private final AtomicIntegerArray buttons = new AtomicIntegerArray(5);
@@ -29,12 +31,18 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private final float[] scratchScaleX = new float[1], scratchScaleY = new float[1];
 
     public PollingLwjgl3Input(Lwjgl3Window window) {
+        this(window, null);
+    }
+
+    public PollingLwjgl3Input(Lwjgl3Window window, FramePacingDiagnostics frameDiagnostics) {
         super(window);
+        this.frameDiagnostics = frameDiagnostics;
         this.window = window;
         callbacks = new Lwjgl3InputCallbacks(window.getWindowHandle(), this, diagnostics);
     }
 
     @Override public void update() {
+        long started = frameDiagnostics != null ? System.nanoTime() : 0;
         super.update();
         if (windowDiagnostics != null) windowDiagnostics.sample();
         if (keyboardEvents.isOverflowed() && !overflowReported) {
@@ -47,6 +55,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             publishState();
             diagnostics.publish(keys, buttons, window.isFocused(), System.nanoTime());
         }
+        if (frameDiagnostics != null) frameDiagnostics.inputUpdated(started, System.nanoTime());
     }
 
     private void publishState() {
@@ -171,6 +180,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     public InputDiagnostics getDiagnostics() { return diagnostics; }
+    public FramePacingDiagnostics getFrameDiagnostics() { return frameDiagnostics; }
     public KeyboardEventQueue getKeyboardEvents() { return keyboardEvents; }
     public void configureKeyboardEvents(int[] assignments) { keyboardEvents.configure(assignments, keys); }
     public void resetKeyboardEvents() { keyboardEvents.reset(keys); }

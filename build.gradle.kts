@@ -121,6 +121,15 @@ tasks.named<JavaExec>("run") {
     dependsOn(verifyBuildEnvironment)
     workingDir(providers.gradleProperty("runWorkingDir").getOrElse(projectDir.absolutePath))
     standardInput = System.`in`
+    for (name in listOf("frameDiagnostics", "frameDiagnosticsIntervalMillis", "frameDiagnosticsLongFrameMillis")) {
+        providers.gradleProperty(name).orNull?.let {
+            systemProperty(when (name) {
+                "frameDiagnosticsIntervalMillis" -> "beatoraja.frameDiagnostics.intervalMillis"
+                "frameDiagnosticsLongFrameMillis" -> "beatoraja.frameDiagnostics.longFrameMillis"
+                else -> "beatoraja.frameDiagnostics"
+            }, it)
+        }
+    }
     providers.gradleProperty("audioDiagnostics").orNull?.let { systemProperty("beatoraja.audioDiagnostics", it) }
     providers.gradleProperty("audioDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.audioDiagnostics.intervalMillis", it)
@@ -141,6 +150,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.FramePacingDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
     "bms.player.beatoraja.input.MouseScratchGeometryTest",
@@ -260,6 +270,17 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     workingDir(projectDir)
 }
 tasks.check { dependsOn(distributionSmokeTest) }
+
+tasks.register<JavaExec>("lwjgl3FramePacingSmokeTest") {
+    group = "verification"
+    description = "Measure real GLFW frames and input publication around a synthetic render stall."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3FramePacingSmokeTest")
+    systemProperty("beatoraja.frameTest.vsync", providers.gradleProperty("frameTestVsync").getOrElse("false"))
+    systemProperty("beatoraja.frameTest.fps", providers.gradleProperty("frameTestFps").getOrElse("60"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
 
 tasks.register<JavaExec>("lwjgl3AudioDiagnosticsSmokeTest") {
     group = "verification"

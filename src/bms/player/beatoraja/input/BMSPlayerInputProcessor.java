@@ -643,8 +643,10 @@ public class BMSPlayerInputProcessor {
 
 	public void poll() {
 		synchronized (kbinput) {
-			if (Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
-				input.getDiagnostics().poll(System.nanoTime());
+			if (Gdx.input instanceof PollingLwjgl3Input input) {
+				if (input.getDiagnostics() != null) input.getDiagnostics().poll(System.nanoTime());
+				if (input.getFrameDiagnostics() != null) input.getFrameDiagnostics().workerPoll(System.nanoTime());
+			}
 			final long origin = starttime;
 			final long now = System.nanoTime() / 1000 - origin;
 			kbinput.poll(now, origin);
