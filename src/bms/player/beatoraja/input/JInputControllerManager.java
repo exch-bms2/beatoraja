@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +37,8 @@ public final class JInputControllerManager implements ControllerManager, Disposa
     private final Runnable pollDevices;
     private final Runnable closeDevices;
     private final Consumer<Runnable> dispatch;
-    private final Runnable pollRunner = this::poll;
+    private final Runnable pollRunner = new PollRunner();
+    private volatile BooleanSupplier pollingShutdown = () -> true;
     private volatile Controller current;
     private volatile boolean disposed;
     private volatile boolean hasListeners;
@@ -136,7 +138,9 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             for (Controller controller : controllers) ((RawController) controller).poll();
         } catch (RuntimeException | LinkageError error) {
             Logger.getGlobal().log(Level.WARNING, "JInput controller polling failed; controller input disabled", error);
-            dispose();
+            // The failed native call has returned, and this monitor excludes other controller polls.
+            // Keep keyboard/MIDI polling alive when only the controller backend fails.
+            disposeStopped();
         }
     }
 
@@ -165,7 +169,24 @@ public final class JInputControllerManager implements ControllerManager, Disposa
         }
     }
 
-    @Override public synchronized void dispose() {
+    private final class PollRunner implements Runnable {
+        @Override public void run() { poll(); }
+        JInputControllerManager owner() { return JInputControllerManager.this; }
+    }
+
+    static JInputControllerManager ownerOf(Runnable runner) {
+        return runner instanceof JInputControllerManager.PollRunner owned ? owned.owner() : null;
+    }
+
+    void setPollingShutdown(BooleanSupplier shutdown) { pollingShutdown = shutdown; }
+
+    @Override public void dispose() {
+        // Backend lifecycle listeners run before MainController.dispose(). Join outside poll's monitor.
+        if (!pollingShutdown.getAsBoolean()) return;
+        synchronized (this) { disposeStopped(); }
+    }
+
+    private void disposeStopped() {
         if (disposed) return;
         disposed = true;
         if (BMSPlayerInputProcessor.controllerPollRunner == pollRunner) BMSPlayerInputProcessor.controllerPollRunner = null;
@@ -192,6 +213,8 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             closeDevices.run();
         } catch (RuntimeException | LinkageError error) {
             Logger.getGlobal().log(Level.WARNING, "JInput controller cleanup failed", error);
+        } finally {
+            pollingShutdown = () -> true;
         }
     }
 

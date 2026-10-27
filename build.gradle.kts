@@ -151,6 +151,8 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.input.InputShutdownTest",
+    "bms.player.beatoraja.input.MidiInputLifecycleTest",
     "bms.player.beatoraja.video.VideoFrameCopyTest",
     "bms.player.beatoraja.FramePacingDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
@@ -349,6 +351,15 @@ tasks.register<JavaExec>("lwjgl3KeyboardQueueSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3KeyboardQueueSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3InputShutdownSmokeTest") {
+    group = "verification"
+    description = "Verify input worker shutdown before controller and GLFW window disposal."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3InputShutdownSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

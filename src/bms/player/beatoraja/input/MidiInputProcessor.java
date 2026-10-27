@@ -5,6 +5,9 @@ import bms.player.beatoraja.PlayModeConfig.MidiConfig;
 import javax.sound.midi.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MIDIデバイス入力処理用クラス
@@ -17,6 +20,9 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 
 	ArrayList<MidiDevice> devices = new ArrayList<>();
 	MidiReceiver receiver = new MidiReceiver();
+	private final ArrayList<MidiDevice> openedDevices = new ArrayList<>();
+	private final ArrayList<Transmitter> transmitters = new ArrayList<>();
+	private boolean opened, closed;
 
 	// milliseconds
 	long starttime = 0;
@@ -36,7 +42,17 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 	KeyHandler pitchBendUp, pitchBendDown;
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
+		this(inputProcessor, discoverDevices());
+	}
+
+	MidiInputProcessor(BMSPlayerInputProcessor inputProcessor, List<MidiDevice> devices) {
 		super(inputProcessor, Type.MIDI);
+		this.devices.addAll(devices);
+		clearHandlers();
+	}
+
+	private static List<MidiDevice> discoverDevices() {
+		var devices = new ArrayList<MidiDevice>();
 		MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
 		for (MidiDevice.Info info : infos) {
 			try {
@@ -46,21 +62,45 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 			}
 		}
 
+		return devices;
+	}
+
+	public synchronized void open() {
+		if (opened || closed) return;
+		opened = true;
+		try {
+			for (MidiDevice device : devices) {
+				openedDevices.add(device);
+				try {
+					device.open();
+					Transmitter transmitter = device.getTransmitter();
+					transmitters.add(transmitter);
+					transmitter.setReceiver(receiver);
+				} catch (MidiUnavailableException e) {
+					closeResource(device::close);
+					openedDevices.remove(openedDevices.size() - 1);
+				}
+			}
+		} catch (RuntimeException | Error e) {
+			close();
+			throw e;
+		}
+	}
+
+	public synchronized void close() {
+		if (closed) return;
+		closed = true;
+		// Gate/wait for callbacks first; never hold the receiver monitor while closing a device.
+		receiver.close();
+		for (Transmitter transmitter : transmitters) closeResource(transmitter::close);
+		for (MidiDevice device : openedDevices) closeResource(device::close);
+		transmitters.clear(); openedDevices.clear(); devices.clear();
 		clearHandlers();
 	}
 
-	public void open() {
-		devices.forEach(device -> {
-			try {
-				device.open();
-				device.getTransmitter().setReceiver(receiver);
-			} catch (MidiUnavailableException e) {
-			}			
-		});
-	}
-
-	public void close() {
-		devices.forEach(MidiDevice::close);
+	private static void closeResource(Runnable close) {
+		try { close.run(); }
+		catch (Throwable e) { Logger.getGlobal().log(Level.WARNING, "MIDI input cleanup failed", e); }
 	}
 
 	public void setConfig(MidiConfig config) {
@@ -173,8 +213,10 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 	}
 
 	private final class MidiReceiver implements Receiver {
+		private boolean closed;
 
-		public void send(MidiMessage message, long timeStamp) {
+		public synchronized void send(MidiMessage message, long timeStamp) {
+			if (closed) return;
 			if (message instanceof ShortMessage) {
 				ShortMessage sm = (ShortMessage)message;
 				switch (sm.getCommand()) {
@@ -219,8 +261,7 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 			}
 		}
 
-		public void close(){
-		}
+		public synchronized void close(){ closed = true; }
 	}
 	
 	private interface KeyHandler {

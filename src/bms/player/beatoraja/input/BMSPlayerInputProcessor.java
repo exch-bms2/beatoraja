@@ -25,7 +25,11 @@ import com.badlogic.gdx.utils.Array;
  */
 public class BMSPlayerInputProcessor {
 	
-	private boolean enable = true;
+	private volatile boolean enable = true;
+	private volatile boolean closing;
+	private InputPollingThread polling;
+	private JInputControllerManager controllerManager;
+	private final java.util.concurrent.atomic.AtomicBoolean devicesReleased = new java.util.concurrent.atomic.AtomicBoolean();
 	private final KeyboardJudgeQueue keyboardJudgeQueue = new KeyboardJudgeQueue();
 	private int[] keyboardReplayKeys = new int[0];
     private int[] controllerReplayKeys = new int[0];
@@ -41,43 +45,56 @@ public class BMSPlayerInputProcessor {
 	private KeyLogger keylog = new KeyLogger();
 
 	public BMSPlayerInputProcessor(Config config, PlayerConfig player) {
+		this(config, player, Controllers.getControllers(), MidiInputProcessor::new);
+	}
+
+	BMSPlayerInputProcessor(Config config, PlayerConfig player, Array<Controller> controllers,
+			java.util.function.Function<BMSPlayerInputProcessor, MidiInputProcessor> midiFactory) {
 		Resolution resolution = config.getResolution();
 		kbinput = new KeyBoardInputProcesseor(this, player.getMode14().getKeyboardConfig(), resolution);
 		// Gdx.input.setInputProcessor(kbinput);
 		Array<BMControllerInputProcessor> bminput = new Array<BMControllerInputProcessor>();
-		for (Controller controller : Controllers.getControllers()) {
-			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			// FIXME:前回終了時のModeからコントローラ設定を復元
-			ControllerConfig controllerConfig = Stream.of(player.getMode7().getController())
-				.filter(m -> matchesControllerName(m.getName(), controller.getName())).findFirst()
-				.orElse(new ControllerConfig());
-			// デバイス名のユニーク化
-			int index = 1;
-			String name = controller.getName();
-			for(BMControllerInputProcessor bm : bminput) {
-				if(bm.getName().equals(name)) {
-					index++;
-					name = controller.getName() + "-" + index;
+		controllerManager = JInputControllerManager.ownerOf(controllerPollRunner);
+		try {
+			for (Controller controller : controllers) {
+				Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
+				// FIXME:前回終了時のModeからコントローラ設定を復元
+				ControllerConfig controllerConfig = Stream.of(player.getMode7().getController())
+					.filter(m -> matchesControllerName(m.getName(), controller.getName())).findFirst()
+					.orElse(new ControllerConfig());
+				// デバイス名のユニーク化
+				int index = 1;
+				String name = controller.getName();
+				for(BMControllerInputProcessor bm : bminput) {
+					if(bm.getName().equals(name)) {
+						index++;
+						name = controller.getName() + "-" + index;
+					}
 				}
+				BMControllerInputProcessor bm = new BMControllerInputProcessor(this, name, controller, controllerConfig);
+				// controller.addListener(bm);
+				bminput.add(bm);
 			}
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, name, controller, controllerConfig);
-			// controller.addListener(bm);
-			bminput.add(bm);
-		}
 
-		this.bminput = bminput.toArray(BMControllerInputProcessor.class);
-		midiinput = new MidiInputProcessor(this);
-		midiinput.open();
-		midiinput.setConfig(new MidiConfig());
+			this.bminput = bminput.toArray(BMControllerInputProcessor.class);
+			midiinput = midiFactory.apply(this);
+			midiinput.open();
+			midiinput.setConfig(new MidiConfig());
 
-		devices = new Array<BMSPlayerInputDevice>();
-		devices.add(kbinput);
-		for (BMControllerInputProcessor bm : bminput) {
-			devices.add(bm);
+			devices = new Array<BMSPlayerInputDevice>();
+			devices.add(kbinput);
+			for (BMControllerInputProcessor bm : bminput) {
+				devices.add(bm);
+			}
+			devices.add(midiinput);
+
+			this.analogScroll = config.isAnalogScroll();
+			polling = new InputPollingThread(this::poll, this::releaseDevices);
+			if (controllerManager != null) controllerManager.setPollingShutdown(this::stopPolling);
+		} catch (RuntimeException | Error e) {
+			releaseDevices();
+			throw e;
 		}
-		devices.add(midiinput);
-		
-		this.analogScroll = config.isAnalogScroll();
 	}
 
 	public  static final int KEYSTATE_SIZE = 256;
@@ -643,6 +660,7 @@ public class BMSPlayerInputProcessor {
 
 	public void poll() {
 		synchronized (kbinput) {
+			if (closing) return;
 			if (Gdx.input instanceof PollingLwjgl3Input input) {
 				if (input.getDiagnostics() != null) input.getDiagnostics().poll(System.nanoTime());
 				if (input.getFrameDiagnostics() != null) input.getFrameDiagnostics().workerPoll(System.nanoTime());
@@ -662,8 +680,37 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 
+	public void startPolling() { polling.start(); }
+
+	private boolean stopPolling() {
+		closing = true;
+		return polling == null || polling.stopAndJoin();
+	}
+
 	public void dispose() {
-		midiinput.close();
+		closing = true;
+		if (polling != null) polling.close();
+		else releaseDevices();
+	}
+
+	private void releaseDevices() {
+		if (!devicesReleased.compareAndSet(false, true)) return;
+		closing = true;
+		try {
+			if (midiinput != null) midiinput.close();
+		} finally {
+			try {
+				synchronized (kbinput) {
+					enable = false;
+					if (bminput != null) for (BMControllerInputProcessor controller : bminput) controller.setEnable(false);
+					Arrays.fill(keystate, false);
+					Arrays.fill(time, Long.MIN_VALUE);
+					keyboardJudgeQueue.end();
+				}
+			} finally {
+				if (controllerManager != null) controllerManager.dispose();
+			}
+		}
 	}
 
 	static boolean matchesControllerName(String configured, String detected) {

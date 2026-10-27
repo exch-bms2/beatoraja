@@ -357,22 +357,7 @@ public final class MainController {
 
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 
-		Thread polling = new Thread(() -> {
-			long time = 0;
-			for (;;) {
-				final long now = System.nanoTime() / 1000000;
-				if (time != now) {
-					time = now;
-					input.poll();
-				} else {
-					try {
-						Thread.sleep(0, 500000);
-					} catch (InterruptedException e) {
-					}
-				}
-			}
-		});
-		polling.start();
+		input.startPolling();
 
 		Array<String> targetlist = new Array<String>(player.getTargetlist());
 		for(int i = 0;i < rivals.getRivalCount();i++) {
@@ -582,6 +567,7 @@ public final class MainController {
 	}
 
 	public void dispose() {
+		disposeInput();
 		saveConfig();
 		rivals.close();
 
@@ -594,12 +580,15 @@ public final class MainController {
 		Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
 		Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
 		resource.dispose();
-//		input.dispose();
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
 		Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
 
 		Logger.getGlobal().info("全リソース破棄完了");
+	}
+
+	void disposeInput() {
+		if (input != null) input.dispose();
 	}
 
 	public void pause() {

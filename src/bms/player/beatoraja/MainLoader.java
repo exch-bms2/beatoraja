@@ -187,34 +187,38 @@ public class MainLoader extends Application {
 
 			Lwjgl3ApplicationConfiguration cfg = createApplicationConfiguration(config);
 			FramePacingDiagnostics frames = FramePacingDiagnostics.createIfEnabled(config);
-			new Lwjgl3Application(FramePacingDiagnostics.wrap(new ApplicationListener() {
-				
-				public void resume() {
-					main.resume();
-				}
-				
-				public void resize(int width, int height) {
-					main.resize(width, height);
-				}
-				
-				public void render() {
-					main.render();
-				}
-				
-				public void pause() {
-					main.pause();
-				}
-				
-				public void dispose() {
-					main.dispose();
-				}
-				
-				public void create() {
-					main.create();
-				}
-			}, frames, () -> main.getCurrentState() != null ? main.getCurrentState().type.name() : "STARTUP"), cfg) {
-				@Override public Lwjgl3Input createInput(Lwjgl3Window window) { return new PollingLwjgl3Input(window, frames); }
-			};
+			try {
+				new Lwjgl3Application(FramePacingDiagnostics.wrap(new ApplicationListener() {
+
+					public void resume() {
+						main.resume();
+					}
+
+					public void resize(int width, int height) {
+						main.resize(width, height);
+					}
+
+					public void render() {
+						main.render();
+					}
+
+					public void pause() {
+						main.pause();
+					}
+
+					public void dispose() {
+						main.dispose();
+					}
+
+					public void create() {
+						main.create();
+					}
+				}, frames, () -> main.getCurrentState() != null ? main.getCurrentState().type.name() : "STARTUP"), cfg) {
+					@Override public Lwjgl3Input createInput(Lwjgl3Window window) { return new PollingLwjgl3Input(window, frames); }
+				};
+			} finally {
+				main.disposeInput();
+			}
 			if (forceExit) System.exit(0);
 		} catch (Throwable e) {
 			e.printStackTrace();
