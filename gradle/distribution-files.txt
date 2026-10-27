@@ -91,3 +91,4 @@ docs/mouse-scratch-events.md
 docs/window-hidpi-diagnostics.md
 docs/audio-diagnostics.md
 docs/frame-pacing-diagnostics.md
+docs/gl-bga-skin-integration.md

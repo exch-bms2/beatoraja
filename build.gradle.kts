@@ -2,6 +2,7 @@ import org.gradle.api.tasks.application.CreateStartScripts
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
+import java.time.Duration
 
 plugins {
     application
@@ -150,6 +151,7 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.video.VideoFrameCopyTest",
     "bms.player.beatoraja.FramePacingDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
@@ -270,6 +272,18 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     workingDir(projectDir)
 }
 tasks.check { dependsOn(distributionSmokeTest) }
+
+tasks.register<JavaExec>("lwjgl3BgaSkinIntegrationTest") {
+    group = "verification"
+    description = "Verify real FFmpeg/GL pixels, skin clipping/fonts and repeated resource disposal with generated video."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.video.Lwjgl3BgaSkinIntegrationTest")
+    timeout.set(Duration.ofMinutes(10))
+    args(layout.buildDirectory.dir("gl-integration").get().asFile.absolutePath)
+    systemProperty("beatoraja.glIntegration.cycles", providers.gradleProperty("glIntegrationCycles").getOrElse("8"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
 
 tasks.register<JavaExec>("lwjgl3FramePacingSmokeTest") {
     group = "verification"

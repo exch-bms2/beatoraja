@@ -7,11 +7,12 @@ precision mediump float;
 varying LOWP vec4 v_color;
 varying vec2 v_texCoords;
 uniform sampler2D u_texture;
+uniform vec2 u_textureSize;
 uniform int filter_type;
 uniform int image_type;
 
 void main() {
-    vec2 texSize = textureSize(u_texture,0);
+    vec2 texSize = u_textureSize;
 
     float center_a = texture2D(u_texture, v_texCoords).a;
     if(center_a > 0.0) {
