@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
@@ -31,13 +33,21 @@ class SkinTextInput {
 	private Texture cursorTexture;
 	private Texture selectionTexture;
 	private boolean committing;
+	private boolean commitRequested;
 
 	void focus(MainState state, SkinText target) {
-		if (target.getWriter() == null) {
+		if (target.getWriter() == null || committing) {
 			return;
 		}
+		if (this.target == target && this.state == state && textField != null && textField.isVisible()
+				&& state.getStage() != null && state.getStage().getKeyboardFocus() == textField) {
+			updateBounds(target);
+			return;
+		}
+		commit();
 		this.state = state;
 		this.target = target;
+		commitRequested = false;
 
 		Stage stage = ensureStage(state);
 		ensureTextField(state, stage, Math.max(1, Math.round(target.region.height)));
@@ -56,21 +66,25 @@ class SkinTextInput {
 			return;
 		}
 		committing = true;
+		commitRequested = false;
+		SkinText current = target;
+		MainState owner = state;
+		TextField field = textField;
 		try {
-			target.getWriter().set(state, textField.getText());
-			target.setText(textField.getText());
-			textField.setVisible(false);
-			textField.getOnscreenKeyboard().close();
-			Stage stage = state != null ? state.getStage() : null;
-			if (stage != null && stage.getKeyboardFocus() == textField) {
-				stage.setKeyboardFocus(null);
-			}
-			if (state != null) {
-				state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
-			}
-			target = null;
+			current.getWriter().set(owner, field.getText());
+			current.setText(field.getText());
 		} finally {
-			committing = false;
+			target = null;
+			try {
+				field.setVisible(false);
+				field.getOnscreenKeyboard().close();
+				Stage stage = owner != null ? owner.getStage() : null;
+				if (stage != null && stage.getKeyboardFocus() == field) stage.setKeyboardFocus(null);
+			} finally {
+				try {
+					if (owner != null) owner.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
+				} finally { committing = false; }
+			}
 		}
 	}
 
@@ -85,7 +99,11 @@ class SkinTextInput {
 	}
 
 	void dispose() {
-		commit();
+		try { commit(); }
+		finally { disposeResources(); }
+	}
+
+	private void disposeResources() {
 		if (textField != null) {
 			textField.remove();
 			textField = null;
@@ -126,13 +144,12 @@ class SkinTextInput {
 			generator = new FreeTypeFontGenerator(Gdx.files.internal(state.main.getConfig().getSystemfontpath()));
 		}
 		if (font == null || fontSize != size) {
-			if (font != null) {
-				font.dispose();
-			}
 			FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 			parameter.size = size;
 			parameter.incremental = true;
-			font = generator.generateFont(parameter);
+			BitmapFont replacement = generator.generateFont(parameter);
+			if (font != null) font.dispose();
+			font = replacement;
 			fontSize = size;
 		}
 		if (style == null) {
@@ -144,13 +161,42 @@ class SkinTextInput {
 		style.font = font;
 		style.messageFont = font;
 		if (textField == null) {
-			textField = new TextField("", style);
+			textField = new TextField("", style) {
+				@Override public void act(float delta) {
+					super.act(delta);
+					// Drain the complete input batch before submitting, including text delivered after Enter.
+					if (commitRequested) commit();
+				}
+				@Override protected InputListener createInputListener() {
+					return new TextFieldClickListener() {
+						@Override public boolean keyDown(InputEvent event, int keycode) {
+							try { return super.keyDown(event, keycode); }
+							catch (SkinTextClipboard.WriteFailure e) { return true; }
+						}
+						@Override public boolean keyTyped(InputEvent event, char character) {
+							int position = getCursorPosition();
+							String value = getText();
+							if (getSelection().isEmpty()) {
+								if (character == '\b' && position >= 2
+										&& Character.isSurrogatePair(value.charAt(position - 2), value.charAt(position - 1)))
+									setSelection(position - 2, position);
+								else if (character == 127 && position + 1 < value.length()
+										&& Character.isSurrogatePair(value.charAt(position), value.charAt(position + 1)))
+									setSelection(position, position + 2);
+							}
+							return super.keyTyped(event, character);
+						}
+					};
+				}
+			};
+			textField.setOnlyFontChars(false);
+			textField.setClipboard(new SkinTextClipboard(() -> Gdx.app.getClipboard()));
 			textField.setFocusTraversal(false);
 			textField.setTextFieldListener(new TextFieldListener() {
 				@Override
 				public void keyTyped(TextField textField, char key) {
 					if (key == '\n' || key == '\r') {
-						commit();
+						commitRequested = true;
 					}
 				}
 			});
@@ -167,14 +213,16 @@ class SkinTextInput {
 			textField.remove();
 			stage.addActor(textField);
 		}
+		textField.setStyle(style);
 	}
 
 	private Texture createTexture(int width, int height, Color color, boolean cursor) {
 		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
 		pixmap.setColor(color);
 		pixmap.fill();
-		Texture texture = new Texture(pixmap);
-		pixmap.dispose();
+		Texture texture;
+		try { texture = new Texture(pixmap); }
+		finally { pixmap.dispose(); }
 		if (cursor) {
 			cursorTexture = texture;
 		} else {

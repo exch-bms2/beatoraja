@@ -151,6 +151,8 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.skin.SkinTextClipboardTest",
+    "bms.player.beatoraja.input.TextEditingControlTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
@@ -297,6 +299,16 @@ tasks.register<JavaExec>("lwjgl3StageFramebufferTest") {
     mainClass.set("bms.player.beatoraja.skin.Lwjgl3StageFramebufferTest")
     timeout.set(Duration.ofMinutes(3))
     systemProperty("beatoraja.viewportTest.fullscreen", providers.gradleProperty("viewportFullscreen").getOrElse("false"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3TextInputTest") {
+    group = "verification"
+    description = "Verify Unicode callbacks, text focus/commit and isolated clipboard shortcuts in real GLFW."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.skin.Lwjgl3TextInputTest")
+    timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

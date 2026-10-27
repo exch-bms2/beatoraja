@@ -153,12 +153,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
-			final boolean startpressed = controlState(control[0]);
+			final boolean startpressed = !suppressedTextControlKeys[control[0]] && controlState(control[0]);
 			if (startpressed != keystate[control[0]]) {
 				keystate[control[0]] = startpressed;
 				this.bmsPlayerInputProcessor.startChanged(startpressed);
 			}
-			final boolean selectpressed = controlState(control[1]);
+			final boolean selectpressed = !suppressedTextControlKeys[control[1]] && controlState(control[1]);
 			if (selectpressed != keystate[control[1]]) {
 				keystate[control[1]] = selectpressed;
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
@@ -175,7 +175,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 				continue;
 			}
-			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
+			if (!(textmode && isEditingControl(key)) && pressed != keystate[key.keycode]) {
 				keystate[key.keycode] = pressed;
 				keytime[key.keycode] = microtime;
 				keymodifiers[key.keycode] = pressed ? currentlyHeldModifiers() : 0;
@@ -297,11 +297,17 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public synchronized void setTextInputMode(boolean textmode) {
+		if (!this.textmode && textmode) {
+			for (ControlKeys key : ControlKeys.values()) if (isEditingControl(key)) {
+				keystate[key.keycode] = false;
+				keytime[key.keycode] = Long.MIN_VALUE;
+			}
+		}
 		if (this.textmode && !textmode) {
 			for (ControlKeys key : ControlKeys.values()) {
-				if (key.text && Gdx.input.isKeyPressed(key.keycode)) {
+				if (isEditingControl(key) && Gdx.input.isKeyPressed(key.keycode)) {
 					suppressedTextControlKeys[key.keycode] = true;
-					keystate[key.keycode] = true;
+					keystate[key.keycode] = false;
 					keytime[key.keycode] = Long.MIN_VALUE;
 				}
 			}
@@ -318,6 +324,13 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return reserved.contains(key);
 	}
 	
+	private static boolean isEditingControl(ControlKeys key) {
+		return key.text || switch (key) {
+			case UP, DOWN, LEFT, RIGHT, DEL, ESCAPE -> true;
+			default -> false;
+		};
+	}
+
 	public enum ControlKeys {
 		NUM0(0, Keys.NUM_0, true),
 		NUM1(1, Keys.NUM_1, true),
