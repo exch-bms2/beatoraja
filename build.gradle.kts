@@ -162,6 +162,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.SkinTextClipboardTest",
     "bms.player.beatoraja.input.TextEditingControlTest",
     "bms.player.beatoraja.input.TextInputSessionTest",
+    "bms.player.beatoraja.input.MacOsImeBridgeTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
@@ -276,12 +277,47 @@ val generateAudioBackendTestAssets by tasks.registering(JavaExec::class) {
     outputs.dir(assets)
     doFirst { delete(assets) }
 }
+val macOsImeLibrary = layout.buildDirectory.file("generated/macos-ime/libbeatoraja-ime.dylib")
+val buildMacOsIme by tasks.registering(Exec::class) {
+    group = "build"
+    description = "Build opt-in AppKit IME prototype for macOS x86_64 and arm64 (requires Xcode tools)."
+    onlyIf { System.getProperty("os.name").startsWith("Mac") }
+    inputs.file("native/macos/ime.m")
+    outputs.file(macOsImeLibrary)
+    doFirst { macOsImeLibrary.get().asFile.parentFile.mkdirs() }
+    val home = java17.get().metadata.installationPath.asFile
+    commandLine("xcrun", "clang", "-dynamiclib", "-fobjc-arc", "-fblocks", "-arch", "x86_64", "-arch", "arm64",
+        "-mmacosx-version-min=11.0", "-I$home/include", "-I$home/include/darwin", "-framework", "AppKit",
+        "-Wl,-install_name,@rpath/libbeatoraja-ime.dylib",
+        file("native/macos/ime.m").absolutePath, "-o", macOsImeLibrary.get().asFile.absolutePath)
+}
+val macOsImeTestLibrary = layout.buildDirectory.file("macos-ime-test/libbeatoraja-ime-test.dylib")
+val buildMacOsImeTest by tasks.registering(Exec::class) {
+    group = "verification"
+    onlyIf { System.getProperty("os.name").startsWith("Mac") }
+    inputs.files("native/macos/ime.m", "test/native/macos/ime-test.m")
+    outputs.file(macOsImeTestLibrary)
+    doFirst { macOsImeTestLibrary.get().asFile.parentFile.mkdirs() }
+    val home = java17.get().metadata.installationPath.asFile
+    commandLine("xcrun", "clang", "-dynamiclib", "-fobjc-arc", "-fblocks", "-arch", "x86_64", "-arch", "arm64",
+        "-mmacosx-version-min=11.0", "-I$home/include", "-I$home/include/darwin", "-framework", "AppKit",
+        "-Wl,-install_name,@rpath/libbeatoraja-ime-test.dylib",
+        file("test/native/macos/ime-test.m").absolutePath, "-o", macOsImeTestLibrary.get().asFile.absolutePath)
+}
+tasks.named<JavaExec>("run") {
+    if (providers.gradleProperty("macosIme").getOrElse("false").toBoolean()) {
+        dependsOn(buildMacOsIme)
+        systemProperty("beatoraja.macosIme", "true")
+        systemProperty("beatoraja.macosIme.library", macOsImeLibrary.get().asFile.absolutePath)
+    }
+}
 distributions {
     main {
         contents {
             from(projectDir) { include(distributionFiles) }
             from(prepareRuntimeDirectories)
             from(generateAudioBackendTestAssets) { into("audio-test") }
+            if (System.getProperty("os.name").startsWith("Mac")) from(buildMacOsIme) { into("natives") }
         }
     }
 }
@@ -397,6 +433,18 @@ tasks.register<JavaExec>("lwjgl3TextInputTest") {
     mainClass.set("bms.player.beatoraja.skin.Lwjgl3TextInputTest")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+tasks.register<JavaExec>("macOsImeIntegrationTest") {
+    group = "verification"
+    description = "Exercise real AppKit NSTextView/IME JNI callbacks with synthetic composition, not a real OS IME."
+    onlyIf { System.getProperty("os.name").startsWith("Mac") }
+    dependsOn(tasks.testClasses, buildMacOsImeTest)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.skin.Lwjgl3TextInputTest")
+    systemProperty("beatoraja.test.macosIme", "true")
+    systemProperty("beatoraja.macosIme.library", macOsImeTestLibrary.get().asFile.absolutePath)
+    timeout.set(Duration.ofMinutes(3))
+    jvmArgs("-XstartOnFirstThread")
 }
 
 tasks.register<JavaExec>("lwjgl3FramePacingSmokeTest") {

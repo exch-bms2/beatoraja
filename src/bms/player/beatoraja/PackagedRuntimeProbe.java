@@ -20,6 +20,12 @@ public final class PackagedRuntimeProbe {
             if (org.lwjgl.openal.ALC.getFunctionProvider() == null) throw new IllegalStateException("No OpenAL provider");
         });
         failures += check("FFmpeg", () -> org.bytedeco.javacv.FFmpegFrameGrabber.tryLoad());
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            var ime = java.nio.file.Path.of("natives/libbeatoraja-ime.dylib");
+            if (java.nio.file.Files.isRegularFile(ime))
+                failures += check("AppKit IME prototype (load only)", () -> System.load(ime.toAbsolutePath().toString()));
+            else System.out.println("SKIP AppKit IME prototype: optional native not included in this build");
+        }
         failures += check("SQLite", () -> {
             Class.forName("org.sqlite.JDBC");
             try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite::memory:")) {

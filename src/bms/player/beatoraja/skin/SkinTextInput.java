@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.ImeBridge;
 import bms.player.beatoraja.input.TextInputSession;
+import bms.player.beatoraja.input.MacOsImeBridge;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -36,11 +37,12 @@ class SkinTextInput {
 	private Texture selectionTexture;
 	private boolean committing;
 	private boolean commitRequested;
-	private final ImeBridge bridge;
+	private ImeBridge bridge;
 	private TextInputSession session;
 	private Runnable pendingFocus;
+	private Runnable publishImeCaret;
 
-	SkinTextInput() { this(ImeBridge.NONE); }
+	SkinTextInput() { this(MacOsImeBridge.create()); }
 	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
 	void focus(MainState state, SkinText target) {
@@ -72,13 +74,20 @@ class SkinTextInput {
 		try {
 			session = new TextInputSession(bridge, editorState());
 		} catch (RuntimeException | Error e) {
-			this.target = null;
-			textField.setVisible(false);
-			stage.setKeyboardFocus(null);
-			throw e;
+			if (bridge instanceof MacOsImeBridge) {
+				java.util.logging.Logger.getGlobal().warning("macOS IME attachment failed; using GLFW text input: " + e);
+				bridge = ImeBridge.NONE;
+				session = new TextInputSession(bridge, editorState());
+			} else {
+				this.target = null;
+				textField.setVisible(false);
+				stage.setKeyboardFocus(null);
+				throw e;
+			}
 		}
 		textField.getOnscreenKeyboard().show(textField);
 		state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(true, session.usesIme());
+		if (session.usesIme() && publishImeCaret != null) publishImeCaret.run();
 	}
 
 	void commit() {
@@ -191,6 +200,7 @@ class SkinTextInput {
 		if (textField != null) {
 			textField.remove();
 			textField = null;
+			publishImeCaret = null;
 		}
 		if (font != null) {
 			font.dispose();
@@ -246,6 +256,38 @@ class SkinTextInput {
 		style.messageFont = font;
 		if (textField == null) {
 			textField = new TextField("", style) {
+				private final com.badlogic.gdx.math.Vector2 caretBottom = new com.badlogic.gdx.math.Vector2();
+				private final com.badlogic.gdx.math.Vector2 caretTop = new com.badlogic.gdx.math.Vector2();
+				private float caretX, caretY;
+				{ publishImeCaret = this::publishCaret; }
+				private void publishCaret() {
+					if (session == null || !session.usesIme() || getStage() == null) return;
+					calculateOffsets();
+					BitmapFont font = getStyle().font;
+					var background = getBackgroundDrawable();
+					caretX = textOffset + glyphPositions.get(cursor) - glyphPositions.get(visibleTextStart)
+							+ fontOffset + font.getData().cursorX + (background != null ? background.getLeftWidth() : 0);
+					caretY = getTextY(font, background) - textHeight - font.getDescent();
+					localToStageCoordinates(caretBottom.set(caretX, caretY));
+					localToStageCoordinates(caretTop.set(caretX + 2, caretY + textHeight));
+					getStage().stageToScreenCoordinates(caretBottom);
+					getStage().stageToScreenCoordinates(caretTop);
+					bridge.caret(session.id(), Math.min(caretBottom.x, caretTop.x), Math.min(caretBottom.y, caretTop.y),
+							Math.abs(caretTop.x - caretBottom.x), Math.abs(caretTop.y - caretBottom.y),
+							Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+				}
+				@Override public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float alpha) {
+					super.draw(batch, alpha);
+					if (session == null || !session.usesIme() || getStage() == null) return;
+					publishCaret();
+					if (session.isComposing()) {
+						int from = Math.min(glyphPositions.size - 1, session.preeditStart());
+						int to = Math.min(glyphPositions.size - 1, from + session.preedit().length());
+						float left = Math.max(0, caretX + glyphPositions.get(from) - glyphPositions.get(cursor));
+						float right = Math.min(getWidth(), caretX + glyphPositions.get(to) - glyphPositions.get(cursor));
+						if (right > left) getStyle().cursor.draw(batch, getX() + left, getY() + caretY, right - left, 1);
+					}
+				}
 				@Override public void act(float delta) {
 					super.act(delta);
 					updateSession();

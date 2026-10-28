@@ -4,7 +4,7 @@ package bms.player.beatoraja.input;
  * Per-editor IME transport. Lifecycle methods run on the UI thread; sinks may be
  * called from another thread. Text/ranges use UTF-16 boundaries (never half a surrogate pair).
  * A native adapter owns character delivery while available: it must not also
- * deliver the same committed characters through GLFW. No OS adapter is enabled yet.
+ * deliver the same committed characters through GLFW. OS adapters are opt-in; NONE is the default.
  */
 public interface ImeBridge {
     enum Command { SUBMIT, CANCEL }
@@ -24,6 +24,8 @@ public interface ImeBridge {
     boolean isAvailable();
     void begin(long session, TextInputSession.EditorState initial, Sink sink);
     void update(long session, TextInputSession.EditorState state);
+    /** Top-left client logical coordinates, NOT framebuffer pixels. */
+    default void caret(long session, double x, double y, double width, double height, double clientWidth, double clientHeight) { }
     void confirmComposition(long session);
     void cancelComposition(long session);
     void finish(long session);

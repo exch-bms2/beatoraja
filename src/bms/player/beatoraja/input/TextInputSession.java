@@ -71,6 +71,7 @@ public final class TextInputSession implements AutoCloseable {
     public boolean isFinishing() { return finishing; }
     public boolean isFinished() { return finished; }
     public String preedit() { return preedit; }
+    public int preeditStart() { return Math.min(state.anchor, state.cursor); }
     public int displayCursor() { return composing ? Math.min(state.anchor, state.cursor) + preeditCaret : state.cursor; }
     public String displayText() {
         if (!composing) return state.text;
