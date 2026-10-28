@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameGrabber.Exception;
 
 import com.badlogic.gdx.Gdx;
@@ -27,6 +28,10 @@ import bms.player.beatoraja.song.SongResources;
  * @author exch
  */
 public class FFmpegProcessor implements VideoProcessor {
+	/** Skip JavaCV's unsafe packed conversion and RAW image_ptr ownership; opaque retains the borrowed AVFrame. */
+	static Frame grabDecodedFrame(FFmpegFrameGrabber grabber) throws Exception {
+		return grabber.grabFrame(false, true, false, false);
+	}
 	private enum ProcessorStatus {
 		TEXTURE_INACTIVE,
 		TEXTURE_ACTIVE,
@@ -134,6 +139,7 @@ public class FFmpegProcessor implements VideoProcessor {
 		 * ffmpegアクセサ
 		 */
 		private FFmpegFrameGrabber grabber;
+		private BgrFrameConverter converter = new BgrFrameConverter();
 		/**
 		 * コマンドキュー
 		 */
@@ -188,7 +194,7 @@ public class FFmpegProcessor implements VideoProcessor {
 						}
 					} else if (microtime >= grabber.getTimestamp()) {
 						while (!haltRequested && (microtime >= grabber.getTimestamp() || framecount % fpsd != 0)) {
-							frame = grabber.grabImage();
+							frame = grabDecodedFrame(grabber);
 							if (frame == null) {
 								break;
 							}
@@ -200,16 +206,17 @@ public class FFmpegProcessor implements VideoProcessor {
 							if (loop) {
 								commands.offerLast(Command.LOOP);
 							}
-						} else if (frame.image != null && frame.image[0] != null) {
+						} else {
+							Frame converted = converter.convert(frame);
 							try {
 								synchronized (pixmapLock) {
-									if (pixmap == null || pixmap.getWidth() != frame.imageWidth || pixmap.getHeight() != frame.imageHeight) {
+									if (pixmap == null || pixmap.getWidth() != converted.imageWidth || pixmap.getHeight() != converted.imageHeight) {
 										if (pixmap != null) {
 											pixmap.dispose();
 										}
-										pixmap = new Pixmap(frame.imageWidth, frame.imageHeight, Pixmap.Format.RGB888);
+										pixmap = new Pixmap(converted.imageWidth, converted.imageHeight, Pixmap.Format.RGB888);
 									}
-									copyFrameToPixmap(frame, pixmap);
+									copyFrameToPixmap(converted, pixmap);
 								}
 								Gdx.app.postRunnable(() -> {
 									synchronized (pixmapLock) {
@@ -282,6 +289,9 @@ public class FFmpegProcessor implements VideoProcessor {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					} finally {
+						try { if (converter != null) converter.close(); }
+						catch (Throwable e) { e.printStackTrace(); }
+						converter = null;
 						movieBytes = null;
 						frameRow = null;
 						commands.clear();
@@ -293,6 +303,7 @@ public class FFmpegProcessor implements VideoProcessor {
 
 		private void openGrabber() throws Exception {
 			grabber = new FFmpegFrameGrabber(new ByteArrayInputStream(movieBytes));
+			grabber.setImageMode(ImageMode.RAW);
 			grabber.start();
 			while (grabber.getVideoBitrate() < 10) {
 				final int videoStream = grabber.getVideoStream();
@@ -338,7 +349,7 @@ public class FFmpegProcessor implements VideoProcessor {
 			} else {
 				try {
 					grabber.restart();
-					grabber.grabImage();
+					grabDecodedFrame(grabber);
 				} catch (Throwable e) {
 					reopenGrabber();
 				}

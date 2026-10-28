@@ -299,6 +299,27 @@ tasks.register<JavaExec>("lwjgl3BgaSkinIntegrationTest") {
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 
+tasks.register<JavaExec>("ffmpegDecoderIsolationTest") {
+    group = "verification"
+    description = "Isolate RAW decode, legacy COLOR and aligned color conversion in separate JVMs."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.video.FFmpegDecoderIsolationTest")
+    timeout.set(Duration.ofMinutes(10))
+    args(layout.buildDirectory.dir("decoder-isolation").get().asFile.absolutePath)
+    systemProperty("beatoraja.decoder.unsafeProbes", providers.gradleProperty("decoderUnsafeProbes").getOrElse("false"))
+    systemProperty("beatoraja.decoder.width", providers.gradleProperty("decoderWidth").getOrElse("0"))
+}
+
+tasks.register<JavaExec>("ffmpegFrameConverterTest") {
+    group = "verification"
+    description = "Verify aligned BGR conversion layouts/formats without a GL context."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.video.BgrFrameConverterTest")
+    timeout.set(Duration.ofMinutes(3))
+}
+
 tasks.register<JavaExec>("lwjgl3StateEnduranceTest") {
     group = "verification"
     description = "Stress synthetic SELECT/PLAY/RESULT transitions with real GL/video/fonts and memory/timing CSVs."
