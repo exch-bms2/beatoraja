@@ -144,6 +144,12 @@ tasks.named<JavaExec>("run") {
     providers.gradleProperty("inputDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
     }
+    providers.gradleProperty("memoryDiagnosticsOutput").orNull?.let {
+        systemProperty("beatoraja.memoryDiagnostics.output", it)
+    }
+    providers.gradleProperty("memoryDiagnosticsSettleMillis").orNull?.let {
+        systemProperty("beatoraja.memoryDiagnostics.settleMillis", it)
+    }
 }
 tasks.named<Jar>("jar") {
     manifest.attributes("Main-Class" to application.mainClass.get())
@@ -151,6 +157,8 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.MemoryDiagnosticsTest",
+    "bms.player.beatoraja.video.EnduranceStatisticsTest",
     "bms.player.beatoraja.skin.SkinTextClipboardTest",
     "bms.player.beatoraja.input.TextEditingControlTest",
     "bms.player.beatoraja.skin.StageViewportTest",
@@ -288,6 +296,37 @@ tasks.register<JavaExec>("lwjgl3BgaSkinIntegrationTest") {
     timeout.set(Duration.ofMinutes(10))
     args(layout.buildDirectory.dir("gl-integration").get().asFile.absolutePath)
     systemProperty("beatoraja.glIntegration.cycles", providers.gradleProperty("glIntegrationCycles").getOrElse("8"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3StateEnduranceTest") {
+    group = "verification"
+    description = "Stress synthetic SELECT/PLAY/RESULT transitions with real GL/video/fonts and memory/timing CSVs."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.video.Lwjgl3StateEnduranceTest")
+    maxHeapSize = "768m"
+    timeout.set(Duration.ofMinutes(providers.gradleProperty("enduranceTimeoutMinutes").getOrElse("120").toLong().coerceIn(1, 1440)))
+    args(providers.gradleProperty("enduranceOutput").getOrElse(layout.buildDirectory.dir("state-endurance").get().asFile.absolutePath))
+    systemProperty("beatoraja.endurance.cycles", providers.gradleProperty("enduranceCycles").getOrElse("20"))
+    systemProperty("beatoraja.endurance.warmup", providers.gradleProperty("enduranceWarmup").getOrElse("3"))
+    systemProperty("beatoraja.endurance.seconds", providers.gradleProperty("enduranceSeconds").getOrElse("0"))
+    systemProperty("beatoraja.endurance.settleFrames", providers.gradleProperty("enduranceSettleFrames").getOrElse("4"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3StateEnduranceFailureTest") {
+    group = "verification"
+    description = "Verify missing-frame detection, failure screenshot and resource cleanup with injected rendering loss."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.video.Lwjgl3StateEnduranceTest")
+    maxHeapSize = "768m"
+    timeout.set(Duration.ofMinutes(3))
+    args(layout.buildDirectory.dir("state-endurance-failure").get().asFile.absolutePath)
+    systemProperty("beatoraja.endurance.cycles", "2")
+    systemProperty("beatoraja.endurance.warmup", "0")
+    systemProperty("beatoraja.endurance.injectMissingFrame", "true")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

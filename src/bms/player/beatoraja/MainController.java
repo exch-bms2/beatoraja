@@ -247,6 +247,7 @@ public final class MainController {
 	}
 
 	public void changeState(MainStateType state) {
+		final long transitionStart = config.isMemoryDiagnostics() ? System.nanoTime() : 0;
 		final MainState newState = switch (state) {
 			case MUSICSELECT -> {
 				if (this.bmsfile != null) {
@@ -268,7 +269,8 @@ public final class MainController {
 			case SKINCONFIG -> skinconfig;
 		};
 
-		if (newState != null && current != newState) {
+		final boolean stateChanged = newState != null && current != newState;
+		if (stateChanged) {
 			if(current != null) {
 				current.shutdown();
 				current.setSkin(null);
@@ -280,7 +282,6 @@ public final class MainController {
 			current = newState;
 			timer.setMainState(newState);
 			current.prepare();
-			memoryDiagnostics.capture(this, current.type.name());
 			updateMainStateListener(0);
 		}
 		if (current.getStage() != null) {
@@ -288,6 +289,7 @@ public final class MainController {
 		} else {
 			Gdx.input.setInputProcessor(new InputMultiplexer(input.getSkinMouseInput(), input.getKeyBoardInputProcesseor()));
 		}
+		if (stateChanged) memoryDiagnostics.transitionComplete(this, current.type.name(), transitionStart);
 	}
 
 	public MainState getCurrentState() {
@@ -402,6 +404,7 @@ public final class MainController {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		current.render();
+		final MainState drawnState = current;
 		sprite.begin();
 		if (current.getSkin() != null) {
 			current.getSkin().updateCustomObjects(current);
@@ -416,6 +419,7 @@ public final class MainController {
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 			stage.draw();
 		}
+		if (current == drawnState) memoryDiagnostics.frameRendered(this, current.type.name());
 
 		// show fps
 		if (showfps && systemfont != null) {
