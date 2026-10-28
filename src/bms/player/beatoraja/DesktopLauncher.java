@@ -20,6 +20,12 @@ public final class DesktopLauncher {
     private DesktopLauncher() { }
 
     public static void main(String[] args) {
+        if (Arrays.asList(args).contains("--runtime-smoke")) {
+            PackagedRuntimeProbe.main(args);
+            return;
+        }
+        DistributionDiagnostics.start(Arrays.asList(args).contains("--display-modes") ? "display-probe"
+                : Boolean.getBoolean(GAME_PROCESS) ? "game" : "launcher");
         if (Arrays.asList(args).contains("--display-modes")) {
             try {
                 var info = new ScreenInfo();
@@ -42,6 +48,7 @@ public final class DesktopLauncher {
             process = new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
                     System.getProperty("os.name"), ManagementFactory.getRuntimeMXBean().getInputArguments(), "--display-modes"))
                     .redirectOutput(output.toFile()).redirectError(ProcessBuilder.Redirect.INHERIT).start();
+            DistributionDiagnostics.observe(process, "display-probe");
             if (!process.waitFor(15, TimeUnit.SECONDS) || process.exitValue() != 0)
                 throw new IOException("Display-mode probe did not complete successfully");
             return new Json().fromJson(ScreenInfo.class, Files.readString(output));
@@ -71,9 +78,9 @@ public final class DesktopLauncher {
     }
 
     public static Process startGame(String... args) throws IOException {
-        return new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
+        return DistributionDiagnostics.observe(new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
                 System.getProperty("os.name"), ManagementFactory.getRuntimeMXBean().getInputArguments(), args))
-                .directory(Path.of(System.getProperty("user.dir")).toFile()).inheritIO().start();
+                .directory(Path.of(System.getProperty("user.dir")).toFile()).inheritIO().start(), "game");
     }
 
     static List<String> gameCommand(String javaHome, String classpath, String os, List<String> vmArgs, String... args) {

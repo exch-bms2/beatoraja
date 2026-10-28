@@ -184,6 +184,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
     "bms.player.beatoraja.Lwjgl3MigrationTest",
+    "bms.player.beatoraja.DistributionDiagnosticsTest",
     "bms.player.beatoraja.TwitterIntegrationRemovalTest",
     "bms.player.beatoraja.CourseDataAccessorTest",
     "bms.player.beatoraja.play.PracticeConfigurationTest",
@@ -286,6 +287,18 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     workingDir(projectDir)
 }
 tasks.check { dependsOn(distributionSmokeTest) }
+
+tasks.register<JavaExec>("packagedZipSmokeTest") {
+    group = "verification"
+    description = "Extract the distribution ZIP and verify native loading/exit using only its packaged classpath."
+    dependsOn(tasks.distZip, tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.PackagedZipSmokeTest")
+    args(tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
+        java17.get().executablePath.asFile.absolutePath,
+        layout.buildDirectory.dir("packaged-smoke").get().asFile.absolutePath)
+    timeout.set(Duration.ofMinutes(3))
+}
 
 tasks.register<JavaExec>("lwjgl3BgaSkinIntegrationTest") {
     group = "verification"

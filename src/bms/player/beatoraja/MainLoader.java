@@ -72,6 +72,7 @@ public class MainLoader extends Application {
 	private final SongDatabaseAccessorProvider songDatabaseAccessorProvider = new SongDatabaseAccessorProvider();
 
 	public static void main(String[] args) {
+		DistributionDiagnostics.start(Boolean.getBoolean(DesktopLauncher.GAME_PROCESS) ? "game" : "launcher");
 
 		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
 			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Java.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -208,10 +209,12 @@ public class MainLoader extends Application {
 
 					public void dispose() {
 						main.dispose();
+						DistributionDiagnostics.event("game-dispose-complete");
 					}
 
 					public void create() {
 						main.create();
+						DistributionDiagnostics.event("game-create-complete");
 					}
 				}, frames, () -> main.getCurrentState() != null ? main.getCurrentState().type.name() : "STARTUP"), cfg) {
 					@Override public Lwjgl3Input createInput(Lwjgl3Window window) { return new PollingLwjgl3Input(window, frames); }

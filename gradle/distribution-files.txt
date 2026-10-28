@@ -83,6 +83,7 @@ skin/default/songbar.png
 skin/default/system.png
 skin/default/trophy.png
 docs/gradle-build.md
+docs/distribution-smoke.md
 docs/input-diagnostics.md
 docs/input-shutdown.md
 docs/window-input-lifecycle.md
