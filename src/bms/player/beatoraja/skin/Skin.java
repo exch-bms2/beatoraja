@@ -403,6 +403,7 @@ public class Skin {
 				textInput.focus(state, text);
 				break;
 			}
+			if (textInput != null && textInput.isFinishing()) break;
 			if (obj.draw && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
@@ -410,6 +411,7 @@ public class Skin {
 	}
 
 	public void mouseDragged(MainState state, int button, int x, int y) {
+		if (textInput != null && textInput.isFinishing()) return;
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
 			if (obj instanceof SkinSlider && obj.draw && obj.mousePressed(state, button, x, y)) {

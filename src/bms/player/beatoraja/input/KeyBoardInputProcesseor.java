@@ -297,6 +297,14 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public synchronized void setTextInputMode(boolean textmode) {
+		setTextInputMode(textmode, false);
+	}
+
+	private boolean imeTextMode;
+
+	/** Native IME sessions reserve function keys too; legacy editing keeps its shortcuts. */
+	public synchronized void setTextInputMode(boolean textmode, boolean ime) {
+		if (textmode) imeTextMode = ime;
 		if (!this.textmode && textmode) {
 			for (ControlKeys key : ControlKeys.values()) if (isEditingControl(key)) {
 				keystate[key.keycode] = false;
@@ -313,6 +321,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			}
 		}
 		this.textmode = textmode;
+		if (!textmode) imeTextMode = false;
 		if (Gdx.input instanceof PollingLwjgl3Input input) input.configureKeyboardEvents(textmode ? new int[0] : keys);
 	}
 
@@ -324,8 +333,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return reserved.contains(key);
 	}
 	
-	private static boolean isEditingControl(ControlKeys key) {
-		return key.text || switch (key) {
+	private boolean isEditingControl(ControlKeys key) {
+		return imeTextMode || key.text || switch (key) {
 			case UP, DOWN, LEFT, RIGHT, DEL, ESCAPE -> true;
 			default -> false;
 		};

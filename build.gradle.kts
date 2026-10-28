@@ -161,6 +161,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.video.EnduranceStatisticsTest",
     "bms.player.beatoraja.skin.SkinTextClipboardTest",
     "bms.player.beatoraja.input.TextEditingControlTest",
+    "bms.player.beatoraja.input.TextInputSessionTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
@@ -169,6 +170,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.FramePacingDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
+    "bms.player.beatoraja.audio.AudioBackendTestAssetsTest",
     "bms.player.beatoraja.input.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.SkinProjectionTest",
@@ -263,11 +265,23 @@ val prepareRuntimeDirectories by tasks.registering {
         check(directories.get().dir("table").asFile.mkdirs() || directories.get().dir("table").asFile.isDirectory)
     }
 }
+val generateAudioBackendTestAssets by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Generate deterministic WAV/BMS fixtures for manual audio backend comparisons (no audio output)."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.audio.AudioBackendTestAssets")
+    val assets = layout.buildDirectory.dir("generated/audio-test")
+    args(assets.get().asFile.absolutePath)
+    outputs.dir(assets)
+    doFirst { delete(assets) }
+}
 distributions {
     main {
         contents {
             from(projectDir) { include(distributionFiles) }
             from(prepareRuntimeDirectories)
+            from(generateAudioBackendTestAssets) { into("audio-test") }
         }
     }
 }

@@ -1,6 +1,8 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.input.ImeBridge;
+import bms.player.beatoraja.input.TextInputSession;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -34,6 +36,12 @@ class SkinTextInput {
 	private Texture selectionTexture;
 	private boolean committing;
 	private boolean commitRequested;
+	private final ImeBridge bridge;
+	private TextInputSession session;
+	private Runnable pendingFocus;
+
+	SkinTextInput() { this(ImeBridge.NONE); }
+	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
 	void focus(MainState state, SkinText target) {
 		if (target.getWriter() == null || committing) {
@@ -44,7 +52,11 @@ class SkinTextInput {
 			updateBounds(target);
 			return;
 		}
-		commit();
+		if (this.target != null) {
+			pendingFocus = () -> focus(state, target);
+			commit();
+			return;
+		}
 		this.state = state;
 		this.target = target;
 		commitRequested = false;
@@ -57,11 +69,36 @@ class SkinTextInput {
 		textField.setVisible(true);
 		stage.setKeyboardFocus(textField);
 		textField.setCursorPosition(textField.getText().length());
+		try {
+			session = new TextInputSession(bridge, editorState());
+		} catch (RuntimeException | Error e) {
+			this.target = null;
+			textField.setVisible(false);
+			stage.setKeyboardFocus(null);
+			throw e;
+		}
 		textField.getOnscreenKeyboard().show(textField);
-		state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(true);
+		state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(true, session.usesIme());
 	}
 
 	void commit() {
+		if (target == null || textField == null || committing) return;
+		if (session != null) {
+			try {
+				syncEditor();
+				session.requestFinish();
+				session.drain();
+				if (!session.isFinished()) return;
+			} catch (RuntimeException | Error e) {
+				pendingFocus = null;
+				try { completeCommit(); } catch (RuntimeException | Error cleanup) { e.addSuppressed(cleanup); }
+				throw e;
+			}
+		}
+		completeCommit();
+	}
+
+	private void completeCommit() {
 		if (target == null || textField == null || committing) {
 			return;
 		}
@@ -70,21 +107,61 @@ class SkinTextInput {
 		SkinText current = target;
 		MainState owner = state;
 		TextField field = textField;
+		Runnable next = pendingFocus;
+		pendingFocus = null;
+		String value = session != null && session.usesIme() ? session.state().text() : field.getText();
 		try {
-			current.getWriter().set(owner, field.getText());
-			current.setText(field.getText());
+			current.getWriter().set(owner, value);
+			current.setText(value);
 		} finally {
 			target = null;
 			try {
-				field.setVisible(false);
-				field.getOnscreenKeyboard().close();
-				Stage stage = owner != null ? owner.getStage() : null;
-				if (stage != null && stage.getKeyboardFocus() == field) stage.setKeyboardFocus(null);
+				try { if (session != null) session.close(); }
+				finally {
+					session = null;
+					field.setVisible(false);
+					field.getOnscreenKeyboard().close();
+					Stage stage = owner != null ? owner.getStage() : null;
+					if (stage != null && stage.getKeyboardFocus() == field) stage.setKeyboardFocus(null);
+				}
 			} finally {
 				try {
 					if (owner != null) owner.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
 				} finally { committing = false; }
 			}
+		}
+		if (next != null) next.run();
+	}
+
+	boolean isFinishing() { return session != null && session.isFinishing() && !session.isFinished(); }
+
+	private TextInputSession.EditorState editorState() {
+		String value = textField.getText();
+		int cursor = textBoundary(value, textField.getCursorPosition());
+		return new TextInputSession.EditorState(value,
+				textField.getSelection().isEmpty() ? cursor : textBoundary(value, textField.getSelectionStart()), cursor);
+	}
+
+	private static int textBoundary(String text, int offset) {
+		return offset > 0 && offset < text.length() && Character.isSurrogatePair(text.charAt(offset - 1), text.charAt(offset))
+				? offset - 1 : offset;
+	}
+
+	private void syncEditor() {
+		if (session != null && session.usesIme() && !session.isComposing() && !session.isFinishing()) session.updateEditor(editorState());
+	}
+
+	private void updateSession() {
+		if (session == null || !session.usesIme() || target == null) return;
+		syncEditor();
+		session.drain();
+		if (session.usesIme()) {
+			if (session.isFinished()) { completeCommit(); return; }
+			String display = session.displayText();
+			if (!textField.getText().equals(display)) textField.setText(display);
+			var value = session.state();
+			if (!session.isComposing() && value.anchor() != value.cursor()) textField.setSelection(value.anchor(), value.cursor());
+			else textField.setCursorPosition(session.displayCursor());
 		}
 	}
 
@@ -99,7 +176,14 @@ class SkinTextInput {
 	}
 
 	void dispose() {
-		try { commit(); }
+		pendingFocus = null;
+		try {
+			// Screen disposal must not wait for a future native finish acknowledgement.
+			if (session != null && session.usesIme()) {
+				try { session.drain(); } finally { completeCommit(); }
+			}
+			else commit();
+		}
 		finally { disposeResources(); }
 	}
 
@@ -164,16 +248,19 @@ class SkinTextInput {
 			textField = new TextField("", style) {
 				@Override public void act(float delta) {
 					super.act(delta);
+					updateSession();
 					// Drain the complete input batch before submitting, including text delivered after Enter.
 					if (commitRequested) commit();
 				}
 				@Override protected InputListener createInputListener() {
 					return new TextFieldClickListener() {
 						@Override public boolean keyDown(InputEvent event, int keycode) {
+							if (session != null && session.usesIme()) return true;
 							try { return super.keyDown(event, keycode); }
 							catch (SkinTextClipboard.WriteFailure e) { return true; }
 						}
 						@Override public boolean keyTyped(InputEvent event, char character) {
+							if (session != null && session.usesIme()) return true;
 							int position = getCursorPosition();
 							String value = getText();
 							if (getSelection().isEmpty()) {
