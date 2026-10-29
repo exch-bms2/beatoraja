@@ -15,6 +15,7 @@ final class WindowModeController {
         Area[] workAreas();
         Insets insets();
         void position(int x, int y);
+        default boolean hasWindowPosition() { return true; }
     }
 
     record Bounds(int x, int y, int width, int height) { }
@@ -54,7 +55,7 @@ final class WindowModeController {
                     height = Math.min(height, Math.max(1, fullscreenBounds.height));
                 }
                 switched = backend.windowed(width, height);
-                if (switched && !backend.fullscreen()) {
+                if (switched && !backend.fullscreen() && backend.hasWindowPosition()) {
                     // Query after leaving fullscreen: its video mode may have changed the desktop work area.
                     Bounds source = saved != null ? saved : backend.bounds();
                     Bounds placed = place(new Bounds(source.x, source.y, requested.width, requested.height),
@@ -70,6 +71,7 @@ final class WindowModeController {
                 Logger.getGlobal().log(success ? Level.INFO : Level.WARNING,
                         "Window mode switch : requestedFullscreen=" + !wasFullscreen + ", success=" + success
                         + ", actualFullscreen=" + backend.fullscreen() + ", restore=" + requested
+                        + ", positionRestoration=" + backend.hasWindowPosition()
                         + ", actualBounds=" + backend.bounds());
             }
             return changed;
@@ -116,10 +118,17 @@ final class WindowModeController {
     }
 
     static WindowModeController create(Lwjgl3Graphics graphics, Resolution fallback) {
+        boolean positioned = GlfwWindowSupport.hasWindowPosition();
         return new WindowModeController(new Backend() {
             public boolean fullscreen() { return graphics.isFullscreen(); }
+            public boolean hasWindowPosition() { return positioned; }
             public Bounds bounds() {
                 var window = graphics.getWindow();
+                if (!positioned) {
+                    int[] width = new int[1], height = new int[1];
+                    GLFW.glfwGetWindowSize(window.getWindowHandle(), width, height);
+                    return new Bounds(0, 0, width[0], height[0]);
+                }
                 return new Bounds(window.getPositionX(), window.getPositionY(),
                         graphics.getLogicalWidth(), graphics.getLogicalHeight());
             }
@@ -129,15 +138,36 @@ final class WindowModeController {
             }
             public boolean enterFullscreen() {
                 invalidateScratch();
-                try { return graphics.setFullscreenMode(graphics.getDisplayMode()); }
+                try {
+                    if (positioned) return graphics.setFullscreenMode(graphics.getDisplayMode());
+                    // libGDX 1.14.2's setter stores desktop position and calls getMonitor().
+                    // Those calls are invalid on Wayland; let xdg-shell place the surface.
+                    long monitor = GLFW.glfwGetPrimaryMonitor();
+                    var mode = monitor != 0 ? GLFW.glfwGetVideoMode(monitor) : null;
+                    if (mode == null) return false;
+                    if (com.badlogic.gdx.Gdx.input instanceof com.badlogic.gdx.backends.lwjgl3.Lwjgl3Input input)
+                        input.resetPollingStates();
+                    GLFW.glfwSetWindowMonitor(graphics.getWindow().getWindowHandle(), monitor, 0, 0,
+                            mode.width(), mode.height(), mode.refreshRate());
+                    // The existing EGL context and requested swap interval are retained.
+                    return graphics.isFullscreen();
+                }
                 finally { invalidateScratch(); }
             }
             public boolean windowed(int width, int height) {
                 invalidateScratch();
-                try { return graphics.setWindowedMode(width, height); }
+                try {
+                    if (positioned) return graphics.setWindowedMode(width, height);
+                    if (com.badlogic.gdx.Gdx.input instanceof com.badlogic.gdx.backends.lwjgl3.Lwjgl3Input input)
+                        input.resetPollingStates();
+                    GLFW.glfwSetWindowMonitor(graphics.getWindow().getWindowHandle(), 0, 0, 0, width, height, GLFW.GLFW_DONT_CARE);
+                    // The compositor's configure/framebuffer callbacks update libGDX asynchronously.
+                    return !graphics.isFullscreen();
+                }
                 finally { invalidateScratch(); }
             }
             public void position(int x, int y) {
+                if (!positioned) return;
                 invalidateScratch();
                 try { graphics.getWindow().setPosition(x, y); }
                 finally { invalidateScratch(); }

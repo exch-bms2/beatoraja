@@ -80,7 +80,7 @@ public final class FramePacingDiagnostics implements AutoCloseable {
         long now = System.nanoTime();
         // Display-mode queries may allocate; do not query them on every high-FPS frame.
         if (!haveRefresh || now - refreshAt >= 1_000_000_000L) {
-            refreshRate = graphics.getDisplayMode().refreshRate;
+            refreshRate = GlfwWindowSupport.refreshRate(graphics);
             refreshAt = now; haveRefresh = true;
         }
         return updateContext(state, window.isFocused(),

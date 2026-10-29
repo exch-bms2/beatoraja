@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.Gdx;
 import bms.player.beatoraja.FramePacingDiagnostics;
+import bms.player.beatoraja.GlfwWindowSupport;
 import org.lwjgl.glfw.GLFW;
 
 /** Publishes GLFW input to the polling thread without calling GLFW from that thread. */
@@ -31,6 +32,9 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private boolean scratchOverflowReported;
     private final WindowDiagnostics windowDiagnostics = WindowDiagnostics.createIfEnabled();
     private final MouseScratchGeometry scratchGeometry = new MouseScratchGeometry();
+    private final MouseScratchPosition scratchPosition = new MouseScratchPosition();
+    private final boolean windowPositionSupported;
+    private boolean captureUnavailable;
     private final int[] scratchWindowX = new int[1], scratchWindowY = new int[1];
     private final float[] scratchScaleX = new float[1], scratchScaleY = new float[1];
 
@@ -39,9 +43,14 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     public PollingLwjgl3Input(Lwjgl3Window window, FramePacingDiagnostics frameDiagnostics) {
+        this(window, frameDiagnostics, GlfwWindowSupport.hasWindowPosition());
+    }
+
+    PollingLwjgl3Input(Lwjgl3Window window, FramePacingDiagnostics frameDiagnostics, boolean windowPositionSupported) {
         super(window);
         this.frameDiagnostics = frameDiagnostics;
         this.window = window;
+        this.windowPositionSupported = windowPositionSupported;
         windowInputActive = window.isFocused();
         callbacks = new Lwjgl3InputCallbacks(window.getWindowHandle(), this, diagnostics);
     }
@@ -85,7 +94,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
                 && Gdx.graphics.getBackBufferWidth() > 0 && Gdx.graphics.getBackBufferHeight() > 0;
         if (scratchEnabled) {
             long handle = window.getWindowHandle();
-            GLFW.glfwGetWindowPos(handle, scratchWindowX, scratchWindowY);
+            if (windowPositionSupported) GLFW.glfwGetWindowPos(handle, scratchWindowX, scratchWindowY);
             GLFW.glfwGetWindowContentScale(handle, scratchScaleX, scratchScaleY);
             boolean iconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) != 0;
             drawable &= !iconified;
@@ -94,25 +103,64 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
                     Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
                     scratchWindowX[0], scratchWindowY[0], scratchScaleX[0], scratchScaleY[0], focused, iconified);
         }
+        boolean sample = scratchEnabled && focused && drawable;
+        if (sample) scratchPosition.sample(windowPositionSupported || super.isCursorCatched(), deliver,
+                x, y, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        else scratchPosition.invalidate();
         if (diagnostics != null) diagnostics.mouseScratch().sample(scratchEnabled, focused, x, y,
                 ((Lwjgl3Graphics) Gdx.graphics).getLogicalWidth(), ((Lwjgl3Graphics) Gdx.graphics).getLogicalHeight(),
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Gdx.graphics.getBackBufferWidth(),
-                Gdx.graphics.getBackBufferHeight(), System.nanoTime(), deliver);
-        if (scratchEnabled && focused && drawable) {
+                Gdx.graphics.getBackBufferHeight(), System.nanoTime(), scratchPosition.delivered,
+                scratchPosition.dx, scratchPosition.dy);
+        if (sample) {
             int centerX = Gdx.graphics.getWidth() / 2;
             int centerY = Gdx.graphics.getHeight() / 2;
             // Already queued samples are real pre-transition movement; do not clear or reinterpret them.
-            if (deliver) scratch.add(x - centerX, y - centerY);
+            if (scratchPosition.delivered) scratch.add(scratchPosition.dx, scratchPosition.dy);
             checkMouseScratchOverflow();
-            if (deliver && diagnostics != null) diagnostics.scratchPublished(x - centerX, y - centerY, System.nanoTime());
-            if (diagnostics != null) diagnostics.mouseScratch().warp(centerX, centerY);
-            super.setCursorPosition(centerX, centerY);
-            x = centerX;
-            y = centerY;
+            if (scratchPosition.delivered && diagnostics != null) diagnostics.scratchPublished(scratchPosition.dx, scratchPosition.dy, System.nanoTime());
+            if (scratchPosition.recenter) {
+                if (diagnostics != null) diagnostics.mouseScratch().warp(centerX, centerY);
+                // GLFW_CURSOR_DISABLED changes only virtual position, including on Wayland.
+                super.setCursorPosition(centerX, centerY);
+                x = centerX;
+                y = centerY;
+            }
         }
     }
 
     public boolean isWindowInputActive() { return windowInputActive; }
+    /** MainController captures immediately for continuous Wayland scratch during play, not in text/config UIs. */
+    public boolean requiresMouseScratchCapture() { return !windowPositionSupported && scratchEnabled && !captureUnavailable; }
+
+    @Override public void setCursorCatched(boolean catched) {
+        if ((!windowPositionSupported && captureUnavailable && catched) || super.isCursorCatched() == catched) return;
+        invalidateMouseScratchCenter();
+        try {
+            if (windowPositionSupported || !catched) { super.setCursorCatched(catched); return; }
+            // GLFW's requested mode is not proof that the compositor supports pointer locking.
+            boolean[] refused = {false};
+            var previous = GLFW.glfwSetErrorCallback(null);
+            org.lwjgl.glfw.GLFWErrorCallback observer = null;
+            try {
+                observer = org.lwjgl.glfw.GLFWErrorCallback.create((error, message) -> {
+                    if (error == GLFW.GLFW_FEATURE_UNAVAILABLE || error == GLFW.GLFW_FEATURE_UNIMPLEMENTED
+                            || error == GLFW.GLFW_PLATFORM_ERROR) refused[0] = true;
+                    if (previous != null) previous.invoke(error, message);
+                });
+                GLFW.glfwSetErrorCallback(observer);
+                super.setCursorCatched(true);
+            } finally {
+                GLFW.glfwSetErrorCallback(previous);
+                if (observer != null) observer.free();
+            }
+            if (refused[0]) {
+                captureUnavailable = true;
+                super.setCursorCatched(false);
+                java.util.logging.Logger.getGlobal().warning("Wayland cursor capture unavailable; using bounded cursor movement without warping");
+            }
+        } finally { invalidateMouseScratchCenter(); }
+    }
 
     synchronized void setActivityListener(java.util.function.Consumer<Boolean> listener) { activityListener = listener; }
     synchronized void clearActivityListener(java.util.function.Consumer<Boolean> listener) {
@@ -236,6 +284,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             callbacks = null;
         }
         super.windowHandleChanged(handle);
+        captureUnavailable = false;
         if (scratch != null) resetMouseScratchDeltas();
         invalidateMouseScratchCenter();
         if (diagnostics != null) diagnostics.mouseScratch().resetCallbacks();

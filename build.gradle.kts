@@ -179,6 +179,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.SkinProjectionTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
+    "bms.player.beatoraja.input.WaylandCompatibilityTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
     "bms.player.beatoraja.input.KeyboardEventQueueTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
@@ -656,4 +657,28 @@ tasks.register<JavaExec>("lwjgl3MouseScratchGeometrySmokeTest") {
     systemProperty("beatoraja.hidpiTest.fullscreen", providers.gradleProperty("hidpiTestFullscreen").getOrElse("false"))
     providers.gradleProperty("inputDiagnostics").orNull?.let { systemProperty("beatoraja.inputDiagnostics", it) }
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+tasks.register<JavaExec>("lwjgl3WaylandPolicyTest") {
+    group = "verification"
+    description = "Real GL with the Wayland input policy and synthetic cursor endpoints, not a compositor test."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3WaylandCompatibilityTest")
+    systemProperty("beatoraja.windowDiagnostics", "true")
+    systemProperty("beatoraja.inputDiagnostics", "true")
+    timeout.set(Duration.ofMinutes(3))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+tasks.register<JavaExec>("nativeWaylandWindowTest") {
+    group = "verification"
+    description = "Linux-only native Wayland window/input smoke, requiring an actual compositor."
+    onlyIf { System.getProperty("os.name").startsWith("Linux") }
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3WaylandCompatibilityTest")
+    systemProperty("beatoraja.test.nativeWayland", "true")
+    systemProperty("beatoraja.test.waylandFullscreen", providers.gradleProperty("waylandFullscreen").getOrElse("false"))
+    systemProperty("beatoraja.windowDiagnostics", "true")
+    systemProperty("beatoraja.inputDiagnostics", "true")
+    timeout.set(Duration.ofMinutes(3))
 }

@@ -27,6 +27,7 @@ import bms.player.beatoraja.external.*;
 import bms.player.beatoraja.external.discord.DiscordListener;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.input.PollingLwjgl3Input;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.TargetProperty;
@@ -516,7 +517,8 @@ public final class MainController {
             	mouseMovedTime = time;
 			}
 			var window = ((Lwjgl3Graphics) Gdx.graphics).getWindow();
-			boolean catchCursor = current == bmsplayer && time > mouseMovedTime + 5000 && window.isFocused()
+			boolean scratchCapture = Gdx.input instanceof PollingLwjgl3Input polling && polling.requiresMouseScratchCapture();
+			boolean catchCursor = current == bmsplayer && (scratchCapture || time > mouseMovedTime + 5000) && window.isFocused()
 					&& (Gdx.input.isCursorCatched() || GLFW.glfwGetWindowAttrib(window.getWindowHandle(), GLFW.GLFW_HOVERED) == GLFW.GLFW_TRUE);
 			if (Gdx.input.isCursorCatched() != catchCursor) Gdx.input.setCursorCatched(catchCursor);
 

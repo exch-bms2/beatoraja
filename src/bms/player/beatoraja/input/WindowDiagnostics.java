@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import org.lwjgl.glfw.GLFW;
+import bms.player.beatoraja.GlfwWindowSupport;
 
 /** Opt-in, change-only observations from the GLFW owner thread. No cursor positions are logged. */
 public final class WindowDiagnostics {
@@ -11,6 +12,8 @@ public final class WindowDiagnostics {
     private final float[] scaleX = new float[1], scaleY = new float[1];
     private Snapshot previous;
     private long previousHandle;
+    private long previousMonitor;
+    private boolean previousCaptured;
 
     public static WindowDiagnostics createIfEnabled() {
         return Boolean.getBoolean("beatoraja.windowDiagnostics") ? new WindowDiagnostics() : null;
@@ -20,21 +23,32 @@ public final class WindowDiagnostics {
         var graphics = (Lwjgl3Graphics) Gdx.graphics;
         var window = graphics.getWindow();
         long handle = window.getWindowHandle();
-        GLFW.glfwGetWindowPos(handle, x, y);
+        boolean positioned = GlfwWindowSupport.hasWindowPosition();
+        if (positioned) GLFW.glfwGetWindowPos(handle, x, y);
+        else { x[0] = 0; y[0] = 0; }
         GLFW.glfwGetWindowContentScale(handle, scaleX, scaleY);
-        var monitor = graphics.getMonitor();
+        long monitorHandle = GLFW.glfwGetWindowMonitor(handle);
+        var monitor = positioned ? graphics.getMonitor() : null;
+        int monitorX = monitor != null ? monitor.virtualX : 0, monitorY = monitor != null ? monitor.virtualY : 0;
         int width = graphics.getWidth(), height = graphics.getHeight();
         int bufferWidth = graphics.getBackBufferWidth(), bufferHeight = graphics.getBackBufferHeight();
         boolean fullscreen = graphics.isFullscreen(), focused = window.isFocused();
+        boolean captured = GLFW.glfwGetInputMode(handle, GLFW.GLFW_CURSOR) == GLFW.GLFW_CURSOR_DISABLED;
         boolean iconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) != 0;
-        if (previous != null && previousHandle == handle && previous.matches(width, height, bufferWidth, bufferHeight,
-                x[0], y[0], scaleX[0], scaleY[0], monitor.virtualX, monitor.virtualY,
+        if (previous != null && previousHandle == handle && previousMonitor == monitorHandle && previousCaptured == captured
+                && previous.matches(width, height, bufferWidth, bufferHeight,
+                x[0], y[0], scaleX[0], scaleY[0], monitorX, monitorY,
                 fullscreen, focused, iconified)) return;
         previous = new Snapshot(width, height, bufferWidth, bufferHeight, x[0], y[0],
-                scaleX[0], scaleY[0], monitor.virtualX, monitor.virtualY, fullscreen, focused, iconified);
+                scaleX[0], scaleY[0], monitorX, monitorY, fullscreen, focused, iconified);
         previousHandle = handle;
-        Logger.getGlobal().info("Window diagnostics [logicalInput=true, cursorPositionsLogged=false] " + previous
-                + ", monitor=" + monitor.name + ", refreshRate=" + graphics.getDisplayMode().refreshRate
+        previousMonitor = monitorHandle;
+        previousCaptured = captured;
+        String monitorName = monitor != null ? monitor.name : monitorHandle != 0 ? GLFW.glfwGetMonitorName(monitorHandle) : "unknown";
+        Logger.getGlobal().info("Window diagnostics [logicalInput=true, cursorPositionsLogged=false, platform=" + GLFW.glfwGetPlatform()
+                + ", windowPositionKnown=" + positioned + ", windowedOutputKnown=" + positioned
+                + ", iconifiedObservable=" + positioned + ", cursorCaptured=" + captured + "] " + previous
+                + ", monitor=" + monitorName + ", refreshRate=" + GlfwWindowSupport.refreshRate(graphics)
                 + ", bufferPerLogical=" + ratio(bufferWidth, width) + "x" + ratio(bufferHeight, height));
     }
 

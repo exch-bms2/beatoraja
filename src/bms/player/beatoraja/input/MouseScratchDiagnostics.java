@@ -67,6 +67,11 @@ final class MouseScratchDiagnostics {
 
     synchronized void sample(boolean enabled, boolean focused, int px, int py,
             int lw, int lh, int iw, int ih, int bw, int bh, long now, boolean deliver) {
+        sample(enabled, focused, px, py, lw, lh, iw, ih, bw, bh, now, deliver, px - iw / 2, py - ih / 2);
+    }
+
+    synchronized void sample(boolean enabled, boolean focused, int px, int py,
+            int lw, int lh, int iw, int ih, int bw, int bh, long now, boolean deliver, int dx, int dy) {
         if (closed) return;
         boolean geometryChanged = haveContext && (logicalWidth != lw || logicalHeight != lh
                 || inputWidth != iw || inputHeight != ih || bufferWidth != bw || bufferHeight != bh);
@@ -105,7 +110,6 @@ final class MouseScratchDiagnostics {
             baseline = warpPending = false;
             return;
         }
-        int dx = px - iw / 2, dy = py - ih / 2;
         if (px <= 0 || py <= 0 || px >= iw - 1 || py >= ih - 1) count(Counter.EDGE_SAMPLES);
         if (px < 0 || py < 0 || px >= iw || py >= ih) count(Counter.OUTSIDE_SAMPLES);
         x.sample(dx);
