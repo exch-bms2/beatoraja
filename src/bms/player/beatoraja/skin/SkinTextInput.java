@@ -4,6 +4,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.ImeBridge;
 import bms.player.beatoraja.input.TextInputSession;
 import bms.player.beatoraja.input.MacOsImeBridge;
+import bms.player.beatoraja.input.WindowsImeBridge;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -42,7 +43,7 @@ class SkinTextInput {
 	private Runnable pendingFocus;
 	private Runnable publishImeCaret;
 
-	SkinTextInput() { this(MacOsImeBridge.create()); }
+	SkinTextInput() { this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create() : MacOsImeBridge.create()); }
 	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
 	void focus(MainState state, SkinText target) {
@@ -74,8 +75,8 @@ class SkinTextInput {
 		try {
 			session = new TextInputSession(bridge, editorState());
 		} catch (RuntimeException | Error e) {
-			if (bridge instanceof MacOsImeBridge) {
-				java.util.logging.Logger.getGlobal().warning("macOS IME attachment failed; using GLFW text input: " + e);
+			if (bridge instanceof MacOsImeBridge || bridge instanceof WindowsImeBridge) {
+				java.util.logging.Logger.getGlobal().warning("Native IME attachment failed; using GLFW text input: " + e);
 				bridge = ImeBridge.NONE;
 				session = new TextInputSession(bridge, editorState());
 			} else {
@@ -163,6 +164,7 @@ class SkinTextInput {
 	private void updateSession() {
 		if (session == null || !session.usesIme() || target == null) return;
 		syncEditor();
+		bridge.poll(session.id());
 		session.drain();
 		if (session.usesIme()) {
 			if (session.isFinished()) { completeCommit(); return; }

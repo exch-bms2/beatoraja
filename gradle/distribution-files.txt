@@ -90,6 +90,7 @@ docs/window-input-lifecycle.md
 docs/stage-framebuffer-hidpi.md
 docs/text-input-ime-clipboard.md
 docs/macos-ime.md
+docs/windows-ime.md
 docs/state-endurance.md
 docs/ffmpeg-decoder-alignment.md
 docs/keyboard-events.md

@@ -163,6 +163,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.TextEditingControlTest",
     "bms.player.beatoraja.input.TextInputSessionTest",
     "bms.player.beatoraja.input.MacOsImeBridgeTest",
+    "bms.player.beatoraja.input.WindowsImeBridgeTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
@@ -305,6 +306,9 @@ val buildMacOsImeTest by tasks.registering(Exec::class) {
         file("test/native/macos/ime-test.m").absolutePath, "-o", macOsImeTestLibrary.get().asFile.absolutePath)
 }
 tasks.named<JavaExec>("run") {
+    if (providers.gradleProperty("windowsIme").getOrElse("false").toBoolean()) {
+        systemProperty("beatoraja.windowsIme", "true")
+    }
     if (providers.gradleProperty("macosIme").getOrElse("false").toBoolean()) {
         dependsOn(buildMacOsIme)
         systemProperty("beatoraja.macosIme", "true")
@@ -433,6 +437,22 @@ tasks.register<JavaExec>("lwjgl3TextInputTest") {
     mainClass.set("bms.player.beatoraja.skin.Lwjgl3TextInputTest")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+tasks.register<JavaExec>("windowsImeCallbackTest") {
+    group = "verification"
+    description = "Check six-argument SUBCLASSPROC FFI marshaling on the host ABI (not Windows IME)."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.WindowsImeCallbackTest")
+}
+tasks.register<JavaExec>("windowsImeWindowTest") {
+    group = "verification"
+    description = "Windows-only synthetic HWND/IMM smoke test; does not automate a Japanese input source."
+    onlyIf { System.getProperty("os.name").startsWith("Windows") }
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.WindowsImeWindowTest")
+    timeout.set(Duration.ofMinutes(3))
 }
 tasks.register<JavaExec>("macOsImeIntegrationTest") {
     group = "verification"

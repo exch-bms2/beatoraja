@@ -26,6 +26,8 @@ public interface ImeBridge {
     void update(long session, TextInputSession.EditorState state);
     /** Top-left client logical coordinates, NOT framebuffer pixels. */
     default void caret(long session, double x, double y, double width, double height, double clientWidth, double clientHeight) { }
+    /** Optional owner-thread work (e.g. a bounded asynchronous native finish). */
+    default void poll(long session) { }
     void confirmComposition(long session);
     void cancelComposition(long session);
     void finish(long session);
