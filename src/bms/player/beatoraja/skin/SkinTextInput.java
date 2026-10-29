@@ -5,6 +5,7 @@ import bms.player.beatoraja.input.ImeBridge;
 import bms.player.beatoraja.input.TextInputSession;
 import bms.player.beatoraja.input.MacOsImeBridge;
 import bms.player.beatoraja.input.WindowsImeBridge;
+import bms.player.beatoraja.input.X11ImeBridge;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -43,7 +44,8 @@ class SkinTextInput {
 	private Runnable pendingFocus;
 	private Runnable publishImeCaret;
 
-	SkinTextInput() { this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create() : MacOsImeBridge.create()); }
+	SkinTextInput() { this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create()
+			: System.getProperty("os.name", "").startsWith("Linux") ? X11ImeBridge.create() : MacOsImeBridge.create()); }
 	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
 	void focus(MainState state, SkinText target) {
@@ -75,7 +77,7 @@ class SkinTextInput {
 		try {
 			session = new TextInputSession(bridge, editorState());
 		} catch (RuntimeException | Error e) {
-			if (bridge instanceof MacOsImeBridge || bridge instanceof WindowsImeBridge) {
+			if (bridge instanceof MacOsImeBridge || bridge instanceof WindowsImeBridge || bridge instanceof X11ImeBridge) {
 				java.util.logging.Logger.getGlobal().warning("Native IME attachment failed; using GLFW text input: " + e);
 				bridge = ImeBridge.NONE;
 				session = new TextInputSession(bridge, editorState());

@@ -3,6 +3,7 @@ import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import java.time.Duration
+import java.io.File
 
 plugins {
     application
@@ -164,6 +165,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.TextInputSessionTest",
     "bms.player.beatoraja.input.MacOsImeBridgeTest",
     "bms.player.beatoraja.input.WindowsImeBridgeTest",
+    "bms.player.beatoraja.input.X11ImeBridgeTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
@@ -279,6 +281,16 @@ val generateAudioBackendTestAssets by tasks.registering(JavaExec::class) {
     doFirst { delete(assets) }
 }
 val macOsImeLibrary = layout.buildDirectory.file("generated/macos-ime/libbeatoraja-ime.dylib")
+val x11ImeDirectory = layout.buildDirectory.dir("generated/x11-ime")
+val buildX11Ime by tasks.registering(Exec::class) {
+    group = "build"
+    description = "Build opt-in X11-only GLFW/JNI prototype on Linux (requires CMake, X11 headers, Python and curl)."
+    onlyIf { System.getProperty("os.name").startsWith("Linux") }
+    inputs.files("native/linux/x11-ime.c", "scripts/prepare-x11-ime.py", "scripts/build-x11-ime.sh")
+    outputs.dir(x11ImeDirectory)
+    environment("JAVA_HOME", java17.get().metadata.installationPath.asFile.absolutePath)
+    commandLine("bash", file("scripts/build-x11-ime.sh").absolutePath, x11ImeDirectory.get().asFile.absolutePath)
+}
 val buildMacOsIme by tasks.registering(Exec::class) {
     group = "build"
     description = "Build opt-in AppKit IME prototype for macOS x86_64 and arm64 (requires Xcode tools)."
@@ -306,6 +318,14 @@ val buildMacOsImeTest by tasks.registering(Exec::class) {
         file("test/native/macos/ime-test.m").absolutePath, "-o", macOsImeTestLibrary.get().asFile.absolutePath)
 }
 tasks.named<JavaExec>("run") {
+    if (providers.gradleProperty("x11Ime").getOrElse("false").toBoolean()) {
+        check(System.getProperty("os.name").startsWith("Linux")) { "-Px11Ime=true requires Linux/X11" }
+        dependsOn(buildX11Ime)
+        val library = x11ImeDirectory.get().file("libglfw-beatoraja-x11-ime.so").asFile.absolutePath
+        systemProperty("beatoraja.x11Ime", "true")
+        systemProperty("beatoraja.x11Ime.library", library)
+        systemProperty("org.lwjgl.glfw.libname", library)
+    }
     if (providers.gradleProperty("windowsIme").getOrElse("false").toBoolean()) {
         systemProperty("beatoraja.windowsIme", "true")
     }
@@ -322,6 +342,10 @@ distributions {
             from(prepareRuntimeDirectories)
             from(generateAudioBackendTestAssets) { into("audio-test") }
             if (System.getProperty("os.name").startsWith("Mac")) from(buildMacOsIme) { into("natives") }
+            if (providers.gradleProperty("x11Ime").getOrElse("false").toBoolean()) {
+                check(System.getProperty("os.name").startsWith("Linux")) { "X11 IME distribution must be built on Linux" }
+                from(buildX11Ime) { into("natives") }
+            }
         }
     }
 }
@@ -444,6 +468,58 @@ tasks.register<JavaExec>("windowsImeCallbackTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.WindowsImeCallbackTest")
+}
+val x11TestSupported = System.getProperty("os.name").startsWith("Linux") ||
+    (System.getProperty("os.name").startsWith("Mac") && providers.gradleProperty("x11Headers").isPresent)
+val x11ImeTestLibrary = layout.buildDirectory.file("x11-ime-test/" +
+    if (System.getProperty("os.name").startsWith("Mac")) "libbeatoraja-x11-ime-test.dylib" else "libbeatoraja-x11-ime-test.so")
+val buildX11ImeTest by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Compile real Xlib/JNI declarations with fake X server calls; not a Linux runtime test."
+    onlyIf { x11TestSupported }
+    inputs.files("native/linux/x11-ime.c", "test/native/linux/x11-ime-test.c")
+    inputs.property("x11Headers", providers.gradleProperty("x11Headers").getOrElse(""))
+    outputs.file(x11ImeTestLibrary)
+    doFirst { x11ImeTestLibrary.get().asFile.parentFile.mkdirs() }
+    val home = java17.get().metadata.installationPath.asFile
+    val mac = System.getProperty("os.name").startsWith("Mac")
+    val includes = providers.gradleProperty("x11Headers").getOrElse("").split(File.pathSeparator)
+        .filter { it.isNotEmpty() }.map { "-I$it" }
+    commandLine(listOf("cc", "-std=c99", "-D_POSIX_C_SOURCE=200809L", "-Wall", "-Wextra", "-Werror=implicit-function-declaration") +
+        (if (mac) listOf("-dynamiclib") else listOf("-shared", "-fPIC")) + includes +
+        listOf("-I$home/include", "-I$home/include/" + if (mac) "darwin" else "linux",
+            file("test/native/linux/x11-ime-test.c").absolutePath, "-o", x11ImeTestLibrary.get().asFile.absolutePath))
+}
+tasks.register<JavaExec>("x11ImeNativeTest") {
+    group = "verification"
+    description = "Exercise production XIM C callbacks/JNI with a fake server, never a real IME."
+    onlyIf { x11TestSupported }
+    dependsOn(tasks.testClasses, buildX11ImeTest)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.X11ImeNativeTest")
+    args(x11ImeTestLibrary.get().asFile.absolutePath)
+}
+tasks.register<Exec>("x11ImePatchTest") {
+    group = "verification"
+    description = "Check guarded GLFW source hooks without downloading GLFW or requiring a display."
+    commandLine("python3", file("test/native/linux/test-prepare.py").absolutePath)
+}
+tasks.register<JavaExec>("x11ImeWindowTest") {
+    group = "verification"
+    description = "Opt-in real Linux/X11 window/XIC lifetime smoke; not Japanese conversion automation."
+    val enabled = System.getProperty("os.name").startsWith("Linux") && providers.gradleProperty("x11Ime").getOrElse("false").toBoolean()
+    onlyIf { enabled }
+    dependsOn(tasks.testClasses)
+    if (enabled) {
+        dependsOn(buildX11Ime)
+        val library = x11ImeDirectory.get().file("libglfw-beatoraja-x11-ime.so").asFile.absolutePath
+        systemProperty("beatoraja.x11Ime", "true")
+        systemProperty("beatoraja.x11Ime.library", library)
+        systemProperty("org.lwjgl.glfw.libname", library)
+    }
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.X11ImeWindowTest")
+    timeout.set(Duration.ofMinutes(3))
 }
 tasks.register<JavaExec>("windowsImeWindowTest") {
     group = "verification"

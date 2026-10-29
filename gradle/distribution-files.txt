@@ -91,6 +91,10 @@ docs/stage-framebuffer-hidpi.md
 docs/text-input-ime-clipboard.md
 docs/macos-ime.md
 docs/windows-ime.md
+docs/x11-ime.md
+native/linux/x11-ime.c
+scripts/prepare-x11-ime.py
+scripts/build-x11-ime.sh
 docs/state-endurance.md
 docs/ffmpeg-decoder-alignment.md
 docs/keyboard-events.md
