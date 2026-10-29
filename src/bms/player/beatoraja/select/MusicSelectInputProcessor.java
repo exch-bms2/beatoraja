@@ -8,7 +8,6 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
@@ -70,7 +69,8 @@ public final class MusicSelectInputProcessor {
 
         if (input.isControlKeyPressed(ControlKeys.NUM0)) {
             // 検索用ポップアップ表示。これ必要？
-            Gdx.input.getTextInput(new Input.TextInputListener() {
+            SwingTextInputSupport.showTextInput("Search", "", "Search bms title",
+                    input.getKeyBoardInputProcesseor(), new Input.TextInputListener() {
                 @Override
                 public void input(String text) {
                     select.search(text);
@@ -79,7 +79,7 @@ public final class MusicSelectInputProcessor {
                 @Override
                 public void canceled() {
                 }
-            }, "Search", "", "Search bms title");
+            });
         }
 
         // KEYフィルターの切り替え

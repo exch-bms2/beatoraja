@@ -75,6 +75,10 @@ public class MainLoader extends Application {
 
 		configureLogger();
 
+		// 曲検索ダイアログで日本語を扱えるようにする。LWJGL2とJavaFXのどちらの
+		// 初期化よりも先に行う必要があるため、分岐より前で呼ぶ
+		SwingTextInputSupport.initialize();
+
 		BMSPlayerMode auto = null;
 		for (String s : args) {
 			if (s.startsWith("-")) {

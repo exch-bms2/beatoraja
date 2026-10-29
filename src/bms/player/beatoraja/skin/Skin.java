@@ -392,9 +392,6 @@ public class Skin {
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
-		if (textInput != null) {
-			textInput.commitIfOutside(x, y);
-		}
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
 			if (obj instanceof SkinText text && text.isEditable() && text.draw && text.getInputBounds().contains(x, y)) {
@@ -420,10 +417,7 @@ public class Skin {
 	}
 
 	public void dispose() {
-		if (textInput != null) {
-			disposeResource(textInput::dispose);
-			textInput = null;
-		}
+		textInput = null;
 		for (SkinObject obj : objects) {
 			if(!obj.isDisposed()) {
 				disposeResource(obj);

@@ -285,7 +285,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		
 		ENTER(26, Keys.ENTER, true),
 		DEL(27, Keys.FORWARD_DEL, false),
-		ESCAPE(28, Keys.ESCAPE, false),
+		// テキスト入力中のESCAPEは入力のキャンセルに使われる。textにしておかないと
+		// ダイアログを閉じたESCAPEがそのままゲーム側にも渡り、曲選択では終了してしまう
+		ESCAPE(28, Keys.ESCAPE, true),
 		;
 		
 		public final int id;
