@@ -505,6 +505,29 @@ tasks.register<Exec>("x11ImePatchTest") {
     description = "Check guarded GLFW source hooks without downloading GLFW or requiring a display."
     commandLine("python3", file("test/native/linux/test-prepare.py").absolutePath)
 }
+val x11ImeArtifactInspectorTest = tasks.register<JavaExec>("x11ImeArtifactInspectorTest") {
+    group = "verification"
+    description = "Test native-artifact validation using synthetic fixtures on every OS."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.X11ImeArtifactTest")
+    args("--self-test")
+}
+regressionTest { dependsOn(x11ImeArtifactInspectorTest) }
+tasks.register<JavaExec>("x11ImeArtifactTest") {
+    group = "verification"
+    description = "Linux x64 ELF/exports/dependencies and extracted optional-ZIP JNI ABI verification, no display."
+    onlyIf { System.getProperty("os.name").startsWith("Linux") }
+    dependsOn(tasks.testClasses, buildX11Ime, distributionSmokeTest)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.X11ImeArtifactTest")
+    args(x11ImeDirectory.get().asFile.absolutePath,
+        tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
+        java17.get().executablePath.asFile.absolutePath,
+        layout.buildDirectory.dir("x11-artifact-check").get().asFile.absolutePath)
+    doFirst { check(providers.gradleProperty("x11Ime").getOrElse("false").toBoolean()) { "Use -Px11Ime=true to verify the opt-in ZIP" } }
+    timeout.set(Duration.ofMinutes(3))
+}
 tasks.register<JavaExec>("x11ImeWindowTest") {
     group = "verification"
     description = "Opt-in real Linux/X11 window/XIC lifetime smoke; not Japanese conversion automation."

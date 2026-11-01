@@ -7,11 +7,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import com.badlogic.gdx.Gdx;
 
 /** Desktop integration. Clipboard text operations must run on the game thread. */
 public final class DesktopActions {
+    private static final Pattern HTTP_URL_PATH = Pattern.compile("\\A(https?://[^/?#]+)(/[^?#]*)", Pattern.CASE_INSENSITIVE);
+
     private DesktopActions() {}
 
     // AppKit runs outside the first-thread GLFW JVM; paths are arguments, never script source.
@@ -41,12 +44,12 @@ public final class DesktopActions {
 
     public static boolean openUri(String uri) {
         return attempt("Browser launch", () -> {
-            URI target = URI.create(uri);
+            URI target = browserUri(uri);
             String scheme = target.getScheme();
             if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme))
                 throw new IOException("Only HTTP(S) browser URLs are supported");
             if (Gdx.net != null) {
-                if (!Gdx.net.openURI(uri)) throw new IOException("Browser unavailable or URI rejected");
+                if (!Gdx.net.openURI(target.toString())) throw new IOException("Browser unavailable or URI rejected");
             } else if (isMac()) {
                 // The JavaFX Launcher has no libGDX application/backend.
                 runCommand(macUriCommand(target));
@@ -77,6 +80,17 @@ public final class DesktopActions {
 
     private static boolean isMac() {
         return System.getProperty("os.name", "").startsWith("Mac");
+    }
+
+    /** Encode only raw path brackets at the browser boundary, preserving all other URL components. */
+    static URI browserUri(String uri) {
+        var path = HTTP_URL_PATH.matcher(uri);
+        if (path.find()) {
+            uri = uri.substring(0, path.start(2))
+                    + path.group(2).replace("[", "%5B").replace("]", "%5D")
+                    + uri.substring(path.end(2));
+        }
+        return URI.create(uri);
     }
 
     static List<String> macOpenCommand(Path path) {

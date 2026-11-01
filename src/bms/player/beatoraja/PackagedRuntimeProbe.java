@@ -16,6 +16,9 @@ public final class PackagedRuntimeProbe {
         failures += check("GLFW (no display initialization)", () -> {
             if (org.lwjgl.glfw.GLFW.glfwGetVersionString() == null) throw new IllegalStateException("No GLFW version");
         });
+        if (java.util.Arrays.asList(args).contains("--x11-ime"))
+            failures += check("X11 IME prototype (load/ABI only)",
+                    bms.player.beatoraja.input.X11ImeBridge::verifyNativeLibrary);
         failures += check("OpenAL (no device opened)", () -> {
             if (org.lwjgl.openal.ALC.getFunctionProvider() == null) throw new IllegalStateException("No OpenAL provider");
         });

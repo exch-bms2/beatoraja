@@ -29,6 +29,12 @@ public final class X11ImeBridge implements ImeBridge {
             warn("unavailable; using GLFW text input (" + failure.getClass().getSimpleName() + ")"); return NONE;
         }
     }
+    /** Distribution diagnostics only: checks the explicitly selected JNI ABI without opening a display or enabling editing. */
+    public static void verifyNativeLibrary() {
+        if (!System.getProperty("os.name", "").startsWith("Linux"))
+            throw new IllegalStateException("X11 IME native verification requires Linux");
+        X11ImeNative.load();
+    }
     static void warn(String value) { Logger.getGlobal().warning("X11 IME prototype " + value); }
     public boolean isAvailable() { return true; }
     public void begin(long id, TextInputSession.EditorState initial, Sink sink) {
