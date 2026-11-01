@@ -483,6 +483,7 @@ public class MusicResult extends AbstractResult {
 		}
 		
 		public boolean send() {
+			if (retry < 0) return retry == -255;
 			Logger.getGlobal().info("IRへスコア送信中 : " + song.getTitle());
             IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
             if(send1.isSucceeded()) {
@@ -491,7 +492,8 @@ public class MusicResult extends AbstractResult {
                 return true;
             } else {
                 Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
-                retry++;
+                retry = IRSubmissionResponse.isOutcomeUnknown(send1) ? -1 : retry + 1;
+                if (retry == -1) Logger.getGlobal().warning("IR送信結果が不明なため自動再送を中止します");
                 return false;
             }
 

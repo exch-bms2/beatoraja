@@ -42,6 +42,20 @@ public final class DistributionDiagnostics {
             event("child-start role=" + role + " child=" + child.pid());
             child.onExit().thenAccept(exited -> event("child-exit role=" + role + " child=" + exited.pid()
                     + " exit=" + exited.exitValue()));
+            // The normal Launcher exits immediately. Explicit diagnostic runs can retain
+            // its Process object through shutdown to record the child's actual exit code.
+            if (Boolean.getBoolean("beatoraja.distributionDiagnostics.awaitChildren")) {
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        if (child.waitFor(120, java.util.concurrent.TimeUnit.SECONDS))
+                            event("child-wait-complete role=" + role + " child=" + child.pid() + " exit=" + child.exitValue());
+                        else event("child-wait-timeout role=" + role + " child=" + child.pid());
+                    } catch (InterruptedException error) {
+                        Thread.currentThread().interrupt();
+                        event("child-wait-interrupted role=" + role + " child=" + child.pid());
+                    }
+                }, "distribution-diagnostics-child-wait-" + child.pid()));
+            }
         }
         return child;
     }

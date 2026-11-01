@@ -158,6 +158,11 @@ tasks.named<Jar>("jar") {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.ir.IsolatedIRConnectionTest",
+    "bms.player.beatoraja.select.IRTableLoaderTest",
+    "bms.player.beatoraja.result.IRSubmissionRetryTest",
+    "bms.player.beatoraja.build.PackagedGameFixtureTest",
+    "bms.player.beatoraja.build.GlTestDiagnosticsTest",
     "bms.player.beatoraja.MemoryDiagnosticsTest",
     "bms.player.beatoraja.video.EnduranceStatisticsTest",
     "bms.player.beatoraja.skin.SkinTextClipboardTest",
@@ -377,6 +382,58 @@ tasks.register<JavaExec>("packagedZipSmokeTest") {
         java17.get().executablePath.asFile.absolutePath,
         layout.buildDirectory.dir("packaged-smoke").get().asFile.absolutePath)
     timeout.set(Duration.ofMinutes(3))
+}
+
+// Optional CI diagnostics never change the normal headless build or application runtime.
+val packagedGameObserverJar = tasks.register<Jar>("packagedGameObserverJar") {
+    dependsOn(tasks.testClasses)
+    archiveFileName.set("packaged-game-test-agent.jar")
+    destinationDirectory.set(layout.buildDirectory.dir("test-agents"))
+    from(sourceSets.test.get().output)
+    include("bms/player/beatoraja/build/PackagedGameAgent*.class", "bms/player/beatoraja/build/PackagedGameSupport.class")
+    manifest.attributes("Premain-Class" to "bms.player.beatoraja.build.PackagedGameAgent")
+}
+tasks.register<JavaExec>("packagedGameIntegrationTest") {
+    group = "verification"
+    description = "Real extracted-ZIP JavaFX START, MainController gameplay, input shutdown and child-process exit."
+    dependsOn(tasks.distZip, tasks.testClasses, packagedGameObserverJar)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.PackagedGameIntegrationTest")
+    args(tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
+        java17.get().executablePath.asFile.absolutePath, packagedGameObserverJar.get().archiveFile.get().asFile.absolutePath,
+        layout.buildDirectory.dir("packaged-game").get().asFile.absolutePath)
+    timeout.set(Duration.ofMinutes(5))
+}
+val glTestOutput = providers.gradleProperty("glTestOutput").getOrElse("build-gradle/ci/gl")
+tasks.register<JavaExec>("glDiagnosticFailureTest") {
+    group = "verification"
+    description = "Verify failure PNG/trace capture and exception preservation using a real GL context."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.GlTestDiagnosticsFailureTest")
+    systemProperty("beatoraja.glTest.output", file(glTestOutput).absolutePath)
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+val glIntegrationTasks = listOf("lwjgl3BgaSkinIntegrationTest", "lwjgl3StageFramebufferTest",
+    "lwjgl3TextInputTest", "lwjgl3WindowInputLifecycleTest", "lwjgl3StateEnduranceTest",
+    "lwjgl3StateEnduranceFailureTest", "glDiagnosticFailureTest", "packagedGameIntegrationTest")
+tasks.withType<JavaExec>().configureEach {
+    if (name in glIntegrationTasks) {
+        if (providers.gradleProperty("glTestOutput").isPresent) {
+            val output = file(glTestOutput)
+            systemProperty("beatoraja.glTest.output", output.absolutePath)
+            jvmArgs("-XX:ErrorFile=${output.resolve("hs_err_pid%p.log").absolutePath}")
+            doFirst { output.mkdirs() }
+        }
+        systemProperty("beatoraja.glTest.requireMesa", providers.gradleProperty("glTestRequireMesa").getOrElse("false"))
+        // Explicit timeouts keep a stuck native window from blocking the entire CI job.
+        if (name in listOf("lwjgl3WindowInputLifecycleTest", "glDiagnosticFailureTest")) timeout.set(Duration.ofMinutes(3))
+    }
+}
+tasks.register("linuxGlIntegrationTest") {
+    group = "verification"
+    description = "Optional GL integration suite; CI runs this under Linux Xvfb/Mesa, never as part of build."
+    dependsOn(glIntegrationTasks)
 }
 
 tasks.register<JavaExec>("lwjgl3BgaSkinIntegrationTest") {

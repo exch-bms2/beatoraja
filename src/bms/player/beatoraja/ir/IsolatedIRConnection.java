@@ -6,6 +6,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.Json;
@@ -21,24 +23,32 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 
-	private static final long REQUEST_TIMEOUT_SECONDS = 30;
-
 	private final String irName;
 	private final Json json = createJson();
-	private final ExecutorService readerExecutor;
-
-	private Process process;
-	private BufferedWriter writer;
-	private BufferedReader reader;
+	private final long timeoutMillis;
+	private final WorkerFactory workerFactory;
+	private final ReentrantLock requests = new ReentrantLock();
+	private final Object lifecycle = new Object();
+	private Worker worker;
+	private Account lastLogin;
+	private boolean closed;
+	private int generation;
 
 	public IsolatedIRConnection(String irName) {
-		this.irName = irName;
-		readerExecutor = Executors.newSingleThreadExecutor(runnable -> {
-			Thread thread = new Thread(runnable, "isolated-ir-reader-" + irName);
-			thread.setDaemon(true);
-			return thread;
-		});
+		this(irName, 30_000, () -> new ProcessBuilder(
+				Path.of(System.getProperty("java.home"), "bin", javaCommand()).toString(),
+				"-cp", System.getProperty("java.class.path"), IRWorkerMain.class.getName(), irName)
+				.redirectError(ProcessBuilder.Redirect.INHERIT).start());
 	}
+
+	IsolatedIRConnection(String irName, long timeoutMillis, WorkerFactory workerFactory) {
+		this.irName = irName;
+		this.timeoutMillis = Math.max(1, timeoutMillis);
+		this.workerFactory = workerFactory;
+	}
+
+	@FunctionalInterface
+	interface WorkerFactory { Process start() throws IOException; }
 
 	@Override
 	public IRResponse<IRPlayerData> register(IRAccount account) {
@@ -112,8 +122,7 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 		request.method = METHOD_SEND_PLAY_DATA;
 		request.chart = Chart.from(model);
 		request.score = Score.from(score);
-		Response response = invoke(request);
-		return new SimpleIRResponse<>(response.succeeded, response.message, null);
+		return submit(request);
 	}
 
 	@Override
@@ -122,8 +131,7 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 		request.method = METHOD_SEND_COURSE_PLAY_DATA;
 		request.course = Course.from(course);
 		request.score = Score.from(score);
-		Response response = invoke(request);
-		return new SimpleIRResponse<>(response.succeeded, response.message, null);
+		return submit(request);
 	}
 
 	@Override
@@ -171,74 +179,161 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 
 	@Override
 	public void close() {
-		destroyProcess();
-		readerExecutor.shutdownNow();
+		Worker old;
+		synchronized (lifecycle) {
+			closed = true;
+			lastLogin = null;
+			old = worker;
+			worker = null;
+		}
+		if (old != null) old.stop();
 	}
 
-	private synchronized Response invoke(Request request) {
-		Future<String> future = null;
+	private IRResponse<Object> submit(Request request) {
+		Invocation result = execute(request);
+		Response response = result.response;
+		if (!response.succeeded && result.attempted)
+			return IRSubmissionResponse.unknown(response.message);
+		return new SimpleIRResponse<>(response.succeeded, response.message, null);
+	}
+
+	private Response invoke(Request request) { return execute(request).response; }
+
+	private Invocation execute(Request request) {
+		Worker session = null;
+		boolean locked = false, attempted = false;
 		try {
-			ensureProcess();
-			writer.write(json.toJson(request));
-			writer.newLine();
-			writer.flush();
-			future = readerExecutor.submit(() -> reader.readLine());
-			String line = future.get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-			if(line == null) {
-				destroyProcess();
-				return Response.error("IR worker exited");
+			requests.lockInterruptibly();
+			locked = true;
+			Account account;
+			synchronized (lifecycle) {
+				if (closed) return new Invocation(Response.error("IR connection closed"), false);
+				if (METHOD_LOGIN.equals(request.method)) lastLogin = null;
+				account = lastLogin;
 			}
-			return json.fromJson(Response.class, line);
-		} catch(TimeoutException e) {
-			if(future != null) {
-				future.cancel(true);
+			session = ensureProcess();
+			if (!session.authenticated && account != null && !METHOD_LOGIN.equals(request.method)
+					&& !METHOD_REGISTER.equals(request.method)) {
+				Request login = new Request(); login.method = METHOD_LOGIN; login.account = account;
+				Response authentication = exchange(session, login);
+				if (!authentication.succeeded) {
+					invalidate(session);
+					return new Invocation(Response.error("IR worker reauthentication failed : " + authentication.message), false);
+				}
+				session.authenticated = true;
+				Logger.getGlobal().info("IR worker reauthenticated : " + irName);
 			}
-			destroyProcess();
-			return Response.error("IR worker timeout");
-		} catch(Throwable e) {
-			destroyProcess();
-			return Response.error("IR worker error : " + e.getMessage());
+			// No request is replayed after this point, including read-only calls.
+			attempted = true;
+			Response response = exchange(session, request);
+			synchronized (lifecycle) {
+				if (closed || worker != session) return new Invocation(Response.error("IR connection closed"), attempted);
+				if (METHOD_LOGIN.equals(request.method) && response.succeeded) {
+					Account saved = new Account();
+					saved.id = request.account.id; saved.password = request.account.password; saved.name = request.account.name;
+					lastLogin = saved;
+					session.authenticated = true;
+				}
+			}
+			if (METHOD_LOGIN.equals(request.method) && !response.succeeded) invalidate(session);
+			return new Invocation(response, attempted);
+		} catch (InterruptedException e) {
+			if (session != null) invalidate(session);
+			Thread.currentThread().interrupt();
+			return new Invocation(Response.error("IR worker interrupted"), attempted);
+		} catch (Exception | LinkageError e) {
+			if (session != null) invalidate(session);
+			String message = e instanceof TimeoutException ? "IR worker timeout"
+					: e instanceof EOFException ? "IR worker exited" : "IR worker error : " + e.getClass().getSimpleName();
+			return new Invocation(Response.error(message), attempted);
+		} finally {
+			if (locked) requests.unlock();
 		}
 	}
 
-	/**
-	 * workerが未起動、または前回の異常で終了している場合に起動する。
-	 * <p>
-	 * classpathは現在のJVMと同じものを引き継ぎ、worker側で従来の
-	 * {@link IRConnectionManager}探索を使ってIR実装を生成する。
-	 * </p>
-	 */
-	private void ensureProcess() throws IOException {
-		if(process != null && process.isAlive()) {
-			return;
-		}
-		ProcessBuilder builder = new ProcessBuilder(
-				Path.of(System.getProperty("java.home"), "bin", javaCommand()).toString(),
-				"-cp",
-				System.getProperty("java.class.path"),
-				IRWorkerMain.class.getName(),
-				irName);
-		builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-		process = builder.start();
-		writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8));
-		reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-		Logger.getGlobal().info("IR worker started : " + irName);
+	private Response exchange(Worker session, Request request) throws Exception {
+		if (!current(session)) throw new IOException("Connection closed");
+		String payload = json.toJson(request);
+		Future<String> future = session.io.submit(() -> {
+			// Captures this generation's pipes, never mutable connection fields.
+			session.writer.write(payload); session.writer.newLine(); session.writer.flush();
+			return session.reader.readLine();
+		});
+		try {
+			String line = future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+			if (line == null) throw new EOFException();
+			Response response = json.fromJson(Response.class, line);
+			if (response == null) throw new IOException("Empty worker response");
+			return response;
+		} finally { if (!future.isDone()) future.cancel(true); }
 	}
 
-	/**
-	 * 通信異常やタイムアウト時にworkerを破棄する。
-	 * <p>
-	 * 次回のIR API呼び出しでは新しいworkerが起動される。
-	 * </p>
-	 */
-	private void destroyProcess() {
-		closeQuietly(writer);
-		closeQuietly(reader);
-		writer = null;
-		reader = null;
-		if(process != null) {
-			process.destroyForcibly();
-			process = null;
+	/** Starts a fresh generation; authentication is restored by execute before any API call. */
+	private Worker ensureProcess() throws IOException {
+		Worker old;
+		synchronized (lifecycle) {
+			if (closed) throw new IOException("Connection closed");
+			if (worker != null && worker.process.isAlive()) return worker;
+			old = worker; worker = null;
+		}
+		if (old != null) old.stop();
+		Worker fresh = new Worker(workerFactory.start(), ++generation);
+		synchronized (lifecycle) {
+			if (!closed) worker = fresh;
+		}
+		if (current(fresh)) {
+			Logger.getGlobal().info("IR worker started : " + irName);
+			return fresh;
+		}
+		fresh.stop();
+		throw new IOException("Connection closed");
+	}
+
+	private boolean current(Worker session) { synchronized (lifecycle) { return !closed && worker == session; } }
+
+	private void invalidate(Worker session) {
+		synchronized (lifecycle) { if (worker == session) worker = null; }
+		session.stop();
+	}
+
+	private record Invocation(Response response, boolean attempted) { }
+
+	/** Owns one worker's I/O and bounded termination; close() never waits for the request lock. */
+	private final class Worker {
+		final Process process;
+		final BufferedWriter writer;
+		final BufferedReader reader;
+		final ExecutorService io;
+		final AtomicBoolean stopped = new AtomicBoolean();
+		boolean authenticated;
+		Worker(Process process, int generation) {
+			this.process = process;
+			writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8));
+			reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+			io = Executors.newSingleThreadExecutor(task -> {
+				Thread thread = new Thread(task, "isolated-ir-io-" + irName + "-" + generation);
+				thread.setDaemon(true); return thread;
+			});
+		}
+		void stop() {
+			if (!stopped.compareAndSet(false, true)) return;
+			// Terminate before touching BufferedReader/Writer locks held by blocked I/O.
+			try (var descendants = process.descendants()) { descendants.forEach(ProcessHandle::destroyForcibly); }
+			catch (RuntimeException e) { Logger.getGlobal().warning("IR descendant cleanup failed : " + irName); }
+			try { process.destroyForcibly(); }
+			catch (RuntimeException e) { Logger.getGlobal().warning("IR worker termination failed : " + irName); }
+			io.shutdownNow();
+			Thread cleanup = new Thread(() -> {
+				closeQuietly(writer); closeQuietly(reader); closeQuietly(process.getErrorStream());
+			}, "isolated-ir-cleanup-" + irName);
+			cleanup.setDaemon(true); cleanup.start();
+			try {
+				process.waitFor(1, TimeUnit.SECONDS);
+				cleanup.join(1000);
+				io.awaitTermination(1, TimeUnit.SECONDS);
+			} catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+			if (process.isAlive() || cleanup.isAlive() || !io.isTerminated())
+				Logger.getGlobal().warning("IR worker cleanup still pending : " + irName);
 		}
 	}
 

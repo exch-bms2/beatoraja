@@ -23,7 +23,8 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.external.BMSSearchAccessor;
-import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.ir.IRChartData;
+import bms.player.beatoraja.ir.IRCourseData;
 import bms.player.beatoraja.ir.IRTableData;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.select.bar.ExecutableBar.RandomFolder;
@@ -45,6 +46,8 @@ public final class BarManager {
 	 * 難易度表バー一覧
 	 */
 	private TableBar[] tables = new TableBar[0];
+	private final IRTableLoader irTables = new IRTableLoader();
+	private boolean disposed;
 
 	private Bar[] commands;
 	
@@ -123,72 +126,6 @@ public final class BarManager {
 			}			
 		}).forEach(table::add);;
 
-		if(select.main.getIRStatus().length > 0) {
-			IRResponse<IRTableData[]> response = select.main.getIRStatus()[0].connection.getTableDatas();
-			if(response.isSucceeded()) {
-				for(IRTableData irtd : response.getData()) {
-					TableData td = new TableData();
-					td.setName(irtd.name);
-					td.setFolder(Stream.of(irtd.folders).map(folder -> {
-						TableData.TableFolder tf = new TableData.TableFolder();
-						tf.setName(folder.name);
-						tf.setSong(Stream.of(folder.charts).map(chart -> {
-							SongData song = new SongData();
-							song.setSha256(chart.sha256);
-							song.setMd5(chart.md5);
-							song.setTitle(chart.title);
-							song.setArtist(chart.artist);
-							song.setGenre(chart.genre);
-							song.setUrl(chart.url);
-							song.setAppendurl(chart.appendurl);
-							if(chart.mode != null) {
-								song.setMode(chart.mode.id);								
-							}
-							return song;
-						}).toArray(SongData[]::new));
-						return tf;
-					}).toArray(TableData.TableFolder[]::new));
-					
-					td.setCourse(Stream.of(irtd.courses).map(course -> {
-						CourseData cd = new CourseData();
-						cd.setName(course.name);
-						cd.setSong(Stream.of(course.charts).map(chart -> {
-							SongData song = new SongData();
-							song.setSha256(chart.sha256);
-							song.setMd5(chart.md5);
-							song.setTitle(chart.title);
-							song.setArtist(chart.artist);
-							song.setGenre(chart.genre);
-							song.setUrl(chart.url);
-							song.setAppendurl(chart.appendurl);
-							if(chart.mode != null) {
-								song.setMode(chart.mode.id);								
-							}
-							return song;
-						}).toArray(SongData[]::new));
-						
-						cd.setConstraint(course.constraint);
-						cd.setTrophy(Stream.of(course.trophy).map(t -> {
-						    TrophyData trophyData = new TrophyData();
-						    trophyData.setName(t.name);
-						    trophyData.setMissrate(t.smissrate);
-						    trophyData.setScorerate(t.scorerate);
-							return trophyData;
-						}).toArray(TrophyData[]::new));
-						
-						cd.setRelease(true);
-						return cd;
-					}).toArray(CourseData[]::new));
-					
-					if(td.validate()) {
-						table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(select.resource.getConfig().getTablepath(), td.getUrl())));						
-					}
-				}
-			} else {
-				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
-			}
-		}
-
 		new Thread(() -> {
 			TableData td = bmssearcha.read();
 			if (td != null) {
@@ -259,6 +196,62 @@ public final class BarManager {
 		}
 
 		commands = l.toArray(Bar.class);
+		if (select.main.getIRStatus().length > 0) irTables.start(select.main.getIRStatus()[0].connection);
+	}
+
+	/** Applies completed metadata on the selection/render thread only. */
+	void updateIRTables() {
+		if (disposed) return;
+		IRTableData[] received = irTables.take();
+		if (received == null) return;
+		List<TableBar> combined = new ArrayList<>(Arrays.asList(tables));
+		for (IRTableData entry : received) {
+			try {
+				TableData data = toTableData(entry);
+				if (data.validate()) combined.add(new TableBar(select, data,
+						new TableDataAccessor.DifficultyTableAccessor(select.resource.getConfig().getTablepath(), data.getUrl())));
+			} catch (RuntimeException e) {
+				Logger.getGlobal().warning("IRテーブルを無視します : " + e.getClass().getSimpleName());
+			}
+		}
+		if (combined.size() == tables.length) return;
+		tables = combined.toArray(TableBar[]::new);
+		// Do not navigate out of a folder or rebuild its contents when metadata arrives.
+		if (dir.size == 0) updateBar();
+	}
+
+	public void dispose() { disposed = true; irTables.close(); }
+
+	static TableData toTableData(IRTableData entry) {
+		Objects.requireNonNull(entry);
+		TableData data = new TableData(); data.setName(entry.name);
+		data.setFolder(Arrays.stream(entry.folders != null ? entry.folders : new IRTableData.IRTableFolder[0])
+				.filter(Objects::nonNull).map(folder -> {
+					TableData.TableFolder result = new TableData.TableFolder(); result.setName(folder.name);
+					result.setSong(Arrays.stream(folder.charts != null ? folder.charts : new IRChartData[0])
+							.filter(Objects::nonNull).map(BarManager::toSongData).toArray(SongData[]::new));
+					return result;
+				}).toArray(TableData.TableFolder[]::new));
+		data.setCourse(Arrays.stream(entry.courses != null ? entry.courses : new IRCourseData[0])
+				.filter(Objects::nonNull).map(course -> {
+					CourseData result = new CourseData(); result.setName(course.name);
+					result.setSong(Arrays.stream(course.charts).filter(Objects::nonNull).map(BarManager::toSongData).toArray(SongData[]::new));
+					result.setConstraint(course.constraint);
+					result.setTrophy(Arrays.stream(course.trophy).filter(Objects::nonNull).map(trophy -> {
+						TrophyData item = new TrophyData(); item.setName(trophy.name);
+						item.setMissrate(trophy.smissrate); item.setScorerate(trophy.scorerate); return item;
+					}).toArray(TrophyData[]::new));
+					result.setRelease(true); return result;
+				}).toArray(CourseData[]::new));
+		return data;
+	}
+
+	private static SongData toSongData(IRChartData chart) {
+		SongData song = new SongData(); song.setSha256(chart.sha256); song.setMd5(chart.md5);
+		song.setTitle(chart.title); song.setArtist(chart.artist); song.setGenre(chart.genre);
+		song.setUrl(chart.url); song.setAppendurl(chart.appendurl);
+		if (chart.mode != null) song.setMode(chart.mode.id);
+		return song;
 	}
 	
 	public boolean updateBar() {
