@@ -160,6 +160,7 @@ tasks.named<Jar>("jar") {
 val regressionClasses = listOf(
     "bms.player.beatoraja.ir.IsolatedIRConnectionTest",
     "bms.player.beatoraja.select.IRTableLoaderTest",
+    "bms.player.beatoraja.select.PreviewMusicProcessorTest",
     "bms.player.beatoraja.result.IRSubmissionRetryTest",
     "bms.player.beatoraja.build.PackagedGameFixtureTest",
     "bms.player.beatoraja.build.GlTestDiagnosticsTest",

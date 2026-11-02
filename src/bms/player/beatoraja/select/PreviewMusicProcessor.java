@@ -49,19 +49,27 @@ public class PreviewMusicProcessor {
         }
         current = song;
 
-        SongResource previewResource = null;
+        commands.add(new PreviewCommand(resolvePreviewResource(song)));
+    }
+
+    static SongResource resolvePreviewResource(SongData song) {
         if (song != null && song.getPreview() != null && song.getPreview().length() > 0) {
             try {
                 SongResource chartResource = SongResources.fromPath(java.nio.file.Path.of(song.getPath()));
-                SongResource candidate = chartResource.parent().resolve(song.getPreview());
-                if (candidate.exists()) {
-                    previewResource = candidate;
+                SongResource requested = chartResource.parent().resolve(song.getPreview());
+                if (requested.exists()) {
+                    return requested;
+                }
+                for (SongResource candidate : AudioDriver.getResources(requested)) {
+                    if (candidate.exists()) {
+                        return candidate;
+                    }
                 }
             } catch (InvalidPathException | java.io.IOException e) {
                 Logger.getGlobal().warning(e.getMessage());
             }
         }
-        commands.add(new PreviewCommand(previewResource));
+        return null;
     }
 
     public SongData getSongData() {
