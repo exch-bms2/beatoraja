@@ -102,7 +102,7 @@ public final class SongArchives {
 		Path normalizedArchive = archive.toAbsolutePath().normalize();
 		ArchiveContents contents = readContents(normalizedArchive);
 		if (contents.entries().stream().noneMatch(SongArchives::isChartEntry)) {
-			throw new IOException("Song archive does not contain a chart: " + archive);
+			throw new IOException("Song archive does not contain a chart within one directory level: " + archive);
 		}
 
 		Path parent = normalizedArchive.getParent();
@@ -308,8 +308,20 @@ public final class SongArchives {
 		return entry.startsWith("__MACOSX/") || entry.startsWith("._");
 	}
 
-	private static boolean isChartEntry(String entry) {
-		String lowerCase = entry.toLowerCase(Locale.ROOT);
+	/**
+	 * Detects charts only at the archive root or one directory below it, before
+	 * visible-root collapsing. Resource access is not subject to this depth limit.
+	 */
+	public static boolean isChartEntry(String entry) {
+		String normalized = normalizeEntryNameOrNull(entry);
+		if (normalized == null) {
+			return false;
+		}
+		int separator = normalized.indexOf('/');
+		if (separator >= 0 && normalized.indexOf('/', separator + 1) >= 0) {
+			return false;
+		}
+		String lowerCase = normalized.toLowerCase(Locale.ROOT);
 		return lowerCase.endsWith(".bms") || lowerCase.endsWith(".bme") || lowerCase.endsWith(".bml")
 				|| lowerCase.endsWith(".pms") || lowerCase.endsWith(".bmson");
 	}

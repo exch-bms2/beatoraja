@@ -1090,7 +1090,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				if (previewpath == null && isPreviewFile(filename)) {
 					previewpath = Path.of(entry).getFileName().toString();
 				}
-				if (isChartFile(filename)) {
+				if (SongArchives.isChartEntry(entry)) {
 					bmsfiles.add(new ChartFile(SongArchives.virtualPath(archive, entry, contents.rootDirectory()), lastModifiedTime));
 				}
 			}
@@ -1102,8 +1102,18 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		
 		private void processDirectory(SongDatabaseUpdaterProperty property)
 				throws IOException, SQLException, ReflectiveOperationException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
-			final List<SongData> records = qr.query(property.conn, "SELECT path, date, preview FROM song WHERE folder = ?", songhandler,
-					SongUtils.crc32(path.toString(), bmsroot, root.toString()));
+			Path archive = SongArchives.archivePath(path);
+			final List<SongData> records;
+			if (archive != null) {
+				String archiveName = archive.startsWith(root) ? root.relativize(archive).toString() : archive.toString();
+				// Include old nested records using an indexed, case-sensitive prefix range.
+				// '"' immediately follows the virtual-path marker '!' in binary order.
+				records = qr.query(property.conn, "SELECT path, date, preview FROM song WHERE path >= ? AND path < ?", songhandler,
+						archiveName + "!", archiveName + "\"");
+			} else {
+				records = qr.query(property.conn, "SELECT path, date, preview FROM song WHERE folder = ?", songhandler,
+						SongUtils.crc32(path.toString(), bmsroot, root.toString()));
+			}
 			final List<FolderData> folders = qr.query(property.conn, "SELECT path,date FROM folder WHERE parent = ?",
 					folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
 

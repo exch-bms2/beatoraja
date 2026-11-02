@@ -225,6 +225,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
     "bms.player.beatoraja.skin.lua.SkinHttpLimitsTest",
     "bms.player.beatoraja.song.archive.SongArchivesTest",
+    "bms.player.beatoraja.song.archive.SongArchiveDepthTest",
     "bms.player.beatoraja.song.archive.RarSongArchiveTest"
 )
 val regressionTasks = regressionClasses.map { className ->
