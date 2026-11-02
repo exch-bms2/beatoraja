@@ -7,8 +7,8 @@
   <chdir>.</chdir>
   <icon>beatoraja.ico</icon>
   <classPath>
-    <mainClass>bms.player.beatoraja.MainLoader</mainClass>
-    <cp>beatoraja.jar;ir/*</cp>
+    <mainClass>bms.player.beatoraja.DesktopLauncher</mainClass>
+    <cp>beatoraja.jar</cp>
   </classPath>
   <jre>
   	<path>./jre-13.0.1</path>

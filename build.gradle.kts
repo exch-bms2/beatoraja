@@ -204,6 +204,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.PlayTimeTrackerTest",
     "bms.player.beatoraja.ir.IRScorePlaytimeTest",
     "bms.player.beatoraja.ir.IRConnectionManagerTest",
+    "bms.player.beatoraja.ir.IRWorkerSecurityTest",
     "bms.player.beatoraja.select.BarSorterTest",
     "bms.player.beatoraja.select.BarSorterConfigurationTest",
     "bms.player.beatoraja.select.ModeFilterTest",

@@ -72,6 +72,7 @@ public class MainLoader extends Application {
 	private final SongDatabaseAccessorProvider songDatabaseAccessorProvider = new SongDatabaseAccessorProvider();
 
 	public static void main(String[] args) {
+		bms.player.beatoraja.ir.IRProcessSupport.ensureParentClasspath(DesktopLauncher.class.getName(), args);
 		DistributionDiagnostics.start(Boolean.getBoolean(DesktopLauncher.GAME_PROCESS) ? "game" : "launcher");
 
 		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {

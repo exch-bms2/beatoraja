@@ -1,203 +1,106 @@
 package bms.player.beatoraja.ir;
 
 import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
-/**
- * IRConnectionの管理用クラス
- * 
- * @author exch
- */
+/** Metadata-only parent facade. Plugin classes are discovered and initialized in a short-lived worker. */
 public class IRConnectionManager {
+    private static IRWorkerProtocol.Metadata[] connections;
 
-	private static final String IR_PACKAGE = "bms.player.beatoraja.ir";
-	private static final String IR_RESOURCE = IR_PACKAGE.replace('.', '/');
-	
-	/**
-	 * 検出されたIRConnection
-	 */
-	private static Class<IRConnection>[] irconnections;
+    public static String[] getAllAvailableIRConnectionName() {
+        if (IRWorkerDiscovery.isWorker()) return IRWorkerDiscovery.getAllAvailableIRConnectionName();
+        return Arrays.stream(metadata()).map(value -> value.name).toArray(String[]::new);
+    }
 
+    public static boolean hasIRConnection(String name) {
+        if (IRWorkerDiscovery.isWorker()) return IRWorkerDiscovery.getIRConnectionClass(name) != null;
+        return name != null && Arrays.stream(metadata()).anyMatch(value -> name.equals(value.name));
+    }
 
-	/**
-	 * 利用可能な全てのIRConnectionの名称を返す
-	 * 
-	 * @return IRConnectionの名称
-	 */
-	public static String[] getAllAvailableIRConnectionName() {
-		Class<IRConnection>[] irClasses = getAllAvailableIRConnection();
-		String[] names = new String[irClasses.length];
-		for(int i = 0;i < names.length;i++) {
-			names[i] = getConnectionName(irClasses[i]);
-		}
-		return names;
-	}
+    public static IRConnection getIRConnection(String name) { return getIsolatedIRConnection(name); }
 
-	/**
-	 * 名称に対応したIRConnectionインスタンスを返す
-	 * 
-	 * @param name
-	 *            IRCOnnectionの名称
-	 * @return 対応するIRConnectionインスタンス。存在しない場合はnull
-	 */
-	public static IRConnection getIRConnection(String name) {
-		return getIsolatedIRConnection(name);
-	}
+    public static IRConnection getIsolatedIRConnection(String name) {
+        return hasIRConnection(name) ? new IsolatedIRConnection(name) : null;
+    }
 
-	public static IRConnection getIsolatedIRConnection(String name) {
-		return getIRConnectionClass(name) != null ? new IsolatedIRConnection(name) : null;
-	}
+    static IRConnection getIRConnectionInProcess(String name) {
+        return IRWorkerDiscovery.getIRConnectionInProcess(name);
+    }
 
-	static IRConnection getIRConnectionInProcess(String name) {
-		Class<IRConnection> irClass = getIRConnectionClass(name);
-		if(irClass != null) {
-			try {
-				return irClass.getDeclaredConstructor().newInstance();
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
+    /**
+     * Retained for binary compatibility inside legacy IR workers. Parent callers must use
+     * {@link #hasIRConnection(String)} instead; returning a plugin Class would break isolation.
+     */
+    @Deprecated
+    public static Class<IRConnection> getIRConnectionClass(String name) {
+        return IRWorkerDiscovery.getIRConnectionClass(name);
+    }
 
-	public static Class<IRConnection> getIRConnectionClass(String name) {
-		if (name == null || name.length() == 0) {
-			return null;
-		}
-		for(Class<IRConnection> irClass : getAllAvailableIRConnection()) {
-			if(name.equals(getConnectionName(irClass))) {
-				return irClass;
-			}
-		}
-		return null;
-	}
+    public static String getHomeURL(String name) {
+        if (IRWorkerDiscovery.isWorker()) return IRWorkerDiscovery.getHomeURL(name);
+        for (IRWorkerProtocol.Metadata metadata : metadata()) {
+            if (metadata.name.equals(name)) return metadata.home;
+        }
+        return null;
+    }
 
-	@SuppressWarnings("unchecked")
-	private static synchronized Class<IRConnection>[] getAllAvailableIRConnection() {
-		if(irconnections != null) {
-			return irconnections;
-		}
-		List<Class<IRConnection>> classes = new ArrayList<>();
+    private static synchronized IRWorkerProtocol.Metadata[] metadata() {
+        if (connections == null) {
+            try {
+                if (IRProcessSupport.classpaths().plugins().isEmpty()) connections = new IRWorkerProtocol.Metadata[0];
+                else connections = discover(30_000);
+            } catch (IOException | RuntimeException e) {
+                Logger.getGlobal().warning("IR metadata discovery failed : " + e.getMessage());
+                connections = new IRWorkerProtocol.Metadata[0];
+            }
+        }
+        return connections;
+    }
 
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		try {
-			Enumeration<URL> urls = cl.getResources(IR_RESOURCE);
-			while (urls.hasMoreElements()) {
-				URL url = urls.nextElement();
-				switch(url.getProtocol()) {
-				case "jar" -> loadFromJar(cl, url, classes);
-				case "file" -> loadFromDirectory(cl, url, classes);
-				default -> {
-				}
-				}
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-		irconnections = classes.toArray(new Class[classes.size()]);
-		return irconnections;
-	}
-
-	private static void loadFromJar(ClassLoader classLoader, URL url, List<Class<IRConnection>> classes) {
-		try {
-			JarURLConnection jarUrlConnection = (JarURLConnection) url.openConnection();
-			jarUrlConnection.setUseCaches(false);
-			try(JarFile jarFile = jarUrlConnection.getJarFile()) {
-				Enumeration<JarEntry> jarEntries = jarFile.entries();
-				while(jarEntries.hasMoreElements()) {
-					String className = toClassName(jarEntries.nextElement().getName());
-					if(className != null) {
-						addConnectionClass(classLoader, className, classes);
-					}
-				}
-			}
-		} catch(Throwable e) {
-			Logger.getGlobal().warning("Jarファイル読み込み失敗 - " + url + " : " + e.getMessage());
-		}
-	}
-
-	private static void loadFromDirectory(ClassLoader classLoader, URL url, List<Class<IRConnection>> classes) {
-		try {
-			Path directory = Path.of(url.toURI());
-			try(Stream<Path> paths = Files.walk(directory)) {
-				paths.filter(Files::isRegularFile)
-						.map(directory::relativize)
-						.map(Path::toString)
-						.map(path -> toClassName(IR_RESOURCE + "/" + path))
-						.filter(className -> className != null)
-						.forEach(className -> addConnectionClass(classLoader, className, classes));
-			}
-		} catch (IOException | URISyntaxException e) {
-			Logger.getGlobal().warning("ディレクトリ読み込み失敗 - " + url + " : " + e.getMessage());
-		}
-	}
-
-	private static String toClassName(String path) {
-		String normalizedPath = path.replace('\\', '/');
-		if(!normalizedPath.startsWith(IR_RESOURCE + "/") || !normalizedPath.endsWith(".class")) {
-			return null;
-		}
-		String className = normalizedPath.substring(0, normalizedPath.length() - 6).replace('/', '.');
-		String simpleName = className.substring(className.lastIndexOf('.') + 1);
-		if(simpleName.equals("module-info") || simpleName.equals("package-info") || simpleName.indexOf('$') >= 0) {
-			return null;
-		}
-		return className;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void addConnectionClass(ClassLoader classLoader, String className, List<Class<IRConnection>> classes) {
-		try {
-			Class<?> type = classLoader.loadClass(className);
-			if(isAvailableConnection(type)) {
-				classes.add((Class<IRConnection>) type);
-			}
-		} catch(Throwable e) {
-			Logger.getGlobal().warning("IRConnection読み込み失敗 - " + className + " : " + e.getMessage());
-		}
-	}
-
-	private static boolean isAvailableConnection(Class<?> type) {
-		return type != IRConnection.class && IRConnection.class.isAssignableFrom(type) && getConnectionName(type) != null;
-	}
-
-	private static String getConnectionName(Class<?> irClass) {
-		try {
-			Object name = irClass.getField("NAME").get(null);
-			return name != null ? name.toString() : null;
-		} catch(Throwable e) {
-			return null;
-		}
-	}
-
-	/**
-	 * IRのホームURLを取得する
-	 * @param name IR名
-	 * @return IRのホームURL。存在しない場合はnull
-	 */
-	public static String getHomeURL(String name) {
-		Class<IRConnection> irClass = getIRConnectionClass(name);
-		if(irClass != null) {
-			try {
-				Object result = irClass.getField("HOME").get(null);
-				if(result != null) {
-					return result.toString();
-				}
-			} catch (Throwable e) {
-			}
-		}
-		return null;
-	}
-
+    static IRWorkerProtocol.Metadata[] discover(long timeoutMillis) throws IOException {
+        Process process = IRProcessSupport.startWorker("--metadata");
+        var reader = Executors.newSingleThreadExecutor(task -> {
+            Thread thread = new Thread(task, "ir-metadata-reader");
+            thread.setDaemon(true);
+            return thread;
+        });
+        try {
+            process.getOutputStream().close();
+            var result = reader.submit(() -> {
+                // Bound discovery independently of potentially large rival score responses.
+                byte[] bytes = process.getInputStream().readNBytes(1024 * 1024 + 1);
+                if (bytes.length > 1024 * 1024) throw new IOException("IR metadata exceeds 1 MiB");
+                return new String(bytes, StandardCharsets.UTF_8);
+            });
+            long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
+            String output = result.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            if (!process.waitFor(Math.max(1, deadline - System.nanoTime()), TimeUnit.NANOSECONDS) || process.exitValue() != 0)
+                throw new IOException("IR metadata worker failed");
+            IRWorkerProtocol.Discovery discovery = IsolatedIRConnection.createJson().fromJson(IRWorkerProtocol.Discovery.class, output);
+            if (discovery == null || discovery.connections == null) throw new IOException("Missing IR metadata");
+            return Arrays.stream(discovery.connections).filter(value -> value != null && value.name != null && !value.name.isBlank())
+                    .toArray(IRWorkerProtocol.Metadata[]::new);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("IR metadata discovery interrupted", e);
+        } catch (ExecutionException | TimeoutException | RuntimeException e) {
+            throw new IOException("IR metadata discovery failed", e);
+        } finally {
+            process.descendants().forEach(child -> child.destroyForcibly());
+            if (process.isAlive()) process.destroyForcibly();
+            try { process.waitFor(5, TimeUnit.SECONDS); }
+            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            reader.shutdownNow();
+            try { process.getInputStream().close(); process.getErrorStream().close(); }
+            catch (IOException ignored) { }
+            try { reader.awaitTermination(1, TimeUnit.SECONDS); }
+            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        }
+    }
 }

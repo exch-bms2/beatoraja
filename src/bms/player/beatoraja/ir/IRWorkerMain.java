@@ -21,6 +21,7 @@ public final class IRWorkerMain {
 	}
 
 	public static void main(String[] args) {
+		IRWorkerDiscovery.enterWorker();
 		if(args.length == 0) {
 			System.err.println("IR worker requires IR name");
 			return;
@@ -33,6 +34,19 @@ public final class IRWorkerMain {
 					StandardCharsets.UTF_8));
 			// IR実装がSystem.outへログを出してもJSON応答ストリームを壊さないようにする。
 			System.setOut(System.err);
+			if (args[0].equals("--metadata")) {
+				Discovery discovery = new Discovery();
+				discovery.connections = java.util.Arrays.stream(IRWorkerDiscovery.getAllAvailableIRConnectionName()).map(name -> {
+					Metadata metadata = new Metadata();
+					metadata.name = name;
+					metadata.home = IRWorkerDiscovery.getHomeURL(name);
+					return metadata;
+				}).toArray(Metadata[]::new);
+				writer.write(json.toJson(discovery));
+				writer.newLine();
+				writer.flush();
+				return;
+			}
 
 			IRConnection connection = IRConnectionManager.getIRConnectionInProcess(args[0]);
 			if(connection == null) {

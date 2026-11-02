@@ -4,7 +4,6 @@ import static bms.player.beatoraja.ir.IRWorkerProtocol.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,10 +34,7 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 	private int generation;
 
 	public IsolatedIRConnection(String irName) {
-		this(irName, 30_000, () -> new ProcessBuilder(
-				Path.of(System.getProperty("java.home"), "bin", javaCommand()).toString(),
-				"-cp", System.getProperty("java.class.path"), IRWorkerMain.class.getName(), irName)
-				.redirectError(ProcessBuilder.Redirect.INHERIT).start());
+		this(irName, 30_000, () -> IRProcessSupport.startWorker(irName));
 	}
 
 	IsolatedIRConnection(String irName, long timeoutMillis, WorkerFactory workerFactory) {
@@ -346,10 +342,6 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 		}
 	}
 
-	private static String javaCommand() {
-		return System.getProperty("os.name", "").toLowerCase().contains("win") ? "java.exe" : "java";
-	}
-
 	/**
 	 * workerと本体で共有するJSON設定を生成する。
 	 * <p>
@@ -358,6 +350,8 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 	 */
 	static Json createJson() {
 		Json json = new Json();
+		// Worker output is untrusted: only the explicitly requested protocol DTO may be constructed.
+		json.setTypeName(null);
 		json.setIgnoreUnknownFields(true);
 		json.setOutputType(OutputType.json);
 		json.setUsePrototypes(false);

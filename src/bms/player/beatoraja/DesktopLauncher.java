@@ -20,6 +20,7 @@ public final class DesktopLauncher {
     private DesktopLauncher() { }
 
     public static void main(String[] args) {
+        bms.player.beatoraja.ir.IRProcessSupport.ensureParentClasspath(DesktopLauncher.class.getName(), args);
         if (Arrays.asList(args).contains("--runtime-smoke")) {
             PackagedRuntimeProbe.main(args);
             return;

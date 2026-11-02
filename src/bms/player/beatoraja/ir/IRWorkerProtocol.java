@@ -35,6 +35,16 @@ final class IRWorkerProtocol {
 	private IRWorkerProtocol() {
 	}
 
+	/** Only strings cross the discovery boundary; no plugin Class or instance enters the parent JVM. */
+	static class Metadata {
+		public String name;
+		public String home;
+	}
+
+	static class Discovery {
+		public Metadata[] connections;
+	}
+
 	/**
 	 * workerへ送る1リクエスト分のデータ。
 	 */
