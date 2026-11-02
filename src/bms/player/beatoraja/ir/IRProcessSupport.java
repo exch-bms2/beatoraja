@@ -91,7 +91,16 @@ public final class IRProcessSupport {
     }
 
     private static boolean containsIR(Path file) throws IOException {
-        if (Files.isDirectory(file)) return Files.isDirectory(file.resolve(RESOURCE));
+        if (Files.isDirectory(file)) {
+            Path directory = file.resolve(RESOURCE);
+            if (!Files.isDirectory(directory)) return false;
+            // Gradle also creates empty package directories in its separate resource output.
+            try (var paths = Files.walk(directory, java.nio.file.FileVisitOption.FOLLOW_LINKS)) {
+                return paths.anyMatch(path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".class"));
+            } catch (java.io.UncheckedIOException e) {
+                throw e.getCause();
+            }
+        }
         if (!Files.isRegularFile(file)) return false;
         try (JarFile jar = new JarFile(file.toFile())) {
             return jar.stream().anyMatch(entry -> entry.getName().startsWith(RESOURCE) && entry.getName().endsWith(".class"));

@@ -85,6 +85,7 @@ skin/default/trophy.png
 docs/gradle-build.md
 docs/ci.md
 docs/ir-worker-recovery.md
+docs/ir-worker-isolation.md
 docs/distribution-smoke.md
 docs/input-diagnostics.md
 docs/input-shutdown.md
