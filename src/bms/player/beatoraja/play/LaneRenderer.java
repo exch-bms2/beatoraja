@@ -354,6 +354,9 @@ public class LaneRenderer {
 		final double orgy = y;
 		final int baseduration = playconfig.getDuration();
 		final float alphaLimit =  playconfig.getConstantFadeinTime() * 1000;
+		// CONSTANT中のLN本体を描画する上限時刻。ノート自体の表示判定と同じ境界で、
+		// ここを超える分は描かない。CONSTANT無効時は打ち切らない
+		final long lnLimit = enableConstant ? microtime + baseduration * 1000L : Long.MAX_VALUE;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getMicroTime() >= microtime) {
@@ -563,13 +566,24 @@ public class LaneRenderer {
 									&& prevtl.getSection() != ln.getPair().getSection(); j++) {
 								final TimeLine nowtl = timelines[j];
 								if (nowtl.getMicroTime() >= microtime) {
-									if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
-										dy += (nowtl.getSection() - prevtl.getSection()) * prevtl.getScroll() * rxhs;
+									// 区間の全長と、譜面が実際に進む時間。STOP中は進まないので除く
+									final double full = (nowtl.getSection() - prevtl.getSection())
+											* prevtl.getScroll() * rxhs;
+									final long scrollStart = prevtl.getMicroTime() + prevtl.getMicroStop();
+									final long span = nowtl.getMicroTime() - scrollStart;
+									if (nowtl.getMicroTime() > lnLimit) {
+										// 表示境界をまたぐ区間は境界までの分だけ伸ばして打ち切る。
+										// 以降は描かないので走査もここで止める
+										if (span > 0) {
+											final long from = Math.max(microtime, scrollStart);
+											dy += full * Math.max(0, lnLimit - from) / span;
+										}
+										break;
+									}
+									if (scrollStart > microtime) {
+										dy += full;
 									} else {
-										dy += (nowtl.getSection() - prevtl.getSection()) * prevtl.getScroll()
-												* (nowtl.getMicroTime() - microtime)
-												/ (nowtl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop())
-												* rxhs;
+										dy += full * (nowtl.getMicroTime() - microtime) / span;
 									}
 								}
 								prevtl = nowtl;
