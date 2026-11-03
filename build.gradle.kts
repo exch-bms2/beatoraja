@@ -181,6 +181,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendTestAssetsTest",
+    "bms.player.beatoraja.build.AudioTestDistributionTest",
     "bms.player.beatoraja.input.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.SkinProjectionTest",
@@ -278,6 +279,8 @@ val prepareRuntimeDirectories by tasks.registering {
         check(directories.get().dir("table").asFile.mkdirs() || directories.get().dir("table").asFile.isDirectory)
     }
 }
+val includeAudioTestAssets = providers.gradleProperty("includeAudioTestAssets")
+    .map { it.toBooleanStrict() }.getOrElse(false)
 val generateAudioBackendTestAssets by tasks.registering(JavaExec::class) {
     group = "verification"
     description = "Generate deterministic WAV/BMS fixtures for manual audio backend comparisons (no audio output)."
@@ -349,7 +352,7 @@ distributions {
         contents {
             from(projectDir) { include(distributionFiles) }
             from(prepareRuntimeDirectories)
-            from(generateAudioBackendTestAssets) { into("audio-test") }
+            if (includeAudioTestAssets) from(generateAudioBackendTestAssets) { into("audio-test") }
             if (System.getProperty("os.name").startsWith("Mac")) from(buildMacOsIme) { into("natives") }
             if (providers.gradleProperty("x11Ime").getOrElse("false").toBoolean()) {
                 check(System.getProperty("os.name").startsWith("Linux")) { "X11 IME distribution must be built on Linux" }
@@ -362,6 +365,33 @@ tasks.named<Zip>("distZip") {
     dependsOn(verifyBuildEnvironment)
 }
 
+val verifyDistributionTaskGraph by tasks.registering {
+    group = "verification"
+    description = "Verify that ordinary distributions do not depend on test compilation or audio fixture generation."
+    doLast {
+        for (name in listOf("distZip", "distTar", "installDist")) {
+            val dependencies = linkedSetOf<Task>()
+            fun visit(task: Task) {
+                if (dependencies.add(task)) task.taskDependencies.getDependencies(task).forEach(::visit)
+            }
+            visit(tasks.getByName(name))
+            val names = dependencies.map { it.name }.toSet()
+            check(("generateAudioBackendTestAssets" in names) == includeAudioTestAssets) {
+                "$name audio fixture dependency does not match includeAudioTestAssets=$includeAudioTestAssets"
+            }
+            check(("testClasses" in names) == includeAudioTestAssets) {
+                "$name test compilation dependency does not match includeAudioTestAssets=$includeAudioTestAssets"
+            }
+            if (!includeAudioTestAssets) {
+                check(names.intersect(setOf("compileTestJava", "processTestResources", "test", "regressionTest")).isEmpty()) {
+                    "$name unexpectedly depends on test tasks: $names"
+                }
+            }
+        }
+        logger.lifecycle("Distribution task graphs verified (includeAudioTestAssets=$includeAudioTestAssets)")
+    }
+}
+
 val distributionSmokeTest by tasks.registering(JavaExec::class) {
     group = "verification"
     description = "Verify installed JARs/resources and start a Java 17 packaged-runtime probe."
@@ -370,10 +400,11 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     mainClass.set("bms.player.beatoraja.build.DistributionSmokeTest")
     args(layout.buildDirectory.dir("install/beatoraja").get().asFile.absolutePath,
         sourceSets.test.get().output.classesDirs.asPath, java17.get().executablePath.asFile.absolutePath,
-        tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath)
+        tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
+        includeAudioTestAssets.toString())
     workingDir(projectDir)
 }
-tasks.check { dependsOn(distributionSmokeTest) }
+tasks.check { dependsOn(distributionSmokeTest, verifyDistributionTaskGraph) }
 
 tasks.register<JavaExec>("packagedZipSmokeTest") {
     group = "verification"
