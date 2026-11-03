@@ -452,6 +452,20 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		}
 	}
 
+	private static boolean isHidden(Path path) {
+		Path name = path.getFileName();
+		return name != null && name.toString().startsWith(".");
+	}
+
+	private static boolean isHiddenEntry(String entry) {
+		for (String name : entry.split("[/\\\\]")) {
+			if (!name.isEmpty() && !name.equals(".") && !name.equals("..") && name.startsWith(".")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * データベースを更新する
 	 * 
@@ -583,6 +597,9 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+					if (!dir.equals(start) && isHidden(dir)) {
+						return FileVisitResult.SKIP_SUBTREE;
+					}
 					if (SongArchives.isArchiveStorageDirectory(dir)) {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
@@ -599,6 +616,9 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+					if (isHidden(file)) {
+						return FileVisitResult.CONTINUE;
+					}
 					BMSFolder parent = folders.get(file.getParent());
 					if (parent != null) {
 						if (scanSongArchives && SongArchives.isSupportedArchive(file)) {
@@ -639,12 +659,18 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 			Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) {
+					if (!directory.equals(start) && isHidden(directory)) {
+						return FileVisitResult.SKIP_SUBTREE;
+					}
 					return SongArchives.isArchiveStorageDirectory(directory) ? FileVisitResult.SKIP_SUBTREE
 							: FileVisitResult.CONTINUE;
 				}
 
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+					if (isHidden(file)) {
+						return FileVisitResult.CONTINUE;
+					}
 					if (SongArchives.isSupportedArchive(file)) {
 						archives.add(file);
 					}
@@ -753,6 +779,9 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 						folderhandler, SongUtils.crc32(path.toString(), bmsroot, root.toString()));
 				try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
 					for (Path child : paths) {
+						if (isHidden(child)) {
+							continue;
+						}
 						if (Files.isDirectory(child)) {
 							if (!SongArchives.isArchiveStorageDirectory(child)) {
 								dirs.add(new LegacyBMSFolder(child));
@@ -1065,6 +1094,9 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		}
 
 		private void addFile(Path file, long lastModifiedTime) {
+			if (isHidden(file)) {
+				return;
+			}
 			final String s = file.getFileName().toString().toLowerCase(Locale.ROOT);
 			if (!txt && s.endsWith(".txt")) {
 				txt = true;
@@ -1079,6 +1111,9 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 
 		private void addArchiveFiles(Path archive, SongArchives.ArchiveContents contents) {
 			for (String entry : contents.entries()) {
+				if (isHiddenEntry(entry)) {
+					continue;
+				}
 				if (contents.rootDirectory() != null && !entry.startsWith(contents.rootDirectory() + "/")) {
 					continue;
 				}
