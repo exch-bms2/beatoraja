@@ -458,6 +458,8 @@ public class JsonSkin {
 		public int loop;
 		public int center;
 		public int offset;
+		/** Offset-size anchor (1-9: keypad positions, 0: legacy behavior), independent of rotation center. */
+		public int offsetcenter;
 		public int[] offsets = new int[0];
 		public int stretch = -1;
 		public DestinationOption[] op = new DestinationOption[0];

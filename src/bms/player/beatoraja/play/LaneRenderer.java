@@ -11,6 +11,7 @@ import bms.player.beatoraja.play.SkinNote.SkinLane;
 import bms.model.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
@@ -286,6 +287,11 @@ public class LaneRenderer {
 	}
 
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, SkinOffset[] offsets) {
+		drawLane(sprite, time, lanes, offsets, 0);
+	}
+
+	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, SkinOffset[] offsets, int offsetcenter) {
+		final boolean anchored = offsetcenter >= 1 && offsetcenter <= 9;
 		float offsetX = 0;
 		float offsetY = 0;
 		float offsetW = 0;
@@ -295,6 +301,10 @@ public class LaneRenderer {
 			offsetY += offset.y;
 			offsetW += offset.w;
 			offsetH += offset.h;
+		}
+		if (anchored) {
+			offsetX -= offsetW * SkinObject.getOffsetCenterX(offsetcenter);
+			offsetY -= offsetH * SkinObject.getOffsetCenterY(offsetcenter);
 		}
 		
 		time = (main.timer.isTimerOn(TIMER_PLAY) ? time - main.timer.getTimer(TIMER_PLAY) : 
@@ -525,17 +535,20 @@ public class LaneRenderer {
 					float dsty = (float) y + offsetY;
 					float dstw = lanes[lane].region.width + offsetW;
 					float dsth = scale + offsetH;
+					// Explicit anchors affect offsets only; the beat animation remains centered on the resized note.
+					final float expansionWidth = lanes[lane].region.width + (anchored ? offsetW : 0);
+					final float expansionHeight = scale + (anchored ? offsetH : 0);
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
 						if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
 							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
 							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
-							dstx -= (dstw - lanes[lane].region.width) / 2;
-							dsty -= (dsth - scale) / 2;
+							dstx -= (dstw - expansionWidth) / 2;
+							dsty -= (dsth - expansionHeight) / 2;
 						} else if((now - main.getNowQuarterNoteTime()) >= noteExpansionTime && (now - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
 							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
 							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-							dstx -= (dstw - lanes[lane].region.width) / 2;
-							dsty -= (dsth - scale) / 2;
+							dstx -= (dstw - expansionWidth) / 2;
+							dsty -= (dsth - expansionHeight) / 2;
 						}
 					}
 					if (note instanceof NormalNote) {
@@ -590,8 +603,10 @@ public class LaneRenderer {
 							}
 							if (dy > 0) {
 								final float dscale = dsth > scale ? (dsth - scale) / 2 : 0;
+								final float bottom = anchored ? lanes[lane].region.y + (dsty - (float) y)
+										: lanes[lane].region.y - dscale;
 								this.drawLongNote(sprite, lanes[lane].longImage, dstx, (float) (dsty + dy), dstw,
-										(float) (dsty < (lanes[lane].region.y - dscale) ? dsty - (lanes[lane].region.y -dscale) : dy), dsth, lane,
+										(float) (dsty < bottom ? dsty - bottom : dy), dsth, lane,
 										ln);
 							}
 							// System.out.println(dy);
@@ -607,7 +622,9 @@ public class LaneRenderer {
 				if (config.isShowhiddennote() && tl.getMicroTime() >= microtime) {
 					final Note hnote = tl.getHiddenNote(lane);
 					if (hnote != null) {
-						sprite.draw(lanes[lane].hiddenImage, lanes[lane].region.x, (float) y, lanes[lane].region.width, scale);
+						sprite.draw(lanes[lane].hiddenImage, lanes[lane].region.x + (anchored ? offsetX : 0),
+								(float) y + (anchored ? offsetY : 0), lanes[lane].region.width + (anchored ? offsetW : 0),
+								scale + (anchored ? offsetH : 0));
 					}
 				}
 			}
@@ -667,26 +684,28 @@ public class LaneRenderer {
 						if (note instanceof NormalNote) {
 							// draw normal note
 							//4分のタイミングでノートを拡大する
-							float dstx = lanes[lane].region.x;
-							float dsty = (float) y;
-							float dstw = lanes[lane].region.width;
-							float dsth = scale;
+							float dstx = lanes[lane].region.x + (anchored ? offsetX : 0);
+							float dsty = (float) y + (anchored ? offsetY : 0);
+							float dstw = lanes[lane].region.width + (anchored ? offsetW : 0);
+							float dsth = scale + (anchored ? offsetH : 0);
+							final float expansionWidth = dstw, expansionHeight = dsth;
 							if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
 								if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
 									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
 									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
-									dstx -= (dstw - lanes[lane].region.width) / 2;
-									dsty -= (dsth - scale) / 2;
+									dstx -= (dstw - expansionWidth) / 2;
+									dsty -= (dsth - expansionHeight) / 2;
 								} else if((now - main.getNowQuarterNoteTime()) >= noteExpansionTime && (now - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
 									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
 									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-									dstx -= (dstw - lanes[lane].region.width) / 2;
-									dsty -= (dsth - scale) / 2;
+									dstx -= (dstw - expansionWidth) / 2;
+									dsty -= (dsth - expansionHeight) / 2;
 								}
 							}
 							if ( ((note.getState() == 0 || note.getState() >= 4) && tl.getMicroTime() <= microtime) && y >= orgy2) {
 								final TextureRegion s = lanes[lane].noteImage;
-								if(y > orgy) sprite.draw(s, dstx, (float) (orgy - (dsth - scale) / 2), dstw, dsth);
+								if(y > orgy) sprite.draw(s, dstx,
+										(float) (orgy + (anchored ? offsetY : 0) - (dsth - expansionHeight) / 2), dstw, dsth);
 								else sprite.draw(s, dstx, dsty, dstw, dsth);
 							}
 						}
