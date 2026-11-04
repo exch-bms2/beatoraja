@@ -237,11 +237,7 @@ public class MainLoader extends Application {
 		int height = config.getResolution().height;
 		cfg.setWindowedMode(width, height);
 		cfg.setDecorated(config.getDisplaymode() != Config.DisplayMode.BORDERLESS);
-		if (config.getDisplaymode() == Config.DisplayMode.FULLSCREEN) {
-			Graphics.DisplayMode mode = selectDisplayMode(Lwjgl3ApplicationConfiguration.getDisplayModes(), width, height);
-			if (mode != null) cfg.setFullscreenMode(mode);
-			else Logger.getGlobal().warning("Requested fullscreen resolution unavailable; using windowed mode: " + width + "x" + height);
-		}
+		StartupMonitor.configure(cfg, config);
 		cfg.useVsync(config.isVsync());
 		cfg.setForegroundFPS(config.getMaxFramePerSecond());
 		cfg.setIdleFPS(Math.max(1, config.getMaxFramePerSecond()));
@@ -263,25 +259,17 @@ public class MainLoader extends Application {
 	}
 
 	public static Graphics.DisplayMode[] getAvailableDisplayMode() {
-		// Launcher queries must not initialize GLFW on JavaFX's application thread.
-		if (Boolean.getBoolean("java.awt.headless")) return new Graphics.DisplayMode[]{fallbackDisplayMode()};
-		if (System.getProperty("os.name").startsWith("Mac"))
-			return Arrays.stream(getLauncherScreenInfo().available).map(DesktopLauncher.ModeData::toDisplayMode)
-					.toArray(Graphics.DisplayMode[]::new);
-		if (java.awt.GraphicsEnvironment.isHeadless()) return new Graphics.DisplayMode[]{fallbackDisplayMode()};
-		return Arrays.stream(java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayModes())
-				.map(MainLoader::toDisplayMode).toArray(Graphics.DisplayMode[]::new);
+		return Arrays.stream(getLauncherScreenInfo().available).map(DesktopLauncher.ModeData::toDisplayMode)
+				.toArray(Graphics.DisplayMode[]::new);
 	}
 
 	public static Graphics.DisplayMode getDesktopDisplayMode() {
-		if (Boolean.getBoolean("java.awt.headless")) return fallbackDisplayMode();
-		if (System.getProperty("os.name").startsWith("Mac")) return getLauncherScreenInfo().desktop.toDisplayMode();
-		if (java.awt.GraphicsEnvironment.isHeadless()) return fallbackDisplayMode();
-		return toDisplayMode(java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode());
+		return getLauncherScreenInfo().desktop.toDisplayMode();
 	}
 
-	private static synchronized DesktopLauncher.ScreenInfo getLauncherScreenInfo() {
+	public static synchronized DesktopLauncher.ScreenInfo getLauncherScreenInfo() {
 		if (launcherScreenInfo == null) {
+			if (Boolean.getBoolean("java.awt.headless")) return launcherScreenInfo = fallbackScreenInfo();
 			try {
 				launcherScreenInfo = DesktopLauncher.queryScreenInfo();
 				if (launcherScreenInfo == null || launcherScreenInfo.desktop == null || launcherScreenInfo.available == null
@@ -289,16 +277,17 @@ public class MainLoader extends Application {
 			} catch (IOException | RuntimeException | InterruptedException error) {
 				if (error instanceof InterruptedException) Thread.currentThread().interrupt();
 				Logger.getGlobal().log(Level.WARNING, "Display-mode probe failed; using fallback resolution", error);
-				launcherScreenInfo = new DesktopLauncher.ScreenInfo();
-				launcherScreenInfo.desktop = new DesktopLauncher.ModeData(fallbackDisplayMode());
-				launcherScreenInfo.available = new DesktopLauncher.ModeData[]{launcherScreenInfo.desktop};
+				launcherScreenInfo = fallbackScreenInfo();
 			}
 		}
 		return launcherScreenInfo;
 	}
 
-	private static Graphics.DisplayMode toDisplayMode(java.awt.DisplayMode mode) {
-		return new Graphics.DisplayMode(mode.getWidth(), mode.getHeight(), mode.getRefreshRate(), mode.getBitDepth()) { };
+	private static DesktopLauncher.ScreenInfo fallbackScreenInfo() {
+		var info = new DesktopLauncher.ScreenInfo();
+		info.desktop = new DesktopLauncher.ModeData(fallbackDisplayMode());
+		info.available = new DesktopLauncher.ModeData[]{info.desktop};
+		return info;
 	}
 
 	private static Graphics.DisplayMode fallbackDisplayMode() {

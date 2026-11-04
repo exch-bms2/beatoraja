@@ -21,14 +21,17 @@
         <Label text="%DISPLAYMODE" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="optionLabel"/>
         <ComboBox fx:id="displayMode" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <Label text="%RESOLUTION" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <ComboBox fx:id="resolution" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="%STARTUP_MONITOR" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="startupMonitor" maxWidth="340" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-        <Label text="%VSYNC" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <CheckBox fx:id="vSync" mnemonicParsing="false" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="%RESOLUTION" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="resolution" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <Label text="%MAXFPS" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <NumericSpinner fx:id="maxFps" editable="true" GridPane.rowIndex="4" GridPane.columnIndex="1">
+        <Label text="%VSYNC" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <CheckBox fx:id="vSync" mnemonicParsing="false" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="%MAXFPS" GridPane.rowIndex="5" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <NumericSpinner fx:id="maxFps" editable="true" GridPane.rowIndex="5" GridPane.columnIndex="1">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60">
                     <min><Config fx:constant="MAX_FPS_MIN" /></min>
@@ -37,10 +40,10 @@
             </valueFactory>
         </NumericSpinner>
 
-        <Label text="%BGA" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+        <Label text="%BGA" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
 
-        <Label text="%BGA" GridPane.rowIndex="6" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <ComboBox fx:id="bgaOp" GridPane.rowIndex="6" GridPane.columnIndex="1">
+        <Label text="%BGA" GridPane.rowIndex="7" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="bgaOp" GridPane.rowIndex="7" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="On"/>
@@ -50,12 +53,12 @@
             </items>
         </ComboBox>
 
-        <Label text="%MISSLAYER_DURATION" GridPane.rowIndex="7" GridPane.columnIndex="0" styleClass="optionLabel">
+        <Label text="%MISSLAYER_DURATION" GridPane.rowIndex="8" GridPane.columnIndex="0" styleClass="optionLabel">
             <tooltip>
                 <Tooltip text="Set miss layer display time (ms)" textAlignment="CENTER"/>
             </tooltip>
         </Label>
-        <NumericSpinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="7" GridPane.columnIndex="1">
+        <NumericSpinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="8" GridPane.columnIndex="1">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500">
                     <min><PlayerConfig fx:constant="MISS_LAYER_DURATION_MIN" /></min>
@@ -64,8 +67,8 @@
             </valueFactory>
         </NumericSpinner>
 
-        <Label text="%BGA_EXPAND" GridPane.rowIndex="8" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <ComboBox fx:id="bgaExpand" GridPane.rowIndex="8" GridPane.columnIndex="1">
+        <Label text="%BGA_EXPAND" GridPane.rowIndex="9" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="bgaExpand" GridPane.rowIndex="9" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Full"/>

@@ -305,7 +305,7 @@ public final class MainController {
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
-		windowMode = WindowModeController.create((Lwjgl3Graphics) Gdx.graphics, config.getResolution());
+		windowMode = WindowModeController.create((Lwjgl3Graphics) Gdx.graphics, config.getResolution(), config.getStartupMonitor());
 		sprite.setProjectionMatrix(skinProjection(config.getResolution().width, config.getResolution().height));
 		bms.player.beatoraja.input.WindowDiagnostics.describeSkinProjection(sprite,
 				config.getResolution().width, config.getResolution().height);

@@ -118,6 +118,10 @@ final class WindowModeController {
     }
 
     static WindowModeController create(Lwjgl3Graphics graphics, Resolution fallback) {
+        return create(graphics, fallback, null);
+    }
+
+    static WindowModeController create(Lwjgl3Graphics graphics, Resolution fallback, Config.MonitorSelection startupMonitor) {
         boolean positioned = GlfwWindowSupport.hasWindowPosition();
         return new WindowModeController(new Backend() {
             public boolean fullscreen() { return graphics.isFullscreen(); }
@@ -143,6 +147,11 @@ final class WindowModeController {
                     // libGDX 1.14.2's setter stores desktop position and calls getMonitor().
                     // Those calls are invalid on Wayland; let xdg-shell place the surface.
                     long monitor = GLFW.glfwGetPrimaryMonitor();
+                    if (startupMonitor != null) {
+                        var monitors = com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration.getMonitors();
+                        int index = StartupMonitor.resolve(startupMonitor, StartupMonitor.snapshot(monitors, false));
+                        if (index >= 0) monitor = ((Lwjgl3Graphics.Lwjgl3Monitor) monitors[index]).getMonitorHandle();
+                    }
                     var mode = monitor != 0 ? GLFW.glfwGetVideoMode(monitor) : null;
                     if (mode == null) return false;
                     if (com.badlogic.gdx.Gdx.input instanceof com.badlogic.gdx.backends.lwjgl3.Lwjgl3Input input)

@@ -86,6 +86,14 @@ public final class DistributionSmokeTest {
             check(jar.getManifest().getMainAttributes().getValue("Main-Class")
                     .equals("bms.player.beatoraja.DesktopLauncher"), "Non-JavaFX desktop entry point");
             check(jar.getEntry("bms/player/beatoraja/MainLoader.class") != null, "Missing application class");
+            check(jar.getEntry("bms/player/beatoraja/StartupMonitor.class") != null, "Missing startup monitor resolver");
+            for (String resource : List.of("resources/UIResources.properties", "resources/UIResources_ja_JP.properties")) {
+                String text;
+                try (var input = jar.getInputStream(jar.getJarEntry(resource))) {
+                    text = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+                }
+                check(text.contains("STARTUP_MONITOR=") && text.contains("MONITOR_AUTO="), "Missing monitor translations: " + resource);
+            }
             check(jar.getEntry("org/lwjgl/glfw/GLFW.class") == null
                     && jar.getEntry("bms/build/FatJarContent.class") == null, "Ordinary distribution must keep the thin application JAR");
             check(jar.getEntry("bms/player/beatoraja/build/PackagedGameAgent.class") == null, "Never ship the test observer agent");

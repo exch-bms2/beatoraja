@@ -19,6 +19,13 @@ public final class PackagedGameIntegrationTest {
         Path fat = args.length == 5 ? PackagedGameSupport.useFatJar(root, Path.of(args[4])) : null;
         verifyAgent(Path.of(args[2]));
         PackagedGameSupport.fixture(root);
+        // Exercise persisted selection and the missing-monitor fallback through the actual Launcher and game JVMs.
+        var json = new com.badlogic.gdx.utils.Json();
+        var configPath = root.resolve("config_sys.json");
+        var config = json.fromJson(bms.player.beatoraja.Config.class, Files.readString(configPath));
+        String missingMonitor = "beatoraja-packaged-test-disconnected-monitor";
+        config.setStartupMonitor(new bms.player.beatoraja.Config.MonitorSelection(missingMonitor, -50000, 0));
+        Files.writeString(configPath, json.toJson(config));
         Path diagnostics = Files.createDirectories(output.resolve("diagnostics").resolve(run.getFileName()));
         Files.writeString(output.resolve("diagnostics/latest.txt"), run.getFileName().toString() + "\n");
         for (String name : new String[]{"home", "tmp"}) Files.createDirectory(root.resolve(name));
@@ -55,6 +62,11 @@ public final class PackagedGameIntegrationTest {
             PackagedGameSupport.check(launcher.exitValue() == 0, "Actual Launcher exit=" + launcher.exitValue());
             discover(root, observed);
             validate(root, launcher.pid());
+            PackagedGameSupport.check(Files.readString(diagnostics.resolve("launcher-game.log"))
+                    .contains("Startup monitor unavailable or ambiguous: " + missingMonitor), "Missing monitor fallback was not exercised");
+            var savedConfig = json.fromJson(bms.player.beatoraja.Config.class, Files.readString(configPath));
+            PackagedGameSupport.check(savedConfig.getStartupMonitor() != null
+                    && missingMonitor.equals(savedConfig.getStartupMonitor().name), "Launcher erased disconnected monitor preference");
             PackagedGameSupport.check(observed.values().stream().noneMatch(ProcessHandle::isAlive), "Descendant process still alive after normal exit");
             String fontWarnings = Files.readString(diagnostics.resolve("launcher-game.log")).lines()
                     .filter(line -> line.contains("Skin Font load failed")).collect(java.util.stream.Collectors.joining("\n"));

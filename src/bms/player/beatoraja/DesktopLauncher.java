@@ -30,9 +30,13 @@ public final class DesktopLauncher {
         if (Arrays.asList(args).contains("--display-modes")) {
             try {
                 var info = new ScreenInfo();
-                info.desktop = new ModeData(Lwjgl3ApplicationConfiguration.getDisplayMode());
-                info.available = Arrays.stream(Lwjgl3ApplicationConfiguration.getDisplayModes())
-                        .map(ModeData::new).toArray(ModeData[]::new);
+                var monitors = Lwjgl3ApplicationConfiguration.getMonitors();
+                info.windowPositionSupported = GlfwWindowSupport.hasWindowPosition();
+                info.monitors = StartupMonitor.snapshot(monitors, info.windowPositionSupported);
+                int primary = StartupMonitor.resolve(null, info.monitors);
+                if (primary < 0) throw new IllegalStateException("No connected monitors");
+                info.desktop = info.monitors[primary].desktop;
+                info.available = info.monitors[primary].available;
                 System.out.println(new Json().toJson(info));
             } finally {
                 org.lwjgl.glfw.GLFW.glfwTerminate();
@@ -62,6 +66,8 @@ public final class DesktopLauncher {
     public static final class ScreenInfo {
         public ModeData desktop;
         public ModeData[] available;
+        public StartupMonitor.Info[] monitors = new StartupMonitor.Info[0];
+        public boolean windowPositionSupported = true;
     }
 
     public static final class ModeData {
@@ -73,7 +79,7 @@ public final class DesktopLauncher {
             refreshRate = mode.refreshRate;
             bitsPerPixel = mode.bitsPerPixel;
         }
-        Graphics.DisplayMode toDisplayMode() {
+        public Graphics.DisplayMode toDisplayMode() {
             return new Graphics.DisplayMode(width, height, refreshRate, bitsPerPixel) { };
         }
     }

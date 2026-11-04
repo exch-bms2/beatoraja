@@ -31,6 +31,7 @@ public final class IRWorkerSecurityTest {
         }
         testFixedJsonTypes();
         testWireJson();
+        testMacGameBootstrap();
         Path root = Files.createTempDirectory("ir-worker-security-");
         try {
             Path plugin = compilePlugin(root);
@@ -68,6 +69,23 @@ public final class IRWorkerSecurityTest {
         var request = json.fromJson(IRWorkerProtocol.Request.class, "{\"class\":\"" + type + "\",\"method\":\"login\"}");
         check(request.method.equals("login") && System.getProperty(MARKER) == null, "No dynamic constructor in requests or responses");
         check(!json.toJson(response).contains("\"class\""), "No outgoing polymorphic tags");
+    }
+
+    private static void testMacGameBootstrap() throws Exception {
+        if (!System.getProperty("os.name").startsWith("Mac")) return;
+        String previous = System.getProperty("beatoraja.gameProcess");
+        try {
+            System.setProperty("beatoraja.gameProcess", "true");
+            var method = IRProcessSupport.class.getDeclaredMethod("javaCommand", boolean.class);
+            method.setAccessible(true);
+            @SuppressWarnings("unchecked") var game = (List<String>) method.invoke(null, false);
+            @SuppressWarnings("unchecked") var worker = (List<String>) method.invoke(null, true);
+            check(game.stream().filter("-XstartOnFirstThread"::equals).count() == 1, "Re-exec preserves macOS GLFW first thread");
+            check(!worker.contains("-XstartOnFirstThread"), "IR workers never require the GLFW first thread");
+        } finally {
+            if (previous == null) System.clearProperty("beatoraja.gameProcess");
+            else System.setProperty("beatoraja.gameProcess", previous);
+        }
     }
 
     private static void testWireJson() throws Exception {

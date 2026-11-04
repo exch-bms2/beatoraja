@@ -219,6 +219,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.build.FatJarContentTest",
     "bms.player.beatoraja.input.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
+    "bms.player.beatoraja.StartupMonitorTest",
     "bms.player.beatoraja.SkinProjectionTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
     "bms.player.beatoraja.input.WaylandCompatibilityTest",
@@ -773,6 +774,18 @@ tasks.register<JavaExec>("lwjgl3LauncherSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.Lwjgl3LauncherProcessSmokeTest")
+}
+
+tasks.register<JavaExec>("lwjgl3StartupMonitorSmokeTest") {
+    group = "verification"
+    description = "Verify explicit startup monitor selection, logical window size and optional fullscreen restoration."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3StartupMonitorSmokeTest")
+    providers.gradleProperty("monitorTestIndex").orNull?.let { systemProperty("beatoraja.monitorTest.index", it) }
+    systemProperty("beatoraja.monitorTest.fullscreen", providers.gradleProperty("monitorTestFullscreen").getOrElse("false"))
+    systemProperty("beatoraja.monitorTest.startFullscreen", providers.gradleProperty("monitorTestStartFullscreen").getOrElse("false"))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 
 tasks.register<JavaExec>("lwjgl3InputDiagnosticsSmokeTest") {

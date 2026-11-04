@@ -50,6 +50,19 @@ public class Config implements Validatable {
 	 * ディスプレイモード
 	 */
 	private DisplayMode displaymode = DisplayMode.WINDOW;
+	/** Null keeps the platform's default startup monitor. */
+	private MonitorSelection startupMonitor;
+
+	/** Persistent hints only; GLFW handles and enumeration indices are process-local. */
+	public static final class MonitorSelection {
+		public String name;
+		public int x, y;
+		public MonitorSelection() { }
+		public MonitorSelection(String name, int x, int y) {
+			this.name = name; this.x = x; this.y = y;
+		}
+		public boolean isValid() { return name != null && !name.isBlank() && name.length() <= 1024; }
+	}
 	/**
 	 * 垂直同期
 	 */
@@ -458,6 +471,10 @@ public class Config implements Validatable {
 		this.displaymode = displaymode;
 	}
 
+	public MonitorSelection getStartupMonitor() { return startupMonitor; }
+
+	public void setStartupMonitor(MonitorSelection startupMonitor) { this.startupMonitor = startupMonitor; }
+
 	public int getSkinPixmapGen() {
 		return skinPixmapGen;
 	}
@@ -572,6 +589,7 @@ public class Config implements Validatable {
 
 	public boolean validate() {
 		displaymode = (displaymode != null) ? displaymode : DisplayMode.WINDOW;
+		if (startupMonitor != null && !startupMonitor.isValid()) startupMonitor = null;
 		resolution = (resolution != null) ? resolution : Resolution.HD;
 
 		windowWidth = MathUtils.clamp(windowWidth, Resolution.SD.width, Resolution.ULTRAHD.width);

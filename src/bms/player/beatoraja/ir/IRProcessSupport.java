@@ -179,6 +179,11 @@ public final class IRProcessSupport {
                 command.add(arg);
             }
         }
+        // macOS's launcher flag is not always reported by RuntimeMXBean. A classpath re-exec
+        // must still start the GLFW game/display probe on thread zero, but never the JavaFX parent or IR worker.
+        if (!worker && System.getProperty("os.name").startsWith("Mac")
+                && Boolean.getBoolean("beatoraja.gameProcess") && !command.contains("-XstartOnFirstThread"))
+            command.add("-XstartOnFirstThread");
         return command;
     }
 }
