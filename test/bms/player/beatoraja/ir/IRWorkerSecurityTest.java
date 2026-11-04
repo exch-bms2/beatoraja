@@ -274,6 +274,23 @@ public final class IRWorkerSecurityTest {
         }
     }
 
+    /** Identical legacy plugin tests with only the Fat JAR supplying production dependencies. */
+    public static void verifyFatJar(Path archive) throws Exception {
+        Path root = Files.createTempDirectory("fat jar IR security with spaces-");
+        try {
+            Path fat = Files.copy(archive, root.resolve("beatoraja-all.jar"));
+            Path plugin = compilePlugin(root);
+            Path host = compileHost(root);
+            runHost(root, host, plugin, false, fat.toString());
+            runHost(root, host, plugin, true, fat.toString());
+            System.out.println("Fat JAR IR security passed (isolated metadata, login/send, legacy classpath filtering and worker exit)");
+        } finally {
+            try (var files = Files.walk(root)) {
+                for (Path file : files.sorted(java.util.Comparator.reverseOrder()).toList()) Files.deleteIfExists(file);
+            }
+        }
+    }
+
     private static void testClasspathPlan(Path root, Path plugin) throws Exception {
         Path core = Path.of(IRProcessSupport.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         Path resources = root.resolve("resources-only");

@@ -156,6 +156,40 @@ tasks.named<Jar>("jar") {
     manifest.attributes("Main-Class" to application.mainClass.get())
 }
 
+// Separate build tooling: neither ordinary distributions nor fatJar require test/.
+val fatJarTools = sourceSets.create("fatJarTools") {
+    java.setSrcDirs(listOf("gradle/fat-jar"))
+    resources.setSrcDirs(emptyList<String>())
+}
+dependencies { testImplementation(fatJarTools.output) }
+val prepareFatJarContent by tasks.registering(JavaExec::class) {
+    group = "build"
+    description = "Merge the explicit runtime dependencies using Java 17 class/resource precedence."
+    dependsOn(tasks.classes, tasks.named(fatJarTools.classesTaskName))
+    classpath = fatJarTools.runtimeClasspath
+    mainClass.set("bms.build.FatJarContent")
+    val staging = layout.buildDirectory.dir("fat-jar-content")
+    inputs.files(sourceSets.main.get().output, configurations.runtimeClasspath)
+    inputs.property("runtimeOrder", provider { configurations.runtimeClasspath.get().files.map { it.name } })
+    outputs.dir(staging)
+    args(staging.get().asFile.absolutePath, file("ir").absolutePath)
+    doFirst {
+        delete(staging)
+        setArgs(listOf(staging.get().asFile.absolutePath, file("ir").absolutePath)
+            + sourceSets.main.get().output.files.map { it.absolutePath }
+            + "--dependencies" + configurations.runtimeClasspath.get().files.map { it.absolutePath })
+    }
+}
+val fatJar by tasks.registering(Jar::class) {
+    group = "build"
+    description = "Build an executable all-dependencies JAR; external skins/natives/JRE remain required."
+    archiveClassifier.set("all")
+    from(prepareFatJarContent)
+    from("LICENSE") { into("META-INF/beatoraja") }
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    manifest.attributes("Main-Class" to application.mainClass.get())
+}
+
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
     "bms.player.beatoraja.ir.IsolatedIRConnectionTest",
@@ -182,6 +216,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendTestAssetsTest",
     "bms.player.beatoraja.build.AudioTestDistributionTest",
+    "bms.player.beatoraja.build.FatJarContentTest",
     "bms.player.beatoraja.input.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.SkinProjectionTest",
@@ -388,6 +423,14 @@ val verifyDistributionTaskGraph by tasks.registering {
                 }
             }
         }
+        val fatDependencies = linkedSetOf<Task>()
+        fun visitFat(task: Task) {
+            if (fatDependencies.add(task)) task.taskDependencies.getDependencies(task).forEach(::visitFat)
+        }
+        visitFat(fatJar.get())
+        check(fatDependencies.none { it.name in setOf("testClasses", "compileTestJava", "test", "regressionTest") }) {
+            "fatJar must not depend on test/"
+        }
         logger.lifecycle("Distribution task graphs verified (includeAudioTestAssets=$includeAudioTestAssets)")
     }
 }
@@ -426,6 +469,31 @@ val packagedGameObserverJar = tasks.register<Jar>("packagedGameObserverJar") {
     from(sourceSets.test.get().output)
     include("bms/player/beatoraja/build/PackagedGameAgent*.class", "bms/player/beatoraja/build/PackagedGameSupport.class")
     manifest.attributes("Premain-Class" to "bms.player.beatoraja.build.PackagedGameAgent")
+}
+tasks.register<JavaExec>("fatJarSmokeTest") {
+    group = "verification"
+    description = "Verify merged dependency/native bytes, java -jar native startup and real IR worker isolation."
+    dependsOn(fatJar, tasks.distZip, tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.FatJarSmokeTest")
+    args(fatJar.get().archiveFile.get().asFile.absolutePath,
+        tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
+        java17.get().executablePath.asFile.absolutePath,
+        layout.buildDirectory.dir("fat-jar-smoke").get().asFile.absolutePath)
+    doFirst { args(configurations.runtimeClasspath.get().files.map { it.absolutePath }) }
+    timeout.set(Duration.ofMinutes(5))
+}
+tasks.register<JavaExec>("fatJarGameIntegrationTest") {
+    group = "verification"
+    description = "Real JavaFX Launcher -> GLFW game -> exit, with only a Fat JAR on the production classpath."
+    dependsOn(fatJar, tasks.distZip, tasks.testClasses, packagedGameObserverJar)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.build.PackagedGameIntegrationTest")
+    args(tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
+        java17.get().executablePath.asFile.absolutePath, packagedGameObserverJar.get().archiveFile.get().asFile.absolutePath,
+        layout.buildDirectory.dir("fat-jar-game").get().asFile.absolutePath,
+        fatJar.get().archiveFile.get().asFile.absolutePath)
+    timeout.set(Duration.ofMinutes(5))
 }
 tasks.register<JavaExec>("packagedGameIntegrationTest") {
     group = "verification"

@@ -11,10 +11,12 @@ import java.util.concurrent.TimeUnit;
 /** Supervises the real extracted runtime. The observer agent is separate and contains no production classes. */
 public final class PackagedGameIntegrationTest {
     public static void main(String[] args) throws Exception {
-        PackagedGameSupport.check(args.length == 4, "Expected distribution ZIP, Java executable, test agent JAR, output directory");
+        PackagedGameSupport.check(args.length == 4 || args.length == 5,
+                "Expected distribution ZIP, Java executable, test agent JAR, output directory and optional Fat JAR");
         Path output = Path.of(args[3]).toAbsolutePath(); Files.createDirectories(output);
         Path run = Files.createTempDirectory(output, "zip game runtime with spaces-");
         Path root = PackagedGameSupport.extract(Path.of(args[0]), run.resolve("extracted"));
+        Path fat = args.length == 5 ? PackagedGameSupport.useFatJar(root, Path.of(args[4])) : null;
         verifyAgent(Path.of(args[2]));
         PackagedGameSupport.fixture(root);
         Path diagnostics = Files.createDirectories(output.resolve("diagnostics").resolve(run.getFileName()));
@@ -28,7 +30,8 @@ public final class PackagedGameIntegrationTest {
         command.add("-Duser.home=" + root.resolve("home")); command.add("-Djava.io.tmpdir=" + root.resolve("tmp"));
         command.add("-Djava.library.path=./natives");
         command.add("-XX:ErrorFile=" + root.resolve("test-evidence/hs_err_pid%p.log"));
-        command.addAll(java.util.List.of("-cp", "lib/*", "bms.player.beatoraja.DesktopLauncher"));
+        if (fat == null) command.addAll(java.util.List.of("-cp", "lib/*", "bms.player.beatoraja.DesktopLauncher"));
+        else command.addAll(java.util.List.of("-jar", root.relativize(fat).toString()));
         var builder = new ProcessBuilder(command).directory(root.toFile()).redirectErrorStream(true)
                 .redirectOutput(diagnostics.resolve("launcher-game.log").toFile());
         var environment = builder.environment();

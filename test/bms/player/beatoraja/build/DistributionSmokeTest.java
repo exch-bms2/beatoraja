@@ -86,6 +86,8 @@ public final class DistributionSmokeTest {
             check(jar.getManifest().getMainAttributes().getValue("Main-Class")
                     .equals("bms.player.beatoraja.DesktopLauncher"), "Non-JavaFX desktop entry point");
             check(jar.getEntry("bms/player/beatoraja/MainLoader.class") != null, "Missing application class");
+            check(jar.getEntry("org/lwjgl/glfw/GLFW.class") == null
+                    && jar.getEntry("bms/build/FatJarContent.class") == null, "Ordinary distribution must keep the thin application JAR");
             check(jar.getEntry("bms/player/beatoraja/build/PackagedGameAgent.class") == null, "Never ship the test observer agent");
             for (String type : List.of("WindowsImeBridge", "WindowsImeSession", "WindowsImeNative", "WindowsImeCallback"))
                 check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing Windows IME component: " + type);
@@ -164,6 +166,7 @@ public final class DistributionSmokeTest {
             check(magic == 0xcafebabe || magic == 0xcafebabf, "macOS IME must be a universal binary");
         }
         try (var zip = new ZipFile(args[3])) {
+            check(zip.stream().noneMatch(e -> e.getName().matches(".*/beatoraja-[^/]+-all\\.jar")), "Fat JAR is a separate opt-in artifact");
             check(zip.stream().noneMatch(e -> e.getName().contains("packaged-game-test-agent")), "Never distribute the observer agent JAR");
             check(zip.stream().noneMatch(e -> e.getName().contains("ime-test.dylib")), "Never ship test-only AppKit JNI hooks");
             verifyAudioTestAssets(install, zip, args.length > 4 && Boolean.parseBoolean(args[4]));

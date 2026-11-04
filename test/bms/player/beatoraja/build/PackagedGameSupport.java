@@ -75,6 +75,13 @@ public final class PackagedGameSupport {
                 "Generated chart registered in isolated DB");
     }
 
+    static Path useFatJar(Path root, Path archive) throws Exception {
+        try (var files = Files.list(root.resolve("lib"))) {
+            for (Path file : files.toList()) Files.delete(file);
+        }
+        return Files.copy(archive, root.resolve("lib/beatoraja-all.jar"));
+    }
+
     static Path verifyRoot(String value) throws Exception {
         Path root = Path.of(value).toRealPath();
         check(root.equals(Path.of("").toRealPath()), "Agent must run inside its generated distribution root");
