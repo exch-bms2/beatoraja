@@ -616,6 +616,26 @@ tasks.register<JavaExec>("ffmpegDecoderIsolationTest") {
     systemProperty("beatoraja.decoder.width", providers.gradleProperty("decoderWidth").getOrElse("0"))
 }
 
+tasks.register<JavaExec>("ffmpegColdStartTest") {
+    group = "verification"
+    description = "Verify video commands with fresh JVM/native caches, timed/EOF wakeups, failure XML and cleanup."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.video.FFmpegColdStartTest")
+    args(layout.buildDirectory.dir("ffmpeg-cold-start").get().asFile.absolutePath)
+    timeout.set(Duration.ofMinutes(5))
+}
+
+tasks.register<JavaExec>("ffmpegFatJarColdStartTest") {
+    group = "verification"
+    description = "Verify cold native video loading/control using only the Fat JAR and test output."
+    dependsOn(fatJar, tasks.testClasses)
+    classpath = files(sourceSets.test.get().output, fatJar.flatMap { it.archiveFile })
+    mainClass.set("bms.player.beatoraja.video.FFmpegColdStartTest")
+    args(layout.buildDirectory.dir("ffmpeg-fat-jar-cold-start").get().asFile.absolutePath)
+    timeout.set(Duration.ofMinutes(5))
+}
+
 tasks.register<JavaExec>("ffmpegFrameConverterTest") {
     group = "verification"
     description = "Verify aligned BGR conversion layouts/formats without a GL context."
