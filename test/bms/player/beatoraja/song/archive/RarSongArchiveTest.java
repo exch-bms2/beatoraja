@@ -18,9 +18,8 @@ import java.util.Map;
 import java.util.zip.CRC32;
 
 import com.github.junrar.Archive;
-import com.github.junrar.exception.UnsupportedRarV5Exception;
 
-/** Exercise real RAR4 I/O without external tools, downloads or player files. */
+/** Exercise real RAR4/RAR5 I/O without external tools, downloads or player files. */
 public final class RarSongArchiveTest {
     // Unmodified Junrar v7.6.0 fixtures; provenance and license are recorded in fixtures/.
     private static final String COMPRESSED =
@@ -29,6 +28,11 @@ public final class RarSongArchiveTest {
             "UmFyIRoHADvQcwgADQAAAAAAAACylHSAkCsAGgAAAAYAAAADBPcp4veq81AdMwkApIEAAGZpbGUxLnR4dADADQwM/hAMt2G79EFqVSh/2gEYP7Diz78doSBa4XSQkCsAAwAAAAYAAAADx6QEyfeq81AdMwkApIEAAGZpbGUyLnR4dADAepIAyjN0kJArAAMAAAAGAAAAA4aVH9D3qvNQHTMJAKSBAABmaWxlMy50eHQAwHsSAPkEdJCQKwADAAAABgAAAANBA16f96rzUB0zCQCkgQAAZmlsZTQudHh0AMB7kgBp1nSQkCsAAwAAAAYAAAADADJFhveq81AdMwkApIEAAGZpbGU1LnR4dADAfBIAmKd0kJArAAMAAAAGAAAAA8NhaK33qvNQHTMJAKSBAABmaWxlNi50eHQAwHySAAh1dJCQKwADAAAABgAAAAOCUHO096rzUB0zCQCkgQAAZmlsZTcudHh0AMB9EgD+yXSQkCsAAwAAAAYAAAADTUzrM/eq81AdMwkApIEAAGZpbGU4LnR4dADAfZIAbht0kJArAAMAAAAGAAAAAwx98Cr3qvNQHTMJAKSBAABmaWxlOS50eHQAwH4SgMQ9ewBABwA=";
     private static final String RAR5 =
             "UmFyIRoHAQDz4YLrCwEFBwAGAQGAgIAATS800SUCAwuHAASHACC6fRl6gAAACUZJTEUxLlRYVAoDAgDwWYPlessBZmlsZTENCqOo3u8lAgMLhwAEhwAg48NfeIAAAAlGSUxFMi5UWFQKAwIAd+2G5XrLAWZpbGUyDQodd1ZRAwUEAA==";
+    // Junrar v8.1.2 fixtures; pinned source paths and hashes are recorded in fixtures/.
+    private static final String RAR5_SOLID =
+            "UmFyIRoHAQAJ78hvCwEFBwQGAQGAgIAA5PLueR8CApsABoYApIMCY0kUXwT3KeKAGwEJZmlsZTEudHh0wYMYNDAz+EAy3Ybv0QWJRKH8DMPdhxsia/YACAfgmR8CAoUABoYApIMCY0kUX8ekBMnAGwEJZmlsZTIudHh0QhoCe4DgrmJzHwIChQAGhgCkgwJjSRRfhpUf0MAbAQlmaWxlMy50eHRCGgJ8ALv5fIsfAgKFAAaGAKSDAmNJFF9BA16fwBsBCWZpbGU0LnR4dEIaAnyAU1D+YR8CAoUABoYApIMCY0kUXwAyRYbAGwEJZmlsZTUudHh0QhoCfQAqrAiFHwIChQAGhgCkgwJjSRRfw2ForcAbAQlmaWxlNi50eHRCGgJ9gMIFim8fAgKFAAaGAKSDAmNJFF+CUHO0wBsBCWZpbGU3LnR4dEIaAn4A3QRFrh8CAoUABoYApIMCY0kUX01M6zPAGwEJZmlsZTgudHh0QhoCfoA1rcdEHwIChQAGhgCkgwJjSRRfDH3wKsAbAQlmaWxlOS50eHRCGgJ/AB13VlEDBQQA";
+    private static final String RAR5_PASSWORD =
+            "UmFyIRoHAQAzkrXlCgEFBgAFAQGAgABfIc6zUQIDMaAABoYApIMCY0kUXxnn0+uAAwEJZmlsZTEudHh0MAEAAw+rgP7jvy7bm3QlOdS3YZwFYG45NDcQ1tsYPE/SbYZEVJmc4Qhprj8yi5S4gj56t2Cqe0X/M28NnKG0ccGCC/yKLzwOLmAr44eAnrJUHXdWUQMFBAA=";
 
     private RarSongArchiveTest() {
     }
@@ -66,13 +70,21 @@ public final class RarSongArchiveTest {
             Map<String, String> solidFiles = new LinkedHashMap<>();
             for (int i = 1; i <= 9; i++) solidFiles.put("file" + i + ".txt", "file" + i + "\n");
             verifyCompressed(root, "solid.rar", SOLID, solidFiles, true);
-            verifyRar5Rejected(root);
+            verifyCompressed(root, "rar5-solid.rar", RAR5_SOLID, solidFiles, true);
+            Path rar5Stored = root.resolve("rar5.rar");
+            Files.write(rar5Stored, Base64.getDecoder().decode(RAR5));
+            verifyEntries(rar5Stored, Map.of("FILE1.TXT", "file1\r\n", "FILE2.TXT", "file2\r\n"));
+            Path password = root.resolve("rar5-password.rar");
+            Files.write(password, Base64.getDecoder().decode(RAR5_PASSWORD));
+            verifyRejectedArchive(password, "file1.txt", "Password protected");
+            verifyRar5Guards(root);
+            verifyCorruptData(root, chart, text);
         } finally {
             try (var paths = Files.walk(root)) {
                 for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) Files.delete(path);
             }
         }
-        System.out.println("RarSongArchiveTest passed (stored/compressed/solid RAR4, reverse reads, extraction, RAR5 rejection)");
+        System.out.println("RarSongArchiveTest passed (RAR4/RAR5, reverse reads, extraction, corrupt data and RAR5 resource/link/split guards)");
     }
 
     private static void verifyCompressed(Path root, String filename, String fixture,
@@ -80,14 +92,24 @@ public final class RarSongArchiveTest {
         Path archive = root.resolve(filename);
         Files.write(archive, Base64.getDecoder().decode(fixture));
         try (var metadata = new Archive(archive.toFile())) {
-            check(metadata.getMainHeader().isSolid() == solid, "Fixture solid flag: " + filename);
+            boolean actualSolid = metadata.getMainHeader() != null ? metadata.getMainHeader().isSolid()
+                    : metadata.getFileHeaders().stream().anyMatch(h -> h.isSolid());
+            check(actualSolid == solid, "Fixture solid flag: " + filename);
             check(metadata.getFileHeaders().stream().filter(h -> !h.isDirectory())
-                    .allMatch(h -> h.getUnpMethod() != 0x30), "Fixture must be compressed: " + filename);
+                    .allMatch(h -> h.getUnpMethod() != (h.isRar5Container() ? 0 : 0x30)),
+                    "Fixture must be compressed: " + filename);
         }
+        verifyEntries(archive, expected);
+    }
+
+    private static void verifyEntries(Path archive, Map<String, String> expected) throws Exception {
+        String filename = archive.getFileName().toString();
         var rar = new RarSongArchive();
         var names = new ArrayList<>(expected.keySet());
-        check(rar.listEntries(archive).equals(names), "Compressed entry list: " + filename);
-        check(SongArchives.listEntries(archive).equals(names), "Compressed RAR routing");
+        var actual = rar.listEntries(archive);
+        check(actual.size() == names.size() && actual.containsAll(names), "Entry list: " + filename);
+        check(SongArchives.listEntries(archive).equals(actual), "RAR routing");
+        names = new ArrayList<>(actual);
         Collections.reverse(names);
         for (String name : names) {
             byte[] bytes = expected.get(name).getBytes(StandardCharsets.UTF_8);
@@ -99,7 +121,7 @@ public final class RarSongArchiveTest {
             check(Arrays.equals(bytes, SongArchives.readEntry(SongArchives.virtualPath(archive, name))),
                     "Compressed virtual path: " + name);
         }
-        Path extracted = Files.createDirectory(root.resolve(filename + "-extracted"));
+        Path extracted = Files.createDirectory(archive.resolveSibling(filename + "-extracted"));
         rar.extract(archive, extracted);
         for (var entry : expected.entrySet()) {
             check(Files.readString(extracted.resolve(entry.getKey())).equals(entry.getValue()),
@@ -107,29 +129,131 @@ public final class RarSongArchiveTest {
         }
     }
 
-    private static void verifyRar5Rejected(Path root) throws Exception {
-        Path archive = root.resolve("rar5.rar");
-        Files.write(archive, Base64.getDecoder().decode(RAR5));
-        var rar = new RarSongArchive();
-        expectUnsupportedRar5(() -> rar.listEntries(archive));
-        expectUnsupportedRar5(() -> rar.entrySize(archive, "FILE1.TXT"));
-        expectUnsupportedRar5(() -> rar.readEntry(archive, "FILE1.TXT"));
-        expectUnsupportedRar5(() -> {
-            try (var ignored = rar.openEntry(archive, "FILE1.TXT")) {
-                throw new AssertionError("RAR5 stream opened");
-            }
-        });
-        Path extracted = Files.createDirectory(root.resolve("rar5-extracted"));
-        expectUnsupportedRar5(() -> rar.extract(archive, extracted));
+    private static void verifyRar5Guards(Path root) throws Exception {
+        String name = "set/\u697d\u66f2.bms";
+        Path stored = root.resolve("rar5-stored.rar");
+        Files.write(stored, storedRar5(name, "#TITLE RAR5\n".getBytes(StandardCharsets.UTF_8), 0, 0, false));
+        verifyEntries(stored, Map.of(name, "#TITLE RAR5\n"));
+        Path largeDictionary = root.resolve("rar5-large-dictionary.rar");
+        Files.write(largeDictionary, storedRar5(name, new byte[0], 12L << 10, 0, false));
+        verifyRejectedArchive(largeDictionary, name, "dictionary is too large");
+        Path link = root.resolve("rar5-link.rar");
+        Files.write(link, storedRar5(name, new byte[0], 0, 0, true));
+        verifyRejectedArchive(link, name, "links are not supported");
+        Path split = root.resolve("rar5-split.rar");
+        Files.write(split, storedRar5(name, new byte[0], 0, 8, false));
+        verifyRejectedArchive(split, name, "Split RAR archives are not supported");
     }
 
-    private static void expectUnsupportedRar5(IoAction action) throws Exception {
+    private static void verifyRejectedArchive(Path archive, String name, String message) throws Exception {
+        var rar = new RarSongArchive();
+        expectFailure(() -> rar.listEntries(archive), message);
+        expectFailure(() -> rar.entrySize(archive, name), message);
+        expectFailure(() -> rar.readEntry(archive, name), message);
+        expectFailure(() -> {
+            try (var ignored = rar.openEntry(archive, name)) {
+                throw new AssertionError("Rejected RAR stream opened");
+            }
+        }, message);
+        Path extracted = Files.createDirectory(archive.resolveSibling(archive.getFileName() + "-rejected"));
+        expectFailure(() -> rar.extract(archive, extracted), message);
+        try (var files = Files.list(extracted)) {
+            check(files.findAny().isEmpty(), "Rejected archive must not write files");
+        }
+    }
+
+    private static void expectFailure(IoAction action, String message) throws Exception {
         try {
             action.run();
-            throw new AssertionError("Junrar 7.6.0 must reject RAR5");
+            throw new AssertionError("Expected RAR failure: " + message);
         } catch (IOException expected) {
-            check(expected.getCause() instanceof UnsupportedRarV5Exception, "RAR5 rejection cause");
+            check(expected.getMessage().contains(message), "Unexpected RAR failure: " + expected);
         }
+    }
+
+    private static void verifyCorruptData(Path root, byte[] chart, byte[] text) throws Exception {
+        byte[] data = storedRar(chart, text);
+        // First payload follows the signature, main header and first file header.
+        int fileHeader = 7 + 13;
+        int payload = fileHeader + 32 + "set\\chart.bms".length();
+        data[payload] ^= 1;
+        Path corrupt = root.resolve("corrupt-data.rar");
+        Files.write(corrupt, data);
+        var rar = new RarSongArchive();
+        for (boolean stream : new boolean[] {false, true}) {
+            try {
+                if (stream) {
+                    try (var input = rar.openEntry(corrupt, "set/chart.bms")) { input.readAllBytes(); }
+                } else {
+                    rar.readEntry(corrupt, "set/chart.bms");
+                }
+                throw new AssertionError("Corrupt RAR data must not become a successful read/EOF");
+            } catch (IOException expected) {
+                check(expected.getCause() != null, "Preserve RAR CRC failure cause");
+            }
+        }
+        data = storedRar(chart, text);
+        data[fileHeader] ^= 1;
+        Path badHeader = root.resolve("corrupt-header.rar");
+        Files.write(badHeader, data);
+        verifyRejectedArchive(badHeader, "set/chart.bms", "broken headers");
+    }
+
+    private static byte[] storedRar5(String name, byte[] data, long compression, int flags, boolean link) throws IOException {
+        var archive = new ByteArrayOutputStream();
+        archive.write(new byte[] {0x52, 0x61, 0x72, 0x21, 0x1a, 0x07, 0x01, 0x00});
+        rar5Block(archive, new byte[] {1, 0, 0});
+        var extra = new ByteArrayOutputStream();
+        if (link) {
+            var record = new ByteArrayOutputStream();
+            byte[] target = "../../outside".getBytes(StandardCharsets.UTF_8);
+            vint(record, 5); // REDIR extra record, Unix symlink, no flags.
+            vint(record, 1);
+            vint(record, 0);
+            vint(record, target.length);
+            record.write(target);
+            vint(extra, record.size());
+            record.writeTo(extra);
+        }
+        var file = new ByteArrayOutputStream();
+        vint(file, 2); // FILE block, data area, optional extra area.
+        vint(file, 2 | flags | (link ? 1 : 0));
+        if (link) vint(file, extra.size());
+        vint(file, data.length);
+        vint(file, 4); // File CRC present.
+        vint(file, data.length);
+        vint(file, 0100644);
+        var crc = new CRC32();
+        crc.update(data);
+        file.write(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt((int) crc.getValue()).array());
+        vint(file, compression);
+        vint(file, 1); // Unix host, UTF-8 filename.
+        byte[] filename = name.getBytes(StandardCharsets.UTF_8);
+        vint(file, filename.length);
+        file.write(filename);
+        extra.writeTo(file);
+        rar5Block(archive, file.toByteArray());
+        archive.write(data);
+        rar5Block(archive, new byte[] {5, 0, 0});
+        return archive.toByteArray();
+    }
+
+    private static void rar5Block(ByteArrayOutputStream archive, byte[] body) throws IOException {
+        var header = new ByteArrayOutputStream();
+        vint(header, body.length);
+        header.write(body);
+        var crc = new CRC32();
+        crc.update(header.toByteArray());
+        archive.write(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt((int) crc.getValue()).array());
+        header.writeTo(archive);
+    }
+
+    private static void vint(ByteArrayOutputStream output, long value) {
+        do {
+            int next = (int) (value & 0x7f);
+            value >>>= 7;
+            output.write(next | (value == 0 ? 0 : 0x80));
+        } while (value != 0);
     }
 
     private static byte[] storedRar(byte[] chart, byte[] text) throws IOException {

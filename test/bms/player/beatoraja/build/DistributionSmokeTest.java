@@ -50,13 +50,16 @@ public final class DistributionSmokeTest {
         }
         return List.copyOf(names);
     }
-    // SHA-256 of the existing local binaries, independently matched to Central in the inventory.
+    // SHA-256 of the selected Maven Central artifacts, including required Commons dependencies.
     private static final Map<String, String> CENTRAL_JARS = Map.ofEntries(
-            Map.entry("junrar-7.6.0.jar", "2fe2f89104f7fa7f4d525159718b9a52927e208c45ffdaaf55355264e207ed8b"),
-            Map.entry("commons-compress-1.16.1.jar", "a20d8e45315abbe07faf952e095817b9925f38c4fc39e8a211c7d072702e97eb"),
-            Map.entry("commons-dbutils-1.6.jar", "bd42e879e33afeacf6c59bdd5382a987eb017202857c509bbd1c88e15bc9a974"),
-            Map.entry("sqlite-jdbc-3.46.1.0.jar", "6dc7464e3803648d3ff18a7359bab6adf079fcd8495b18991f6f5edcb8ac6e3b"),
-            Map.entry("slf4j-api-1.7.36.jar", "d3ef575e3e4979678dc01bf1dcce51021493b4d11fb7f1be8ad982877c16a1c0"),
+            Map.entry("junrar-8.1.2.jar", "6f8204a7fa257af3fb127d0d71176bc5f55d9a572fc576d02d67bf79def19b15"),
+            Map.entry("commons-compress-1.28.0.jar", "e1522945218456f3649a39bc4afd70ce4bd466221519dba7d378f2141a4642ca"),
+            Map.entry("commons-dbutils-1.8.1.jar", "e64501edba68fb4e674a3c350955e743b1f55a878c8fd348adf0ebffc008e7b0"),
+            Map.entry("commons-io-2.20.0.jar", "df90bba0fe3cb586b7f164e78fe8f8f4da3f2dd5c27fa645f888100ccc25dd72"),
+            Map.entry("commons-codec-1.19.0.jar", "5c3881e4f556855e9c532927ee0c9dfde94cc66760d5805c031a59887070af5f"),
+            Map.entry("commons-lang3-3.18.0.jar", "4eeeae8d20c078abb64b015ec158add383ac581571cddc45c68f0c9ae0230720"),
+            Map.entry("sqlite-jdbc-3.54.1.0.jar", "f8dce420a6016278497f4f0560f65602b9db858de141b541cf91a4644ebe4639"),
+            Map.entry("slf4j-api-2.0.20.jar", "7e1446499b359675d8aabe6af2de86b85e72ae8a2a932c0b40d0e5ba57097439"),
             Map.entry("javacpp-1.3.3.jar", "e800b74c7239bc651b747cf4936ae84d055d2fbb1b45bd2f51e32cfeaf2ec186"),
             Map.entry("javacv-1.3.3.jar", "aa14054a40320bd0dfc449ddd2ad9736cae24fc22aa6c374edfd06b3be5f4523"),
             Map.entry("javacv-platform-1.3.3.jar", "04c9d7fc3ec01c50c0f1bfd265479649fb12301367e120b4cd2394fa042f82f2"),
@@ -272,7 +275,9 @@ public final class DistributionSmokeTest {
         bms.player.beatoraja.input.ControllerEventQueueTest.main(new String[0]);
         KeyboardJudgeCompatibilityTest.main(new String[0]);
         for (String name : List.of("org.apache.commons.compress.archivers.zip.ZipFile",
-                "org.apache.commons.dbutils.QueryRunner", "org.sqlite.JDBC", "org.slf4j.LoggerFactory",
+                "org.apache.commons.dbutils.QueryRunner", "org.apache.commons.io.IOUtils",
+                "org.apache.commons.codec.digest.DigestUtils", "org.apache.commons.lang3.ArrayUtils",
+                "org.sqlite.JDBC", "org.slf4j.LoggerFactory",
                 "org.bytedeco.javacpp.Pointer", "org.bytedeco.javacv.FFmpegFrameGrabber",
                 "org.bytedeco.javacpp.avcodec", "com.github.junrar.Archive")) {
             Class<?> type = Class.forName(name, false, DistributionSmokeTest.class.getClassLoader());
@@ -298,6 +303,9 @@ public final class DistributionSmokeTest {
         }
         var mapper = Class.forName("com.fasterxml.jackson.databind.ObjectMapper").getConstructor().newInstance();
         RarSongArchiveTest.main(new String[0]);
+        bms.player.beatoraja.song.archive.ZipSongArchiveTest.main(new String[0]);
+        CommonsCompatibilityTest.main(new String[0]);
+        DatabaseRuntimeCompatibilityTest.main(new String[0]);
         check(mapper != null, "Bundled Jackson initialization");
         Class.forName("org.sqlite.JDBC");
         try (var connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
@@ -325,7 +333,7 @@ public final class DistributionSmokeTest {
         try (var files = Files.list(install.resolve("lib")); var zip = new ZipFile(archive.toFile())) {
             var names = files.map(p -> p.getFileName().toString()).toList();
             var entries = zip.stream().toList();
-            var prefixes = List.of("commons-compress-", "commons-dbutils-", "sqlite-jdbc-", "slf4j-api-",
+            var prefixes = List.of("commons-", "sqlite-jdbc-", "slf4j-api-",
                     "javacpp-", "javacv-", "ffmpeg-", "junrar-");
             var expectedNames = CENTRAL_JARS.keySet().stream().sorted().toList();
             check(names.stream().filter(n -> prefixes.stream().anyMatch(n::startsWith)).sorted().toList()
@@ -352,7 +360,7 @@ public final class DistributionSmokeTest {
                         "Local duplicate in ZIP: " + obsolete);
             }
         }
-        System.out.println("Central dependencies match existing binaries in install and ZIP");
+        System.out.println("Central dependencies match pinned versions and hashes in install and ZIP");
     }
 
     private static String sha256(InputStream in) throws Exception {

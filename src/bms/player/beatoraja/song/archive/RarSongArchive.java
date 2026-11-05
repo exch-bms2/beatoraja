@@ -13,11 +13,15 @@ import java.util.List;
 import java.util.Set;
 
 import com.github.junrar.Archive;
+import com.github.junrar.ArchiveOptions;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.rarfile.FileHeader;
 
 /** RAR implementation backed by Junrar. */
 public final class RarSongArchive extends SongArchive {
+	private static final long MAX_DICTIONARY_SIZE = 256L * 1024 * 1024;
+	private static final ArchiveOptions OPTIONS = ArchiveOptions.builder()
+			.maxDictionarySize(MAX_DICTIONARY_SIZE).build();
 
 	public RarSongArchive() {
 		super(".rar");
@@ -143,10 +147,13 @@ public final class RarSongArchive extends SongArchive {
 	}
 
 	private Archive open(Path archive) throws IOException, RarException {
-		Archive rar = new Archive(archive.toFile());
+		Archive rar = new Archive(archive.toFile(), OPTIONS);
 		try {
 			if (rar.isPasswordProtected()) {
 				throw new IOException("Password protected RAR archives are not supported: " + archive);
+			}
+			if (rar.hasBrokenHeaders()) {
+				throw new IOException("RAR archive has broken headers: " + archive);
 			}
 			return rar;
 		} catch (IOException | RarException e) {
@@ -159,6 +166,12 @@ public final class RarSongArchive extends SongArchive {
 	}
 
 	private void validate(FileHeader header, Path archive) throws IOException {
+		if (header.getRedirection() != null) {
+			throw new IOException("RAR links are not supported: " + archive);
+		}
+		if (header.isRar5Container() && header.getRar5WinSize() > MAX_DICTIONARY_SIZE) {
+			throw new IOException("RAR dictionary is too large: " + archive);
+		}
 		if (header.isEncrypted()) {
 			throw new IOException("Password protected RAR entries are not supported: " + archive);
 		}

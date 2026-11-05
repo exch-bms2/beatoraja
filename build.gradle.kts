@@ -75,12 +75,14 @@ dependencies {
     for (platform in listOf("linux", "windows", "osx")) {
         runtimeOnly("net.java.jinput:jinput-platform:2.0.5:natives-$platform") { isTransitive = false }
     }
-    // Preserve the existing runtime set instead of importing new transitive dependencies.
-    implementation("org.apache.commons:commons-compress:1.16.1") { isTransitive = false }
-    implementation("commons-dbutils:commons-dbutils:1.6") { isTransitive = false }
-    implementation("org.xerial:sqlite-jdbc:3.46.1.0") { isTransitive = false }
-    runtimeOnly("org.slf4j:slf4j-api:1.7.36") { isTransitive = false }
-    implementation("com.github.junrar:junrar:7.6.0") { isTransitive = false }
+    // Compress requires Commons IO, Codec and Lang3; resolve its non-optional dependencies.
+    implementation("org.apache.commons:commons-compress:1.28.0")
+    implementation("commons-dbutils:commons-dbutils:1.8.1")
+    // SQLite's optional GraalVM/SLF4J dependencies are not needed; keep a single SLF4J API, without a provider.
+    implementation("org.xerial:sqlite-jdbc:3.54.1.0") { isTransitive = false }
+    runtimeOnly("org.slf4j:slf4j-api:2.0.20") { isTransitive = false }
+    implementation("com.github.junrar:junrar:8.1.2")
+    // Preserve the other existing runtime sets instead of importing new transitive dependencies.
     implementation("org.bytedeco:javacpp:1.3.3") { isTransitive = false }
     implementation("org.bytedeco:javacv:1.3.3") { isTransitive = false }
     runtimeOnly("org.bytedeco:javacv-platform:1.3.3") { isTransitive = false }
@@ -212,6 +214,8 @@ val fatJar by tasks.registering(Jar::class) {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.build.CommonsCompatibilityTest",
+    "bms.player.beatoraja.build.DatabaseRuntimeCompatibilityTest",
     "bms.player.beatoraja.ir.IsolatedIRConnectionTest",
     "bms.player.beatoraja.select.IRTableLoaderTest",
     "bms.player.beatoraja.select.PreviewMusicProcessorTest",
@@ -290,6 +294,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
     "bms.player.beatoraja.skin.lua.SkinHttpLimitsTest",
     "bms.player.beatoraja.song.archive.SongArchivesTest",
+    "bms.player.beatoraja.song.archive.ZipSongArchiveTest",
     "bms.player.beatoraja.song.archive.SongArchiveDepthTest",
     "bms.player.beatoraja.song.archive.RarSongArchiveTest"
 )
