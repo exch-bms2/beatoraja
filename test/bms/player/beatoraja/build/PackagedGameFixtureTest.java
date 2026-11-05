@@ -9,6 +9,11 @@ import java.util.zip.ZipOutputStream;
 /** Offline contract/negative fixtures only; not Launcher/GL or real shutdown evidence. */
 public final class PackagedGameFixtureTest {
     public static void main(String[] args) throws Exception {
+        for (String command : new String[]{"bms.player.beatoraja.ir.IRWorkerMain", "bms.player.beatoraja.ir.IRWorkerMain --metadata",
+                "bms.player.beatoraja.ir.IRWorkerMain mocha", "beatoraja-all.jar --display-modes", "beatoraja-all.jar --runtime-smoke"})
+            check(!PackagedGameSupport.shouldObserve(command), "Worker/probe must not overwrite game evidence: " + command);
+        for (String command : new String[]{"beatoraja-all.jar", "bms.player.beatoraja.DesktopLauncher", "bms.player.beatoraja.MainLoader -p smoke"})
+            check(PackagedGameSupport.shouldObserve(command), "Observe actual Launcher/game: " + command);
         Path parent = Files.createTempDirectory("packaged game fixture ");
         try {
             Path root = Files.createDirectory(parent.resolve("runtime"));

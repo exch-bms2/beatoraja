@@ -4,6 +4,9 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import java.time.Duration
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.util.Locale
 
 plugins {
     application
@@ -44,6 +47,9 @@ val bundledJars = listOf(
 val luaJar = listOf("luaj-jse-3.0.2-custom.jar", "luaj-jse.jar")
     .firstOrNull { file("lib/$it").isFile } ?: "luaj-jse-3.0.2-custom.jar"
 val localLibraries = (bundledJars + luaJar).map { file("lib/$it") }
+// A deliberate build-time trust decision, never inferred from arbitrary lib/ or ir/ contents.
+val includeTrustedIr = providers.gradleProperty("includeTrustedIr").map { it.toBooleanStrict() }.getOrElse(false)
+val trustedIrJars = fileTree("trusted_ir") { include("*.jar", "*.JAR") }.files.sortedBy { it.name }
 dependencies {
     implementation(files(localLibraries))
     implementation("com.badlogicgames.gdx:gdx:1.14.2")
@@ -93,6 +99,16 @@ val verifyBuildEnvironment by tasks.registering {
     doLast {
         val missing = localLibraries.filterNot { it.isFile }
         check(missing.isEmpty()) { "Missing bundled JARs: ${missing.joinToString()}. Restore lib/ before building." }
+        if (includeTrustedIr) {
+            check(trustedIrJars.isNotEmpty()) { "-PincludeTrustedIr=true requires JARs in trusted_ir/" }
+            check(trustedIrJars.size <= 128 && trustedIrJars.map { it.name.lowercase(Locale.ROOT) }.distinct().size == trustedIrJars.size) {
+                "Too many or duplicate trusted IR filenames"
+            }
+            for (jar in trustedIrJars) check(Files.isRegularFile(jar.toPath(), LinkOption.NOFOLLOW_LINKS)
+                    && jar.name.matches(Regex("[A-Za-z0-9][A-Za-z0-9._ ()-]{0,123}\\.[jJ][aA][rR]"))) {
+                "Invalid trusted IR input (regular file with portable name required): $jar"
+            }
+        }
         val home = java17.get().metadata.installationPath.asFile
         check(home.resolve("jmods/javafx.controls.jmod").isFile && home.resolve("jmods/javafx.fxml.jmod").isFile) {
             "A JavaFX-enabled JDK 17 is required (for example Liberica Full JDK 17). " +
@@ -123,6 +139,7 @@ tasks.named<JavaExec>("run") {
     dependsOn(verifyBuildEnvironment)
     workingDir(providers.gradleProperty("runWorkingDir").getOrElse(projectDir.absolutePath))
     standardInput = System.`in`
+    if (includeTrustedIr) systemProperty("beatoraja.ir.classpath", trustedIrJars.joinToString(File.pathSeparator) { it.absolutePath })
     for (name in listOf("frameDiagnostics", "frameDiagnosticsIntervalMillis", "frameDiagnosticsLongFrameMillis")) {
         providers.gradleProperty(name).orNull?.let {
             systemProperty(when (name) {
@@ -171,13 +188,16 @@ val prepareFatJarContent by tasks.registering(JavaExec::class) {
     val staging = layout.buildDirectory.dir("fat-jar-content")
     inputs.files(sourceSets.main.get().output, configurations.runtimeClasspath)
     inputs.property("runtimeOrder", provider { configurations.runtimeClasspath.get().files.map { it.name } })
+    inputs.property("includeTrustedIr", includeTrustedIr)
+    if (includeTrustedIr) inputs.files(trustedIrJars)
     outputs.dir(staging)
     args(staging.get().asFile.absolutePath, file("ir").absolutePath)
     doFirst {
         delete(staging)
         setArgs(listOf(staging.get().asFile.absolutePath, file("ir").absolutePath)
             + sourceSets.main.get().output.files.map { it.absolutePath }
-            + "--dependencies" + configurations.runtimeClasspath.get().files.map { it.absolutePath })
+            + "--dependencies" + configurations.runtimeClasspath.get().files.map { it.absolutePath }
+            + if (includeTrustedIr) listOf("--trusted-ir") + trustedIrJars.map { it.absolutePath } else emptyList())
     }
 }
 val fatJar by tasks.registering(Jar::class) {
@@ -245,6 +265,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.ir.IRScorePlaytimeTest",
     "bms.player.beatoraja.ir.IRConnectionManagerTest",
     "bms.player.beatoraja.ir.IRWorkerSecurityTest",
+    "bms.player.beatoraja.ir.BundledIRIntegrationTest",
+    "bms.player.beatoraja.ir.BundledIRTest",
     "bms.player.beatoraja.select.BarSorterTest",
     "bms.player.beatoraja.select.BarSorterConfigurationTest",
     "bms.player.beatoraja.select.ModeFilterTest",
@@ -391,6 +413,7 @@ distributions {
         contents {
             from(projectDir) { include(distributionFiles) }
             from(prepareRuntimeDirectories)
+            if (includeTrustedIr) from(trustedIrJars) { into("ir") }
             if (includeAudioTestAssets) from(generateAudioBackendTestAssets) { into("audio-test") }
             if (System.getProperty("os.name").startsWith("Mac")) from(buildMacOsIme) { into("natives") }
             if (providers.gradleProperty("x11Ime").getOrElse("false").toBoolean()) {
@@ -484,7 +507,11 @@ tasks.register<JavaExec>("fatJarSmokeTest") {
         tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
         java17.get().executablePath.asFile.absolutePath,
         layout.buildDirectory.dir("fat-jar-smoke").get().asFile.absolutePath)
-    doFirst { args(configurations.runtimeClasspath.get().files.map { it.absolutePath }) }
+    doFirst {
+        args(configurations.runtimeClasspath.get().files.map { it.absolutePath })
+        args("--trusted-ir")
+        if (includeTrustedIr) args(trustedIrJars.map { it.absolutePath })
+    }
     timeout.set(Duration.ofMinutes(5))
 }
 tasks.register<JavaExec>("fatJarGameIntegrationTest") {

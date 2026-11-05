@@ -32,10 +32,11 @@ public final class PackagedGameAgent {
     private static String previousState = "";
 
     public static void premain(String arguments, Instrumentation instrumentation) throws Exception {
+        // JAVA_TOOL_OPTIONS is inherited by metadata/RPC workers too; never drive them as a game.
+        String command = System.getProperty("sun.java.command", "");
+        if (!PackagedGameSupport.shouldObserve(command)) return;
         root = PackagedGameSupport.verifyRoot(System.getProperty("beatoraja.packagedGameTest.root"));
         evidence = root.resolve("test-evidence");
-        String command = System.getProperty("sun.java.command", "");
-        if (command.contains("--display-modes") || command.contains("--runtime-smoke")) return;
         boolean game = Boolean.getBoolean("beatoraja.gameProcess");
         String role = game ? "game" : "launcher";
         Files.writeString(evidence.resolve(role + ".pid"), Long.toString(ProcessHandle.current().pid()));

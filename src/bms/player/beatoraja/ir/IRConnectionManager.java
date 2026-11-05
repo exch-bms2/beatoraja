@@ -53,7 +53,7 @@ public class IRConnectionManager {
     private static synchronized IRWorkerProtocol.Metadata[] metadata() {
         if (connections == null) {
             try {
-                if (IRProcessSupport.classpaths().plugins().isEmpty()) connections = new IRWorkerProtocol.Metadata[0];
+                if (IRProcessSupport.classpaths().plugins().isEmpty() && !BundledIR.isPresent()) connections = new IRWorkerProtocol.Metadata[0];
                 else connections = discover(30_000);
             } catch (IOException | RuntimeException e) {
                 Logger.getGlobal().warning("IR metadata discovery failed : " + e.getMessage());

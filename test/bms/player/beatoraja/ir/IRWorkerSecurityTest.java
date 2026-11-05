@@ -145,7 +145,8 @@ public final class IRWorkerSecurityTest {
                     }
                     public IRResponse<IRPlayerData> login(IRAccount account) {
                         if (!getClass().equals(IRConnectionManager.getIRConnectionClass(NAME))) throw new AssertionError("Legacy worker Class API");
-                        if (IRConnectionManager.getAllAvailableIRConnectionName().length != 1) throw new AssertionError("Worker metadata recursion");
+                        if (!java.util.Arrays.asList(IRConnectionManager.getAllAvailableIRConnectionName()).contains(NAME))
+                            throw new AssertionError("Worker metadata recursion");
                         event("login"); return result(new IRPlayerData(account.id, account.name, ""));
                     }
                     public IRResponse<Object> sendPlayData(IRChartData chart, IRScoreData score) {
@@ -208,14 +209,22 @@ public final class IRWorkerSecurityTest {
                         java.sql.DriverManager.getDrivers();
                         if (System.getProperty("fixture.service.initialized") != null) throw new AssertionError("Parent service init");
                         String[] names = IRConnectionManager.getAllAvailableIRConnectionName();
-                        if (!java.util.Arrays.equals(names, new String[]{"Isolated marker IR"}))
+                        String name = "Isolated marker IR";
+                        boolean bundled = false;
+                        var core = java.nio.file.Path.of(IRProcessSupport.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+                        if (java.nio.file.Files.isRegularFile(core)) {
+                            try (var jar = new java.util.jar.JarFile(core.toFile())) {
+                                bundled = jar.getJarEntry("META-INF/beatoraja/bundled-ir/index.bin") != null;
+                            }
+                        }
+                        if (!java.util.Arrays.asList(names).contains(name) || !bundled && names.length != 1)
                             throw new AssertionError("Metadata names: " + java.util.Arrays.toString(names));
-                        if (!"https://example.invalid/fixture".equals(IRConnectionManager.getHomeURL(names[0])))
+                        if (!"https://example.invalid/fixture".equals(IRConnectionManager.getHomeURL(name)))
                             throw new AssertionError("Metadata HOME");
                         if (IRConnectionManager.hasIRConnection("missing")) throw new AssertionError("Invalid IR");
-                        try { IRConnectionManager.getIRConnectionClass(names[0]); throw new AssertionError("Parent Class API"); }
+                        try { IRConnectionManager.getIRConnectionClass(name); throw new AssertionError("Parent Class API"); }
                         catch (IllegalStateException expected) { }
-                        try (var proxy = (IsolatedIRConnection) IRConnectionManager.getIRConnection(names[0])) {
+                        try (var proxy = (IsolatedIRConnection) IRConnectionManager.getIRConnection(name)) {
                             if (!proxy.login(new IRAccount("fixture", "not-a-real-password", "fixture")).isSucceeded())
                                 throw new AssertionError("Legacy login");
                             if (!proxy.sendPlayData(null, null).isSucceeded()) throw new AssertionError("Legacy send");

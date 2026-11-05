@@ -19,7 +19,9 @@ import java.util.zip.ZipFile;
 public final class FatJarSmokeTest {
     public static void main(String[] args) throws Exception {
         Path archive = Path.of(args[0]);
-        verify(archive, Arrays.stream(args).skip(4).map(Path::of).toList());
+        int bundled = Arrays.asList(args).indexOf("--trusted-ir");
+        check(bundled >= 4, "Missing trusted IR argument separator");
+        verify(archive, Arrays.stream(args, 4, bundled).map(Path::of).toList());
         Path output = Files.createDirectories(Path.of(args[3]));
         Path run = Files.createTempDirectory(output, "fat jar with spaces-");
         Path root = PackagedGameSupport.extract(Path.of(args[1]), run.resolve("extracted"));
@@ -38,6 +40,8 @@ public final class FatJarSmokeTest {
             if (child.isAlive()) { child.destroyForcibly(); child.waitFor(5, TimeUnit.SECONDS); }
         }
         IRWorkerSecurityTest.verifyFatJar(fat);
+        bms.player.beatoraja.ir.BundledIRIntegrationTest.verifyActual(fat,
+                Arrays.stream(args).skip(bundled + 1).map(Path::of).toList(), Path.of(args[1]));
         System.out.println("FatJarSmokeTest passed (classes/resources/native hashes, merged services, java -jar, isolated legacy IR and process exit)");
     }
 

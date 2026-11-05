@@ -13,6 +13,12 @@ import com.badlogic.gdx.utils.JsonWriter;
 
 /** Isolated fixture and validation helpers; never shipped in the application. */
 public final class PackagedGameSupport {
+    static boolean shouldObserve(String command) {
+        String entry = command.split("\\s+", 2)[0];
+        return !entry.equals("bms.player.beatoraja.ir.IRWorkerMain")
+                && !command.contains("--display-modes") && !command.contains("--runtime-smoke");
+    }
+
     static final String MARKER = "beatoraja-generated-packaged-game-test-v1";
     private PackagedGameSupport() { }
 

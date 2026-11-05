@@ -71,12 +71,46 @@ public final class FatJarContentTest {
             Path traversal = jar(root.resolve("traversal.jar"), Map.of("../escaped.txt", "bad"), false, null);
             expectFailure(() -> FatJarContent.prepare(root.resolve("bad-path"), ir, List.of(), List.of(traversal)), "Unsafe archive");
             check(!Files.exists(root.resolve("escaped.txt")), "Traversal rejected");
+            testBundledIR(root, ir);
             System.out.println("FatJarContentTest passed (precedence, Java 17 MR view, services, licenses, signatures, native conflicts and IR exclusion)");
         } finally {
             try (var files = Files.walk(root)) {
                 for (Path file : files.sorted(Comparator.reverseOrder()).toList()) Files.deleteIfExists(file);
             }
         }
+    }
+
+    private static void testBundledIR(Path root, Path ir) throws Exception {
+        String entry = "bms/player/beatoraja/ir/MochaIRConnection.class";
+        String prefix = "META-INF/beatoraja/bundled-ir/";
+        Path mocha = jar(root.resolve("beatoraja-mocha.jar"), Map.of(entry, "fixture", entry.replace(".class", "$1.class"), "inner",
+                "bms/player/beatoraja/ir/mocha/dto/LoginRequest.class", "dto",
+                "bms/player/beatoraja/ir/mocha/illegal-bms.json", "[]"), false, ".");
+        expectFailure(() -> FatJarContent.prepare(root.resolve("implicit-mocha"), ir, List.of(), List.of(mocha)), "IR implementation");
+        Path helper = jar(root.resolve("helper.jar"), Map.of("META-INF/services/example.Service", "private.Provider",
+                "bms/player/beatoraja/MainController.class", "opaque, not a parent class"), false, null);
+        Path output = root.resolve("trusted-ir");
+        FatJarContent.prepare(output, ir, List.of(), List.of(), List.of(mocha, helper));
+        check(!Files.exists(output.resolve(entry)) && !Files.exists(output.resolve("bms/player/beatoraja/MainController.class")), "No IR/helper classes merged");
+        check(!Files.exists(output.resolve("META-INF/services/example.Service")), "No IR service providers merged");
+        check(Files.mismatch(mocha, output.resolve(prefix + "jars/beatoraja-mocha.jar")) == -1, "Original IR JAR retained byte-for-byte");
+        try (var index = new java.io.DataInputStream(Files.newInputStream(output.resolve(prefix + "index.bin")))) {
+            check(index.readInt() == 0x42495231 && index.readInt() == 2, "Index format/count");
+            for (Path file : List.of(mocha, helper)) {
+                check(index.readUTF().equals(file.getFileName().toString()) && index.readLong() == Files.size(file), "Index name/size");
+                check(index.readUTF().equals(java.util.HexFormat.of().formatHex(java.security.MessageDigest
+                        .getInstance("SHA-256").digest(Files.readAllBytes(file)))), "Source JAR hash recorded");
+            }
+            check(index.read() == -1, "No trailing index data");
+        }
+        Path reversed = root.resolve("reversed-bundles");
+        FatJarContent.prepare(reversed, ir, List.of(), List.of(), List.of(helper, mocha));
+        check(Files.mismatch(output.resolve(prefix + "index.bin"), reversed.resolve(prefix + "index.bin")) == -1, "Deterministic bundle order");
+        Path spoof = jar(root.resolve("spoof-marker.jar"), Map.of(prefix + "index.bin", "anything"), false, null);
+        expectFailure(() -> FatJarContent.prepare(root.resolve("spoofed"), ir, List.of(), List.of(spoof)), "Reserved bundled");
+        expectFailure(() -> FatJarContent.prepare(root.resolve("duplicate-bundles"), ir, List.of(), List.of(), List.of(mocha, mocha)), "Invalid/duplicate");
+        Path invalid = root.resolve("invalid.jar"); Files.writeString(invalid, "not a zip");
+        expectFailure(() -> FatJarContent.prepare(root.resolve("invalid-bundle"), ir, List.of(), List.of(), List.of(invalid)), "zip");
     }
 
     private static Path jar(Path path, Map<String, String> entries, boolean multiRelease, String classpath) throws Exception {

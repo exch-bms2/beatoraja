@@ -34,12 +34,7 @@ public final class IRProcessSupport {
     }
 
     static Classpaths classpaths(String classpath, String configured, Path directory) throws IOException {
-        Path core;
-        try {
-            core = Path.of(IRProcessSupport.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toRealPath();
-        } catch (java.net.URISyntaxException e) {
-            throw new IOException(e);
-        }
+        Path core = applicationLocation();
         Set<Path> plugins = new LinkedHashSet<>();
         if (configured != null && !configured.isBlank()) {
             for (String entry : configured.split(java.util.regex.Pattern.quote(File.pathSeparator))) {
@@ -66,6 +61,12 @@ public final class IRProcessSupport {
         Set<Path> checked = new LinkedHashSet<>();
         for (Path file : application) validateManifest(file, core, plugins, pluginDirectory, checked);
         return new Classpaths(List.copyOf(application), List.copyOf(plugins));
+    }
+
+    static Path applicationLocation() throws IOException {
+        try {
+            return Path.of(IRProcessSupport.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toRealPath();
+        } catch (java.net.URISyntaxException e) { throw new IOException(e); }
     }
 
     private static void validateManifest(Path file, Path core, Set<Path> plugins, Path directory, Set<Path> checked) throws IOException {
@@ -151,11 +152,48 @@ public final class IRProcessSupport {
     }
 
     static Process startWorker(String argument) throws IOException {
-        List<String> command = javaCommand(true);
-        Classpaths paths = classpaths();
-        command.add("-D" + PLUGIN_CLASSPATH + "=" + join(paths.plugins()));
-        command.addAll(List.of("-cp", paths.workerPath(), IRWorkerMain.class.getName(), argument));
-        return new ProcessBuilder(command).redirectError(ProcessBuilder.Redirect.INHERIT).start();
+        BundledIR.Prepared bundled = BundledIR.prepare();
+        Process child = null;
+        try {
+            List<String> command = javaCommand(true);
+            Classpaths paths = classpaths();
+            Set<Path> plugins = new LinkedHashSet<>(bundled.files());
+            plugins.addAll(paths.plugins());
+            var worker = new Classpaths(paths.application(), List.copyOf(plugins));
+            command.add("-D" + PLUGIN_CLASSPATH + "=" + join(worker.plugins()));
+            command.addAll(List.of("-cp", worker.workerPath(), IRWorkerMain.class.getName(), argument));
+            child = new ProcessBuilder(command).redirectError(ProcessBuilder.Redirect.INHERIT).start();
+            if (!bundled.files().isEmpty()) {
+                Process process = child;
+                Thread shutdown = new Thread(() -> {
+                    process.destroyForcibly();
+                    try {
+                        if (process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)) closeBundle(bundled);
+                    } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                }, "ir-bundled-worker-shutdown");
+                Runtime.getRuntime().addShutdownHook(shutdown);
+                child.onExit().thenRun(() -> {
+                    closeBundle(bundled);
+                    try { Runtime.getRuntime().removeShutdownHook(shutdown); }
+                    catch (IllegalStateException ignored) { /* JVM shutdown already owns cleanup. */ }
+                });
+            }
+            return child;
+        } catch (IOException | RuntimeException | Error failure) {
+            if (child != null) {
+                child.destroyForcibly();
+                try { child.waitFor(5, java.util.concurrent.TimeUnit.SECONDS); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            }
+            if (child != null && child.isAlive()) child.onExit().thenRun(() -> closeBundle(bundled));
+            else try { bundled.close(); } catch (IOException cleanup) { failure.addSuppressed(cleanup); }
+            throw failure;
+        }
+    }
+
+    private static void closeBundle(BundledIR.Prepared bundled) {
+        try { bundled.close(); }
+        catch (IOException e) { java.util.logging.Logger.getGlobal().warning("Bundled IR cleanup failed : " + e.getMessage()); }
     }
 
     private static List<String> javaCommand(boolean worker) {

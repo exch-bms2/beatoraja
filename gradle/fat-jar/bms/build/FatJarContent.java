@@ -2,6 +2,7 @@ package bms.build;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.DataOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +14,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipFile;
@@ -20,6 +24,7 @@ import java.util.zip.ZipFile;
 /** Build-only merger. Keeps Java 17 classpath precedence without loading dependency classes. */
 public final class FatJarContent {
     private static final String SERVICES = "META-INF/services/";
+    private static final String BUNDLED_IR = "META-INF/beatoraja/bundled-ir/";
     private FatJarContent() { }
 
     public static void main(String[] args) throws Exception {
@@ -27,11 +32,23 @@ public final class FatJarContent {
         if (separator < 3) throw new IllegalArgumentException("Expected output, plugin root, application outputs, --dependencies, JARs");
         List<Path> application = new ArrayList<>(), dependencies = new ArrayList<>();
         for (int i = 2; i < separator; i++) application.add(Path.of(args[i]));
-        for (int i = separator + 1; i < args.length; i++) dependencies.add(Path.of(args[i]));
-        prepare(Path.of(args[0]), Path.of(args[1]), application, dependencies);
+        List<Path> trusted = new ArrayList<>();
+        boolean nested = false;
+        for (int i = separator + 1; i < args.length; i++) {
+            if (args[i].equals("--trusted-ir")) {
+                if (nested) throw new IllegalArgumentException("Repeated --trusted-ir");
+                nested = true;
+            } else (nested ? trusted : dependencies).add(Path.of(args[i]));
+        }
+        if (nested && trusted.isEmpty()) throw new IllegalArgumentException("Expected trusted IR JARs");
+        prepare(Path.of(args[0]), Path.of(args[1]), application, dependencies, trusted);
     }
 
     public static void prepare(Path output, Path pluginRoot, List<Path> application, List<Path> dependencies) throws IOException {
+        prepare(output, pluginRoot, application, dependencies, List.of());
+    }
+
+    public static void prepare(Path output, Path pluginRoot, List<Path> application, List<Path> dependencies, List<Path> trusted) throws IOException {
         if (Files.exists(output)) throw new IOException("Refuse existing staging directory: " + output);
         Path root = Files.createDirectories(output).toAbsolutePath().normalize();
         Path forbidden = Files.exists(pluginRoot) ? pluginRoot.toRealPath() : pluginRoot.toAbsolutePath().normalize();
@@ -77,6 +94,7 @@ public final class FatJarContent {
                 }
             }
         }
+        bundleIR(root, trusted, inventory);
         for (var entry : services.entrySet()) {
             Path target = target(root, entry.getKey());
             Files.createDirectories(target.getParent());
@@ -87,8 +105,50 @@ public final class FatJarContent {
         Files.writeString(inventoryFile, inventory, StandardCharsets.UTF_8);
     }
 
+    private static void bundleIR(Path root, List<Path> inputs, StringBuilder inventory) throws IOException {
+        if (inputs.isEmpty()) return;
+        if (inputs.size() > 128) throw new IOException("Too many bundled IR JARs (maximum 128)");
+        var jars = inputs.stream().sorted(Comparator.comparing(p -> p.getFileName().toString())).toList();
+        Path index = target(root, BUNDLED_IR + "index.bin");
+        Files.createDirectories(index.getParent());
+        var names = new java.util.HashSet<String>();
+        long total = 0;
+        try (var output = new DataOutputStream(Files.newOutputStream(index))) {
+            output.writeInt(0x42495231); // BIR1, followed by count and (name, size, SHA-256) records.
+            output.writeInt(jars.size());
+            for (Path jar : jars) {
+                String name = jar.getFileName().toString();
+                if (!name.matches("[A-Za-z0-9][A-Za-z0-9._ ()-]{0,123}\\.[jJ][aA][rR]")
+                        || !names.add(name.toLowerCase(Locale.ROOT))
+                        || !Files.isRegularFile(jar, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+                    throw new IOException("Invalid/duplicate bundled IR JAR: " + jar);
+                long size = Files.size(jar);
+                total += size;
+                if (size <= 0 || size > 512L * 1024 * 1024 || total > 1024L * 1024 * 1024)
+                    throw new IOException("Bundled IR size limit exceeded");
+                try (var archive = new JarFile(jar.toFile())) { archive.size(); } // Validate without loading any classes.
+                Path destination = target(root, BUNDLED_IR + "jars/" + name);
+                Files.createDirectories(destination.getParent());
+                Files.copy(jar, destination);
+                if (Files.size(destination) != size) throw new IOException("Bundled IR changed while copying: " + jar);
+                String hash;
+                try {
+                    var digest = MessageDigest.getInstance("SHA-256");
+                    try (var input = Files.newInputStream(destination)) {
+                        byte[] buffer = new byte[8192];
+                        for (int n; (n = input.read(buffer)) != -1;) digest.update(buffer, 0, n);
+                    }
+                    hash = HexFormat.of().formatHex(digest.digest());
+                } catch (NoSuchAlgorithmException e) { throw new AssertionError(e); }
+                output.writeUTF(name); output.writeLong(size); output.writeUTF(hash);
+                inventory.append("bundled-ir ").append(name).append(' ').append(hash).append('\n');
+            }
+        }
+    }
+
     private static void copy(Path root, String name, InputStream input,
             Map<String, LinkedHashSet<String>> services) throws IOException {
+        if (name.startsWith(BUNDLED_IR)) throw new IOException("Reserved bundled IR resource: " + name);
         Path target = target(root, name);
         String upper = name.toUpperCase(Locale.ROOT);
         if (upper.equals("META-INF/MANIFEST.MF") || upper.equals("META-INF/INDEX.LIST")
