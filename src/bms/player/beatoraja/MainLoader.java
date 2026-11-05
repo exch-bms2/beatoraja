@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
-import bms.player.beatoraja.input.JInputControllerManager;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
@@ -162,7 +161,7 @@ public class MainLoader extends Application {
 			config = Config.read();
 		}
 		if(player == null) {
-			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
+			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername(), config.getControllerBackend());
 		}
 
 		SongDatabaseAccessor songdb;
@@ -184,7 +183,8 @@ public class MainLoader extends Application {
 		}
 
 		try {
-			JInputControllerManager.configure();
+			config.getControllerBackend().configure();
+			player.selectControllerBackend(config.getControllerBackend());
 			final MainController main = new MainController(f, config, player, auto, songUpdated, songdb);
 
 			Lwjgl3ApplicationConfiguration cfg = createApplicationConfiguration(config);

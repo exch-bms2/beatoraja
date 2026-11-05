@@ -116,6 +116,7 @@ public final class PackagedGameAgent {
                         "Packaged game must use Linux X11/Mesa llvmpipe");
             capture("select-before.png");
             Files.writeString(evidence.resolve("game-runtime.txt"), "MainController=" + source(MainController.class)
+                    + "\ncontrollerBackend=" + main.getConfig().getControllerBackend()
                     + "\nclasspath=" + System.getProperty("java.class.path") + "\nrenderer=" + Gdx.gl.glGetString(com.badlogic.gdx.graphics.GL20.GL_RENDERER)
                     + "\nbackend=" + org.lwjgl.glfw.GLFW.glfwGetPlatform() + "\n");
             main.setPlayMode(BMSPlayerMode.PLAY);

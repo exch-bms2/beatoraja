@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.input.ControllerBackend;
+
 import java.util.Arrays;
 
 import com.badlogic.gdx.Input.Keys;
@@ -30,6 +32,8 @@ public final class PlayModeConfig {
      * コントローラー設定
      */
     private ControllerConfig[] controller = new ControllerConfig[] { new ControllerConfig() };
+    private ControllerConfig[] sdlController;
+    private transient ControllerBackend controllerBackend = ControllerBackend.JINPUT;
     /**
      * MIDI設定
      */
@@ -66,7 +70,7 @@ public final class PlayModeConfig {
     }
 
     public ControllerConfig[] getController() {
-        return controller;
+        return controllerBackend == ControllerBackend.SDL ? sdlController : controller;
     }
 
     public MidiConfig getMidiConfig() {
@@ -74,7 +78,43 @@ public final class PlayModeConfig {
     }
 
     public void setController(ControllerConfig[] controllerassign) {
-        this.controller = controllerassign;
+        if (controllerBackend == ControllerBackend.SDL) sdlController = controllerassign;
+        else controller = controllerassign;
+    }
+
+    public void selectControllerBackend(ControllerBackend backend, Mode mode) {
+        controllerBackend = backend;
+        if (backend == ControllerBackend.SDL && sdlController == null)
+            sdlController = repairControllers(null, mode, true);
+    }
+
+    private static ControllerConfig[] repairControllers(ControllerConfig[] bank, Mode mode, boolean sdl) {
+        if (bank == null || bank.length != mode.player) bank = bank == null ? new ControllerConfig[mode.player] : Arrays.copyOf(bank, mode.player);
+        for (int i = 0; i < bank.length; i++) {
+            if (bank[i] == null) {
+                bank[i] = new ControllerConfig(mode, i, false);
+                if (sdl) { bank[i].start = -1; bank[i].select = -1; }
+            }
+        }
+        return bank;
+    }
+
+    private static void sanitizeControllers(ControllerConfig[] bank, int keys, boolean sdl) {
+        for (ControllerConfig c : bank) {
+            if (c.keys == null) {
+                c.keys = sdl ? new int[keys] : new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
+                        BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS2_PLUS, BMKeys.AXIS1_PLUS, BMKeys.AXIS1_MINUS };
+                if (sdl) Arrays.fill(c.keys, -1);
+            }
+            if (c.keys.length != keys) {
+                int[] resized = new int[keys]; Arrays.fill(resized, -1);
+                System.arraycopy(c.keys, 0, resized, 0, Math.min(c.keys.length, keys)); c.keys = resized;
+            }
+            c.name = c.name != null ? c.name : "";
+            c.duration = MathUtils.clamp(c.duration, INPUT_DURATION_MIN, INPUT_DURATION_MAX);
+            c.analogScratchMode = MathUtils.clamp(c.analogScratchMode, 0, 1);
+            c.analogScratchThreshold = MathUtils.clamp(c.analogScratchThreshold, 1, 1000);
+        }
     }
 
 	public int getVersion() {
@@ -99,18 +139,9 @@ public final class PlayModeConfig {
         if (keyboard.mouseScratchConfig == null) {
             keyboard.mouseScratchConfig = new MouseScratchConfig(mode);
         }
-        if (controller == null || controller.length != mode.player) {
-            ControllerConfig[] repaired = new ControllerConfig[mode.player];
-            if (controller != null) {
-                System.arraycopy(controller, 0, repaired, 0, Math.min(controller.length, repaired.length));
-            }
-            controller = repaired;
-        }
-        for (int i = 0; i < controller.length; i++) {
-            if (controller[i] == null) {
-                controller[i] = new ControllerConfig(mode, i, false);
-            }
-        }
+        controller = repairControllers(controller, mode, false);
+        if (sdlController != null || controllerBackend == ControllerBackend.SDL)
+            sdlController = repairControllers(sdlController, mode, true);
         if (midi == null) {
             midi = new MidiConfig(mode, isMidiMode(mode));
         }
@@ -137,24 +168,8 @@ public final class PlayModeConfig {
             mousescratch.keys[i] = sanitizeMouseScratchKey(mousescratch.keys[i]);
         }
 
-        for (ControllerConfig c : controller) {
-            if (c.keys == null) {
-                c.keys = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-                        BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.AXIS2_PLUS, BMKeys.AXIS1_PLUS, BMKeys.AXIS1_MINUS };
-            }
-            if (c.keys.length != keys) {
-                int[] newkeys = new int[keys];
-                Arrays.fill(newkeys, -1);
-                for (int i = 0; i < c.keys.length && i < newkeys.length; i++) {
-                    newkeys[i] = c.keys[i];
-                }
-                c.keys = newkeys;
-            }
-            c.name = c.name != null ? c.name : "";
-            c.duration = MathUtils.clamp(c.duration, INPUT_DURATION_MIN, INPUT_DURATION_MAX);
-            c.analogScratchMode = MathUtils.clamp(c.analogScratchMode, 0, 1);
-            c.analogScratchThreshold = MathUtils.clamp(c.analogScratchThreshold, 1, 1000);
-        }
+        sanitizeControllers(controller, keys, false);
+        if (sdlController != null) sanitizeControllers(sdlController, keys, true);
         
 		// ボタsン数拡張(16->32)に伴う変換(0.8.1 -> 0.8.2)。あとで消す
 		if(version == 0) {
@@ -178,8 +193,9 @@ public final class PlayModeConfig {
         // KB, コントローラー, Midiの各ボタンについて排他的処理を実施
         boolean[] exclusive = new boolean[keyboard.keys.length];
         validate0(keyboard.keys,  exclusive);
-        for(int i = 0;i < controller.length;i++) {
-            validate0(controller[i].keys,  exclusive);
+        ControllerConfig[] activeControllers = getController();
+        for(int i = 0;i < activeControllers.length;i++) {
+            validate0(activeControllers[i].keys,  exclusive);
         }
 
         for(int i = 0;i < midi.getKeys().length;i++) {

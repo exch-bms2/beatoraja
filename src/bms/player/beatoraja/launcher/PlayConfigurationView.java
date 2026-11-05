@@ -411,7 +411,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void updatePlayer() {
-		player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), players.getValue());
+		player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), players.getValue(), config.getControllerBackend());
 		playername.setText(player.getName());
 
 		videoController.updatePlayer(player);

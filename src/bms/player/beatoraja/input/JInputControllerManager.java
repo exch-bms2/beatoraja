@@ -31,7 +31,7 @@ import net.java.games.input.Event;
  * gdx-controllers 2.x manager reading JInput directly with LWJGL2-compatible IDs.
  * No SDL gamepad remapping is applied. Enumeration is performed at startup.
  */
-public final class JInputControllerManager implements ControllerManager, Disposable {
+public final class JInputControllerManager implements ControllerManager, ControllerBackendManager {
     private final Array<Controller> controllers = new Array<>();
     private final Array<ControllerListener> listeners = new Array<>();
     private final Runnable pollDevices;
@@ -169,16 +169,16 @@ public final class JInputControllerManager implements ControllerManager, Disposa
         }
     }
 
-    private final class PollRunner implements Runnable {
+    private final class PollRunner implements ControllerBackendManager.PollRunner {
         @Override public void run() { poll(); }
-        JInputControllerManager owner() { return JInputControllerManager.this; }
+        @Override public JInputControllerManager owner() { return JInputControllerManager.this; }
     }
 
     static JInputControllerManager ownerOf(Runnable runner) {
         return runner instanceof JInputControllerManager.PollRunner owned ? owned.owner() : null;
     }
 
-    void setPollingShutdown(BooleanSupplier shutdown) { pollingShutdown = shutdown; }
+    public void setPollingShutdown(BooleanSupplier shutdown) { pollingShutdown = shutdown; }
 
     @Override public void dispose() {
         // Backend lifecycle listeners run before MainController.dispose(). Join outside poll's monitor.
@@ -228,7 +228,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             BMControllerInputProcessor.BMKeys.HAT1_TOP, BMControllerInputProcessor.BMKeys.HAT1_BOTTOM,
             BMControllerInputProcessor.BMKeys.HAT1_LEFT, BMControllerInputProcessor.BMKeys.HAT1_RIGHT) { };
 
-    final class RawController implements Controller {
+    final class RawController implements QueuedController {
         final ControllerInputDiagnostics diagnostics;
         final ControllerEventQueue events = new ControllerEventQueue();
         private boolean captureEvents;
@@ -294,7 +294,7 @@ public final class JInputControllerManager implements ControllerManager, Disposa
                     + "; legacy key IDs retained; verify assignments after OIS migration");
         }
 
-        synchronized void resetEvents(boolean active) {
+        public synchronized void resetEvents(boolean active) {
             captureEvents = active;
             events.reset(active, buttons);
             inputGeneration++;
@@ -307,7 +307,9 @@ public final class JInputControllerManager implements ControllerManager, Disposa
             resetEvents(captureEvents);
         }
 
-        synchronized long inputGeneration() { return inputGeneration; }
+        public synchronized long inputGeneration() { return inputGeneration; }
+        public ControllerEventQueue events() { return events; }
+        public ControllerInputDiagnostics diagnostics() { return diagnostics; }
 
         private boolean buttonPressed(int i) {
             return (i < rawButtonCount && rawButtons[i]) || switch (i) {

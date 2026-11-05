@@ -32,7 +32,7 @@ public class BMSPlayerInputProcessor {
     private PollingLwjgl3Input windowInput;
     private final java.util.function.Consumer<Boolean> windowActivityListener = this::windowActivityChanged;
 	private InputPollingThread polling;
-	private JInputControllerManager controllerManager;
+	private ControllerBackendManager controllerManager;
 	private final java.util.concurrent.atomic.AtomicBoolean devicesReleased = new java.util.concurrent.atomic.AtomicBoolean();
 	private final KeyboardJudgeQueue keyboardJudgeQueue = new KeyboardJudgeQueue();
 	private int[] keyboardReplayKeys = new int[0];
@@ -55,10 +55,11 @@ public class BMSPlayerInputProcessor {
 	BMSPlayerInputProcessor(Config config, PlayerConfig player, Array<Controller> controllers,
 			java.util.function.Function<BMSPlayerInputProcessor, MidiInputProcessor> midiFactory) {
 		Resolution resolution = config.getResolution();
+		player.selectControllerBackend(config.getControllerBackend());
 		kbinput = new KeyBoardInputProcesseor(this, player.getMode14().getKeyboardConfig(), resolution);
 		// Gdx.input.setInputProcessor(kbinput);
 		Array<BMControllerInputProcessor> bminput = new Array<BMControllerInputProcessor>();
-		controllerManager = JInputControllerManager.ownerOf(controllerPollRunner);
+		controllerManager = ControllerBackendManager.ownerOf(controllerPollRunner);
 		try {
 			for (Controller controller : controllers) {
 				Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());

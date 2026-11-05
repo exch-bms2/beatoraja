@@ -62,6 +62,13 @@ public final class PackagedGameIntegrationTest {
             PackagedGameSupport.check(launcher.exitValue() == 0, "Actual Launcher exit=" + launcher.exitValue());
             discover(root, observed);
             validate(root, launcher.pid());
+            if (config.getControllerBackend() == bms.player.beatoraja.input.ControllerBackend.SDL) {
+                String gameLog = Files.readString(diagnostics.resolve("launcher-game.log"));
+                PackagedGameSupport.check(gameLog.contains("Controller backend=SDL/Jamepad, devices=")
+                        && !gameLog.contains("SDL controller initialization failed")
+                        && gameLog.contains("SDL controller native shutdown complete"), "SDL native initialization/update/shutdown was not verified");
+                PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=SDL"), "Game lost SDL selection");
+            }
             PackagedGameSupport.check(Files.readString(diagnostics.resolve("launcher-game.log"))
                     .contains("Startup monitor unavailable or ambiguous: " + missingMonitor), "Missing monitor fallback was not exercised");
             var savedConfig = json.fromJson(bms.player.beatoraja.Config.class, Files.readString(configPath));

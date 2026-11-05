@@ -140,8 +140,9 @@ public final class MainController {
 		}
 
 		if(player == null) {
-			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
+			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername(), config.getControllerBackend());
 		}
+		player.selectControllerBackend(config.getControllerBackend());
 		this.player = player;
 
 		this.bmsfile = f;

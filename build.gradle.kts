@@ -283,6 +283,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
     "bms.player.beatoraja.input.SkinMouseInputTest",
     "bms.player.beatoraja.input.JInputControllerCompatibilityTest",
+    "bms.player.beatoraja.input.ControllerBackendTest",
+    "bms.player.beatoraja.input.SdlControllerManagerTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
@@ -515,6 +517,7 @@ tasks.register<JavaExec>("fatJarSmokeTest") {
     timeout.set(Duration.ofMinutes(5))
 }
 tasks.register<JavaExec>("fatJarGameIntegrationTest") {
+    systemProperty("beatoraja.packagedGameTest.controllerBackend", providers.gradleProperty("controllerBackendTest").getOrElse("JINPUT"))
     group = "verification"
     description = "Real JavaFX Launcher -> GLFW game -> exit, with only a Fat JAR on the production classpath."
     dependsOn(fatJar, tasks.distZip, tasks.testClasses, packagedGameObserverJar)
@@ -527,6 +530,7 @@ tasks.register<JavaExec>("fatJarGameIntegrationTest") {
     timeout.set(Duration.ofMinutes(5))
 }
 tasks.register<JavaExec>("packagedGameIntegrationTest") {
+    systemProperty("beatoraja.packagedGameTest.controllerBackend", providers.gradleProperty("controllerBackendTest").getOrElse("JINPUT"))
     group = "verification"
     description = "Real extracted-ZIP JavaFX START, MainController gameplay, input shutdown and child-process exit."
     dependsOn(tasks.distZip, tasks.testClasses, packagedGameObserverJar)

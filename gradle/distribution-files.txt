@@ -103,6 +103,7 @@ docs/state-endurance.md
 docs/ffmpeg-decoder-alignment.md
 docs/keyboard-events.md
 docs/controller-events.md
+docs/controller-backends.md
 docs/mouse-scratch-diagnostics.md
 docs/mouse-scratch-events.md
 docs/window-hidpi-diagnostics.md

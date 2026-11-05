@@ -172,12 +172,12 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
                 inputGeneration = generation;
                 Arrays.fill(buttontime, Long.MIN_VALUE);
             }
-            if (raw.events.isOverflowed()) return;
+            if (raw.events().isOverflowed()) return;
             Arrays.fill(buttonchanged, 0, 32, false);
             int event;
-            while ((event = raw.events.pollNext(buttonstate, buttontime, microtime, duration)) >= 0)
+            while ((event = raw.events().pollNext(buttonstate, buttontime, microtime, duration)) >= 0)
                 forwardButtonEvent(event / 2, event % 2 != 0, microtime);
-            gatedSamples += raw.events.deferredCount(buttonstate, buttontime, microtime, duration);
+            gatedSamples += raw.events().deferredCount(buttonstate, buttontime, microtime, duration);
         }
 
 		for (int button = 0; button < buttonstate.length; button++) {
@@ -259,8 +259,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
         else if (select == button) bmsPlayerInputProcessor.setSelectPressed(down);
     }
 
-    private JInputControllerManager.RawController rawController() {
-        return controller instanceof JInputControllerManager.RawController raw ? raw : null;
+    private QueuedController rawController() {
+        return controller instanceof QueuedController raw ? raw : null;
     }
 
     private void resetEvents() {
@@ -290,7 +290,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
     }
 
     ControllerInputDiagnostics getDiagnostics() {
-        return controller instanceof JInputControllerManager.RawController raw ? raw.diagnostics : null;
+        return controller instanceof QueuedController raw ? raw.diagnostics() : null;
     }
 
     public static int computeAnalogDiff(float oldValue, float newValue) {

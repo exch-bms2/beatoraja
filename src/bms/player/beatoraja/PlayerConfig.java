@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.input.ControllerBackend;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -272,6 +274,19 @@ public final class PlayerConfig {
 		validate();
 	}
 
+    private transient ControllerBackend controllerBackend = ControllerBackend.JINPUT;
+
+    public void selectControllerBackend(ControllerBackend backend) {
+        controllerBackend = backend != null ? backend : ControllerBackend.JINPUT;
+        if (mode5 != null) mode5.selectControllerBackend(controllerBackend, Mode.BEAT_5K);
+        if (mode7 != null) mode7.selectControllerBackend(controllerBackend, Mode.BEAT_7K);
+        if (mode10 != null) mode10.selectControllerBackend(controllerBackend, Mode.BEAT_10K);
+        if (mode14 != null) mode14.selectControllerBackend(controllerBackend, Mode.BEAT_14K);
+        if (mode9 != null) mode9.selectControllerBackend(controllerBackend, Mode.POPN_9K);
+        if (mode24 != null) mode24.selectControllerBackend(controllerBackend, Mode.KEYBOARD_24K);
+        if (mode24double != null) mode24double.selectControllerBackend(controllerBackend, Mode.KEYBOARD_24K_DOUBLE);
+    }
+
     public String getName() {
         return name;
     }
@@ -445,28 +460,33 @@ public final class PlayerConfig {
 	public PlayModeConfig getMode5() {
 		if (mode5 == null) {
 			mode5 = new PlayModeConfig(Mode.BEAT_5K);
+			mode5.selectControllerBackend(controllerBackend, Mode.BEAT_5K);
 		}
 		return mode5;
 	}
 
 	public void setMode5(PlayModeConfig mode5) {
 		this.mode5 = mode5;
+		if (mode5 != null) mode5.selectControllerBackend(controllerBackend, Mode.BEAT_5K);
 	}
 
 	public PlayModeConfig getMode7() {
 		if (mode7 == null) {
 			mode7 = new PlayModeConfig(Mode.BEAT_7K);
+			mode7.selectControllerBackend(controllerBackend, Mode.BEAT_7K);
 		}
 		return mode7;
 	}
 
 	public void setMode7(PlayModeConfig mode7) {
 		this.mode7 = mode7;
+		if (mode7 != null) mode7.selectControllerBackend(controllerBackend, Mode.BEAT_7K);
 	}
 
 	public PlayModeConfig getMode10() {
 		if(mode10 == null || mode10.getController() == null || mode10.getController().length < 2) {
 			mode10 = new PlayModeConfig(Mode.BEAT_10K);
+			mode10.selectControllerBackend(controllerBackend, Mode.BEAT_10K);
 			Logger.getGlobal().warning("mode10のPlayConfigを再構成");
 		}
 		return mode10;
@@ -474,11 +494,13 @@ public final class PlayerConfig {
 
 	public void setMode10(PlayModeConfig mode10) {
 		this.mode10 = mode10;
+		if (mode10 != null) mode10.selectControllerBackend(controllerBackend, Mode.BEAT_10K);
 	}
 
 	public PlayModeConfig getMode14() {
 		if(mode14 == null || mode14.getController() == null || mode14.getController().length < 2) {
 			mode14 = new PlayModeConfig(Mode.BEAT_14K);
+			mode14.selectControllerBackend(controllerBackend, Mode.BEAT_14K);
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
 		return mode14;
@@ -486,33 +508,39 @@ public final class PlayerConfig {
 
 	public void setMode14(PlayModeConfig mode14) {
 		this.mode14 = mode14;
+		if (mode14 != null) mode14.selectControllerBackend(controllerBackend, Mode.BEAT_14K);
 	}
 
 	public PlayModeConfig getMode9() {
 		if (mode9 == null) {
 			mode9 = new PlayModeConfig(Mode.POPN_9K);
+			mode9.selectControllerBackend(controllerBackend, Mode.POPN_9K);
 		}
 		return mode9;
 	}
 
 	public void setMode9(PlayModeConfig mode9) {
 		this.mode9 = mode9;
+		if (mode9 != null) mode9.selectControllerBackend(controllerBackend, Mode.POPN_9K);
 	}
 
 	public PlayModeConfig getMode24() {
 		if (mode24 == null) {
 			mode24 = new PlayModeConfig(Mode.KEYBOARD_24K);
+			mode24.selectControllerBackend(controllerBackend, Mode.KEYBOARD_24K);
 		}
 		return mode24;
 	}
 
 	public void setMode24(PlayModeConfig mode24) {
 		this.mode24 = mode24;
+		if (mode24 != null) mode24.selectControllerBackend(controllerBackend, Mode.KEYBOARD_24K);
 	}
 
 	public PlayModeConfig getMode24double() {
 		if(mode24double == null || mode24double.getController() == null || mode24double.getController().length < 2) {
 			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
+			mode24double.selectControllerBackend(controllerBackend, Mode.KEYBOARD_24K_DOUBLE);
 			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
 		}
 		return mode24double;
@@ -520,6 +548,7 @@ public final class PlayerConfig {
 
 	public void setMode24double(PlayModeConfig mode24double) {
 		this.mode24double = mode24double;
+		if (mode24double != null) mode24double.selectControllerBackend(controllerBackend, Mode.KEYBOARD_24K_DOUBLE);
 	}
 
 	public void setMode(Mode m)  {
@@ -916,6 +945,7 @@ public final class PlayerConfig {
 		if(mode24double == null) {
 			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 		}
+		selectControllerBackend(controllerBackend);
 		mode5.validate(Mode.BEAT_5K);
 		mode7.validate(Mode.BEAT_7K);
 		mode10.validate(Mode.BEAT_10K);
@@ -1157,6 +1187,10 @@ public final class PlayerConfig {
 	}
 
 	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
+        return readPlayerConfig(playerpath, playerid, ControllerBackend.JINPUT);
+    }
+
+    public static PlayerConfig readPlayerConfig(String playerpath, String playerid, ControllerBackend backend) {
 		Path directory = getPlayerDirectory(playerpath, playerid);
 		if (directory == null) {
 			Logger.getGlobal().warning("Refusing to load player config with an invalid path or id");
@@ -1207,6 +1241,7 @@ public final class PlayerConfig {
 			}
 		}
 		player.setId(playerid);
+		player.selectControllerBackend(backend);
 		player.validate();
 		return player;
 	}

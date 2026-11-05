@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.input.ControllerBackend;
+
 import static bms.player.beatoraja.Resolution.*;
 
 import java.io.*;
@@ -50,6 +52,15 @@ public class Config implements Validatable {
 	 * ディスプレイモード
 	 */
 	private DisplayMode displaymode = DisplayMode.WINDOW;
+	private ControllerBackend controllerBackend = ControllerBackend.JINPUT;
+
+	public ControllerBackend getControllerBackend() {
+		return controllerBackend != null ? controllerBackend : ControllerBackend.JINPUT;
+	}
+
+	public void setControllerBackend(ControllerBackend backend) {
+		controllerBackend = backend != null ? backend : ControllerBackend.JINPUT;
+	}
 	/** Null keeps the platform's default startup monitor. */
 	private MonitorSelection startupMonitor;
 
@@ -588,6 +599,7 @@ public class Config implements Validatable {
 	}
 
 	public boolean validate() {
+		controllerBackend = getControllerBackend();
 		displaymode = (displaymode != null) ? displaymode : DisplayMode.WINDOW;
 		if (startupMonitor != null && !startupMonitor.isValid()) startupMonitor = null;
 		resolution = (resolution != null) ? resolution : Resolution.HD;
