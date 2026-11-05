@@ -62,11 +62,11 @@ dependencies {
     implementation("net.java.jinput:jinput:2.0.5")
     // Regression oracle only: never include LWJGL2 in the application or distribution.
     testImplementation("org.lwjgl.lwjgl:lwjgl:2.9.3") { isTransitive = false }
-    // Match the LWJGL3 version required by libGDX 1.14.2; keep native modules aligned.
+    // Override libGDX 1.14.2's original LWJGL version; keep all Java/native modules aligned.
     for (module in listOf("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb")) {
-        implementation("org.lwjgl:$module:3.3.3") { isTransitive = false }
+        implementation("org.lwjgl:$module:3.4.3") { isTransitive = false }
         for (platform in listOf("windows", "linux", "macos", "macos-arm64")) {
-            runtimeOnly("org.lwjgl:$module:3.3.3:natives-$platform") { isTransitive = false }
+            runtimeOnly("org.lwjgl:$module:3.4.3:natives-$platform") { isTransitive = false }
         }
     }
     runtimeOnly("com.badlogicgames.gdx:gdx-platform:1.14.2:natives-desktop") { isTransitive = false }
@@ -217,6 +217,7 @@ val fatJar by tasks.registering(Jar::class) {
 val regressionClasses = listOf(
     "bms.player.beatoraja.build.CommonsCompatibilityTest",
     "bms.player.beatoraja.build.DatabaseRuntimeCompatibilityTest",
+    "bms.player.beatoraja.build.LwjglRuntimeCompatibilityTest",
     "bms.player.beatoraja.ir.IsolatedIRConnectionTest",
     "bms.player.beatoraja.select.IRTableLoaderTest",
     "bms.player.beatoraja.select.PreviewMusicProcessorTest",

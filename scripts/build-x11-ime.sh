@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Separate output; the stock Maven native and Ant libraries are never overwritten.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-REVISION=3eaf1255b29fdf5c2895856c7be7d7185ef2b241
+REVISION=d9d6f0f1f967807ffade6598ea9a631ebaf37a56
 OUT="${1:-$ROOT/build-gradle/generated/x11-ime}"
 JAVA_HOME="${JAVA_HOME:?Set JAVA_HOME to a Java 17 JDK}"
 if [[ "$(uname -s)" != Linux ]]; then
@@ -20,8 +20,8 @@ else
     curl -fL --connect-timeout 15 --max-time 120 \
         "https://codeload.github.com/glfw/glfw/tar.gz/$REVISION" -o "$WORK/glfw.tar.gz"
 fi
-# This is the source revision recorded inside lwjgl-glfw-3.3.3-natives-linux.jar.
-echo 'b16beeaa10539ec32070c5144aa1a7021d25ec444b7db9278baf1d3526ac7fa0  '"$WORK/glfw.tar.gz" | sha256sum --check --status
+# This is the source revision recorded inside lwjgl-glfw-3.4.3-natives-linux.jar.
+echo '96722514789b1aa1ad9c4debd874450156ea457aea691e546ffaf5b53892d5a3  '"$WORK/glfw.tar.gz" | sha256sum --check --status
 tar -xzf "$WORK/glfw.tar.gz" -C "$WORK"
 SOURCE="$WORK/glfw-$REVISION"
 python3 "$ROOT/scripts/prepare-x11-ime.py" "$SOURCE" "$ROOT/native/linux/x11-ime.c"

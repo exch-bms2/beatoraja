@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Apply guarded mechanical hooks to the exact GLFW shipped by LWJGL 3.3.3."""
+"""Apply guarded mechanical hooks to the exact GLFW shipped by LWJGL 3.4.3."""
 import argparse
 from pathlib import Path
 
-REVISION = "3eaf1255b29fdf5c2895856c7be7d7185ef2b241"
+REVISION = "d9d6f0f1f967807ffade6598ea9a631ebaf37a56"
 
 
 def prepare(source: Path, bridge: Path):

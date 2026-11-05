@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.JsonWriter;
 /** Linux artifact/ABI verification only: no display, GL context, audio or real IME server. */
 public final class X11ImeArtifactTest {
     private static final String LIBRARY = "libglfw-beatoraja-x11-ime.so";
-    private static final String REVISION = "3eaf1255b29fdf5c2895856c7be7d7185ef2b241";
+    private static final String REVISION = "d9d6f0f1f967807ffade6598ea9a631ebaf37a56";
     private static final Set<String> EXPORTS = Set.of("glfwInit", "glfwGetVersionString", "glfwGetPlatform",
             "Java_bms_player_beatoraja_input_X11ImeNative_versionNative",
             "Java_bms_player_beatoraja_input_X11ImeNative_openNative",
@@ -105,6 +105,14 @@ public final class X11ImeArtifactTest {
         } finally { if (child.isAlive()) { child.destroyForcibly(); child.waitFor(10,TimeUnit.SECONDS); } }
     }
     private static void selfTest() throws Exception {
+        try (var source=X11ImeArtifactTest.class.getClassLoader().getResourceAsStream(
+                "META-INF/linux/x64/org/lwjgl/glfw/libglfw.so.git")) {
+            check(source!=null && new String(source.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8).trim().equals(REVISION),
+                    "X11 IME must match the selected LWJGL GLFW native source");
+        }
+        for (String script:List.of("scripts/prepare-x11-ime.py","scripts/build-x11-ime.sh"))
+            check(Files.readString(Path.of(script)).contains("REVISION="+REVISION)
+                    || Files.readString(Path.of(script)).contains("REVISION = \""+REVISION+"\""),"Stale GLFW source pin: "+script);
         byte[] elf=new byte[64]; elf[0]=0x7f; elf[1]='E'; elf[2]='L'; elf[3]='F'; elf[4]=2; elf[5]=1; elf[6]=1; elf[16]=3; elf[18]=62;
         verifyElf(elf);
         for (int position : new int[]{0,4,5,6,16,18}) { byte[] broken=elf.clone(); broken[position]=0; rejects(()->verifyElf(broken)); }

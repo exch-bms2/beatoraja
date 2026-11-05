@@ -44,9 +44,9 @@ public final class DistributionSmokeTest {
             "gdx-jnigen-loader-2.5.2.jar", "gdx-controllers-core-2.2.4.jar", "gdx-controllers-desktop-2.2.4.jar",
             "jamepad-2.26.5.0.jar"));
         for (String module : List.of("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb")) {
-            names.add(module + "-3.3.3.jar");
+            names.add(module + "-3.4.3.jar");
             for (String platform : List.of("windows", "linux", "macos", "macos-arm64"))
-                names.add(module + "-3.3.3-natives-" + platform + ".jar");
+                names.add(module + "-3.4.3-natives-" + platform + ".jar");
         }
         return List.copyOf(names);
     }
@@ -103,7 +103,7 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("org/lwjgl/glfw/GLFW.class") == null
                     && jar.getEntry("bms/build/FatJarContent.class") == null, "Ordinary distribution must keep the thin application JAR");
             check(jar.getEntry("bms/player/beatoraja/build/PackagedGameAgent.class") == null, "Never ship the test observer agent");
-            for (String type : List.of("WindowsImeBridge", "WindowsImeSession", "WindowsImeNative", "WindowsImeCallback"))
+            for (String type : List.of("WindowsImeBridge", "WindowsImeSession", "WindowsImeNative", "WindowsImeCallback", "WindowsImeCallbackI"))
                 check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing Windows IME component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/WindowsImeTestSupport.class") == null, "Never ship fake IMM transport");
             check(jar.getEntry("bms/player/beatoraja/audio/AudioDiagnostics.class") != null, "Missing audio diagnostics");
@@ -247,8 +247,13 @@ public final class DistributionSmokeTest {
         verifyClassOrigin("com.badlogic.gdx.Gdx", "gdx-1.14.2.jar");
         verifyClassOrigin("com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator", "gdx-freetype-1.14.2.jar");
         verifyClassOrigin("com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application", "gdx-backend-lwjgl3-1.14.2.jar");
-        verifyClassOrigin("org.lwjgl.glfw.GLFW", "lwjgl-glfw-3.3.3.jar");
-        verifyClassOrigin("org.lwjgl.system.MemoryUtil", "lwjgl-3.3.3.jar");
+        verifyClassOrigin("org.lwjgl.glfw.GLFW", "lwjgl-glfw-3.4.3.jar");
+        verifyClassOrigin("org.lwjgl.system.MemoryUtil", "lwjgl-3.4.3.jar");
+        verifyClassOrigin("org.lwjgl.opengl.GL11", "lwjgl-opengl-3.4.3.jar");
+        verifyClassOrigin("org.lwjgl.openal.ALC10", "lwjgl-openal-3.4.3.jar");
+        verifyClassOrigin("org.lwjgl.system.jemalloc.JEmalloc", "lwjgl-jemalloc-3.4.3.jar");
+        verifyClassOrigin("org.lwjgl.stb.STBImage", "lwjgl-stb-3.4.3.jar");
+        LwjglRuntimeCompatibilityTest.main(new String[0]);
         for (String retired : List.of("org.lwjgl.Sys", "org.lwjgl.input.Controllers", "com.badlogic.gdx.backends.lwjgl.LwjglApplication")) {
             try {
                 Class.forName(retired, false, DistributionSmokeTest.class.getClassLoader());
