@@ -82,7 +82,7 @@ public final class JInputControllerManager implements ControllerManager, Control
         try {
             prepareNativeLibraries();
             var devices = ControllerEnvironment.getDefaultEnvironment().getControllers();
-            // JInput 2.0.5 owns native handles until its JVM shutdown hooks run;
+            // JInput owns native handles until its JVM shutdown hooks run;
             // it exposes no public close/destroy operation for the default environment.
             return new Devices(devices, () -> { }, () -> { });
         } catch (Exception | LinkageError error) {
@@ -115,7 +115,7 @@ public final class JInputControllerManager implements ControllerManager, Control
         var directory = first.getParent().toFile();
         for (int i = 1; i < libraries.size(); i++) loader.extractFileTo(libraries.get(i), directory);
         if (libraries.get(0).equals("libjinput-osx.jnilib")) {
-            // JInput 2.0.5 ships .jnilib, while Java 17 maps the name to .dylib.
+            // JInput ships a universal .jnilib, while Java 17 maps the name to .dylib.
             Path mapped = first.resolveSibling(System.mapLibraryName("jinput-osx"));
             if (!Files.exists(mapped)) Files.copy(first, mapped);
         }
@@ -123,9 +123,8 @@ public final class JInputControllerManager implements ControllerManager, Control
     }
 
     static List<String> nativeLibraries(String os) {
-        if (os.startsWith("Windows")) return List.of("jinput-dx8.dll", "jinput-dx8_64.dll",
-                "jinput-raw.dll", "jinput-raw_64.dll", "jinput-wintab.dll");
-        if (os.startsWith("Linux")) return List.of("libjinput-linux.so", "libjinput-linux64.so");
+        if (os.startsWith("Windows")) return List.of("jinput-dx8_64.dll", "jinput-raw_64.dll", "jinput-wintab.dll");
+        if (os.startsWith("Linux")) return List.of("libjinput-linux64.so");
         if (os.startsWith("Mac")) return List.of("libjinput-osx.jnilib");
         throw new IllegalStateException("Unsupported JInput platform: " + os);
     }

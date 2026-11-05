@@ -59,7 +59,9 @@ dependencies {
     implementation("org.jcraft:jorbis:0.0.17") { isTransitive = false }
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.4")
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.4")
-    implementation("net.java.jinput:jinput:2.0.5")
+    // JInput 2.0.10 includes JUtils/plugin classes; native code is one classifier JAR.
+    implementation("net.java.jinput:jinput:2.0.10") { isTransitive = false }
+    implementation("com.badlogicgames.jamepad:jamepad:2.30.0.0")
     // Regression oracle only: never include LWJGL2 in the application or distribution.
     testImplementation("org.lwjgl.lwjgl:lwjgl:2.9.3") { isTransitive = false }
     // Override libGDX 1.14.2's original LWJGL version; keep all Java/native modules aligned.
@@ -71,10 +73,8 @@ dependencies {
     }
     runtimeOnly("com.badlogicgames.gdx:gdx-platform:1.14.2:natives-desktop") { isTransitive = false }
     runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:1.14.2:natives-desktop") { isTransitive = false }
-    // JInput remains independent from the rendering backend.
-    for (platform in listOf("linux", "windows", "osx")) {
-        runtimeOnly("net.java.jinput:jinput-platform:2.0.5:natives-$platform") { isTransitive = false }
-    }
+    // JInput remains independent from the rendering backend; do not mix the old platform/JUtils JARs.
+    runtimeOnly("net.java.jinput:jinput:2.0.10:natives-all") { isTransitive = false }
     // Compress requires Commons IO, Codec and Lang3; resolve its non-optional dependencies.
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
@@ -290,6 +290,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.SkinMouseInputTest",
     "bms.player.beatoraja.input.JInputControllerCompatibilityTest",
     "bms.player.beatoraja.input.ControllerBackendTest",
+    "bms.player.beatoraja.input.ControllerLibraryCompatibilityTest",
     "bms.player.beatoraja.input.SdlControllerManagerTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
@@ -785,6 +786,17 @@ tasks.register<JavaExec>("lwjgl3AudioDiagnosticsSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.audio.Lwjgl3AudioDiagnosticsSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("controllerNativeSmokeTest") {
+    group = "verification"
+    description = "Verify actual JInput plugin loading and SDL init/update/quit; no physical-input validation."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.ControllerLibraryCompatibilityTest")
+    args("--native")
+    timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

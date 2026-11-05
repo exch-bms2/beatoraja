@@ -28,13 +28,10 @@ public final class DistributionSmokeTest {
     private static final Map<String, String> CONTROLLER_JARS = Map.of(
             "gdx-controllers-core-2.2.4.jar", "04da67627b1a3646ef8f214c91d296742a7c05597dbc2167aaab09cbdcc77470",
             "gdx-controllers-desktop-2.2.4.jar", "8e390e59c6211ed23e0a6fd4018cefa37f8b9865dee69995699053496b801d6c",
-            "jamepad-2.26.5.0.jar", "b0ef910ba531cadfe0418496a30d87cbac46021b062547f5b5947e035435711a");
+            "jamepad-2.30.0.0.jar", "65b90692053b2a0a799840c06e9c31b5bfb648c0cf50cb6b238f99747fbcb9f2");
     private static final Map<String, String> JINPUT_JARS = Map.of(
-            "jinput-2.0.5.jar", "79b5a4f5829e1a49a415711f7fb8eb5b9ad22defa72929fda2da96ec30d3f018",
-            "jutils-1.0.0.jar", "c3334ff39cf0ab3b54925619101054c90098b7c733b1e7834c7b75e4c41e84a5",
-            "jinput-platform-2.0.5-natives-osx.jar", "171024b00f9a743b92388b48733dc30fd3f6d3a7da4f66f9821531fbcf1aa074",
-            "jinput-platform-2.0.5-natives-linux.jar", "1ab4d194277816b6105253d224c8c69f1b6d720690efe7c85f3ce884f0ea273d",
-            "jinput-platform-2.0.5-natives-windows.jar", "24afbd5e1fab17da57d16a4d3f19d53f36155ef46a9976484201a4bb9722287f");
+            "jinput-2.0.10.jar", "84386ea57160c17558a162761b4ca651f036933d0aabbc4892b0d3aaf6d92193",
+            "jinput-2.0.10-natives-all.jar", "8ab7bbb4345c36a5e667a4b435a0cc506bb1e3857dba9bda799210603a12d66a");
     private static final List<String> GRAPHICS_JARS = graphicsJars();
 
     private static List<String> graphicsJars() {
@@ -42,7 +39,7 @@ public final class DistributionSmokeTest {
             "gdx-1.14.2.jar", "gdx-freetype-1.14.2.jar", "gdx-backend-lwjgl3-1.14.2.jar",
             "gdx-platform-1.14.2-natives-desktop.jar", "gdx-freetype-platform-1.14.2-natives-desktop.jar",
             "gdx-jnigen-loader-2.5.2.jar", "gdx-controllers-core-2.2.4.jar", "gdx-controllers-desktop-2.2.4.jar",
-            "jamepad-2.26.5.0.jar"));
+            "jamepad-2.30.0.0.jar"));
         for (String module : List.of("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb")) {
             names.add(module + "-3.4.3.jar");
             for (String platform : List.of("windows", "linux", "macos", "macos-arm64"))
@@ -262,8 +259,9 @@ public final class DistributionSmokeTest {
         }
         verifyClassOrigin("com.badlogic.gdx.controllers.Controllers", "gdx-controllers-core-2.2.4.jar");
         verifyClassOrigin("com.badlogic.gdx.controllers.desktop.JamepadControllerManager", "gdx-controllers-desktop-2.2.4.jar");
-        verifyClassOrigin("com.studiohartman.jamepad.ControllerManager", "jamepad-2.26.5.0.jar");
-        verifyClassOrigin("net.java.games.input.ControllerEnvironment", "jinput-2.0.5.jar");
+        verifyClassOrigin("com.studiohartman.jamepad.ControllerManager", "jamepad-2.30.0.0.jar");
+        verifyClassOrigin("net.java.games.input.ControllerEnvironment", "jinput-2.0.10.jar");
+        verifyClassOrigin("net.java.games.util.plugins.Plugins", "jinput-2.0.10.jar");
         try {
             Class.forName("com.badlogic.gdx.controllers.desktop.OisControllers");
             throw new AssertionError("Do not ship the old OIS backend");
@@ -271,6 +269,7 @@ public final class DistributionSmokeTest {
             // The raw adapter must not share a classpath with the retired backend.
         }
         JInputControllerCompatibilityTest.main(new String[]{"--packaged"});
+        bms.player.beatoraja.input.ControllerLibraryCompatibilityTest.main(new String[0]);
         LibGdxCompatibilityTest.main(new String[0]);
         bms.player.beatoraja.SkinProjectionTest.main(new String[0]);
         bms.player.beatoraja.WindowModeControllerTest.main(new String[0]);

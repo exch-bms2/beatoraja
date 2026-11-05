@@ -222,6 +222,10 @@ public final class JInputControllerCompatibilityTest {
         String property = "net.java.games.input.librarypath";
         String previous = System.getProperty(property);
         try {
+            check(JInputControllerManager.nativeLibraries("Windows 11").equals(
+                    List.of("jinput-dx8_64.dll", "jinput-raw_64.dll", "jinput-wintab.dll")), "JInput 2.0.10 Windows natives");
+            check(JInputControllerManager.nativeLibraries("Linux").equals(List.of("libjinput-linux64.so")),
+                    "JInput 2.0.10 Linux native");
             for (String os : List.of("Windows 11", "Linux", "Mac OS X")) {
                 for (String name : JInputControllerManager.nativeLibraries(os)) {
                     check(JInputControllerCompatibilityTest.class.getClassLoader().getResource(name) != null,
@@ -236,9 +240,15 @@ public final class JInputControllerCompatibilityTest {
             Path directory = Path.of(System.getProperty(property));
             for (String name : JInputControllerManager.nativeLibraries(System.getProperty("os.name"))) {
                 check(Files.isRegularFile(directory.resolve(name)), "Extracted JInput native: " + name);
+                try (var source = JInputControllerCompatibilityTest.class.getClassLoader().getResourceAsStream(name)) {
+                    check(Arrays.equals(source.readAllBytes(), Files.readAllBytes(directory.resolve(name))),
+                            "Extracted native matches selected JAR: " + name);
+                }
             }
             if (System.getProperty("os.name").startsWith("Mac")) {
                 check(Files.isRegularFile(directory.resolve(System.mapLibraryName("jinput-osx"))), "Java 17 dylib alias");
+                check(Files.mismatch(directory.resolve("libjinput-osx.jnilib"),
+                        directory.resolve(System.mapLibraryName("jinput-osx"))) == -1, "Universal macOS alias content");
             }
         } finally {
             if (previous == null) System.clearProperty(property);
