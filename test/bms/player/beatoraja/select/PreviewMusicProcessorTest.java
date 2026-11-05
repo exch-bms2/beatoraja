@@ -18,6 +18,7 @@ import java.util.zip.ZipOutputStream;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongResources;
 import bms.player.beatoraja.song.archive.SongArchives;
+import bms.player.beatoraja.audio.Mp3CompatibilityTest;
 
 /** Preview resolution tests using real local, ZIP and RAR4 resources, without audio hardware. */
 public final class PreviewMusicProcessorTest {
@@ -34,6 +35,7 @@ public final class PreviewMusicProcessorTest {
                     "sounds.v1/preview space.ogg", "PREVIEW.OGG"}) {
                 entries.put("set/" + name, name.getBytes(StandardCharsets.UTF_8));
             }
+            entries.put("set/mp3/preview.mp3", Mp3CompatibilityTest.fixture("tone-48000-2.mp3"));
             for (var entry : entries.entrySet()) {
                 Path path = root.resolve("local").resolve(entry.getKey());
                 Files.createDirectories(path.getParent());
@@ -88,6 +90,7 @@ public final class PreviewMusicProcessorTest {
         try (var input = resource.openStream()) {
             check(Arrays.equals(input.readAllBytes(), entries.get("set/" + expected)), "Preview bytes: " + requested);
         }
+        if (expected.equals("mp3/preview.mp3")) Mp3CompatibilityTest.verifyResource(resource);
         check(materialized == SongResources.getMaterializedStatistics().fileCount(), "No materialization");
         check(requested.equals(song.getPreview()), "Do not modify song metadata");
     }

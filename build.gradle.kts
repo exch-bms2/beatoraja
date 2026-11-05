@@ -30,7 +30,7 @@ sourceSets {
     }
     test {
         java.setSrcDirs(listOf("test"))
-        resources.setSrcDirs(emptyList<String>())
+        resources.setSrcDirs(listOf("test/resources"))
     }
 }
 
@@ -55,7 +55,7 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx:1.14.2")
     implementation("com.badlogicgames.gdx:gdx-freetype:1.14.2")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.14.2") { isTransitive = false }
-    implementation("com.badlogicgames.jlayer:jlayer:1.0.1-gdx") { isTransitive = false }
+    implementation("com.badlogicgames.jlayer:jlayer:1.0.2-gdx") { isTransitive = false }
     implementation("org.jcraft:jorbis:0.0.17") { isTransitive = false }
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.4")
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.4")
@@ -215,6 +215,7 @@ val fatJar by tasks.registering(Jar::class) {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.audio.Mp3CompatibilityTest",
     "bms.player.beatoraja.build.CommonsCompatibilityTest",
     "bms.player.beatoraja.build.DatabaseRuntimeCompatibilityTest",
     "bms.player.beatoraja.build.LwjglRuntimeCompatibilityTest",
@@ -479,7 +480,7 @@ val distributionSmokeTest by tasks.registering(JavaExec::class) {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.build.DistributionSmokeTest")
     args(layout.buildDirectory.dir("install/beatoraja").get().asFile.absolutePath,
-        sourceSets.test.get().output.classesDirs.asPath, java17.get().executablePath.asFile.absolutePath,
+        sourceSets.test.get().output.asPath, java17.get().executablePath.asFile.absolutePath,
         tasks.named<Zip>("distZip").get().archiveFile.get().asFile.absolutePath,
         includeAudioTestAssets.toString())
     workingDir(projectDir)
@@ -507,10 +508,18 @@ val packagedGameObserverJar = tasks.register<Jar>("packagedGameObserverJar") {
     include("bms/player/beatoraja/build/PackagedGameAgent*.class", "bms/player/beatoraja/build/PackagedGameSupport.class")
     manifest.attributes("Premain-Class" to "bms.player.beatoraja.build.PackagedGameAgent")
 }
+val mp3FatJarSmokeTest by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Decode MP3 key sounds with only the Fat JAR and test output on the classpath."
+    dependsOn(fatJar, tasks.testClasses)
+    classpath = files(sourceSets.test.get().output, fatJar.flatMap { it.archiveFile })
+    mainClass.set("bms.player.beatoraja.audio.Mp3CompatibilityTest")
+}
+
 tasks.register<JavaExec>("fatJarSmokeTest") {
     group = "verification"
     description = "Verify merged dependency/native bytes, java -jar native startup and real IR worker isolation."
-    dependsOn(fatJar, tasks.distZip, tasks.testClasses)
+    dependsOn(fatJar, tasks.distZip, tasks.testClasses, mp3FatJarSmokeTest)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.build.FatJarSmokeTest")
     args(fatJar.get().archiveFile.get().asFile.absolutePath,
@@ -787,6 +796,15 @@ tasks.register<JavaExec>("lwjgl3AudioDiagnosticsSmokeTest") {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.audio.Lwjgl3AudioDiagnosticsSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("mp3OpenALSmokeTest") {
+    group = "verification"
+    description = "Verify MP3 Sound/Music decoding, muted playback, looping and cleanup with real OpenAL."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.audio.Mp3OpenALSmokeTest")
+    timeout.set(Duration.ofMinutes(2))
 }
 
 tasks.register<JavaExec>("controllerNativeSmokeTest") {

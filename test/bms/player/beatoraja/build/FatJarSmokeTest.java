@@ -57,6 +57,9 @@ public final class FatJarSmokeTest {
                         && !name.equals("META-INF/INDEX.LIST") && !name.matches("META-INF/[^/]+\\.(?i:SF|RSA|DSA|EC)"), "Stale metadata: " + name);
                 check(!name.startsWith("bms/build/") && !name.startsWith("bms/player/beatoraja/build/")
                         && !name.equals("org/lwjgl/Sys.class"), "Build/test-only class leaked: " + name);
+                check(!name.startsWith("audio/mp3/") && !name.startsWith("bms/player/beatoraja/audio/Mp3CompatibilityTest")
+                        && !name.equals("bms/player/beatoraja/audio/Mp3TestAssets.class")
+                        && !name.equals("bms/player/beatoraja/audio/Mp3OpenALSmokeTest.class"), "MP3 test data leaked: " + name);
             }
             check(fat.getEntry("resources/UIResources_ja_JP.properties") != null
                     && fat.getEntry("bms/player/beatoraja/launcher/PlayConfigurationView.fxml") != null, "Launcher resources");

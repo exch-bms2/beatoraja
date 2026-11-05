@@ -49,6 +49,7 @@ public final class DistributionSmokeTest {
     }
     // SHA-256 of the selected Maven Central artifacts, including required Commons dependencies.
     private static final Map<String, String> CENTRAL_JARS = Map.ofEntries(
+            Map.entry("jlayer-1.0.2-gdx.jar", "db9eb448c1ae50a6e5acd2fea398b06d186c87546a914cebcffd8ab37128e15b"),
             Map.entry("junrar-8.1.2.jar", "6f8204a7fa257af3fb127d0d71176bc5f55d9a572fc576d02d67bf79def19b15"),
             Map.entry("commons-compress-1.28.0.jar", "e1522945218456f3649a39bc4afd70ce4bd466221519dba7d378f2141a4642ca"),
             Map.entry("commons-dbutils-1.8.1.jar", "e64501edba68fb4e674a3c350955e743b1f55a878c8fd348adf0ebffc008e7b0"),
@@ -100,6 +101,9 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("org/lwjgl/glfw/GLFW.class") == null
                     && jar.getEntry("bms/build/FatJarContent.class") == null, "Ordinary distribution must keep the thin application JAR");
             check(jar.getEntry("bms/player/beatoraja/build/PackagedGameAgent.class") == null, "Never ship the test observer agent");
+            check(jar.stream().noneMatch(e -> e.getName().startsWith("audio/mp3/")
+                    || e.getName().startsWith("bms/player/beatoraja/audio/Mp3CompatibilityTest")
+                    || e.getName().equals("bms/player/beatoraja/audio/Mp3TestAssets.class")), "Never ship MP3 test fixtures/classes");
             for (String type : List.of("WindowsImeBridge", "WindowsImeSession", "WindowsImeNative", "WindowsImeCallback", "WindowsImeCallbackI"))
                 check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing Windows IME component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/WindowsImeTestSupport.class") == null, "Never ship fake IMM transport");
@@ -179,6 +183,7 @@ public final class DistributionSmokeTest {
         try (var zip = new ZipFile(args[3])) {
             check(zip.stream().noneMatch(e -> e.getName().matches(".*/beatoraja-[^/]+-all\\.jar")), "Fat JAR is a separate opt-in artifact");
             check(zip.stream().noneMatch(e -> e.getName().contains("packaged-game-test-agent")), "Never distribute the observer agent JAR");
+            check(zip.stream().noneMatch(e -> e.getName().contains("/audio/mp3/")), "Never distribute MP3 regression fixtures");
             check(zip.stream().noneMatch(e -> e.getName().contains("ime-test.dylib")), "Never ship test-only AppKit JNI hooks");
             verifyAudioTestAssets(install, zip, args.length > 4 && Boolean.parseBoolean(args[4]));
             check(zip.stream().noneMatch(e -> e.getName().contains("/gl-integration/")
@@ -244,6 +249,10 @@ public final class DistributionSmokeTest {
         verifyClassOrigin("com.badlogic.gdx.Gdx", "gdx-1.14.2.jar");
         verifyClassOrigin("com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator", "gdx-freetype-1.14.2.jar");
         verifyClassOrigin("com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application", "gdx-backend-lwjgl3-1.14.2.jar");
+        verifyClassOrigin("javazoom.jl.decoder.MP3Decoder", "jlayer-1.0.2-gdx.jar");
+        verifyClassOrigin("javazoom.jl.decoder.Bitstream", "jlayer-1.0.2-gdx.jar");
+        bms.player.beatoraja.audio.Mp3CompatibilityTest.main(new String[0]);
+        bms.player.beatoraja.select.PreviewMusicProcessorTest.main(new String[0]);
         verifyClassOrigin("org.lwjgl.glfw.GLFW", "lwjgl-glfw-3.4.3.jar");
         verifyClassOrigin("org.lwjgl.system.MemoryUtil", "lwjgl-3.4.3.jar");
         verifyClassOrigin("org.lwjgl.opengl.GL11", "lwjgl-opengl-3.4.3.jar");
@@ -341,7 +350,7 @@ public final class DistributionSmokeTest {
             var names = files.map(p -> p.getFileName().toString()).toList();
             var entries = zip.stream().toList();
             var prefixes = List.of("commons-", "sqlite-jdbc-", "slf4j-api-",
-                    "javacpp-", "javacv-", "ffmpeg-", "junrar-");
+                    "javacpp-", "javacv-", "ffmpeg-", "junrar-", "jlayer-");
             var expectedNames = CENTRAL_JARS.keySet().stream().sorted().toList();
             check(names.stream().filter(n -> prefixes.stream().anyMatch(n::startsWith)).sorted().toList()
                     .equals(expectedNames), "Installed Central dependency/native set changed");
