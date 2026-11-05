@@ -82,15 +82,16 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.54.1.0") { isTransitive = false }
     runtimeOnly("org.slf4j:slf4j-api:2.0.20") { isTransitive = false }
     implementation("com.github.junrar:junrar:8.1.2")
-    // Preserve the other existing runtime sets instead of importing new transitive dependencies.
-    implementation("org.bytedeco:javacpp:1.3.3") { isTransitive = false }
-    implementation("org.bytedeco:javacv:1.3.3") { isTransitive = false }
-    runtimeOnly("org.bytedeco:javacv-platform:1.3.3") { isTransitive = false }
-    implementation("org.bytedeco.javacpp-presets:ffmpeg:3.2.1-1.3") { isTransitive = false }
-    runtimeOnly("org.bytedeco.javacpp-presets:ffmpeg-platform:3.2.1-1.3") { isTransitive = false }
-    // Match the existing native set, not the platform POM's broader dependency graph.
-    for (classifier in listOf("linux-x86", "linux-x86_64", "macosx-x86_64", "windows-x86", "windows-x86_64")) {
-        runtimeOnly("org.bytedeco.javacpp-presets:ffmpeg:3.2.1-1.3:$classifier") { isTransitive = false }
+    // Select only FFmpeg, not JavaCV's camera/OpenCV dependencies or the platform POMs' full native set.
+    implementation("org.bytedeco:javacpp:1.5.14") { isTransitive = false }
+    implementation("org.bytedeco:javacv:1.5.14") { isTransitive = false }
+    runtimeOnly("org.bytedeco:javacv-platform:1.5.14") { isTransitive = false }
+    implementation("org.bytedeco:ffmpeg:8.1.2-1.5.14") { isTransitive = false }
+    runtimeOnly("org.bytedeco:ffmpeg-platform:8.1.2-1.5.14") { isTransitive = false }
+    // Match the LWJGL3 desktop targets; JavaCPP now also needs its own JNI native JARs.
+    for (classifier in listOf("linux-x86_64", "macosx-x86_64", "macosx-arm64", "windows-x86_64")) {
+        runtimeOnly("org.bytedeco:javacpp:1.5.14:$classifier") { isTransitive = false }
+        runtimeOnly("org.bytedeco:ffmpeg:8.1.2-1.5.14:$classifier") { isTransitive = false }
     }
 }
 

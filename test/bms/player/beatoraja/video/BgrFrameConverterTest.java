@@ -1,9 +1,9 @@
 package bms.player.beatoraja.video;
 
 import java.nio.ByteBuffer;
-import org.bytedeco.javacpp.avutil.AVFrame;
+import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.javacv.Frame;
-import static org.bytedeco.javacpp.avutil.*;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 
 /** Native conversion regression: no display/audio, but requires matching existing FFmpeg natives. */
 public final class BgrFrameConverterTest {

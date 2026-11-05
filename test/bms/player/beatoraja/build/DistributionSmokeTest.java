@@ -60,16 +60,19 @@ public final class DistributionSmokeTest {
             Map.entry("commons-lang3-3.18.0.jar", "4eeeae8d20c078abb64b015ec158add383ac581571cddc45c68f0c9ae0230720"),
             Map.entry("sqlite-jdbc-3.54.1.0.jar", "f8dce420a6016278497f4f0560f65602b9db858de141b541cf91a4644ebe4639"),
             Map.entry("slf4j-api-2.0.20.jar", "7e1446499b359675d8aabe6af2de86b85e72ae8a2a932c0b40d0e5ba57097439"),
-            Map.entry("javacpp-1.3.3.jar", "e800b74c7239bc651b747cf4936ae84d055d2fbb1b45bd2f51e32cfeaf2ec186"),
-            Map.entry("javacv-1.3.3.jar", "aa14054a40320bd0dfc449ddd2ad9736cae24fc22aa6c374edfd06b3be5f4523"),
-            Map.entry("javacv-platform-1.3.3.jar", "04c9d7fc3ec01c50c0f1bfd265479649fb12301367e120b4cd2394fa042f82f2"),
-            Map.entry("ffmpeg-3.2.1-1.3.jar", "7cd071753ca3c7ed8b9f4d3e20e631986c6d3e8fc0daba7b1f3eb9fab073f5cc"),
-            Map.entry("ffmpeg-platform-3.2.1-1.3.jar", "fb8ff4f7897c5b747bdf52917695d7c7765fdf758140684151623f9ebe0546a9"),
-            Map.entry("ffmpeg-3.2.1-1.3-linux-x86.jar", "030fd7a87fbdbfdd1875f81f203f6877093eeea1e2e21297da5e18f3e7bf4e8d"),
-            Map.entry("ffmpeg-3.2.1-1.3-linux-x86_64.jar", "ac6f3fc9eb5b4cefe3ca84c81cf82403bc9ab4df26ceda569ebbe7ecdc1769d6"),
-            Map.entry("ffmpeg-3.2.1-1.3-macosx-x86_64.jar", "47e433b905e595c68d2f89cdc23bbcea3600b86ca2a56192e09ee2c0b1cc54b7"),
-            Map.entry("ffmpeg-3.2.1-1.3-windows-x86.jar", "a5c1f415cee64e1cd1de17adfe6ce425479fde159fa92776b47de37dcac13878"),
-            Map.entry("ffmpeg-3.2.1-1.3-windows-x86_64.jar", "d6b1284299c442c6b720660d21e8abf32640ef0283cc0b27c005153b302577ec"));
+            Map.entry("javacpp-1.5.14.jar", "cb95a82ce1c337690436017eb8886597de71c1463dc16a3570f6a96b7c98a82b"),
+            Map.entry("javacv-1.5.14.jar", "bb421c3d3476843e78f62768a3a3b3e1bdc373efd019dc02987035d0ea036810"),
+            Map.entry("javacv-platform-1.5.14.jar", "a25a1f875097826144d30a6c71e51eb6657e76f7510a02e28b990eac260d6e84"),
+            Map.entry("ffmpeg-8.1.2-1.5.14.jar", "1bc7d6db5ef4d8fee1b3be8cd6b2e3ef8409cb7be630f290c4d5d82d2a2fa079"),
+            Map.entry("ffmpeg-platform-8.1.2-1.5.14.jar", "c699d647b07e01959afba8a12cd6ad3c337206fe35803592c5d3d39f71540a81"),
+            Map.entry("javacpp-1.5.14-linux-x86_64.jar", "1efab617735a44529bb85daaaefabe46c8686582989c46593c36569e9786fdaa"),
+            Map.entry("javacpp-1.5.14-windows-x86_64.jar", "69bb4b0322aa807199485a9bf394ffe2117bb9ef5c34762b7d6567d7053087b5"),
+            Map.entry("javacpp-1.5.14-macosx-x86_64.jar", "ce2e642c0317d08f08fc97ba44b2c18d2a22a85516fdec6b9854f3a930c5127b"),
+            Map.entry("javacpp-1.5.14-macosx-arm64.jar", "75d755656d3ddafaa51c5d2d8d340c731a0bf2d742b033a37641a905aa2a7332"),
+            Map.entry("ffmpeg-8.1.2-1.5.14-linux-x86_64.jar", "6d0f000c4ddede3b669aa7c5c585e9b71f69b7f621fed7ab28ec01045dc336d0"),
+            Map.entry("ffmpeg-8.1.2-1.5.14-windows-x86_64.jar", "67ebc3e6940add83b1b8a9dfd337a5c67556f2b72cb3225efe91a26874445c8e"),
+            Map.entry("ffmpeg-8.1.2-1.5.14-macosx-x86_64.jar", "b5a8f5124fb2d04412bd01eb5ca469d153d1c396fd0c67a33d3f9a1501c94c0c"),
+            Map.entry("ffmpeg-8.1.2-1.5.14-macosx-arm64.jar", "af57468c0bb7b2e9c8c93547e6d599e2b4faa4117118555be92675850972420c"));
 
     public static void main(String[] args) throws Exception {
         if (args.length == 1 && args[0].equals("--probe")) {
@@ -279,7 +282,7 @@ public final class DistributionSmokeTest {
                 "org.apache.commons.codec.digest.DigestUtils", "org.apache.commons.lang3.ArrayUtils",
                 "org.sqlite.JDBC", "org.slf4j.LoggerFactory",
                 "org.bytedeco.javacpp.Pointer", "org.bytedeco.javacv.FFmpegFrameGrabber",
-                "org.bytedeco.javacpp.avcodec", "com.github.junrar.Archive")) {
+                "org.bytedeco.ffmpeg.global.avcodec", "com.github.junrar.Archive")) {
             Class<?> type = Class.forName(name, false, DistributionSmokeTest.class.getClassLoader());
             String resource = name.replace('.', '/') + ".class";
             var resources = type.getClassLoader().getResources(resource);

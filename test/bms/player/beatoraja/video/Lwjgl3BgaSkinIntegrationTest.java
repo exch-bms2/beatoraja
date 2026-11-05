@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
-import static org.bytedeco.javacpp.avcodec.*;
-import static org.bytedeco.javacpp.avutil.*;
+import static org.bytedeco.ffmpeg.global.avcodec.*;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.*;

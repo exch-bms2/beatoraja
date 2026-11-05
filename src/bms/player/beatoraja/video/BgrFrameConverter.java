@@ -2,11 +2,11 @@ package bms.player.beatoraja.video;
 
 import java.nio.Buffer;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.avutil.AVFrame;
-import org.bytedeco.javacpp.swscale.SwsContext;
+import org.bytedeco.ffmpeg.avutil.AVFrame;
+import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacv.Frame;
-import static org.bytedeco.javacpp.avutil.*;
-import static org.bytedeco.javacpp.swscale.*;
+import static org.bytedeco.ffmpeg.global.avutil.*;
+import static org.bytedeco.ffmpeg.global.swscale.*;
 
 /** Worker-owned, aligned BGR24 conversion. Input AVFrames are borrowed until the next grab. */
 final class BgrFrameConverter implements AutoCloseable {
@@ -34,7 +34,7 @@ final class BgrFrameConverter implements AutoCloseable {
             result.imageWidth = width; result.imageHeight = height; result.imageDepth = Frame.DEPTH_UBYTE;
             result.imageChannels = 3; result.imageStride = destination.linesize(0); result.opaque = destination;
         }
-        // Match JavaCV 1.3.3's format/size and SWS_BILINEAR policy; do not change CPU flags or scale the image.
+        // Preserve the existing BGR24/SWS_BILINEAR policy without decoder scaling or CPU flag overrides.
         context = sws_getCachedContext(context, width, height, format, width, height, AV_PIX_FMT_BGR24,
                 SWS_BILINEAR, null, null, (DoublePointer)null);
         if (context == null || context.isNull()) throw new IllegalStateException("Cannot create color conversion context");

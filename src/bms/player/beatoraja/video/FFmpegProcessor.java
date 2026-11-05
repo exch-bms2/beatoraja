@@ -28,9 +28,9 @@ import bms.player.beatoraja.song.SongResources;
  * @author exch
  */
 public class FFmpegProcessor implements VideoProcessor {
-	/** Skip JavaCV's unsafe packed conversion and RAW image_ptr ownership; opaque retains the borrowed AVFrame. */
+	/** JavaCV 1.5.14 exposes the borrowed AVFrame through processed RAW frames without owning their planes. */
 	static Frame grabDecodedFrame(FFmpegFrameGrabber grabber) throws Exception {
-		return grabber.grabFrame(false, true, false, false);
+		return grabber.grabImage();
 	}
 	private enum ProcessorStatus {
 		TEXTURE_INACTIVE,
