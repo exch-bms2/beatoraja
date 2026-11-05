@@ -80,6 +80,19 @@ public class SkinConfig implements Validatable {
 		 * 設定項目名-オフセットのセット
 		 */
 		private Offset[] offset = new Offset[0];
+		private int notesOffsetCenter;
+
+		/** 0 follows the skin; 2/5/8 anchor note resizing at bottom/center/top. */
+		public int getNotesOffsetCenter() {
+			return notesOffsetCenter;
+		}
+
+		public void setNotesOffsetCenter(int center) {
+			notesOffsetCenter = switch (center) {
+				case 2, 5, 8 -> center;
+				default -> 0;
+			};
+		}
 
 		public Option[] getOption() {
 			return option;
@@ -106,6 +119,7 @@ public class SkinConfig implements Validatable {
 		}
 		
 		public boolean validate() {
+			setNotesOffsetCenter(notesOffsetCenter);
 			if(option == null) {
 				option = new Option[0];
 			}

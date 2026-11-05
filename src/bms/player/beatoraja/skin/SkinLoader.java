@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
+import bms.player.beatoraja.play.SkinNote;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.utils.Array;
@@ -59,30 +60,38 @@ public abstract class SkinLoader {
             return null;
         }
         try {
+            Skin skin;
             if (sc.getPath().endsWith(".json")) {
                 JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
-                Skin skin = sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
-                SkinLoader.resource.disposeOld();
-                return skin;
+                skin = sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
             } else if (sc.getPath().endsWith(".luaskin")) {
                 LuaSkinLoader loader = new LuaSkinLoader(state, resource.getConfig());
-                Skin skin = loader.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
-                SkinLoader.resource.disposeOld();
-                return skin;
+                skin = loader.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
             } else {
                 LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(resource.getConfig());
                 SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperties());
                 LR2SkinCSVLoader<?> dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
                 header.setSourceResolution(dloader.src);
                 header.setDestinationResolution(dloader.dst);
-                Skin skin = dloader.loadSkin(state, header, loader.getOption());
-                SkinLoader.resource.disposeOld();
-                return skin;
+                skin = dloader.loadSkin(state, header, loader.getOption());
             }
+            applyNotesOffsetCenter(skin, sc.getProperties());
+            SkinLoader.resource.disposeOld();
+            return skin;
         } catch (Throwable e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    static void applyNotesOffsetCenter(Skin skin, SkinConfig.Property property) {
+        if (skin != null && property.getNotesOffsetCenter() != 0) {
+            for (SkinObject object : skin.getAllSkinObjects()) {
+                if (object instanceof SkinNote) {
+                    object.setOffsetCenter(property.getNotesOffsetCenter());
+                }
+            }
+        }
     }
 
     public static PixmapResourcePool getResource() {

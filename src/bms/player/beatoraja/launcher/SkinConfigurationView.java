@@ -19,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -48,6 +49,7 @@ public class SkinConfigurationView implements Initializable {
 	private Map<CustomOption, ComboBox<String>> optionbox = new HashMap<CustomOption, ComboBox<String>>();
 	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
 	private Map<CustomOffset, Spinner<Integer>[]> offsetbox = new HashMap<CustomOffset, Spinner<Integer>[]>();
+	private ComboBox<Integer> notesOffsetCenter;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -115,6 +117,9 @@ public class SkinConfigurationView implements Initializable {
 			}
 		}
 		property.setOffset(offsets.toArray(new SkinConfig.Offset[offsets.size()]));
+		if (notesOffsetCenter != null && notesOffsetCenter.getValue() != null) {
+			property.setNotesOffsetCenter(notesOffsetCenter.getValue());
+		}
 
 		return property;
 	}
@@ -293,6 +298,7 @@ public class SkinConfigurationView implements Initializable {
 
 	private VBox create(SkinHeader header, SkinConfig.Property property) {
 		selected = header;
+		notesOffsetCenter = null;
 		if (header == null) {
 			return null;
 		}
@@ -460,6 +466,29 @@ public class SkinConfigurationView implements Initializable {
 				}
 				offsetbox.put(option, spinner);
 				main.getChildren().add(hbox);
+				if (header.getSkinType() != null && header.getSkinType().isPlay()
+						&& option.id == OFFSET_NOTES_1P && notesOffsetCenter == null) {
+					notesOffsetCenter = new ComboBox<>();
+					notesOffsetCenter.getItems().addAll(0, 2, 5, 8);
+					notesOffsetCenter.setConverter(new StringConverter<>() {
+						@Override public String toString(Integer value) {
+							return value == null ? "Skin default" : switch (value) {
+								case 2 -> "2 (Bottom)";
+								case 5 -> "5 (Center)";
+								case 8 -> "8 (Top)";
+								default -> "Skin default";
+							};
+						}
+						@Override public Integer fromString(String value) {
+							throw new UnsupportedOperationException("Selection only");
+						}
+					});
+					notesOffsetCenter.setValue(property.getNotesOffsetCenter());
+					notesOffsetCenter.setPrefWidth(200);
+					Label centerLabel = new Label("Notes Offset Center");
+					centerLabel.setMinWidth(250);
+					main.getChildren().add(new HBox(centerLabel, notesOffsetCenter));
+				}
 			}
 			if(item instanceof String) {
 				HBox hbox = new HBox();

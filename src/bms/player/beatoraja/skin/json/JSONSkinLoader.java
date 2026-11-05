@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.*;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
+import bms.player.beatoraja.play.SkinNote;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomItem;
@@ -32,6 +33,7 @@ public class JSONSkinLoader extends SkinLoader {
 	protected int bgaExpand = -1;
 
 	protected JsonSkin.Skin sk;
+	private int notesOffsetCenter;
 
 	Map<String, SourceData> sourceMap;
 	Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
@@ -260,6 +262,8 @@ public class JSONSkinLoader extends SkinLoader {
 	}
 
 	protected Skin loadJsonSkin(SkinHeader header, JsonSkin.Skin sk, SkinType type, SkinConfig.Property property, Path p){
+		this.sk = sk;
+		notesOffsetCenter = property != null ? property.getNotesOffsetCenter() : 0;
 		Skin skin = null;
 		try {
 			Resolution src = HD;
@@ -422,8 +426,15 @@ public class JSONSkinLoader extends SkinLoader {
 		return key.toString();
 	}
 
+	int resolveOffsetCenter(SkinObject obj, JsonSkin.Destination dst) {
+		if (obj instanceof SkinNote && notesOffsetCenter != 0) {
+			return notesOffsetCenter;
+		}
+		return dst.offsetcenter;
+	}
+
 	private void setDestination(Skin skin, SkinObject obj, JsonSkin.Destination dst) {
-		obj.setOffsetCenter(dst.offsetcenter);
+		obj.setOffsetCenter(resolveOffsetCenter(obj, dst));
 		JsonSkin.Animation prev = null;
 		for (JsonSkin.Animation a : dst.dst) {
 			if (prev == null) {
