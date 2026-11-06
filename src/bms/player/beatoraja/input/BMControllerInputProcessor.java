@@ -91,6 +91,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	}
 
 	public synchronized void setConfig(ControllerConfig controllerConfig) {
+        if (controller instanceof QueuedController queued) queued.configure(controllerConfig);
 		this.buttons = controllerConfig.getKeyAssign().clone();
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
@@ -269,6 +270,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
     }
 
     synchronized void setWindowActive(boolean active) {
+        if (controller instanceof QueuedController queued) queued.windowActivityChanged();
         windowActive = active;
         windowBaseline = true;
         Arrays.fill(buttonstate, false);

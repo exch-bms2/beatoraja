@@ -69,6 +69,14 @@ public final class PackagedGameIntegrationTest {
                         && gameLog.contains("SDL controller native shutdown complete"), "SDL native initialization/update/shutdown was not verified");
                 PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=SDL"), "Game lost SDL selection");
             }
+            if (config.getControllerBackend() == bms.player.beatoraja.input.ControllerBackend.SDL_RAW) {
+                String gameLog = Files.readString(diagnostics.resolve("launcher-game.log"));
+                PackagedGameSupport.check(gameLog.contains("Controller backend=SDL_RAW, devices=")
+                        && !gameLog.contains("SDL_RAW initialization failed")
+                        && !gameLog.contains("SDL_RAW polling failed")
+                        && gameLog.contains("SDL_RAW controller native shutdown complete"), "SDL_RAW native initialization/update/shutdown was not verified");
+                PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=SDL_RAW"), "Game lost SDL_RAW selection");
+            }
             PackagedGameSupport.check(Files.readString(diagnostics.resolve("launcher-game.log"))
                     .contains("Startup monitor unavailable or ambiguous: " + missingMonitor), "Missing monitor fallback was not exercised");
             var savedConfig = json.fromJson(bms.player.beatoraja.Config.class, Files.readString(configPath));

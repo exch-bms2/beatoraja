@@ -33,6 +33,7 @@ public final class PlayModeConfig {
      */
     private ControllerConfig[] controller = new ControllerConfig[] { new ControllerConfig() };
     private ControllerConfig[] sdlController;
+    private ControllerConfig[] sdlRawController;
     private transient ControllerBackend controllerBackend = ControllerBackend.JINPUT;
     /**
      * MIDI設定
@@ -70,7 +71,11 @@ public final class PlayModeConfig {
     }
 
     public ControllerConfig[] getController() {
-        return controllerBackend == ControllerBackend.SDL ? sdlController : controller;
+        return switch (controllerBackend != null ? controllerBackend : ControllerBackend.JINPUT) {
+            case SDL -> sdlController;
+            case SDL_RAW -> sdlRawController;
+            default -> controller;
+        };
     }
 
     public MidiConfig getMidiConfig() {
@@ -79,6 +84,7 @@ public final class PlayModeConfig {
 
     public void setController(ControllerConfig[] controllerassign) {
         if (controllerBackend == ControllerBackend.SDL) sdlController = controllerassign;
+        else if (controllerBackend == ControllerBackend.SDL_RAW) sdlRawController = controllerassign;
         else controller = controllerassign;
     }
 
@@ -86,6 +92,23 @@ public final class PlayModeConfig {
         controllerBackend = backend;
         if (backend == ControllerBackend.SDL && sdlController == null)
             sdlController = repairControllers(null, mode, true);
+        if (backend == ControllerBackend.SDL_RAW && sdlRawController == null) {
+            // Never share mutable key arrays or scratch settings with the JInput bank.
+            var json = new com.badlogic.gdx.utils.Json();
+            sdlRawController = json.fromJson(ControllerConfig[].class, json.toJson(controller, ControllerConfig[].class));
+            sdlRawController = repairControllers(sdlRawController, mode, true);
+            for (ControllerConfig c : sdlRawController) if (c.name == null || c.name.isEmpty()) {
+                if (c.keys != null) Arrays.fill(c.keys, -1);
+                c.start = c.select = -1;
+            }
+            if (version == 0) for (ControllerConfig c : sdlRawController) if (c.keys != null)
+                for (int i = 0; i < c.keys.length; i++)
+                    if (c.keys[i] >= BMKeys.BUTTON_17 && c.keys[i] <= BMKeys.BUTTON_20)
+                        c.keys[i] += BMKeys.AXIS1_PLUS - BMKeys.BUTTON_17;
+            if (Arrays.stream(sdlRawController).anyMatch(c -> c.name != null && !c.name.isEmpty()))
+                java.util.logging.Logger.getGlobal().warning("SDL_RAW copied JInput bindings for " + mode
+                        + "; same-name devices activate automatically, but raw button/axis order may differ; verify assignments before play");
+        }
     }
 
     private static ControllerConfig[] repairControllers(ControllerConfig[] bank, Mode mode, boolean sdl) {
@@ -114,7 +137,18 @@ public final class PlayModeConfig {
             c.duration = MathUtils.clamp(c.duration, INPUT_DURATION_MIN, INPUT_DURATION_MAX);
             c.analogScratchMode = MathUtils.clamp(c.analogScratchMode, 0, 1);
             c.analogScratchThreshold = MathUtils.clamp(c.analogScratchThreshold, 1, 1000);
+            c.sdlRawButtonMap = sanitizeRawMap(c.sdlRawButtonMap, 32);
+            c.sdlRawAxisMap = sanitizeRawMap(c.sdlRawAxisMap, 8);
+            if (c.sdlRawAxisInverted != null && c.sdlRawAxisInverted.length > 8)
+                c.sdlRawAxisInverted = Arrays.copyOf(c.sdlRawAxisInverted, 8);
         }
+    }
+
+    private static int[] sanitizeRawMap(int[] map, int max) {
+        if (map == null) return null;
+        if (map.length > max) map = Arrays.copyOf(map, max);
+        for (int i = 0; i < map.length; i++) if (map[i] < -1 || map[i] > 255) map[i] = -1;
+        return map;
     }
 
 	public int getVersion() {
@@ -142,6 +176,8 @@ public final class PlayModeConfig {
         controller = repairControllers(controller, mode, false);
         if (sdlController != null || controllerBackend == ControllerBackend.SDL)
             sdlController = repairControllers(sdlController, mode, true);
+        if (sdlRawController != null || controllerBackend == ControllerBackend.SDL_RAW)
+            sdlRawController = repairControllers(sdlRawController, mode, true);
         if (midi == null) {
             midi = new MidiConfig(mode, isMidiMode(mode));
         }
@@ -170,6 +206,7 @@ public final class PlayModeConfig {
 
         sanitizeControllers(controller, keys, false);
         if (sdlController != null) sanitizeControllers(sdlController, keys, true);
+        if (sdlRawController != null) sanitizeControllers(sdlRawController, keys, true);
         
 		// ボタsン数拡張(16->32)に伴う変換(0.8.1 -> 0.8.2)。あとで消す
 		if(version == 0) {
@@ -522,6 +559,17 @@ public final class PlayModeConfig {
          * JKOC Hack (boolean) private variable
          */
         private boolean jkoc_hack = false;
+        // Logical JInput-compatible index -> physical SDL joystick index; null means identity.
+        private int[] sdlRawButtonMap;
+        private int[] sdlRawAxisMap;
+        private boolean[] sdlRawAxisInverted;
+
+        public int[] getSdlRawButtonMap() { return sdlRawButtonMap; }
+        public void setSdlRawButtonMap(int[] map) { sdlRawButtonMap = map; }
+        public int[] getSdlRawAxisMap() { return sdlRawAxisMap; }
+        public void setSdlRawAxisMap(int[] map) { sdlRawAxisMap = map; }
+        public boolean[] getSdlRawAxisInverted() { return sdlRawAxisInverted; }
+        public void setSdlRawAxisInverted(boolean[] map) { sdlRawAxisInverted = map; }
         /**
          * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
          */

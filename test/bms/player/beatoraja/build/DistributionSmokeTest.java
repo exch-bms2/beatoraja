@@ -40,7 +40,7 @@ public final class DistributionSmokeTest {
             "gdx-platform-1.14.2-natives-desktop.jar", "gdx-freetype-platform-1.14.2-natives-desktop.jar",
             "gdx-jnigen-loader-2.5.2.jar", "gdx-controllers-core-2.2.4.jar", "gdx-controllers-desktop-2.2.4.jar",
             "jamepad-2.30.0.0.jar"));
-        for (String module : List.of("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb")) {
+        for (String module : List.of("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb", "lwjgl-sdl")) {
             names.add(module + "-3.4.3.jar");
             for (String platform : List.of("windows", "linux", "macos", "macos-arm64"))
                 names.add(module + "-3.4.3-natives-" + platform + ".jar");
@@ -110,6 +110,8 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("bms/player/beatoraja/audio/AudioDiagnostics.class") != null, "Missing audio diagnostics");
             check(jar.getEntry("bms/player/beatoraja/FramePacingDiagnostics.class") != null, "Missing frame pacing diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/JInputControllerManager.class") != null, "Missing JInput manager");
+            for (String type : List.of("SdlRawControllerManager", "SdlRawMapping", "SdlRawNative", "SdlRawSource"))
+                check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing SDL_RAW component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/InputDiagnostics.class") != null, "Missing input diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/InputPollingThread.class") != null, "Missing input polling lifecycle");
             check(jar.getEntry("bms/player/beatoraja/skin/SkinRenderTarget.class") != null, "Missing preview render target scope");
@@ -259,6 +261,7 @@ public final class DistributionSmokeTest {
         verifyClassOrigin("org.lwjgl.openal.ALC10", "lwjgl-openal-3.4.3.jar");
         verifyClassOrigin("org.lwjgl.system.jemalloc.JEmalloc", "lwjgl-jemalloc-3.4.3.jar");
         verifyClassOrigin("org.lwjgl.stb.STBImage", "lwjgl-stb-3.4.3.jar");
+        verifyClassOrigin("org.lwjgl.sdl.SDLJoystick", "lwjgl-sdl-3.4.3.jar");
         LwjglRuntimeCompatibilityTest.main(new String[0]);
         for (String retired : List.of("org.lwjgl.Sys", "org.lwjgl.input.Controllers", "com.badlogic.gdx.backends.lwjgl.LwjglApplication")) {
             try {
@@ -291,6 +294,7 @@ public final class DistributionSmokeTest {
         KeyboardEventQueueTest.main(new String[0]);
         bms.player.beatoraja.input.WindowsKeyboardMappingTest.main(new String[0]);
         bms.player.beatoraja.input.ControllerEventQueueTest.main(new String[0]);
+        bms.player.beatoraja.input.SdlRawControllerTest.main(new String[0]);
         KeyboardJudgeCompatibilityTest.main(new String[0]);
         for (String name : List.of("org.apache.commons.compress.archivers.zip.ZipFile",
                 "org.apache.commons.dbutils.QueryRunner", "org.apache.commons.io.IOUtils",

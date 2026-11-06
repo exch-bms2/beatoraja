@@ -23,6 +23,9 @@ public final class PackagedRuntimeProbe {
             if (org.lwjgl.openal.ALC.getFunctionProvider() == null) throw new IllegalStateException("No OpenAL provider");
         });
         failures += check("FFmpeg", () -> org.bytedeco.javacv.FFmpegFrameGrabber.tryLoad());
+        failures += check("SDL_RAW SDL3 (no joystick initialization)", () -> {
+            if (org.lwjgl.sdl.SDLVersion.SDL_GetVersion() < 3_000_000) throw new IllegalStateException("No SDL3 version");
+        });
         if (System.getProperty("os.name").startsWith("Mac")) {
             var ime = java.nio.file.Path.of("natives/libbeatoraja-ime.dylib");
             if (java.nio.file.Files.isRegularFile(ime))
@@ -36,7 +39,7 @@ public final class PackagedRuntimeProbe {
             }
         });
         System.out.println("Native probe failures=" + failures
-                + "; NOT TESTED: window/GL, JavaFX, audio playback, PortAudio, physical JInput devices, IME");
+                + "; NOT TESTED: window/GL, JavaFX, audio playback, PortAudio, physical controllers, IME");
         if (failures != 0) System.exit(1);
     }
 

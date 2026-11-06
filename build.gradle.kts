@@ -65,7 +65,7 @@ dependencies {
     // Regression oracle only: never include LWJGL2 in the application or distribution.
     testImplementation("org.lwjgl.lwjgl:lwjgl:2.9.3") { isTransitive = false }
     // Override libGDX 1.14.2's original LWJGL version; keep all Java/native modules aligned.
-    for (module in listOf("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb")) {
+    for (module in listOf("lwjgl", "lwjgl-glfw", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb", "lwjgl-sdl")) {
         implementation("org.lwjgl:$module:3.4.3") { isTransitive = false }
         for (platform in listOf("windows", "linux", "macos", "macos-arm64")) {
             runtimeOnly("org.lwjgl:$module:3.4.3:natives-$platform") { isTransitive = false }
@@ -297,6 +297,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.ControllerBackendTest",
     "bms.player.beatoraja.input.ControllerLibraryCompatibilityTest",
     "bms.player.beatoraja.input.SdlControllerManagerTest",
+    "bms.player.beatoraja.input.SdlRawControllerTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
@@ -898,6 +899,25 @@ tasks.register<JavaExec>("lwjgl3KeyboardQueueSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3KeyboardQueueSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("sdlRawNativeTest") {
+    group = "verification"
+    description = "Verify bundled SDL3 raw joystick events using an isolated virtual device."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    timeout.set(Duration.ofMinutes(3))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("sdlRawFatJarTest") {
+    group = "verification"
+    dependsOn(fatJar, tasks.testClasses)
+    classpath = sourceSets.test.get().output + files(fatJar.flatMap { it.archiveFile })
+    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

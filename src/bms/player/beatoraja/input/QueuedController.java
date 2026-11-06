@@ -8,4 +8,6 @@ interface QueuedController extends Controller {
     long inputGeneration();
     void resetEvents(boolean active);
     ControllerInputDiagnostics diagnostics();
+    default void configure(bms.player.beatoraja.PlayModeConfig.ControllerConfig config) { }
+    default void windowActivityChanged() { }
 }
