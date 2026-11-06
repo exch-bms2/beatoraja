@@ -289,6 +289,7 @@ public final class DistributionSmokeTest {
         bms.player.beatoraja.input.MouseScratchDiagnosticsTest.main(new String[0]);
         bms.player.beatoraja.input.MouseMotionQueueTest.main(new String[0]);
         KeyboardEventQueueTest.main(new String[0]);
+        bms.player.beatoraja.input.WindowsKeyboardMappingTest.main(new String[0]);
         bms.player.beatoraja.input.ControllerEventQueueTest.main(new String[0]);
         KeyboardJudgeCompatibilityTest.main(new String[0]);
         for (String name : List.of("org.apache.commons.compress.archivers.zip.ZipFile",

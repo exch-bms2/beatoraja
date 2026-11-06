@@ -298,7 +298,7 @@ public class KeyConfiguration extends MainState {
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
 				titlefont.draw(sprite, getMouseScratchKeyString(keysa[i], getKeyboardKeyAssign(keysa[i]) != -1 ? 
-					Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
+					keyboardKeyName(getKeyboardKeyAssign(keysa[i])) : "----"), 202 * scaleX, (y + 22) * scaleY);
 				titlefont.draw(sprite, getControllerKeyAssign(0, keysa[i]) != -1
 						? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, keysa[i])) : "----",
 						352 * scaleX, (y + 22) * scaleY);
@@ -340,7 +340,7 @@ public class KeyConfiguration extends MainState {
 		
 		final int kbinput = getKeyboardKeyAssign(keyindex);
 		if(kbinput != -1) {
-			return Keys.toString(getKeyboardKeyAssign(keyindex));
+			return keyboardKeyName(getKeyboardKeyAssign(keyindex));
 		}
 
 		final String mouseinput = getMouseScratchKeyString(keyindex, null);
@@ -393,6 +393,10 @@ public class KeyConfiguration extends MainState {
 			return keyboardConfig.getSelect();
 		}
 		return 0;
+	}
+
+	private static String keyboardKeyName(int key) {
+		return Gdx.input instanceof PollingLwjgl3Input input ? input.keyName(key) : Keys.toString(key);
 	}
 
 	private void setKeyboardKeyAssign(int index) {

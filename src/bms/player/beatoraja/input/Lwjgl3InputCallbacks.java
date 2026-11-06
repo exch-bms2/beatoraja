@@ -25,11 +25,33 @@ final class Lwjgl3InputCallbacks {
     private GLFWCharCallback originalCharacter;
     private final GLFWCharCallback character;
     private int lastSupplementary;
+    private int fallbackPressed;
+    private int knownAliasPressed;
 
     Lwjgl3InputCallbacks(long handle, PollingLwjgl3Input input, InputDiagnostics diagnostics) {
         this.handle = handle;
         key = GLFWKeyCallback.create((window, code, scancode, action, mods) -> {
-            int mapped = input.getGdxKeyCode(code);
+            int resolved = input.resolveKeyboardKey(code, scancode);
+            int mapped = input.getGdxKeyCode(resolved);
+            if (input.isWindowsKeyboardAlias(mapped)) {
+                // GLFW cannot track/repeat UNKNOWN keys itself. Mirror its known-key bookkeeping.
+                int bit = mapped == WindowsKeyboardMapping.RO ? 1 : 2;
+                boolean fallback = resolved != code;
+                int held = fallback ? fallbackPressed : knownAliasPressed;
+                boolean wasPressed = input.isKeyPressed(mapped);
+                if (action == GLFW.GLFW_PRESS) {
+                    if ((held & bit) != 0) action = GLFW.GLFW_REPEAT;
+                    else held |= bit;
+                } else if (action == GLFW.GLFW_RELEASE) {
+                    if (fallback && (held & bit) == 0) return;
+                    held &= ~bit;
+                } else if (fallback && action == GLFW.GLFW_REPEAT && (held & bit) == 0) return;
+                if (fallback) fallbackPressed = held;
+                else knownAliasPressed = held;
+                // Yen aliases the existing Backslash ID. One physical source cannot release the other.
+                if (action == GLFW.GLFW_RELEASE && (!wasPressed || ((fallbackPressed | knownAliasPressed) & bit) != 0)) return;
+                if ((action == GLFW.GLFW_PRESS && wasPressed) || (action == GLFW.GLFW_REPEAT && !wasPressed)) return;
+            }
             long eventTime = diagnostics != null ? System.nanoTime() : 0;
             if (mapped != com.badlogic.gdx.Input.Keys.UNKNOWN
                     && (action == GLFW.GLFW_PRESS || action == GLFW.GLFW_RELEASE))
@@ -45,7 +67,8 @@ final class Lwjgl3InputCallbacks {
                 originalCharacter.invoke(window, Character.lowSurrogate(lastSupplementary));
             } else if (originalKey != null) {
                 if (action == GLFW.GLFW_PRESS) lastSupplementary = 0;
-                originalKey.invoke(window, code, scancode, action, mods);
+                // Feed the same alias to libGDX's held state and InputProcessor/key configuration.
+                originalKey.invoke(window, resolved, scancode, action, mods);
             }
         });
         button = diagnostics == null ? null : GLFWMouseButtonCallback.create((window, code, action, mods) -> {
@@ -73,13 +96,21 @@ final class Lwjgl3InputCallbacks {
         focus = GLFWWindowFocusCallback.create((window, focused) -> {
             if (originalFocus != null) originalFocus.invoke(window, focused);
             input.windowFocus(focused);
+            if (!focused) releaseFallbackKeys();
         });
         iconify = GLFWWindowIconifyCallback.create((window, minimized) -> {
             if (originalIconify != null) originalIconify.invoke(window, minimized);
             input.windowIconified(minimized);
+            if (minimized) releaseFallbackKeys();
         });
         if (button != null) originalButton = GLFW.glfwSetMouseButtonCallback(handle, button);
         if (cursor != null) originalCursor = GLFW.glfwSetCursorPosCallback(handle, cursor);
+    }
+
+    private void releaseFallbackKeys() {
+        // GLFW's focus-loss releases cover only keys in its own known-key table.
+        if ((fallbackPressed & 1) != 0) key.invoke(handle, GLFW.GLFW_KEY_UNKNOWN, 0x73, GLFW.GLFW_RELEASE, 0);
+        if ((fallbackPressed & 2) != 0) key.invoke(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7d, GLFW.GLFW_RELEASE, 0);
     }
 
     void attachWindowCallbacks() {
@@ -91,6 +122,7 @@ final class Lwjgl3InputCallbacks {
     }
 
     void close(boolean restore) {
+        releaseFallbackKeys();
         if (restore) {
             GLFW.glfwSetKeyCallback(handle, originalKey);
             GLFW.glfwSetCharCallback(handle, originalCharacter);

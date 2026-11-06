@@ -34,6 +34,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private final MouseScratchGeometry scratchGeometry = new MouseScratchGeometry();
     private final MouseScratchPosition scratchPosition = new MouseScratchPosition();
     private final boolean windowPositionSupported;
+    private final boolean windowsKeyboard;
     private boolean captureUnavailable;
     private final int[] scratchWindowX = new int[1], scratchWindowY = new int[1];
     private final float[] scratchScaleX = new float[1], scratchScaleY = new float[1];
@@ -47,10 +48,16 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     PollingLwjgl3Input(Lwjgl3Window window, FramePacingDiagnostics frameDiagnostics, boolean windowPositionSupported) {
+        this(window, frameDiagnostics, windowPositionSupported, System.getProperty("os.name", "").startsWith("Windows"));
+    }
+
+    PollingLwjgl3Input(Lwjgl3Window window, FramePacingDiagnostics frameDiagnostics, boolean windowPositionSupported,
+            boolean windowsKeyboard) {
         super(window);
         this.frameDiagnostics = frameDiagnostics;
         this.window = window;
         this.windowPositionSupported = windowPositionSupported;
+        this.windowsKeyboard = windowsKeyboard;
         windowInputActive = window.isFocused();
         callbacks = new Lwjgl3InputCallbacks(window.getWindowHandle(), this, diagnostics);
     }
@@ -272,6 +279,11 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     public InputDiagnostics getDiagnostics() { return diagnostics; }
+    int resolveKeyboardKey(int key, int scancode) { return WindowsKeyboardMapping.resolve(windowsKeyboard, key, scancode); }
+    boolean isWindowsKeyboardAlias(int key) {
+        return windowsKeyboard && (key == WindowsKeyboardMapping.RO || key == WindowsKeyboardMapping.YEN);
+    }
+    public String keyName(int key) { return WindowsKeyboardMapping.keyName(windowsKeyboard, key); }
     public FramePacingDiagnostics getFrameDiagnostics() { return frameDiagnostics; }
     public KeyboardEventQueue getKeyboardEvents() { return keyboardEvents; }
     public void configureKeyboardEvents(int[] assignments) { keyboardEvents.configure(assignments, keys); }

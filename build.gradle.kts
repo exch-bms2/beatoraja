@@ -257,6 +257,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.WaylandCompatibilityTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
     "bms.player.beatoraja.input.KeyboardEventQueueTest",
+    "bms.player.beatoraja.input.WindowsKeyboardMappingTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
     "bms.player.beatoraja.input.ControllerInputDiagnosticsTest",
     "bms.player.beatoraja.input.ControllerEventQueueTest",
@@ -897,6 +898,17 @@ tasks.register<JavaExec>("lwjgl3KeyboardQueueSmokeTest") {
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3KeyboardQueueSmokeTest")
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("lwjgl3WindowsKeyboardTest") {
+    group = "verification"
+    description = "Verify Windows UNKNOWN-key aliases through real libGDX state, key config and judgment FIFO."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.Lwjgl3WindowsKeyboardTest")
+    systemProperty("beatoraja.inputDiagnostics", "true")
+    timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 
