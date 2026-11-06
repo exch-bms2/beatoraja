@@ -110,7 +110,7 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("bms/player/beatoraja/audio/AudioDiagnostics.class") != null, "Missing audio diagnostics");
             check(jar.getEntry("bms/player/beatoraja/FramePacingDiagnostics.class") != null, "Missing frame pacing diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/JInputControllerManager.class") != null, "Missing JInput manager");
-            for (String type : List.of("SdlRawControllerManager", "SdlRawMapping", "SdlRawNative", "SdlRawSource"))
+            for (String type : List.of("SdlRawControllerManager", "SdlRawAsyncControllerManager", "SdlRawMapping", "SdlRawNative", "SdlRawSource"))
                 check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing SDL_RAW component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/InputDiagnostics.class") != null, "Missing input diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/InputPollingThread.class") != null, "Missing input polling lifecycle");

@@ -298,6 +298,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.ControllerLibraryCompatibilityTest",
     "bms.player.beatoraja.input.SdlControllerManagerTest",
     "bms.player.beatoraja.input.SdlRawControllerTest",
+    "bms.player.beatoraja.input.SdlRawAsyncControllerTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
@@ -917,6 +918,27 @@ tasks.register<JavaExec>("sdlRawFatJarTest") {
     dependsOn(fatJar, tasks.testClasses)
     classpath = sourceSets.test.get().output + files(fatJar.flatMap { it.archiveFile })
     mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    timeout.set(Duration.ofMinutes(3))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("sdlRawAsyncNativeTest") {
+    group = "verification"
+    description = "Verify actual SDL3 acquisition on the input worker with no render loop."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    args("--async")
+    timeout.set(Duration.ofMinutes(3))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+
+tasks.register<JavaExec>("sdlRawAsyncFatJarTest") {
+    group = "verification"
+    dependsOn(fatJar, tasks.testClasses)
+    classpath = sourceSets.test.get().output + files(fatJar.flatMap { it.archiveFile })
+    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    args("--async")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

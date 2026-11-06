@@ -12,11 +12,13 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Raw SDL joystick producer on the render thread; the input thread consumes only common FIFOs/state. */
-public final class SdlRawControllerManager implements ControllerManager, ControllerBackendManager {
+/** Shared raw SDL joystick conversion/FIFO; acquisition is render-paced or input-thread paced. */
+public class SdlRawControllerManager implements ControllerManager, ControllerBackendManager {
     private final Array<Controller> controllers = new Array<>();
     private final Array<ControllerListener> listeners = new Array<>();
     private final Thread owner = Thread.currentThread();
+    private final boolean async;
+    private final String backend;
     private final Consumer<Runnable> dispatch;
     private final AtomicBoolean closed = new AtomicBoolean();
     private final PollRunner pollRunner = new PollRunner();
@@ -24,17 +26,22 @@ public final class SdlRawControllerManager implements ControllerManager, Control
     private SdlRawSource source;
     private volatile BooleanSupplier pollingShutdown = () -> true;
     private volatile boolean disposed, hasListeners;
+    private boolean workerStarted;
     private volatile Controller current;
 
     public SdlRawControllerManager() {
-        this(open(), Gdx.app::postRunnable);
+        this(false);
+    }
+
+    protected SdlRawControllerManager(boolean async) {
+        this(open(async), Gdx.app::postRunnable, async);
         BMSPlayerInputProcessor.controllerPollRunner = pollRunner;
         Gdx.app.addLifecycleListener(new LifecycleListener() {
             public void pause() { }
             public void resume() { }
             public void dispose() { SdlRawControllerManager.this.dispose(); }
         });
-        Gdx.app.postRunnable(new Runnable() {
+        if (!async) Gdx.app.postRunnable(new Runnable() {
             public void run() {
                 if (disposed) return;
                 poll();
@@ -44,13 +51,20 @@ public final class SdlRawControllerManager implements ControllerManager, Control
     }
 
     SdlRawControllerManager(SdlRawSource source, Consumer<Runnable> dispatch) {
+        this(source, dispatch, false);
+    }
+
+    SdlRawControllerManager(SdlRawSource source, Consumer<Runnable> dispatch, boolean async) {
         this.source = source;
         this.dispatch = dispatch;
+        this.async = async;
+        backend = async ? "SDL_RAW_ASYNC" : "SDL_RAW";
         try {
             if (source != null) {
                 var devices = source.devices();
                 for (int i = 0; i < devices.length; i++) controllers.add(new RawController(devices[i], i));
-                Logger.getGlobal().info("Controller backend=SDL_RAW, devices=" + devices.length + "; SDL3 raw joystick events; render-thread native capture");
+                Logger.getGlobal().info("Controller backend=" + backend + ", devices=" + devices.length
+                        + "; SDL3 raw joystick events; acquisition=" + (async ? "input-thread" : "render-thread"));
                 poll();
             }
         } catch (RuntimeException | Error failure) {
@@ -60,17 +74,22 @@ public final class SdlRawControllerManager implements ControllerManager, Control
         if (controllers.notEmpty()) current = controllers.first();
     }
 
-    private static SdlRawSource open() {
-        try { return new SdlRawNative(); }
+    private static SdlRawSource open(boolean async) {
+        try { return new SdlRawNative(async); }
         catch (RuntimeException | LinkageError failure) {
             Logger.getGlobal().log(Level.WARNING, "SDL_RAW initialization failed; keyboard remains available; no backend fallback", failure);
             return null;
         }
     }
 
-    void poll() {
-        if (Thread.currentThread() != owner) throw new IllegalStateException("SDL_RAW update requires its owner thread");
+    synchronized void poll() {
+        if (!async && Thread.currentThread() != owner) throw new IllegalStateException("SDL_RAW update requires its owner thread");
         if (disposed || source == null) return;
+        if (async && !workerStarted && Thread.currentThread() != owner) {
+            workerStarted = true;
+            Logger.getGlobal().info(backend + " input polling started: thread=" + Thread.currentThread().getName()
+                    + "; native update/read independent of rendering; judgment clock unchanged");
+        }
         try {
             for (int i = 0; i < controllers.size; i++) {
                 var raw = (RawController) controllers.get(i);
@@ -84,36 +103,43 @@ public final class SdlRawControllerManager implements ControllerManager, Control
             for (int i = 0; i < controllers.size; i++) ((RawController) controllers.get(i)).snapshot();
         } catch (RuntimeException | LinkageError failure) {
             Logger.getGlobal().log(Level.WARNING, "SDL_RAW polling failed; disabling controller input", failure);
-            dispose();
+            // The native call has returned. Exclude further polls and close on the owner,
+            // without stopping the shared keyboard/MIDI polling thread on a backend failure.
+            disable();
+            scheduleClose();
         }
     }
 
     private final class PollRunner implements ControllerBackendManager.PollRunner {
-        public void run() { }
+        public void run() { if (async) poll(); }
         public ControllerBackendManager owner() { return SdlRawControllerManager.this; }
     }
     public void setPollingShutdown(BooleanSupplier shutdown) { pollingShutdown = shutdown; }
     public void dispose() {
         if (!pollingShutdown.getAsBoolean()) return;
-        synchronized (this) {
-            if (!disposed) {
-                disposed = true;
-                if (BMSPlayerInputProcessor.controllerPollRunner == pollRunner) BMSPlayerInputProcessor.controllerPollRunner = null;
-                for (int i = 0; i < controllers.size; i++) ((RawController) controllers.get(i)).disconnect();
-                current = null;
-                clearListeners();
-            }
+        disable();
+        scheduleClose();
+    }
+    private synchronized void disable() {
+        if (!disposed) {
+            disposed = true;
+            if (BMSPlayerInputProcessor.controllerPollRunner == pollRunner) BMSPlayerInputProcessor.controllerPollRunner = null;
+            for (int i = 0; i < controllers.size; i++) ((RawController) controllers.get(i)).disconnect();
+            current = null;
+            clearListeners();
         }
+    }
+    private void scheduleClose() {
         if (Thread.currentThread() == owner) closeNative();
         else dispatch.accept(this::closeNative);
     }
-    private void closeNative() {
+    private synchronized void closeNative() {
         if (Thread.currentThread() != owner) throw new IllegalStateException("SDL_RAW shutdown requires its owner thread");
         if (!closed.compareAndSet(false, true)) return;
         try {
             if (source != null) {
                 source.close();
-                Logger.getGlobal().info("SDL_RAW controller native shutdown complete");
+                Logger.getGlobal().info(backend + " controller native shutdown complete");
             }
         }
         finally {
@@ -155,10 +181,11 @@ public final class SdlRawControllerManager implements ControllerManager, Control
             mapping = new SdlRawMapping(new ControllerConfig(), device.buttons(), device.axes());
             physical = new boolean[device.buttons()]; physicalAxes = new float[device.axes()];
             diagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics")
-                    ? new ControllerInputDiagnostics("SDL_RAW:" + slot, 32, 8, true) : null;
-            Logger.getGlobal().info("Controller backend=SDL_RAW, name=" + device.name() + ", buttons=" + device.buttons()
+                    ? new ControllerInputDiagnostics(backend + ":" + slot, 32, 8, true) : null;
+            Logger.getGlobal().info("Controller backend=" + backend + ", name=" + device.name() + ", buttons=" + device.buttons()
                     + ", axes=" + device.axes() + ", hats=" + device.hats()
-                    + "; JInput-compatible IDs; same-name settings inherited; verify physical order/direction; render-thread native event capture");
+                    + "; JInput-compatible IDs; same-name settings inherited; verify physical order/direction; acquisition="
+                    + (async ? "input-thread" : "render-thread"));
         }
 
         public synchronized void configure(ControllerConfig config) {

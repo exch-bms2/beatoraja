@@ -73,7 +73,7 @@ public final class PlayModeConfig {
     public ControllerConfig[] getController() {
         return switch (controllerBackend != null ? controllerBackend : ControllerBackend.JINPUT) {
             case SDL -> sdlController;
-            case SDL_RAW -> sdlRawController;
+            case SDL_RAW, SDL_RAW_ASYNC -> sdlRawController;
             default -> controller;
         };
     }
@@ -84,12 +84,13 @@ public final class PlayModeConfig {
 
     public void setController(ControllerConfig[] controllerassign) {
         if (controllerBackend == ControllerBackend.SDL) sdlController = controllerassign;
-        else if (controllerBackend == ControllerBackend.SDL_RAW) sdlRawController = controllerassign;
+        else if (controllerBackend == ControllerBackend.SDL_RAW || controllerBackend == ControllerBackend.SDL_RAW_ASYNC) sdlRawController = controllerassign;
         else controller = controllerassign;
     }
 
     public void selectControllerBackend(ControllerBackend backend, Mode mode) {
         controllerBackend = backend;
+        backend = backend != null ? backend.bindingBackend() : ControllerBackend.JINPUT;
         if (backend == ControllerBackend.SDL && sdlController == null)
             sdlController = repairControllers(null, mode, true);
         if (backend == ControllerBackend.SDL_RAW && sdlRawController == null) {
@@ -176,7 +177,7 @@ public final class PlayModeConfig {
         controller = repairControllers(controller, mode, false);
         if (sdlController != null || controllerBackend == ControllerBackend.SDL)
             sdlController = repairControllers(sdlController, mode, true);
-        if (sdlRawController != null || controllerBackend == ControllerBackend.SDL_RAW)
+        if (sdlRawController != null || controllerBackend == ControllerBackend.SDL_RAW || controllerBackend == ControllerBackend.SDL_RAW_ASYNC)
             sdlRawController = repairControllers(sdlRawController, mode, true);
         if (midi == null) {
             midi = new MidiConfig(mode, isMidiMode(mode));

@@ -6,20 +6,31 @@ import static org.lwjgl.sdl.SDLInit.*;
 import static org.lwjgl.sdl.SDLJoystick.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLError.SDL_GetError;
+import static org.lwjgl.sdl.SDLHints.*;
 
 /** SDL3 joystick API, isolated from the existing SDL2/Jamepad GameController backend. */
 final class SdlRawNative implements SdlRawSource {
     private static final int SUBSYSTEMS = SDL_INIT_JOYSTICK | SDL_INIT_EVENTS;
     private final Thread owner = Thread.currentThread();
+    private final boolean async;
+    private final String previousAutoUpdate;
     private final Device[] devices;
     private final long[] handles;
     private SDL_Event event;
     private boolean closed;
 
     SdlRawNative() {
+        this(false);
+    }
+
+    SdlRawNative(boolean async) {
+        this.async = async;
+        previousAutoUpdate = async ? SDL_GetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS) : null;
         if (!SDL_InitSubSystem(SUBSYSTEMS)) throw new IllegalStateException("SDL_RAW init failed: " + SDL_GetError());
         var opened = new ArrayList<Long>();
         try {
+            if (async && !SDL_SetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS, "0"))
+                throw new IllegalStateException("SDL_RAW_ASYNC cannot disable automatic joystick updates");
             var found = new ArrayList<Device>();
             var ids = SDL_GetJoysticks();
             try {
@@ -44,6 +55,7 @@ final class SdlRawNative implements SdlRawSource {
             for (long handle : opened) SDL_CloseJoystick(handle);
             if (event != null) event.free();
             SDL_QuitSubSystem(SUBSYSTEMS);
+            restoreAutoUpdate();
             throw failure;
         }
     }
@@ -51,11 +63,28 @@ final class SdlRawNative implements SdlRawSource {
     private void checkThread() {
         if (Thread.currentThread() != owner) throw new IllegalStateException("SDL_RAW requires its owner thread");
     }
+    private void checkAcquisition() {
+        if (!async) checkThread();
+        if (closed) throw new IllegalStateException("SDL_RAW source is closed");
+    }
+    private void restoreAutoUpdate() {
+        if (!async) return;
+        if (previousAutoUpdate == null) SDL_ResetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS);
+        else SDL_SetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS, previousAutoUpdate);
+    }
     public Device[] devices() { return devices.clone(); }
-    public void update() { checkThread(); SDL_UpdateJoysticks(); }
+    public void update() { checkAcquisition(); SDL_UpdateJoysticks(); }
+    private boolean readEvent() {
+        if (!async) return SDL_PollEvent(event);
+        // Unlike PollEvent, PeepEvents never pumps the main-thread window event loop.
+        int count = nSDL_PeepEvents(event.address(), 1, SDL_GETEVENT,
+                SDL_EVENT_JOYSTICK_AXIS_MOTION, SDL_EVENT_JOYSTICK_UPDATE_COMPLETE);
+        if (count < 0) throw new IllegalStateException("SDL_RAW_ASYNC event read failed: " + SDL_GetError());
+        return count != 0;
+    }
     public boolean next(Event target) {
-        checkThread();
-        while (SDL_PollEvent(event)) {
+        checkAcquisition();
+        while (readEvent()) {
             long address = event.address();
             switch (event.type()) {
                 case SDL_EVENT_JOYSTICK_BUTTON_DOWN, SDL_EVENT_JOYSTICK_BUTTON_UP -> {
@@ -82,15 +111,18 @@ final class SdlRawNative implements SdlRawSource {
         return false;
     }
     static float normalized(short value) { return value < 0 ? value / 32768f : value / 32767f; }
-    public boolean connected(int slot) { checkThread(); return !closed && SDL_JoystickConnected(handles[slot]); }
-    public boolean button(int slot, int button) { checkThread(); return SDL_GetJoystickButton(handles[slot], button); }
-    public float axis(int slot, int axis) { checkThread(); return normalized(SDL_GetJoystickAxis(handles[slot], axis)); }
-    public int hat(int slot) { checkThread(); return devices[slot].hats() == 0 ? 0 : Byte.toUnsignedInt(SDL_GetJoystickHat(handles[slot], 0)); }
+    public boolean connected(int slot) { checkAcquisition(); return SDL_JoystickConnected(handles[slot]); }
+    public boolean button(int slot, int button) { checkAcquisition(); return SDL_GetJoystickButton(handles[slot], button); }
+    public float axis(int slot, int axis) { checkAcquisition(); return normalized(SDL_GetJoystickAxis(handles[slot], axis)); }
+    public int hat(int slot) { checkAcquisition(); return devices[slot].hats() == 0 ? 0 : Byte.toUnsignedInt(SDL_GetJoystickHat(handles[slot], 0)); }
     public void close() {
         checkThread();
         if (closed) return;
         closed = true;
         try { for (long handle : handles) SDL_CloseJoystick(handle); }
-        finally { event.free(); SDL_QuitSubSystem(SUBSYSTEMS); }
+        finally {
+            try { event.free(); SDL_QuitSubSystem(SUBSYSTEMS); }
+            finally { restoreAutoUpdate(); }
+        }
     }
 }

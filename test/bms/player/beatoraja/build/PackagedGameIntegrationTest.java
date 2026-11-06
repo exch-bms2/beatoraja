@@ -69,13 +69,17 @@ public final class PackagedGameIntegrationTest {
                         && gameLog.contains("SDL controller native shutdown complete"), "SDL native initialization/update/shutdown was not verified");
                 PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=SDL"), "Game lost SDL selection");
             }
-            if (config.getControllerBackend() == bms.player.beatoraja.input.ControllerBackend.SDL_RAW) {
+            if (config.getControllerBackend().bindingBackend() == bms.player.beatoraja.input.ControllerBackend.SDL_RAW) {
+                String backend = config.getControllerBackend().name();
                 String gameLog = Files.readString(diagnostics.resolve("launcher-game.log"));
-                PackagedGameSupport.check(gameLog.contains("Controller backend=SDL_RAW, devices=")
+                PackagedGameSupport.check(gameLog.contains("Controller backend=" + backend + ", devices=")
                         && !gameLog.contains("SDL_RAW initialization failed")
                         && !gameLog.contains("SDL_RAW polling failed")
-                        && gameLog.contains("SDL_RAW controller native shutdown complete"), "SDL_RAW native initialization/update/shutdown was not verified");
-                PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=SDL_RAW"), "Game lost SDL_RAW selection");
+                        && gameLog.contains(backend + " controller native shutdown complete"), "SDL_RAW native initialization/update/shutdown was not verified");
+                PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=" + backend), "Game lost SDL_RAW selection");
+                if (config.getControllerBackend() == bms.player.beatoraja.input.ControllerBackend.SDL_RAW_ASYNC)
+                    PackagedGameSupport.check(gameLog.contains("SDL_RAW_ASYNC input polling started: thread=Input polling"),
+                            "SDL_RAW_ASYNC did not acquire on the real input worker");
             }
             PackagedGameSupport.check(Files.readString(diagnostics.resolve("launcher-game.log"))
                     .contains("Startup monitor unavailable or ambiguous: " + missingMonitor), "Missing monitor fallback was not exercised");

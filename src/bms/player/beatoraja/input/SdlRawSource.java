@@ -1,6 +1,6 @@
 package bms.player.beatoraja.input;
 
-/** Owner-thread raw joystick boundary; event/state buffers are reused, never allocated per input. */
+/** Single-consumer raw joystick boundary; lifecycle stays on the owner, buffers are reused per poll. */
 interface SdlRawSource extends AutoCloseable {
     record Device(int id, String name, int buttons, int axes, int hats) { }
     final class Event {
