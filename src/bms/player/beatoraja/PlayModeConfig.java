@@ -72,7 +72,7 @@ public final class PlayModeConfig {
 
     public ControllerConfig[] getController() {
         return switch (controllerBackend != null ? controllerBackend : ControllerBackend.JINPUT) {
-            case SDL -> sdlController;
+            case SDL, SDL_ASYNC -> sdlController;
             case SDL_RAW, SDL_RAW_ASYNC -> sdlRawController;
             default -> controller;
         };
@@ -83,7 +83,7 @@ public final class PlayModeConfig {
     }
 
     public void setController(ControllerConfig[] controllerassign) {
-        if (controllerBackend == ControllerBackend.SDL) sdlController = controllerassign;
+        if (controllerBackend == ControllerBackend.SDL || controllerBackend == ControllerBackend.SDL_ASYNC) sdlController = controllerassign;
         else if (controllerBackend == ControllerBackend.SDL_RAW || controllerBackend == ControllerBackend.SDL_RAW_ASYNC) sdlRawController = controllerassign;
         else controller = controllerassign;
     }
@@ -175,7 +175,7 @@ public final class PlayModeConfig {
             keyboard.mouseScratchConfig = new MouseScratchConfig(mode);
         }
         controller = repairControllers(controller, mode, false);
-        if (sdlController != null || controllerBackend == ControllerBackend.SDL)
+        if (sdlController != null || controllerBackend == ControllerBackend.SDL || controllerBackend == ControllerBackend.SDL_ASYNC)
             sdlController = repairControllers(sdlController, mode, true);
         if (sdlRawController != null || controllerBackend == ControllerBackend.SDL_RAW || controllerBackend == ControllerBackend.SDL_RAW_ASYNC)
             sdlRawController = repairControllers(sdlRawController, mode, true);

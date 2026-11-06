@@ -1,6 +1,6 @@
 package bms.player.beatoraja.input;
 
-/** Single-consumer raw joystick boundary; lifecycle stays on the owner, buffers are reused per poll. */
+/** Single-consumer SDL3 channels (raw or legacy mapped IDs); lifecycle stays on the owner. */
 interface SdlRawSource extends AutoCloseable {
     record Device(int id, String name, int buttons, int axes, int hats) { }
     final class Event {

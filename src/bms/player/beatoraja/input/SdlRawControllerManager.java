@@ -12,12 +12,13 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Shared raw SDL joystick conversion/FIFO; acquisition is render-paced or input-thread paced. */
+/** Shared SDL3 FIFO/lifecycle; sources expose either raw channels or Jamepad-compatible channels. */
 public class SdlRawControllerManager implements ControllerManager, ControllerBackendManager {
     private final Array<Controller> controllers = new Array<>();
     private final Array<ControllerListener> listeners = new Array<>();
     private final Thread owner = Thread.currentThread();
     private final boolean async;
+    private final boolean mapped;
     private final String backend;
     private final Consumer<Runnable> dispatch;
     private final AtomicBoolean closed = new AtomicBoolean();
@@ -34,7 +35,11 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
     }
 
     protected SdlRawControllerManager(boolean async) {
-        this(open(async), Gdx.app::postRunnable, async);
+        this(async ? ControllerBackend.SDL_RAW_ASYNC : ControllerBackend.SDL_RAW);
+    }
+
+    protected SdlRawControllerManager(ControllerBackend backend) {
+        this(open(backend), Gdx.app::postRunnable, backend);
         BMSPlayerInputProcessor.controllerPollRunner = pollRunner;
         Gdx.app.addLifecycleListener(new LifecycleListener() {
             public void pause() { }
@@ -55,16 +60,24 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
     }
 
     SdlRawControllerManager(SdlRawSource source, Consumer<Runnable> dispatch, boolean async) {
+        this(source, dispatch, async ? ControllerBackend.SDL_RAW_ASYNC : ControllerBackend.SDL_RAW);
+    }
+
+    SdlRawControllerManager(SdlRawSource source, Consumer<Runnable> dispatch, ControllerBackend selected) {
+        if (selected != ControllerBackend.SDL_RAW && selected != ControllerBackend.SDL_RAW_ASYNC && selected != ControllerBackend.SDL_ASYNC)
+            throw new IllegalArgumentException("Not an SDL3 backend: " + selected);
         this.source = source;
         this.dispatch = dispatch;
-        this.async = async;
-        backend = async ? "SDL_RAW_ASYNC" : "SDL_RAW";
+        async = selected != ControllerBackend.SDL_RAW;
+        mapped = selected == ControllerBackend.SDL_ASYNC;
+        backend = selected.name();
         try {
             if (source != null) {
                 var devices = source.devices();
                 for (int i = 0; i < devices.length; i++) controllers.add(new RawController(devices[i], i));
                 Logger.getGlobal().info("Controller backend=" + backend + ", devices=" + devices.length
-                        + "; SDL3 raw joystick events; acquisition=" + (async ? "input-thread" : "render-thread"));
+                        + (mapped ? "; SDL3 Gamepad, Jamepad-compatible logical IDs" : "; SDL3 raw joystick events")
+                        + "; acquisition=" + (async ? "input-thread" : "render-thread"));
                 poll();
             }
         } catch (RuntimeException | Error failure) {
@@ -74,10 +87,10 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         if (controllers.notEmpty()) current = controllers.first();
     }
 
-    private static SdlRawSource open(boolean async) {
-        try { return new SdlRawNative(async); }
+    private static SdlRawSource open(ControllerBackend backend) {
+        try { return backend == ControllerBackend.SDL_ASYNC ? new SdlGamepadNative() : new SdlRawNative(backend == ControllerBackend.SDL_RAW_ASYNC); }
         catch (RuntimeException | LinkageError failure) {
-            Logger.getGlobal().log(Level.WARNING, "SDL_RAW initialization failed; keyboard remains available; no backend fallback", failure);
+            Logger.getGlobal().log(Level.WARNING, backend + " initialization failed; keyboard remains available; no backend fallback", failure);
             return null;
         }
     }
@@ -102,7 +115,7 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             }
             for (int i = 0; i < controllers.size; i++) ((RawController) controllers.get(i)).snapshot();
         } catch (RuntimeException | LinkageError failure) {
-            Logger.getGlobal().log(Level.WARNING, "SDL_RAW polling failed; disabling controller input", failure);
+            Logger.getGlobal().log(Level.WARNING, backend + " polling failed; disabling controller input", failure);
             // The native call has returned. Exclude further polls and close on the owner,
             // without stopping the shared keyboard/MIDI polling thread on a backend failure.
             disable();
@@ -134,7 +147,7 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         else dispatch.accept(this::closeNative);
     }
     private synchronized void closeNative() {
-        if (Thread.currentThread() != owner) throw new IllegalStateException("SDL_RAW shutdown requires its owner thread");
+        if (Thread.currentThread() != owner) throw new IllegalStateException(backend + " shutdown requires its owner thread");
         if (!closed.compareAndSet(false, true)) return;
         try {
             if (source != null) {
@@ -184,11 +197,13 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
                     ? new ControllerInputDiagnostics(backend + ":" + slot, 32, 8, true) : null;
             Logger.getGlobal().info("Controller backend=" + backend + ", name=" + device.name() + ", buttons=" + device.buttons()
                     + ", axes=" + device.axes() + ", hats=" + device.hats()
-                    + "; JInput-compatible IDs; same-name settings inherited; verify physical order/direction; acquisition="
+                    + (mapped ? "; SDL bindings shared; Jamepad-compatible logical IDs; verify SDL2/SDL3 device name/mapping"
+                            : "; JInput-compatible IDs; same-name settings inherited; verify physical order/direction") + "; acquisition="
                     + (async ? "input-thread" : "render-thread"));
         }
 
         public synchronized void configure(ControllerConfig config) {
+            if (mapped) return; // Raw conversion profiles must not reinterpret saved SDL/Jamepad IDs.
             var replacement = new SdlRawMapping(config, device.buttons(), device.axes());
             if (mapping.same(replacement)) return;
             mapping = replacement;
@@ -201,6 +216,8 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             if (event.type == SdlRawSource.Event.BUTTON && event.index >= 0 && event.index < physical.length) {
                 physical[event.index] = event.value != 0;
                 long targets = mapping.buttonTargets[event.index];
+                int alias = mapped ? SdlGamepadCompatibility.dpadAlias(event.index) : -1;
+                if (alias >= 0) targets |= 1L << alias;
                 while (targets != 0) {
                     int i = Long.numberOfTrailingZeros(targets); targets &= targets - 1;
                     boolean value = digital(i);
@@ -217,7 +234,9 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             // Axes intentionally remain final snapshots: preserve JKOC/scratch update frequency.
         }
         private boolean digital(int i) {
-            return (mapping.buttons[i] >= 0 && physical[mapping.buttons[i]]) || SdlRawMapping.hat(i, pov);
+            int dpad = mapped ? SdlGamepadCompatibility.dpadButton(i) : -1;
+            return (mapping.buttons[i] >= 0 && physical[mapping.buttons[i]]) || SdlRawMapping.hat(i, pov)
+                    || (dpad >= 0 && dpad < physical.length && physical[dpad]);
         }
         synchronized void snapshot() {
             if (!source.connected(slot)) {
@@ -239,7 +258,7 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), true);
             if (events.isOverflowed() && !overflowReported) {
                 overflowReported = true;
-                Logger.getGlobal().severe("SDL_RAW controller input queue overflow; stopping to avoid invalid scores");
+                Logger.getGlobal().severe(backend + " controller input queue overflow; stopping to avoid invalid scores");
                 if (Gdx.app != null) Gdx.app.exit();
             }
         }
@@ -289,12 +308,12 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         public synchronized boolean getButton(int i) { return connected && i >= 0 && i < 32 && buttons[i]; }
         public synchronized float getAxis(int i) { return connected && i >= 0 && i < 8 ? axes[i] : 0; }
         public String getName() { return device.name(); }
-        public String getUniqueId() { return "SDL_RAW:" + device.id(); }
+        public String getUniqueId() { return (mapped ? "SDL:" : "SDL_RAW:") + device.id(); }
         public boolean isConnected() { return connected; }
         public int getMinButtonIndex() { return 0; }
         public int getMaxButtonIndex() { return 31; }
-        public int getAxisCount() { return 8; }
-        public ControllerMapping getMapping() { return RAW_MAPPING; }
+        public int getAxisCount() { return mapped ? device.axes() : 8; }
+        public ControllerMapping getMapping() { return mapped ? SdlGamepadCompatibility.MAPPING : RAW_MAPPING; }
         public ControllerPowerLevel getPowerLevel() { return ControllerPowerLevel.POWER_UNKNOWN; }
         public boolean canVibrate() { return false; }
         public boolean isVibrating() { return false; }

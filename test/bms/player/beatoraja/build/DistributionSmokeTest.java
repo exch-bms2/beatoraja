@@ -112,6 +112,8 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("bms/player/beatoraja/input/JInputControllerManager.class") != null, "Missing JInput manager");
             for (String type : List.of("SdlRawControllerManager", "SdlRawAsyncControllerManager", "SdlRawMapping", "SdlRawNative", "SdlRawSource"))
                 check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing SDL_RAW component: " + type);
+            for (String type : List.of("SdlAsyncControllerManager", "SdlGamepadNative", "SdlGamepadCompatibility"))
+                check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing SDL_ASYNC component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/InputDiagnostics.class") != null, "Missing input diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/InputPollingThread.class") != null, "Missing input polling lifecycle");
             check(jar.getEntry("bms/player/beatoraja/skin/SkinRenderTarget.class") != null, "Missing preview render target scope");
