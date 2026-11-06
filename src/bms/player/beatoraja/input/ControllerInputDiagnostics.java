@@ -21,6 +21,8 @@ final class ControllerInputDiagnostics implements AutoCloseable {
     private long polls, failures, buttonEdges, povEdges, axisEvents;
     private long buttonCollapsed, povCollapsed, axisCollapsed, gatedSamples, acceptedEdges, forwarded;
     private long gameWrites, gameSlotReplaced;
+    private long buttonSnapshotMismatches, povSnapshotMismatches, axisSnapshotMismatches;
+    private long snapshotCorrections, snapshotDeferred, jinputEvents, jinputMaxEvents, jinputSaturatedPolls;
     private long lastPoll, lastBm, publishedAt;
     private boolean havePoll, haveBm, havePublication, closed;
     private final ScheduledExecutorService reporter;
@@ -101,9 +103,32 @@ final class ControllerInputDiagnostics implements AutoCloseable {
         if (pending) gameSlotReplaced++;
     }
 
+    synchronized void jinputQueue(int events, int confirmedCapacity) {
+        if (closed) return;
+        jinputEvents += events;
+        jinputMaxEvents = Math.max(jinputMaxEvents, events);
+        // A full Java queue is a saturation candidate, not a measurement of native loss.
+        if (confirmedCapacity > 0 && events >= confirmedCapacity) jinputSaturatedPolls++;
+    }
+
+    synchronized void snapshotMismatch(int channel, float value, boolean deferred) {
+        if (closed) return;
+        if (channel < buttons) buttonSnapshotMismatches++;
+        else if (channel < buttons + axes) axisSnapshotMismatches++;
+        else povSnapshotMismatches++;
+        if (deferred) snapshotDeferred++;
+        else {
+            snapshotCorrections++;
+            // Corrections are not observed edges and must not inflate collapsed-event counts.
+            values[channel] = value;
+        }
+    }
+
     synchronized Snapshot snapshot() {
         return new Snapshot(polls, failures, buttonEdges, povEdges, axisEvents, buttonCollapsed,
                 povCollapsed, axisCollapsed, gatedSamples, acceptedEdges, forwarded, gameWrites, gameSlotReplaced,
+                buttonSnapshotMismatches, povSnapshotMismatches, axisSnapshotMismatches,
+                snapshotCorrections, snapshotDeferred, jinputEvents, jinputMaxEvents, jinputSaturatedPolls,
                 Map.of("pollGap", pollGap.snapshot(), "pollDuration", pollDuration.snapshot(),
                         "bmGap", bmGap.snapshot(), "snapshotToBm", snapshotToBm.snapshot(),
                         "bmDuration", bmDuration.snapshot()));
@@ -112,6 +137,9 @@ final class ControllerInputDiagnostics implements AutoCloseable {
     record Snapshot(long polls, long failures, long buttonEdges, long povEdges, long axisEvents,
             long buttonCollapsed, long povCollapsed, long axisCollapsed, long gatedSamples,
             long acceptedEdges, long forwarded, long gameWrites, long gameSlotReplaced,
+            long buttonSnapshotMismatches, long povSnapshotMismatches, long axisSnapshotMismatches,
+            long snapshotCorrections, long snapshotDeferred, long jinputEvents, long jinputMaxEvents,
+            long jinputSaturatedPolls,
             Map<String, InputDiagnostics.Timing> timings) { }
 
     private void log() {

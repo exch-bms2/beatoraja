@@ -292,6 +292,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
     "bms.player.beatoraja.input.SkinMouseInputTest",
     "bms.player.beatoraja.input.JInputControllerCompatibilityTest",
+    "bms.player.beatoraja.input.JInputQueueRecoveryTest",
     "bms.player.beatoraja.input.ControllerBackendTest",
     "bms.player.beatoraja.input.ControllerLibraryCompatibilityTest",
     "bms.player.beatoraja.input.SdlControllerManagerTest",

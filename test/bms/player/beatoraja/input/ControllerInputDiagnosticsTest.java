@@ -29,6 +29,20 @@ public final class ControllerInputDiagnosticsTest {
             check(s.timings().get("pollDuration").maxUs() == 1000, "Native poll plus adapter duration");
             check(s.timings().get("snapshotToBm").maxUs() == 250, "Publication to translation");
             check(s.timings().get("bmDuration").maxUs() == 250, "Translation duration");
+            d.jinputQueue(1024, 1024);
+            d.jinputQueue(32, 0);
+            d.snapshotMismatch(0, 1, true);
+            d.snapshotMismatch(0, 1, false);
+            d.snapshotMismatch(2, .5f, false);
+            d.snapshotMismatch(3, .25f, false);
+            s = d.snapshot();
+            check(s.buttonSnapshotMismatches() == 2 && s.axisSnapshotMismatches() == 1
+                    && s.povSnapshotMismatches() == 1 && s.snapshotCorrections() == 3
+                    && s.snapshotDeferred() == 1, "Separate mismatch, deferred and correction counts");
+            check(s.jinputEvents() == 1056 && s.jinputMaxEvents() == 1024 && s.jinputSaturatedPolls() == 1,
+                    "Queue saturation candidates require confirmed capacity");
+            check(s.buttonEdges() == 3 && s.axisEvents() == 3 && s.povEdges() == 2,
+                    "Snapshot repairs are not observed native edges");
             d.beginPoll(2_000_000);
             d.endPoll(2_500_000, false);
             d.beginBm(2_750_000);
@@ -45,6 +59,8 @@ public final class ControllerInputDiagnosticsTest {
             d.beginBm(11_000_000);
             d.endBm(12_000_000, 99, 99, 99);
             d.gameWrite(true);
+            d.jinputQueue(1024, 1024);
+            d.snapshotMismatch(0, 1, false);
             check(d.snapshot().equals(s), "Closed collector is inert and close is idempotent");
         }
         System.out.println("ControllerInputDiagnosticsTest passed (synthetic timings)");

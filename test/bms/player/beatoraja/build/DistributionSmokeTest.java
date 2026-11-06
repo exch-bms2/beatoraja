@@ -278,6 +278,7 @@ public final class DistributionSmokeTest {
             // The raw adapter must not share a classpath with the retired backend.
         }
         JInputControllerCompatibilityTest.main(new String[]{"--packaged"});
+        bms.player.beatoraja.input.JInputQueueRecoveryTest.main(new String[0]);
         bms.player.beatoraja.input.ControllerLibraryCompatibilityTest.main(new String[0]);
         LibGdxCompatibilityTest.main(new String[0]);
         bms.player.beatoraja.SkinProjectionTest.main(new String[0]);

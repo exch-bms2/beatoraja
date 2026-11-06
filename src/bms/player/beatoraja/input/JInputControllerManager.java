@@ -32,6 +32,7 @@ import net.java.games.input.Event;
  * No SDL gamepad remapping is applied. Enumeration is performed at startup.
  */
 public final class JInputControllerManager implements ControllerManager, ControllerBackendManager {
+    static final int DEVICE_EVENT_QUEUE_CAPACITY = 1024;
     private final Array<Controller> controllers = new Array<>();
     private final Array<ControllerListener> listeners = new Array<>();
     private final Runnable pollDevices;
@@ -232,6 +233,7 @@ public final class JInputControllerManager implements ControllerManager, Control
         final ControllerEventQueue events = new ControllerEventQueue();
         private boolean captureEvents;
         private boolean overflowReported;
+        private boolean reconciliationReported;
         private long inputGeneration;
         private net.java.games.input.Controller device;
         private final String name;
@@ -246,6 +248,8 @@ public final class JInputControllerManager implements ControllerManager, Control
         private final boolean[] rawButtons;
         private final float[] axisValues;
         private final float[] axisMaximum;
+        private final boolean[] buttonEvents, axisEvents;
+        private final int deviceQueueCapacity;
         private final Event event = new Event();
         private Component pov;
         private float povValue;
@@ -257,6 +261,13 @@ public final class JInputControllerManager implements ControllerManager, Control
             this.device = device;
             this.name = device.getName();
             this.id = name + ":" + index;
+            var previousQueue = device.getEventQueue();
+            device.setEventQueueSize(DEVICE_EVENT_QUEUE_CAPACITY);
+            // AbstractController swallows native resize IOExceptions and retains the old queue.
+            deviceQueueCapacity = device.getEventQueue() != previousQueue ? DEVICE_EVENT_QUEUE_CAPACITY : 0;
+            if (deviceQueueCapacity == 0) Logger.getGlobal().warning(
+                    "JInput event queue resize was not confirmed: " + name
+                    + "; requestedCapacity=" + DEVICE_EVENT_QUEUE_CAPACITY);
             List<Component> buttonList = new ArrayList<>();
             List<Component> axisList = new ArrayList<>();
             for (var component : device.getComponents()) {
@@ -273,6 +284,8 @@ public final class JInputControllerManager implements ControllerManager, Control
             rawButtons = new boolean[rawButtonCount];
             axisValues = new float[axes.length];
             axisMaximum = new float[axes.length];
+            buttonEvents = new boolean[rawButtonCount];
+            axisEvents = new boolean[axes.length];
             Arrays.fill(axisMaximum, 1);
             for (int i = 0; i < rawButtonCount; i++) {
                 buttonIndices.put(buttonComponents[i], i);
@@ -282,14 +295,18 @@ public final class JInputControllerManager implements ControllerManager, Control
                 axisIndices.put(axisComponents[i], i);
                 axisValues[i] = axisComponents[i].getPollData();
             }
+            if (pov != null) povValue = pov.getPollData();
             diagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics")
                     ? new ControllerInputDiagnostics(Integer.toString(index), rawButtonCount, axes.length, true) : null;
             if (diagnostics != null) {
                 for (int i = 0; i < rawButtonCount; i++) diagnostics.seed(i, rawButtons[i] ? 1 : 0);
                 for (int i = 0; i < axes.length; i++) diagnostics.seed(rawButtonCount + i, axisValues[i]);
+                diagnostics.seed(rawButtonCount + axes.length, povValue);
             }
             Logger.getGlobal().info("Controller backend=JInput direct, name=" + name + ", buttons="
                     + rawButtonCount + ", axes=" + axes.length
+                    + ", eventQueueRequested=" + DEVICE_EVENT_QUEUE_CAPACITY
+                    + ", eventQueueResizeConfirmed=" + (deviceQueueCapacity != 0)
                     + "; legacy key IDs retained; verify assignments after OIS migration");
         }
 
@@ -342,14 +359,21 @@ public final class JInputControllerManager implements ControllerManager, Control
             // per-poll Event and per-change ControllerEvent objects.
             var queue = device.getEventQueue();
             boolean continuous = connected;
+            Arrays.fill(buttonEvents, false);
+            Arrays.fill(axisEvents, false);
+            boolean povEvent = false;
+            int eventCount = 0;
             while (queue.getNextEvent(event)) {
+                eventCount++;
                 Component component = event.getComponent();
                 Integer button = buttonIndices.get(component);
                 if (button != null) {
+                    buttonEvents[button] = true;
                     if (diagnostics != null) diagnostics.event(button, event.getValue() != 0 ? 1 : 0);
                     rawButtons[button] = event.getValue() != 0;
                     if (continuous && button < 32) events.offer(button, buttonPressed(button));
                 } else if (component == pov) {
+                    povEvent = true;
                     if (diagnostics != null) diagnostics.event(rawButtonCount + axes.length, event.getValue());
                     povValue = event.getValue();
                     if (continuous) for (int i = 28; i < 32; i++) events.offer(i, buttonPressed(i));
@@ -357,12 +381,36 @@ public final class JInputControllerManager implements ControllerManager, Control
                 else {
                     Integer axis = axisIndices.get(component);
                     if (axis != null) {
+                        axisEvents[axis] = true;
                         if (diagnostics != null) diagnostics.event(rawButtonCount + axis, event.getValue());
-                        float value = component.getPollData();
-                        if (!Float.isFinite(value)) value = 0;
-                        if (Math.abs(value) < component.getDeadZone()) value = 0;
-                        axisMaximum[axis] = Math.max(axisMaximum[axis], Math.abs(value));
-                        axisValues[axis] = value / axisMaximum[axis];
+                        axisValues[axis] = normalizedAxis(axis);
+                    }
+                }
+            }
+            if (diagnostics != null) diagnostics.jinputQueue(eventCount, deviceQueueCapacity);
+            // DirectInput captures its snapshot before collecting events. Do not undo a newer
+            // event with that older snapshot; reconcile that channel on an event-free poll.
+            for (int i = 0; i < rawButtonCount; i++) {
+                boolean pressed = buttonComponents[i].getPollData() != 0;
+                if (rawButtons[i] != pressed) {
+                    if (continuous) mismatch(i, pressed ? 1 : 0, buttonEvents[i]);
+                    if (!continuous || !buttonEvents[i]) rawButtons[i] = pressed;
+                }
+            }
+            if (pov != null) {
+                float value = pov.getPollData();
+                if (Float.compare(povValue, value) != 0) {
+                    if (continuous) mismatch(rawButtonCount + axes.length, value, povEvent);
+                    if (!continuous || !povEvent) povValue = value;
+                }
+            }
+            for (int i = 0; i < axes.length; i++) {
+                // Relative-axis deltas reset each JInput poll; retain legacy event-driven handling.
+                if (!axisEvents[i] && !axisComponents[i].isRelative()) {
+                    float value = normalizedAxis(i);
+                    if (Float.compare(axisValues[i], value) != 0) {
+                        if (continuous) mismatch(rawButtonCount + i, value, false);
+                        axisValues[i] = value;
                     }
                 }
             }
@@ -391,6 +439,26 @@ public final class JInputControllerManager implements ControllerManager, Control
                 overflowReported = true;
                 Logger.getGlobal().severe("Controller input queue overflow; stopping to avoid invalid scores");
                 if (Gdx.app != null) Gdx.app.exit();
+            }
+        }
+
+        private float normalizedAxis(int axis) {
+            Component component = axisComponents[axis];
+            float value = component.getPollData();
+            if (!Float.isFinite(value)) value = 0;
+            if (Math.abs(value) < component.getDeadZone()) value = 0;
+            axisMaximum[axis] = Math.max(axisMaximum[axis], Math.abs(value));
+            return value / axisMaximum[axis];
+        }
+
+        private void mismatch(int channel, float value, boolean deferred) {
+            if (diagnostics != null) diagnostics.snapshotMismatch(channel, value, deferred);
+            if (!deferred && !reconciliationReported) {
+                reconciliationReported = true;
+                Logger.getGlobal().warning("JInput snapshot reconciliation: device=" + id
+                        + ", channel=" + channel + ", snapshot=" + value
+                        + "; event/snapshot mismatch is not proof of native overflow;"
+                        + " enable -Dbeatoraja.inputDiagnostics=true for cumulative counts");
             }
         }
 

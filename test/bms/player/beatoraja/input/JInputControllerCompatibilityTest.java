@@ -453,7 +453,7 @@ public final class JInputControllerCompatibilityTest {
         final FakeComponent[] axisComponents;
         final FakeComponent pov = new FakeComponent(Component.Identifier.Axis.POV);
         final FakeComponent secondPov = new FakeComponent(Component.Identifier.Axis.POV);
-        final EventQueue queue = new EventQueue(1024);
+        EventQueue queue = new EventQueue(1024);
         final Event event = new Event();
         final Method addEvent;
         String name = "Raw device";
@@ -499,6 +499,7 @@ public final class JInputControllerCompatibilityTest {
                         }
                         case "getRumblers" -> new net.java.games.input.Rumbler[0];
                         case "getEventQueue" -> queue;
+                        case "setEventQueueSize" -> { queue = new EventQueue((int) args[0]); yield null; }
                         case "poll" -> {
                             pollCount++;
                             if (!pollSuccess) yield false;
