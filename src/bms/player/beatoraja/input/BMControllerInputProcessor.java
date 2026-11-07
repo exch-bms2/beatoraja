@@ -122,6 +122,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		return name;
 	}
 
+    Controller getController() { return controller; }
+
 	public synchronized void clear() {
 		Arrays.fill(buttonchanged, false);
 		Arrays.fill(buttontime, Long.MIN_VALUE);
@@ -131,6 +133,16 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
 	public synchronized void poll(final long microtime) {
 		if (!enabled || !windowActive) return;
+        var queued = rawController();
+        boolean rebaseline = queued != null && connectionGeneration != queued.connectionGeneration();
+        if (rebaseline) {
+            connectionGeneration = queued.connectionGeneration();
+            inputGeneration = queued.inputGeneration();
+            releaseDisconnected(microtime);
+            int event;
+            while ((event = queued.events().pollNext(buttonstate, buttontime, microtime, 0)) >= 0)
+                forwardButtonEvent(event / 2, event % 2 != 0, microtime);
+        }
 		ControllerInputDiagnostics diagnostics = getDiagnostics();
         gatedSamples = acceptedEdges = forwardedEdges = 0;
 		if (diagnostics != null) diagnostics.beginBm(System.nanoTime());
@@ -139,6 +151,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		for (int i = 0; i < AXIS_LENGTH ; i++) {
 			axis[i] = i < controller.getAxisCount() ? controller.getAxis(i) : 0;
 		}
+        if (rebaseline && analogScratchAlgorithm != null)
+            for (int i = 0; i < AXIS_LENGTH; i++) analogScratchAlgorithm[i].reset(axis[i]);
 
         if (windowBaseline) {
             windowBaseline = false;
@@ -239,6 +253,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
             if (button < 0 || button >= BMKeys.MAXID) continue;
             if (isAnalog && button >= BMKeys.AXIS1_PLUS) {
                 this.bmsPlayerInputProcessor.setAnalogState(i, true, getAnalogValue(button));
+                if (rebaseline) this.bmsPlayerInputProcessor.resetAnalogInput(i);
             } else {
                 this.bmsPlayerInputProcessor.setAnalogState(i, false, 0);
             }
@@ -262,6 +277,27 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 
     private QueuedController rawController() {
         return controller instanceof QueuedController raw ? raw : null;
+    }
+
+    private long connectionGeneration;
+
+    /** Unplug releases bypass debounce and enter the same judgment/replay stream as physical edges. */
+    private void releaseDisconnected(long time) {
+        for (int i = 0; i < buttons.length; i++) {
+            int button = buttons[i];
+            if (button >= 0 && button < buttonstate.length && buttonstate[button]) {
+                bmsPlayerInputProcessor.controllerKeyChanged(this, time, i, false);
+                bmsPlayerInputProcessor.setAnalogState(i, false, 0);
+            }
+        }
+        if (start >= 0 && start < buttonstate.length && buttonstate[start]) bmsPlayerInputProcessor.startChanged(false);
+        if (select >= 0 && select < buttonstate.length && buttonstate[select]) bmsPlayerInputProcessor.setSelectPressed(false);
+        Arrays.fill(buttonstate, false);
+        Arrays.fill(buttonchanged, false);
+        Arrays.fill(buttontime, Long.MIN_VALUE);
+        Arrays.fill(axis, 0);
+        if (analogScratchAlgorithm != null) for (var algorithm : analogScratchAlgorithm) algorithm.reset(0);
+        lastPressedButton = -1;
     }
 
     private void resetEvents() {

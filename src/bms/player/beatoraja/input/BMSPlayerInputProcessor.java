@@ -42,7 +42,9 @@ public class BMSPlayerInputProcessor {
 
 	private KeyBoardInputProcesseor kbinput;
 
-	private BMControllerInputProcessor[] bminput;
+	private volatile BMControllerInputProcessor[] bminput;
+    private ControllerConfig[] currentControllerConfigs;
+    private long sdlControllerVersion = -1;
 
 	private MidiInputProcessor midiinput;
 	
@@ -193,6 +195,7 @@ public class BMSPlayerInputProcessor {
 
 	public void setControllerConfig(ControllerConfig[] configs) {
 		synchronized (kbinput) {
+			currentControllerConfigs = configs;
 			boolean[] b = new boolean[configs.length];
 			for (BMControllerInputProcessor controller : bminput) {
 				controller.setEnable(false);
@@ -685,12 +688,55 @@ public class BMSPlayerInputProcessor {
 				controllerPoll.run();
 			}
 
+            if (controllerManager instanceof SdlRawControllerManager sdl) registerSdlControllers(sdl);
+
 			if (!windowInputActive) return;
 			for (BMControllerInputProcessor controller : bminput) {
 				controller.poll(now);
 			}
 		}
 	}
+
+    private void registerSdlControllers(SdlRawControllerManager manager) {
+        long version = manager.controllerVersion();
+        if (sdlControllerVersion == version) return;
+        for (Controller controller : manager.getControllers()) {
+            boolean known = false;
+            for (var existing : bminput) if (existing.getController() == controller) { known = true; break; }
+            if (known) continue;
+            String name = controller.getName();
+            int suffix = 1;
+            for (var existing : bminput) if (existing.getName().equals(name)) name = controller.getName() + "-" + ++suffix;
+            var settings = new ControllerConfig();
+            var added = new BMControllerInputProcessor(this, name, controller, settings);
+            var updated = Arrays.copyOf(bminput, bminput.length + 1);
+            updated[bminput.length] = added;
+            bminput = updated;
+            devices.add(added);
+            if (!windowInputActive) added.setWindowActive(false);
+            if (currentControllerConfigs != null) applyNewControllerConfig(added);
+            if (!replayInput) {
+                int[] keys = added.getQueuedGameKeys();
+                synchronized (keyboardJudgeQueue) {
+                    keyboardJudgeQueue.include(keys, keystate);
+                    controllerReplayKeys = mergeEventKeys(controllerReplayKeys, keys);
+                }
+            }
+            Logger.getGlobal().info("SDL3 controller attached: " + name);
+        }
+        sdlControllerVersion = version;
+    }
+
+    private void applyNewControllerConfig(BMControllerInputProcessor added) {
+        for (var settings : currentControllerConfigs) {
+            if (settings.getName() == null || settings.getName().isEmpty()) settings.setName(added.getName());
+            if (matchesControllerName(settings.getName(), added.getName())) {
+                added.setConfig(settings);
+                added.setEnable(true);
+                return;
+            }
+        }
+    }
 
 	/** Serialize boundaries with polling; accepted judgment/replay events retain their order and clocks. */
 	void windowActivityChanged(boolean active) {

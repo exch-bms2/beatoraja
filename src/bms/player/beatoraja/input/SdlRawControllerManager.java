@@ -28,6 +28,8 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
     private volatile BooleanSupplier pollingShutdown = () -> true;
     private volatile boolean disposed, hasListeners;
     private boolean workerStarted;
+    private long inventoryVersion = -1;
+    private long controllerVersion;
     private volatile Controller current;
 
     public SdlRawControllerManager() {
@@ -73,9 +75,8 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         backend = selected.name();
         try {
             if (source != null) {
-                var devices = source.devices();
-                for (int i = 0; i < devices.length; i++) controllers.add(new RawController(devices[i], i));
-                Logger.getGlobal().info("Controller backend=" + backend + ", devices=" + devices.length
+                refreshDevices();
+                Logger.getGlobal().info("Controller backend=" + backend + ", devices=" + controllers.size
                         + (mapped ? "; SDL3 Gamepad, Jamepad-compatible logical IDs" : "; SDL3 raw joystick events")
                         + "; acquisition=" + (async ? "input-thread" : "render-thread"));
                 poll();
@@ -109,9 +110,16 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
                 if (raw.diagnostics != null) raw.diagnostics.beginPoll(System.nanoTime());
             }
             source.update();
-            while (source.next(event)) for (int i = 0; i < controllers.size; i++) {
-                var raw = (RawController) controllers.get(i);
-                if (raw.device.id() == event.device) { raw.event(event); break; }
+            while (source.next(event)) {
+                if (event.type == SdlRawSource.Event.ADDED) refreshDevices();
+                else for (int i = 0; i < controllers.size; i++) {
+                    var raw = (RawController) controllers.get(i);
+                    if (raw.device.id() == event.device) {
+                        if (event.type == SdlRawSource.Event.REMOVED) raw.disconnect();
+                        else raw.event(event);
+                        break;
+                    }
+                }
             }
             for (int i = 0; i < controllers.size; i++) ((RawController) controllers.get(i)).snapshot();
         } catch (RuntimeException | LinkageError failure) {
@@ -121,6 +129,26 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             disable();
             scheduleClose();
         }
+    }
+
+    private void refreshDevices() {
+        if (inventoryVersion == source.inventoryVersion()) return;
+        var devices = source.devices();
+        for (int i = 0; i < devices.length; i++) {
+            if (i == controllers.size) {
+                controllers.add(new RawController(devices[i], i));
+                controllerVersion++;
+            }
+            else {
+                var raw = (RawController) controllers.get(i);
+                if (raw.device.id() != devices[i].id()) {
+                    raw.disconnect();
+                    raw.device = devices[i];
+                    raw.snapshot();
+                }
+            }
+        }
+        inventoryVersion = source.inventoryVersion();
     }
 
     private final class PollRunner implements ControllerBackendManager.PollRunner {
@@ -165,7 +193,8 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             }
         }
     }
-    public Array<Controller> getControllers() { return controllers; }
+    public synchronized Array<Controller> getControllers() { return new Array<>(controllers); }
+    synchronized long controllerVersion() { return controllerVersion; }
     public Controller getCurrentController() { return current; }
     public Array<ControllerListener> getListeners() { return listeners; }
     public synchronized void addListener(ControllerListener listener) { listeners.add(listener); hasListeners = listeners.notEmpty(); }
@@ -176,7 +205,7 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 29, 31, 28, 30) { };
 
     final class RawController implements QueuedController {
-        private final SdlRawSource.Device device;
+        private volatile SdlRawSource.Device device;
         private final int slot;
         private final boolean[] physical, buttons = new boolean[32];
         private final float[] physicalAxes, axes = new float[8];
@@ -186,8 +215,9 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         private final ControllerInputDiagnostics diagnostics;
         private final Array<ControllerListener> localListeners = new Array<>();
         private volatile boolean connected, hasLocalListeners;
-        private boolean capture, overflowReported, discardPendingEvents;
+        private boolean capture, overflowReported, discardPendingEvents, previouslyConnected;
         private long generation;
+        private long connectionGeneration;
 
         RawController(SdlRawSource.Device device, int slot) {
             this.device = device; this.slot = slot;
@@ -251,10 +281,12 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
                 physicalAxes[i] = Float.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
             }
             pov = source.hat(slot);
-            publish(continuous);
+            publish(continuous || previouslyConnected);
             discardPendingEvents = false;
-            if (!continuous) resetEvents(capture);
+            if (!continuous && previouslyConnected) connectionGeneration++;
+            if (!continuous && !previouslyConnected) resetEvents(capture);
             connected = true;
+            previouslyConnected = true;
             if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), true);
             if (events.isOverflowed() && !overflowReported) {
                 overflowReported = true;
@@ -282,12 +314,18 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             boolean wasConnected = connected;
             connected = false;
             Arrays.fill(buttons, false); Arrays.fill(axes, 0); Arrays.fill(physical, false); Arrays.fill(physicalAxes, 0); pov = 0;
-            if (wasConnected) resetEvents(capture);
+            if (wasConnected) {
+                connectionGeneration++;
+                // Keep preceding native edges in order, followed by unconditional releases.
+                for (int i = 0; i < buttons.length; i++) events.offer(i, false);
+                generation++;
+            }
             if (current == this) current = null;
         }
         public synchronized void resetEvents(boolean active) { capture = active; events.reset(active, buttons); generation++; }
         public synchronized void windowActivityChanged() { discardPendingEvents = true; }
         public synchronized long inputGeneration() { return generation; }
+        public synchronized long connectionGeneration() { return connectionGeneration; }
         public ControllerEventQueue events() { return events; }
         public ControllerInputDiagnostics diagnostics() { return diagnostics; }
         private void notifyChange(int index, boolean button, boolean down, float value) {

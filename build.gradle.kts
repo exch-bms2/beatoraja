@@ -162,6 +162,9 @@ tasks.named<JavaExec>("run") {
     providers.gradleProperty("inputDiagnostics").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics", it)
     }
+    providers.gradleProperty("textInputDiagnostics").orNull?.let {
+        systemProperty("beatoraja.textInputDiagnostics", it)
+    }
     providers.gradleProperty("inputDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
     }
@@ -232,6 +235,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.SkinTextClipboardTest",
     "bms.player.beatoraja.input.TextEditingControlTest",
     "bms.player.beatoraja.input.TextInputSessionTest",
+    "bms.player.beatoraja.input.TextInputDiagnosticsTest",
     "bms.player.beatoraja.input.MacOsImeBridgeTest",
     "bms.player.beatoraja.input.WindowsImeBridgeTest",
     "bms.player.beatoraja.input.X11ImeBridgeTest",

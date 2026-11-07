@@ -1,7 +1,6 @@
 package bms.player.beatoraja.input;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.logging.Logger;
 import org.lwjgl.sdl.*;
 import org.lwjgl.system.MemoryUtil;
@@ -16,48 +15,50 @@ final class SdlGamepadNative implements SdlRawSource {
     private static final int SUBSYSTEMS = SDL_INIT_GAMEPAD | SDL_INIT_EVENTS;
     private final Thread owner = Thread.currentThread();
     private final String previousAutoUpdate = SDL_GetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS);
-    private final Device[] devices;
-    private final long[] handles;
+    private final SdlDeviceRegistry registry = new SdlDeviceRegistry(SDLGamepad::SDL_CloseGamepad);
     private SDL_Event event;
     private boolean closed;
 
     SdlGamepadNative() {
         if (!SDL_InitSubSystem(SUBSYSTEMS)) throw new IllegalStateException("SDL_ASYNC init failed: " + SDL_GetError());
-        var opened = new ArrayList<Long>();
         try {
             if (!SDL_SetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS, "0"))
                 throw new IllegalStateException("SDL_ASYNC cannot disable automatic joystick updates");
             loadLegacyMappings();
-            var found = new ArrayList<Device>();
             var ids = SDL_GetGamepads();
             try {
                 if (ids == null) throw new IllegalStateException("SDL_ASYNC enumeration failed: " + SDL_GetError());
-                for (int i = 0; i < ids.remaining(); i++) {
-                    long handle = SDL_OpenGamepad(ids.get(i));
-                    if (handle == 0) throw new IllegalStateException("SDL_ASYNC open failed: " + SDL_GetError());
-                    opened.add(handle);
-                    String name = SDL_GetGamepadName(handle);
-                    int buttons = SdlGamepadCompatibility.BUTTONS.length;
-                    while (buttons > 1 && !SDL_GamepadHasButton(handle, SdlGamepadCompatibility.BUTTONS[buttons - 1])) buttons--;
-                    int axes = SdlGamepadCompatibility.AXES.length;
-                    while (axes > 0 && !SDL_GamepadHasAxis(handle, SdlGamepadCompatibility.AXES[axes - 1])) axes--;
-                    found.add(new Device(ids.get(i), name != null ? name : "Unknown", buttons, axes, 0));
-                    Logger.getGlobal().info("SDL_ASYNC mapping: id=" + ids.get(i) + ", name=" + name
-                            + ", joystickName=" + SDLJoystick.SDL_GetJoystickName(SDL_GetGamepadJoystick(handle))
-                            + ", mapping=" + SDL_GetGamepadMapping(handle));
-                }
+                for (int i = 0; i < ids.remaining(); i++) open(ids.get(i));
             } finally { if (ids != null) SDLStdinc.SDL_free(ids); }
-            handles = new long[opened.size()];
-            for (int i = 0; i < handles.length; i++) handles[i] = opened.get(i);
-            devices = found.toArray(Device[]::new);
             event = SDL_Event.calloc();
             SDLJoystick.SDL_SetJoystickEventsEnabled(true);
             SDL_SetGamepadEventsEnabled(true);
         } catch (RuntimeException | Error failure) {
-            for (long handle : opened) SDL_CloseGamepad(handle);
+            registry.close();
             if (event != null) event.free();
             SDL_QuitSubSystem(SUBSYSTEMS);
             restoreHint();
+            throw failure;
+        }
+    }
+
+    private boolean open(int id) {
+        if (registry.contains(id)) return false;
+        long handle = SDL_OpenGamepad(id);
+        if (handle == 0) return false;
+        try {
+            String name = SDL_GetGamepadName(handle);
+            if (name == null) name = "Unknown";
+            int buttons = SdlGamepadCompatibility.BUTTONS.length;
+            while (buttons > 1 && !SDL_GamepadHasButton(handle, SdlGamepadCompatibility.BUTTONS[buttons - 1])) buttons--;
+            int axes = SdlGamepadCompatibility.AXES.length;
+            while (axes > 0 && !SDL_GamepadHasAxis(handle, SdlGamepadCompatibility.AXES[axes - 1])) axes--;
+            registry.add(new Device(id, name, buttons, axes, 0,
+                    SdlDeviceRegistry.identity(SDL_GetGamepadJoystick(handle), name)), handle);
+            Logger.getGlobal().info("SDL_ASYNC mapping: id=" + id + ", name=" + name + ", mapping=" + SDL_GetGamepadMapping(handle));
+            return true;
+        } catch (RuntimeException | Error failure) {
+            SDL_CloseGamepad(handle);
             throw failure;
         }
     }
@@ -85,7 +86,8 @@ final class SdlGamepadNative implements SdlRawSource {
         if (previousAutoUpdate == null) SDL_ResetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS);
         else SDL_SetHint(SDL_HINT_AUTO_UPDATE_JOYSTICKS, previousAutoUpdate);
     }
-    public Device[] devices() { return devices.clone(); }
+    public Device[] devices() { return registry.devices(); }
+    public long inventoryVersion() { return registry.version(); }
     public void update() { checkOpen(); SDL_UpdateGamepads(); }
     public boolean next(Event target) {
         checkOpen();
@@ -96,6 +98,14 @@ final class SdlGamepadNative implements SdlRawSource {
                     SDL_EVENT_JOYSTICK_AXIS_MOTION, SDL_EVENT_GAMEPAD_STEAM_HANDLE_UPDATED);
             if (count < 0) throw new IllegalStateException("SDL_ASYNC event read failed: " + SDL_GetError());
             if (count == 0) return false;
+            if (event.type() == SDL_EVENT_GAMEPAD_ADDED) {
+                int id = SDL_GamepadDeviceEvent.nwhich(event.address());
+                if (open(id)) { target.device = id; target.type = Event.ADDED; return true; }
+            } else if (event.type() == SDL_EVENT_GAMEPAD_REMOVED) {
+                target.device = SDL_GamepadDeviceEvent.nwhich(event.address()); target.type = Event.REMOVED;
+                registry.remove(target.device);
+                return true;
+            }
             if (event.type() == SDL_EVENT_GAMEPAD_BUTTON_DOWN || event.type() == SDL_EVENT_GAMEPAD_BUTTON_UP) {
                 int legacy = SdlGamepadCompatibility.legacyButton(Byte.toUnsignedInt(SDL_GamepadButtonEvent.nbutton(event.address())));
                 if (legacy >= 0) {
@@ -107,23 +117,23 @@ final class SdlGamepadNative implements SdlRawSource {
             // Axes use the final mapped snapshot, not one scratch update per native event.
         }
     }
-    public boolean connected(int slot) { checkOpen(); return SDL_GamepadConnected(handles[slot]); }
+    public boolean connected(int slot) { checkOpen(); return registry.handle(slot) != 0 && SDL_GamepadConnected(registry.handle(slot)); }
     public boolean button(int slot, int button) {
         checkOpen();
-        return button >= 0 && button < SdlGamepadCompatibility.BUTTONS.length
-                && SDL_GetGamepadButton(handles[slot], SdlGamepadCompatibility.BUTTONS[button]);
+        return registry.handle(slot) != 0 && button >= 0 && button < SdlGamepadCompatibility.BUTTONS.length
+                && SDL_GetGamepadButton(registry.handle(slot), SdlGamepadCompatibility.BUTTONS[button]);
     }
     public float axis(int slot, int axis) {
         checkOpen();
-        return axis >= 0 && axis < SdlGamepadCompatibility.AXES.length
-                ? SdlGamepadCompatibility.normalized(SDL_GetGamepadAxis(handles[slot], SdlGamepadCompatibility.AXES[axis])) : 0;
+        return registry.handle(slot) != 0 && axis >= 0 && axis < SdlGamepadCompatibility.AXES.length
+                ? SdlGamepadCompatibility.normalized(SDL_GetGamepadAxis(registry.handle(slot), SdlGamepadCompatibility.AXES[axis])) : 0;
     }
     public int hat(int slot) { checkOpen(); return 0; }
     public void close() {
         if (Thread.currentThread() != owner) throw new IllegalStateException("SDL_ASYNC shutdown requires its owner thread");
         if (closed) return;
         closed = true;
-        try { for (long handle : handles) SDL_CloseGamepad(handle); }
+        try { registry.close(); }
         finally {
             try { event.free(); SDL_QuitSubSystem(SUBSYSTEMS); }
             finally { restoreHint(); }

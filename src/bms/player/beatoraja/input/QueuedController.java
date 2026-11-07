@@ -6,6 +6,7 @@ import com.badlogic.gdx.controllers.Controller;
 interface QueuedController extends Controller {
     ControllerEventQueue events();
     long inputGeneration();
+    default long connectionGeneration() { return 0; }
     void resetEvents(boolean active);
     ControllerInputDiagnostics diagnostics();
     default void configure(bms.player.beatoraja.PlayModeConfig.ControllerConfig config) { }

@@ -128,6 +128,11 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void render() {
+		var detectedControllers = input.getBMInputProcessor();
+		if (controllers != detectedControllers) {
+			for (var controller : detectedControllers) controller.setEnable(true);
+			controllers = detectedControllers;
+		}
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final float scaleX = (float) getSkin().getScaleX();
 		final float scaleY = (float) getSkin().getScaleY();

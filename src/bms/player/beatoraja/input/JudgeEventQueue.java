@@ -37,6 +37,15 @@ public class JudgeEventQueue {
         return active && key >= 0 && key < enabled.length && enabled[key];
     }
 
+    /** Add a newly attached controller without discarding pending events or resetting held keys. */
+    synchronized void include(int[] assignments, boolean[] initial) {
+        if (!active) return;
+        for (int key : assignments) if (!enabled[key]) {
+            enabled[key] = true;
+            held[key] = initial[key];
+        }
+    }
+
     public synchronized void offer(int key, boolean down, long time) {
         if (!isQueued(key) || overflow) return;
         if (size == keys.length) { overflow = true; return; }
