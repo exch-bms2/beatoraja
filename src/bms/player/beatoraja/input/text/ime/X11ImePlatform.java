@@ -1,7 +1,7 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 /** Owner-thread XIM boundary. Each attachment belongs to exactly one editor session. */
-interface X11ImePlatform {
+public interface X11ImePlatform {
     int COMMIT = 0, PREEDIT = 1, END = 2, KEY = 3, RELEASE = 4, FOCUS_LOST = 5, LOST = 6;
     interface Listener { void event(int kind, byte[] utf8, int first, int second, boolean consumed); }
     record Caret(double x, double y, double width, double height, double clientWidth, double clientHeight) {
@@ -10,7 +10,7 @@ interface X11ImePlatform {
                     || width < 0 || height <= 0 || clientWidth <= 0 || clientHeight <= 0)
                 throw new IllegalArgumentException("Invalid X11 IME caret");
         }
-        int[] nativeRectangle(int width, int height) {
+        public int[] nativeRectangle(int width, int height) {
             double sx = width / clientWidth, sy = height / clientHeight;
             return new int[] {bounded(Math.floor(x * sx)), bounded(Math.floor(y * sy)),
                     bounded(Math.ceil((x + this.width) * sx)), bounded(Math.ceil((y + this.height) * sy))};

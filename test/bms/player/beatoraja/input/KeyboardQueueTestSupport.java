@@ -6,13 +6,14 @@ import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.List;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.input.controller.BMControllerInputProcessor;
+import bms.player.beatoraja.input.midi.MidiInputProcessor;
+import bms.player.beatoraja.input.midi.MidiInputTestSupport;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.utils.Array;
 
@@ -21,7 +22,7 @@ public final class KeyboardQueueTestSupport {
     private KeyboardQueueTestSupport() {}
 
     public static BMSPlayerInputProcessor input(Config config, PlayerConfig player, Array<Controller> controllers) {
-        return new BMSPlayerInputProcessor(config, player, controllers, owner -> new MidiInputProcessor(owner, List.of()));
+        return new BMSPlayerInputProcessor(config, player, controllers, MidiInputTestSupport::withoutDevices);
     }
 
     public static void windowActivityChanged(BMSPlayerInputProcessor input, boolean active) {

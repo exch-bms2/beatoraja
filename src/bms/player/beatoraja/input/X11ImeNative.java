@@ -1,20 +1,24 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ime.X11ImePlatform;
 import com.badlogic.gdx.Gdx;
 import java.nio.file.Path;
+import java.util.logging.Logger;
 import org.lwjgl.glfw.GLFW;
 
-/** JNI entry points are compiled into the opt-in GLFW itself, never into a second GLFW instance. */
-final class X11ImeNative implements X11ImePlatform {
+/** JNI attachment for the opt-in GLFW. Keep this binary name and callback signature for existing libraries. */
+public final class X11ImeNative implements X11ImePlatform {
     private static boolean loaded;
     private final long window;
     private long handle;
     private Listener listener;
     private boolean positionWarned;
 
-    X11ImeNative(long window) { this.window = window; }
+    private X11ImeNative(long window) { this.window = window; }
 
-    static synchronized void load() {
+    public static X11ImePlatform forWindow(long window) { return new X11ImeNative(window); }
+
+    public static synchronized void load() {
         if (loaded) return;
         String selected = System.getProperty("org.lwjgl.glfw.libname", "");
         Path library = Path.of(System.getProperty("beatoraja.x11Ime.library", "natives/libglfw-beatoraja-x11-ime.so")).toAbsolutePath().normalize();
@@ -29,7 +33,7 @@ final class X11ImeNative implements X11ImePlatform {
         this.listener = listener;
         handle = openNative(window);
         if (handle == 0) throw new IllegalStateException("XIM callback style unavailable or another editor is active");
-        java.util.logging.Logger.getGlobal().info("X11 IME prototype attached; candidate positioning is best effort with XIM callbacks");
+        Logger.getGlobal().info("X11 IME prototype attached; candidate positioning is best effort with XIM callbacks");
     }
     public void reset() { if (handle != 0) resetNative(handle); }
     public void caret(Caret caret) {
@@ -41,7 +45,7 @@ final class X11ImeNative implements X11ImePlatform {
                 int[] rect = caret.nativeRectangle(width.get(0), height.get(0));
                 if (!caretNative(handle, rect[0], rect[1], rect[2], rect[3]) && !positionWarned) {
                     positionWarned = true;
-                    X11ImeBridge.warn("candidate position request refused by the input method");
+                    Logger.getGlobal().warning("X11 IME prototype candidate position request refused by the input method");
                 }
             }
         }

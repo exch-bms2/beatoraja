@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.midi;
 
 import javax.sound.midi.*;
 import java.util.*;

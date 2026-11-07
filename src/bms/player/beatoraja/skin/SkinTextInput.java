@@ -2,11 +2,12 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.MacOsImeBridge;
-import bms.player.beatoraja.input.text.ime.WindowsImeBridge;
-import bms.player.beatoraja.input.X11ImeBridge;
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.TextInputDiagnostics;
 import bms.player.beatoraja.input.text.TextInputSession;
+import bms.player.beatoraja.input.text.ime.MacOsIme;
+import bms.player.beatoraja.input.text.ime.WindowsImeBridge;
+import bms.player.beatoraja.input.text.ime.X11ImeBridge;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -46,7 +47,7 @@ class SkinTextInput {
 	private Runnable publishImeCaret;
 
 	SkinTextInput() { this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create()
-			: System.getProperty("os.name", "").startsWith("Linux") ? X11ImeBridge.create() : MacOsImeBridge.create()); }
+			: System.getProperty("os.name", "").startsWith("Linux") ? X11ImeBridge.create() : MacOsIme.create()); }
 	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
 	void focus(MainState state, SkinText target) {

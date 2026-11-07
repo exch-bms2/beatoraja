@@ -1,5 +1,6 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
+import bms.player.beatoraja.input.X11ImeNative;
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.TextInputSession;
 
@@ -27,7 +28,7 @@ public final class X11ImeBridge implements ImeBridge {
             }
             X11ImeNative.load();
             long window = graphics.getWindow().getWindowHandle();
-            return new X11ImeBridge(() -> new X11ImeNative(window));
+            return new X11ImeBridge(() -> X11ImeNative.forWindow(window));
         } catch (RuntimeException | LinkageError failure) {
             warn("unavailable; using GLFW text input (" + failure.getClass().getSimpleName() + ")"); return NONE;
         }

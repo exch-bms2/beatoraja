@@ -5,7 +5,6 @@ import bms.player.beatoraja.input.controller.JInputControllerManager;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.List;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
@@ -101,7 +100,7 @@ public final class WindowInputLifecycleTest {
             controller.setAnalogScratch(mode >= 2); controller.setAnalogScratchMode(mode - 2);
             Arrays.fill(controller.getKeyAssign(), -1);
             controller.getKeyAssign()[1] = 0; controller.getKeyAssign()[5] = 28; controller.getKeyAssign()[6] = 32;
-            input = new BMSPlayerInputProcessor(new Config(), player, manager.getControllers(), owner -> new MidiInputProcessor(owner, List.of()));
+            input = KeyboardQueueTestSupport.input(new Config(), player, manager.getControllers());
             input.setControllerConfig(new ControllerConfig[] {controller});
             input.setStartTime(1);
             input.beginInputJudge(null, null, false);

@@ -10,7 +10,9 @@ import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.MockImeBridge;
 import bms.player.beatoraja.input.text.TextInputSession;
+import bms.player.beatoraja.input.text.ime.MacOsIme;
 import bms.player.beatoraja.input.text.ime.WindowsImeTestSupport;
+import bms.player.beatoraja.input.text.ime.X11ImeTestSupport;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -212,7 +214,7 @@ public final class Lwjgl3TextInputTest {
     private static void macIme(MainState state) throws Exception {
         String previous = System.getProperty("beatoraja.macosIme");
         System.setProperty("beatoraja.macosIme", "true");
-        ImeBridge created = MacOsImeBridge.create();
+        ImeBridge created = MacOsIme.create();
         check(created instanceof MacOsImeBridge, "Opt-in JNI bridge must load for this native test");
         var bridge = (MacOsImeBridge)created;
         var editor = new SkinTextInput(bridge);
@@ -305,7 +307,7 @@ public final class Lwjgl3TextInputTest {
                     query.set((String)args[0]); return bms.player.beatoraja.song.SongData.EMPTY;
                 });
         KeyboardQueueTestSupport.set(state, state.getClass(), "songdb", db);
-        var bridge = (MacOsImeBridge)MacOsImeBridge.create();
+        var bridge = (MacOsImeBridge)MacOsIme.create();
         var editor = new SkinTextInput(bridge);
         var search = text("", 32, bms.player.beatoraja.skin.property.StringPropertyFactory.getStringWriter(30));
         long pointer = 0;

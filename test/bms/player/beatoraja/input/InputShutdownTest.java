@@ -110,8 +110,7 @@ public final class InputShutdownTest {
         Thread backend = null;
         try {
             var config = new Config();
-            input = new BMSPlayerInputProcessor(config, new PlayerConfig(), manager.getControllers(),
-                    owner -> new MidiInputProcessor(owner, List.of()));
+            input = KeyboardQueueTestSupport.input(config, new PlayerConfig(), manager.getControllers());
             input.startPolling(); await(nativePoll);
             // The backend calls the manager first. Its shutdown hook must join outside manager.poll's monitor.
             backend = new Thread(manager::dispose, "Backend disposal"); backend.start();

@@ -18,7 +18,7 @@ public final class PackagedRuntimeProbe {
         });
         if (java.util.Arrays.asList(args).contains("--x11-ime"))
             failures += check("X11 IME prototype (load/ABI only)",
-                    bms.player.beatoraja.input.X11ImeBridge::verifyNativeLibrary);
+                    bms.player.beatoraja.input.text.ime.X11ImeBridge::verifyNativeLibrary);
         failures += check("OpenAL (no device opened)", () -> {
             if (org.lwjgl.openal.ALC.getFunctionProvider() == null) throw new IllegalStateException("No OpenAL provider");
         });

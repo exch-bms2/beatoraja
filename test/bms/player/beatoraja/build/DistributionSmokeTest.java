@@ -117,10 +117,14 @@ public final class DistributionSmokeTest {
                 check(jar.getEntry("bms/player/beatoraja/input/controller/" + type + ".class") != null, "Missing SDL_ASYNC component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/InputDiagnostics.class") != null, "Missing input diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/InputPollingThread.class") != null, "Missing input polling lifecycle");
+            check(jar.getEntry("bms/player/beatoraja/input/midi/MidiInputProcessor.class") != null, "Missing MIDI input processor");
+            check(jar.getEntry("bms/player/beatoraja/input/MidiInputProcessor.class") == null, "Stale MIDI input processor");
             check(jar.getEntry("bms/player/beatoraja/skin/SkinRenderTarget.class") != null, "Missing preview render target scope");
             check(jar.getEntry("bms/player/beatoraja/skin/SkinTextClipboard.class") != null, "Missing guarded text clipboard");
-            check(jar.getEntry("bms/player/beatoraja/input/X11ImeBridge.class") != null, "Missing opt-in X11 IME bridge");
-            check(jar.getEntry("bms/player/beatoraja/input/X11ImeSession.class") != null, "Missing X11 IME session");
+            for (String type : List.of("MacOsIme", "X11ImeBridge", "X11ImeSession", "X11ImePlatform"))
+                check(jar.getEntry("bms/player/beatoraja/input/text/ime/" + type + ".class") != null, "Missing IME component: " + type);
+            for (String type : List.of("MacOsImeBridge", "X11ImeNative"))
+                check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing legacy JNI entry point: " + type);
             check(jar.getEntry("bms/player/beatoraja/MemoryDiagnostics$Snapshot.class") != null, "Missing structured memory diagnostics");
             check(jar.getEntry("bms/player/beatoraja/video/BgrFrameConverter.class") != null, "Missing aligned movie conversion");
             check(jar.getEntry("bms/player/beatoraja/input/controller/ControllerInputDiagnostics.class") != null,

@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 import bms.player.beatoraja.input.text.ImeBridge;
 
@@ -8,10 +8,10 @@ public final class MacOsImeBridgeTest {
         String previous = System.getProperty("beatoraja.macosIme");
         try {
             System.clearProperty("beatoraja.macosIme");
-            check(MacOsImeBridge.create() == ImeBridge.NONE, "Disabled by default");
+            check(MacOsIme.create() == ImeBridge.NONE, "Disabled by default");
             System.setProperty("beatoraja.macosIme", "true");
-            check(MacOsImeBridge.create() == ImeBridge.NONE, "No GLFW context is a safe fallback");
-            var loaded = MacOsImeBridge.class.getDeclaredField("loaded"); loaded.setAccessible(true);
+            check(MacOsIme.create() == ImeBridge.NONE, "No GLFW context is a safe fallback");
+            var loaded = MacOsIme.class.getDeclaredField("loaded"); loaded.setAccessible(true);
             check(!(boolean)loaded.get(null), "Headless/Launcher fallback must not load JNI");
             System.out.println("MacOsImeBridgeTest passed (opt-out, no GLFW fallback, no native load)");
         } finally {

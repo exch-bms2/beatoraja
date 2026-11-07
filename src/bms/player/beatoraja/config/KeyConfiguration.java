@@ -25,6 +25,7 @@ import bms.player.beatoraja.PlayModeConfig.*;
 import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.input.controller.BMControllerInputProcessor;
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.midi.MidiInputProcessor;
 
 /**
  * キーコンフィグ画面

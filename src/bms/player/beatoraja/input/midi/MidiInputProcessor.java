@@ -1,6 +1,8 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.midi;
 
 import bms.player.beatoraja.PlayModeConfig.MidiConfig;
+import bms.player.beatoraja.input.BMSPlayerInputDevice;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
@@ -111,7 +113,7 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
 			setHandler(keys[i], pressed -> {
-				bmsPlayerInputProcessor.keyChanged(this, currentTime(), key, pressed);
+				keyChanged(currentTime(), key, pressed);
 				bmsPlayerInputProcessor.setAnalogState(key, false, 0);
 			});
 		}

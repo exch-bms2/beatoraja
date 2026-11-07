@@ -3,7 +3,6 @@ package bms.player.beatoraja.input;
 import bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest;
 import bms.player.beatoraja.input.controller.JInputControllerManager;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -39,8 +38,7 @@ public final class Lwjgl3InputShutdownSmokeTest {
             new Lwjgl3Application(new ApplicationAdapter() {
                 int frames;
                 @Override public void create() {
-                    input.set(new BMSPlayerInputProcessor(new Config(), new PlayerConfig(), manager.getControllers(),
-                            owner -> new MidiInputProcessor(owner, List.of())));
+                    input.set(KeyboardQueueTestSupport.input(new Config(), new PlayerConfig(), manager.getControllers()));
                     Gdx.app.addLifecycleListener(new LifecycleListener() {
                         @Override public void pause() { }
                         @Override public void resume() { }

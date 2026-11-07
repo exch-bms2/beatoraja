@@ -3,39 +3,14 @@ package bms.player.beatoraja.input;
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.TextInputSession;
 
-import java.nio.file.Path;
-import java.util.logging.Logger;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
-import org.lwjgl.glfw.GLFWNativeCocoa;
-
-/** Opt-in AppKit editor hosted by the current GLFW window; no JavaFX/AWT initialization. */
+/** AppKit JNI attachment. Keep this binary name and callback signature for existing dylibs. */
 public final class MacOsImeBridge implements ImeBridge {
-    private static boolean loaded;
     private final long window;
     private final Thread owner = Thread.currentThread();
     private long handle, session;
     private Sink sink;
 
-    private MacOsImeBridge(long window) { this.window = window; }
-
-    public static ImeBridge create() {
-        if (!Boolean.getBoolean("beatoraja.macosIme") || !System.getProperty("os.name", "").startsWith("Mac")
-                || !(Gdx.graphics instanceof Lwjgl3Graphics graphics)) return NONE;
-        try {
-            synchronized (MacOsImeBridge.class) {
-                if (!loaded) {
-                    System.load(Path.of(System.getProperty("beatoraja.macosIme.library",
-                            "natives/libbeatoraja-ime.dylib")).toAbsolutePath().toString());
-                    loaded = true;
-                }
-            }
-            return new MacOsImeBridge(GLFWNativeCocoa.glfwGetCocoaWindow(graphics.getWindow().getWindowHandle()));
-        } catch (LinkageError | RuntimeException failure) {
-            Logger.getGlobal().warning("macOS IME prototype unavailable; using GLFW text input: " + failure);
-            return NONE;
-        }
-    }
+    public MacOsImeBridge(long window) { this.window = window; }
 
     public boolean isAvailable() { return window != 0; }
     public void begin(long id, TextInputSession.EditorState initial, Sink sink) {

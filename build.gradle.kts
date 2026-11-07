@@ -239,13 +239,13 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.keyboard.TextEditingControlTest",
     "bms.player.beatoraja.input.text.TextInputSessionTest",
     "bms.player.beatoraja.input.text.TextInputDiagnosticsTest",
-    "bms.player.beatoraja.input.MacOsImeBridgeTest",
+    "bms.player.beatoraja.input.text.ime.MacOsImeBridgeTest",
     "bms.player.beatoraja.input.text.ime.WindowsImeBridgeTest",
-    "bms.player.beatoraja.input.X11ImeBridgeTest",
+    "bms.player.beatoraja.input.text.ime.X11ImeBridgeTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
     "bms.player.beatoraja.input.InputShutdownTest",
-    "bms.player.beatoraja.input.MidiInputLifecycleTest",
+    "bms.player.beatoraja.input.midi.MidiInputLifecycleTest",
     "bms.player.beatoraja.video.VideoFrameCopyTest",
     "bms.player.beatoraja.FramePacingDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
@@ -743,7 +743,7 @@ tasks.register<JavaExec>("x11ImeNativeTest") {
     onlyIf { x11TestSupported }
     dependsOn(tasks.testClasses, buildX11ImeTest)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.X11ImeNativeTest")
+    mainClass.set("bms.player.beatoraja.input.text.ime.X11ImeNativeIntegrationTest")
     args(x11ImeTestLibrary.get().asFile.absolutePath)
 }
 tasks.register<Exec>("x11ImePatchTest") {
@@ -788,7 +788,7 @@ tasks.register<JavaExec>("x11ImeWindowTest") {
         systemProperty("org.lwjgl.glfw.libname", library)
     }
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.X11ImeWindowTest")
+    mainClass.set("bms.player.beatoraja.input.text.ime.X11ImeWindowTest")
     timeout.set(Duration.ofMinutes(3))
 }
 tasks.register<JavaExec>("windowsImeWindowTest") {

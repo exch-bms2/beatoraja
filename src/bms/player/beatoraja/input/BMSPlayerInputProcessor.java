@@ -1,5 +1,6 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.midi.MidiInputProcessor;
 import bms.player.beatoraja.input.mouse.MouseCoordinates;
 import bms.player.beatoraja.input.mouse.SkinMouseInput;
 
