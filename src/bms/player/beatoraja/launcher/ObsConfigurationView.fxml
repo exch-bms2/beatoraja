@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.ObsConfigurationView">
+    <VBox spacing="10">
+        <padding><Insets top="12" right="12" bottom="12" left="12" /></padding>
+        <CheckBox fx:id="enabled" text="%OBS_ENABLE" />
+        <GridPane hgap="8" vgap="6">
+            <Label text="%OBS_HOST" />
+            <TextField fx:id="host" GridPane.columnIndex="1" />
+            <Label text="%OBS_PORT" GridPane.columnIndex="2" />
+            <Spinner fx:id="port" editable="true" prefWidth="96" GridPane.columnIndex="3">
+                <valueFactory><SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="65535" initialValue="4455" /></valueFactory>
+            </Spinner>
+            <Label text="%OBS_PASSWORD" GridPane.rowIndex="1" />
+            <PasswordField fx:id="password" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button onAction="#connect" text="%OBS_TEST_CONNECTION" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.columnSpan="2" />
+            <Label fx:id="status" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+            <Label text="%OBS_STOP_DELAY" GridPane.rowIndex="2" />
+            <Spinner fx:id="stopDelay" editable="true" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <valueFactory><SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="10000" initialValue="5000" amountToStepBy="100" /></valueFactory>
+            </Spinner>
+            <Label text="%OBS_RECORD_MODE" GridPane.rowIndex="3" />
+            <ComboBox fx:id="recordingMode" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.columnSpan="3" />
+        </GridPane>
+        <Label text="%OBS_RECORD_HELP" wrapText="true" />
+        <GridPane hgap="8" vgap="6">
+            <Label text="%OBS_TIMING" />
+            <Label text="%OBS_ACTION" GridPane.columnIndex="1" />
+            <Label text="%OBS_SCENE" GridPane.columnIndex="2" />
+            <Label text="%OBS_SOURCE" GridPane.columnIndex="3" />
+            <ComboBox fx:id="timing" prefWidth="165" GridPane.rowIndex="1" />
+            <ComboBox fx:id="action" prefWidth="145" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="scene" editable="true" prefWidth="140" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <ComboBox fx:id="source" editable="true" prefWidth="140" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+        </GridPane>
+        <HBox spacing="8">
+            <Button onAction="#addCommand" text="%OBS_ADD" />
+            <Button onAction="#removeCommand" text="%OBS_REMOVE" />
+        </HBox>
+        <TableView fx:id="commands" prefHeight="220">
+            <columns>
+                <TableColumn fx:id="timingColumn" text="%OBS_TIMING" prefWidth="155" />
+                <TableColumn fx:id="actionColumn" text="%OBS_ACTION" prefWidth="145" />
+                <TableColumn fx:id="sceneColumn" text="%OBS_SCENE" prefWidth="145" />
+                <TableColumn fx:id="sourceColumn" text="%OBS_SOURCE" prefWidth="145" />
+            </columns>
+        </TableView>
+    </VBox>
+</ScrollPane>

@@ -415,6 +415,9 @@
                 </VBox>
             </AnchorPane>
         </Tab>
+        <Tab closable="false" text="OBS">
+            <fx:include fx:id="obs" source="ObsConfigurationView.fxml" />
+        </Tab>
         <Tab fx:id="otherTab" closable="false" text="%Other">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <padding>

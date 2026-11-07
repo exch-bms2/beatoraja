@@ -319,9 +319,11 @@ public class MusicResult extends AbstractResult {
 				&& resource.getScoreData() != null) {
 			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
-				main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
-						resource.getPlayerConfig().getLnmode(), index);
-				saveReplay[index] = ReplayStatus.SAVED;
+				if (main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
+						resource.getPlayerConfig().getLnmode(), index)) {
+					saveReplay[index] = ReplayStatus.SAVED;
+					main.obsReplaySaved();
+				}
 			}
 		}
 	}

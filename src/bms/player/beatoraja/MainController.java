@@ -29,6 +29,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.PollingLwjgl3Input;
 import bms.player.beatoraja.ir.*;
+import bms.player.beatoraja.obs.ObsController;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.CourseResult;
@@ -127,6 +128,7 @@ public final class MainController {
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
 
 	private final Array<MainStateListener> stateListener = new Array<MainStateListener>();
+	private ObsController obs;
 
 	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated,
 			SongDatabaseAccessor songdb) {
@@ -205,6 +207,15 @@ public final class MainController {
 		
 		if(config.isUseDiscordRPC()) {
 			stateListener.add(new DiscordListener());
+		}
+		if (config.isUseObsWs()) {
+			try {
+				obs = new ObsController(config);
+				stateListener.add(obs);
+				obs.start();
+			} catch (RuntimeException unavailable) {
+				Logger.getGlobal().warning("OBS: could not initialize connection");
+			}
 		}
 	}
 
@@ -553,12 +564,14 @@ public final class MainController {
             if (input.isActivated(KeyCommand.SAVE_SCREENSHOT)) {
                 if (screenshot == null || !screenshot.isAlive()) {
             		final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight(), true);
+                    final MainState screenshotState = current;
+                    if (obs != null) obs.keepRecording(true);
                     screenshot = new Thread(() -> {
                 		// 全ピクセルのアルファ値を255にする(=透明色を無くす)
                 		for(int i = 3;i < pixels.length;i+=4) {
                 			pixels[i] = (byte) 0xff;
                 		}
-                    	new ScreenShotFileExporter().send(current, pixels);
+                        new ScreenShotFileExporter().send(screenshotState, pixels);
                     });
                     screenshot.start();
                 }
@@ -577,6 +590,7 @@ public final class MainController {
 
 	public void dispose() {
 		disposeInput();
+		if (obs != null) obs.close();
 		saveConfig();
 		rivals.close();
 
@@ -658,6 +672,9 @@ public final class MainController {
 			listener.update(current, status);
 		}
 	}
+
+	public void obsPlayEnded() { if (obs != null) obs.playEnded(); }
+	public void obsReplaySaved() { if (obs != null) obs.keepRecording(false); }
 
 	public long getPlayTime() {
 		return System.currentTimeMillis() - boottime;

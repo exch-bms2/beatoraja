@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.ControllerBackend;
+import bms.player.beatoraja.obs.ObsControlCommand;
 
 import static bms.player.beatoraja.Resolution.*;
 
@@ -53,6 +54,28 @@ public class Config implements Validatable {
 	 */
 	private DisplayMode displaymode = DisplayMode.WINDOW;
 	private ControllerBackend controllerBackend = ControllerBackend.JINPUT;
+	private boolean useObsWs;
+	private String obsWsHost = "localhost";
+	private int obsWsPort = 4455;
+	private String obsWsPass = "";
+	private int obsWsRecStopWait = 5000;
+	private int obsWsRecMode;
+	private java.util.ArrayList<ObsControlCommand> obsCommands = new java.util.ArrayList<>();
+
+	public boolean isUseObsWs() { return useObsWs; }
+	public void setUseObsWs(boolean value) { useObsWs = value; }
+	public String getObsWsHost() { return obsWsHost; }
+	public void setObsWsHost(String value) { obsWsHost = value; }
+	public int getObsWsPort() { return obsWsPort; }
+	public void setObsWsPort(int value) { obsWsPort = value; }
+	public String getObsWsPass() { return obsWsPass; }
+	public void setObsWsPass(String value) { obsWsPass = value; }
+	public int getObsWsRecStopWait() { return obsWsRecStopWait; }
+	public void setObsWsRecStopWait(int value) { obsWsRecStopWait = value; }
+	public int getObsWsRecMode() { return obsWsRecMode; }
+	public void setObsWsRecMode(int value) { obsWsRecMode = value; }
+	public java.util.ArrayList<ObsControlCommand> getObsCommands() { return obsCommands; }
+	public void setObsCommands(java.util.ArrayList<ObsControlCommand> value) { obsCommands = value; }
 
 	public ControllerBackend getControllerBackend() {
 		return controllerBackend != null ? controllerBackend : ControllerBackend.JINPUT;
@@ -599,6 +622,15 @@ public class Config implements Validatable {
 	}
 
 	public boolean validate() {
+		if (obsWsHost == null || obsWsHost.isBlank() || obsWsHost.length() > 253) obsWsHost = "localhost";
+		if (obsWsPass == null || obsWsPass.length() > 4096) obsWsPass = "";
+		obsWsPort = MathUtils.clamp(obsWsPort, 1, 65535);
+		obsWsRecStopWait = MathUtils.clamp(obsWsRecStopWait, 0, 10000);
+		obsWsRecMode = MathUtils.clamp(obsWsRecMode, 0, 2);
+		if (obsCommands == null) obsCommands = new java.util.ArrayList<>();
+		obsCommands.removeIf(command -> command == null || !command.isValid());
+		if (obsCommands.size() > MAX_CONFIG_LIST_ENTRIES)
+			obsCommands = new java.util.ArrayList<>(obsCommands.subList(0, MAX_CONFIG_LIST_ENTRIES));
 		controllerBackend = getControllerBackend();
 		displaymode = (displaymode != null) ? displaymode : DisplayMode.WINDOW;
 		if (startupMonitor != null && !startupMonitor.isValid()) startupMonitor = null;

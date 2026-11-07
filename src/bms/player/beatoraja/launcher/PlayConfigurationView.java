@@ -231,6 +231,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private MusicSelectConfigurationView musicselectController;
 	@FXML
+	private ObsConfigurationView obsController;
+	@FXML
 	private SkinConfigurationView skinController;
 	@FXML
 	private IRConfigurationView irController;
@@ -352,6 +354,7 @@ public class PlayConfigurationView implements Initializable {
 		videoController.update(config);
 		audioController.update(config.getAudioConfig());
 		musicselectController.update(config);
+		obsController.update(config);
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
@@ -483,6 +486,7 @@ public class PlayConfigurationView implements Initializable {
 	    videoController.commit(config);
 		audioController.commit();
 		musicselectController.commit();
+		obsController.commit(config);
 
 		config.setPlayername(players.getValue());
 

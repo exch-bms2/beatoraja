@@ -39,6 +39,7 @@ public class BMSPlayer extends MainState {
 
 	private int playtime;
 	private final PlayTimeTracker playTimeTracker = new PlayTimeTracker();
+	private boolean obsPlayEndNotified;
 
 	/**
 	 * キー入力用スレッド
@@ -607,6 +608,7 @@ public class BMSPlayer extends MainState {
 				if (timer.getNowTime(TIMER_READY) > skin.getPlaystart()) {
 					replayConfig = players[0].lanerender.getPlayConfig().clone();
 					state = STATE_PLAY;
+					obsPlayEndNotified = false;
 					timer.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
 					playTimeTracker.start(micronow, starttimeoffset * 1000, (long) (playtime - TIME_MARGIN) * 1000);
 					timer.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
@@ -702,6 +704,7 @@ public class BMSPlayer extends MainState {
 			}
 			// 閉店処理
 			case STATE_FAILED -> {
+				notifyObsPlayEnd();
 				keyinput.stopJudge();
 				keysound.stopBGPlay();
 				if ((input.startPressed() ^ input.isSelectPressed()) && resource.getCourseBMSModels() == null
@@ -754,6 +757,7 @@ public class BMSPlayer extends MainState {
 			}
 			// 完奏処理
 			case STATE_FINISHED -> {
+				notifyObsPlayEnd();
 				keyinput.stopJudge();
 				keysound.stopBGPlay();
 				if (timer.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
@@ -948,6 +952,13 @@ public class BMSPlayer extends MainState {
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		score.setSkin(getSkin().header.getName());
 		return score;
+	}
+
+	private void notifyObsPlayEnd() {
+		if (!obsPlayEndNotified) {
+			obsPlayEndNotified = true;
+			main.obsPlayEnded();
+		}
 	}
 
 	public void stopPlay() {

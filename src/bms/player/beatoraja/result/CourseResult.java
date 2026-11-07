@@ -294,9 +294,11 @@ public class CourseResult extends AbstractResult {
 				for(int i = 0; i < rd.length; i++) {
 					rd[i].gauge = resource.getPlayerConfig().getGauge();
 				}
-				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), index, resource.getConstraint());
-				saveReplay[index] = ReplayStatus.SAVED;
+				if (main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
+						resource.getPlayerConfig().getLnmode(), index, resource.getConstraint())) {
+					saveReplay[index] = ReplayStatus.SAVED;
+					main.obsReplaySaved();
+				}
 			}
 		}
 	}
