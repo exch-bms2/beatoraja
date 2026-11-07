@@ -188,6 +188,11 @@
                                             </tooltip>
                                          </CheckBox>
                                          <Label text="%NOTE_MODIFIER" GridPane.rowIndex="6" />
+                                         <CheckBox fx:id="analogScratchHispeed" mnemonicParsing="false" text="%ANALOG_SCRATCH_HISPEED" GridPane.columnIndex="4" GridPane.rowIndex="6" GridPane.columnSpan="8">
+                                             <tooltip>
+                                                 <Tooltip text="%ANALOG_SCRATCH_HISPEED_TOOLTIP" wrapText="true" prefWidth="440.0" />
+                                             </tooltip>
+                                         </CheckBox>
                                          <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                                          <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                                          <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />

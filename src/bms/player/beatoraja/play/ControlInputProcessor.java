@@ -45,6 +45,7 @@ public final class ControlInputProcessor {
 	private long coverSpeedSwitchDuration = 500;
 
 	private boolean hispeedAutoAdjust;
+	private final boolean analogScratchHispeed;
 
 	public ControlInputProcessor(BMSPlayer player, BMSPlayerMode autoplay) {
 		this.player = player;
@@ -57,6 +58,7 @@ public final class ControlInputProcessor {
 		coverChangeMarginHigh = playConfig.getLanecovermarginhigh();
 		coverSpeedSwitchDuration = playConfig.getLanecoverswitchduration();
 		hispeedAutoAdjust = playConfig.isEnableHispeedAutoAdjust();
+		analogScratchHispeed = playConfig.isAnalogScratchHispeed();
 
 		exitPressDuration = player.main.getPlayerConfig().getExitPressDuration();
 
@@ -245,13 +247,19 @@ public final class ControlInputProcessor {
 
 	private void changeCoverValue(int key, boolean up) {
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
+		final LaneRenderer lanerender = player.getLanerender();
 
 		// move lane cover by START + Scratch
 		if(input.isAnalogInput(key)) {
 			// analog
 			int dTicks = input.getAnalogDiffAndReset(key, 200) * (up ? 1 : -1);
 			if (dTicks != 0) {
-				setCoverValue(dTicks*coverChangeMarginLow);
+				if (analogScratchHispeed && !hispeedAutoAdjust && !lanerender.isEnableLanecover()
+						&& !lanerender.isEnableLift() && !lanerender.isEnableHidden()) {
+					lanerender.addHispeed(-dTicks * 0.01f);
+				} else {
+					setCoverValue(dTicks*coverChangeMarginLow);
+				}
 			}
 		} else {
 			// non-analog

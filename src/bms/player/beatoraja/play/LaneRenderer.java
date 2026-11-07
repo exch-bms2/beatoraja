@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
@@ -244,6 +245,18 @@ public class LaneRenderer {
 		}
 		if (playconfig.getHispeed() + f > 0 && playconfig.getHispeed() + f < 20) {
 			playconfig.setHispeed(playconfig.getHispeed() + f);
+		}
+	}
+
+	/** Absolute adjustment, independent of the configured key step and fixed-HS multiplier. */
+	void addHispeed(float delta) {
+		float next = MathUtils.clamp(playconfig.getHispeed() + delta, PlayConfig.HISPEED_MIN, PlayConfig.HISPEED_MAX);
+		playconfig.setHispeed(next);
+		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF && basebpm > 0) {
+			// BMSPlayer saves the green number for fixed HS, so keep it consistent with the new speed.
+			double visible = playconfig.isEnablelanecover() ? 1 - playconfig.getLanecover() : 1;
+			int duration = (int) Math.round(240000 * visible / basebpm / next);
+			playconfig.setDuration(MathUtils.clamp(duration, PlayConfig.DURATION_MIN, PlayConfig.DURATION_MAX));
 		}
 	}
 	

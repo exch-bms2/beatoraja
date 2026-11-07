@@ -97,6 +97,8 @@ public class PlayConfig implements Cloneable {
 	 * HI-SPEED固定自動調整：レーンカバーを変化するとHI-SPEED固定を現在のBPMに自動的に調整する（皿チョン）
 	 */
 	private boolean hispeedautoadjust = false;
+	/** Fine HI-SPEED adjustment with START + analog scratch when covers and auto adjust are disabled. */
+	private boolean analogScratchHispeed = false;
 	/**
 	 * 判定アルゴリズム
 	 */
@@ -231,6 +233,14 @@ public class PlayConfig implements Cloneable {
 
 	public void setHispeedAutoAdjust(boolean hispeedautoadjust) {
 		this.hispeedautoadjust = hispeedautoadjust;
+	}
+
+	public boolean isAnalogScratchHispeed() {
+		return analogScratchHispeed;
+	}
+
+	public void setAnalogScratchHispeed(boolean analogScratchHispeed) {
+		this.analogScratchHispeed = analogScratchHispeed;
 	}
 
 	public String getJudgetype() {

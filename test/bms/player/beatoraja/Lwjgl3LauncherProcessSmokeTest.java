@@ -25,6 +25,7 @@ public final class Lwjgl3LauncherProcessSmokeTest {
             if (MainLoader.getAvailableDisplayMode().length == 0 || MainLoader.getDesktopDisplayMode().width <= 0)
                 throw new AssertionError("JavaFX display-mode query");
             stage.setTitle("beatoraja Launcher process smoke test");
+            bms.player.beatoraja.launcher.PlayConfigurationViewTest.verify();
             bms.player.beatoraja.launcher.VideoConfigurationViewTest.verify();
             stage.setScene(new Scene(bms.player.beatoraja.launcher.SkinConfigurationViewTest.verifyNotesOffsetCenter(), 740, 560));
             stage.show();
