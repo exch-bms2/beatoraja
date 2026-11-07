@@ -16,6 +16,7 @@ import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.input.TextInputDiagnostics;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.select.bar.*;
@@ -310,14 +311,20 @@ public final class MusicSelector extends MainState {
 	}
 
 	public void search(String text) {
+		TextInputDiagnostics.search("search-received", text, -1, false);
 		if (text == null || text.isBlank()) {
+			TextInputDiagnostics.search("search-skipped-blank", text, 0, false);
 			return;
 		}
 		SearchWordBar swb = new SearchWordBar(this, text);
-		if (swb.getChildren().length > 0) {
+		int matches = swb.getChildren().length;
+		TextInputDiagnostics.search("search-results", text, matches, false);
+		if (matches > 0) {
 			manager.addSearch(swb);
+			TextInputDiagnostics.search("search-bar-added", text, matches, false);
 			manager.updateBar(null);
 			manager.setSelected(swb);
+			if (TextInputDiagnostics.isEnabled()) TextInputDiagnostics.search("search-bar-selected", text, matches, manager.getSelected() == swb);
 		}
 	}
 	

@@ -203,7 +203,7 @@ public final class Lwjgl3TextInputTest {
         } finally { editor.dispose(); }
     }
 
-    private static void macIme(MainState state) {
+    private static void macIme(MainState state) throws Exception {
         String previous = System.getProperty("beatoraja.macosIme");
         System.setProperty("beatoraja.macosIme", "true");
         ImeBridge created = MacOsImeBridge.create();
@@ -273,6 +273,7 @@ public final class Lwjgl3TextInputTest {
             editor.commit();
             check(MacOsImeNativeTest.geometry(empty)[9] == 0 && MacOsImeNativeTest.geometry(empty)[10] == 0,
                     "Empty session closes without native residue");
+            macImeSearchDiagnostics(state);
             System.out.println("macOS AppKit IME JNI test passed: synthetic marked text/commit/cancel, focus, guard, screen coordinates; backingScale=" + actual[8]);
         } finally {
             editor.dispose();
@@ -280,6 +281,62 @@ public final class Lwjgl3TextInputTest {
             if (next != 0) MacOsImeNativeTest.release(next);
             if (empty != 0) MacOsImeNativeTest.release(empty);
             if (previous == null) System.clearProperty("beatoraja.macosIme"); else System.setProperty("beatoraja.macosIme", previous);
+        }
+    }
+
+    private static void macImeSearchDiagnostics(MainState owner) throws Exception {
+        String previous = System.getProperty("beatoraja.textInputDiagnostics");
+        System.setProperty("beatoraja.textInputDiagnostics", "true");
+        var state = KeyboardQueueTestSupport.allocate(bms.player.beatoraja.select.MusicSelector.class);
+        KeyboardQueueTestSupport.set(state, MainState.class, "main", owner.main);
+        KeyboardQueueTestSupport.set(state, MainState.class, "timer", owner.timer);
+        KeyboardQueueTestSupport.set(state, MainState.class, "resource", owner.resource);
+        var query = new AtomicReference<String>();
+        var db = (bms.player.beatoraja.song.SongDatabaseAccessor)java.lang.reflect.Proxy.newProxyInstance(
+                Lwjgl3TextInputTest.class.getClassLoader(), new Class<?>[]{bms.player.beatoraja.song.SongDatabaseAccessor.class},
+                (proxy, method, args) -> {
+                    if (!method.getName().equals("getSongDatasByText")) throw new AssertionError(method);
+                    query.set((String)args[0]); return bms.player.beatoraja.song.SongData.EMPTY;
+                });
+        KeyboardQueueTestSupport.set(state, state.getClass(), "songdb", db);
+        var bridge = (MacOsImeBridge)MacOsImeBridge.create();
+        var editor = new SkinTextInput(bridge);
+        var search = text("", 32, bms.player.beatoraja.skin.property.StringPropertyFactory.getStringWriter(30));
+        long pointer = 0;
+        try {
+            editor.focus(state, search);
+            pointer = MacOsImeNativeTest.retain(bridge);
+            TextField field = (TextField)state.getStage().getActors().peek();
+            MacOsImeNativeTest.inject(pointer, 1, "as"); state.getStage().act(0);
+            check(field.getText().equals("as"), "Native text reaches initially empty search field");
+            MacOsImeNativeTest.inject(pointer, 5, ""); state.getStage().act(0);
+            check("as".equals(query.get()) && !field.isVisible(), "Real search writer receives native committed ASCII exactly");
+            MacOsImeNativeTest.inject(pointer, 7, ""); MacOsImeNativeTest.release(pointer); pointer = 0;
+
+            query.set(null); search.setText(""); editor.focus(state, search);
+            pointer = MacOsImeNativeTest.retain(bridge);
+            MacOsImeNativeTest.inject(pointer, 0, "\u3042\u3059"); state.getStage().act(0);
+            check(query.get() == null && field.getText().equals("\u3042\u3059"), "Search preedit is visible but never queried");
+            MacOsImeNativeTest.inject(pointer, 3, ""); state.getStage().act(0);
+            check(query.get() == null && field.isVisible(), "Composition Return does not run search");
+            MacOsImeNativeTest.inject(pointer, 5, ""); state.getStage().act(0);
+            check("\u3042\u3059".equals(query.get()) && !field.isVisible(), "Distinct Return sends confirmed Japanese to search");
+            MacOsImeNativeTest.inject(pointer, 7, ""); MacOsImeNativeTest.release(pointer); pointer = 0;
+
+            query.set(null); search.setText(""); editor.focus(state, search);
+            pointer = MacOsImeNativeTest.retain(bridge);
+            MacOsImeNativeTest.inject(pointer, 1, "as");
+            MacOsImeNativeTest.inject(pointer, 5, ""); state.getStage().act(0);
+            check("as".equals(query.get()), "Native commit and Return in one batch keep the final query even before display refresh");
+            MacOsImeNativeTest.inject(pointer, 7, "");
+        } finally {
+            try { editor.dispose(); }
+            finally {
+                if (state.getStage() != null) { state.getStage().dispose(); state.setStage(null); }
+                if (pointer != 0) MacOsImeNativeTest.release(pointer);
+                if (previous == null) System.clearProperty("beatoraja.textInputDiagnostics");
+                else System.setProperty("beatoraja.textInputDiagnostics", previous);
+            }
         }
     }
 

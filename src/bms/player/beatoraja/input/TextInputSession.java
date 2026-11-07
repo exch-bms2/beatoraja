@@ -38,6 +38,7 @@ public final class TextInputSession implements AutoCloseable {
                 throw e;
             }
         }
+        TextInputDiagnostics.session("session-begin", this, bridge);
     }
 
     private final ImeBridge.Sink sink = new ImeBridge.Sink() {
@@ -61,7 +62,15 @@ public final class TextInputSession implements AutoCloseable {
     private boolean accepts(long session) { return session == id && !closed; }
 
     private synchronized void post(long session, Event event) {
-        if (session == id && !closed) events.add(event);
+        if (session == id && !closed) {
+            traceEvent("ime-enqueue", event);
+            events.add(event);
+        }
+    }
+
+    private void traceEvent(String phase, Event event) {
+        if (TextInputDiagnostics.isEnabled()) TextInputDiagnostics.event(phase, id, event.kind.name(),
+                event.state, event.text, event.caret, event.command, event.consumed);
     }
 
     public long id() { return id; }
@@ -83,12 +92,14 @@ public final class TextInputSession implements AutoCloseable {
     public void updateEditor(EditorState value) {
         if (closed || composing || finishing || state.equals(value)) return;
         state = Objects.requireNonNull(value);
+        TextInputDiagnostics.session("scene2d-update", this, bridge);
         if (available) bridge.update(id, state);
     }
 
     public void requestFinish() {
         if (closed || finishing) return;
         finishing = true;
+        TextInputDiagnostics.session("finish-request", this, bridge);
         if (available) bridge.finish(id);
         else { finished = true; close(); }
     }
@@ -97,6 +108,7 @@ public final class TextInputSession implements AutoCloseable {
     public void drain() {
         Event event;
         while (!closed && (event = events.poll()) != null) {
+            traceEvent("ime-apply", event);
             switch (event.kind) {
                 case COMMITTED -> { state = event.state; clearComposition(); }
                 case PREEDIT -> { preedit = event.text; preeditCaret = event.caret; composing = true; }
@@ -112,6 +124,7 @@ public final class TextInputSession implements AutoCloseable {
                     if (finishing) { clearComposition(); finished = true; close(); }
                 }
             }
+            TextInputDiagnostics.session("ime-applied", this, bridge);
         }
     }
 
@@ -123,6 +136,7 @@ public final class TextInputSession implements AutoCloseable {
             if (closed) return;
             closed = true; events.clear();
         }
+        TextInputDiagnostics.session("session-close", this, bridge);
         clearComposition();
         if (available) bridge.close(id);
     }

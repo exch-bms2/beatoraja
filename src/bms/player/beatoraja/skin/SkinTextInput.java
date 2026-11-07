@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.ImeBridge;
 import bms.player.beatoraja.input.TextInputSession;
+import bms.player.beatoraja.input.TextInputDiagnostics;
 import bms.player.beatoraja.input.MacOsImeBridge;
 import bms.player.beatoraja.input.WindowsImeBridge;
 import bms.player.beatoraja.input.X11ImeBridge;
@@ -90,11 +91,13 @@ class SkinTextInput {
 		}
 		textField.getOnscreenKeyboard().show(textField);
 		state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(true, session.usesIme());
+		TextInputDiagnostics.editor("editor-focus", session, textField.getText(), null);
 		if (session.usesIme() && publishImeCaret != null) publishImeCaret.run();
 	}
 
 	void commit() {
 		if (target == null || textField == null || committing) return;
+		TextInputDiagnostics.editor("editor-finish-request", session, textField.getText(), null);
 		if (session != null) {
 			try {
 				syncEditor();
@@ -122,9 +125,14 @@ class SkinTextInput {
 		Runnable next = pendingFocus;
 		pendingFocus = null;
 		String value = session != null && session.usesIme() ? session.state().text() : field.getText();
+		TextInputDiagnostics.editor("writer-submit", session, field.getText(), value);
 		try {
 			current.getWriter().set(owner, value);
+			TextInputDiagnostics.editor("writer-returned", session, field.getText(), value);
 			current.setText(value);
+		} catch (RuntimeException | Error failure) {
+			TextInputDiagnostics.failure("writer-failure", session != null ? session.id() : 0, failure);
+			throw failure;
 		} finally {
 			target = null;
 			try {
@@ -171,7 +179,11 @@ class SkinTextInput {
 		if (session.usesIme()) {
 			if (session.isFinished()) { completeCommit(); return; }
 			String display = session.displayText();
-			if (!textField.getText().equals(display)) textField.setText(display);
+			if (!textField.getText().equals(display)) {
+				TextInputDiagnostics.editor("editor-before-display-update", session, textField.getText(), null);
+				textField.setText(display);
+				TextInputDiagnostics.editor("editor-display-update", session, textField.getText(), null);
+			}
 			var value = session.state();
 			if (!session.isComposing() && value.anchor() != value.cursor()) textField.setSelection(value.anchor(), value.cursor());
 			else textField.setCursorPosition(session.displayCursor());
@@ -329,6 +341,7 @@ class SkinTextInput {
 				@Override
 				public void keyTyped(TextField textField, char key) {
 					if (key == '\n' || key == '\r') {
+						TextInputDiagnostics.editor("editor-enter", session, textField.getText(), null);
 						commitRequested = true;
 					}
 				}
@@ -337,6 +350,7 @@ class SkinTextInput {
 				@Override
 				public void keyboardFocusChanged(FocusEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor, boolean focused) {
 					if (!focused) {
+						TextInputDiagnostics.editor("editor-focus-lost", session, textField.getText(), null);
 						commit();
 					}
 				}
