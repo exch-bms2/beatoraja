@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.controller.ControllerBackend;
+import bms.player.beatoraja.external.discord.DiscordWebhook;
 import bms.player.beatoraja.external.obs.ObsControlCommand;
 
 import static bms.player.beatoraja.Resolution.*;
@@ -11,6 +12,8 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -237,6 +240,10 @@ public class Config implements Validatable {
 	private int irSendCount = 5;
 
 	private boolean useDiscordRPC = false;
+	private int webhookOption;
+	private String webhookName = "";
+	private String webhookAvatar = "";
+	private String[] webhookUrl = new String[0];
 	private boolean setClipboardScreenshot = false;
 
 	private static final String[] DEFAULT_TABLEURL = { "https://rattoto10.jounin.jp/table.html",
@@ -464,6 +471,15 @@ public class Config implements Validatable {
 	public void setUseDiscordRPC(boolean useDiscordRPC) {
 		this.useDiscordRPC = useDiscordRPC;
 	}
+
+	public int getWebhookOption() { return webhookOption; }
+	public void setWebhookOption(int value) { webhookOption = value; }
+	public String getWebhookName() { return webhookName; }
+	public void setWebhookName(String value) { webhookName = value; }
+	public String getWebhookAvatar() { return webhookAvatar; }
+	public void setWebhookAvatar(String value) { webhookAvatar = value; }
+	public String[] getWebhookUrl() { return webhookUrl != null ? webhookUrl.clone() : new String[0]; }
+	public void setWebhookUrl(String[] value) { webhookUrl = value != null ? value.clone() : new String[0]; }
 	
 	public boolean isSetClipboardWhenScreenshot() {
 		return setClipboardScreenshot;
@@ -622,6 +638,14 @@ public class Config implements Validatable {
 	}
 
 	public boolean validate() {
+		if (webhookOption < DiscordWebhook.OFF || webhookOption > DiscordWebhook.SCORE_CARD) {
+			webhookOption = DiscordWebhook.OFF;
+		}
+		if (webhookName == null || webhookName.length() > 80) webhookName = "";
+		webhookAvatar = DiscordWebhook.normalizeAvatar(webhookAvatar);
+		webhookUrl = Arrays.stream(webhookUrl == null ? new String[0] : webhookUrl)
+				.limit(DiscordWebhook.MAX_DESTINATIONS).map(DiscordWebhook::normalizeUrl)
+				.filter(Objects::nonNull).distinct().toArray(String[]::new);
 		if (obsWsHost == null || obsWsHost.isBlank() || obsWsHost.length() > 253) obsWsHost = "localhost";
 		if (obsWsPass == null || obsWsPass.length() > 4096) obsWsPass = "";
 		obsWsPort = MathUtils.clamp(obsWsPort, 1, 65535);
@@ -756,7 +780,8 @@ public class Config implements Validatable {
 			}
 			return config;
 		} catch (Exception e) {
-			Logger.getGlobal().warning("Failed to read system config " + path + ": " + e.getMessage());
+			// JSON parser messages can include raw config values, including webhook tokens.
+			Logger.getGlobal().warning("Failed to read system config " + path + " (" + e.getClass().getSimpleName() + ")");
 			return null;
 		}
 	}

@@ -25,6 +25,7 @@ import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.external.*;
 import bms.player.beatoraja.external.discord.DiscordListener;
+import bms.player.beatoraja.external.discord.DiscordWebhook;
 import bms.player.beatoraja.external.obs.ObsController;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.keyboard.KeyCommand;
@@ -565,13 +566,14 @@ public final class MainController {
                 if (screenshot == null || !screenshot.isAlive()) {
             		final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight(), true);
                     final MainState screenshotState = current;
+                    final DiscordWebhook.Post webhook = DiscordWebhook.capture(screenshotState);
                     if (obs != null) obs.keepRecording(true);
                     screenshot = new Thread(() -> {
                 		// 全ピクセルのアルファ値を255にする(=透明色を無くす)
                 		for(int i = 3;i < pixels.length;i+=4) {
                 			pixels[i] = (byte) 0xff;
                 		}
-                        new ScreenShotFileExporter().send(screenshotState, pixels);
+                        new ScreenShotFileExporter().send(screenshotState, pixels, webhook);
                     });
                     screenshot.start();
                 }

@@ -1,5 +1,6 @@
 package bms.player.beatoraja.launcher;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
 import java.net.URL;
 import java.util.Locale;
@@ -8,6 +9,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 
 /** Real FXML injection and per-mode commits, run on the launcher smoke test's JavaFX thread. */
 public final class PlayConfigurationViewTest {
@@ -26,6 +30,9 @@ public final class PlayConfigurationViewTest {
                 catch (ReflectiveOperationException error) { throw new IllegalStateException(error); }
             });
             loader.load();
+            if (!(loader.getNamespace().get("discordWebhookController") instanceof DiscordConfigurationView))
+                throw new AssertionError("Discord Webhook settings missing from launcher");
+            verifyDiscordWebhookSettings(locale);
             var player = new PlayerConfig();
             var field = PlayConfigurationView.class.getDeclaredField("player");
             field.setAccessible(true); field.set(view, player);
@@ -57,5 +64,31 @@ public final class PlayConfigurationViewTest {
                 throw new AssertionError("Explicitly selecting existing cover controls must persist");
         }
         System.out.println("PlayConfigurationViewTest passed (real FXML, English/Japanese, mode-specific checkbox save/restore)");
+    }
+
+    private static void verifyDiscordWebhookSettings(Locale locale) throws Exception {
+        var loader = new FXMLLoader(DiscordConfigurationView.class.getResource("DiscordConfigurationView.fxml"),
+                ResourceBundle.getBundle("resources.UIResources", locale));
+        loader.load();
+        DiscordConfigurationView view = loader.getController();
+        var config = new Config();
+        view.update(config);
+        var fields = loader.getNamespace();
+        var mode = (ComboBox<?>) fields.get("mode");
+        var url = (PasswordField) fields.get("url");
+        var destinations = (ListView<?>) fields.get("destinations");
+        if (mode.getSelectionModel().getSelectedIndex() != 0 || mode.getItems().size() != 3)
+            throw new AssertionError("Discord Webhook is opt-in and has three post formats");
+        mode.getSelectionModel().select(2);
+        ((TextField) fields.get("name")).setText("リザルト");
+        url.setText("https://discord.com/api/webhooks/123/token");
+        url.fireEvent(new ActionEvent());
+        url.setText("https://discord.com/api/webhooks/456/token");
+        view.commit(config);
+        config.validate();
+        view.update(config);
+        if (mode.getSelectionModel().getSelectedIndex() != 2 || destinations.getItems().size() != 2
+                || !config.getWebhookName().equals("リザルト") || !url.getText().isEmpty())
+            throw new AssertionError("Discord Webhook settings did not round-trip: " + locale);
     }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.DiscordConfigurationView">
+    <VBox spacing="10">
+        <padding><Insets top="12" right="12" bottom="12" left="12" /></padding>
+        <Label text="%DISCORD_WEBHOOK_HELP" wrapText="true" />
+        <GridPane hgap="8" vgap="6">
+            <Label text="%DISCORD_WEBHOOK_MODE" />
+            <ComboBox fx:id="mode" GridPane.columnIndex="1" />
+            <Label text="%DISCORD_WEBHOOK_NAME" GridPane.rowIndex="1" />
+            <TextField fx:id="name" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+            <Label text="%DISCORD_WEBHOOK_AVATAR" GridPane.rowIndex="2" />
+            <TextField fx:id="avatar" promptText="https://" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+        </GridPane>
+        <Label text="%DISCORD_WEBHOOK_URL" />
+        <HBox spacing="8">
+            <PasswordField fx:id="url" HBox.hgrow="ALWAYS" onAction="#addUrl" />
+            <Button text="%DISCORD_WEBHOOK_ADD" onAction="#addUrl" />
+        </HBox>
+        <Label fx:id="status" wrapText="true" />
+        <Label text="%DISCORD_WEBHOOK_DESTINATIONS" />
+        <ListView fx:id="destinations" prefHeight="145" />
+        <Button text="%DISCORD_WEBHOOK_REMOVE" onAction="#removeUrl" />
+    </VBox>
+</ScrollPane>

@@ -233,6 +233,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ObsConfigurationView obsController;
 	@FXML
+	private DiscordConfigurationView discordWebhookController;
+	@FXML
 	private SkinConfigurationView skinController;
 	@FXML
 	private IRConfigurationView irController;
@@ -355,6 +357,7 @@ public class PlayConfigurationView implements Initializable {
 		audioController.update(config.getAudioConfig());
 		musicselectController.update(config);
 		obsController.update(config);
+		discordWebhookController.update(config);
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
@@ -487,6 +490,7 @@ public class PlayConfigurationView implements Initializable {
 		audioController.commit();
 		musicselectController.commit();
 		obsController.commit(config);
+		discordWebhookController.commit(config);
 
 		config.setPlayername(players.getValue());
 
