@@ -2,8 +2,8 @@ package bms.player.beatoraja.launcher;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState.MainStateType;
-import bms.player.beatoraja.obs.ObsControlCommand;
-import bms.player.beatoraja.obs.ObsController;
+import bms.player.beatoraja.external.obs.ObsControlCommand;
+import bms.player.beatoraja.external.obs.ObsController;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

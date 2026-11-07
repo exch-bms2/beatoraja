@@ -1,4 +1,4 @@
-package bms.player.beatoraja.obs;
+package bms.player.beatoraja.external.obs;
 
 import bms.player.beatoraja.Config;
 import com.badlogic.gdx.utils.JsonReader;
@@ -11,7 +11,7 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.*;
-import static bms.player.beatoraja.obs.ObsWebSocket.object;
+import static bms.player.beatoraja.external.obs.ObsWebSocket.object;
 
 /** Real JDK WebSocket handshake, authentication, request correlation and reconnect over loopback. */
 public final class ObsWebSocketTest {

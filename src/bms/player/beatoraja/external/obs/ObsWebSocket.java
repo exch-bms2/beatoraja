@@ -1,4 +1,4 @@
-package bms.player.beatoraja.obs;
+package bms.player.beatoraja.external.obs;
 
 import bms.player.beatoraja.Config;
 import com.badlogic.gdx.utils.JsonReader;

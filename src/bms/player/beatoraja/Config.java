@@ -1,7 +1,7 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.controller.ControllerBackend;
-import bms.player.beatoraja.obs.ObsControlCommand;
+import bms.player.beatoraja.external.obs.ObsControlCommand;
 
 import static bms.player.beatoraja.Resolution.*;
 

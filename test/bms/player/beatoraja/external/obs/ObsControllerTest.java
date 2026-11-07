@@ -1,4 +1,4 @@
-package bms.player.beatoraja.obs;
+package bms.player.beatoraja.external.obs;
 
 import bms.player.beatoraja.Config;
 import com.badlogic.gdx.utils.Json;
@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import static bms.player.beatoraja.obs.ObsWebSocket.object;
+import static bms.player.beatoraja.external.obs.ObsWebSocket.object;
 
 /** Uses a deterministic transport and isolated files to test the game controller's ownership rules. */
 public final class ObsControllerTest {

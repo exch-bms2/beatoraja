@@ -1,4 +1,4 @@
-package bms.player.beatoraja.obs;
+package bms.player.beatoraja.external.obs;
 
 import com.badlogic.gdx.utils.JsonValue;
 import java.util.concurrent.CompletableFuture;

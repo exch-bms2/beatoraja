@@ -1,4 +1,4 @@
-package bms.player.beatoraja.obs;
+package bms.player.beatoraja.external.obs;
 
 import bms.player.beatoraja.*;
 import com.badlogic.gdx.utils.JsonValue;
@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import static bms.player.beatoraja.obs.ObsWebSocket.object;
+import static bms.player.beatoraja.external.obs.ObsWebSocket.object;
 
 /** Nonblocking game hooks; all OBS state and recording ownership live on one executor. */
 public final class ObsController implements MainStateListener, AutoCloseable, ObsTransport.Listener {

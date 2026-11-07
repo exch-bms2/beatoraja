@@ -117,6 +117,10 @@ public final class DistributionSmokeTest {
                 check(jar.getEntry("bms/player/beatoraja/input/controller/" + type + ".class") != null, "Missing SDL_ASYNC component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/InputDiagnostics.class") != null, "Missing input diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/InputPollingThread.class") != null, "Missing input polling lifecycle");
+            for (String type : List.of("ObsController", "ObsWebSocket", "ObsTransport", "ObsControlCommand")) {
+                check(jar.getEntry("bms/player/beatoraja/external/obs/" + type + ".class") != null, "Missing OBS component: " + type);
+                check(jar.getEntry("bms/player/beatoraja/obs/" + type + ".class") == null, "Stale OBS component: " + type);
+            }
             check(jar.getEntry("bms/player/beatoraja/input/midi/MidiInputProcessor.class") != null, "Missing MIDI input processor");
             check(jar.getEntry("bms/player/beatoraja/input/MidiInputProcessor.class") == null, "Stale MIDI input processor");
             check(jar.getEntry("bms/player/beatoraja/skin/SkinRenderTarget.class") != null, "Missing preview render target scope");
