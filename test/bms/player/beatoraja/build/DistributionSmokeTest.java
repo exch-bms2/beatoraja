@@ -17,10 +17,10 @@ import java.util.zip.ZipFile;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 import bms.player.beatoraja.skin.LibGdxCompatibilityTest;
 import bms.player.beatoraja.song.archive.RarSongArchiveTest;
-import bms.player.beatoraja.input.JInputControllerCompatibilityTest;
+import bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest;
 import bms.player.beatoraja.external.DesktopActionsTest;
 import bms.player.beatoraja.input.InputDiagnosticsTest;
-import bms.player.beatoraja.input.KeyboardEventQueueTest;
+import bms.player.beatoraja.input.keyboard.KeyboardEventQueueTest;
 import bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest;
 
 /** Verify the thin-JAR distribution without opening windows or using player data. */
@@ -109,11 +109,11 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("bms/player/beatoraja/input/WindowsImeTestSupport.class") == null, "Never ship fake IMM transport");
             check(jar.getEntry("bms/player/beatoraja/audio/AudioDiagnostics.class") != null, "Missing audio diagnostics");
             check(jar.getEntry("bms/player/beatoraja/FramePacingDiagnostics.class") != null, "Missing frame pacing diagnostics");
-            check(jar.getEntry("bms/player/beatoraja/input/JInputControllerManager.class") != null, "Missing JInput manager");
+            check(jar.getEntry("bms/player/beatoraja/input/controller/JInputControllerManager.class") != null, "Missing JInput manager");
             for (String type : List.of("SdlRawControllerManager", "SdlRawAsyncControllerManager", "SdlRawMapping", "SdlRawNative", "SdlRawSource"))
-                check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing SDL_RAW component: " + type);
+                check(jar.getEntry("bms/player/beatoraja/input/controller/" + type + ".class") != null, "Missing SDL_RAW component: " + type);
             for (String type : List.of("SdlAsyncControllerManager", "SdlGamepadNative", "SdlGamepadCompatibility"))
-                check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing SDL_ASYNC component: " + type);
+                check(jar.getEntry("bms/player/beatoraja/input/controller/" + type + ".class") != null, "Missing SDL_ASYNC component: " + type);
             check(jar.getEntry("bms/player/beatoraja/input/InputDiagnostics.class") != null, "Missing input diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/InputPollingThread.class") != null, "Missing input polling lifecycle");
             check(jar.getEntry("bms/player/beatoraja/skin/SkinRenderTarget.class") != null, "Missing preview render target scope");
@@ -122,22 +122,22 @@ public final class DistributionSmokeTest {
             check(jar.getEntry("bms/player/beatoraja/input/X11ImeSession.class") != null, "Missing X11 IME session");
             check(jar.getEntry("bms/player/beatoraja/MemoryDiagnostics$Snapshot.class") != null, "Missing structured memory diagnostics");
             check(jar.getEntry("bms/player/beatoraja/video/BgrFrameConverter.class") != null, "Missing aligned movie conversion");
-            check(jar.getEntry("bms/player/beatoraja/input/ControllerInputDiagnostics.class") != null,
+            check(jar.getEntry("bms/player/beatoraja/input/controller/ControllerInputDiagnostics.class") != null,
                     "Missing controller diagnostics");
-            check(jar.getEntry("bms/player/beatoraja/input/MouseScratchDiagnostics.class") != null,
+            check(jar.getEntry("bms/player/beatoraja/input/mouse/MouseScratchDiagnostics.class") != null,
                     "Missing mouse scratch diagnostics");
-            check(jar.getEntry("bms/player/beatoraja/input/MouseMotionQueue.class") != null, "Missing sampled mouse FIFO");
+            check(jar.getEntry("bms/player/beatoraja/input/mouse/MouseMotionQueue.class") != null, "Missing sampled mouse FIFO");
             check(jar.getEntry("bms/player/beatoraja/input/WindowDiagnostics.class") != null, "Missing window diagnostics");
             check(jar.getEntry("bms/player/beatoraja/GlfwWindowSupport.class") != null, "Missing Wayland window capability policy");
-            check(jar.getEntry("bms/player/beatoraja/input/MouseScratchPosition.class") != null, "Missing Wayland endpoint sampler");
+            check(jar.getEntry("bms/player/beatoraja/input/mouse/MouseScratchPosition.class") != null, "Missing Wayland endpoint sampler");
             check(jar.getEntry("bms/player/beatoraja/input/Lwjgl3InputCallbacks.class") != null,
                     "Missing native callback diagnostics");
-            check(jar.getEntry("bms/player/beatoraja/input/KeyboardEventQueue.class") != null
+            check(jar.getEntry("bms/player/beatoraja/input/keyboard/KeyboardEventQueue.class") != null
                     && jar.getEntry("bms/player/beatoraja/input/KeyboardJudgeQueue.class") != null, "Missing keyboard queues");
-            check(jar.getEntry("bms/player/beatoraja/input/ControllerEventQueue.class") != null
+            check(jar.getEntry("bms/player/beatoraja/input/controller/ControllerEventQueue.class") != null
                     && jar.getEntry("bms/player/beatoraja/input/JudgeEventQueue.class") != null, "Missing shared/controller queues");
             check(jar.getEntry("bms/player/beatoraja/input/Lwjgl2ControllerManager.class") == null, "Retired raw manager remains");
-            for (var entry : jar.stream().filter(e -> e.getName().startsWith("bms/player/beatoraja/input/JInputControllerManager")
+            for (var entry : jar.stream().filter(e -> e.getName().startsWith("bms/player/beatoraja/input/controller/JInputControllerManager")
                     && e.getName().endsWith(".class")).toList()) {
                 try (var in = jar.getInputStream(entry)) {
                     check(!new String(in.readAllBytes(), StandardCharsets.ISO_8859_1).contains("org/lwjgl/"),
@@ -283,20 +283,20 @@ public final class DistributionSmokeTest {
             // The raw adapter must not share a classpath with the retired backend.
         }
         JInputControllerCompatibilityTest.main(new String[]{"--packaged"});
-        bms.player.beatoraja.input.JInputQueueRecoveryTest.main(new String[0]);
-        bms.player.beatoraja.input.ControllerLibraryCompatibilityTest.main(new String[0]);
+        bms.player.beatoraja.input.controller.JInputQueueRecoveryTest.main(new String[0]);
+        bms.player.beatoraja.input.controller.ControllerLibraryCompatibilityTest.main(new String[0]);
         LibGdxCompatibilityTest.main(new String[0]);
         bms.player.beatoraja.SkinProjectionTest.main(new String[0]);
         bms.player.beatoraja.WindowModeControllerTest.main(new String[0]);
-        bms.player.beatoraja.input.MouseScratchGeometryTest.main(new String[0]);
+        bms.player.beatoraja.input.mouse.MouseScratchGeometryTest.main(new String[0]);
         DesktopActionsTest.main(new String[0]);
         InputDiagnosticsTest.main(new String[0]);
-        bms.player.beatoraja.input.MouseScratchDiagnosticsTest.main(new String[0]);
-        bms.player.beatoraja.input.MouseMotionQueueTest.main(new String[0]);
+        bms.player.beatoraja.input.mouse.MouseScratchDiagnosticsTest.main(new String[0]);
+        bms.player.beatoraja.input.mouse.MouseMotionQueueTest.main(new String[0]);
         KeyboardEventQueueTest.main(new String[0]);
-        bms.player.beatoraja.input.WindowsKeyboardMappingTest.main(new String[0]);
-        bms.player.beatoraja.input.ControllerEventQueueTest.main(new String[0]);
-        bms.player.beatoraja.input.SdlRawControllerTest.main(new String[0]);
+        bms.player.beatoraja.input.keyboard.WindowsKeyboardMappingTest.main(new String[0]);
+        bms.player.beatoraja.input.controller.ControllerEventQueueTest.main(new String[0]);
+        bms.player.beatoraja.input.controller.SdlRawControllerTest.main(new String[0]);
         KeyboardJudgeCompatibilityTest.main(new String[0]);
         for (String name : List.of("org.apache.commons.compress.archivers.zip.ZipFile",
                 "org.apache.commons.dbutils.QueryRunner", "org.apache.commons.io.IOUtils",

@@ -1,6 +1,6 @@
 package bms.player.beatoraja;
 
-import bms.player.beatoraja.input.MouseMotionQueue;
+import bms.player.beatoraja.input.mouse.MouseMotionQueue;
 import bms.player.beatoraja.input.PollingLwjgl3Input;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;

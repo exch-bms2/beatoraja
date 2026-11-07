@@ -1,5 +1,15 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.mouse.MouseCoordinates;
+import bms.player.beatoraja.input.mouse.SkinMouseInput;
+
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
+import bms.player.beatoraja.input.keyboard.KeyCommand;
+
+import bms.player.beatoraja.input.controller.BMControllerInputProcessor;
+import bms.player.beatoraja.input.controller.ControllerBackendManager;
+import bms.player.beatoraja.input.controller.SdlRawControllerManager;
+
 import bms.player.beatoraja.*;
 
 import java.nio.charset.StandardCharsets;
@@ -9,11 +19,10 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.PlayModeConfig.*;
 import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Array;
@@ -165,26 +174,6 @@ public class BMSPlayerInputProcessor {
 
 	public boolean isSkinMouseJustPressed(int button) {
 		return skinMouseInput.isJustPressed(button);
-	}
-
-	static final class SkinMouseInput extends InputAdapter {
-		private final boolean[] pending = new boolean[5];
-		private final boolean[] justPressed = new boolean[5];
-
-		@Override
-		public boolean touchDown(int x, int y, int pointer, int button) {
-			if (button >= 0 && button < pending.length) pending[button] = true;
-			return false;
-		}
-
-		void beginFrame() {
-			System.arraycopy(pending, 0, justPressed, 0, pending.length);
-			Arrays.fill(pending, false);
-		}
-
-		boolean isJustPressed(int button) {
-			return button >= 0 && button < justPressed.length && justPressed[button];
-		}
 	}
 
 	private Type type = Type.KEYBOARD;
@@ -444,15 +433,16 @@ public class BMSPlayerInputProcessor {
 		return keyboardJudgeQueue.isQueued(key) ? keyboardJudgeQueue.held(key) : getKeyState(key);
 	}
 
-	void keyboardKeyChanged(long presstime, int key, boolean pressed) {
+	public void keyboardKeyChanged(long presstime, int key, boolean pressed) {
         queuedKeyChanged(kbinput, presstime, key, pressed);
     }
 
-    void controllerKeyChanged(BMControllerInputProcessor device, long presstime, int key, boolean pressed) {
+    /** Accepts a translated controller edge on the input polling thread. */
+    public void controllerKeyChanged(BMControllerInputProcessor device, long presstime, int key, boolean pressed) {
         queuedKeyChanged(device, presstime, key, pressed);
     }
 
-    void mouseScratchKeyChanged(KeyBoardInputProcesseor device, long presstime, int key, boolean pressed) {
+    public void mouseScratchKeyChanged(KeyBoardInputProcesseor device, long presstime, int key, boolean pressed) {
         queuedKeyChanged(device, presstime, key, pressed);
     }
 
@@ -501,8 +491,8 @@ public class BMSPlayerInputProcessor {
 			return;
 		}
 		if (keystate[i] != pressed) {
-			if (device instanceof BMControllerInputProcessor controller && controller.getDiagnostics() != null)
-				controller.getDiagnostics().gameWrite(time[i] != Long.MIN_VALUE);
+			if (device instanceof BMControllerInputProcessor controller)
+				controller.recordGameWrite(time[i] != Long.MIN_VALUE);
 			if (device == kbinput && Gdx.input instanceof PollingLwjgl3Input input && input.getDiagnostics() != null)
 				input.getDiagnostics().gameWrite(i, time[i] != Long.MIN_VALUE, System.nanoTime());
 			keystate[i] = pressed;
@@ -656,6 +646,35 @@ public class BMSPlayerInputProcessor {
 
 	public int getScroll() {
 		return (int) -scrollY;
+	}
+
+	public void mouseMoved(int x, int y, Resolution resolution) {
+		if (Gdx.graphics.getWidth() <= 0 || Gdx.graphics.getHeight() <= 0) return;
+		setMouseMoved(true);
+		updateMousePosition(x, y, resolution);
+	}
+
+	public void mousePressed(int x, int y, int button, Resolution resolution) {
+		if (Gdx.graphics.getWidth() <= 0 || Gdx.graphics.getHeight() <= 0) return;
+		mousebutton = button;
+		updateMousePosition(x, y, resolution);
+		mousepressed = true;
+	}
+
+	public void mouseDragged(int x, int y, Resolution resolution) {
+		if (Gdx.graphics.getWidth() <= 0 || Gdx.graphics.getHeight() <= 0) return;
+		updateMousePosition(x, y, resolution);
+		mousedragged = true;
+	}
+
+	private void updateMousePosition(int x, int y, Resolution resolution) {
+		mousex = MouseCoordinates.skinX(x, resolution.width, Gdx.graphics.getWidth());
+		mousey = MouseCoordinates.skinY(y, resolution.height, Gdx.graphics.getHeight());
+	}
+
+	public void addScroll(float amountX, float amountY) {
+		scrollX += amountX;
+		scrollY += amountY;
 	}
 
 	public float getScrollX() {

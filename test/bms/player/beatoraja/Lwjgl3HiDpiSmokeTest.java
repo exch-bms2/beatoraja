@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.input.mouse.MouseCoordinates;
+
 import bms.player.beatoraja.input.PollingLwjgl3Input;
 import bms.player.beatoraja.input.WindowDiagnostics;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -126,17 +128,17 @@ public final class Lwjgl3HiDpiSmokeTest {
                 GLFW.glfwSetCursorPosCallback(handle, callback);
                 callback.invoke(handle, cx, cy);
                 check(Gdx.input.getX() == cx && Gdx.input.getY() == cy, "GLFW logical cursor coordinates");
-                check(Math.abs(WindowDiagnostics.skinX(cx, 320, graphics.getWidth()) - 160) <= 1,
+                check(Math.abs(MouseCoordinates.skinX(cx, 320, graphics.getWidth()) - 160) <= 1,
                         "Click X agrees with rendered center");
-                check(Math.abs(WindowDiagnostics.skinY(cy, 240, graphics.getHeight()) - 120) <= 1,
+                check(Math.abs(MouseCoordinates.skinY(cy, 240, graphics.getHeight()) - 120) <= 1,
                         "Click Y agrees with rendered center");
                 int inside = (int) Math.ceil(graphics.getWidth() * 81.0 / 320);
                 int outside = (int) Math.floor(graphics.getWidth() * 79.0 / 320);
                 var clickBounds = new com.badlogic.gdx.math.Rectangle(80, 60, 160, 120);
-                check(clickBounds.contains(WindowDiagnostics.skinX(inside, 320, graphics.getWidth()),
-                                WindowDiagnostics.skinY(cy, 240, graphics.getHeight()))
-                        && !clickBounds.contains(WindowDiagnostics.skinX(outside, 320, graphics.getWidth()),
-                                WindowDiagnostics.skinY(cy, 240, graphics.getHeight())),
+                check(clickBounds.contains(MouseCoordinates.skinX(inside, 320, graphics.getWidth()),
+                                MouseCoordinates.skinY(cy, 240, graphics.getHeight()))
+                        && !clickBounds.contains(MouseCoordinates.skinX(outside, 320, graphics.getWidth()),
+                                MouseCoordinates.skinY(cy, 240, graphics.getHeight())),
                         "Hit edges agree with visible clip edges after mismatched startup and resize");
                 callback.invoke(handle, cx + 10, cy);
                 check(Gdx.input.getX() - cx == 10, "Scratch input remains ten logical pixels, no DPI multiplier");

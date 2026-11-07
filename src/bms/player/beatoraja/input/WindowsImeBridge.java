@@ -1,5 +1,8 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ImeBridge;
+import bms.player.beatoraja.input.text.TextInputSession;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import org.lwjgl.glfw.GLFWNativeWin32;

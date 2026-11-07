@@ -149,7 +149,7 @@
 				<path refid="test.classpath" />
 			</classpath>
 		</java>
-		<java classname="bms.player.beatoraja.input.SkinMouseInputTest" fork="true" failonerror="true">
+		<java classname="bms.player.beatoraja.input.mouse.SkinMouseInputTest" fork="true" failonerror="true">
 			<classpath><pathelement location="${build.test.dest}" /><path refid="test.classpath" /></classpath>
 		</java>
 		<java classname="bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest" fork="true" failonerror="true">

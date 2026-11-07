@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.mouse.MouseScratchDiagnostics;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -44,7 +46,7 @@ public final class InputDiagnostics implements AutoCloseable {
     private final ScheduledExecutorService reporter;
     private final MouseScratchDiagnostics mouseScratch = new MouseScratchDiagnostics();
 
-    MouseScratchDiagnostics mouseScratch() { return mouseScratch; }
+    public MouseScratchDiagnostics mouseScratch() { return mouseScratch; }
 
     /** No arrays, callback hooks or worker are allocated unless this property is enabled. */
     static InputDiagnostics createIfEnabled() {
@@ -152,7 +154,7 @@ public final class InputDiagnostics implements AutoCloseable {
         observed[channel] = down;
     }
 
-    synchronized void keyboardDecision(int key, boolean forwarded, long now) {
+    public synchronized void keyboardDecision(int key, boolean forwarded, long now) {
         if (closed) return;
         if (forwarded) {
             keyboardForwarded++;
@@ -163,7 +165,7 @@ public final class InputDiagnostics implements AutoCloseable {
         }
     }
 
-    synchronized void keyboardEventRead(int key, long callbackTime, long publicationTime, long now) {
+    public synchronized void keyboardEventRead(int key, long callbackTime, long publicationTime, long now) {
         readCallbackAt[key] = callbackTime == 0 ? Long.MIN_VALUE : callbackTime;
         if (callbackTime != 0) callbackToRead.add(now - callbackTime);
         if (publicationTime != 0) snapshotToRead.add(now - publicationTime);
@@ -261,12 +263,13 @@ public final class InputDiagnostics implements AutoCloseable {
         }
     }
 
-    static final class Histogram {
+    /** Shared timing buckets for input and controller diagnostics. */
+    public static final class Histogram {
         private static final long[] LIMIT_US = {100, 250, 500, 1000, 2000, 4000, 8000, 16000,
                 32000, 64000, 128000, 256000, 1000000, Long.MAX_VALUE};
         private final long[] buckets = new long[LIMIT_US.length];
         private long count, sum, max;
-        void add(long nanos) {
+        public void add(long nanos) {
             if (nanos < 0) return;
             count++;
             sum += nanos;
@@ -275,7 +278,7 @@ public final class InputDiagnostics implements AutoCloseable {
             while (LIMIT_US[bucket] != Long.MAX_VALUE && nanos > LIMIT_US[bucket] * 1000) bucket++;
             buckets[bucket]++;
         }
-        Timing snapshot() {
+        public Timing snapshot() {
             long accumulated = 0, p95 = 0;
             for (int i = 0; i < buckets.length && count != 0; i++) {
                 accumulated += buckets[i];

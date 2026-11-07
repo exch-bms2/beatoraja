@@ -1,5 +1,8 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest;
+import bms.player.beatoraja.input.controller.JInputControllerManager;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,7 +21,7 @@ public final class Lwjgl3InputShutdownSmokeTest {
         var polls = new AtomicInteger();
         var closed = new AtomicInteger();
         var disposed = new AtomicInteger();
-        var manager = new JInputControllerManager(new net.java.games.input.Controller[0], () -> {
+        var manager = JInputControllerCompatibilityTest.createManager(new net.java.games.input.Controller[0], () -> {
             worker.set(Thread.currentThread()); polls.incrementAndGet();
         }, () -> {
             check(worker.get() != null && !worker.get().isAlive(), "Controller release must follow join");

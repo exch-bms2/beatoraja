@@ -7,14 +7,14 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyCommand;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;

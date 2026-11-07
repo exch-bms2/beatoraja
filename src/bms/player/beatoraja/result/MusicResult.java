@@ -7,8 +7,8 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.input.KeyCommand;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;

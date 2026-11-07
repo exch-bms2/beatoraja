@@ -11,7 +11,7 @@ import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;

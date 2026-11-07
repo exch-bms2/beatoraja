@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ImeBridge;
+
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicLong;
 

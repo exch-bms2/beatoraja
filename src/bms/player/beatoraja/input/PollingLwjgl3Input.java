@@ -1,5 +1,12 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.mouse.MouseMotionQueue;
+import bms.player.beatoraja.input.mouse.MouseScratchGeometry;
+import bms.player.beatoraja.input.mouse.MouseScratchPosition;
+
+import bms.player.beatoraja.input.keyboard.KeyboardEventQueue;
+import bms.player.beatoraja.input.keyboard.WindowsKeyboardMapping;
+
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import com.badlogic.gdx.backends.lwjgl3.DefaultLwjgl3Input;
@@ -117,16 +124,16 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         if (diagnostics != null) diagnostics.mouseScratch().sample(scratchEnabled, focused, x, y,
                 ((Lwjgl3Graphics) Gdx.graphics).getLogicalWidth(), ((Lwjgl3Graphics) Gdx.graphics).getLogicalHeight(),
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Gdx.graphics.getBackBufferWidth(),
-                Gdx.graphics.getBackBufferHeight(), System.nanoTime(), scratchPosition.delivered,
-                scratchPosition.dx, scratchPosition.dy);
+                Gdx.graphics.getBackBufferHeight(), System.nanoTime(), scratchPosition.delivered(),
+                scratchPosition.dx(), scratchPosition.dy());
         if (sample) {
             int centerX = Gdx.graphics.getWidth() / 2;
             int centerY = Gdx.graphics.getHeight() / 2;
             // Already queued samples are real pre-transition movement; do not clear or reinterpret them.
-            if (scratchPosition.delivered) scratch.add(scratchPosition.dx, scratchPosition.dy);
+            if (scratchPosition.delivered()) scratch.add(scratchPosition.dx(), scratchPosition.dy());
             checkMouseScratchOverflow();
-            if (scratchPosition.delivered && diagnostics != null) diagnostics.scratchPublished(scratchPosition.dx, scratchPosition.dy, System.nanoTime());
-            if (scratchPosition.recenter) {
+            if (scratchPosition.delivered() && diagnostics != null) diagnostics.scratchPublished(scratchPosition.dx(), scratchPosition.dy(), System.nanoTime());
+            if (scratchPosition.recenter()) {
                 if (diagnostics != null) diagnostics.mouseScratch().warp(centerX, centerY);
                 // GLFW_CURSOR_DISABLED changes only virtual position, including on Wayland.
                 super.setCursorPosition(centerX, centerY);
@@ -281,7 +288,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     public InputDiagnostics getDiagnostics() { return diagnostics; }
     int resolveKeyboardKey(int key, int scancode) { return WindowsKeyboardMapping.resolve(windowsKeyboard, key, scancode); }
     boolean isWindowsKeyboardAlias(int key) {
-        return windowsKeyboard && (key == WindowsKeyboardMapping.RO || key == WindowsKeyboardMapping.YEN);
+        return WindowsKeyboardMapping.isAlias(windowsKeyboard, key);
     }
     public String keyName(int key) { return WindowsKeyboardMapping.keyName(windowsKeyboard, key); }
     public FramePacingDiagnostics getFrameDiagnostics() { return frameDiagnostics; }

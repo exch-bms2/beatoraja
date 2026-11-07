@@ -1,5 +1,8 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest;
+import bms.player.beatoraja.input.controller.JInputControllerManager;
+
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
@@ -82,7 +85,7 @@ public final class WindowInputLifecycleTest {
         final JInputControllerManager manager;
         final BMSPlayerInputProcessor input;
         Fixture(int mode, boolean mouse) throws Exception {
-            manager = new JInputControllerManager(new net.java.games.input.Controller[] {fake.device}, () -> { }, () -> { }, Runnable::run);
+            manager = JInputControllerCompatibilityTest.createManager(new net.java.games.input.Controller[] {fake.device}, () -> { }, () -> { }, Runnable::run);
             var runner = JInputControllerManager.class.getDeclaredField("pollRunner"); runner.setAccessible(true);
             BMSPlayerInputProcessor.controllerPollRunner = (Runnable) runner.get(manager);
             var player = new PlayerConfig();

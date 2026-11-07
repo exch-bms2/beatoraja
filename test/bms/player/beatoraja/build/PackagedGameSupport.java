@@ -60,7 +60,7 @@ public final class PackagedGameSupport {
                 + "#BPM 240\n#PLAYLEVEL 1\n#RANK 2\n#TOTAL 100\n#WAV01 silence.wav\n#BMP01 stage.png\n"
                 + "#00004:01\n#00111:01010101\n#00219:01\n");
         var config = new Config();
-        config.setControllerBackend(bms.player.beatoraja.input.ControllerBackend.valueOf(System.getProperty("beatoraja.packagedGameTest.controllerBackend", "JINPUT")));
+        config.setControllerBackend(bms.player.beatoraja.input.controller.ControllerBackend.valueOf(System.getProperty("beatoraja.packagedGameTest.controllerBackend", "JINPUT")));
         config.setPlayername("smoke"); config.setPlayerpath("player");
         config.setBmsroot(new String[]{songs.toString()}); config.setTableURL(new String[0]);
         config.setSongpath(root.resolve("songdata.db").toString()); config.setTablepath("table");

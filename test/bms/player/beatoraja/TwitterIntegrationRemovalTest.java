@@ -8,7 +8,7 @@ import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import bms.player.beatoraja.input.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyCommand;
 
 /** Legacy settings must remain readable without retaining retired credentials. */
 public final class TwitterIntegrationRemovalTest {

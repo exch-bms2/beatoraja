@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ImeBridge;
+
 import java.nio.charset.StandardCharsets;
 
 /** Fake XIM boundary shared by standalone and real-GL SkinTextInput regressions. */

@@ -1,12 +1,13 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.input.mouse.MouseCoordinates;
+
 import java.lang.reflect.Proxy;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import bms.player.beatoraja.input.WindowDiagnostics;
 
 /** Logical skin/Stage inverse mapping and physical GL viewport, without a window. */
 public final class StageViewportTest {
@@ -33,8 +34,8 @@ public final class StageViewportTest {
                     for (float fraction : new float[] {0, .25f, .5f, .75f, 1}) {
                         int x = Math.round(size[0] * fraction), y = Math.round(size[1] * fraction);
                         var point = stage.unproject(new Vector2(x, y));
-                        check(Math.abs(point.x - WindowDiagnostics.skinX(x, 1280, size[0])) <= 1.1f, "Stage/skin click X agreement");
-                        check(Math.abs(point.y - WindowDiagnostics.skinY(y, 720, size[1])) <= 1.1f, "Stage/skin click Y agreement");
+                        check(Math.abs(point.x - MouseCoordinates.skinX(x, 1280, size[0])) <= 1.1f, "Stage/skin click X agreement");
+                        check(Math.abs(point.y - MouseCoordinates.skinY(y, 720, size[1])) <= 1.1f, "Stage/skin click Y agreement");
                     }
                 }
             System.out.println("StageViewportTest passed (logical coordinates, nonuniform resizing, fractional/2x DPI)");

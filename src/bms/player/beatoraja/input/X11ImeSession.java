@@ -1,5 +1,8 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ImeBridge;
+import bms.player.beatoraja.input.text.TextInputSession;
+
 import static org.lwjgl.glfw.GLFW.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;

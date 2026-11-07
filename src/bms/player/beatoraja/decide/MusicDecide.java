@@ -2,7 +2,7 @@ package bms.player.beatoraja.decide;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.skin.*;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;

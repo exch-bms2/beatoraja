@@ -23,6 +23,10 @@ public abstract class BMSPlayerInputDevice {
 		this.type = type;
 	}
 
+	protected final void keyChanged(long time, int key, boolean pressed) {
+		bmsPlayerInputProcessor.keyChanged(this, time, key, pressed);
+	}
+
 	/**
 	 * 入力デバイスのタイプ
 	 *

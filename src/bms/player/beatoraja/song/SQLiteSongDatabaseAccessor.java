@@ -389,7 +389,7 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 							+ " GROUP BY sha256",songhandler, "%" + text + "%");
 			return toSongDataArray(m);
 		} catch (Exception e) {
-			bms.player.beatoraja.input.TextInputDiagnostics.failure("search-db-failure", 0, e);
+			bms.player.beatoraja.input.text.TextInputDiagnostics.failure("search-db-failure", 0, e);
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 

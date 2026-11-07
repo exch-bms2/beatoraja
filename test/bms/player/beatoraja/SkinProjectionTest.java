@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.input.mouse.MouseCoordinates;
+
 import bms.player.beatoraja.input.WindowDiagnostics;
 import com.badlogic.gdx.math.Matrix4;
 
@@ -24,9 +26,9 @@ public final class SkinProjectionTest {
                         near(logicalY * dpi, window[1] * dpi * fraction, 0.002, "Framebuffer Y");
                         double toleranceX = Math.ceil((double) resolution.width / window[0]) + 1;
                         double toleranceY = Math.ceil((double) resolution.height / window[1]) + 1;
-                        near(WindowDiagnostics.skinX((int) Math.round(logicalX), resolution.width, window[0]),
+                        near(MouseCoordinates.skinX((int) Math.round(logicalX), resolution.width, window[0]),
                                 skinX, toleranceX, "Click inverse X");
-                        near(WindowDiagnostics.skinY((int) Math.round(window[1] - logicalY), resolution.height, window[1]),
+                        near(MouseCoordinates.skinY((int) Math.round(window[1] - logicalY), resolution.height, window[1]),
                                 skinY, toleranceY, "Click inverse Y");
                     }
                 }

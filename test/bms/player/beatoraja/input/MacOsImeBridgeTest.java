@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ImeBridge;
+
 /** The prototype must never load native code on an opt-out or non-GLFW editor path. */
 public final class MacOsImeBridgeTest {
     public static void main(String[] args) throws Exception {

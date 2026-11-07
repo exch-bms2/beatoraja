@@ -1,13 +1,13 @@
 package bms.player.beatoraja;
 
-import bms.player.beatoraja.input.ControllerBackend;
+import bms.player.beatoraja.input.controller.ControllerBackend;
 
 import java.util.Arrays;
 
 import com.badlogic.gdx.Input.Keys;
 
 import bms.model.Mode;
-import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
+import bms.player.beatoraja.input.controller.BMControllerInputProcessor.BMKeys;
 import com.badlogic.gdx.math.MathUtils;
 
 /**

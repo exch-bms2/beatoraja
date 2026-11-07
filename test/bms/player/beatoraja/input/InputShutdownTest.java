@@ -1,5 +1,8 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest;
+import bms.player.beatoraja.input.controller.JInputControllerManager;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -97,7 +100,7 @@ public final class InputShutdownTest {
         var nativePoll = new CountDownLatch(1);
         var unblock = new CountDownLatch(1);
         var active = new AtomicBoolean(); var closed = new AtomicInteger();
-        var manager = new JInputControllerManager(new net.java.games.input.Controller[0], () -> {
+        var manager = JInputControllerCompatibilityTest.createManager(new net.java.games.input.Controller[0], () -> {
             active.set(true); nativePoll.countDown();
             try { awaitIgnoringInterrupt(unblock); } finally { active.set(false); }
         }, () -> { check(!active.get(), "Controller release cannot overlap native polling"); closed.incrementAndGet(); }, Runnable::run);
@@ -129,6 +132,24 @@ public final class InputShutdownTest {
 
     private static ThreadFactory recording(AtomicReference<Thread> worker) {
         return task -> { var t = new Thread(task, "Test input polling"); worker.set(t); return t; };
+    }
+
+    /** Test-only access to the shared polling lifecycle from controller fixtures. */
+    public static final class TestPolling implements AutoCloseable {
+        private final InputPollingThread thread;
+
+        public TestPolling(Runnable poll, Runnable release) {
+            thread = new InputPollingThread(poll, release);
+        }
+
+        public TestPolling(Runnable poll, Runnable release, ThreadFactory factory,
+                java.util.function.LongSupplier clock, long timeout) {
+            thread = new InputPollingThread(poll, release, factory, clock, timeout);
+        }
+
+        public void start() { thread.start(); }
+        public boolean stopAndJoin() { return thread.stopAndJoin(); }
+        @Override public void close() { thread.close(); }
     }
     private static void await(CountDownLatch latch) throws InterruptedException { check(latch.await(5, TimeUnit.SECONDS), "Latch timed out"); }
     private static void awaitIgnoringInterrupt(CountDownLatch latch) {

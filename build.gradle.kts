@@ -236,9 +236,9 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.MemoryDiagnosticsTest",
     "bms.player.beatoraja.video.EnduranceStatisticsTest",
     "bms.player.beatoraja.skin.SkinTextClipboardTest",
-    "bms.player.beatoraja.input.TextEditingControlTest",
-    "bms.player.beatoraja.input.TextInputSessionTest",
-    "bms.player.beatoraja.input.TextInputDiagnosticsTest",
+    "bms.player.beatoraja.input.keyboard.TextEditingControlTest",
+    "bms.player.beatoraja.input.text.TextInputSessionTest",
+    "bms.player.beatoraja.input.text.TextInputDiagnosticsTest",
     "bms.player.beatoraja.input.MacOsImeBridgeTest",
     "bms.player.beatoraja.input.WindowsImeBridgeTest",
     "bms.player.beatoraja.input.X11ImeBridgeTest",
@@ -253,7 +253,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.audio.AudioBackendTestAssetsTest",
     "bms.player.beatoraja.build.AudioTestDistributionTest",
     "bms.player.beatoraja.build.FatJarContentTest",
-    "bms.player.beatoraja.input.MouseScratchGeometryTest",
+    "bms.player.beatoraja.input.mouse.MouseScratchGeometryTest",
     "bms.player.beatoraja.WindowModeControllerTest",
     "bms.player.beatoraja.StartupMonitorTest",
     "bms.player.beatoraja.SkinProjectionTest",
@@ -261,15 +261,15 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.OffsetCenterLoaderTest",
     "bms.player.beatoraja.play.NoteOffsetCenterTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
-    "bms.player.beatoraja.input.WaylandCompatibilityTest",
+    "bms.player.beatoraja.input.mouse.WaylandCompatibilityTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
-    "bms.player.beatoraja.input.KeyboardEventQueueTest",
-    "bms.player.beatoraja.input.WindowsKeyboardMappingTest",
+    "bms.player.beatoraja.input.keyboard.KeyboardEventQueueTest",
+    "bms.player.beatoraja.input.keyboard.WindowsKeyboardMappingTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
-    "bms.player.beatoraja.input.ControllerInputDiagnosticsTest",
-    "bms.player.beatoraja.input.ControllerEventQueueTest",
-    "bms.player.beatoraja.input.MouseScratchDiagnosticsTest",
-    "bms.player.beatoraja.input.MouseMotionQueueTest",
+    "bms.player.beatoraja.input.controller.ControllerInputDiagnosticsTest",
+    "bms.player.beatoraja.input.controller.ControllerEventQueueTest",
+    "bms.player.beatoraja.input.mouse.MouseScratchDiagnosticsTest",
+    "bms.player.beatoraja.input.mouse.MouseMotionQueueTest",
     "bms.player.beatoraja.external.DesktopActionsTest",
     "bms.player.beatoraja.ResourcePoolTest",
     "bms.player.beatoraja.InputDataValidationTest",
@@ -298,15 +298,16 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.JSONSkinResourceLifecycleTest",
     "bms.player.beatoraja.skin.json.JSONSkinLoaderTest",
     "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
-    "bms.player.beatoraja.input.SkinMouseInputTest",
-    "bms.player.beatoraja.input.JInputControllerCompatibilityTest",
-    "bms.player.beatoraja.input.JInputQueueRecoveryTest",
-    "bms.player.beatoraja.input.ControllerBackendTest",
-    "bms.player.beatoraja.input.ControllerLibraryCompatibilityTest",
-    "bms.player.beatoraja.input.SdlControllerManagerTest",
-    "bms.player.beatoraja.input.SdlRawControllerTest",
-    "bms.player.beatoraja.input.SdlRawAsyncControllerTest",
-    "bms.player.beatoraja.input.SdlGamepadCompatibilityTest",
+    "bms.player.beatoraja.input.mouse.SkinMouseInputTest",
+    "bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest",
+    "bms.player.beatoraja.input.controller.JInputQueueRecoveryTest",
+    "bms.player.beatoraja.input.controller.ControllerBackendTest",
+    "bms.player.beatoraja.input.controller.ControllerLibraryCompatibilityTest",
+    "bms.player.beatoraja.input.controller.SdlControllerManagerTest",
+    "bms.player.beatoraja.input.controller.SdlRawControllerTest",
+    "bms.player.beatoraja.input.controller.SdlRawAsyncControllerTest",
+    "bms.player.beatoraja.input.controller.SdlGamepadCompatibilityTest",
+    "bms.player.beatoraja.input.controller.SdlHotplugTest",
     "bms.player.beatoraja.skin.lua.MainStateInputLuaApiTest",
     "bms.player.beatoraja.skin.lua.SkinLuaIoSymlinkTest",
     "bms.player.beatoraja.skin.lua.SkinCompatibilityApiTest",
@@ -846,7 +847,7 @@ tasks.register<JavaExec>("controllerNativeSmokeTest") {
     description = "Verify actual JInput plugin loading and SDL init/update/quit; no physical-input validation."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.ControllerLibraryCompatibilityTest")
+    mainClass.set("bms.player.beatoraja.input.controller.ControllerLibraryCompatibilityTest")
     args("--native")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
@@ -907,7 +908,7 @@ tasks.register<JavaExec>("lwjgl3KeyboardQueueSmokeTest") {
     description = "Verify queued keyboard edges and poll timestamps through real GLFW callbacks."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.Lwjgl3KeyboardQueueSmokeTest")
+    mainClass.set("bms.player.beatoraja.input.keyboard.Lwjgl3KeyboardQueueSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 
@@ -916,7 +917,7 @@ tasks.register<JavaExec>("sdlRawNativeTest") {
     description = "Verify bundled SDL3 raw joystick events using an isolated virtual device."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    mainClass.set("bms.player.beatoraja.input.controller.SdlRawNativeTest")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
@@ -925,7 +926,7 @@ tasks.register<JavaExec>("sdlRawFatJarTest") {
     group = "verification"
     dependsOn(fatJar, tasks.testClasses)
     classpath = sourceSets.test.get().output + files(fatJar.flatMap { it.archiveFile })
-    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    mainClass.set("bms.player.beatoraja.input.controller.SdlRawNativeTest")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
@@ -935,7 +936,7 @@ tasks.register<JavaExec>("sdlRawAsyncNativeTest") {
     description = "Verify actual SDL3 acquisition on the input worker with no render loop."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    mainClass.set("bms.player.beatoraja.input.controller.SdlRawNativeTest")
     args("--async")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
@@ -945,7 +946,7 @@ tasks.register<JavaExec>("sdlRawAsyncFatJarTest") {
     group = "verification"
     dependsOn(fatJar, tasks.testClasses)
     classpath = sourceSets.test.get().output + files(fatJar.flatMap { it.archiveFile })
-    mainClass.set("bms.player.beatoraja.input.SdlRawNativeTest")
+    mainClass.set("bms.player.beatoraja.input.controller.SdlRawNativeTest")
     args("--async")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
@@ -956,7 +957,7 @@ tasks.register<JavaExec>("sdlGamepadNativeTest") {
     description = "Verify SDL_ASYNC mapping, legacy IDs and worker acquisition with a real SDL3 virtual Gamepad."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.SdlGamepadNativeTest")
+    mainClass.set("bms.player.beatoraja.input.controller.SdlGamepadNativeTest")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
@@ -965,7 +966,7 @@ tasks.register<JavaExec>("sdlGamepadFatJarTest") {
     group = "verification"
     dependsOn(fatJar, tasks.testClasses)
     classpath = sourceSets.test.get().output + files(fatJar.flatMap { it.archiveFile })
-    mainClass.set("bms.player.beatoraja.input.SdlGamepadNativeTest")
+    mainClass.set("bms.player.beatoraja.input.controller.SdlGamepadNativeTest")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
@@ -975,7 +976,7 @@ tasks.register<JavaExec>("lwjgl3WindowsKeyboardTest") {
     description = "Verify Windows UNKNOWN-key aliases through real libGDX state, key config and judgment FIFO."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.Lwjgl3WindowsKeyboardTest")
+    mainClass.set("bms.player.beatoraja.input.keyboard.Lwjgl3WindowsKeyboardTest")
     systemProperty("beatoraja.inputDiagnostics", "true")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
@@ -1005,7 +1006,7 @@ tasks.register<JavaExec>("lwjgl3MouseScratchDiagnosticsSmokeTest") {
     description = "Verify mouse scratch observations through real GLFW callbacks and worker consumption."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.Lwjgl3MouseScratchDiagnosticsSmokeTest")
+    mainClass.set("bms.player.beatoraja.input.mouse.Lwjgl3MouseScratchDiagnosticsSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 
@@ -1014,7 +1015,7 @@ tasks.register<JavaExec>("lwjgl3MouseScratchQueueSmokeTest") {
     description = "Verify sampled mouse motion FIFO through real GLFW and the mapped judgment stream."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.Lwjgl3MouseScratchQueueSmokeTest")
+    mainClass.set("bms.player.beatoraja.input.mouse.Lwjgl3MouseScratchQueueSmokeTest")
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

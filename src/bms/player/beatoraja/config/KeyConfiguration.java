@@ -1,5 +1,7 @@
 package bms.player.beatoraja.config;
 
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
+
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -21,7 +23,8 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayModeConfig.*;
 import bms.player.beatoraja.input.*;
-import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.controller.BMControllerInputProcessor;
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 /**
  * キーコンフィグ画面

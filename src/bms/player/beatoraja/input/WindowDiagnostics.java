@@ -68,15 +68,6 @@ public final class WindowDiagnostics {
                 + ", initialProjectionScale=" + xScale + "x" + yScale + ", matchesConfigured=" + matches);
     }
 
-    /** Same integer rounding as the legacy click mapping; minimized windows are not interactive. */
-    public static int skinX(int x, int skinWidth, int windowWidth) {
-        return windowWidth > 0 ? (int) ((long) x * skinWidth / windowWidth) : 0;
-    }
-
-    public static int skinY(int y, int skinHeight, int windowHeight) {
-        return windowHeight > 0 ? skinHeight - (int) ((long) y * skinHeight / windowHeight) : 0;
-    }
-
     public record Snapshot(int width, int height, int bufferWidth, int bufferHeight, int x, int y,
             float scaleX, float scaleY, int monitorX, int monitorY,
             boolean fullscreen, boolean focused, boolean iconified) {

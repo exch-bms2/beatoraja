@@ -1,12 +1,12 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.input.ImeBridge;
-import bms.player.beatoraja.input.TextInputSession;
-import bms.player.beatoraja.input.TextInputDiagnostics;
 import bms.player.beatoraja.input.MacOsImeBridge;
 import bms.player.beatoraja.input.WindowsImeBridge;
 import bms.player.beatoraja.input.X11ImeBridge;
+import bms.player.beatoraja.input.text.ImeBridge;
+import bms.player.beatoraja.input.text.TextInputDiagnostics;
+import bms.player.beatoraja.input.text.TextInputSession;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;

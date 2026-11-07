@@ -1,10 +1,15 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.*;
+import bms.player.beatoraja.input.text.ImeBridge;
+import bms.player.beatoraja.input.text.MockImeBridge;
+import bms.player.beatoraja.input.text.TextInputSession;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;

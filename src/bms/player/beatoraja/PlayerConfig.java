@@ -1,6 +1,6 @@
 package bms.player.beatoraja;
 
-import bms.player.beatoraja.input.ControllerBackend;
+import bms.player.beatoraja.input.controller.ControllerBackend;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

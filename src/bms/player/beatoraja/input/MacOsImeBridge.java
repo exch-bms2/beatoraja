@@ -1,5 +1,8 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.ImeBridge;
+import bms.player.beatoraja.input.text.TextInputSession;
+
 import java.nio.file.Path;
 import java.util.logging.Logger;
 import com.badlogic.gdx.Gdx;

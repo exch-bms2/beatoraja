@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.input.text.TextInputSession;
+
 import java.nio.charset.StandardCharsets;
 
 /** Production C callbacks/JNI with fake Xlib server functions, NOT an actual Linux IME. */

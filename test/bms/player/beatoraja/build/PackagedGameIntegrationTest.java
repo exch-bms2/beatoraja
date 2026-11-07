@@ -62,15 +62,15 @@ public final class PackagedGameIntegrationTest {
             PackagedGameSupport.check(launcher.exitValue() == 0, "Actual Launcher exit=" + launcher.exitValue());
             discover(root, observed);
             validate(root, launcher.pid());
-            if (config.getControllerBackend() == bms.player.beatoraja.input.ControllerBackend.SDL) {
+            if (config.getControllerBackend() == bms.player.beatoraja.input.controller.ControllerBackend.SDL) {
                 String gameLog = Files.readString(diagnostics.resolve("launcher-game.log"));
                 PackagedGameSupport.check(gameLog.contains("Controller backend=SDL/Jamepad, devices=")
                         && !gameLog.contains("SDL controller initialization failed")
                         && gameLog.contains("SDL controller native shutdown complete"), "SDL native initialization/update/shutdown was not verified");
                 PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=SDL"), "Game lost SDL selection");
             }
-            if (config.getControllerBackend().bindingBackend() == bms.player.beatoraja.input.ControllerBackend.SDL_RAW
-                    || config.getControllerBackend() == bms.player.beatoraja.input.ControllerBackend.SDL_ASYNC) {
+            if (config.getControllerBackend().bindingBackend() == bms.player.beatoraja.input.controller.ControllerBackend.SDL_RAW
+                    || config.getControllerBackend() == bms.player.beatoraja.input.controller.ControllerBackend.SDL_ASYNC) {
                 String backend = config.getControllerBackend().name();
                 String gameLog = Files.readString(diagnostics.resolve("launcher-game.log"));
                 PackagedGameSupport.check(gameLog.contains("Controller backend=" + backend + ", devices=")
@@ -78,7 +78,7 @@ public final class PackagedGameIntegrationTest {
                         && !gameLog.contains(backend + " polling failed")
                         && gameLog.contains(backend + " controller native shutdown complete"), "SDL3 controller native initialization/update/shutdown was not verified");
                 PackagedGameSupport.check(Files.readString(root.resolve("test-evidence/game-runtime.txt")).contains("controllerBackend=" + backend), "Game lost SDL_RAW selection");
-                if (config.getControllerBackend() != bms.player.beatoraja.input.ControllerBackend.SDL_RAW)
+                if (config.getControllerBackend() != bms.player.beatoraja.input.controller.ControllerBackend.SDL_RAW)
                     PackagedGameSupport.check(gameLog.contains(backend + " input polling started: thread=Input polling"),
                             "SDL3 async backend did not acquire on the real input worker");
             }
