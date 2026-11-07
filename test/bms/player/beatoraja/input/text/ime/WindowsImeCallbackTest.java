@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 /** Native libffi round-trip; validates marshaling, NOT the Windows OS or its IME. */
 public final class WindowsImeCallbackTest {

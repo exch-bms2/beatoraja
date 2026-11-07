@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 import bms.player.beatoraja.input.text.ImeBridge;
 

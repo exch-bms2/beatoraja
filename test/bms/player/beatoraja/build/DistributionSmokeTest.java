@@ -104,9 +104,10 @@ public final class DistributionSmokeTest {
             check(jar.stream().noneMatch(e -> e.getName().startsWith("audio/mp3/")
                     || e.getName().startsWith("bms/player/beatoraja/audio/Mp3CompatibilityTest")
                     || e.getName().equals("bms/player/beatoraja/audio/Mp3TestAssets.class")), "Never ship MP3 test fixtures/classes");
-            for (String type : List.of("WindowsImeBridge", "WindowsImeSession", "WindowsImeNative", "WindowsImeCallback", "WindowsImeCallbackI"))
-                check(jar.getEntry("bms/player/beatoraja/input/" + type + ".class") != null, "Missing Windows IME component: " + type);
-            check(jar.getEntry("bms/player/beatoraja/input/WindowsImeTestSupport.class") == null, "Never ship fake IMM transport");
+            for (String type : List.of("WindowsImeBridge", "WindowsImeSession", "WindowsImeNative",
+                    "WindowsImePlatform", "WindowsImeCallback", "WindowsImeCallbackI"))
+                check(jar.getEntry("bms/player/beatoraja/input/text/ime/" + type + ".class") != null, "Missing Windows IME component: " + type);
+            check(jar.getEntry("bms/player/beatoraja/input/text/ime/WindowsImeTestSupport.class") == null, "Never ship fake IMM transport");
             check(jar.getEntry("bms/player/beatoraja/audio/AudioDiagnostics.class") != null, "Missing audio diagnostics");
             check(jar.getEntry("bms/player/beatoraja/FramePacingDiagnostics.class") != null, "Missing frame pacing diagnostics");
             check(jar.getEntry("bms/player/beatoraja/input/controller/JInputControllerManager.class") != null, "Missing JInput manager");

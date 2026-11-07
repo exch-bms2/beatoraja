@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 import org.lwjgl.system.Callback;
 

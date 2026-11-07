@@ -1,9 +1,9 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.TextInputSession;
 
-import static bms.player.beatoraja.input.WindowsImeSession.*;
+import static bms.player.beatoraja.input.text.ime.WindowsImeSession.*;
 import java.util.Arrays;
 
 /** Synthetic IMM ordering/model/lifecycle tests, runnable on every supported OS. */

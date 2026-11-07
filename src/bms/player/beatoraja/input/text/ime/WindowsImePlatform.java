@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 /** Injectable Win32 boundary; implementations must release each borrowed HIMC. */
 interface WindowsImePlatform {

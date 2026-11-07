@@ -240,7 +240,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.text.TextInputSessionTest",
     "bms.player.beatoraja.input.text.TextInputDiagnosticsTest",
     "bms.player.beatoraja.input.MacOsImeBridgeTest",
-    "bms.player.beatoraja.input.WindowsImeBridgeTest",
+    "bms.player.beatoraja.input.text.ime.WindowsImeBridgeTest",
     "bms.player.beatoraja.input.X11ImeBridgeTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
@@ -714,7 +714,7 @@ tasks.register<JavaExec>("windowsImeCallbackTest") {
     description = "Check six-argument SUBCLASSPROC FFI marshaling on the host ABI (not Windows IME)."
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.WindowsImeCallbackTest")
+    mainClass.set("bms.player.beatoraja.input.text.ime.WindowsImeCallbackTest")
 }
 val x11TestSupported = System.getProperty("os.name").startsWith("Linux") ||
     (System.getProperty("os.name").startsWith("Mac") && providers.gradleProperty("x11Headers").isPresent)
@@ -797,7 +797,7 @@ tasks.register<JavaExec>("windowsImeWindowTest") {
     onlyIf { System.getProperty("os.name").startsWith("Windows") }
     dependsOn(tasks.testClasses)
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("bms.player.beatoraja.input.WindowsImeWindowTest")
+    mainClass.set("bms.player.beatoraja.input.text.ime.WindowsImeWindowTest")
     timeout.set(Duration.ofMinutes(3))
 }
 tasks.register<JavaExec>("macOsImeIntegrationTest") {

@@ -2,7 +2,7 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.MacOsImeBridge;
-import bms.player.beatoraja.input.WindowsImeBridge;
+import bms.player.beatoraja.input.text.ime.WindowsImeBridge;
 import bms.player.beatoraja.input.X11ImeBridge;
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.TextInputDiagnostics;

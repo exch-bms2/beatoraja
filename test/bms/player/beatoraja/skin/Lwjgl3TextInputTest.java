@@ -10,6 +10,7 @@ import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.MockImeBridge;
 import bms.player.beatoraja.input.text.TextInputSession;
+import bms.player.beatoraja.input.text.ime.WindowsImeTestSupport;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;

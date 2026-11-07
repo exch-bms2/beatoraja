@@ -1,4 +1,4 @@
-package bms.player.beatoraja.input;
+package bms.player.beatoraja.input.text.ime;
 
 import java.lang.invoke.MethodHandles;
 import org.lwjgl.system.APIUtil;

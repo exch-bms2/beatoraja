@@ -45,7 +45,7 @@ public final class LwjglRuntimeCompatibilityTest {
             }
         }
         check(ALC10.alcGetCurrentContext() == 0, "Probe must not create an OpenAL context/device");
-        bms.player.beatoraja.input.WindowsImeCallbackTest.main(new String[0]);
+        bms.player.beatoraja.input.text.ime.WindowsImeCallbackTest.main(new String[0]);
         System.out.println("LwjglRuntimeCompatibilityTest passed (" + Version.getVersion()
                 + ", " + GLFW.glfwGetVersionString() + "; JNI memory/jemalloc/STB/OpenAL loader and callback ABI; NO window/device)");
     }
