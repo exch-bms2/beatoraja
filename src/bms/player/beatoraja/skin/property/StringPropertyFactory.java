@@ -12,6 +12,7 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
+import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
@@ -77,6 +78,10 @@ public class StringPropertyFactory {
 	}
 
 	private static SongData selectedReviewChart(MainState state) {
+		if (state instanceof MusicResult result) {
+			var review = result.getEditableLevelReview();
+			return review != null ? review.song() : null;
+		}
 		return state instanceof MusicSelector selector && selector.getSelectedBar() instanceof SongBar bar
 				&& bar.existsSong() && !bar.getSongData().getSha256().isEmpty() ? bar.getSongData() : null;
 	}
@@ -106,6 +111,12 @@ public class StringPropertyFactory {
 
 		@Override
 		public StringWriter bind(MainState state) {
+			if (state instanceof MusicResult result) {
+				var target = result.getEditableLevelReview();
+				if (target == null) return null;
+				MainController main = result.main;
+				return (owner, value) -> writeReviewLevel(main, main.getSongDatabase(), target.song(), target.lnmode(), value);
+			}
 			SongData song = selectedReviewChart(state);
 			if (song == null) return null;
 			SongDatabaseAccessor database = ((MusicSelector) state).getSongDatabase();

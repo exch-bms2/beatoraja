@@ -454,6 +454,11 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 	}
 
 	@Override
+	public SongReview getSongReview(String sha256) {
+		return reviewdb != null ? reviewdb.getSongReview(sha256) : null;
+	}
+
+	@Override
 	public boolean setSongReviewLevel(SongData song, double level) {
 		if (reviewdb == null || song == null || !reviewdb.setLevelReview(song.getSha256(), level)) {
 			return false;

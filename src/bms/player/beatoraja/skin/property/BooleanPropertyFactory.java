@@ -348,6 +348,8 @@ public class BooleanPropertyFactory {
 	
 	public enum BooleanType {
 
+		result_level_review_editable(OPTION_RESULT_LEVEL_REVIEW_EDITABLE, DrawProperty.TYPE_NO_STATIC,
+				state -> state instanceof MusicResult result && result.getEditableLevelReview() != null),
 		table_song(OPTION_TABLE_SONG, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
 				(state) -> (state.resource.getTablename().length() != 0)),
 		randomselectbar(OPTION_RANDOMSELECTBAR, DrawProperty.TYPE_NO_STATIC,

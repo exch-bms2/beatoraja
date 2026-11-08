@@ -32,6 +32,9 @@ import bms.player.beatoraja.song.SongData;
 public class MusicResult extends AbstractResult {
 
 	private ResultKeyProperty property;
+	private LevelReviewTarget levelReviewTarget;
+
+	public record LevelReviewTarget(SongData song, int lnmode) {}
 	
 	private List<IRSendStatus> irSendStatus = new ArrayList<IRSendStatus>();
 
@@ -68,7 +71,31 @@ public class MusicResult extends AbstractResult {
 		
 		gaugeType = resource.getGrooveGauge().getType();
 
+		prepareLevelReview();
 		loadSkin(SkinType.RESULT);
+	}
+
+	void prepareLevelReview() {
+		levelReviewTarget = null;
+		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
+				|| resource.getCourseBMSModels() != null || resource.getScoreData() == null) {
+			return;
+		}
+		var song = resource.getSongdata();
+		var model = resource.getBMSModel();
+		var database = main.getSongDatabase();
+		if (song == null || model == null || database == null || song.getSha256().isEmpty()
+				|| !song.getSha256().equals(model.getSHA256())) {
+			return;
+		}
+		int lnmode = song.hasUndefinedLongNote() ? model.getLntype() : 0;
+		if (lnmode < 0 || lnmode > 2) return;
+		song.setSongReview(database.getSongReview(song.getSha256()));
+		levelReviewTarget = new LevelReviewTarget(song, lnmode);
+	}
+
+	public LevelReviewTarget getEditableLevelReview() {
+		return state != STATE_IR_PROCESSING && !timer.isTimerOn(TIMER_FADEOUT) ? levelReviewTarget : null;
 	}
 	
 	public void prepare() {
@@ -260,6 +287,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void input() {
+		if (getSkin() != null && getSkin().isTextInputActive()) return;
 		super.input();
 		long time = timer.getNowTime();
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();

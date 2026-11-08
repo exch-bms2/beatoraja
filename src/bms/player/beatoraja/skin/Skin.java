@@ -390,6 +390,10 @@ public class Skin {
 		renderer = new SkinObjectRenderer(sprite, scissorCamera);
 	}
 
+	public boolean isTextInputActive() {
+		return textInput != null && textInput.isActive();
+	}
+
 	public void mousePressed(MainState state, int button, int x, int y) {
 		if (textInput != null) {
 			textInput.commitIfOutside(x, y);

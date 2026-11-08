@@ -53,6 +53,10 @@ public interface SongDatabaseAccessor {
 		return false;
 	}
 
+	default SongReview getSongReview(String sha256) {
+		return null;
+	}
+
 	public SongData[] getSongDatasByText(String text);
 
 	/**

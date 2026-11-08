@@ -209,6 +209,10 @@ class SkinTextInput {
 		return target == text;
 	}
 
+	boolean isActive() {
+		return target != null;
+	}
+
 	void dispose() {
 		pendingFocus = null;
 		try {

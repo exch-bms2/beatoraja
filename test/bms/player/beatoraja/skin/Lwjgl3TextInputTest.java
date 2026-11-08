@@ -13,11 +13,17 @@ import bms.player.beatoraja.input.text.TextInputSession;
 import bms.player.beatoraja.input.text.ime.MacOsIme;
 import bms.player.beatoraja.input.text.ime.WindowsImeTestSupport;
 import bms.player.beatoraja.input.text.ime.X11ImeTestSupport;
+import bms.player.beatoraja.result.MusicResult;
+import bms.player.beatoraja.result.MusicResultSkin;
+import bms.player.beatoraja.result.ResultKeyProperty;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.Clipboard;
 import org.lwjgl.glfw.GLFW;
+
+import static bms.player.beatoraja.skin.SkinProperty.TIMER_FADEOUT;
+import static bms.player.beatoraja.skin.SkinProperty.TIMER_STARTINPUT;
 
 /** Committed-character callbacks, not an OS IME automation; never reads/writes the user's clipboard. */
 public final class Lwjgl3TextInputTest {
@@ -137,7 +143,54 @@ public final class Lwjgl3TextInputTest {
             windowsIme(state);
             x11Ime(state, source, handle, input);
             if (Boolean.getBoolean("beatoraja.test.macosIme")) macIme(state);
+            resultEnter(main, input, source, handle);
         } finally { editor.dispose(); state.dispose(); }
+    }
+
+    private static void resultEnter(MainController main, BMSPlayerInputProcessor input, PollingLwjgl3Input source,
+            long handle) throws Exception {
+        var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
+        resource.setScoreData(new ScoreData());
+        KeyboardQueueTestSupport.set(main, MainController.class, "resource", resource);
+        var result = new MusicResult(main) {
+            @Override public String getSound(SystemSoundManager.SoundType sound) { return null; }
+        };
+        var header = new SkinHeader();
+        header.setSourceResolution(Resolution.SD);
+        header.setDestinationResolution(Resolution.SD);
+        var skin = new MusicResultSkin(header);
+        skin.setInput(-1);
+        result.setSkin(skin);
+        KeyboardQueueTestSupport.set(result, MusicResult.class, "property", ResultKeyProperty.BEAT_7K);
+        result.timer.setMainState(result);
+        result.timer.setTimerOn(TIMER_STARTINPUT);
+        var saved = new AtomicReference<String>();
+        var review = text("", 32, (s, value) -> saved.set(value));
+        review.draw = true;
+        KeyboardQueueTestSupport.set(skin, Skin.class, "objectarray", new SkinObject[]{review});
+        try {
+            skin.mousePressed(result, 0, 90, 70);
+            check(skin.isTextInputActive(), "Result text editor opens from its skin");
+            characters(handle, "12.5"); source.update();
+            key(handle, GLFW.GLFW_KEY_ENTER, GLFW.GLFW_PRESS); source.update();
+            input.getKeyBoardInputProcesseor().poll(1_000_000);
+            result.input();
+            check(!result.timer.isTimerOn(TIMER_FADEOUT), "Enter cannot leave a result while editing");
+            result.getStage().act(0);
+            input.getKeyBoardInputProcesseor().poll(1_010_000);
+            result.input();
+            check("12.5".equals(saved.get()) && !skin.isTextInputActive() && !result.timer.isTimerOn(TIMER_FADEOUT),
+                    "The submitted Enter commits only the review, even while held after focus leaves");
+            key(handle, GLFW.GLFW_KEY_ENTER, GLFW.GLFW_RELEASE); source.update();
+            input.getKeyBoardInputProcesseor().poll(1_020_000);
+            key(handle, GLFW.GLFW_KEY_ENTER, GLFW.GLFW_PRESS); source.update();
+            input.getKeyBoardInputProcesseor().poll(1_030_000);
+            result.input();
+            check(result.timer.isTimerOn(TIMER_FADEOUT), "A new Enter press still closes the result normally");
+        } finally {
+            key(handle, GLFW.GLFW_KEY_ENTER, GLFW.GLFW_RELEASE); source.update();
+            result.dispose();
+        }
     }
 
     private static void x11Ime(MainState state, PollingLwjgl3Input source, long handle, BMSPlayerInputProcessor input) {

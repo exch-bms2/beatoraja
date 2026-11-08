@@ -17,7 +17,7 @@ public abstract class AbstractResult extends MainState {
 	/**
 	 * 状態
 	 */
-	protected int state;
+	protected volatile int state;
 
 	public static final int STATE_OFFLINE = 0;
 	/**
