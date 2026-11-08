@@ -732,7 +732,6 @@ public class Config implements Validatable {
 			return new String[0];
 		}
 		return java.util.Arrays.stream(values)
-				.limit(MAX_CONFIG_LIST_ENTRIES)
 				.filter(Config::isUsablePath)
 				.toArray(String[]::new);
 	}
