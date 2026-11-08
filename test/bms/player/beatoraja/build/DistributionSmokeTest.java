@@ -90,6 +90,8 @@ public final class DistributionSmokeTest {
             check(jar.getManifest().getMainAttributes().getValue("Main-Class")
                     .equals("bms.player.beatoraja.DesktopLauncher"), "Non-JavaFX desktop entry point");
             check(jar.getEntry("bms/player/beatoraja/MainLoader.class") != null, "Missing application class");
+            check(jar.getEntry("bms/player/beatoraja/ir/IRReview.class") != null, "Missing IR review API");
+            check(jar.getEntry("bms/player/beatoraja/ir/IRReviewSync.class") != null, "Missing IR review synchronizer");
             check(jar.getEntry("bms/player/beatoraja/StartupMonitor.class") != null, "Missing startup monitor resolver");
             for (String resource : List.of("resources/UIResources.properties", "resources/UIResources_ja_JP.properties")) {
                 String text;

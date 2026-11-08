@@ -86,6 +86,7 @@ public final class IRWorkerMain {
 				case METHOD_SEND_PLAY_DATA -> objectResponse(connection.sendPlayData(
 						request.chart != null ? request.chart.toIRChartData() : null,
 						request.score != null ? request.score.toIRScoreData() : null));
+				case METHOD_SET_REVIEW -> reviewResponse(connection.setReview(request.review.toIRReview()));
 				case METHOD_SEND_COURSE_PLAY_DATA -> objectResponse(connection.sendCoursePlayData(
 						request.course != null ? request.course.toIRCourseData() : null,
 						request.score != null ? request.score.toIRScoreData() : null));
@@ -137,6 +138,12 @@ public final class IRWorkerMain {
 
 	private static Response objectResponse(IRResponse<Object> irResponse) {
 		return base(irResponse);
+	}
+
+	private static Response reviewResponse(IRResponse<Object> irResponse) {
+		Response response = base(irResponse);
+		response.reviewUnsupported = irResponse == IRReview.UNSUPPORTED;
+		return response;
 	}
 
 	private static Response textResponse(String text) {

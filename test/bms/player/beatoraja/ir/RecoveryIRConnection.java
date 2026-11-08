@@ -5,18 +5,20 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 /** Legacy-method-only plugin fixture; inherited optional IR APIs exercise binary-compatible defaults. */
-public final class RecoveryIRConnection extends TestIRConnectionBase {
+public class RecoveryIRConnection extends TestIRConnectionBase {
     public static final String NAME = "Recovery fixture";
     private boolean loggedIn;
 
     public static void main(String[] args) throws Exception {
-        System.setProperty("fixture.events", args[0]); System.setProperty("fixture.mode", args[1]);
+        boolean reviews = args[1].startsWith("review-");
+        System.setProperty("fixture.events", args[0]);
+        System.setProperty("fixture.mode", reviews ? args[1].substring("review-".length()) : args[1]);
         if (args[1].equals("no-read")) { Thread.sleep(60_000); return; }
         if (args[1].equals("malformed")) {
             new java.io.BufferedReader(new java.io.InputStreamReader(System.in)).readLine();
             System.out.println("{broken-json"); System.out.flush(); Thread.sleep(60_000); return;
         }
-        IRWorkerMain.main(new String[]{NAME});
+        IRWorkerMain.main(new String[]{reviews ? ReviewRecoveryIRConnection.NAME : NAME});
     }
     private static void event(String text) {
         try { Files.writeString(Path.of(System.getProperty("fixture.events")), text + "\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND); }
@@ -47,7 +49,7 @@ public final class RecoveryIRConnection extends TestIRConnectionBase {
     }
     @Override public IRResponse<Object> sendPlayData(IRChartData chart, IRScoreData score) { return submission("send"); }
     @Override public IRResponse<Object> sendCoursePlayData(IRCourseData course, IRScoreData score) { return submission("course-send"); }
-    private IRResponse<Object> submission(String method) {
+    protected IRResponse<Object> submission(String method) {
         event(method);
         if (mode().equals("accept-hang")) pause();
         return response(loggedIn && !mode().equals("negative-response"), "negative-response".equals(mode()) ? "Read timed out" : "sent", null);

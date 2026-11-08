@@ -9,6 +9,7 @@ import java.util.concurrent.*;
 /** Actual child JVM/pipe regressions, no network, IR accounts, GUI or production data. */
 public final class IsolatedIRConnectionTest {
     public static void main(String[] args) throws Exception {
+        verifyReviews();
         for (String fault : List.of("crash", "timeout")) {
             try (var f = new Fixture(fault)) {
                 f.login();
@@ -95,7 +96,33 @@ public final class IsolatedIRConnectionTest {
                 check(!login.get(4, TimeUnit.SECONDS).isSucceeded(), "Close during startup must discard the new generation");
             } finally { allowStart.countDown(); executor.shutdownNow(); executor.awaitTermination(4, TimeUnit.SECONDS); }
         }
-        System.out.println("IsolatedIRConnectionTest passed (real legacy-method worker, reauthentication, crash/read/write timeout, concurrent close/requests, unknown submission outcome)");
+        System.out.println("IsolatedIRConnectionTest passed (legacy and review-capable workers, reauthentication, crash/read/write timeout, concurrent close/requests, unknown submission outcome)");
+    }
+
+    private static void verifyReviews() throws Exception {
+        String hash = "a".repeat(64);
+        var review = new IRReview(hash, 12.5, null, null);
+        try (var f = new Fixture("normal")) {
+            check(!f.connection.setReview(review).isSucceeded() && f.processes.isEmpty(), "Review requires prior login");
+            f.login();
+            check(f.connection.setReview(review) == IRReview.UNSUPPORTED, "Legacy plugin inherits the unsupported response");
+            check(f.connection.sendPlayData(null, null).isSucceeded(), "Unsupported review does not break existing score uploads");
+        }
+        try (var f = new Fixture("review-normal")) {
+            f.login();
+            f.processes.get(0).destroyForcibly().waitFor();
+            check(f.connection.setReview(review).isSucceeded() && f.count("login:user-a") == 2,
+                    "Review is sent after worker reauthentication");
+            check(f.count("review:" + hash + ":12.5:null:null") == 1, "Level-only patch survives the worker boundary");
+            check(f.connection.setReview(new IRReview(hash, 0.0, "", false)).isSucceeded()
+                    && f.count("review:" + hash + ":0.0::false") == 1, "Explicit clears survive the worker boundary");
+        }
+        try (var f = new Fixture("review-accept-hang")) {
+            f.login();
+            check(IRSubmissionResponse.isOutcomeUnknown(f.connection.setReview(review)), "Review timeout is ambiguous");
+            check(f.connection.getTableDatas().isSucceeded() && f.count("review:" + hash + ":12.5:null:null") == 1,
+                    "Recover without automatically resending the timed-out review");
+        }
     }
     private static final class Fixture implements AutoCloseable {
         final Path root = Files.createTempDirectory("isolated-ir-recovery-");
@@ -109,7 +136,9 @@ public final class IsolatedIRConnectionTest {
             Path plugin = root.resolve("legacy-plugin.jar");
             try (var jar = new java.util.jar.JarOutputStream(Files.newOutputStream(plugin))) {
                 jar.putNextEntry(new java.util.jar.JarEntry("bms/player/beatoraja/ir/")); jar.closeEntry();
-                for (String name : List.of("RecoveryIRConnection", "RecoveryIRConnection$1", "TestIRConnectionBase")) {
+                var classes = new ArrayList<>(List.of("RecoveryIRConnection", "RecoveryIRConnection$1", "TestIRConnectionBase"));
+                if (mode.startsWith("review-")) classes.add("ReviewRecoveryIRConnection");
+                for (String name : classes) {
                     String resource = "bms/player/beatoraja/ir/" + name + ".class";
                     jar.putNextEntry(new java.util.jar.JarEntry(resource));
                     try (var input = IsolatedIRConnectionTest.class.getClassLoader().getResourceAsStream(resource)) { input.transferTo(jar); }

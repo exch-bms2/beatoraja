@@ -36,6 +36,8 @@ public class IRConfigurationView implements Initializable {
 	private CheckBox importrival;
 	@FXML
 	private CheckBox importscore;
+	@FXML
+	private CheckBox syncReviewLevel;
 	
 	private Map<String, IRConfig> irmap = new HashMap<String, IRConfig>();
 	
@@ -59,6 +61,8 @@ public class IRConfigurationView implements Initializable {
 	
     public void update(PlayerConfig player) {
     	this.player = player;
+		currentir = null;
+		irmap.clear();
     	
     	for(IRConfig ir : player.getIrconfig()) {
     		irmap.put(ir.getIrname(), ir);
@@ -110,7 +114,11 @@ public class IRConfigurationView implements Initializable {
 			currentir.setIrsend(irsend.getValue());
 			currentir.setImportscore(importscore.isSelected());
 			currentir.setImportrival(importrival.isSelected());
+			currentir.setSyncReviewLevel(syncReviewLevel.isSelected());
 		}
+
+		String selected = irname.getValue();
+		syncReviewLevel.setDisable(selected == null || !selected.equals(primary));
 		
     	String homeurl = IRConnectionManager.getHomeURL(irname.getValue());
 		irhome.setText(homeurl);
@@ -127,7 +135,8 @@ public class IRConfigurationView implements Initializable {
 		irsend.setValue(currentir.getIrsend());
 		importscore.setSelected(currentir.isImportscore());
 		importrival.setSelected(currentir.isImportrival());
+		syncReviewLevel.setSelected(currentir.isSyncReviewLevel());
 
-		primarybutton.setVisible(!(primary != null && irname.getValue().equals(primary)));
+		primarybutton.setVisible(selected != null && !selected.equals(primary));
 	}
 }

@@ -73,6 +73,11 @@ public interface IRConnection {
 	 */
 	public IRResponse<Object> sendPlayData(IRChartData model, IRScoreData score);
 
+	/** Updates only the supplied review fields for the authenticated user. */
+	default IRResponse<Object> setReview(IRReview review) {
+		return IRReview.UNSUPPORTED;
+	}
+
 	/**
 	 * コーススコアデータを送信する
 	 * 

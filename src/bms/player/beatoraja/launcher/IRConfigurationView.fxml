@@ -69,4 +69,10 @@
 		</VBox.margin>
 		<CheckBox fx:id="importscore" prefHeight="24.0" prefWidth="200.0" text="%IR_IMPORT_SCORE"/>
 	</HBox>
+	<HBox>
+		<VBox.margin>
+			<Insets top="10.0" />
+		</VBox.margin>
+		<CheckBox fx:id="syncReviewLevel" text="%IR_SYNC_REVIEW_LEVEL"/>
+	</HBox>
 </VBox>

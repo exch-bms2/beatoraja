@@ -122,6 +122,15 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 	}
 
 	@Override
+	public IRResponse<Object> setReview(IRReview review) {
+		if (review == null) return new SimpleIRResponse<>(false, "Missing review update", null);
+		Request request = new Request();
+		request.method = METHOD_SET_REVIEW;
+		request.review = Review.from(review);
+		return submit(request);
+	}
+
+	@Override
 	public IRResponse<Object> sendCoursePlayData(IRCourseData course, IRScoreData score) {
 		Request request = new Request();
 		request.method = METHOD_SEND_COURSE_PLAY_DATA;
@@ -188,6 +197,8 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 	private IRResponse<Object> submit(Request request) {
 		Invocation result = execute(request);
 		Response response = result.response;
+		if (METHOD_SET_REVIEW.equals(request.method) && response.reviewUnsupported)
+			return IRReview.UNSUPPORTED;
 		if (!response.succeeded && result.attempted)
 			return IRSubmissionResponse.unknown(response.message);
 		return new SimpleIRResponse<>(response.succeeded, response.message, null);
@@ -207,6 +218,8 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 				if (METHOD_LOGIN.equals(request.method)) lastLogin = null;
 				account = lastLogin;
 			}
+			if (METHOD_SET_REVIEW.equals(request.method) && account == null)
+				return new Invocation(Response.error("IR review requires login"), false);
 			session = ensureProcess();
 			if (!session.authenticated && account != null && !METHOD_LOGIN.equals(request.method)
 					&& !METHOD_REGISTER.equals(request.method)) {
