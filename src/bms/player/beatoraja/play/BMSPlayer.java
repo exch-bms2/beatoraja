@@ -6,6 +6,7 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.Array;
@@ -20,6 +21,8 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.pattern.LaneShuffleModifier.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinType;
 
 /**
@@ -82,6 +85,7 @@ public class BMSPlayer extends MainState {
 	private long starttimeoffset;
 
 	private RhythmTimerProcessor rhythm;
+	private boolean preparingSkinPreview;
 	private long startpressedtime;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
@@ -822,6 +826,66 @@ public class BMSPlayer extends MainState {
 	public boolean canAdjustSkin() {
 		return SkinAdjustmentOverlay.allows(resource.getPlayMode().mode)
 				&& getSkin() instanceof PlaySkin skin && skin.getEditableNoteProperties() != null;
+	}
+
+	static boolean allowsSkinPreview(BMSPlayerMode.Mode mode, int state, boolean playTimerOn) {
+		return mode == BMSPlayerMode.Mode.PRACTICE && state == STATE_PRACTICE && !playTimerOn;
+	}
+
+	public boolean canPreviewSkin() {
+		return allowsSkinPreview(resource.getPlayMode().mode, state, timer.isTimerOn(TIMER_PLAY))
+				&& canAdjustSkin() && !getSkin().isTextInputActive();
+	}
+
+	public boolean applySkinPreview(SkinConfig.Property draft) {
+		return applySkinPreview(draft, (type, candidate) -> SkinLoader.loadPracticePreview(this, type, candidate));
+	}
+
+	boolean applySkinPreview(SkinConfig.Property draft, BiFunction<SkinType, SkinConfig, Skin> loader) {
+		if (preparingSkinPreview || !canPreviewSkin()) return false;
+		preparingSkinPreview = true;
+		try {
+			return replacePracticeSkin(draft, loader);
+		} finally {
+			preparingSkinPreview = false;
+		}
+	}
+
+	public boolean isPreparingSkinPreview() { return preparingSkinPreview; }
+
+	private boolean replacePracticeSkin(SkinConfig.Property draft, BiFunction<SkinType, SkinConfig, Skin> loader) {
+		var previous = (PlaySkin) getSkin();
+		var saved = previous.getEditableNoteProperties();
+		var type = getSkinType();
+		if (type == null) return false;
+		var configured = resource.getPlayerConfig().getSkin()[type.getId()];
+		if (configured == null || configured.getProperties() != saved) return false;
+		var candidateConfig = new SkinConfig(configured.getPath());
+		candidateConfig.setProperties(draft);
+		var loaded = loader.apply(type, candidateConfig);
+		if (!(loaded instanceof PlaySkin candidate)) {
+			if (loaded != null) loaded.dispose();
+			Logger.getGlobal().warning("Practice skin preview could not load: " + configured.getPath());
+			return false;
+		}
+		RhythmTimerProcessor nextRhythm;
+		try {
+			var expansion = candidate.getNoteExpansionRate();
+			nextRhythm = new RhythmTimerProcessor(model, expansion[0] != 100 || expansion[1] != 100);
+		} catch (RuntimeException failure) {
+			candidate.dispose();
+			Logger.getGlobal().log(java.util.logging.Level.WARNING, "Practice skin preview rhythm preparation failed", failure);
+			return false;
+		}
+		if (!tryReplaceSkin(candidate)) return false;
+
+		rhythm = nextRhythm;
+		saved.setOption(draft.getOption());
+		saved.setFile(draft.getFile());
+		saved.setOffset(draft.getOffset());
+		saved.setPendingSelection(null);
+		candidate.setEditableNoteProperties(saved);
+		return true;
 	}
 
 	public KeyInputProccessor getKeyinput() {

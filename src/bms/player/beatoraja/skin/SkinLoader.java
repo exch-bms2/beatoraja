@@ -26,6 +26,7 @@ public abstract class SkinLoader {
      * スキンイメージのリソースプール
      */
     private static PixmapResourcePool resource;
+    private static final ThreadLocal<PixmapResourcePool> previewResources = new ThreadLocal<>();
 
     public static void initPixmapResourcePool(int gen) {
     	if(resource != null) {
@@ -96,6 +97,23 @@ public abstract class SkinLoader {
     }
 
     public static Skin load(MainState state, SkinType skinType, SkinConfig sc) {
+        return load(state, skinType, sc, true);
+    }
+
+    public static Skin loadPracticePreview(MainState state, SkinType skinType, SkinConfig sc) {
+        var previous = previewResources.get();
+        var temporary = new PixmapResourcePool();
+        previewResources.set(temporary);
+        try {
+            return load(state, skinType, sc, false);
+        } finally {
+            if (previous == null) previewResources.remove();
+            else previewResources.set(previous);
+            temporary.dispose();
+        }
+    }
+
+    private static Skin load(MainState state, SkinType skinType, SkinConfig sc, boolean ageCache) {
         final PlayerResource resource = state.resource;
         if (sc == null || !sc.validate()) {
             return null;
@@ -117,7 +135,7 @@ public abstract class SkinLoader {
                 skin = dloader.loadSkin(state, header, loader.getOption());
             }
             applyNotesOffsetCenter(skin, sc.getProperties());
-            SkinLoader.resource.disposeOld();
+            if (ageCache) SkinLoader.resource.disposeOld();
             return skin;
         } catch (Throwable e) {
             e.printStackTrace();
@@ -189,12 +207,13 @@ public abstract class SkinLoader {
     }
 
     public static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
-    	final PixmapResourcePool resource = SkinLoader.getResource();
+        final PixmapResourcePool temporary = previewResources.get();
+        final PixmapResourcePool resource = temporary == null ? SkinLoader.getResource() : temporary;
         if(resource.exists(path)) {
             return new Texture(resource.getPixmap(path), useMipMaps);
         }
         try {
-            boolean usePixmapCache = usecim && !path.toLowerCase(Locale.ROOT).endsWith(".webp");
+            boolean usePixmapCache = temporary == null && usecim && !path.toLowerCase(Locale.ROOT).endsWith(".webp");
             long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
             String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
             if(usePixmapCache && resource.exists(cim)) {

@@ -31,6 +31,10 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		this.state = state;
 	}
 
+	private boolean preparingPracticePreview() {
+		return state instanceof BMSPlayer player && player.isPreparingSkinPreview();
+	}
+
 	@Override
 	public void export(LuaTable table) {
 		table.set("option", new OptionFunction());
@@ -83,6 +87,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		table.set("set_volume_sys", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
+				if (preparingPracticePreview()) return LuaBoolean.FALSE;
 				state.main.getConfig().getAudioConfig().setSystemvolume(value.tofloat());
 				return LuaBoolean.TRUE;
 			}
@@ -90,6 +95,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		table.set("set_volume_key", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
+				if (preparingPracticePreview()) return LuaBoolean.FALSE;
 				state.main.getConfig().getAudioConfig().setKeyvolume(value.tofloat());
 				return LuaBoolean.TRUE;
 			}
@@ -97,6 +103,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		table.set("set_volume_bg", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
+				if (preparingPracticePreview()) return LuaBoolean.FALSE;
 				state.main.getConfig().getAudioConfig().setBgvolume(value.tofloat());
 				return LuaBoolean.TRUE;
 			}
@@ -274,6 +281,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	private class SetTimerFunction extends TwoArgFunction {
 		@Override
 		public LuaValue call(LuaValue timerId, LuaValue timerValue) {
+			if (preparingPracticePreview()) return LuaBoolean.FALSE;
 			int id = timerId.toint();
 			if(!SkinPropertyMapper.isTimerWritableBySkin(id)) {
 				throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
@@ -286,18 +294,21 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	private class EventExecFunction extends VarArgFunction {
 		@Override
 		public LuaValue call(LuaValue luaValue) {
+			if (preparingPracticePreview()) return LuaBoolean.FALSE;
 			state.executeEvent(getId(luaValue));
 			return LuaBoolean.TRUE;
 		}
 
 		@Override
 		public LuaValue call(LuaValue luaValue, LuaValue arg1) {
+			if (preparingPracticePreview()) return LuaBoolean.FALSE;
 			state.executeEvent(getId(luaValue), arg1.toint());
 			return LuaBoolean.TRUE;
 		}
 
 		@Override
 		public LuaValue call(LuaValue luaValue, LuaValue arg1, LuaValue arg2) {
+			if (preparingPracticePreview()) return LuaBoolean.FALSE;
 			state.executeEvent(getId(luaValue), arg1.toint(), arg2.toint());
 			return LuaBoolean.TRUE;
 		}

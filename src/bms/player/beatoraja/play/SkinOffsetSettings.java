@@ -53,11 +53,15 @@ public final class SkinOffsetSettings {
     }
 
     private static void store(PlaySkin skin, SkinConfig.Property property, int id, SkinConfig.Offset value) {
+        store(property, value);
+        skin.getOffset().put(id, value);
+    }
+
+    private static void store(SkinConfig.Property property, SkinConfig.Offset value) {
         var offsets = new ArrayList<SkinConfig.Offset>();
         for (var offset : property.getOffset()) if (!value.name.equals(offset.name)) offsets.add(offset);
         offsets.add(value);
         property.setOffset(offsets.toArray(SkinConfig.Offset[]::new));
-        skin.getOffset().put(id, value);
     }
 
     /** Only migrate when the old note-only transform is equivalent to the declared offset. */
@@ -143,6 +147,10 @@ public final class SkinOffsetSettings {
             } else {
                 live.x = original[0]; live.y = original[1]; live.w = original[2]; live.h = original[3];
             }
+        }
+
+        void copyTo(SkinConfig.Property property) {
+            if (!Arrays.equals(values, values(stored))) store(property, copy(definition.name, stored, values));
         }
     }
 }

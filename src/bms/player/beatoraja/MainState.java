@@ -125,6 +125,10 @@ public abstract class MainState {
 			this.skin.dispose();
 		}
 		this.skin = skin;
+		applySkinOffsets(skin);
+	}
+
+	private void applySkinOffsets(Skin skin) {
 		if (skin != null) {
 			for (IntMap.Entry<Offset> e : skin.getOffset().entries()) {
 				SkinOffset offset = main.getOffset(e.key);
@@ -138,6 +142,50 @@ public abstract class MainState {
 				offset.r = e.value.r;
 				offset.a = e.value.a;
 			}
+		}
+	}
+
+	/** Prepare with the new skin visible to properties, but keep the old skin alive until success. */
+	protected final boolean tryReplaceSkin(Skin candidate) {
+		Skin previous = skin;
+		var offsets = new IntMap<float[]>();
+		try {
+			for (var entry : previous.getOffset().entries()) snapshotOffset(offsets, entry.key);
+			for (var entry : candidate.getOffset().entries()) snapshotOffset(offsets, entry.key);
+			for (var entry : offsets.entries()) {
+				if (!candidate.getOffset().containsKey(entry.key))
+					restoreOffset(main.getOffset(entry.key), new float[6]);
+			}
+			skin = candidate;
+			applySkinOffsets(candidate);
+			candidate.prepare(this);
+		} catch (RuntimeException | LinkageError failure) {
+			skin = previous;
+			for (var entry : offsets.entries()) restoreOffset(main.getOffset(entry.key), entry.value);
+			disposePreviewSkin(candidate);
+			java.util.logging.Logger.getGlobal().log(java.util.logging.Level.WARNING, "Practice skin preview preparation failed", failure);
+			return false;
+		}
+		disposePreviewSkin(previous);
+		return true;
+	}
+
+	private void snapshotOffset(IntMap<float[]> snapshot, int id) {
+		var offset = main.getOffset(id);
+		if (offset != null && !snapshot.containsKey(id))
+			snapshot.put(id, new float[]{offset.x, offset.y, offset.w, offset.h, offset.r, offset.a});
+	}
+
+	private static void restoreOffset(SkinOffset offset, float[] values) {
+		offset.x = values[0]; offset.y = values[1]; offset.w = values[2];
+		offset.h = values[3]; offset.r = values[4]; offset.a = values[5];
+	}
+
+	private static void disposePreviewSkin(Skin skin) {
+		try {
+			skin.dispose();
+		} catch (RuntimeException | LinkageError failure) {
+			java.util.logging.Logger.getGlobal().log(java.util.logging.Level.WARNING, "Practice skin preview disposal failed", failure);
 		}
 	}
 

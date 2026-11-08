@@ -164,7 +164,7 @@ public final class NoteOffsetCenterTest {
             set(player.judge, JudgeManager.class, "states", states);
             set(player.judge, JudgeManager.class, "window", new JudgeProperty.JudgeWindow(JudgeProperty.SEVENKEYS, 100, new int[]{100,100,100}));
             renderer = KeyboardQueueTestSupport.allocate(LaneRenderer.class);
-            set(renderer, LaneRenderer.class, "main", player); set(renderer, LaneRenderer.class, "skin", skin);
+            set(renderer, LaneRenderer.class, "main", player);
             set(renderer, LaneRenderer.class, "config", playerConfig); set(renderer, LaneRenderer.class, "playconfig", playConfig);
             set(renderer, LaneRenderer.class, "model", model);
             model.setMode(Mode.BEAT_7K); model.setBpm(120);

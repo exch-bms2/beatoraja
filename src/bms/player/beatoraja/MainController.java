@@ -326,10 +326,28 @@ public final class MainController {
 			overlay.finish(save);
 			if (save) PlayerConfig.write(config.getPlayerpath(), player);
 		} finally {
-			input.setOverlayInput(false);
-			updateInputProcessor();
-			mouseMovedTime = System.currentTimeMillis();
-			overlay.dispose();
+			releaseSkinAdjustment(overlay);
+		}
+	}
+
+	private void releaseSkinAdjustment(SkinAdjustmentOverlay overlay) {
+		input.setOverlayInput(false);
+		updateInputProcessor();
+		mouseMovedTime = System.currentTimeMillis();
+		overlay.dispose();
+	}
+
+	private void applySkinAdjustmentPreview() {
+		var overlay = skinAdjustment;
+		if (!(current instanceof BMSPlayer play) || !play.canPreviewSkin() || !play.applySkinPreview(overlay.previewProperties())) {
+			overlay.previewFailed();
+			return;
+		}
+		skinAdjustment = null;
+		try {
+			PlayerConfig.write(config.getPlayerpath(), player);
+		} finally {
+			releaseSkinAdjustment(overlay);
 		}
 	}
 
@@ -442,7 +460,8 @@ public final class MainController {
 		final boolean adjustmentWasOpen = skinAdjustment != null;
 		if (!adjustmentWasOpen && toggleAdjustment && current instanceof BMSPlayer play && play.canAdjustSkin()
 				&& (play.getStage() == null || play.getStage().getKeyboardFocus() == null)) {
-			skinAdjustment = new SkinAdjustmentOverlay((PlaySkin) play.getSkin(), this::getOffset, config.getSystemfontpath());
+			skinAdjustment = new SkinAdjustmentOverlay((PlaySkin) play.getSkin(), this::getOffset, config.getSystemfontpath(),
+					play.canPreviewSkin());
 			input.setOverlayInput(true);
 			updateInputProcessor();
 			if (Gdx.input.isCursorCatched()) Gdx.input.setCursorCatched(false);
@@ -549,7 +568,10 @@ public final class MainController {
 			Boolean save = skinAdjustment.saveRequested();
 			if (save != null || (adjustmentWasOpen && toggleAdjustment) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
 				finishSkinAdjustment(Boolean.TRUE.equals(save));
-			else skinAdjustment.draw();
+			else {
+				if (skinAdjustment.takePreviewRequest()) applySkinAdjustmentPreview();
+				if (skinAdjustment != null) skinAdjustment.draw();
+			}
 			return;
 		}
 		if (adjustmentWasOpen) return;

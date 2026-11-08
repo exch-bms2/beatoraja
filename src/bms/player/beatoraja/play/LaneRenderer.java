@@ -51,8 +51,6 @@ public class LaneRenderer {
 
 	private JudgeAreaOverlay judgearea;
 
-	private final PlaySkin skin;
-
 	private final PlayerConfig config;
 	private PlayConfig playconfig;
 
@@ -88,7 +86,6 @@ public class LaneRenderer {
 			Logger.getGlobal().severe("Practice Font読み込み失敗");
 		}
 
-		this.skin = (PlaySkin) main.getSkin();
 		this.config = main.resource.getPlayerConfig();
 		this.playconfig = config.getPlayConfig(model.getMode()).getPlayconfig().clone();
 
@@ -304,6 +301,7 @@ public class LaneRenderer {
 	}
 
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, SkinOffset[] offsets, int offsetcenter) {
+		final PlaySkin skin = (PlaySkin) main.getSkin();
 		final boolean anchored = offsetcenter >= 1 && offsetcenter <= 9;
 		float offsetX = 0;
 		float offsetY = 0;
