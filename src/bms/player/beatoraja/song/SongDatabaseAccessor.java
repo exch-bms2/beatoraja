@@ -48,6 +48,11 @@ public interface SongDatabaseAccessor {
 		setSongDatas(songs);
 	}
 
+	/** Updates the current player's review level without modifying song metadata. */
+	default boolean setSongReviewLevel(SongData song, double level) {
+		return false;
+	}
+
 	public SongData[] getSongDatasByText(String text);
 
 	/**

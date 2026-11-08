@@ -400,8 +400,7 @@ public class Skin {
 				if (textInput == null) {
 					textInput = new SkinTextInput();
 				}
-				textInput.focus(state, text);
-				break;
+				if (textInput.focus(state, text)) break;
 			}
 			if (textInput != null && textInput.isFinishing()) break;
 			if (obj.draw && obj.mousePressed(state, button, x, y)) {

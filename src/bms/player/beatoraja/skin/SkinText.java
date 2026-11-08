@@ -159,6 +159,11 @@ public abstract class SkinText extends SkinObject {
         return currentText != null ? currentText : text;
     }
 
+    final String getInputText(MainState state) {
+        String value = ref != null ? ref.get(state) : getCurrentText();
+        return value != null ? value : "";
+    }
+
     public final Rectangle getInputBounds() {
         float x = switch (getAlign()) {
             case ALIGN_RIGHT -> region.x - region.width;

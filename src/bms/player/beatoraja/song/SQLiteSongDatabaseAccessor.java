@@ -453,6 +453,22 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		}
 	}
 
+	@Override
+	public boolean setSongReviewLevel(SongData song, double level) {
+		if (reviewdb == null || song == null || !reviewdb.setLevelReview(song.getSha256(), level)) {
+			return false;
+		}
+		SongReview review = song.getSongReview();
+		review.setLevelreview(level);
+		SongReview cached = songReviewCache.get(song.getSha256());
+		if (cached == null) {
+			songReviewCacheLoaded = false;
+		} else if (cached != review) {
+			cached.setLevelreview(level);
+		}
+		return true;
+	}
+
 	private static boolean isHidden(Path path) {
 		Path name = path.getFileName();
 		return name != null && name.toString().startsWith(".");

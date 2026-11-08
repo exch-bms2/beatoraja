@@ -1,6 +1,7 @@
 package bms.player.beatoraja.launcher;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.IRConfig;
 import bms.player.beatoraja.PlayerConfig;
 import java.net.URL;
 import java.util.Locale;
@@ -33,6 +34,7 @@ public final class PlayConfigurationViewTest {
             if (!(loader.getNamespace().get("discordWebhookController") instanceof DiscordConfigurationView))
                 throw new AssertionError("Discord Webhook settings missing from launcher");
             verifyDiscordWebhookSettings(locale);
+            verifyReviewSyncSettings(locale);
             var player = new PlayerConfig();
             var field = PlayConfigurationView.class.getDeclaredField("player");
             field.setAccessible(true); field.set(view, player);
@@ -64,6 +66,46 @@ public final class PlayConfigurationViewTest {
                 throw new AssertionError("Explicitly selecting existing cover controls must persist");
         }
         System.out.println("PlayConfigurationViewTest passed (real FXML, English/Japanese, mode-specific checkbox save/restore)");
+    }
+
+    private static void verifyReviewSyncSettings(Locale locale) throws Exception {
+        var loader = new FXMLLoader(IRConfigurationView.class.getResource("IRConfigurationView.fxml"),
+                ResourceBundle.getBundle("resources.UIResources", locale));
+        loader.load();
+        IRConfigurationView view = loader.getController();
+        var sync = (CheckBox) loader.getNamespace().get("syncReviewLevel");
+        @SuppressWarnings("unchecked")
+        var names = (ComboBox<String>) loader.getNamespace().get("irname");
+        names.getItems().setAll("review-test-primary", "review-test-secondary");
+        var player = new PlayerConfig();
+        var primary = reviewAccount("review-test-primary");
+        var secondary = reviewAccount("review-test-secondary");
+        player.setIrconfig(new IRConfig[]{primary, secondary});
+        view.update(player);
+        if (sync.isSelected() || sync.isDisable() || sync.getText().contains("%"))
+            throw new AssertionError("Primary review sync must be localized and opt-in");
+        sync.setSelected(true);
+        names.setValue(secondary.getIrname());
+        view.updateIRConnection();
+        if (!sync.isDisable() || sync.isSelected())
+            throw new AssertionError("Review sync cannot be enabled on a secondary connection");
+        view.commit();
+        if (!player.getIrconfig()[0].isSyncReviewLevel() || player.getIrconfig()[1].isSyncReviewLevel())
+            throw new AssertionError("Review sync is stored on the selected Primary connection");
+
+        var other = new PlayerConfig();
+        other.setIrconfig(new IRConfig[]{reviewAccount(secondary.getIrname())});
+        view.update(other);
+        names.setValue(primary.getIrname());
+        view.updateIRConnection();
+        if (sync.isSelected()) throw new AssertionError("Review opt-in cannot carry over from another player");
+    }
+
+    private static IRConfig reviewAccount(String name) {
+        var config = new IRConfig();
+        config.setIrname(name);
+        config.setUserid("fixture");
+        return config;
     }
 
     private static void verifyDiscordWebhookSettings(Locale locale) throws Exception {

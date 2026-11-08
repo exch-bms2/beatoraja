@@ -220,6 +220,7 @@ public class SkinProperty {
 	public static final int STRING_ARTIST = 14;
 	public static final int STRING_SUBARTIST = 15;
 	public static final int STRING_FULLARTIST = 16;
+	public static final int STRING_LEVELREVIEW = 29;
 	public static final int STRING_SEARCHWORD = 30;
 	public static final int STRING_SKIN_NAME = 50;
 	public static final int STRING_SKIN_AUTHOR = 51;

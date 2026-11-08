@@ -17,9 +17,12 @@ import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.RandomCourseBar;
+import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
 import com.badlogic.gdx.utils.IntMap;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
@@ -71,6 +74,43 @@ public class StringPropertyFactory {
 	public static StringWriter getStringWriter(final String name) {
 		StringType type = StringType.get(name);
 		return type != null ? type.writer : null;
+	}
+
+	private static SongData selectedReviewChart(MainState state) {
+		return state instanceof MusicSelector selector && selector.getSelectedBar() instanceof SongBar bar
+				&& bar.existsSong() && !bar.getSongData().getSha256().isEmpty() ? bar.getSongData() : null;
+	}
+
+	private static void writeReviewLevel(MainController main, SongDatabaseAccessor database, SongData song, String input) {
+		if (input == null) return;
+		String value = input.strip();
+		if (value.length() > 1024) return;
+		try {
+			BigDecimal decimal = value.isEmpty() ? BigDecimal.ZERO : new BigDecimal(value);
+			double level = decimal.doubleValue();
+			if (decimal.signum() >= 0 && Double.isFinite(level) && (level != 0 || decimal.signum() == 0)
+					&& level != song.getSongReview().getLevelreview()
+					&& database.setSongReviewLevel(song, level) && main != null) {
+				main.syncReviewLevel(song.getSha256(), level);
+			}
+		} catch (NumberFormatException ignored) {
+		}
+	}
+
+	private static final class ReviewLevelWriter implements StringWriter {
+		@Override
+		public void set(MainState state, String value) {
+			StringWriter bound = bind(state);
+			if (bound != null) bound.set(state, value);
+		}
+
+		@Override
+		public StringWriter bind(MainState state) {
+			SongData song = selectedReviewChart(state);
+			if (song == null) return null;
+			SongDatabaseAccessor database = ((MusicSelector) state).getSongDatabase();
+			return database == null ? null : (owner, value) -> writeReviewLevel(state.main, database, song, value);
+		}
 	}
 
 	/**
@@ -227,6 +267,10 @@ public class StringPropertyFactory {
 			final SongData song = state.resource.getSongdata();
 			return song != null ? song.getFullArtist() : "";
 		}),
+		levelreview(STRING_LEVELREVIEW, state -> {
+			SongData song = selectedReviewChart(state);
+			return song != null ? song.getSongReview().getLevelreviewText() : "";
+		}, new ReviewLevelWriter()),
 		searchword(30, (state) -> "", (state, value) -> {
 			if (state instanceof MusicSelector selector) {
 				selector.search(value);

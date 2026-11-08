@@ -104,6 +104,21 @@ public class SongReviewAccessor extends SQLiteDatabaseAccessor {
 		}
 	}
 
+	boolean setLevelReview(String sha256, double level) {
+		if (sha256 == null || sha256.isEmpty() || !Double.isFinite(level) || level < 0) {
+			return false;
+		}
+		try {
+			return qr.update("""
+					INSERT INTO review (sha256, tag, favorite, levelreview, comment) VALUES (?, '', 0, ?, '')
+					ON CONFLICT (sha256) DO UPDATE SET levelreview = excluded.levelreview
+					""", sha256, level) == 1;
+		} catch (SQLException e) {
+			Logger.getGlobal().severe("楽曲評価データベースのレベル更新中の例外:" + e.getMessage());
+			return false;
+		}
+	}
+
 	public void setSongReviews(SongData[] songs) {
 		if (songs == null || songs.length == 0) {
 			return;

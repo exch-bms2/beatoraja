@@ -107,6 +107,23 @@ public final class Lwjgl3TextInputTest {
             field.setText("focus-out"); state.getStage().setKeyboardFocus(null);
             check(first.get().equals("focus-out") && !field.isVisible(), "Scene2D focus-out commits");
 
+            var selection = new AtomicReference<>("first");
+            var submitted = new AtomicReference<String>();
+            var bound = text("", 32, new bms.player.beatoraja.skin.property.StringWriter() {
+                @Override public void set(MainState owner, String value) {
+                    throw new AssertionError("The original writer must not handle a bound edit");
+                }
+                @Override public bms.player.beatoraja.skin.property.StringWriter bind(MainState owner) {
+                    String selected = selection.get();
+                    return (s, value) -> submitted.set(selected + ":" + value);
+                }
+            });
+            check(editor.focus(state, bound), "Bindable editor opens");
+            field.setText("12.5");
+            selection.set("second");
+            state.getStage().setKeyboardFocus(null);
+            check(submitted.get().equals("first:12.5"), "Focus-out uses the destination bound at edit start");
+
             var failed = text("unchanged", 32, (s, value) -> { throw new IllegalStateException("Expected writer failure"); });
             editor.focus(state, failed);
             try { editor.commit(); throw new AssertionError("Expected failure"); }

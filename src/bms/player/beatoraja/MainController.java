@@ -93,6 +93,7 @@ public final class MainController {
 	private SongInformationAccessor infodb;
 
 	private IRStatus[] ir;
+	private final IRReviewSync reviewSync;
 
 	private RivalDataAccessor rivals = new RivalDataAccessor();
 
@@ -188,6 +189,7 @@ public final class MainController {
 
 		}
 		ir = irarray.toArray(IRStatus.class);
+		reviewSync = IRReviewSync.forPrimary(player.getIrconfig(), ir);
 		
 		rivals.update(this);
 
@@ -593,6 +595,7 @@ public final class MainController {
 	public void dispose() {
 		disposeInput();
 		if (obs != null) obs.close();
+		if (reviewSync != null) reviewSync.close();
 		saveConfig();
 		rivals.close();
 
@@ -647,6 +650,10 @@ public final class MainController {
 
 	public IRStatus[] getIRStatus() {
 		return ir;
+	}
+
+	public void syncReviewLevel(String sha256, double level) {
+		if (reviewSync != null) reviewSync.offerLevel(sha256, level);
 	}
 
 	public SystemSoundManager getSoundManager() {

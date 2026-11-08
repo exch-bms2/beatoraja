@@ -8,6 +8,7 @@ import bms.player.beatoraja.input.text.TextInputSession;
 import bms.player.beatoraja.input.text.ime.MacOsIme;
 import bms.player.beatoraja.input.text.ime.WindowsImeBridge;
 import bms.player.beatoraja.input.text.ime.X11ImeBridge;
+import bms.player.beatoraja.skin.property.StringWriter;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -32,6 +33,7 @@ class SkinTextInput {
 
 	private MainState state;
 	private SkinText target;
+	private StringWriter writer;
 	private TextField textField;
 	private TextField.TextFieldStyle style;
 	private FreeTypeFontGenerator generator;
@@ -50,29 +52,32 @@ class SkinTextInput {
 			: System.getProperty("os.name", "").startsWith("Linux") ? X11ImeBridge.create() : MacOsIme.create()); }
 	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
-	void focus(MainState state, SkinText target) {
+	boolean focus(MainState state, SkinText target) {
 		if (target.getWriter() == null || committing) {
-			return;
+			return false;
 		}
 		if (this.target == target && this.state == state && textField != null && textField.isVisible()
 				&& state.getStage() != null && state.getStage().getKeyboardFocus() == textField) {
 			updateBounds(target);
-			return;
+			return true;
 		}
 		if (this.target != null) {
 			pendingFocus = () -> focus(state, target);
 			commit();
-			return;
+			return true;
 		}
+		StringWriter bound = target.getWriter().bind(state);
+		if (bound == null) return false;
 		this.state = state;
 		this.target = target;
+		this.writer = bound;
 		commitRequested = false;
 
 		Stage stage = ensureStage(state);
 		ensureTextField(state, stage, Math.max(1, Math.round(target.region.height)));
 		updateBounds(target);
 		style.fontColor = target.color;
-		textField.setText(target.getCurrentText());
+		textField.setText(target.getInputText(state));
 		textField.setVisible(true);
 		stage.setKeyboardFocus(textField);
 		textField.setCursorPosition(textField.getText().length());
@@ -85,6 +90,7 @@ class SkinTextInput {
 				session = new TextInputSession(bridge, editorState());
 			} else {
 				this.target = null;
+				this.writer = null;
 				textField.setVisible(false);
 				stage.setKeyboardFocus(null);
 				throw e;
@@ -94,6 +100,7 @@ class SkinTextInput {
 		state.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(true, session.usesIme());
 		TextInputDiagnostics.editor("editor-focus", session, textField.getText(), null);
 		if (session.usesIme() && publishImeCaret != null) publishImeCaret.run();
+		return true;
 	}
 
 	void commit() {
@@ -128,7 +135,7 @@ class SkinTextInput {
 		String value = session != null && session.usesIme() ? session.state().text() : field.getText();
 		TextInputDiagnostics.editor("writer-submit", session, field.getText(), value);
 		try {
-			current.getWriter().set(owner, value);
+			writer.set(owner, value);
 			TextInputDiagnostics.editor("writer-returned", session, field.getText(), value);
 			current.setText(value);
 		} catch (RuntimeException | Error failure) {
@@ -136,6 +143,7 @@ class SkinTextInput {
 			throw failure;
 		} finally {
 			target = null;
+			writer = null;
 			try {
 				try { if (session != null) session.close(); }
 				finally {

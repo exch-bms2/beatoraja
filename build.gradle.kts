@@ -218,6 +218,7 @@ val fatJar by tasks.registering(Jar::class) {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.skin.lr2.PlayerReviewLevelTest",
     "bms.player.beatoraja.external.discord.DiscordWebhookTest",
     "bms.player.beatoraja.external.obs.ObsControllerTest",
     "bms.player.beatoraja.external.obs.ObsWebSocketTest",
@@ -230,6 +231,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.build.DatabaseRuntimeCompatibilityTest",
     "bms.player.beatoraja.build.LwjglRuntimeCompatibilityTest",
     "bms.player.beatoraja.ir.IsolatedIRConnectionTest",
+    "bms.player.beatoraja.ir.IRReviewSyncTest",
     "bms.player.beatoraja.select.IRTableLoaderTest",
     "bms.player.beatoraja.select.PreviewMusicProcessorTest",
     "bms.player.beatoraja.result.IRSubmissionRetryTest",
