@@ -7,10 +7,15 @@ import java.util.regex.Pattern;
  * Partial update to the authenticated player's review of a chart.
  * Null leaves a field unchanged. Zero level, empty comment and false favorite
  * clear their respective fields. Favorite is chart-specific, not a song flag.
+ * LN mode is the score bucket (0=LN, 1=CN, 2=HCN); null means unspecified.
  */
-public record IRReview(String sha256, Double level, String comment, Boolean favorite) {
+public record IRReview(String sha256, Double level, String comment, Boolean favorite, Integer lnmode) {
     private static final Pattern SHA256 = Pattern.compile("[0-9a-fA-F]{64}");
     static final IRResponse<Object> UNSUPPORTED = new SimpleIRResponse<>(false, "Review updates not supported", null);
+
+    public IRReview(String sha256, Double level, String comment, Boolean favorite) {
+        this(sha256, level, comment, favorite, null);
+    }
 
     public IRReview {
         if (sha256 == null || !SHA256.matcher(sha256).matches())
@@ -20,6 +25,8 @@ public record IRReview(String sha256, Double level, String comment, Boolean favo
             throw new IllegalArgumentException("Invalid review level");
         if (comment != null && comment.length() > 4096)
             throw new IllegalArgumentException("Review comment too long");
+        if (lnmode != null && (lnmode < 0 || lnmode > 2))
+            throw new IllegalArgumentException("Invalid review LN mode");
         if (level == null && comment == null && favorite == null)
             throw new IllegalArgumentException("Review update has no fields");
     }

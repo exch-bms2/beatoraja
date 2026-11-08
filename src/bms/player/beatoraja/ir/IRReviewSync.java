@@ -17,7 +17,9 @@ public final class IRReviewSync implements AutoCloseable {
         thread.setDaemon(true);
         return thread;
     });
-    private final LinkedHashMap<String, IRReview> pending = new LinkedHashMap<>();
+    private record ScoreKey(String sha256, int lnmode) {}
+
+    private final LinkedHashMap<ScoreKey, IRReview> pending = new LinkedHashMap<>();
     private boolean draining, closed, unsupported;
 
     private IRReviewSync(IRConnection connection) {
@@ -34,20 +36,21 @@ public final class IRReviewSync implements AutoCloseable {
         return null;
     }
 
-    public synchronized void offerLevel(String sha256, double level) {
+    public synchronized void offerLevel(String sha256, double level, int lnmode) {
         if (closed || unsupported) return;
         IRReview update;
         try {
-            update = new IRReview(sha256, level, null, null);
+            update = new IRReview(sha256, level, null, null, lnmode);
         } catch (IllegalArgumentException invalid) {
             Logger.getGlobal().warning("IR review level not queued: " + invalid.getMessage());
             return;
         }
-        if (pending.size() >= MAX_PENDING && !pending.containsKey(update.sha256())) {
+        var key = new ScoreKey(update.sha256(), lnmode);
+        if (pending.size() >= MAX_PENDING && !pending.containsKey(key)) {
             Logger.getGlobal().warning("IR review queue is full; review remains saved locally");
             return;
         }
-        pending.put(update.sha256(), update);
+        pending.put(key, update);
         if (!draining) {
             draining = true;
             executor.execute(this::drain);

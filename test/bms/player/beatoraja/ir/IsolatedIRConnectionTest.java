@@ -101,7 +101,7 @@ public final class IsolatedIRConnectionTest {
 
     private static void verifyReviews() throws Exception {
         String hash = "a".repeat(64);
-        var review = new IRReview(hash, 12.5, null, null);
+        var review = new IRReview(hash, 12.5, null, null, 2);
         try (var f = new Fixture("normal")) {
             check(!f.connection.setReview(review).isSucceeded() && f.processes.isEmpty(), "Review requires prior login");
             f.login();
@@ -113,14 +113,14 @@ public final class IsolatedIRConnectionTest {
             f.processes.get(0).destroyForcibly().waitFor();
             check(f.connection.setReview(review).isSucceeded() && f.count("login:user-a") == 2,
                     "Review is sent after worker reauthentication");
-            check(f.count("review:" + hash + ":12.5:null:null") == 1, "Level-only patch survives the worker boundary");
+            check(f.count("review:" + hash + ":12.5:null:null:2") == 1, "Level and score mode survive the worker boundary");
             check(f.connection.setReview(new IRReview(hash, 0.0, "", false)).isSucceeded()
-                    && f.count("review:" + hash + ":0.0::false") == 1, "Explicit clears survive the worker boundary");
+                    && f.count("review:" + hash + ":0.0::false:null") == 1, "Explicit clears and optional mode survive the worker boundary");
         }
         try (var f = new Fixture("review-accept-hang")) {
             f.login();
             check(IRSubmissionResponse.isOutcomeUnknown(f.connection.setReview(review)), "Review timeout is ambiguous");
-            check(f.connection.getTableDatas().isSucceeded() && f.count("review:" + hash + ":12.5:null:null") == 1,
+            check(f.connection.getTableDatas().isSucceeded() && f.count("review:" + hash + ":12.5:null:null:2") == 1,
                     "Recover without automatically resending the timed-out review");
         }
     }

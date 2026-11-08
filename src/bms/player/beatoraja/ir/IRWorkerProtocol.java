@@ -94,6 +94,7 @@ final class IRWorkerProtocol {
 		public Double level;
 		public String comment;
 		public Boolean favorite;
+		public Integer lnmode;
 
 		static Review from(IRReview review) {
 			Review dto = new Review();
@@ -101,11 +102,12 @@ final class IRWorkerProtocol {
 			dto.level = review.level();
 			dto.comment = review.comment();
 			dto.favorite = review.favorite();
+			dto.lnmode = review.lnmode();
 			return dto;
 		}
 
 		IRReview toIRReview() {
-			return new IRReview(sha256, level, comment, favorite);
+			return new IRReview(sha256, level, comment, favorite, lnmode);
 		}
 	}
 

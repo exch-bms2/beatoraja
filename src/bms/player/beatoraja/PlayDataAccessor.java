@@ -168,6 +168,10 @@ public final class PlayDataAccessor {
 		return scoredb.getScoreData(hash, ln ? lnmode : 0);
 	}
 
+	int getLastPlayedLnMode(String sha256, int fallback) {
+		return scoredb != null ? scoredb.getLastPlayedLnMode(sha256, fallback) : fallback;
+	}
+
 	/**
 	 * スコアデータをまとめて読み込み、collectorに渡す
 	 * @param collector スコアデータのcollector

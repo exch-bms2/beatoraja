@@ -81,7 +81,7 @@ public class StringPropertyFactory {
 				&& bar.existsSong() && !bar.getSongData().getSha256().isEmpty() ? bar.getSongData() : null;
 	}
 
-	private static void writeReviewLevel(MainController main, SongDatabaseAccessor database, SongData song, String input) {
+	private static void writeReviewLevel(MainController main, SongDatabaseAccessor database, SongData song, int lnmode, String input) {
 		if (input == null) return;
 		String value = input.strip();
 		if (value.length() > 1024) return;
@@ -91,7 +91,7 @@ public class StringPropertyFactory {
 			if (decimal.signum() >= 0 && Double.isFinite(level) && (level != 0 || decimal.signum() == 0)
 					&& level != song.getSongReview().getLevelreview()
 					&& database.setSongReviewLevel(song, level) && main != null) {
-				main.syncReviewLevel(song.getSha256(), level);
+				main.syncReviewLevel(song.getSha256(), level, lnmode);
 			}
 		} catch (NumberFormatException ignored) {
 		}
@@ -109,7 +109,10 @@ public class StringPropertyFactory {
 			SongData song = selectedReviewChart(state);
 			if (song == null) return null;
 			SongDatabaseAccessor database = ((MusicSelector) state).getSongDatabase();
-			return database == null ? null : (owner, value) -> writeReviewLevel(state.main, database, song, value);
+			if (database == null) return null;
+			MainController main = state.main;
+			int lnmode = main != null ? main.getReviewLnMode(song) : 0;
+			return (owner, value) -> writeReviewLevel(main, database, song, lnmode, value);
 		}
 	}
 
