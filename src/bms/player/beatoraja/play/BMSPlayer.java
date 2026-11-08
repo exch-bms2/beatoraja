@@ -819,6 +819,11 @@ public class BMSPlayer extends MainState {
 		keyinput.input();
 	}
 
+	public boolean canAdjustSkin() {
+		return SkinAdjustmentOverlay.allows(resource.getPlayMode().mode)
+				&& getSkin() instanceof PlaySkin skin && skin.getEditableNoteProperties() != null;
+	}
+
 	public KeyInputProccessor getKeyinput() {
 		return keyinput;
 	}

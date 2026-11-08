@@ -32,6 +32,8 @@ import bms.player.beatoraja.input.keyboard.KeyCommand;
 import bms.player.beatoraja.input.PollingLwjgl3Input;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.PlaySkin;
+import bms.player.beatoraja.play.SkinAdjustmentOverlay;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -65,6 +67,7 @@ public final class MainController {
 	private long mouseMovedTime;
 
 	private BMSPlayer bmsplayer;
+	private SkinAdjustmentOverlay skinAdjustment;
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
@@ -287,6 +290,7 @@ public final class MainController {
 
 		final boolean stateChanged = newState != null && current != newState;
 		if (stateChanged) {
+			finishSkinAdjustment(false);
 			if(current != null) {
 				current.shutdown();
 				current.setSkin(null);
@@ -300,12 +304,33 @@ public final class MainController {
 			current.prepare();
 			updateMainStateListener(0);
 		}
-		if (current.getStage() != null) {
+		updateInputProcessor();
+		if (stateChanged) memoryDiagnostics.transitionComplete(this, current.type.name(), transitionStart);
+	}
+
+	private void updateInputProcessor() {
+		if (skinAdjustment != null) {
+			Gdx.input.setInputProcessor(skinAdjustment.stage());
+		} else if (current.getStage() != null) {
 			Gdx.input.setInputProcessor(new InputMultiplexer(input.getSkinMouseInput(), current.getStage(), input.getKeyBoardInputProcesseor()));
 		} else {
 			Gdx.input.setInputProcessor(new InputMultiplexer(input.getSkinMouseInput(), input.getKeyBoardInputProcesseor()));
 		}
-		if (stateChanged) memoryDiagnostics.transitionComplete(this, current.type.name(), transitionStart);
+	}
+
+	private void finishSkinAdjustment(boolean save) {
+		if (skinAdjustment == null) return;
+		var overlay = skinAdjustment;
+		skinAdjustment = null;
+		try {
+			overlay.finish(save);
+			if (save) PlayerConfig.write(config.getPlayerpath(), player);
+		} finally {
+			input.setOverlayInput(false);
+			updateInputProcessor();
+			mouseMovedTime = System.currentTimeMillis();
+			overlay.dispose();
+		}
 	}
 
 	public MainState getCurrentState() {
@@ -413,6 +438,15 @@ public final class MainController {
 
 	public void render() {
 		if (windowMode != null && windowMode.isSwitching()) return;
+		final boolean toggleAdjustment = Gdx.input.isKeyJustPressed(Input.Keys.F12);
+		final boolean adjustmentWasOpen = skinAdjustment != null;
+		if (!adjustmentWasOpen && toggleAdjustment && current instanceof BMSPlayer play && play.canAdjustSkin()
+				&& (play.getStage() == null || play.getStage().getKeyboardFocus() == null)) {
+			skinAdjustment = new SkinAdjustmentOverlay((PlaySkin) play.getSkin(), this::getOffset, config.getSystemfontpath());
+			input.setOverlayInput(true);
+			updateInputProcessor();
+			if (Gdx.input.isCursorCatched()) Gdx.input.setCursorCatched(false);
+		}
 //		input.poll();
 		input.beginSkinInputFrame();
 		timer.update();
@@ -511,6 +545,14 @@ public final class MainController {
 			downloadIpfsMessageRenderer(download.getMessage());
 		}
 
+		if (skinAdjustment != null) {
+			Boolean save = skinAdjustment.saveRequested();
+			if (save != null || (adjustmentWasOpen && toggleAdjustment) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+				finishSkinAdjustment(Boolean.TRUE.equals(save));
+			else skinAdjustment.draw();
+			return;
+		}
+		if (adjustmentWasOpen) return;
 		final long time = System.currentTimeMillis();
 		if(time > prevtime) {
 		    prevtime = time;
@@ -593,6 +635,7 @@ public final class MainController {
 	}
 
 	public void dispose() {
+		finishSkinAdjustment(false);
 		disposeInput();
 		if (obs != null) obs.close();
 		if (reviewSync != null) reviewSync.close();

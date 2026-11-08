@@ -766,14 +766,16 @@ public class Skin {
 	}
 
 	public SkinOffset getOffsetAll(MainState state) {
-		SkinOffset offsetAll = null;
-		if(state instanceof BMSPlayer) {
-			switch(((BMSPlayer)state).getSkinType()) {
-				case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE ->
-					offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL);
-			}
-		}
-		return offsetAll;
+		return state instanceof BMSPlayer player && supportsAllOffset(player.getSkinType())
+				? state.getOffsetValue(SkinProperty.OFFSET_ALL) : null;
+	}
+
+	public static boolean supportsAllOffset(SkinType type) {
+		if (type == null) return false;
+		return switch (type) {
+			case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE -> true;
+			default -> false;
+		};
 	}
 
 	public void addCustomEvent(CustomEvent event) {

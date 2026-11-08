@@ -364,12 +364,13 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 			int button = inputIndex(value, Input.Buttons.FORWARD);
 			if (button < 0) return LuaBoolean.FALSE;
 			BMSPlayerInputProcessor input = getInput();
+			if (input != null && input.isOverlayInput()) return LuaBoolean.FALSE;
 			return LuaBoolean.valueOf(justPressed ? input != null && input.isSkinMouseJustPressed(button)
 					: Gdx.input != null && Gdx.input.isButtonPressed(button));
 		}
 	}
 
-	private static class KeyPressedFunction extends OneArgFunction {
+	private class KeyPressedFunction extends OneArgFunction {
 		private static final Map<String, Integer> KEY_CODES = createKeyCodes();
 		private final boolean justPressed;
 
@@ -396,7 +397,8 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		}
 		@Override
 		public LuaValue call(LuaValue value) {
-			if(Gdx.input == null) {
+			BMSPlayerInputProcessor input = getInput();
+			if(Gdx.input == null || (input != null && input.isOverlayInput())) {
 				return LuaBoolean.FALSE;
 			}
 			int keycode = value.isnumber() ? inputIndex(value, 255)

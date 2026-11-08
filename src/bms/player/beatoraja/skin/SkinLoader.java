@@ -6,6 +6,7 @@ import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 import bms.player.beatoraja.play.SkinNote;
+import bms.player.beatoraja.play.SkinOffsetSettings;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.utils.Array;
@@ -42,7 +43,28 @@ public abstract class SkinLoader {
      */
     public static Skin load(MainState state, SkinType skinType) {
         SkinConfig skinConfig = state.resource.getPlayerConfig().getSkin()[skinType.getId()];
-        Skin skin = skinConfig != null && skinConfig.validate() ? load(state, skinType, skinConfig) : null;
+        Skin skin = null;
+        if (skinConfig != null && skinConfig.validate()) {
+            var mode = state.resource.getPlayMode();
+            if (state instanceof bms.player.beatoraja.play.BMSPlayer && mode != null
+                    && (mode.mode == bms.player.beatoraja.BMSPlayerMode.Mode.PRACTICE
+                        || mode.mode == bms.player.beatoraja.BMSPlayerMode.Mode.AUTOPLAY)
+                    && skinConfig.getProperties().getPendingSelection() != null) {
+                skin = loadPending(skinConfig, candidate -> load(state, skinType, candidate));
+                PlayerConfig.write(state.resource.getConfig().getPlayerpath(), state.resource.getPlayerConfig());
+            }
+            if (skin == null) skin = load(state, skinType, skinConfig);
+        }
+        if (skin instanceof bms.player.beatoraja.play.PlaySkin playSkin) {
+            var properties = skinConfig.getProperties();
+            if (SkinOffsetSettings.migrateLegacy(playSkin, properties, skinConfig.getPath())) {
+                PlayerConfig.write(state.resource.getConfig().getPlayerpath(), state.resource.getPlayerConfig());
+            } else if (properties.hasLegacyNoteAdjustment()) {
+                java.util.logging.Logger.getGlobal().warning("Legacy note adjustment retained but not applied: "
+                        + skinConfig.getPath() + " " + java.util.Arrays.toString(properties.getNoteAdjustment()));
+            }
+            playSkin.setEditableNoteProperties(properties);
+        }
         if(skin == null) {
             SkinConfig.Default defaultSkin = SkinConfig.Default.get(skinType);
             if (defaultSkin == null) {
@@ -52,6 +74,25 @@ public abstract class SkinLoader {
             skin = load(state, skinType, skinConfig);
         }
         return skin;
+    }
+
+    static Skin loadPending(SkinConfig config, java.util.function.Function<SkinConfig, Skin> loader) {
+        var property = config.getProperties();
+        var pending = property.getPendingSelection();
+        if (pending == null) return null;
+        var candidate = new SkinConfig(config.getPath());
+        var values = property.candidateFor(pending);
+        candidate.setProperties(values);
+        property.setPendingSelection(null);
+        Skin loaded = loader.apply(candidate);
+        if (loaded instanceof bms.player.beatoraja.play.PlaySkin) {
+            property.setOption(values.getOption());
+            property.setFile(values.getFile());
+            return loaded;
+        }
+        if (loaded != null) loaded.dispose();
+        java.util.logging.Logger.getGlobal().warning("Keeping previous skin settings after deferred load failed: " + config.getPath());
+        return null;
     }
 
     public static Skin load(MainState state, SkinType skinType, SkinConfig sc) {
@@ -106,8 +147,13 @@ public abstract class SkinLoader {
         for (String key : filemap.keys()) {
             if (imagepath.startsWith(key)) {
                 String foot = imagepath.substring(key.length());
-                imagefile = new File(
-                        imagepath.substring(0, imagepath.lastIndexOf('*')) + filemap.get(key) + foot);
+                String filename = filemap.get(key);
+                int wildcard = key.lastIndexOf('*');
+                int basename = key.lastIndexOf('/', wildcard < 0 ? key.length() - 1 : wildcard) + 1;
+                // The UI stores full filenames; retain the old prefix for legacy suffix-only values.
+                int prefixEnd = wildcard < 0 || filename.regionMatches(true, 0, key, basename, wildcard - basename)
+                        ? basename : wildcard;
+                imagefile = new File(key.substring(0, prefixEnd) + filename + foot);
                 // System.out.println(imagefile.getPath());
                 imagepath = "";
                 break;

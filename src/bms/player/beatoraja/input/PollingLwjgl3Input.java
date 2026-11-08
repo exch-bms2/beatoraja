@@ -91,7 +91,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     private void publishState() {
         int count = 0;
-        boolean focused = windowInputActive;
+        boolean focused = windowInputActive && !overlayActive;
         for (int i = 0; i < keys.length(); i++) {
             if (!super.isKeyPressed(i)) suppressedKeys[i] = false;
             int pressed = focused && !suppressedKeys[i] && super.isKeyPressed(i) ? 1 : 0;
@@ -106,7 +106,8 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         boolean deliver = false;
         boolean drawable = Gdx.graphics.getWidth() > 0 && Gdx.graphics.getHeight() > 0
                 && Gdx.graphics.getBackBufferWidth() > 0 && Gdx.graphics.getBackBufferHeight() > 0;
-        if (scratchEnabled) {
+        boolean scratchActive = scratchEnabled && !overlayActive;
+        if (scratchActive) {
             long handle = window.getWindowHandle();
             if (windowPositionSupported) GLFW.glfwGetWindowPos(handle, scratchWindowX, scratchWindowY);
             GLFW.glfwGetWindowContentScale(handle, scratchScaleX, scratchScaleY);
@@ -117,7 +118,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
                     Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
                     scratchWindowX[0], scratchWindowY[0], scratchScaleX[0], scratchScaleY[0], focused, iconified);
         }
-        boolean sample = scratchEnabled && focused && drawable;
+        boolean sample = scratchActive && focused && drawable;
         if (sample) scratchPosition.sample(windowPositionSupported || super.isCursorCatched(), deliver,
                 x, y, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         else scratchPosition.invalidate();
@@ -206,7 +207,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     void keyboardEdge(int key, boolean down, long time) {
         if (key < 0 || key >= suppressedKeys.length) return;
         if (!down) suppressedKeys[key] = false;
-        if (windowInputActive && !suppressedKeys[key]) keyboardEvents.offer(key, down, time);
+        if (windowInputActive && !overlayActive && !suppressedKeys[key]) keyboardEvents.offer(key, down, time);
     }
 
     @Override public boolean isKeyPressed(int key) {
@@ -233,6 +234,19 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     @Override public int getX() { return Thread.currentThread() == owner ? super.getX() : x; }
     @Override public int getY() { return Thread.currentThread() == owner ? super.getY() : y; }
+
+    private boolean overlayActive;
+
+    void setOverlayActive(boolean active) {
+        overlayActive = active;
+        for (int i = 0; i < keys.length(); i++) {
+            suppressedKeys[i] = super.isKeyPressed(i);
+            keys.set(i, 0);
+        }
+        pressedCount = 0;
+        invalidateMouseScratchCenter();
+        resetMouseScratchDeltas();
+    }
 
     public void setMouseScratchEnabled(boolean enabled) {
         scratchEnabled = enabled;

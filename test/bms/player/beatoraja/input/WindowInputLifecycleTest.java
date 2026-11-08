@@ -27,8 +27,37 @@ public final class WindowInputLifecycleTest {
         try {
             for (int mode = 0; mode < 4; mode++) controllerBoundaries(mode);
             replayBoundary();
+            overlayBoundary(keys);
             System.out.println("WindowInputLifecycleTest passed (button/POV, JKOC, analog v1/v2, FIFO boundaries, replay isolation)");
         } finally { Gdx.input = old; }
+    }
+
+    private static void overlayBoundary(boolean[] keys) throws Exception {
+        try (var f = new Fixture(0, false)) {
+            f.input.poll();
+            f.input.setOverlayInput(true);
+            f.input.windowActivityChanged(false);
+            f.input.windowActivityChanged(true);
+            keys[Input.Keys.ESCAPE] = true;
+            f.fake.buttons[0] = true;
+            f.input.keyboardKeyChanged(10, 0, true);
+            f.input.startChanged(true);
+            f.input.setSelectPressed(true);
+            f.input.poll();
+            check(!f.input.getKeyState(0) && !f.input.getKeyState(1)
+                    && !f.input.startPressed() && !f.input.isSelectPressed()
+                    && f.consume().size == 0, "Overlay suppresses game input even after focus returns");
+            f.input.setOverlayInput(false);
+            f.input.poll();
+            check(!f.input.isControlKeyPressed(bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys.ESCAPE)
+                    && !f.input.getKeyState(1), "Closing overlay does not forward held controls");
+            keys[Input.Keys.ESCAPE] = false;
+            f.fake.buttons[0] = false;
+            f.input.poll();
+            f.fake.buttons[0] = true;
+            f.input.poll();
+            check(f.input.getKeyState(1), "Fresh input works after closing");
+        } finally { keys[Input.Keys.ESCAPE] = false; }
     }
 
     private static void controllerBoundaries(int mode) throws Exception {

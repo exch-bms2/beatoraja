@@ -81,6 +81,55 @@ public class SkinConfig implements Validatable {
 		 */
 		private Offset[] offset = new Offset[0];
 		private int notesOffsetCenter;
+		private int[] noteAdjustment;
+		private Selection pendingSelection;
+		private transient Selection requiredSelection;
+
+		public Selection getPendingSelection() { return pendingSelection; }
+
+		public void setPendingSelection(Selection selection) {
+			pendingSelection = selection != null && selection.validate() ? selection : null;
+		}
+
+		public Selection getRequiredSelection() { return requiredSelection; }
+
+		public Property candidateFor(Selection selection) {
+			var candidate = new Property();
+			candidate.option = merge(option, selection.options, o -> o.name, Option[]::new);
+			candidate.file = merge(file, selection.files, f -> f.name, FilePath[]::new);
+			candidate.offset = offset.clone();
+			candidate.notesOffsetCenter = notesOffsetCenter;
+			candidate.setNoteAdjustment(noteAdjustment);
+			candidate.requiredSelection = selection;
+			return candidate;
+		}
+
+		private static <T> T[] merge(T[] saved, T[] changes, java.util.function.Function<T, String> name,
+				java.util.function.IntFunction<T[]> factory) {
+			var entries = new java.util.LinkedHashMap<String, T>();
+			for (T item : saved) entries.put(name.apply(item), item);
+			for (T item : changes) entries.put(name.apply(item), item);
+			return entries.values().toArray(factory);
+		}
+
+		public int[] getNoteAdjustment() {
+			return noteAdjustment == null ? new int[4] : noteAdjustment.clone();
+		}
+
+		public boolean hasLegacyNoteAdjustment() { return noteAdjustment != null; }
+
+		public void setNoteAdjustment(int[] values) {
+			noteAdjustment = null;
+			if (values == null || values.length != 4) return;
+			for (int value : values) {
+				if (value != 0) {
+					noteAdjustment = values.clone();
+					for (int i = 0; i < 4; i++)
+						noteAdjustment[i] = Math.max(-256, Math.min(256, noteAdjustment[i]));
+					break;
+				}
+			}
+		}
 
 		/** 0 follows the skin; 2/5/8 anchor note resizing at bottom/center/top. */
 		public int getNotesOffsetCenter() {
@@ -120,6 +169,8 @@ public class SkinConfig implements Validatable {
 		
 		public boolean validate() {
 			setNotesOffsetCenter(notesOffsetCenter);
+			setNoteAdjustment(noteAdjustment);
+			setPendingSelection(pendingSelection);
 			if(option == null) {
 				option = new Option[0];
 			}
@@ -136,6 +187,27 @@ public class SkinConfig implements Validatable {
 			offset = Validatable.removeInvalidElements(offset);
 			
 			return true;
+		}
+	}
+
+	public static final class Selection implements Validatable {
+		private Option[] options = new Option[0];
+		private FilePath[] files = new FilePath[0];
+
+		public Selection() { }
+
+		public Selection(Option[] options, FilePath[] files) {
+			this.options = options;
+			this.files = files;
+		}
+
+		public Option[] options() { return options; }
+		public FilePath[] files() { return files; }
+
+		@Override public boolean validate() {
+			options = options == null ? new Option[0] : Validatable.removeInvalidElements(options);
+			files = files == null ? new FilePath[0] : Validatable.removeInvalidElements(files);
+			return options.length != 0 || files.length != 0;
 		}
 	}
 

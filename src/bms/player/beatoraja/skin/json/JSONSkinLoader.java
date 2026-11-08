@@ -219,9 +219,8 @@ public class JSONSkinLoader extends SkinLoader {
 			if (lua != null) lua.dispose();
 			return null;
 		}
-		header.setSkinConfigProperty(property);
-
 		try {
+			header.setSkinConfigProperty(property);
 			if(lua != null) {
 				lua.setDirectory(p.getParent());
 			}

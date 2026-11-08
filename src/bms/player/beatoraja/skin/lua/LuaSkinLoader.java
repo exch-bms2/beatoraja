@@ -73,9 +73,8 @@ public class LuaSkinLoader extends JSONSkinLoader {
 			lua.dispose();
 			return null;
 		}
-		header.setSkinConfigProperty(property);
-		
-		try {			
+		try {
+			header.setSkinConfigProperty(property);
 			filemap = new ObjectMap<>();
 			for(SkinHeader.CustomFile customFile : header.getCustomFiles()) {
 				if(customFile.getSelectedFilename() != null) {

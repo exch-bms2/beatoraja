@@ -266,6 +266,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.SkinObjectOffsetCenterTest",
     "bms.player.beatoraja.skin.json.OffsetCenterLoaderTest",
     "bms.player.beatoraja.play.NoteOffsetCenterTest",
+    "bms.player.beatoraja.play.SkinAdjustmentOverlayTest",
+    "bms.player.beatoraja.skin.SkinCustomizationTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
     "bms.player.beatoraja.input.mouse.WaylandCompatibilityTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",

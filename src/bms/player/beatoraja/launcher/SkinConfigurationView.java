@@ -67,6 +67,8 @@ public class SkinConfigurationView implements Initializable {
 
 	public SkinConfig.Property getProperty() {
 		SkinConfig.Property property = new SkinConfig.Property();
+		property.setNoteAdjustment(noteAdjustment);
+		property.setPendingSelection(pendingSelection);
 
 		List<SkinConfig.Option> options = new ArrayList<>();
 		for (CustomOption option : selected.getCustomOptions()) {
@@ -296,9 +298,14 @@ public class SkinConfigurationView implements Initializable {
 		}
     }
 
+	private int[] noteAdjustment;
+	private SkinConfig.Selection pendingSelection;
+
 	private VBox create(SkinHeader header, SkinConfig.Property property) {
 		selected = header;
 		notesOffsetCenter = null;
+		noteAdjustment = property == null ? null : property.getNoteAdjustment();
+		pendingSelection = property == null ? null : property.getPendingSelection();
 		if (header == null) {
 			return null;
 		}

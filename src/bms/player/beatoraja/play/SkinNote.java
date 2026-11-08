@@ -60,6 +60,17 @@ public class SkinNote extends SkinObject {
 	public void draw(SkinObjectRenderer sprite) {
 		renderer.drawLane(sprite, time, lanes, this.getOffsets(), getOffsetCenter());
 	}
+
+	boolean canMigrateSize(int widthDelta, int heightDelta, int widthOffset, int heightOffset) {
+		if (lanes.length == 0) return false;
+		for (SkinLane lane : lanes) {
+			var destinations = lane.getAllDestination();
+			if (destinations.length != 1
+					|| (widthDelta != 0 && !(destinations[0].region.width + widthOffset >= 1))
+					|| (heightDelta != 0 && !(lane.scale + heightOffset >= 1))) return false;
+		}
+		return true;
+	}
 	
 	@Override
 	public void dispose() {

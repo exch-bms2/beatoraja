@@ -150,6 +150,7 @@ public final class SkinHeader {
 	}
 	
 	public void setSkinConfigProperty(SkinConfig.Property property) {
+		var requiredFiles = SkinCustomization.resolveRequiredFiles(this, property.getRequiredSelection());
 		for (SkinHeader.CustomOption customOption : getCustomOptions()) {
 			int op = customOption.getDefaultOption();
 			for (SkinConfig.Option option : property.getOption()) {
@@ -172,6 +173,10 @@ public final class SkinHeader {
 		}
 		
 		for (SkinHeader.CustomFile customFile : getCustomFiles()) {
+			if (requiredFiles.containsKey(customFile.name)) {
+				customFile.filename = requiredFiles.get(customFile.name);
+				continue;
+			}
 			for (SkinConfig.FilePath file : property.getFile()) {
 				if (customFile.name.equals(file.name)) {
 					if (!file.path.equals("Random")) {

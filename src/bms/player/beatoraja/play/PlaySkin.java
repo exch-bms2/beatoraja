@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -12,6 +13,16 @@ import com.badlogic.gdx.math.Rectangle;
  * @author exch
  */
 public class PlaySkin extends Skin {
+	private SkinConfig.Property editableNoteProperties;
+
+	public void setEditableNoteProperties(SkinConfig.Property properties) {
+		editableNoteProperties = properties;
+	}
+
+	public SkinConfig.Property getEditableNoteProperties() {
+		return editableNoteProperties;
+	}
+
 	/**
 	 * STATE_READYからSTATE_PLAYに移行するまでのマージン(ms)
 	 */

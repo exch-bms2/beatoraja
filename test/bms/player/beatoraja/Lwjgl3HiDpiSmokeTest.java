@@ -34,6 +34,7 @@ public final class Lwjgl3HiDpiSmokeTest {
             int frames, verified;
             int restoredWidth, restoredHeight;
             @Override public void create() {
+                bms.player.beatoraja.play.SkinAdjustmentOverlayTest.verifyScene2d();
                 batch = new SpriteBatch();
                 check(Gdx.graphics.getWidth() != 320 || Gdx.graphics.getHeight() != 240,
                         "Exercise actual mismatched startup dimensions");

@@ -63,9 +63,51 @@ public final class NoteOffsetCenterTest {
                 Draw zero = f.draw(0, 0, f.lane.noteImage);
                 near(legacy.x(), zero.x()); near(legacy.y(), zero.y());
                 near(legacy.width(), zero.width()); near(legacy.height(), zero.height());
+                f.beat(-1);
+                verifyLegacyMigration(f);
             } finally { texture.dispose(); }
         }
         System.out.println("NoteOffsetCenterTest passed (real SkinNote forwarding, normal/mine/hidden, LN/CN/HCN, held/CONSTANT, beat expansion, PMS and legacy geometry)");
+    }
+
+    private static void verifyLegacyMigration(Fixture f) throws Exception {
+        int id = SkinProperty.OFFSET_NOTES_1P;
+        var property = new SkinConfig.Property();
+        var offset = new SkinConfig.Offset();
+        offset.name = "Notes offset";
+        offset.h = 4;
+        property.setOffset(new SkinConfig.Offset[]{offset});
+        f.skin.header.setCustomOffsets(new SkinHeader.CustomOffset[]{
+                new SkinHeader.CustomOffset(offset.name, id, false, false, false, true, false, false)});
+        f.skin.getOffset().put(id, offset);
+        f.skin.add(f.note);
+        f.note.setOffsetID(id);
+        set(f.note, SkinObject.class, "off", new SkinOffset[]{f.offset});
+        set(f.lane, SkinObject.class, "dst", new SkinObject.SkinObjectDestination[]{
+                new SkinObject.SkinObjectDestination(0, new Rectangle(f.lane.region),
+                        com.badlogic.gdx.graphics.Color.WHITE, 0, 0)});
+        f.chart(new NormalNote(0));
+        Draw before = f.draw(5, 0, f.lane.noteImage);
+        property.setNoteAdjustment(new int[]{0, 0, 0, 6});
+        check(!SkinOffsetSettings.migrateLegacy(f.skin, property, "play.luaskin"), "Dynamic definitions are not migrated");
+        f.note.setOffsetCenter(0);
+        check(!SkinOffsetSettings.migrateLegacy(f.skin, property, "play.lr2skin"), "Legacy anchor is not equivalent for LN/PMS");
+        f.note.setOffsetCenter(5);
+        property.setNoteAdjustment(new int[]{1, 0, 0, 6});
+        check(!SkinOffsetSettings.migrateLegacy(f.skin, property, "play.lr2skin")
+                && property.getNoteAdjustment()[0] == 1, "Unsupported axes leave all legacy values intact");
+        property.setNoteAdjustment(new int[]{0, 0, 0, -20});
+        check(!SkinOffsetSettings.migrateLegacy(f.skin, property, "play.lr2skin"), "Old clamp must be redundant");
+        property.setNoteAdjustment(new int[]{0, 0, 0, 6});
+        check(SkinOffsetSettings.migrateLegacy(f.skin, property, "play.lr2skin"), "Equivalent anchored LR2 offset migrates");
+        f.offset.h = property.getOffset()[0].h;
+        Draw migrated = f.draw(5, 0, f.lane.noteImage);
+        near(migrated.x(), before.x());
+        near(migrated.y(), before.y() - 3);
+        near(migrated.width(), before.width());
+        near(migrated.height(), before.height() + 6);
+        check(!property.hasLegacyNoteAdjustment() && !SkinOffsetSettings.migrateLegacy(f.skin, property, "play.lr2skin"),
+                "Migration is applied only once");
     }
 
     private static void verify(Draw draw, int center, SkinOffset offset, int beat, boolean ignoreOffset) {

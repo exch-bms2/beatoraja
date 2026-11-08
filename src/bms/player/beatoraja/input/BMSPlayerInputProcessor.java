@@ -38,6 +38,8 @@ public class BMSPlayerInputProcessor {
 	private volatile boolean enable = true;
 	private volatile boolean closing;
 	private boolean windowInputActive = true;
+	private boolean windowFocused = true;
+	private volatile boolean overlayInput;
     private boolean replayInput;
     private PollingLwjgl3Input windowInput;
     private final java.util.function.Consumer<Boolean> windowActivityListener = this::windowActivityChanged;
@@ -449,7 +451,7 @@ public class BMSPlayerInputProcessor {
 
     private void queuedKeyChanged(BMSPlayerInputDevice device, long presstime, int key, boolean pressed) {
 		synchronized (keyboardJudgeQueue) {
-			if (enable && keystate[key] != pressed) {
+			if (enable && (!overlayInput || !pressed) && keystate[key] != pressed) {
 				keyChanged(device, presstime, key, pressed);
 				keyboardJudgeQueue.offer(key, pressed, presstime);
 				checkKeyboardQueueOverflow();
@@ -488,7 +490,7 @@ public class BMSPlayerInputProcessor {
 	}
 	
 	protected void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
-		if (!enable) {
+		if (!enable || (overlayInput && pressed)) {
 			return;
 		}
 		if (keystate[i] != pressed) {
@@ -549,7 +551,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void startChanged(boolean pressed) {
-		startPressed = pressed;
+		startPressed = pressed && !overlayInput;
 	}
 
 	public boolean startPressed() {
@@ -594,7 +596,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setSelectPressed(boolean selectPressed) {
-		this.selectPressed = selectPressed;
+		this.selectPressed = selectPressed && !overlayInput;
 	}
 
 	public KeyBoardInputProcesseor getKeyBoardInputProcesseor() {
@@ -761,22 +763,40 @@ public class BMSPlayerInputProcessor {
 	/** Serialize boundaries with polling; accepted judgment/replay events retain their order and clocks. */
 	void windowActivityChanged(boolean active) {
 		synchronized (kbinput) {
-			if (closing || active == windowInputActive) return;
-			windowInputActive = active;
-			if (!active && !replayInput) {
-				long now = System.nanoTime() / 1000 - starttime;
-				for (int key = 0; key < keystate.length; key++)
-					if (keystate[key]) queuedKeyChanged(kbinput, now, key, false);
-				startPressed = selectPressed = mousepressed = mousedragged = false;
-				mouseMoved = false;
-				scrollX = scrollY = 0;
-				Arrays.fill(isAnalog, false);
-				Arrays.fill(currentAnalogValue, 0);
-				Arrays.fill(lastAnalogValue, 0);
-			}
-			kbinput.resetWindowInput();
-			for (BMControllerInputProcessor controller : bminput) controller.setWindowActive(active);
+			windowFocused = active;
+			updateInputActivity();
 		}
+	}
+
+	public void setOverlayInput(boolean overlay) {
+		synchronized (kbinput) {
+			if (overlay == overlayInput) return;
+			overlayInput = overlay;
+			if (Gdx.input instanceof PollingLwjgl3Input polling) polling.setOverlayActive(overlay);
+			updateInputActivity();
+			if (!overlay && windowInputActive) kbinput.suppressHeldControlKeys();
+		}
+	}
+
+	public boolean isOverlayInput() { return overlayInput; }
+
+	private void updateInputActivity() {
+		boolean active = windowFocused && !overlayInput;
+		if (closing || active == windowInputActive) return;
+		windowInputActive = active;
+		if (!active && !replayInput) {
+			long now = System.nanoTime() / 1000 - starttime;
+			for (int key = 0; key < keystate.length; key++)
+				if (keystate[key]) queuedKeyChanged(kbinput, now, key, false);
+			startPressed = selectPressed = mousepressed = mousedragged = false;
+			mouseMoved = false;
+			scrollX = scrollY = 0;
+			Arrays.fill(isAnalog, false);
+			Arrays.fill(currentAnalogValue, 0);
+			Arrays.fill(lastAnalogValue, 0);
+		}
+		kbinput.resetWindowInput();
+		for (BMControllerInputProcessor controller : bminput) controller.setWindowActive(active);
 	}
 
 	public void startPolling() { polling.start(); }

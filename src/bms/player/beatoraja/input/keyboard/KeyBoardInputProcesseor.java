@@ -159,12 +159,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				}
 			}
 
-			final boolean startpressed = !suppressedTextControlKeys[control[0]] && controlState(control[0]);
+			final boolean startpressed = unsuppressedControlState(control[0]);
 			if (startpressed != keystate[control[0]]) {
 				keystate[control[0]] = startpressed;
 				this.bmsPlayerInputProcessor.startChanged(startpressed);
 			}
-			final boolean selectpressed = !suppressedTextControlKeys[control[1]] && controlState(control[1]);
+			final boolean selectpressed = unsuppressedControlState(control[1]);
 			if (selectpressed != keystate[control[1]]) {
 				keystate[control[1]] = selectpressed;
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
@@ -199,6 +199,21 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		if (Gdx.input instanceof PollingLwjgl3Input)
 			for (int assigned : keys) if (assigned == key) return keystate[key];
 		return Gdx.input.isKeyPressed(key);
+	}
+
+	private boolean unsuppressedControlState(int key) {
+		if (suppressedTextControlKeys[key]) {
+			if (!Gdx.input.isKeyPressed(key)) suppressedTextControlKeys[key] = false;
+			return false;
+		}
+		return controlState(key);
+	}
+
+	public synchronized void suppressHeldControlKeys() {
+		for (ControlKeys key : ControlKeys.values())
+			suppressedTextControlKeys[key.keycode] = Gdx.input.isKeyPressed(key.keycode);
+		for (int key : control)
+			suppressedTextControlKeys[key] = Gdx.input.isKeyPressed(key);
 	}
 
 	private int currentlyHeldModifiers() {
