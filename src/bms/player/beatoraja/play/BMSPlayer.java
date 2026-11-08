@@ -23,6 +23,8 @@ import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinCatalog;
+import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
 
 /**
@@ -837,15 +839,24 @@ public class BMSPlayer extends MainState {
 				&& canAdjustSkin() && !getSkin().isTextInputActive();
 	}
 
-	public boolean applySkinPreview(SkinConfig.Property draft) {
-		return applySkinPreview(draft, (type, candidate) -> SkinLoader.loadPracticePreview(this, type, candidate));
+	public List<SkinHeader> previewSkinChoices() {
+		if (!canPreviewSkin()) return List.of();
+		return SkinCatalog.discover(resource.getConfig(), Path.of(resource.getConfig().getSkinpath()), getSkinType());
+	}
+
+	public boolean applySkinPreview(SkinHeader target, SkinConfig.Property draft) {
+		return applySkinPreview(target, draft, (type, candidate) -> SkinLoader.loadPracticePreview(this, type, candidate));
 	}
 
 	boolean applySkinPreview(SkinConfig.Property draft, BiFunction<SkinType, SkinConfig, Skin> loader) {
+		return applySkinPreview(null, draft, loader);
+	}
+
+	boolean applySkinPreview(SkinHeader target, SkinConfig.Property draft, BiFunction<SkinType, SkinConfig, Skin> loader) {
 		if (preparingSkinPreview || !canPreviewSkin()) return false;
 		preparingSkinPreview = true;
 		try {
-			return replacePracticeSkin(draft, loader);
+			return replacePracticeSkin(target, draft, loader);
 		} finally {
 			preparingSkinPreview = false;
 		}
@@ -853,19 +864,27 @@ public class BMSPlayer extends MainState {
 
 	public boolean isPreparingSkinPreview() { return preparingSkinPreview; }
 
-	private boolean replacePracticeSkin(SkinConfig.Property draft, BiFunction<SkinType, SkinConfig, Skin> loader) {
+	private boolean replacePracticeSkin(SkinHeader target, SkinConfig.Property draft, BiFunction<SkinType, SkinConfig, Skin> loader) {
 		var previous = (PlaySkin) getSkin();
 		var saved = previous.getEditableNoteProperties();
 		var type = getSkinType();
 		if (type == null) return false;
-		var configured = resource.getPlayerConfig().getSkin()[type.getId()];
+		var profile = resource.getPlayerConfig();
+		var configured = profile.getSkin()[type.getId()];
 		if (configured == null || configured.getProperties() != saved) return false;
-		var candidateConfig = new SkinConfig(configured.getPath());
+		if (target != null && (!SkinCatalog.supports(target, type) || target.getPath() == null)) return false;
+		String path = target == null ? configured.getPath() : target.getPath().toString();
+		boolean switching = !SkinCatalog.samePath(path, configured.getPath());
+		if (switching) {
+			var settings = historicalSkinProperties(profile, path);
+			draft = settings.candidateFor(settings.getPendingSelection());
+		}
+		var candidateConfig = new SkinConfig(path);
 		candidateConfig.setProperties(draft);
 		var loaded = loader.apply(type, candidateConfig);
-		if (!(loaded instanceof PlaySkin candidate)) {
+		if (!(loaded instanceof PlaySkin candidate) || (switching && !SkinCatalog.supports(candidate.header, type))) {
 			if (loaded != null) loaded.dispose();
-			Logger.getGlobal().warning("Practice skin preview could not load: " + configured.getPath());
+			Logger.getGlobal().warning("Practice skin preview could not load: " + path);
 			return false;
 		}
 		RhythmTimerProcessor nextRhythm;
@@ -880,12 +899,42 @@ public class BMSPlayer extends MainState {
 		if (!tryReplaceSkin(candidate)) return false;
 
 		rhythm = nextRhythm;
+		if (switching) {
+			var selected = new SkinConfig(path);
+			selected.setProperties(draft.candidateFor(null));
+			rememberPracticeSkins(profile, configured, selected);
+			profile.getSkin()[type.getId()] = selected;
+			candidate.setEditableNoteProperties(selected.getProperties());
+			return true;
+		}
 		saved.setOption(draft.getOption());
 		saved.setFile(draft.getFile());
 		saved.setOffset(draft.getOffset());
 		saved.setPendingSelection(null);
 		candidate.setEditableNoteProperties(saved);
 		return true;
+	}
+
+	private static SkinConfig.Property historicalSkinProperties(PlayerConfig profile, String path) {
+		var history = profile.getSkinHistory();
+		if (history != null) {
+			for (var skin : history)
+				if (skin != null && skin.getProperties() != null && SkinCatalog.samePath(skin.getPath(), path))
+					return skin.getProperties();
+		}
+		return new SkinConfig.Property();
+	}
+
+	private static void rememberPracticeSkins(PlayerConfig profile, SkinConfig previous, SkinConfig selected) {
+		var history = new ArrayList<SkinConfig>();
+		history.add(selected);
+		history.add(previous);
+		if (profile.getSkinHistory() != null) {
+			for (var item : profile.getSkinHistory())
+				if (item != null && !SkinCatalog.samePath(item.getPath(), previous.getPath())
+						&& !SkinCatalog.samePath(item.getPath(), selected.getPath())) history.add(item);
+		}
+		profile.setSkinHistory(history.toArray(SkinConfig[]::new));
 	}
 
 	public KeyInputProccessor getKeyinput() {

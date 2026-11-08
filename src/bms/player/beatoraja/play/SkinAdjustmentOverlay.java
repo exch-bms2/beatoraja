@@ -3,6 +3,8 @@ package bms.player.beatoraja.play;
 import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.SkinCustomization;
+import bms.player.beatoraja.skin.SkinCatalog;
+import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -26,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import static bms.player.beatoraja.skin.SkinProperty.OPTION_RANDOM_VALUE;
 
@@ -42,12 +45,21 @@ public final class SkinAdjustmentOverlay implements Disposable {
     private Boolean saveRequested;
     private boolean previewRequested;
     private Label previewStatus;
+    private TextButton saveButton;
+    private Label selectedSkinLabel;
+    private List<SkinHeader> alternateSkins;
+    private int selectedSkin;
 
     public SkinAdjustmentOverlay(PlaySkin skin, IntFunction<SkinOffset> liveOffsets, String fontPath) {
         this(skin, liveOffsets, fontPath, false);
     }
 
     public SkinAdjustmentOverlay(PlaySkin skin, IntFunction<SkinOffset> liveOffsets, String fontPath, boolean canPreview) {
+        this(skin, liveOffsets, fontPath, canPreview, null);
+    }
+
+    public SkinAdjustmentOverlay(PlaySkin skin, IntFunction<SkinOffset> liveOffsets, String fontPath, boolean canPreview,
+                                 Supplier<List<SkinHeader>> skinChoices) {
         session = new Session(skin, liveOffsets);
         font = createFont(fontPath);
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -70,6 +82,13 @@ public final class SkinAdjustmentOverlay implements Disposable {
         panel.setBackground(drawable.tint(Color.valueOf("182126f5")));
         panel.pad(12);
         panel.defaults().space(6);
+        if (canPreview && skinChoices != null) {
+            selectedSkinLabel = new Label(skinLabel(skin.header), labelStyle);
+            selectedSkinLabel.setEllipsis(true);
+            panel.add(button("<", buttonStyle, () -> stepSkin(skinChoices, -1))).size(24, 24);
+            panel.add(selectedSkinLabel).colspan(2).width(202);
+            panel.add(button(">", buttonStyle, () -> stepSkin(skinChoices, 1))).size(24, 24).row();
+        }
         addSettings(skin, panel, labelStyle, buttonStyle, drawable);
         if (canPreview) {
             panel.add(button("Apply & Preview", buttonStyle, () -> previewRequested = true))
@@ -80,10 +99,37 @@ public final class SkinAdjustmentOverlay implements Disposable {
             sizeChoices(Gdx.graphics.getHeight());
         }
         panel.add(button("Cancel", buttonStyle, () -> saveRequested = false)).colspan(2).size(88, 28);
-        panel.add(button("Save", buttonStyle, () -> saveRequested = true)).colspan(2).size(88, 28);
+        saveButton = button("Save", buttonStyle, () -> {
+            if (previewSkin() == null) saveRequested = true;
+        });
+        panel.add(saveButton).colspan(2).size(88, 28);
         root.add(panel);
         stage.addActor(root);
         if (choicesPane != null) stage.setScrollFocus(choicesPane);
+    }
+
+    private static String skinLabel(SkinHeader header) {
+        return header.getName() == null || header.getName().isBlank()
+                ? (header.getPath() == null ? "Current skin" : header.getPath().getFileName().toString())
+                : header.getName();
+    }
+
+    private void stepSkin(Supplier<List<SkinHeader>> choices, int direction) {
+        if (alternateSkins == null) {
+            var currentPath = session.skin.header.getPath();
+            alternateSkins = choices.get().stream()
+                    .filter(header -> header.getPath() != null && (currentPath == null
+                            || !SkinCatalog.samePath(currentPath.toString(), header.getPath().toString())))
+                    .toList();
+        }
+        selectedSkin = Math.floorMod(selectedSkin + direction, alternateSkins.size() + 1);
+        var target = previewSkin();
+        selectedSkinLabel.setText(skinLabel(target == null ? session.skin.header : target));
+        saveButton.setDisabled(target != null);
+        if (choicesPane != null) choicesPane.setVisible(target == null);
+        if (previewStatus != null) previewStatus.setText(alternateSkins.isEmpty() ? "No other compatible skins."
+                : target == null ? "" : "Using this skin's saved settings.");
+        sizeChoices(Gdx.graphics.getHeight());
     }
 
     private BitmapFont createFont(String fontPath) {
@@ -210,6 +256,8 @@ public final class SkinAdjustmentOverlay implements Disposable {
 
     public SkinConfig.Property previewProperties() { return session.previewProperties(); }
 
+    public SkinHeader previewSkin() { return selectedSkin == 0 ? null : alternateSkins.get(selectedSkin - 1); }
+
     public void previewFailed() {
         if (previewStatus != null) previewStatus.setText("Preview failed. Previous skin kept.");
     }
@@ -228,7 +276,8 @@ public final class SkinAdjustmentOverlay implements Disposable {
 
     private void sizeChoices(int height) {
         if (choicesCell == null) return;
-        choicesCell.height(Math.min(preferredChoicesHeight, Math.max(30, height - (previewStatus == null ? 80 : 140))));
+        int fixedHeight = previewStatus == null ? 80 : selectedSkinLabel == null ? 140 : 174;
+        choicesCell.height(selectedSkin == 0 ? Math.min(preferredChoicesHeight, Math.max(30, height - fixedHeight)) : 0);
         ((Table) choicesPane.getParent()).invalidateHierarchy();
     }
 

@@ -95,8 +95,8 @@ public class SkinConfig implements Validatable {
 
 		public Property candidateFor(Selection selection) {
 			var candidate = new Property();
-			candidate.option = merge(option, selection.options, o -> o.name, Option[]::new);
-			candidate.file = merge(file, selection.files, f -> f.name, FilePath[]::new);
+			candidate.option = selection == null ? option.clone() : merge(option, selection.options, o -> o.name, Option[]::new);
+			candidate.file = selection == null ? file.clone() : merge(file, selection.files, f -> f.name, FilePath[]::new);
 			candidate.offset = offset.clone();
 			candidate.notesOffsetCenter = notesOffsetCenter;
 			candidate.setNoteAdjustment(noteAdjustment);

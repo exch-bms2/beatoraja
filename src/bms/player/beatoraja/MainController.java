@@ -339,7 +339,9 @@ public final class MainController {
 
 	private void applySkinAdjustmentPreview() {
 		var overlay = skinAdjustment;
-		if (!(current instanceof BMSPlayer play) || !play.canPreviewSkin() || !play.applySkinPreview(overlay.previewProperties())) {
+		var target = overlay.previewSkin();
+		if (!(current instanceof BMSPlayer play) || !play.canPreviewSkin()
+				|| !play.applySkinPreview(target, target == null ? overlay.previewProperties() : null)) {
 			overlay.previewFailed();
 			return;
 		}
@@ -461,7 +463,7 @@ public final class MainController {
 		if (!adjustmentWasOpen && toggleAdjustment && current instanceof BMSPlayer play && play.canAdjustSkin()
 				&& (play.getStage() == null || play.getStage().getKeyboardFocus() == null)) {
 			skinAdjustment = new SkinAdjustmentOverlay((PlaySkin) play.getSkin(), this::getOffset, config.getSystemfontpath(),
-					play.canPreviewSkin());
+					play.canPreviewSkin(), play::previewSkinChoices);
 			input.setOverlayInput(true);
 			updateInputProcessor();
 			if (Gdx.input.isCursorCatched()) Gdx.input.setCursorCatched(false);

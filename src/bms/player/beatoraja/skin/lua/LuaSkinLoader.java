@@ -42,6 +42,15 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		return new LuaSkinLoader(skinRoot != null ? skinRoot : Path.of("").toAbsolutePath().normalize());
 	}
 
+	public static SkinHeader loadSandboxedHeader(Path path) {
+		var loader = sandboxed(path);
+		try {
+			return loader.loadHeader(path);
+		} finally {
+			loader.lua.dispose();
+		}
+	}
+
 	public LuaSkinLoader(MainState state, Config c) {
 		super(state, c, new SkinLuaAccessor(false));
 	}
