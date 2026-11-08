@@ -84,6 +84,10 @@ public class InputConfigurationView implements Initializable {
         commitMode();
     }
 
+    void refreshMode() {
+        if (mode != null) updateMode(mode);
+    }
+
     public void updateMode(PlayConfigurationView.PlayMode mode) {
 	this.mode = mode;
 	PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(mode.name()));

@@ -58,9 +58,14 @@
             </AnchorPane>
         </Tab>
         <Tab fx:id="inputTab" closable="false" text="%TAB_INPUT">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <fx:include fx:id="input" source="InputConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            </AnchorPane>
+            <VBox>
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <padding><Insets top="10" right="10" bottom="4" left="10" /></padding>
+                    <Label text="%INPUT_BACKEND" />
+                    <ComboBox fx:id="controllerBackend" accessibleText="%INPUT_BACKEND" onAction="#changeControllerBackend" />
+                </HBox>
+                <fx:include fx:id="input" source="InputConfigurationView.fxml" VBox.vgrow="ALWAYS" />
+            </VBox>
         </Tab>
         <Tab fx:id="resourceTab" closable="false" text="%Resource">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -415,11 +420,18 @@
                 </VBox>
             </AnchorPane>
         </Tab>
-        <Tab closable="false" text="OBS">
-            <fx:include fx:id="obs" source="ObsConfigurationView.fxml" />
-        </Tab>
-        <Tab closable="false" text="Discord Webhook">
-            <fx:include fx:id="discordWebhook" source="DiscordConfigurationView.fxml" />
+        <Tab closable="false" text="%TAB_EXTERNAL_TOOLS">
+            <TabPane fx:id="externalToolsTabs" tabClosingPolicy="UNAVAILABLE">
+                <Tab text="OBS">
+                    <fx:include fx:id="obs" source="ObsConfigurationView.fxml" />
+                </Tab>
+                <Tab text="Discord">
+                    <fx:include fx:id="discordWebhook" source="DiscordConfigurationView.fxml" />
+                </Tab>
+                <Tab text="Stream">
+                    <fx:include fx:id="stream" source="StreamConfigurationView.fxml" />
+                </Tab>
+            </TabPane>
         </Tab>
         <Tab fx:id="otherTab" closable="false" text="%Other">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -428,7 +440,6 @@
                 </padding>
                 <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" text="%CACHE_SKIN_IMAGE" />
-                    <CheckBox fx:id="discord" mnemonicParsing="false" prefHeight="25.0" text="%DISCORD_RPC" />
                     <CheckBox fx:id="clipboardScreenshot" mnemonicParsing="false" prefHeight="25.0" text="%CLIPBOARD_SCREENSHOT" />
                     <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%IMPORT_LR2_SCORE">
                         <VBox.margin>
@@ -456,11 +467,6 @@
             <padding>
                <Insets left="10.0" top="10.0" />
             </padding>
-            </AnchorPane>
-        </Tab>
-        <Tab fx:id="streamTab" closable="false" text="Stream">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <fx:include fx:id="stream" source="StreamConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             </AnchorPane>
         </Tab>
     </TabPane>

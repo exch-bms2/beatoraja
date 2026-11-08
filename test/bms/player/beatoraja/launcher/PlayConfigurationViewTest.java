@@ -3,7 +3,9 @@ package bms.player.beatoraja.launcher;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.IRConfig;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.input.controller.ControllerBackend;
 import java.net.URL;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -12,6 +14,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 
 /** Real FXML injection and per-mode commits, run on the launcher smoke test's JavaFX thread. */
@@ -33,11 +37,15 @@ public final class PlayConfigurationViewTest {
             loader.load();
             if (!(loader.getNamespace().get("discordWebhookController") instanceof DiscordConfigurationView))
                 throw new AssertionError("Discord Webhook settings missing from launcher");
+            var external = (TabPane) loader.getNamespace().get("externalToolsTabs");
+            if (!external.getTabs().stream().map(Tab::getText).toList().equals(List.of("OBS", "Discord", "Stream")))
+                throw new AssertionError("External tools must be grouped in their own tabs");
             verifyDiscordWebhookSettings(locale);
             verifyReviewSyncSettings(locale);
             var player = new PlayerConfig();
             var field = PlayConfigurationView.class.getDeclaredField("player");
             field.setAccessible(true); field.set(view, player);
+            verifyControllerBackendSwitch(view, loader, player);
             var option = (CheckBox) loader.getNamespace().get("analogScratchHispeed");
             if (option == null || option.getText().contains("%") || option.getTooltip().getText().isBlank())
                 throw new AssertionError("Localized checkbox and tooltip missing: " + locale);
@@ -66,6 +74,33 @@ public final class PlayConfigurationViewTest {
                 throw new AssertionError("Explicitly selecting existing cover controls must persist");
         }
         System.out.println("PlayConfigurationViewTest passed (real FXML, English/Japanese, mode-specific checkbox save/restore)");
+    }
+
+    private static void verifyControllerBackendSwitch(PlayConfigurationView view, FXMLLoader loader,
+                                                      PlayerConfig player) throws Exception {
+        var config = new Config();
+        var field = PlayConfigurationView.class.getDeclaredField("config");
+        field.setAccessible(true);
+        field.set(view, config);
+        var input = (InputConfigurationView) loader.getNamespace().get("inputController");
+        input.update(player);
+        var original = player.getMode7().getController();
+        @SuppressWarnings("unchecked")
+        var backend = (ComboBox<ControllerBackend>) loader.getNamespace().get("controllerBackend");
+        backend.getItems().setAll(ControllerBackend.values());
+        backend.setValue(ControllerBackend.SDL_ASYNC);
+        backend.fireEvent(new ActionEvent());
+        var sdl = player.getMode7().getController();
+        if (config.getControllerBackend() != ControllerBackend.SDL_ASYNC || sdl == original)
+            throw new AssertionError("Selecting SDL_ASYNC must switch the active binding bank");
+        backend.setValue(ControllerBackend.SDL);
+        backend.fireEvent(new ActionEvent());
+        if (player.getMode7().getController() != sdl)
+            throw new AssertionError("SDL and SDL_ASYNC must share their binding bank");
+        backend.setValue(ControllerBackend.JINPUT);
+        backend.fireEvent(new ActionEvent());
+        if (player.getMode7().getController() != original)
+            throw new AssertionError("Switching back must restore the original binding bank");
     }
 
     private static void verifyReviewSyncSettings(Locale locale) throws Exception {
@@ -116,6 +151,9 @@ public final class PlayConfigurationViewTest {
         var config = new Config();
         view.update(config);
         var fields = loader.getNamespace();
+        var richPresence = (CheckBox) fields.get("richPresence");
+        richPresence.setSelected(!config.isUseDiscordRPC());
+        boolean expectedRichPresence = richPresence.isSelected();
         var mode = (ComboBox<?>) fields.get("mode");
         var url = (PasswordField) fields.get("url");
         var destinations = (ListView<?>) fields.get("destinations");
@@ -130,7 +168,8 @@ public final class PlayConfigurationViewTest {
         config.validate();
         view.update(config);
         if (mode.getSelectionModel().getSelectedIndex() != 2 || destinations.getItems().size() != 2
-                || !config.getWebhookName().equals("リザルト") || !url.getText().isEmpty())
+                || !config.getWebhookName().equals("リザルト") || !url.getText().isEmpty()
+                || config.isUseDiscordRPC() != expectedRichPresence || richPresence.isSelected() != expectedRichPresence)
             throw new AssertionError("Discord Webhook settings did not round-trip: " + locale);
     }
 }

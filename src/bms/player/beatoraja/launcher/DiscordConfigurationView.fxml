@@ -5,6 +5,8 @@
 <ScrollPane fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.DiscordConfigurationView">
     <VBox spacing="10">
         <padding><Insets top="12" right="12" bottom="12" left="12" /></padding>
+        <CheckBox fx:id="richPresence" text="%DISCORD_RPC" />
+        <Separator />
         <Label text="%DISCORD_WEBHOOK_HELP" wrapText="true" />
         <GridPane hgap="8" vgap="6">
             <Label text="%DISCORD_WEBHOOK_MODE" />

@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.external.discord.DiscordWebhook;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -15,6 +16,7 @@ import javafx.scene.control.TextField;
 
 public final class DiscordConfigurationView {
     @FXML private ResourceBundle resources;
+    @FXML private CheckBox richPresence;
     @FXML private ComboBox<String> mode;
     @FXML private TextField name;
     @FXML private TextField avatar;
@@ -40,6 +42,7 @@ public final class DiscordConfigurationView {
     }
 
     public void update(Config config) {
+        richPresence.setSelected(config.isUseDiscordRPC());
         mode.getSelectionModel().select(config.getWebhookOption());
         name.setText(config.getWebhookName());
         avatar.setText(config.getWebhookAvatar());
@@ -49,6 +52,7 @@ public final class DiscordConfigurationView {
     }
 
     public void commit(Config config) {
+        config.setUseDiscordRPC(richPresence.isSelected());
         if (!url.getText().isBlank()) addUrl();
         config.setWebhookOption(mode.getSelectionModel().getSelectedIndex());
         config.setWebhookName(name.getText().strip());

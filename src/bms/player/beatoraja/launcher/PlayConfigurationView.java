@@ -13,6 +13,7 @@ import bms.player.beatoraja.external.ScoreDataImporter;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.input.controller.ControllerBackend;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.song.*;
@@ -56,6 +57,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Tab inputTab;
 	@FXML
+	private ComboBox<ControllerBackend> controllerBackend;
+	@FXML
 	private Tab skinTab;
 	@FXML
 	private Tab musicselectTab;
@@ -67,8 +70,6 @@ public class PlayConfigurationView implements Initializable {
 	private Tab irTab;
 	@FXML
 	private Tab courseTab;
-	@FXML
-    private Tab streamTab;
 	@FXML
 	private HBox controlPanel;
 
@@ -254,9 +255,6 @@ public class PlayConfigurationView implements Initializable {
 
 
 	@FXML
-	public CheckBox discord;
-
-	@FXML
 	public CheckBox clipboardScreenshot;
 
 	private String dbUpdateCheckDialogMessage;
@@ -270,6 +268,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		controllerBackend.getItems().setAll(ControllerBackend.values());
 		final long t = System.currentTimeMillis();
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
@@ -351,6 +350,7 @@ public class PlayConfigurationView implements Initializable {
 	 */
 	public void update(Config config) {
 		this.config = config;
+		controllerBackend.setValue(config.getControllerBackend());
 
 		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 		videoController.update(config);
@@ -368,7 +368,6 @@ public class PlayConfigurationView implements Initializable {
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
         usecim.setSelected(config.isCacheSkinImage());
-        discord.setSelected(config.isUseDiscordRPC());
         clipboardScreenshot.setSelected(config.isSetClipboardWhenScreenshot());
 
 		enableIpfs.setSelected(config.isEnableIpfs());
@@ -386,6 +385,18 @@ public class PlayConfigurationView implements Initializable {
 			tableController.update(Paths.get(config.getTablepath() + "/" + "default.json"));
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	private void changeControllerBackend() {
+		ControllerBackend selected = controllerBackend.getValue();
+		if (config == null || selected == null || selected == config.getControllerBackend()) return;
+		if (player != null) inputController.commit();
+		config.setControllerBackend(selected);
+		if (player != null) {
+			player.selectControllerBackend(selected);
+			inputController.refreshMode();
 		}
 	}
 
@@ -506,7 +517,6 @@ public class PlayConfigurationView implements Initializable {
 		config.setEnableIpfs(enableIpfs.isSelected());
 		config.setIpfsUrl(ipfsurl.getText());
 
-		config.setUseDiscordRPC(discord.isSelected());
 		config.setClipboardWhenScreenshot(clipboardScreenshot.isSelected());
 
 		commitPlayer();
