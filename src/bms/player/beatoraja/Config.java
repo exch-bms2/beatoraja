@@ -57,6 +57,11 @@ public class Config implements Validatable {
 	 */
 	private DisplayMode displaymode = DisplayMode.WINDOW;
 	private ControllerBackend controllerBackend = ControllerBackend.JINPUT;
+	private boolean imeBridgeEnabled = true;
+
+	public boolean isImeBridgeEnabled() { return imeBridgeEnabled; }
+
+	public void setImeBridgeEnabled(boolean enabled) { imeBridgeEnabled = enabled; }
 	private boolean useObsWs;
 	private String obsWsHost = "localhost";
 	private int obsWsPort = 4455;

@@ -8,7 +8,7 @@ public final class MacOsImeBridgeTest {
         String previous = System.getProperty("beatoraja.macosIme");
         try {
             System.clearProperty("beatoraja.macosIme");
-            check(MacOsIme.create() == ImeBridge.NONE, "Disabled by default");
+            check(MacOsIme.create(false) == ImeBridge.NONE, "Config opt-out");
             System.setProperty("beatoraja.macosIme", "true");
             check(MacOsIme.create() == ImeBridge.NONE, "No GLFW context is a safe fallback");
             var loaded = MacOsIme.class.getDeclaredField("loaded"); loaded.setAccessible(true);

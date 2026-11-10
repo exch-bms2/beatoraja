@@ -4,9 +4,14 @@ package bms.player.beatoraja.input.text;
  * Per-editor IME transport. Lifecycle methods run on the UI thread; sinks may be
  * called from another thread. Text/ranges use UTF-16 boundaries (never half a surrogate pair).
  * A native adapter owns character delivery while available: it must not also
- * deliver the same committed characters through GLFW. OS adapters are opt-in; NONE is the default.
+ * deliver the same committed characters through GLFW. NONE is the fallback when no native adapter is available.
  */
 public interface ImeBridge {
+    static boolean isEnabled(String property, boolean configured) {
+        String override = System.getProperty(property);
+        return override == null ? configured : Boolean.parseBoolean(override);
+    }
+
     enum Command { SUBMIT, CANCEL }
 
     interface Sink {

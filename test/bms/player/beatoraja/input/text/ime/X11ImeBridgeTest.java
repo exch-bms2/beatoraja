@@ -12,7 +12,7 @@ public final class X11ImeBridgeTest {
     public static void main(String[] args) throws Exception {
         String flag = System.getProperty("beatoraja.x11Ime");
         try {
-            System.clearProperty("beatoraja.x11Ime"); check(X11ImeBridge.create() == ImeBridge.NONE,"Default opt-out");
+            System.clearProperty("beatoraja.x11Ime"); check(X11ImeBridge.create(false) == ImeBridge.NONE,"Config opt-out");
             System.setProperty("beatoraja.x11Ime","true"); check(X11ImeBridge.create() == ImeBridge.NONE,"Unavailable without GLFW graphics");
         } finally { if (flag == null) System.clearProperty("beatoraja.x11Ime"); else System.setProperty("beatoraja.x11Ime",flag); }
         var support = new X11ImeTestSupport();

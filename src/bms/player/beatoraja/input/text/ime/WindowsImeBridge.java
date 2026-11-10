@@ -21,7 +21,11 @@ public final class WindowsImeBridge implements ImeBridge {
         this.platforms=platforms; this.clock=clock;
     }
     public static ImeBridge create() {
-        if (!Boolean.getBoolean("beatoraja.windowsIme") || !System.getProperty("os.name", "").startsWith("Windows")
+        return create(true);
+    }
+
+    public static ImeBridge create(boolean configured) {
+        if (!ImeBridge.isEnabled("beatoraja.windowsIme", configured) || !System.getProperty("os.name", "").startsWith("Windows")
                 || !(Gdx.graphics instanceof Lwjgl3Graphics graphics)) return NONE;
         try {
             long hwnd=GLFWNativeWin32.glfwGetWin32Window(graphics.getWindow().getWindowHandle());

@@ -16,7 +16,11 @@ public final class MacOsIme {
     private MacOsIme() { }
 
     public static ImeBridge create() {
-        if (!Boolean.getBoolean("beatoraja.macosIme") || !System.getProperty("os.name", "").startsWith("Mac")
+        return create(true);
+    }
+
+    public static ImeBridge create(boolean configured) {
+        if (!ImeBridge.isEnabled("beatoraja.macosIme", configured) || !System.getProperty("os.name", "").startsWith("Mac")
                 || !(Gdx.graphics instanceof Lwjgl3Graphics graphics)) return ImeBridge.NONE;
         try {
             load();

@@ -63,6 +63,9 @@
                     <padding><Insets top="10" right="10" bottom="4" left="10" /></padding>
                     <Label text="%INPUT_BACKEND" />
                     <ComboBox fx:id="controllerBackend" accessibleText="%INPUT_BACKEND" onAction="#changeControllerBackend" />
+                    <CheckBox fx:id="imeBridgeEnabled" text="%INPUT_IME_BRIDGE">
+                        <tooltip><Tooltip text="%INPUT_IME_BRIDGE_TOOLTIP" /></tooltip>
+                    </CheckBox>
                 </HBox>
                 <fx:include fx:id="input" source="InputConfigurationView.fxml" VBox.vgrow="ALWAYS" />
             </VBox>
