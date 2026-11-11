@@ -43,7 +43,8 @@ public abstract class SkinLoader {
      * @return
      */
     public static Skin load(MainState state, SkinType skinType) {
-        SkinConfig skinConfig = state.resource.getPlayerConfig().getSkin()[skinType.getId()];
+        var side = state instanceof bms.player.beatoraja.play.BMSPlayer ? state.resource.getPlaySide() : PlaySide.P1;
+        SkinConfig skinConfig = state.resource.getPlayerConfig().getSkinConfig(skinType, side);
         Skin skin = null;
         if (skinConfig != null && skinConfig.validate()) {
             var mode = state.resource.getPlayMode();

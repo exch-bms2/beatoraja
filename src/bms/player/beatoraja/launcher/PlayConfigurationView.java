@@ -59,6 +59,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<ControllerBackend> controllerBackend;
 	@FXML
+	private CheckBox imeBridgeEnabled;
+	@FXML
 	private Tab skinTab;
 	@FXML
 	private Tab musicselectTab;
@@ -185,6 +187,8 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox chartpreview;
 	@FXML
 	private CheckBox guidese;
+	@FXML
+	private CheckBox independentPlaySides;
 	@FXML
 	private CheckBox windowhold;
 	@FXML
@@ -351,6 +355,7 @@ public class PlayConfigurationView implements Initializable {
 	public void update(Config config) {
 		this.config = config;
 		controllerBackend.setValue(config.getControllerBackend());
+		imeBridgeEnabled.setSelected(config.isImeBridgeEnabled());
 
 		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 		videoController.update(config);
@@ -432,6 +437,7 @@ public class PlayConfigurationView implements Initializable {
 	public void updatePlayer() {
 		player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), players.getValue(), config.getControllerBackend());
 		playername.setText(player.getName());
+		independentPlaySides.setSelected(player.isIndependentPlaySides());
 
 		videoController.updatePlayer(player);
 		musicselectController.updatePlayer(player);
@@ -497,6 +503,7 @@ public class PlayConfigurationView implements Initializable {
 	 * ダイアログの項目をconfig.xmlに反映する
 	 */
 	public void commit() {
+		config.setImeBridgeEnabled(imeBridgeEnabled.isSelected());
 	    videoController.commit(config);
 		audioController.commit();
 		musicselectController.commit();
@@ -524,6 +531,14 @@ public class PlayConfigurationView implements Initializable {
 		Config.write(config);
 
 		tableController.commit();
+	}
+
+	@FXML
+	private void changeIndependentPlaySides() {
+		if (player == null || player.isIndependentPlaySides() == independentPlaySides.isSelected()) return;
+		skinController.commit();
+		player.setIndependentPlaySides(independentPlaySides.isSelected());
+		skinController.update(player);
 	}
 
 	public void commitPlayer() {

@@ -8,7 +8,10 @@ import java.util.Arrays;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlaySide;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
+import bms.player.beatoraja.select.MusicSelectKeyProperty;
+import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
@@ -28,8 +31,78 @@ public final class WindowInputLifecycleTest {
             for (int mode = 0; mode < 4; mode++) controllerBoundaries(mode);
             replayBoundary();
             overlayBoundary(keys);
+            musicSelectSideBoundary();
             System.out.println("WindowInputLifecycleTest passed (button/POV, JKOC, analog v1/v2, FIFO boundaries, replay isolation)");
         } finally { Gdx.input = old; }
+    }
+
+    private static void musicSelectSideBoundary() throws Exception {
+        var left = new JInputControllerCompatibilityTest.FakeDevice(2, 4);
+        var right = new JInputControllerCompatibilityTest.FakeDevice(2, 4);
+        left.name = "Left deck";
+        right.name = "Right deck";
+        Runnable previous = BMSPlayerInputProcessor.controllerPollRunner;
+        var manager = JInputControllerCompatibilityTest.createManager(
+                new net.java.games.input.Controller[]{left.device, right.device}, () -> {}, () -> {}, Runnable::run);
+        try {
+            var runner = JInputControllerManager.class.getDeclaredField("pollRunner");
+            runner.setAccessible(true);
+            BMSPlayerInputProcessor.controllerPollRunner = (Runnable) runner.get(manager);
+            var player = new PlayerConfig();
+            player.setIndependentPlaySides(true);
+            var leftBindings = player.getMusicSelectInputConfig(PlaySide.P1);
+            var rightBindings = player.getMusicSelectInputConfig(PlaySide.P2);
+            var leftConfig = leftBindings.getController()[0];
+            var rightConfig = rightBindings.getController()[0];
+            leftConfig.setName(left.name);
+            rightConfig.setName(right.name);
+            for (var controller : new ControllerConfig[]{leftConfig, rightConfig}) {
+                Arrays.fill(controller.getKeyAssign(), -1);
+                controller.setDuration(0);
+            }
+            leftConfig.getKeyAssign()[0] = 0;
+            rightConfig.getKeyAssign()[0] = 1;
+            rightConfig.getKeyAssign()[8] = 0;
+            var input = KeyboardQueueTestSupport.input(new Config(), player, manager.getControllers());
+            try {
+                var menu = MusicSelectKeyProperty.BEAT_7K;
+                input.rebindMusicSelectInputs(leftBindings);
+                input.poll();
+                left.buttons[0] = true;
+                right.buttons[1] = true;
+                input.poll();
+                check(menu.isPressed(input, MusicSelectKey.PLAY, false), "Left can confirm before switching");
+                input.rebindMusicSelectInputs(rightBindings);
+                input.poll();
+                check(!menu.isPressed(input, MusicSelectKey.PLAY, false), "Neither old nor newly bound held button confirms");
+                right.buttons[1] = false;
+                left.buttons[0] = false;
+                input.poll();
+                left.buttons[0] = true;
+                input.poll();
+                check(!menu.isPressed(input, MusicSelectKey.PLAY, false), "Old controller can no longer confirm");
+                right.buttons[0] = true;
+                right.buttons[1] = true;
+                input.poll();
+                check(menu.isPressed(input, MusicSelectKey.PLAY, false) && menu.isPressed(input, MusicSelectKey.DOWN, false),
+                        "New controller can navigate and confirm");
+                input.rebindMusicSelectInputs(leftBindings);
+                input.poll();
+                check(!menu.isPressed(input, MusicSelectKey.PLAY, false), "Held button remains suppressed when switching back");
+                left.buttons[0] = false;
+                input.poll();
+                left.buttons[0] = true;
+                input.poll();
+                check(menu.isPressed(input, MusicSelectKey.PLAY, false), "Left can confirm again");
+            } finally { input.dispose(); }
+            player.setMusicselectinput(1);
+            check(player.getMusicSelectInputConfig(PlaySide.P2) == player.getMode9(), "9KEY selection layout is unchanged");
+            player.setMusicselectinput(2);
+            check(player.getMusicSelectInputConfig(PlaySide.P2) == player.getMode14(), "14KEY selection layout is unchanged");
+        } finally {
+            manager.dispose();
+            BMSPlayerInputProcessor.controllerPollRunner = previous;
+        }
     }
 
     private static void overlayBoundary(boolean[] keys) throws Exception {

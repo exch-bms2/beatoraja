@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlaySide;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
@@ -31,7 +32,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 public class SkinConfigurationView implements Initializable {
 
 	@FXML
-	private ComboBox<SkinType> skintypeSelector;
+	private ComboBox<SkinSlot> skintypeSelector;
 	@FXML
 	private ComboBox<SkinHeader> skinheaderSelector;
 	@FXML
@@ -39,6 +40,21 @@ public class SkinConfigurationView implements Initializable {
 
 	private PlayerConfig player;
 	private SkinType mode = null;
+	private PlaySide side = PlaySide.P1;
+	private boolean updating;
+
+	private record SkinSlot(SkinType type, PlaySide side) {
+		@Override public String toString() { return type.getName() + (side == PlaySide.P2 ? " (2P)" : ""); }
+	}
+
+	private void updateSlots(boolean independent) {
+		var slots = new ArrayList<SkinSlot>();
+		for (var type : SkinType.values()) {
+			slots.add(new SkinSlot(type, PlaySide.P1));
+			if (independent && PlaySide.supports(type)) slots.add(new SkinSlot(type, PlaySide.P2));
+		}
+		skintypeSelector.getItems().setAll(slots);
+	}
 
 	/**
 	 * 検出されたスキン定義ファイル
@@ -53,9 +69,7 @@ public class SkinConfigurationView implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		skintypeSelector.setCellFactory((param) -> new SkinTypeCell());
-		skintypeSelector.setButtonCell(new SkinTypeCell());
-		skintypeSelector.getItems().addAll(SkinType.values());
+		updateSlots(false);
 
 		skinheaderSelector.setCellFactory((param) -> new SkinListCell());
 		skinheaderSelector.setButtonCell(new SkinListCell());
@@ -138,30 +152,28 @@ public class SkinConfigurationView implements Initializable {
 	
     @FXML
 	public void changeSkinType() {
-    	commitSkinType();
-    	updateSkinType(skintypeSelector.getValue());    	
+		var slot = skintypeSelector.getValue();
+		if (updating || player == null || slot == null) return;
+		commit();
+		updateSkinType(slot);
 	}
     
 	public void updateSkinType(SkinType type) {
-		mode = type;
+		updateSkinType(new SkinSlot(type, PlaySide.P1));
+	}
 
-		skinheaderSelector.getItems().clear();
-		SkinHeader[] headers = getSkinHeader(type);
-		skinheaderSelector.getItems().addAll(headers);
-		if (player.getSkin()[type.getId()] != null) {
-			SkinConfig skinconf = player.getSkin()[type.getId()];
-			if (skinconf != null) {
-				for (SkinHeader header : skinheaderSelector.getItems()) {
-					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
-						skinheaderSelector.setValue(header);
-						skinconfig.setContent(create(skinheaderSelector.getValue(), skinconf.getProperties()));
-						break;
-					}
-				}
-			} else {
-				skinheaderSelector.getSelectionModel().select(0);
-			}
-		}
+	private void updateSkinType(SkinSlot slot) {
+		updating = true;
+		try {
+			mode = slot.type();
+			side = slot.side();
+			skinheaderSelector.getItems().setAll(getSkinHeader(mode));
+			var configured = player.getSkinConfig(mode, side);
+			var header = configured == null ? null : skinheaderSelector.getItems().stream()
+					.filter(item -> SkinCatalog.samePath(item.getPath().toString(), configured.getPath())).findFirst().orElse(null);
+			skinheaderSelector.setValue(header);
+			skinconfig.setContent(create(header, configured == null ? null : configured.getProperties()));
+		} finally { updating = false; }
 	}
     
     @FXML
@@ -173,9 +185,7 @@ public class SkinConfigurationView implements Initializable {
 		if (selected != null) {
 			SkinConfig skin = new SkinConfig(selected.getPath().toString());
 			skin.setProperties(getProperty());
-			player.getSkin()[selected.getSkinType().getId()] = skin;
-		} else if (mode != null) {
-			player.getSkin()[mode.getId()] = null;
+			player.setSkinConfig(mode == null ? selected.getSkinType() : mode, side, skin);
 		}
 	}
     
@@ -243,7 +253,11 @@ public class SkinConfigurationView implements Initializable {
 
     public void update(PlayerConfig player) {
     	this.player = player;
-    	skintypeSelector.setValue(SkinType.PLAY_7KEYS);
+		updating = true;
+		try {
+			updateSlots(player.isIndependentPlaySides());
+			skintypeSelector.setValue(new SkinSlot(SkinType.PLAY_7KEYS, PlaySide.P1));
+		} finally { updating = false; }
 		updateSkinType(SkinType.PLAY_7KEYS);
     }
 
@@ -254,6 +268,7 @@ public class SkinConfigurationView implements Initializable {
     
     @FXML
 	public void changeSkinHeader() {
+		if (updating) return;
     	commitSkinHeader();
 		updateSkinHeader(skinheaderSelector.getValue());
 	}
@@ -262,8 +277,8 @@ public class SkinConfigurationView implements Initializable {
 		// historyからconfig抽出
 		SkinConfig.Property property = null;
 		if(header != null) {
-			for(SkinConfig skinc : player.getSkinHistory()) {
-				if(skinc.getPath().equals(header.getPath().toString())) {
+			for(SkinConfig skinc : player.getSkinHistory(side)) {
+				if(SkinCatalog.samePath(skinc.getPath(), header.getPath().toString())) {
 					property = skinc.getProperties();
 					break;
 				}
@@ -278,8 +293,9 @@ public class SkinConfigurationView implements Initializable {
 		if(selected != null) {
 			SkinConfig.Property property = getProperty();
 			int index = -1;
-			for(int i = 0;i < player.getSkinHistory().length;i++) {
-				if(player.getSkinHistory()[i].getPath().equals(selected.getPath().toString())) {
+			var saved = player.getSkinHistory(side);
+			for(int i = 0;i < saved.length;i++) {
+				if(SkinCatalog.samePath(saved[i].getPath(), selected.getPath().toString())) {
 					index = i;
 					break;
 				}
@@ -289,11 +305,11 @@ public class SkinConfigurationView implements Initializable {
 			sc.setPath(selected.getPath().toString());
 			sc.setProperties(property);
 			if(index >= 0) {
-				player.getSkinHistory()[index] = sc;
+				saved[index] = sc;
 			} else {
-				SkinConfig[] history = Arrays.copyOf(player.getSkinHistory(), player.getSkinHistory().length + 1);
+				SkinConfig[] history = Arrays.copyOf(saved, saved.length + 1);
 				history[history.length - 1] = sc;
-				player.setSkinHistory(history);
+				player.setSkinHistory(side, history);
 			}
 		}
     }
@@ -509,15 +525,6 @@ public class SkinConfigurationView implements Initializable {
 		return main;
 	}
 	
-	static class SkinTypeCell extends ListCell<SkinType> {
-
-		@Override
-		protected void updateItem(SkinType arg0, boolean arg1) {
-			super.updateItem(arg0, arg1);
-			setText(arg0 != null ? arg0.getName() : "");
-		}
-	}
-
 	static class SkinListCell extends ListCell<SkinHeader> {
 
 		@Override

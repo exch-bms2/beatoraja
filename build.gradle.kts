@@ -153,6 +153,9 @@ tasks.named<JavaExec>("run") {
         }
     }
     providers.gradleProperty("audioDiagnostics").orNull?.let { systemProperty("beatoraja.audioDiagnostics", it) }
+    providers.gradleProperty("notePositionSmoothing").orNull?.let {
+        systemProperty("beatoraja.notePositionSmoothing", it)
+    }
     providers.gradleProperty("audioDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.audioDiagnostics.intervalMillis", it)
     }
@@ -218,6 +221,7 @@ val fatJar by tasks.registering(Jar::class) {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.RivalDataAccessorTest",
     "bms.player.beatoraja.skin.lr2.PlayerReviewLevelTest",
     "bms.player.beatoraja.result.MusicResultReviewTest",
     "bms.player.beatoraja.external.discord.DiscordWebhookTest",
@@ -254,6 +258,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.midi.MidiInputLifecycleTest",
     "bms.player.beatoraja.video.VideoFrameCopyTest",
     "bms.player.beatoraja.FramePacingDiagnosticsTest",
+    "bms.player.beatoraja.play.NotePositionSmootherTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendTestAssetsTest",
@@ -268,6 +273,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.NoteOffsetCenterTest",
     "bms.player.beatoraja.play.SkinAdjustmentOverlayTest",
     "bms.player.beatoraja.play.PracticeSkinPreviewTest",
+    "bms.player.beatoraja.PlaySideConfigTest",
     "bms.player.beatoraja.skin.SkinCustomizationTest",
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
     "bms.player.beatoraja.input.mouse.WaylandCompatibilityTest",

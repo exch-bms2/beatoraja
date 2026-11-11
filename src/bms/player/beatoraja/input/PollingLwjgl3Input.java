@@ -239,6 +239,10 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     void setOverlayActive(boolean active) {
         overlayActive = active;
+        resetBindingInput();
+    }
+
+    void resetBindingInput() {
         for (int i = 0; i < keys.length(); i++) {
             suppressedKeys[i] = super.isKeyPressed(i);
             keys.set(i, 0);

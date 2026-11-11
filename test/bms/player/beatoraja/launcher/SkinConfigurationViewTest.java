@@ -93,6 +93,17 @@ public final class SkinConfigurationViewTest {
         create.invoke(view, other, new SkinConfig.Property());
         if (view.getProperty().getNotesOffsetCenter() != 0) throw new AssertionError("No stale selection on other skins");
         scroll.setContent((VBox) create.invoke(view, header, player.getSkin()[SkinType.PLAY_7KEYS.getId()].getProperties()));
+        var types = (ComboBox<?>) loader.getNamespace().get("skintypeSelector");
+        if (types.getItems().stream().anyMatch(item -> item.toString().endsWith(" (2P)")))
+            throw new AssertionError("2P entries must not be visible by default");
+        player.setIndependentPlaySides(true);
+        view.update(player);
+        var rightItems = types.getItems().stream().map(Object::toString).filter(name -> name.endsWith(" (2P)")).toList();
+        if (!rightItems.equals(List.of("7KEYS (2P)", "5KEYS (2P)", "24KEYS (2P)")))
+            throw new AssertionError("Only supported SP skin slots are duplicated: " + rightItems);
+        player.setIndependentPlaySides(false);
+        view.update(player);
+        scroll.setContent((VBox) create.invoke(view, header, player.getSkin()[SkinType.PLAY_7KEYS.getId()].getProperties()));
         System.out.println("SkinConfigurationView Notes Offset Center passed (real FXML, placement, choices, save/history/restore/reset)");
         return root;
     }

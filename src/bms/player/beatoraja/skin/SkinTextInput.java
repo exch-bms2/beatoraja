@@ -48,8 +48,10 @@ class SkinTextInput {
 	private Runnable pendingFocus;
 	private Runnable publishImeCaret;
 
-	SkinTextInput() { this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create()
-			: System.getProperty("os.name", "").startsWith("Linux") ? X11ImeBridge.create() : MacOsIme.create()); }
+	SkinTextInput(boolean configured) {
+		this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create(configured)
+				: System.getProperty("os.name", "").startsWith("Linux") ? X11ImeBridge.create(configured) : MacOsIme.create(configured));
+	}
 	SkinTextInput(ImeBridge bridge) { this.bridge = java.util.Objects.requireNonNull(bridge); }
 
 	boolean focus(MainState state, SkinText target) {

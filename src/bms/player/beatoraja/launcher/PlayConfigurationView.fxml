@@ -47,6 +47,9 @@
                 <Insets left="10.0" />
             </HBox.margin>
         </Button>
+        <CheckBox fx:id="independentPlaySides" onAction="#changeIndependentPlaySides" text="%INDEPENDENT_PLAY_SIDES">
+            <HBox.margin><Insets left="16.0" /></HBox.margin>
+        </CheckBox>
     </HBox>
     <TabPane prefHeight="435.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
         <Tab fx:id="videoTab" closable="false" text="%TAB_VIDEO">
@@ -63,6 +66,9 @@
                     <padding><Insets top="10" right="10" bottom="4" left="10" /></padding>
                     <Label text="%INPUT_BACKEND" />
                     <ComboBox fx:id="controllerBackend" accessibleText="%INPUT_BACKEND" onAction="#changeControllerBackend" />
+                    <CheckBox fx:id="imeBridgeEnabled" text="%INPUT_IME_BRIDGE">
+                        <tooltip><Tooltip text="%INPUT_IME_BRIDGE_TOOLTIP" /></tooltip>
+                    </CheckBox>
                 </HBox>
                 <fx:include fx:id="input" source="InputConfigurationView.fxml" VBox.vgrow="ALWAYS" />
             </VBox>

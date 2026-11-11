@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -15,6 +17,7 @@ import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 
+import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.external.ScoreDataImporter;
 import bms.player.beatoraja.ir.IRConnection;
@@ -32,6 +35,7 @@ import bms.player.beatoraja.song.SongData;
  */
 public final class RivalDataAccessor implements AutoCloseable {
 
+	private final Path rivalDirectory;
 	private final ExecutorService syncExecutor = Executors.newSingleThreadExecutor(runnable -> {
 		Thread thread = new Thread(runnable, "rival-score-sync");
 		thread.setDaemon(true);
@@ -39,17 +43,24 @@ public final class RivalDataAccessor implements AutoCloseable {
 	});
 	private final AtomicBoolean syncScheduled = new AtomicBoolean();
 
-	/** ライバル情報 */
-	private volatile PlayerInformation[] rivals = new PlayerInformation[0];
-	/** ライバルスコアデータキャッシュ */
-	private volatile ScoreDataCache[] rivalcaches = new ScoreDataCache[0];
+	private volatile RivalData[] rivals = new RivalData[0];
+
+	public RivalDataAccessor() {
+		this(Paths.get("rival"));
+	}
+
+	RivalDataAccessor(Path rivalDirectory) {
+		this.rivalDirectory = rivalDirectory;
+	}
 
 	public PlayerInformation getRivalInformation(int index) {
-		return index >= 0 && index < rivals.length ? rivals[index] : null;
+		RivalData[] current = rivals;
+		return index >= 0 && index < current.length ? current[index].information() : null;
 	}
 
 	public ScoreDataCache getRivalScoreDataCache(int index) {
-		return index >= 0 && index < rivalcaches.length ? rivalcaches[index] : null;
+		RivalData[] current = rivals;
+		return index >= 0 && index < current.length ? current[index].scores() : null;
 	}
 
 	public int getRivalCount() {
@@ -57,18 +68,19 @@ public final class RivalDataAccessor implements AutoCloseable {
 	}
 
 	/**
-	 * IRからのスコア同期をバックグラウンドで開始する。
+	 * ローカルライバルの読み込みとIRからのスコア同期をバックグラウンドで開始する。
 	 * 同期中に重複して呼ばれても、新しい同期は追加しない。
 	 */
 	public void update(MainController main) {
-		if (main.getIRStatus().length == 0 || !syncScheduled.compareAndSet(false, true)) {
+		if (!syncScheduled.compareAndSet(false, true)) {
 			return;
 		}
 
 		try {
 			syncExecutor.execute(() -> {
 				try {
-					updateInBackground(main);
+					IRStatus[] statuses = main.getIRStatus();
+					updateInBackground(main.getConfig(), statuses.length > 0 ? statuses[0] : null);
 				} finally {
 					syncScheduled.set(false);
 				}
@@ -78,41 +90,33 @@ public final class RivalDataAccessor implements AutoCloseable {
 		}
 	}
 
-	private void updateInBackground(MainController main) {
-		if (main.getIRStatus().length == 0) {
-			return;
-		}
-
-		var status = main.getIRStatus()[0];
-		if (status.config.isImportscore()) {
+	void updateInBackground(Config config, IRStatus status) {
+		if (status != null && status.config.isImportscore()) {
 			status.config.setImportscore(false);
-			importPlayerScores(main, status.connection, status.player, status.config.getIrname());
-		}
-
-		IRResponse<IRPlayerData[]> response = status.connection.getRivals();
-		if (!response.isSucceeded()) {
-			Logger.getGlobal().warning("IRからのライバル取得失敗 : " + response.getMessage());
-			return;
+			importPlayerScores(config, status.connection, status.player, status.config.getIrname());
 		}
 
 		try {
-			Files.createDirectories(Paths.get("rival"));
-			Array<PlayerInformation> updatedRivals = new Array<>();
-			Array<ScoreDataCache> updatedCaches = new Array<>();
+			Files.createDirectories(rivalDirectory);
+			Array<RivalData> updatedRivals = new Array<>();
 			var syncTargets = new ArrayList<RivalSyncTarget>();
-			if (status.config.isImportrival()) {
-				for (IRPlayerData irPlayer : response.getData()) {
+			var syncedFiles = new HashSet<Path>();
+			if (status != null && status.config.isImportrival()) {
+				for (IRPlayerData irPlayer : fetchRivals(status.connection)) {
+					if (irPlayer == null) {
+						continue;
+					}
 					PlayerInformation rival = createRival(irPlayer);
-					ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + status.config.getIrname() + rival.getId() + ".db");
-					updatedRivals.add(rival);
-					updatedCaches.add(createScoreCache(scoredb, null));
+					Path path = Paths.get(rivalDirectory.toString(), status.config.getIrname() + rival.getId() + ".db");
+					ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(path.toString());
+					updatedRivals.add(new RivalData(rival, createScoreCache(scoredb, null)));
 					syncTargets.add(new RivalSyncTarget(irPlayer, rival, scoredb));
+					syncedFiles.add(path);
 				}
 			}
 
-			loadLocalRivals(status.config.getIrname(), updatedRivals, updatedCaches);
-			rivals = updatedRivals.toArray(PlayerInformation.class);
-			rivalcaches = updatedCaches.toArray(ScoreDataCache.class);
+			loadLocalRivals(syncedFiles, updatedRivals);
+			rivals = updatedRivals.toArray(RivalData.class);
 
 			for (RivalSyncTarget target : syncTargets) {
 				if (Thread.currentThread().isInterrupted()) {
@@ -125,11 +129,25 @@ public final class RivalDataAccessor implements AutoCloseable {
 		}
 	}
 
-	private void importPlayerScores(MainController main, IRConnection connection, IRPlayerData player, String irName) {
+	private IRPlayerData[] fetchRivals(IRConnection connection) {
+		try {
+			IRResponse<IRPlayerData[]> response = connection.getRivals();
+			if (response != null && response.isSucceeded()) {
+				IRPlayerData[] data = response.getData();
+				return data != null ? data : new IRPlayerData[0];
+			}
+			Logger.getGlobal().warning("IRからのライバル取得失敗 : " + (response != null ? response.getMessage() : "応答なし"));
+		} catch (RuntimeException exception) {
+			Logger.getGlobal().warning("IRからのライバル取得失敗 : " + exception.getMessage());
+		}
+		return new IRPlayerData[0];
+	}
+
+	private void importPlayerScores(Config config, IRConnection connection, IRPlayerData player, String irName) {
 		try {
 			IRResponse<IRScoreData[]> scores = connection.getPlayData(player, null);
 			if (scores.isSucceeded()) {
-				var scoredb = new ScoreDatabaseAccessor(main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + File.separatorChar + "score.db");
+				var scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + File.separatorChar + config.getPlayername() + File.separatorChar + "score.db");
 				new ScoreDataImporter(scoredb).importScores(convert(scores.getData()), irName);
 				Logger.getGlobal().info("IRからのスコアインポート完了");
 			} else {
@@ -206,32 +224,21 @@ public final class RivalDataAccessor implements AutoCloseable {
 		}
 	}
 
-	private void loadLocalRivals(String irName, Array<PlayerInformation> updatedRivals, Array<ScoreDataCache> updatedCaches) throws Exception {
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"), "*.db")) {
+	private void loadLocalRivals(Set<Path> syncedFiles, Array<RivalData> updatedRivals) throws Exception {
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(rivalDirectory, "*.db")) {
 			for (Path path : paths) {
-				if (containsRival(path, irName, updatedRivals)) {
+				if (syncedFiles.contains(path)) {
 					continue;
 				}
 
 				ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(path.toString());
 				PlayerInformation info = scoredb.getInformation();
 				if (info != null) {
-					updatedRivals.add(info);
-					updatedCaches.add(createScoreCache(scoredb, info.getName()));
+					updatedRivals.add(new RivalData(info, createScoreCache(scoredb, info.getName())));
 					Logger.getGlobal().info("ローカルに保存されているライバルスコア取得完了 : " + info.getName());
 				}
 			}
 		}
-	}
-
-	private boolean containsRival(Path path, String irName, Array<PlayerInformation> updatedRivals) {
-		String fileName = path.getFileName().toString();
-		for (PlayerInformation info : updatedRivals) {
-			if (fileName.equals(irName + info.getId() + ".db")) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -274,5 +281,8 @@ public final class RivalDataAccessor implements AutoCloseable {
 	}
 
 	private record RivalSyncTarget(IRPlayerData irPlayer, PlayerInformation rival, ScoreDatabaseAccessor scoredb) {
+	}
+
+	private record RivalData(PlayerInformation information, ScoreDataCache scores) {
 	}
 }

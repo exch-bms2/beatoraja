@@ -31,6 +31,8 @@ public class VideoConfigurationView implements Initializable {
 
 	@FXML
 	private CheckBox vSync;
+	@FXML
+	private CheckBox notePositionSmoothing;
 
 	@FXML
 	private Spinner<Integer> maxFps;
@@ -80,6 +82,7 @@ public class VideoConfigurationView implements Initializable {
 		displayMode.setValue(config.getDisplaymode());
 		resolution.setValue(config.getResolution());
 		vSync.setSelected(config.isVsync());
+		notePositionSmoothing.setSelected(config.isNotePositionSmoothing());
 		bgaOp.getSelectionModel().select(config.getBga());
 		bgaExpand.getSelectionModel().select(config.getBgaExpand());
 		maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
@@ -95,6 +98,7 @@ public class VideoConfigurationView implements Initializable {
 		var monitor = startupMonitor.getValue();
 		config.setStartupMonitor(monitor != null ? monitor.selection() : null);
 		config.setVsync(vSync.isSelected());
+		config.setNotePositionSmoothing(notePositionSmoothing.isSelected());
 		config.setBga(bgaOp.getSelectionModel().getSelectedIndex());
 		config.setBgaExpand(bgaExpand.getSelectionModel().getSelectedIndex());
 		config.setMaxFramePerSecond(maxFps.getValue());

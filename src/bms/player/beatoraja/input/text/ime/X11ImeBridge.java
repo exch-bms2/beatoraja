@@ -20,8 +20,14 @@ public final class X11ImeBridge implements ImeBridge {
     X11ImeBridge(Supplier<X11ImePlatform> platforms) { this.platforms = platforms; }
 
     public static ImeBridge create() {
-        if (!Boolean.getBoolean("beatoraja.x11Ime") || !System.getProperty("os.name", "").startsWith("Linux")
+        return create(true);
+    }
+
+    public static ImeBridge create(boolean configured) {
+        if (!ImeBridge.isEnabled("beatoraja.x11Ime", configured) || !System.getProperty("os.name", "").startsWith("Linux")
                 || !(Gdx.graphics instanceof Lwjgl3Graphics graphics)) return NONE;
+        // Keep stock GLFW and native Wayland startup unchanged.
+        if (System.getProperty("beatoraja.x11Ime") == null && System.getProperty("org.lwjgl.glfw.libname", "").isEmpty()) return NONE;
         try {
             if (GLFW.glfwGetPlatform() != GLFW.GLFW_PLATFORM_X11) {
                 warn("requires the X11 backend; using GLFW text input"); return NONE;

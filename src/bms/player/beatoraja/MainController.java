@@ -559,6 +559,15 @@ public final class MainController {
 		// show message
 		sprite.begin();
 		messageRenderer.render(current, sprite, 100, config.getResolution().height - 2);
+		if (systemfont != null && player.isIndependentPlaySides()) {
+			PlaySide side = current instanceof MusicSelector select ? select.getSelectedPlaySide()
+					: current instanceof SkinConfiguration skin && PlaySide.supports(skin.getSkinType()) ? skin.getPlaySide() : null;
+			if (side != null) {
+				systemfont.setColor(Color.WHITE);
+				systemfont.draw(sprite, side == PlaySide.P2 ? "SP SIDE: 2P" : "SP SIDE: 1P",
+						Math.max(0, config.getResolution().width - 245), config.getResolution().height - 5);
+			}
+		}
 		sprite.end();
 
 		// TODO renderループに入れるのではなく、MusicDownloadProcessorのListenerとして実装したほうがいいのでは

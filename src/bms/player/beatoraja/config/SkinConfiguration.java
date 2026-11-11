@@ -5,6 +5,7 @@ import bms.player.beatoraja.MainState;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlaySide;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
@@ -30,6 +31,9 @@ public class SkinConfiguration extends MainState {
 
 	private SkinConfigurationSkin skin;
 	private SkinType type;
+	private PlaySide side = PlaySide.P1;
+
+	public PlaySide getPlaySide() { return side; }
 	private SkinConfig config;
 	private List<SkinHeader> allSkins;
 	private List<SkinHeader> availableSkins;
@@ -68,6 +72,10 @@ public class SkinConfiguration extends MainState {
 
 	public void input() {
 		BMSPlayerInputProcessor input = main.getInputProcessor();
+		if (player.isIndependentPlaySides() && PlaySide.supports(type) && !getSkin().isTextInputActive()
+				&& input.isControlKeyPressed(ControlKeys.F5)) {
+			changeSkinType(type, side.other());
+		}
 		int mov = -input.getScroll();
 		input.resetScroll();
 		if (mov != 0 && customOptions != null) {
@@ -149,12 +157,17 @@ public class SkinConfiguration extends MainState {
 	}
 
 	private void changeSkinType(SkinType type) {
+		changeSkinType(type, side);
+	}
+
+	private void changeSkinType(SkinType type, PlaySide requestedSide) {
 		saveSkinHistory();
 		this.type = type != null ? type : SkinType.PLAY_7KEYS;
-		this.config = main.getPlayerConfig().getSkin()[this.type.getId()];
+		side = player.isIndependentPlaySides() && PlaySide.supports(this.type) ? requestedSide : PlaySide.P1;
+		this.config = player.getSkinConfig(this.type, side);
 		availableSkins = new ArrayList<>();
 		for (SkinHeader header : allSkins) {
-			if (header.getSkinType() == type) {
+			if (header.getSkinType() == this.type) {
 				availableSkins.add(header);
 			}
 		}
@@ -184,7 +197,7 @@ public class SkinConfiguration extends MainState {
 
 		if (config == null) {
 			config = new SkinConfig();
-			main.getPlayerConfig().getSkin()[type.getId()] = config;
+			player.setSkinConfig(type, side, config);
 		} else {
 			saveSkinHistory();
 		}
@@ -192,6 +205,13 @@ public class SkinConfiguration extends MainState {
 		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex + indexDiff + availableSkins.size()) % availableSkins.size();
 		config.setPath(availableSkins.get(index).getPath().toString());
 		config.setProperties(new SkinConfig.Property());
+		for (SkinConfig saved : player.getSkinHistory(side)) {
+			if (SkinCatalog.samePath(saved.getPath(), config.getPath())) {
+				config.setProperties(saved.getProperties().candidateFor(null));
+				config.getProperties().setPendingSelection(saved.getProperties().getPendingSelection());
+				break;
+			}
+		}
 		selectSkin(index);
 	}
 
@@ -201,13 +221,6 @@ public class SkinConfiguration extends MainState {
 			selectedSkinHeader = availableSkins.get(selectedSkinIndex);
 			customOptions = new ArrayList<>();
 			customOptionOffset = 0;
-			// Loading properties from SkinHistory
-			for (SkinConfig skinc : player.getSkinHistory()) {
-				if (skinc.getPath().equals(selectedSkinHeader.getPath().toString())) {
-					config.setProperties(skinc.getProperties());
-					break;
-				}
-			}
 			if (config.getProperties() == null) {
 				config.setProperties(new SkinConfig.Property());
 			}
@@ -226,8 +239,9 @@ public class SkinConfiguration extends MainState {
 	private void saveSkinHistory() {
 		if(config != null && config.getPath() != null) {
 			int index = -1;
-			for (int i = 0; i < player.getSkinHistory().length; i++) {
-				if (player.getSkinHistory()[i].getPath().equals(config.getPath())) {
+			var saved = player.getSkinHistory(side);
+			for (int i = 0; i < saved.length; i++) {
+				if (SkinCatalog.samePath(saved[i].getPath(), config.getPath())) {
 					index = i;
 					break;
 				}
@@ -237,11 +251,11 @@ public class SkinConfiguration extends MainState {
 			sc.setPath(config.getPath());
 			sc.setProperties(config.getProperties());
 			if (index >= 0) {
-				player.getSkinHistory()[index] = sc;
+				saved[index] = sc;
 			} else {
-				SkinConfig[] history = Arrays.copyOf(player.getSkinHistory(), player.getSkinHistory().length + 1);
+				SkinConfig[] history = Arrays.copyOf(saved, saved.length + 1);
 				history[history.length - 1] = sc;
-				player.setSkinHistory(history);
+				player.setSkinHistory(side, history);
 			}
 		}
 	}

@@ -402,7 +402,7 @@ public class Skin {
 			final SkinObject obj = objectarray[i];
 			if (obj instanceof SkinText text && text.isEditable() && text.draw && text.getInputBounds().contains(x, y)) {
 				if (textInput == null) {
-					textInput = new SkinTextInput();
+					textInput = new SkinTextInput(state.main.getConfig().isImeBridgeEnabled());
 				}
 				if (textInput.focus(state, text)) break;
 			}

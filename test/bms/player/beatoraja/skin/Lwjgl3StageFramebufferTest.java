@@ -63,7 +63,7 @@ public final class Lwjgl3StageFramebufferTest {
                 };
                 text.region.set(80, 60, 160, 40); text.color.set(Color.WHITE);
                 text.setText("HELLO"); text.setEditable(true); text.setWriter((s, value) -> written.set(value));
-                editor = new SkinTextInput(); editor.focus(state, text);
+                editor = new SkinTextInput(bms.player.beatoraja.input.text.ImeBridge.NONE); editor.focus(state, text);
                 check(state.getStage().getViewport() instanceof StretchViewport, "Production editor uses full stretched skin space");
                 var processors = ((InputMultiplexer)Gdx.input.getInputProcessor()).getProcessors();
                 check(processors.first() == input.getSkinMouseInput(), "Editor preserves skin mouse edge observer");

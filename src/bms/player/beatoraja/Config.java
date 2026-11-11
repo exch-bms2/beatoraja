@@ -57,6 +57,11 @@ public class Config implements Validatable {
 	 */
 	private DisplayMode displaymode = DisplayMode.WINDOW;
 	private ControllerBackend controllerBackend = ControllerBackend.JINPUT;
+	private boolean imeBridgeEnabled = true;
+
+	public boolean isImeBridgeEnabled() { return imeBridgeEnabled; }
+
+	public void setImeBridgeEnabled(boolean enabled) { imeBridgeEnabled = enabled; }
 	private boolean useObsWs;
 	private String obsWsHost = "localhost";
 	private int obsWsPort = 4455;
@@ -104,6 +109,7 @@ public class Config implements Validatable {
 	 * 垂直同期
 	 */
 	private boolean vsync;
+	private boolean notePositionSmoothing;
 	/**
 	 * 解像度
 	 */
@@ -283,6 +289,19 @@ public class Config implements Validatable {
 
 	public void setVsync(boolean vsync) {
 		this.vsync = vsync;
+	}
+
+	public boolean isNotePositionSmoothing() {
+		return notePositionSmoothing;
+	}
+
+	public void setNotePositionSmoothing(boolean notePositionSmoothing) {
+		this.notePositionSmoothing = notePositionSmoothing;
+	}
+
+	public boolean isNotePositionSmoothingEnabled() {
+		String override = System.getProperty("beatoraja.notePositionSmoothing");
+		return override == null ? notePositionSmoothing : Boolean.parseBoolean(override);
 	}
 
 	public int getBga() {

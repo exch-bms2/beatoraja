@@ -213,6 +213,24 @@ public class BMSPlayerInputProcessor {
 		midiinput.setConfig(config);
 	}
 
+	/** Change menu bindings at a polling boundary; a held button is not a new menu press. */
+	public void rebindMusicSelectInputs(PlayModeConfig config) {
+		synchronized (kbinput) {
+			setKeyboardConfig(config.getKeyboardConfig());
+			setControllerConfig(config.getController());
+			setMidiConfig(config.getMidiConfig());
+			resetAllKeyState();
+			startPressed = selectPressed = false;
+			Arrays.fill(isAnalog, false);
+			Arrays.fill(currentAnalogValue, 0);
+			Arrays.fill(lastAnalogValue, 0);
+			if (Gdx.input instanceof PollingLwjgl3Input polling) polling.resetBindingInput();
+			kbinput.resetWindowInput();
+			if (Gdx.input != null) kbinput.suppressHeldControlKeys();
+			for (var controller : bminput) controller.setWindowActive(windowInputActive);
+		}
+	}
+
 	public void setStartTime(long starttime) {
 		synchronized (kbinput) {
 			this.starttime = starttime;

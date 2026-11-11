@@ -46,6 +46,16 @@ public final class PlayerResource {
 
 	private Config config;
 	private PlayerConfig pconfig;
+	private PlaySide playSide = PlaySide.P1;
+
+	public void setPlaySide(PlaySide side) {
+		playSide = side != null ? side : PlaySide.P1;
+	}
+
+	public PlaySide getPlaySide() {
+		return pconfig.isIndependentPlaySides() && mode != null && mode.mode != BMSPlayerMode.Mode.REPLAY
+				&& model != null && PlaySide.supports(model.getMode()) && playSide == PlaySide.P2 ? PlaySide.P2 : PlaySide.P1;
+	}
 	/**
 	 * プレイモード
 	 */

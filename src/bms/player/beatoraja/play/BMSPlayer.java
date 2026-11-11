@@ -419,7 +419,7 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		if(autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.PRACTICE) {
-			input.setPlayConfig(config.getPlayConfig(model.getMode()));
+			input.setPlayConfig(config.getPlayInputConfig(model.getMode(), resource.getPlaySide()));
 		} else if (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
 			input.setEnable(false);
 		}
@@ -870,13 +870,14 @@ public class BMSPlayer extends MainState {
 		var type = getSkinType();
 		if (type == null) return false;
 		var profile = resource.getPlayerConfig();
-		var configured = profile.getSkin()[type.getId()];
+		var side = resource.getPlaySide();
+		var configured = profile.getSkinConfig(type, side);
 		if (configured == null || configured.getProperties() != saved) return false;
 		if (target != null && (!SkinCatalog.supports(target, type) || target.getPath() == null)) return false;
 		String path = target == null ? configured.getPath() : target.getPath().toString();
 		boolean switching = !SkinCatalog.samePath(path, configured.getPath());
 		if (switching) {
-			var settings = historicalSkinProperties(profile, path);
+			var settings = historicalSkinProperties(profile, side, path);
 			draft = settings.candidateFor(settings.getPendingSelection());
 		}
 		var candidateConfig = new SkinConfig(path);
@@ -902,8 +903,8 @@ public class BMSPlayer extends MainState {
 		if (switching) {
 			var selected = new SkinConfig(path);
 			selected.setProperties(draft.candidateFor(null));
-			rememberPracticeSkins(profile, configured, selected);
-			profile.getSkin()[type.getId()] = selected;
+			rememberPracticeSkins(profile, side, configured, selected);
+			profile.setSkinConfig(type, side, selected);
 			candidate.setEditableNoteProperties(selected.getProperties());
 			return true;
 		}
@@ -915,8 +916,8 @@ public class BMSPlayer extends MainState {
 		return true;
 	}
 
-	private static SkinConfig.Property historicalSkinProperties(PlayerConfig profile, String path) {
-		var history = profile.getSkinHistory();
+	private static SkinConfig.Property historicalSkinProperties(PlayerConfig profile, PlaySide side, String path) {
+		var history = profile.getSkinHistory(side);
 		if (history != null) {
 			for (var skin : history)
 				if (skin != null && skin.getProperties() != null && SkinCatalog.samePath(skin.getPath(), path))
@@ -925,16 +926,16 @@ public class BMSPlayer extends MainState {
 		return new SkinConfig.Property();
 	}
 
-	private static void rememberPracticeSkins(PlayerConfig profile, SkinConfig previous, SkinConfig selected) {
+	private static void rememberPracticeSkins(PlayerConfig profile, PlaySide side, SkinConfig previous, SkinConfig selected) {
 		var history = new ArrayList<SkinConfig>();
 		history.add(selected);
 		history.add(previous);
-		if (profile.getSkinHistory() != null) {
-			for (var item : profile.getSkinHistory())
+		if (profile.getSkinHistory(side) != null) {
+			for (var item : profile.getSkinHistory(side))
 				if (item != null && !SkinCatalog.samePath(item.getPath(), previous.getPath())
 						&& !SkinCatalog.samePath(item.getPath(), selected.getPath())) history.add(item);
 		}
-		profile.setSkinHistory(history.toArray(SkinConfig[]::new));
+		profile.setSkinHistory(side, history.toArray(SkinConfig[]::new));
 	}
 
 	public KeyInputProccessor getKeyinput() {

@@ -9,9 +9,28 @@ import java.util.Arrays;
 /** Synthetic IMM ordering/model/lifecycle tests, runnable on every supported OS. */
 public final class WindowsImeBridgeTest {
     public static void main(String[] args) throws Exception {
+        var json = new com.badlogic.gdx.utils.Json();
+        var config = json.fromJson(bms.player.beatoraja.Config.class, "{}");
+        check(config.isImeBridgeEnabled(), "Older configurations enable the IME bridge by default");
+        config.setImeBridgeEnabled(false);
+        check(!json.fromJson(bms.player.beatoraja.Config.class, json.toJson(config)).isImeBridgeEnabled(),
+                "Launcher opt-out survives a config round trip");
+        for (String key : new String[]{"beatoraja.windowsIme", "beatoraja.macosIme", "beatoraja.x11Ime"}) {
+            String previous = System.getProperty(key);
+            try {
+                System.clearProperty(key);
+                check(ImeBridge.isEnabled(key, true) && !ImeBridge.isEnabled(key, false), "Respect Config without an override");
+                System.setProperty(key, "true");
+                check(ImeBridge.isEnabled(key, false), "Explicit JVM enable takes precedence");
+                System.setProperty(key, "false");
+                check(!ImeBridge.isEnabled(key, true), "Explicit JVM disable takes precedence");
+            } finally {
+                if (previous == null) System.clearProperty(key); else System.setProperty(key, previous);
+            }
+        }
         String flag=System.getProperty("beatoraja.windowsIme");
         try {
-            System.clearProperty("beatoraja.windowsIme"); check(WindowsImeBridge.create()==ImeBridge.NONE,"Default opt-out");
+            System.clearProperty("beatoraja.windowsIme"); check(WindowsImeBridge.create(false)==ImeBridge.NONE,"Config opt-out");
             System.setProperty("beatoraja.windowsIme","true"); check(WindowsImeBridge.create()==ImeBridge.NONE,"Headless/other OS fallback");
         } finally { if (flag==null) System.clearProperty("beatoraja.windowsIme"); else System.setProperty("beatoraja.windowsIme",flag); }
         var support=new WindowsImeTestSupport();
