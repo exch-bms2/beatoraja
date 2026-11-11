@@ -153,6 +153,9 @@ tasks.named<JavaExec>("run") {
         }
     }
     providers.gradleProperty("audioDiagnostics").orNull?.let { systemProperty("beatoraja.audioDiagnostics", it) }
+    providers.gradleProperty("notePositionSmoothing").orNull?.let {
+        systemProperty("beatoraja.notePositionSmoothing", it)
+    }
     providers.gradleProperty("audioDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.audioDiagnostics.intervalMillis", it)
     }
@@ -255,6 +258,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.midi.MidiInputLifecycleTest",
     "bms.player.beatoraja.video.VideoFrameCopyTest",
     "bms.player.beatoraja.FramePacingDiagnosticsTest",
+    "bms.player.beatoraja.play.NotePositionSmootherTest",
     "bms.player.beatoraja.audio.AudioBackendLifecycleTest",
     "bms.player.beatoraja.audio.AudioDiagnosticsTest",
     "bms.player.beatoraja.audio.AudioBackendTestAssetsTest",
