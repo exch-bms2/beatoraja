@@ -42,6 +42,7 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
+import bms.player.beatoraja.skin.FontRenderRetirement;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
@@ -670,25 +671,45 @@ public final class MainController {
 	public void dispose() {
 		finishSkinAdjustment(false);
 		disposeInput();
-		if (obs != null) obs.close();
-		if (reviewSync != null) reviewSync.close();
-		saveConfig();
-		rivals.close();
+		// 終了処理では次の postRunnable が実行されないことがある。フォント解放の前に描画中の頂点を確定させる。
+		// Shutdown may never execute another postRunnable. End pending vertices before releasing fonts.
+		if (sprite != null && sprite.isDrawing()) sprite.end();
+		Throwable shutdownFailure = null;
+		try {
+			if (obs != null) obs.close();
+			if (reviewSync != null) reviewSync.close();
+			saveConfig();
+			rivals.close();
 
-		Optional.ofNullable(bmsplayer).ifPresent(MainState::dispose);
-		Optional.ofNullable(selector).ifPresent(MainState::dispose);
-		Optional.ofNullable(streamController).ifPresent(StreamController::dispose);
-		Optional.ofNullable(decide).ifPresent(MainState::dispose);
-		Optional.ofNullable(result).ifPresent(MainState::dispose);
-		Optional.ofNullable(gresult).ifPresent(MainState::dispose);
-		Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
-		Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
-		resource.dispose();
-		SkinLoader.getResource().dispose();
-		ShaderManager.dispose();
-		Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
+			Optional.ofNullable(bmsplayer).ifPresent(MainState::dispose);
+			Optional.ofNullable(selector).ifPresent(MainState::dispose);
+			Optional.ofNullable(streamController).ifPresent(StreamController::dispose);
+			Optional.ofNullable(decide).ifPresent(MainState::dispose);
+			Optional.ofNullable(result).ifPresent(MainState::dispose);
+			Optional.ofNullable(gresult).ifPresent(MainState::dispose);
+			Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
+			Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
+			resource.dispose();
+			SkinLoader.getResource().dispose();
+			ShaderManager.dispose();
+			Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
+			Optional.ofNullable(systemfont).ifPresent(BitmapFont::dispose);
+			systemfont = null;
+			Optional.ofNullable(messageRenderer).ifPresent(MessageRenderer::dispose);
+			messageRenderer = null;
 
-		Logger.getGlobal().info("全リソース破棄完了");
+			Logger.getGlobal().info("全リソース破棄完了");
+		} catch (RuntimeException | Error failure) {
+			shutdownFailure = failure;
+			throw failure;
+		} finally {
+			try {
+				FontRenderRetirement.drainAfterBatch(sprite);
+			} catch (RuntimeException | Error cleanupFailure) {
+				if (shutdownFailure == null) throw cleanupFailure;
+				shutdownFailure.addSuppressed(cleanupFailure);
+			}
+		}
 	}
 
 	void disposeInput() {
