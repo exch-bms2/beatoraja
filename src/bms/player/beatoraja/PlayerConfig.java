@@ -257,6 +257,14 @@ public final class PlayerConfig {
 		return rightSideInput[index];
 	}
 
+	public PlayModeConfig getMusicSelectInputConfig(PlaySide side) {
+		return switch (getMusicselectinput()) {
+			case 1 -> getMode9();
+			case 2 -> getMode14();
+			default -> getPlayInputConfig(Mode.BEAT_7K, side);
+		};
+	}
+
 	public SkinConfig getSkinConfig(SkinType type, PlaySide side) {
 		if (!independentPlaySides || side != PlaySide.P2 || !PlaySide.supports(type)) return getSkin()[type.getId()];
 		ensureRightSideSettings();

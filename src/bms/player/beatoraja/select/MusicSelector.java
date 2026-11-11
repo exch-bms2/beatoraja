@@ -180,11 +180,15 @@ public final class MusicSelector extends MainState {
 		preview.setDefault(getSound(SELECT));
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		PlayModeConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
-				: (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
-		input.setKeyboardConfig(pc.getKeyboardConfig());
-		input.setControllerConfig(pc.getController());
-		input.setMidiConfig(pc.getMidiConfig());
+		var bindings = config.getMusicSelectInputConfig(getSelectedPlaySide());
+		if (usesSideSelectionInput()) {
+			input.rebindMusicSelectInputs(bindings);
+			bar.resetSideInput();
+		} else {
+			input.setKeyboardConfig(bindings.getKeyboardConfig());
+			input.setControllerConfig(bindings.getController());
+			input.setMidiConfig(bindings.getMidiConfig());
+		}
 		manager.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
@@ -300,8 +304,14 @@ public final class MusicSelector extends MainState {
 
 	public void input() {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		if (config.isIndependentPlaySides() && !getSkin().isTextInputActive() && input.isControlKeyPressed(ControlKeys.F5))
+		if (config.isIndependentPlaySides() && !getSkin().isTextInputActive() && input.isControlKeyPressed(ControlKeys.F5)) {
 			selectedPlaySide = getSelectedPlaySide().other();
+			if (usesSideSelectionInput()) {
+				input.rebindMusicSelectInputs(config.getMusicSelectInputConfig(selectedPlaySide));
+				bar.resetSideInput();
+				return;
+			}
+		}
 
 		if (input.getControlKeyState(ControlKeys.NUM6)) {
 			main.changeState(MainStateType.CONFIG);
@@ -310,6 +320,10 @@ public final class MusicSelector extends MainState {
 		}
 
 		musicinput.input();
+	}
+
+	private boolean usesSideSelectionInput() {
+		return config.isIndependentPlaySides() && config.getMusicselectinput() == 0;
 	}
 
 	public void shutdown() {
