@@ -18,6 +18,8 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JSONスキンオブジェクトローダー
@@ -649,7 +651,23 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						loader.bitmapSourceMap.put(font.id, source);
 						loader.registerResource(source);
 					}
-					skinText = new SkinTextBitmap(loader.bitmapSourceMap.get(font.id), text.size * ((float)loader.dstr.width / loader.sk.w), property);
+					List<String> vectorFallbacks = new ArrayList<>();
+					if (font.fallback != null) {
+						for (int i = 0; i < font.fallback.length; i++) {
+							if (font.fallback[i] == null || font.fallback[i].path == null) {
+								continue;
+							}
+							String fb = skinPath.getParent().resolve(font.fallback[i].path).toString();
+							if (!fb.toLowerCase().endsWith(".fnt")) {
+								vectorFallbacks.add(fb);
+							}
+						}
+					}
+					// スキンが指定した TTF などの代替だけを渡す。共通代替フォントは SkinFontSource(指定がなければ共有の共通供給元)が後ろに付ける。
+					// Pass only the vector fallbacks the skin specified; SkinFontSource (or the shared global source when none) appends the global fallbacks.
+					SkinFontSource fallbackSource = vectorFallbacks.isEmpty() ? null
+							: loader.getFontSource(vectorFallbacks.get(0), vectorFallbacks.subList(1, vectorFallbacks.size()).toArray(new String[0]));
+					skinText = new SkinTextBitmap(loader.bitmapSourceMap.get(font.id), fallbackSource, text.size * ((float)loader.dstr.width / loader.sk.w), property);
 				} else {
 					String[] fallbackPaths = new String[font.fallback.length];
 					for (int i = 0; i < font.fallback.length; i++) {
