@@ -161,13 +161,16 @@ public final class PlayModeConfig {
 	}
 	
     public void validate(Mode mode) {
-        int keys = keyCount(mode);
         if(playconfig == null) {
             playconfig = new PlayConfig();
         }
 
         playconfig.validate();
+        validateInputs(mode);
+    }
 
+    void validateInputs(Mode mode) {
+        int keys = keyCount(mode);
         if (keyboard == null) {
             keyboard = new KeyboardConfig(mode, !isMidiMode(mode));
         }
@@ -244,6 +247,13 @@ public final class PlayModeConfig {
         }
         validateMidiInput(midi.start);
         validateMidiInput(midi.select);
+    }
+
+    PlayModeConfig copyInputs() {
+        var json = new com.badlogic.gdx.utils.Json();
+        var copy = json.fromJson(PlayModeConfig.class, json.toJson(this));
+        copy.playconfig = null;
+        return copy;
     }
 
     /**

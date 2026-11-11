@@ -78,6 +78,8 @@ public class KeyConfiguration extends MainState {
 	private boolean keyinput = false;
 
 	private int mode = 0;
+	private int modeSlot;
+	private static final int[] RIGHT_MODES = {0, 1, 5};
 
 	private ShapeRenderer shape;
 
@@ -145,10 +147,10 @@ public class KeyConfiguration extends MainState {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		if (input.isControlKeyPressed(ControlKeys.LEFT)) {
-			setMode((mode + KEYS.length - 1) % KEYS.length);
+			setMode(Math.floorMod(modeSlot - 1, modeCount()));
 		}
 		if (input.isControlKeyPressed(ControlKeys.RIGHT)) {
-			setMode((mode + 1) % KEYS.length);
+			setMode((modeSlot + 1) % modeCount());
 		}
 
 		String[] keys = KEYS[mode];
@@ -262,7 +264,7 @@ public class KeyConfiguration extends MainState {
 		sprite.begin();
 		if(titlefont != null) {
 			titlefont.setColor(Color.CYAN);
-			titlefont.draw(sprite, "<-- " + MODE[mode] + " -->", 80 * scaleX, 650 * scaleY);
+			titlefont.draw(sprite, "<-- " + MODE[mode] + (modeSlot >= KEYS.length ? " (2P)" : "") + " -->", 80 * scaleX, 650 * scaleY);
 			titlefont.setColor(Color.YELLOW);
 			titlefont.draw(sprite, "Keyboard", 180 * scaleX, 620 * scaleY);
 			titlefont.draw(sprite, "Controller1", 330 * scaleX, 620 * scaleY);
@@ -375,10 +377,16 @@ public class KeyConfiguration extends MainState {
 		return "---";
 	}
 
-	private void setMode(int mode) {
-		this.mode = mode;
+	private int modeCount() {
+		return KEYS.length + (config.isIndependentPlaySides() ? RIGHT_MODES.length : 0);
+	}
+
+	private void setMode(int slot) {
+		modeSlot = slot;
+		boolean right = slot >= KEYS.length;
+		int mode = this.mode = right ? RIGHT_MODES[slot - KEYS.length] : slot;
 		config = main.getPlayerResource().getPlayerConfig();
-		pc = config.getPlayConfig(MODE_HINT[mode]);
+		pc = config.getPlayInputConfig(MODE_HINT[mode], right ? bms.player.beatoraja.PlaySide.P2 : bms.player.beatoraja.PlaySide.P1);
 		keyboardConfig = pc.getKeyboardConfig();
 		controllerConfigs = pc.getController();
 		midiconfig = pc.getMidiConfig();

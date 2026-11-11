@@ -31,6 +31,11 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
  * @author exch
  */
 public final class MusicSelector extends MainState {
+	private PlaySide selectedPlaySide = PlaySide.P1;
+
+	public PlaySide getSelectedPlaySide() {
+		return config.isIndependentPlaySides() ? selectedPlaySide : PlaySide.P1;
+	}
 
 	// TODO　ミラーランダム段位のスコア表示
 
@@ -281,6 +286,7 @@ public final class MusicSelector extends MainState {
 						.map(bar -> Paths.get(((SongBar) bar).getSongData().getPath())).toArray(Path[]::new);
 					if(paths.length > 0) {
 						resource.clear();
+						resource.setPlaySide(getSelectedPlaySide());
 						resource.setAutoPlaySongs(paths, false);
 						if(resource.nextSong()) {
 							main.changeState(MainStateType.DECIDE);
@@ -294,6 +300,8 @@ public final class MusicSelector extends MainState {
 
 	public void input() {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
+		if (config.isIndependentPlaySides() && !getSkin().isTextInputActive() && input.isControlKeyPressed(ControlKeys.F5))
+			selectedPlaySide = getSelectedPlaySide().other();
 
 		if (input.getControlKeyState(ControlKeys.NUM6)) {
 			main.changeState(MainStateType.CONFIG);
@@ -353,6 +361,7 @@ public final class MusicSelector extends MainState {
 
 	private void readChart(SongData song, Bar current) {
 		resource.clear();
+		resource.setPlaySide(getSelectedPlaySide());
 		if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 			// TODO 表名、フォルダ名をPlayerResource上でも重複実施している
 			final Queue<DirectoryBar> dir = manager.getDirectory();
@@ -477,6 +486,7 @@ public final class MusicSelector extends MainState {
 
 	private boolean _readCourse(BMSPlayerMode mode, GradeBar gradeBar) {
 		resource.clear();
+		resource.setPlaySide(getSelectedPlaySide());
 		final SongData[] songs = gradeBar.getSongDatas();
 		final Path[] files = Stream.of(songs).map(song -> Paths.get(song.getPath())).toArray(Path[]::new);
 		if (resource.setCourseBMSFiles(files)) {

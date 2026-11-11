@@ -47,6 +47,9 @@
                 <Insets left="10.0" />
             </HBox.margin>
         </Button>
+        <CheckBox fx:id="independentPlaySides" onAction="#changeIndependentPlaySides" text="%INDEPENDENT_PLAY_SIDES">
+            <HBox.margin><Insets left="16.0" /></HBox.margin>
+        </CheckBox>
     </HBox>
     <TabPane prefHeight="435.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
         <Tab fx:id="videoTab" closable="false" text="%TAB_VIDEO">
