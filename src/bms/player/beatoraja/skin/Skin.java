@@ -548,7 +548,7 @@ public class Skin {
 		
 		private final Color color = new Color(Color.WHITE);
 		
-		private Color orgcolor;
+		private final Color orgcolor = new Color();
 
 		private final Rectangle clipBounds = new Rectangle();
 		private final Array<Rectangle> scissors = new Array<>(false, 2);
@@ -623,9 +623,14 @@ public class Skin {
 			for (TextureRegion region : font.getRegions()) {
 				setFilter(region);
 			}
-			preDraw();
-			font.setColor(c);
-			font.draw(sprite, s, x, y);
+			try {
+				preDraw();
+				font.setColor(c);
+				font.draw(sprite, s, x, y);
+			} catch (RuntimeException | Error failure) {
+				restoreAfterFailure(failure);
+				throw failure;
+			}
 			postDraw();
 		}
 
@@ -637,31 +642,51 @@ public class Skin {
 			for (TextureRegion region : font.getRegions()) {
 				setFilter(region);
 			}
-			preDraw(shaderVariableSetter);
-			font.draw(sprite, layout, x, y);
+			try {
+				preDraw(shaderVariableSetter);
+				font.draw(sprite, layout, x, y);
+			} catch (RuntimeException | Error failure) {
+				restoreAfterFailure(failure);
+				throw failure;
+			}
 			postDraw();
 		}
 
 		public void draw(Texture image, float x, float y, float w, float h) {
 			setFilter(image);
-			preDraw();
-			sprite.draw(image, x, y, w, h);
+			try {
+				preDraw();
+				sprite.draw(image, x, y, w, h);
+			} catch (RuntimeException | Error failure) {
+				restoreAfterFailure(failure);
+				throw failure;
+			}
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
 			setFilter(image);
-			preDraw();
-			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
-			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
+			try {
+				preDraw();
+				// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
+				sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
+			} catch (RuntimeException | Error failure) {
+				restoreAfterFailure(failure);
+				throw failure;
+			}
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
 			setFilter(image);
-			preDraw();
-			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
-			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
+			try {
+				preDraw();
+				// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
+				sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
+			} catch (RuntimeException | Error failure) {
+				restoreAfterFailure(failure);
+				throw failure;
+			}
 			postDraw();
 		}
 
@@ -682,6 +707,8 @@ public class Skin {
 		}
 		
 		private void preDraw(Consumer<ShaderProgram> shaderVariableSetter) {
+			// SpriteBatch は可変の Color を返すので、コールバック前に値を写し取る。 / SpriteBatch exposes a mutable Color; snapshot its value before callbacks.
+			orgcolor.set(sprite.getColor());
 			if(shaders[current] != shaders[type]) {
 				sprite.setShader(shaders[type]);
 				current = type;
@@ -713,13 +740,20 @@ public class Skin {
 			}
 
 			if(color != null) {
-				orgcolor = sprite.getColor();
 				sprite.setColor(color);				
-			} else {
-				orgcolor = null;
 			}
 		}
 		
+		private void restoreAfterFailure(Throwable failure) {
+			try {
+				postDraw();
+			} catch (RuntimeException | Error cleanupFailure) {
+				if (cleanupFailure != failure) {
+					failure.addSuppressed(cleanupFailure);
+				}
+			}
+		}
+
 		private void postDraw() {
 			if(orgcolor != null) {
 				sprite.setColor(orgcolor);				
@@ -727,6 +761,12 @@ public class Skin {
 
 			if (blend >= 2) {
 				sprite.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+			}
+
+			if (type == TYPE_DISTANCE_FIELD || type == TYPE_LINEAR) {
+				sprite.setShader(null);
+				current = TYPE_NORMAL;
+				type = TYPE_NORMAL;
 			}
 		}
 
