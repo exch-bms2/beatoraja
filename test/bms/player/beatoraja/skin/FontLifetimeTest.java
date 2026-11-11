@@ -57,6 +57,7 @@ public final class FontLifetimeTest {
         generatorLeases();
         samePathReplacement();
         shutdownWithoutApp();
+        shutdownReleasesGlobalSource();
         drain();
         check(pending.isEmpty(), "no pending cleanup");
         check(Gdx.gl == null, "GL stayed absent");
@@ -460,6 +461,23 @@ public final class FontLifetimeTest {
         catch (IllegalStateException expected) { check(expected.getSuppressed().length==1,"cleanup failure propagated"); }
         check(count[0]==2,"cleanup failure cannot prevent subsequent retirement");
         Gdx.app=application;
+    }
+
+    /**
+     * 終了処理は共通代替フォントの貸与をすべて返して解放を実行し、その後は作り直さない。
+     * Shutdown returns every global lease, drains the cleanup, and does not rebuild the global source afterwards.
+     */
+    private static void shutdownReleasesGlobalSource() {
+        SystemFallbackGlyphs.resetGlobalSource(); drain();
+        SkinFontSource global = SystemFallbackGlyphs.globalSource();
+        check(global != null && global.getGenerator() != null && FontGeneratorPool.activeCount() > 0,
+                "the global source holds pooled faces before shutdown");
+        FontRenderRetirement.drainAtShutdown(null);
+        check(FontGeneratorPool.activeCount() == 0 && FontRenderRetirement.pendingCount() == 0,
+                "shutdown returns every global lease and drains its cleanup");
+        FontGeneratorPool.clear();
+        check(SystemFallbackGlyphs.globalSource() == null, "the global source is not rebuilt after shutdown");
+        SystemFallbackGlyphs.resetGlobalSource();
     }
 
     private static void check(boolean condition, String message) {
