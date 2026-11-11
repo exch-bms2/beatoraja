@@ -4,6 +4,7 @@ import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
 
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.SystemFontFactory;
 
 import java.util.logging.Logger;
 
@@ -86,7 +87,6 @@ public class KeyConfiguration extends MainState {
 	private static final int[] RIGHT_MODES = {0, 1, 5};
 
 	private ShapeRenderer shape;
-	private FreeTypeFontGenerator fontGenerator;
 
 	private BMSPlayerInputProcessor input;
 	private KeyBoardInputProcesseor keyboard;
@@ -120,16 +120,16 @@ public class KeyConfiguration extends MainState {
 		}
 
 		try {
-			fontGenerator = new FreeTypeFontGenerator(
-					Gdx.files.internal(main.getConfig().getSystemfontpath()));
+			// 機器名などシステムフォントにない文字は、必要になったとき代替フォントから作る。
+			// Characters the system font lacks (device names, ...) are built from the fallback fonts on demand.
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = (int) (20 * getSkin().getScaleY());
-			parameter.incremental = true;
-			titlefont = fontGenerator.generateFont(parameter);
+			titlefont = SystemFontFactory.createFont(
+					Gdx.files.internal(main.getConfig().getSystemfontpath()), parameter);
 		} catch (GdxRuntimeException e) {
-			if (fontGenerator != null) fontGenerator.dispose();
-			fontGenerator = null;
 			Logger.getGlobal().severe("Font読み込み失敗");
+		}
+		if (titlefont == null) {
 			titlefont = new BitmapFont();
 		}
 
@@ -717,10 +717,6 @@ public class KeyConfiguration extends MainState {
 		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
-		}
-		if (fontGenerator != null) {
-			fontGenerator.dispose();
-			fontGenerator = null;
 		}
 		if (shape != null) {
 			shape.dispose();

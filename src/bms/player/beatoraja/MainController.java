@@ -42,6 +42,7 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
+import bms.player.beatoraja.skin.SystemFontFactory;
 import bms.player.beatoraja.skin.FontRenderRetirement;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.song.*;
@@ -373,11 +374,11 @@ public final class MainController {
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 		try {
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
+
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
-			systemfont = generator.generateFont(parameter);
-			generator.dispose();
+			systemfont = SystemFontFactory.createFont(Gdx.files.internal(config.getSystemfontpath()), parameter);
+
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("System Font読み込み失敗");
 		}

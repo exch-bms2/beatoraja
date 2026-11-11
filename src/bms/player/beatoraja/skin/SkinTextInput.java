@@ -36,7 +36,6 @@ class SkinTextInput {
 	private StringWriter writer;
 	private TextField textField;
 	private TextField.TextFieldStyle style;
-	private FreeTypeFontGenerator generator;
 	private BitmapFont font;
 	private int fontSize;
 	private Texture cursorTexture;
@@ -237,10 +236,6 @@ class SkinTextInput {
 			font.dispose();
 			font = null;
 		}
-		if (generator != null) {
-			generator.dispose();
-			generator = null;
-		}
 		if (cursorTexture != null) {
 			cursorTexture.dispose();
 			cursorTexture = null;
@@ -265,14 +260,16 @@ class SkinTextInput {
 	}
 
 	private void ensureTextField(MainState state, Stage stage, int size) {
-		if (generator == null) {
-			generator = new FreeTypeFontGenerator(Gdx.files.internal(state.main.getConfig().getSystemfontpath()));
-		}
 		if (font == null || fontSize != size) {
 			FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 			parameter.size = size;
 			parameter.incremental = true;
-			BitmapFont replacement = generator.generateFont(parameter);
+			// システムフォントにない文字は共通代替フォントで描く。 / Characters missing from the system font use the global fallback fonts.
+			String systemFont = state.main.getConfig().getSystemfontpath();
+			BitmapFont replacement = SystemFontFactory.createFont(systemFont, parameter);
+			if (replacement == null) {
+				throw new com.badlogic.gdx.utils.GdxRuntimeException("System font unavailable: " + systemFont);
+			}
 			if (font != null) font.dispose();
 			font = replacement;
 			fontSize = size;

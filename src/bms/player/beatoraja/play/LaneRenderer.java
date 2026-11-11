@@ -13,6 +13,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SystemFontFactory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
@@ -35,7 +36,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  * 
  * @author exch
  */
-public class LaneRenderer {
+public class LaneRenderer implements Disposable {
 	
 	private float basehispeed;
 
@@ -82,12 +83,13 @@ public class LaneRenderer {
 		hp.dispose();
 
 		try {
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-					Gdx.files.internal(main.main.getConfig().getSystemfontpath()));
+
+
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 18;
-			font = generator.generateFont(parameter);
-			generator.dispose();
+			font = SystemFontFactory.createFont(
+					Gdx.files.internal(main.main.getConfig().getSystemfontpath()), parameter);
+
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("Practice Font読み込み失敗");
 		}
