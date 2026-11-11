@@ -309,12 +309,18 @@ public class LaneRenderer {
 	private long notePositionTimeOffset(long microtime) {
 		if (notePositionSmoother == null) return 0;
 		if (main.getState() != BMSPlayer.STATE_PLAY || !main.timer.isTimerOn(TIMER_PLAY)
-				|| !main.main.getConfig().isVsync() || !(Gdx.graphics instanceof Lwjgl3Graphics graphics)) {
+				|| !(Gdx.graphics instanceof Lwjgl3Graphics graphics)) {
 			notePositionSmoother.reset();
 			nextNoteRefreshCheck = 0;
 			return 0;
 		}
 		final long now = main.timer.getNowMicroTime();
+		final long origin = main.timer.getMicroTimer(TIMER_PLAY);
+		final Config systemConfig = main.main.getConfig();
+		if (!systemConfig.isVsync()) {
+			nextNoteRefreshCheck = 0;
+			return notePositionSmoother.sampleCapped(microtime, origin, systemConfig.getMaxFramePerSecond(), now);
+		}
 		if (nextNoteRefreshCheck == 0 || now >= nextNoteRefreshCheck) {
 			nextNoteRefreshCheck = now + 250_000;
 			// Monitor enumeration allocates in libGDX, and window position is unavailable on Wayland.
@@ -327,7 +333,7 @@ public class LaneRenderer {
 				noteRefreshRate = 0;
 			}
 		}
-		return notePositionSmoother.sample(microtime, main.timer.getMicroTimer(TIMER_PLAY), noteRefreshRate);
+		return notePositionSmoother.sample(microtime, origin, noteRefreshRate);
 	}
 
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, SkinOffset[] offsets, int offsetcenter) {
