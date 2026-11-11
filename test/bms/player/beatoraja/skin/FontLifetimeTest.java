@@ -11,6 +11,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.BitmapFontData;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -49,6 +50,8 @@ public final class FontLifetimeTest {
         rotationBounded(args.length == 0 ? "font/VL-Gothic-Regular.ttf" : args[0]);
         transientBorrowers(args.length == 0 ? "font/VL-Gothic-Regular.ttf" : args[0]);
         coverageLookup();
+        fallbackBaselineAlignment();
+        variationSelectorsAreZeroWidth();
         faceIndexLeases();
         sharedGlobalChoice();
         generatorLeases();
@@ -320,6 +323,72 @@ public final class FontLifetimeTest {
         b.dispose();
         check(FontGeneratorPool.activeCount()==0 && pending.size()==1, "last native face retirement is deferred");
         FontGeneratorPool.clear(); drain();
+    }
+
+    /**
+     * 別のフォントから作った代替グリフは、生成済みフォントの基準線(基本ジェネレーターの ascender)にそろう。
+     * A fallback glyph from another font lands on the generated font's baseline (the base generator's ascender).
+     */
+    private static void fallbackBaselineAlignment() {
+        SkinFontSource source = new SkinFontSource("font/VL-Gothic-Regular.ttf",
+                new String[] { "font/NotoEmoji-VariableFont_wght.ttf" });
+        FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+        parameter.size = 32;
+        int baseBottom = source.getGenerator().generateGlyphAndBitmap('4', parameter.size, false).glyph.yoffset;
+        int[] raw = { Integer.MIN_VALUE }, aligned = { Integer.MIN_VALUE };
+        new GlyphProvider(source, parameter, (cp, cause) -> { throw new AssertionError(cause); })
+                .resolve('4', true, (raster, cp) -> { raw[0] = raster.glyph.yoffset; return raster.glyph; });
+        GlyphProvider.Result result = new GlyphProvider(source, parameter, (cp, cause) -> { throw new AssertionError(cause); }, true)
+                .resolve('4', true, (raster, cp) -> { aligned[0] = raster.glyph.yoffset; return raster.glyph; });
+        System.out.println("baseline: base=" + baseBottom + " fallback raw=" + raw[0] + " aligned=" + aligned[0]);
+        check(raw[0] != Integer.MIN_VALUE && Math.abs(raw[0] - baseBottom) > 1,
+                "the bundled second font really has another baseline before alignment");
+        check(result.glyph != null && Math.abs(aligned[0] - baseBottom) <= 1,
+                "fallback glyph from another font is aligned to the generated font's baseline");
+        source.dispose();
+        drain();
+    }
+
+    /**
+     * 画面フォントの代替データでは、異体字セレクター(U+FE00–FE0F、U+E0100–E01EF)が幅も欠落記号も足さない。GL なしで字形列を比べる。
+     * In screen-font fallback data, variation selectors (U+FE00–FE0F, U+E0100–E01EF) add neither advance nor a marker.
+     * Compares glyph runs without GL.
+     */
+    private static void variationSelectorsAreZeroWidth() {
+        BitmapFontData base = new BitmapFontData();
+        for (char c : new char[] { 'A', 'B' }) {
+            BitmapFont.Glyph glyph = new BitmapFont.Glyph();
+            glyph.id = c;
+            glyph.width = 10;
+            glyph.height = 10;
+            glyph.xadvance = 12;
+            base.setGlyph(c, glyph);
+        }
+        SystemFontFactory.OnDemandFallbackFontData data = new SystemFontFactory.OnDemandFallbackFontData(base, null, null);
+        float pair = runWidth(data, "AB");
+        check(runWidth(data, "A\uFE00B") == pair && runWidth(data, "A\uFE0FB") == pair
+                && runWidth(data, "A\uDB40\uDD00B") == pair && selectorSlotsAreEmpty(data, "A\uFE00\uFE0F\uDB40\uDD00"),
+                "variation selectors (U+FE00-FE0F, U+E0100-E01EF) are zero-width");
+    }
+
+    /** 先頭以外の字形がすべて幅・大きさ 0(欠落記号ではない)。 / Every glyph after the first has zero advance and size (no marker). */
+    private static boolean selectorSlotsAreEmpty(BitmapFontData data, String text) {
+        GlyphLayout.GlyphRun run = new GlyphLayout.GlyphRun();
+        data.getGlyphs(run, text, 0, text.length(), null);
+        for (int i = 1; i < run.glyphs.size; i++) {
+            BitmapFont.Glyph glyph = run.glyphs.get(i);
+            if (glyph.xadvance != 0 || glyph.width != 0) return false;
+        }
+        return run.glyphs.size == text.length();
+    }
+
+    private static float runWidth(BitmapFontData data, String text) {
+        GlyphLayout.GlyphRun run = new GlyphLayout.GlyphRun();
+        data.getGlyphs(run, text, 0, text.length(), null);
+        float width = 0;
+        for (int i = 0; i < run.xAdvances.size; i++) width += run.xAdvances.get(i);
+        if (run.glyphs.size != text.length()) throw new AssertionError("one glyph slot per UTF-16 unit: " + text);
+        return width;
     }
 
     private static void coverageLookup() {
