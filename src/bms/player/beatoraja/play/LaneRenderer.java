@@ -45,8 +45,7 @@ public class LaneRenderer {
 	private TimeLine[] timelines;
 
 	private int pos;
-	private final NotePositionSmoother notePositionSmoother = Boolean.getBoolean("beatoraja.notePositionSmoothing")
-			? new NotePositionSmoother() : null;
+	private final NotePositionSmoother notePositionSmoother;
 	private long nextNoteRefreshCheck;
 	private long noteMonitor;
 	private int noteRefreshRate;
@@ -77,6 +76,7 @@ public class LaneRenderer {
 	public LaneRenderer(BMSPlayer main, BMSModel model) {
 
 		this.main = main;
+		notePositionSmoother = main.main.getConfig().isNotePositionSmoothingEnabled() ? new NotePositionSmoother() : null;
 		Pixmap hp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		hp.drawPixel(0, 0, Color.toIntBits(255, 255, 255, 255));
 		hp.dispose();
