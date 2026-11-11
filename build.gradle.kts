@@ -223,6 +223,7 @@ val fatJar by tasks.registering(Jar::class) {
 val regressionClasses = listOf(
     "bms.player.beatoraja.RivalDataAccessorTest",
     "bms.player.beatoraja.skin.FontCoverageTest",
+    "bms.player.beatoraja.skin.FallbackOrderTest",
     "bms.player.beatoraja.skin.BitmapTextRunsTest",
     "bms.player.beatoraja.skin.FontLifetimeTest",
     "bms.player.beatoraja.skin.BitmapFontLoaderTest",

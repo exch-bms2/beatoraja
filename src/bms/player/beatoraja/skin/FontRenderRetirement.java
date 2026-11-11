@@ -39,6 +39,17 @@ public final class FontRenderRetirement {
         drain();
     }
 
+    /**
+     * 終了処理の最後に一度だけ呼ぶ。共有アトラスと共通代替フォントを手放してから解放を実行する。
+     * Call once at the end of shutdown: releases the shared atlases and the global fallback source, then drains.
+     */
+    public static void drainAtShutdown(SpriteBatch batch) {
+        try {
+            SystemFallbackGlyphs.shutdown();
+        } finally {
+            drainAfterBatch(batch);
+        }
+    }
 
     /**
      * 次に確認できた描画の区切りを待つ解放処理の数(ネイティブ確保数ではない)。

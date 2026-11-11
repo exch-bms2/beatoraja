@@ -704,7 +704,7 @@ public final class MainController {
 			throw failure;
 		} finally {
 			try {
-				FontRenderRetirement.drainAfterBatch(sprite);
+				FontRenderRetirement.drainAtShutdown(sprite);
 			} catch (RuntimeException | Error cleanupFailure) {
 				if (shutdownFailure == null) throw cleanupFailure;
 				shutdownFailure.addSuppressed(cleanupFailure);
