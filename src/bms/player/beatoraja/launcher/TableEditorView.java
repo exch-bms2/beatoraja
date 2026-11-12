@@ -4,15 +4,17 @@ import bms.player.beatoraja.external.DesktopActions;
 import bms.player.beatoraja.song.archive.SongArchives;
 
 import java.net.URL;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 import bms.player.beatoraja.TableData;
+import bms.player.beatoraja.LocalTableFile;
 import bms.player.beatoraja.TableData.TableFolder;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -21,8 +23,15 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.Scene;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 
 import java.util.regex.Pattern;
@@ -31,7 +40,7 @@ public class TableEditorView implements Initializable {
 
 	private static final Pattern hexadecimalPattern = Pattern.compile("[0-9a-fA-F]*");
 
-	private Path filepath;
+	private TableData loaded;
 
 	@FXML
 	private TextField tableName;
@@ -45,31 +54,73 @@ public class TableEditorView implements Initializable {
 		
 	}
 	
-	protected void init(SongDatabaseAccessor songdb) {
+	protected void init(TableChartLookup songdb) {
 		courseController.setSongDatabaseAccessor(songdb);
 		folderController.init(songdb);
 	}
 
-	public void update(Path p) {
-		TableData td = TableData.read(p);
-		if(td == null) {
-			td = new TableData();
-			td.setName("New Table");
-		}
-		
+	private void update(TableData td) {
+		loaded = td;
 		courseController.setCourseData(td.getCourse());
 		folderController.setTableFolder(td.getFolder());
 		tableName.setText(td.getName());
-		filepath = p;
 	}
 	
-	public void commit() {
+	private TableData draft() {
 		TableData td = new TableData();
+		td.setUrl(loaded.getUrl());
+		td.setTag(loaded.getTag());
 		td.setName(tableName.getText());
 		td.setCourse(courseController.getCourseData());
 		td.setFolder(folderController.getTableFolder());
-		
-		TableData.write(filepath, td);
+		return td;
+	}
+
+	static Stage open(Path path, TableChartLookup songdb) throws IOException {
+		var file = new LocalTableFile(path);
+		TableData data = file.load();
+		var loader = new FXMLLoader(TableEditorView.class.getResource("TableEditorView.fxml"),
+				ResourceBundle.getBundle("resources.UIResources"));
+		var root = new BorderPane();
+		root.setCenter(loader.load());
+		TableEditorView editor = loader.getController();
+		editor.init(songdb);
+		editor.update(data);
+		var saved = new String[]{LocalTableFile.snapshot(editor.draft())};
+
+		// No owner: hiding the launcher must not hide this window.
+		var stage = new Stage();
+		stage.setTitle("Table Editor");
+		var save = new Button("Save");
+		var cancel = new Button("Cancel");
+		var status = new Label();
+		var controls = new HBox(10, save, cancel, status);
+		controls.setAlignment(Pos.CENTER_LEFT);
+		controls.setPadding(new Insets(8));
+		root.setBottom(controls);
+		save.setOnAction(event -> {
+			try {
+				var draft = editor.draft();
+				file.save(draft);
+				saved[0] = LocalTableFile.snapshot(draft);
+				status.setText("Saved. Select the local table (or COURSE on first load) and press F2.");
+			} catch (IOException | RuntimeException e) {
+				var alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
+				alert.initOwner(stage);
+				alert.showAndWait();
+			}
+		});
+		cancel.setOnAction(event -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+		stage.setOnCloseRequest(event -> {
+			if (saved[0].equals(LocalTableFile.snapshot(editor.draft()))) return;
+			var discard = new ButtonType("Discard", ButtonData.OK_DONE);
+			var alert = new Alert(Alert.AlertType.CONFIRMATION, "Discard unsaved table changes?", discard, ButtonType.CANCEL);
+			alert.initOwner(stage);
+			if (alert.showAndWait().orElse(ButtonType.CANCEL) != discard) event.consume();
+		});
+		stage.setScene(new Scene(root, 960, 640));
+		stage.show();
+		return stage;
 	}
 
 	public static boolean isMd5OrSha256Hash(String text) {
@@ -84,7 +135,7 @@ public class TableEditorView implements Initializable {
 		gridPane.add(textField, 1, row, 2, 1);
 	}
 
-	protected static void displayChartDetailsDialog(SongDatabaseAccessor songdb, SongData song, String... extraData) {
+	protected static void displayChartDetailsDialog(TableChartLookup songdb, SongData song, String... extraData) {
 		if (song == null) return;
 
 		GridPane gridPane = new GridPane();
@@ -104,11 +155,11 @@ public class TableEditorView implements Initializable {
 
 		if (song.getPath() == null && songdb != null) {
 			// Try to find actual song in songdb, if songdata was not retrieved from songdb
-			SongData[] foundSongs = songdb.getSongDatas(new String[]{song.getSha256()});
+			SongData[] foundSongs = songdb.byHash(song.getSha256());
 			if (foundSongs.length != 0) {
 				song = foundSongs[0];
 			} else {
-				foundSongs = songdb.getSongDatas(new String[]{song.getMd5()});
+				foundSongs = songdb.byHash(song.getMd5());
 				if (foundSongs.length != 0) {
 					song = foundSongs[0];
 				}

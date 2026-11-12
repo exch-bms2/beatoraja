@@ -381,6 +381,7 @@ public class EventFactory {
 		update_folder(211, state -> {
 			if(state instanceof MusicSelector selector) {
 				Bar selected = selector.getBarManager().getSelected();
+				if (selector.getBarManager().handleLocalTableUpdate(selected)) return;
 				if (selected instanceof FolderBar) {
 					selector.main.updateSong(((FolderBar) selected).getFolderData().getPath());
 				} else if (selected instanceof TableBar) {

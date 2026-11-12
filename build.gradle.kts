@@ -229,6 +229,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.external.obs.ObsWebSocketTest",
     "bms.player.beatoraja.external.obs.ObsConfigCompatibilityTest",
     "bms.player.beatoraja.BmsRootConfigTest",
+    "bms.player.beatoraja.LocalTableFileTest",
     "bms.player.beatoraja.play.ControlInputProcessorTest",
     "bms.player.beatoraja.skin.NotesOffsetCenterConfigTest",
     "bms.player.beatoraja.skin.json.NotesOffsetCenterLoaderTest",
