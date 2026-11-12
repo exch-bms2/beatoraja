@@ -347,6 +347,13 @@ val regressionTasks = regressionClasses.map { className ->
         systemProperty("java.awt.headless", "true")
     }
 }
+tasks.register<JavaExec>("tableEditorWindowTest") {
+    group = "verification"
+    description = "Open the standalone table editor with JavaFX (requires a desktop session)."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.launcher.TableEditorWindowTest")
+}
 val regressionTest by tasks.registering {
     group = "verification"
     description = "Run all standalone regression tests (fail on any non-zero exit)."

@@ -24,7 +24,7 @@ public final class LocalTableFile {
             empty.setName("New Table");
             return empty;
         }
-        TableData data = decode(new String(bytes, StandardCharsets.UTF_8));
+        TableData data = decode(new String(bytes, StandardCharsets.UTF_8), true);
         original = bytes;
         return data;
     }
@@ -35,7 +35,7 @@ public final class LocalTableFile {
 
     public void save(TableData draft) throws IOException {
         // Shrinking removes transient chart metadata; never mutate the editor's live rows.
-        TableData copy = decode(snapshot(draft));
+        TableData copy = decode(snapshot(draft), false);
         copy.shrink();
         byte[] bytes = snapshot(copy).getBytes(StandardCharsets.UTF_8);
         Files.createDirectories(path.getParent());
@@ -60,12 +60,18 @@ public final class LocalTableFile {
         }
     }
 
-    private static TableData decode(String text) throws IOException {
+    private static TableData decode(String text, boolean allowEmptyDraft) throws IOException {
         try {
             var json = new Json();
             json.setIgnoreUnknownFields(true);
             var data = json.fromJson(TableData.class, text);
-            if (data != null && data.validate()) return data;
+            if (data != null) {
+                // Older launchers wrote named drafts before any folder or course was added.
+                boolean emptyDraft = allowEmptyDraft && data.getName() != null && !data.getName().isEmpty()
+                        && (data.getFolder() == null || data.getFolder().length == 0)
+                        && (data.getCourse() == null || data.getCourse().length == 0);
+                if (data.validate() || emptyDraft) return data;
+            }
         } catch (RuntimeException e) {
             throw new IOException("The local table could not be read.", e);
         }
