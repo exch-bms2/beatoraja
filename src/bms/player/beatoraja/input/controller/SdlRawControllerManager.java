@@ -356,6 +356,11 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
                         : listener.axisMoved(this, index, value)) break;
             }
         }
+        @Override public synchronized void readSelectionButtons(boolean[] state) {
+            if (!connected) return;
+            for (int i = 0; i < Math.min(state.length, physical.length); i++)
+                state[i] = physical[i] && (!mapped || SdlGamepadCompatibility.dpadAlias(i) < 0);
+        }
         public synchronized boolean getButton(int i) { return connected && i >= 0 && i < 32 && buttons[i]; }
         public synchronized float getAxis(int i) { return connected && i >= 0 && i < 8 ? axes[i] : 0; }
         public String getName() { return device.name(); }

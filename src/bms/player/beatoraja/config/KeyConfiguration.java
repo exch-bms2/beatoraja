@@ -76,6 +76,7 @@ public class KeyConfiguration extends MainState {
 	private int cursorpos = 0;
 	private int scrollpos = 0;
 	private boolean keyinput = false;
+	private int deviceSelectionSlot = -1;
 	private final boolean assignmentDiagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics");
 	private String assignmentDevice = "";
 	private String assignmentResult = "";
@@ -107,6 +108,7 @@ public class KeyConfiguration extends MainState {
 
 	public void create() {
 		keyinput = false;
+		deviceSelectionSlot = -1;
 		assignmentDevice = "";
 		assignmentResult = "";
 		loadSkin(SkinType.KEY_CONFIG);
@@ -156,6 +158,7 @@ public class KeyConfiguration extends MainState {
 				if (!known) {
 					logController(controller);
 					controller.setAssignmentTrace(keyinput);
+					controller.setDeviceSelectionCapture(deviceSelectionSlot >= 0);
 				}
 			}
 			controllers = detectedControllers;
@@ -167,17 +170,31 @@ public class KeyConfiguration extends MainState {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		if (input.isControlKeyPressed(ControlKeys.LEFT)) {
+		if (deviceSelectionSlot < 0 && input.isControlKeyPressed(ControlKeys.LEFT)) {
 			setMode(Math.floorMod(modeSlot - 1, modeCount()));
 		}
-		if (input.isControlKeyPressed(ControlKeys.RIGHT)) {
+		if (deviceSelectionSlot < 0 && input.isControlKeyPressed(ControlKeys.RIGHT)) {
 			setMode((modeSlot + 1) % modeCount());
 		}
 
 		String[] keys = KEYS[mode];
 		int[] keysa = KEYSA[mode];
 
-		if (keyinput) {
+		if (deviceSelectionSlot >= 0) {
+			if (input.isControlKeyPressed(ControlKeys.ESCAPE) || keyboard.getLastPressedKey() == Keys.ESCAPE) {
+				finishDeviceSelection();
+				assignmentResult = "Device selection cancelled";
+			} else {
+				for (var controller : controllers) {
+					if (controller.takeDeviceSelectionButton() < 0) continue;
+					selectController(controllerConfigs, deviceSelectionSlot, controller.getName());
+					assignmentDevice = displayDeviceName(controller.getName());
+					assignmentResult = "Selected as Controller " + (deviceSelectionSlot + 1);
+					finishDeviceSelection();
+					break;
+				}
+			}
+		} else if (keyinput) {
 			if (input.isControlKeyPressed(ControlKeys.ESCAPE) || keyboard.getLastPressedKey() == Keys.ESCAPE) {
 				keyinput = false;
 				assignmentResult = "Assignment cancelled";
@@ -278,7 +295,11 @@ public class KeyConfiguration extends MainState {
 				midiconfig.setKeyAssign(MODE_HINT[mode], true);
 			}
 
-			if (input.isControlKeyPressed(ControlKeys.ENTER)) {
+			if (input.isControlKeyPressed(ControlKeys.NUM4)) {
+				startDeviceSelection(0);
+			} else if (input.isControlKeyPressed(ControlKeys.NUM5) && controllerConfigs.length > 1) {
+				startDeviceSelection(1);
+			} else if (input.isControlKeyPressed(ControlKeys.ENTER)) {
 				setKeyAssignMode(cursorpos);
 			}
 
@@ -307,13 +328,13 @@ public class KeyConfiguration extends MainState {
 			titlefont.draw(sprite, "Music Select Input (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
 			titlefont.draw(sprite, SELECTKEY[config.getMusicselectinput()], 780 * scaleX, 590 * scaleY);
 
-			titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   ", 750 * scaleX, 500 * scaleY);
+			titlefont.draw(sprite, "Controller 1 ([2] Next / [4] Select by press)", 750 * scaleX, 500 * scaleY);
 			titlefont.draw(sprite, pc.getController()[0].getName(), 780 * scaleX, 470 * scaleY);
 			if (pc.getController().length > 1) {
 				titlefont.setColor(Color.YELLOW);
 				titlefont.draw(sprite, "Controller2", 480 * scaleX, 620 * scaleY);
 				titlefont.setColor(Color.ORANGE);
-				titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   ", 750 * scaleX, 300 * scaleY);
+				titlefont.draw(sprite, "Controller 2 ([3] Next / [5] Select by press)", 750 * scaleX, 300 * scaleY);
 				titlefont.draw(sprite, pc.getController()[1].getName(), 780 * scaleX, 270 * scaleY);
 			}
 
@@ -368,6 +389,7 @@ public class KeyConfiguration extends MainState {
 	}
 	
 	public void setKeyAssignMode(final int index) {
+		if (deviceSelectionSlot >= 0) return;
 		input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
 		input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
 		for (BMControllerInputProcessor bmc : controllers) {
@@ -379,6 +401,24 @@ public class KeyConfiguration extends MainState {
 		assignmentResult = "";
 		cursorpos = index;
 		keyinput = true;
+	}
+
+	private void startDeviceSelection(int slot) {
+		deviceSelectionSlot = slot;
+		keyboard.setLastPressedKey(-1);
+		assignmentDevice = "Controller " + (slot + 1);
+		assignmentResult = "Press a controller button (Esc to cancel)";
+		for (var controller : controllers) controller.setDeviceSelectionCapture(true);
+	}
+
+	private void finishDeviceSelection() {
+		if (deviceSelectionSlot < 0) return;
+		deviceSelectionSlot = -1;
+		for (var controller : controllers) controller.setDeviceSelectionCapture(false);
+	}
+
+	static void selectController(ControllerConfig[] configs, int slot, String device) {
+		configs[slot].setName(device);
 	}
 	/**
 	 * キーインデックスに対応するキーの文字列を返す
@@ -672,6 +712,7 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private void releaseView() {
+		finishDeviceSelection();
 		stopAssignmentTrace();
 		if (titlefont != null) {
 			titlefont.dispose();

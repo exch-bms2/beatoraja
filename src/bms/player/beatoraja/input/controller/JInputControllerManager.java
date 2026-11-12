@@ -487,6 +487,9 @@ public final class JInputControllerManager implements ControllerManager, Control
             }
         }
 
+        @Override public synchronized void readSelectionButtons(boolean[] state) {
+            if (connected) System.arraycopy(rawButtons, 0, state, 0, Math.min(state.length, rawButtons.length));
+        }
         @Override public boolean getButton(int index) { return connected && index >= 0 && index < buttons.length && buttons[index]; }
         @Override public float getAxis(int index) { return connected && index >= 0 && index < axes.length ? axes[index] : 0; }
         @Override public int getMinButtonIndex() { return 0; }

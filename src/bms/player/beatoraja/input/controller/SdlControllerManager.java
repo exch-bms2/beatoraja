@@ -232,6 +232,11 @@ public final class SdlControllerManager implements ControllerManager, Controller
                 if (button ? (down ? listener.buttonDown(this, index) : listener.buttonUp(this, index)) : listener.axisMoved(this, index, value)) break;
             }
         }
+        @Override public synchronized void readSelectionButtons(boolean[] state) {
+            if (!connected) return;
+            for (int i = 0; i < Math.min(state.length, buttons.length); i++)
+                state[i] = i < 28 && SdlGamepadCompatibility.dpadAlias(i) < 0 && buttons[i];
+        }
         public synchronized boolean getButton(int index) { return connected && index >= 0 && index < 32 && buttons[index]; }
         public synchronized float getAxis(int index) { return connected && index >= 0 && index < axes.length ? axes[index] : 0; }
         public String getName() { return name; }

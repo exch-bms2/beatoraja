@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 public final class ControllerInputDiagnosticsTest {
     public static void main(String[] args) throws Exception {
         checkAssignmentTrace();
+        checkDeviceSelectionCapture();
         try (var d = new ControllerInputDiagnostics("test", 2, 1, false)) {
             d.seed(1, 1);
             d.beginPoll(0);
@@ -100,6 +101,32 @@ public final class ControllerInputDiagnosticsTest {
         } finally {
             logger.removeHandler(handler);
         }
+    }
+
+    private static void checkDeviceSelectionCapture() {
+        var capture = new DeviceButtonCapture();
+        boolean[] physical = new boolean[256];
+        var source = (QueuedController) java.lang.reflect.Proxy.newProxyInstance(
+                QueuedController.class.getClassLoader(), new Class<?>[]{QueuedController.class},
+                (proxy, method, args) -> {
+                    if (!method.getName().equals("readSelectionButtons"))
+                        throw new AssertionError("Selection must only observe physical buttons: " + method);
+                    System.arraycopy(physical, 0, args[0], 0, physical.length);
+                    return null;
+                });
+        physical[28] = true;
+        capture.sample(source);
+        capture.sample(source);
+        check(capture.take() == -1, "Already-held buttons are ignored");
+        physical[28] = false;
+        capture.sample(source);
+        check(capture.take() == -1, "Release is not a selection");
+        physical[28] = true;
+        capture.sample(source);
+        check(capture.take() == 28 && capture.take() == -1, "Fresh physical press is consumed once");
+        capture.reset();
+        capture.sample(source);
+        check(capture.take() == -1, "Cancel/rearm does not retain a stale press");
     }
 
     private static void check(boolean condition, String message) {
