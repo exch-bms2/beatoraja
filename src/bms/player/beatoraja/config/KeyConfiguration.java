@@ -149,6 +149,10 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void render() {
+		if (!keyinput && deviceSelectionSlot < 0 && input.isControlKeyPressed(ControlKeys.ESCAPE)) {
+			returnToMusicSelect();
+			return;
+		}
 		var detectedControllers = input.getBMInputProcessor();
 		if (controllers != detectedControllers) {
 			for (var controller : detectedControllers) {
@@ -303,13 +307,6 @@ public class KeyConfiguration extends MainState {
 				setKeyAssignMode(cursorpos);
 			}
 
-			if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
-				boolean saved = main.saveConfigAndReportPlayerResult();
-				if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller assignment: player config "
-						+ (saved ? "saved" : "save failed"));
-				main.changeState(MainStateType.MUSICSELECT);
-			}
-
 			if (input.isControlKeyPressed(ControlKeys.DEL)) {
 				if(!deletepressed) deleteKeyAssign(keysa[cursorpos]);
 				deletepressed = true;
@@ -386,6 +383,13 @@ public class KeyConfiguration extends MainState {
 			}
 			sprite.end();
 		}
+	}
+
+	void returnToMusicSelect() {
+		boolean saved = main.saveConfigAndReportPlayerResult();
+		if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller assignment: player config "
+				+ (saved ? "saved" : "save failed"));
+		main.changeState(MainStateType.MUSICSELECT);
 	}
 	
 	public void setKeyAssignMode(final int index) {
