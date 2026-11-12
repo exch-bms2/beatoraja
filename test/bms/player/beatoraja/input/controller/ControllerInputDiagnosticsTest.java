@@ -1,8 +1,14 @@
 package bms.player.beatoraja.input.controller;
 
+import java.util.ArrayList;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
 /** Deterministic observations, not a hardware latency benchmark. */
 public final class ControllerInputDiagnosticsTest {
     public static void main(String[] args) throws Exception {
+        checkAssignmentTrace();
         try (var d = new ControllerInputDiagnostics("test", 2, 1, false)) {
             d.seed(1, 1);
             d.beginPoll(0);
@@ -64,6 +70,36 @@ public final class ControllerInputDiagnosticsTest {
             check(d.snapshot().equals(s), "Closed collector is inert and close is idempotent");
         }
         System.out.println("ControllerInputDiagnosticsTest passed (synthetic timings)");
+    }
+
+    private static void checkAssignmentTrace() {
+        var messages = new ArrayList<String>();
+        var logger = Logger.getGlobal();
+        var handler = new Handler() {
+            @Override public void publish(LogRecord record) { messages.add(record.getMessage()); }
+            @Override public void flush() {}
+            @Override public void close() {}
+        };
+        logger.addHandler(handler);
+        try (var d = new ControllerInputDiagnostics("assignment-test", 32, 8, false)) {
+            d.trace("pov", 0, 1, "received");
+            d.traceLogicalPress(28);
+            check(messages.isEmpty(), "Detailed tracing is opt-in per assignment");
+            d.setAssignmentTrace(true);
+            d.trace("button", 7, 1, "received");
+            d.trace("axis", 1, -0.5f, "received");
+            d.trace("pov", 0, 1, "received");
+            d.traceLogicalPress(28);
+            d.setAssignmentTrace(false);
+            d.traceLogicalPress(29);
+            check(messages.size() == 4 && messages.get(0).contains("device=assignment-test")
+                    && messages.get(0).contains("kind=button, index=7")
+                    && messages.get(1).contains("kind=axis, index=1")
+                    && messages.get(2).contains("kind=pov, index=0")
+                    && messages.get(3).contains("stage=logical, index=28"), "Trace exposes source and logical IDs");
+        } finally {
+            logger.removeHandler(handler);
+        }
     }
 
     private static void check(boolean condition, String message) {

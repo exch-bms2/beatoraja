@@ -76,12 +76,16 @@ public class KeyConfiguration extends MainState {
 	private int cursorpos = 0;
 	private int scrollpos = 0;
 	private boolean keyinput = false;
+	private final boolean assignmentDiagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics");
+	private String assignmentDevice = "";
+	private String assignmentResult = "";
 
 	private int mode = 0;
 	private int modeSlot;
 	private static final int[] RIGHT_MODES = {0, 1, 5};
 
 	private ShapeRenderer shape;
+	private FreeTypeFontGenerator fontGenerator;
 
 	private BMSPlayerInputProcessor input;
 	private KeyBoardInputProcesseor keyboard;
@@ -102,6 +106,9 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void create() {
+		keyinput = false;
+		assignmentDevice = "";
+		assignmentResult = "";
 		loadSkin(SkinType.KEY_CONFIG);
 		if(getSkin() == null) {
 			SkinHeader header = new SkinHeader();
@@ -111,14 +118,17 @@ public class KeyConfiguration extends MainState {
 		}
 
 		try {
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+			fontGenerator = new FreeTypeFontGenerator(
 					Gdx.files.internal(main.getConfig().getSystemfontpath()));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = (int) (20 * getSkin().getScaleY());
-			titlefont = generator.generateFont(parameter);
-			generator.dispose();
+			parameter.incremental = true;
+			titlefont = fontGenerator.generateFont(parameter);
 		} catch (GdxRuntimeException e) {
+			if (fontGenerator != null) fontGenerator.dispose();
+			fontGenerator = null;
 			Logger.getGlobal().severe("Font読み込み失敗");
+			titlefont = new BitmapFont();
 		}
 
 		shape = new ShapeRenderer();
@@ -126,8 +136,11 @@ public class KeyConfiguration extends MainState {
 		input = main.getInputProcessor();
 		keyboard = input.getKeyBoardInputProcesseor();
 		controllers = input.getBMInputProcessor();
+		if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller enumeration: backend="
+				+ main.getConfig().getControllerBackend() + ", count=" + controllers.length);
 		for (BMControllerInputProcessor controller: controllers) {
 			controller.setEnable(true);
+			logController(controller);
 		}
 		midiinput = input.getMidiInputProcessor();
 		setMode(0);
@@ -136,7 +149,15 @@ public class KeyConfiguration extends MainState {
 	public void render() {
 		var detectedControllers = input.getBMInputProcessor();
 		if (controllers != detectedControllers) {
-			for (var controller : detectedControllers) controller.setEnable(true);
+			for (var controller : detectedControllers) {
+				controller.setEnable(true);
+				boolean known = false;
+				for (var previous : controllers) if (previous == controller) { known = true; break; }
+				if (!known) {
+					logController(controller);
+					controller.setAssignmentTrace(keyinput);
+				}
+			}
 			controllers = detectedControllers;
 		}
 		final SpriteBatch sprite = main.getSpriteBatch();
@@ -157,6 +178,10 @@ public class KeyConfiguration extends MainState {
 		int[] keysa = KEYSA[mode];
 
 		if (keyinput) {
+			if (input.isControlKeyPressed(ControlKeys.ESCAPE) || keyboard.getLastPressedKey() == Keys.ESCAPE) {
+				keyinput = false;
+				assignmentResult = "Assignment cancelled";
+			}
 			if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
 				setKeyboardKeyAssign(keysa[cursorpos]);
 				// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
@@ -168,12 +193,18 @@ public class KeyConfiguration extends MainState {
 				keyinput = false;
 			}
 			for (BMControllerInputProcessor bmc : controllers) {
-				if (keyinput && bmc.getLastPressedButton() != -1) {
-					setControllerKeyAssign(keysa[cursorpos], bmc);
-					// System.out.println(bmc.getLastPressedButton());
-					keyinput = false;
-					break;
-				}
+				if (!keyinput) break;
+				int button = bmc.takeLastPressedButton();
+				if (button < 0) continue;
+				int slot = assignController(controllerConfigs, keysa[cursorpos], bmc.getName(), button, this::resetKeyAssign);
+				assignmentDevice = displayDeviceName(bmc.getName());
+				assignmentResult = "#" + button + " " + BMControllerInputProcessor.BMKeys.toString(button)
+						+ (slot >= 0 ? " - Assigned to Controller " + (slot + 1) : " - Device not selected");
+				if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller assignment: device="
+						+ bmc.getAssignmentTraceId() + ", name=" + assignmentDevice + ", logical=" + button
+						+ ", target=" + keys[cursorpos] + ", slot=" + (slot + 1)
+						+ ", result=" + (slot >= 0 ? "assigned (pending config save)" : "not selected; still waiting"));
+				if (slot >= 0) keyinput = false;
 			}
 			if (keyinput && midiinput.hasLastPressedKey()) {
 				setMidiKeyAssign(keysa[cursorpos]);
@@ -182,6 +213,7 @@ public class KeyConfiguration extends MainState {
 			if (input.isControlKeyPressed(ControlKeys.DEL)) {
 				deletepressed = true;
 			}
+			if (!keyinput) stopAssignmentTrace();
 		} else {
 			if (input.isControlKeyPressed(ControlKeys.UP)) {
 				cursorpos = (cursorpos + keys.length - 1) % keys.length;
@@ -202,7 +234,7 @@ public class KeyConfiguration extends MainState {
 						}
 					}
 					pc.getController()[0]
-							.setName(controllers[(index + 1) % controllers.length].getName());
+							.setName(controllers[index == controllers.length ? 0 : (index + 1) % controllers.length].getName());
 					pc.setController(pc.getController());
 				}
 			}
@@ -216,7 +248,7 @@ public class KeyConfiguration extends MainState {
 						}
 					}
 					pc.getController()[1]
-							.setName(controllers[(index + 1) % controllers.length].getName());
+							.setName(controllers[index == controllers.length ? 0 : (index + 1) % controllers.length].getName());
 					pc.setController(pc.getController());
 				}
 			}
@@ -251,7 +283,9 @@ public class KeyConfiguration extends MainState {
 			}
 
 			if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
-				main.saveConfig();
+				boolean saved = main.saveConfigAndReportPlayerResult();
+				if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller assignment: player config "
+						+ (saved ? "saved" : "save failed"));
 				main.changeState(MainStateType.MUSICSELECT);
 			}
 
@@ -286,6 +320,13 @@ public class KeyConfiguration extends MainState {
 			titlefont.draw(sprite, "[7] Restore to Default (Keyboard)", 750 * scaleX, 150 * scaleY);
 			titlefont.draw(sprite, "[8] Restore to Default (Controller)", 750 * scaleX, 120 * scaleY);
 			titlefont.draw(sprite, "[9] Restore to Default (MIDI)", 750 * scaleX, 90 * scaleY);			
+			if (!assignmentResult.isEmpty()) {
+				titlefont.setColor(keyinput ? Color.YELLOW : Color.WHITE);
+				titlefont.draw(sprite, assignmentDevice, 750 * scaleX, 420 * scaleY, 0, assignmentDevice.length(),
+						500 * scaleX, com.badlogic.gdx.utils.Align.left, false, "...");
+				titlefont.draw(sprite, assignmentResult, 750 * scaleX, 390 * scaleY);
+				if (keyinput) titlefont.draw(sprite, "Waiting for input (Esc to cancel)", 750 * scaleX, 360 * scaleY);
+			}
 		}
 
 		sprite.end();
@@ -331,8 +372,11 @@ public class KeyConfiguration extends MainState {
 		input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
 		for (BMControllerInputProcessor bmc : controllers) {
 			bmc.setLastPressedButton(-1);
+			bmc.setAssignmentTrace(true);
 		}
 		midiinput.clearLastPressedKey();
+		assignmentDevice = "";
+		assignmentResult = "";
 		cursorpos = index;
 		keyinput = true;
 	}
@@ -469,26 +513,32 @@ public class KeyConfiguration extends MainState {
 		return 0;
 	}
 
-	private void setControllerKeyAssign(int index, BMControllerInputProcessor bmc) {
-		int cindex = -1;
-		for (int i = 0; i < controllerConfigs.length; i++) {
-			if (bmc.getName().equals(controllerConfigs[i].getName())) {
-				cindex = i;
-				break;
-			}
+	static int assignController(ControllerConfig[] configs, int index, String device, int button,
+			java.util.function.IntConsumer reset) {
+		for (int slot = 0; slot < configs.length; slot++) {
+			var config = configs[slot];
+			if (!device.equals(config.getName())) continue;
+			reset.accept(index);
+			if (index >= 0) config.getKeyAssign()[index] = button;
+			else if (index == -1) config.setStart(button);
+			else if (index == -2) config.setSelect(button);
+			return slot;
 		}
-		if (cindex < 0) {
-			return;
-		}
+		return -1;
+	}
 
-		resetKeyAssign(index);
-		if (index >= 0) {
-			controllerConfigs[cindex].getKeyAssign()[index] = bmc.getLastPressedButton();
-		} else if (index == -1) {
-			controllerConfigs[cindex].setStart(bmc.getLastPressedButton());
-		} else if (index == -2) {
-			controllerConfigs[cindex].setSelect(bmc.getLastPressedButton());
-		}
+	private static String displayDeviceName(String name) {
+		return name.replace('\r', ' ').replace('\n', ' ');
+	}
+
+	private void logController(BMControllerInputProcessor controller) {
+		if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller enumerated: backend="
+				+ main.getConfig().getControllerBackend() + ", device=" + controller.getAssignmentTraceId()
+				+ ", name=" + displayDeviceName(controller.getName()));
+	}
+
+	private void stopAssignmentTrace() {
+		if (controllers != null) for (var controller : controllers) controller.setAssignmentTrace(false);
 	}
 
 	private MidiConfig.Input getMidiKeyAssign(int index) {
@@ -611,11 +661,25 @@ public class KeyConfiguration extends MainState {
 	}
 
 	@Override
+	public void shutdown() {
+		releaseView();
+	}
+
+	@Override
 	public void dispose() {
+		releaseView();
 		super.dispose();
+	}
+
+	private void releaseView() {
+		stopAssignmentTrace();
 		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
+		}
+		if (fontGenerator != null) {
+			fontGenerator.dispose();
+			fontGenerator = null;
 		}
 		if (shape != null) {
 			shape.dispose();

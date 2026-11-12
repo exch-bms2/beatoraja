@@ -243,13 +243,24 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             resetEvents(capture);
         }
         synchronized void event(SdlRawSource.Event event) {
+            if (diagnostics != null) {
+                switch (event.type) {
+                    case SdlRawSource.Event.BUTTON -> diagnostics.trace("button", event.index, event.value, "received");
+                    case SdlRawSource.Event.AXIS -> diagnostics.trace("axis", event.index, event.value, "received");
+                    case SdlRawSource.Event.HAT -> diagnostics.trace("pov", event.index, event.value, "received");
+                    default -> { }
+                }
+            }
             // Native events may predate focus regain even after the Java FIFO was reset.
             if (discardPendingEvents) return;
             if (event.type == SdlRawSource.Event.BUTTON && event.index >= 0 && event.index < physical.length) {
                 physical[event.index] = event.value != 0;
                 long targets = mapping.buttonTargets[event.index];
                 int alias = mapped ? SdlGamepadCompatibility.dpadAlias(event.index) : -1;
-                if (alias >= 0) targets |= 1L << alias;
+                if (alias >= 0) {
+                    targets |= 1L << alias;
+                    if (diagnostics != null) diagnostics.trace("pov", alias - 28, event.value, "mapped-dpad");
+                }
                 while (targets != 0) {
                     int i = Long.numberOfTrailingZeros(targets); targets &= targets - 1;
                     boolean value = digital(i);

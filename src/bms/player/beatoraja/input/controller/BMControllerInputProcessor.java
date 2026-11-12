@@ -365,12 +365,30 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		}
 	}
 
-	public int getLastPressedButton() {
+	public synchronized int getLastPressedButton() {
 		return lastPressedButton;
 	}
 
-	public void setLastPressedButton(int lastPressedButton) {
+	public synchronized void setLastPressedButton(int lastPressedButton) {
 		this.lastPressedButton = lastPressedButton;
+		var diagnostics = getDiagnostics();
+		if (lastPressedButton >= 0 && diagnostics != null) diagnostics.traceLogicalPress(lastPressedButton);
+	}
+
+	public synchronized int takeLastPressedButton() {
+		int button = lastPressedButton;
+		lastPressedButton = -1;
+		return button;
+	}
+
+	public void setAssignmentTrace(boolean enabled) {
+		var diagnostics = getDiagnostics();
+		if (diagnostics != null) diagnostics.setAssignmentTrace(enabled);
+	}
+
+	public String getAssignmentTraceId() {
+		var diagnostics = getDiagnostics();
+		return diagnostics != null ? diagnostics.traceId() : controller.getUniqueId();
 	}
 
 	public synchronized void setEnable(boolean enabled) {

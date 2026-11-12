@@ -305,6 +305,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.audio.PortAudioStreamLifecycleTest",
     "bms.player.beatoraja.video.FFmpegProcessorLifecycleTest",
     "bms.player.beatoraja.launcher.ConfigurationRangeTest",
+    "bms.player.beatoraja.config.KeyConfigurationControllerAssignmentTest",
     "bms.player.beatoraja.launcher.SkinConfigurationViewTest",
     "bms.player.beatoraja.skin.SkinResourceLifecycleTest",
     "bms.player.beatoraja.skin.BitmapFontCacheTest",

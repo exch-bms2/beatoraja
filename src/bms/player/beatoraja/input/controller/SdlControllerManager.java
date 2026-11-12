@@ -179,7 +179,11 @@ public final class SdlControllerManager implements ControllerManager, Controller
                 if (continuous) events.offer(i, value);
                 if (buttons[i] != value) {
                     buttons[i] = value;
-                    if (diagnostics != null) diagnostics.event(i, value ? 1 : 0);
+                    if (diagnostics != null) {
+                        if (mapping != null && i >= 28)
+                            diagnostics.trace("pov", i - 28, value ? 1 : 0, "mapped-dpad");
+                        diagnostics.event(i, value ? 1 : 0);
+                    }
                     notifyChange(i, true, value, 0);
                 }
             }

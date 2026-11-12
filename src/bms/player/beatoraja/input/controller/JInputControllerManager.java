@@ -371,11 +371,13 @@ public final class JInputControllerManager implements ControllerManager, Control
                 Integer button = buttonIndices.get(component);
                 if (button != null) {
                     buttonEvents[button] = true;
+                    if (diagnostics != null) diagnostics.trace("button", button, event.getValue(), "received");
                     if (diagnostics != null) diagnostics.event(button, event.getValue() != 0 ? 1 : 0);
                     rawButtons[button] = event.getValue() != 0;
                     if (continuous && button < 32) events.offer(button, buttonPressed(button));
                 } else if (component == pov) {
                     povEvent = true;
+                    if (diagnostics != null) diagnostics.trace("pov", 0, event.getValue(), "received");
                     if (diagnostics != null) diagnostics.event(rawButtonCount + axes.length, event.getValue());
                     povValue = event.getValue();
                     if (continuous) for (int i = 28; i < 32; i++) events.offer(i, buttonPressed(i));
@@ -384,6 +386,7 @@ public final class JInputControllerManager implements ControllerManager, Control
                     Integer axis = axisIndices.get(component);
                     if (axis != null) {
                         axisEvents[axis] = true;
+                        if (diagnostics != null) diagnostics.trace("axis", axis, event.getValue(), "received");
                         if (diagnostics != null) diagnostics.event(rawButtonCount + axis, event.getValue());
                         axisValues[axis] = normalizedAxis(axis);
                     }
