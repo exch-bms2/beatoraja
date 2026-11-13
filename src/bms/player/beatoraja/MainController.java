@@ -672,45 +672,32 @@ public final class MainController {
 	public void dispose() {
 		finishSkinAdjustment(false);
 		disposeInput();
-		// 終了処理では次の postRunnable が実行されないことがある。フォント解放の前に描画中の頂点を確定させる。
-		// Shutdown may never execute another postRunnable. End pending vertices before releasing fonts.
-		if (sprite != null && sprite.isDrawing()) sprite.end();
-		Throwable shutdownFailure = null;
-		try {
-			if (obs != null) obs.close();
-			if (reviewSync != null) reviewSync.close();
-			saveConfig();
-			rivals.close();
+		if (obs != null) obs.close();
+		if (reviewSync != null) reviewSync.close();
+		saveConfig();
+		rivals.close();
 
-			Optional.ofNullable(bmsplayer).ifPresent(MainState::dispose);
-			Optional.ofNullable(selector).ifPresent(MainState::dispose);
-			Optional.ofNullable(streamController).ifPresent(StreamController::dispose);
-			Optional.ofNullable(decide).ifPresent(MainState::dispose);
-			Optional.ofNullable(result).ifPresent(MainState::dispose);
-			Optional.ofNullable(gresult).ifPresent(MainState::dispose);
-			Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
-			Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
-			resource.dispose();
-			SkinLoader.getResource().dispose();
-			ShaderManager.dispose();
-			Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
-			Optional.ofNullable(systemfont).ifPresent(BitmapFont::dispose);
-			systemfont = null;
-			Optional.ofNullable(messageRenderer).ifPresent(MessageRenderer::dispose);
-			messageRenderer = null;
+		Optional.ofNullable(bmsplayer).ifPresent(MainState::dispose);
+		Optional.ofNullable(selector).ifPresent(MainState::dispose);
+		Optional.ofNullable(streamController).ifPresent(StreamController::dispose);
+		Optional.ofNullable(decide).ifPresent(MainState::dispose);
+		Optional.ofNullable(result).ifPresent(MainState::dispose);
+		Optional.ofNullable(gresult).ifPresent(MainState::dispose);
+		Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
+		Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
+		resource.dispose();
+		SkinLoader.getResource().dispose();
+		ShaderManager.dispose();
+		Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
+		Optional.ofNullable(systemfont).ifPresent(BitmapFont::dispose);
+		systemfont = null;
+		Optional.ofNullable(messageRenderer).ifPresent(MessageRenderer::dispose);
+		messageRenderer = null;
+		// 終了処理では次の postRunnable が実行されないことがある。共有アトラスと共通代替フォントを手放し、ネイティブのフォント資源をここで解放する。
+		// Shutdown may never run another postRunnable: release the shared atlases and global fallbacks, then native font resources.
+		FontRenderRetirement.drainAtShutdown(sprite);
 
-			Logger.getGlobal().info("全リソース破棄完了");
-		} catch (RuntimeException | Error failure) {
-			shutdownFailure = failure;
-			throw failure;
-		} finally {
-			try {
-				FontRenderRetirement.drainAtShutdown(sprite);
-			} catch (RuntimeException | Error cleanupFailure) {
-				if (shutdownFailure == null) throw cleanupFailure;
-				shutdownFailure.addSuppressed(cleanupFailure);
-			}
-		}
+		Logger.getGlobal().info("全リソース破棄完了");
 	}
 
 	void disposeInput() {

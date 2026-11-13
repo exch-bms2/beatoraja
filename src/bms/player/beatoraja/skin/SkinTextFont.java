@@ -112,7 +112,7 @@ public final class SkinTextFont extends SkinText {
             return;
         }
         invalidateLayout();
-        if(preparedFonts != null && session != null && session.isLive()) {
+        if(preparedFonts != null && session != null && session.isLive() && !session.needsRenewal()) {
         	return;
         }
         replaceSession(preparedFonts != null ? preparedFonts : text, preparedFonts != null);
@@ -474,8 +474,9 @@ public final class SkinTextFont extends SkinText {
         return gl.width;
     }
 
+    /** 無効になった、または代替ページが上限に達したセッションを描画の前に作り直す。 / Rebuilds a dead session, or one whose fallback pages hit the cap, before drawing. */
     private void recoverSession() {
-        if (!isDisposed() && session != null && !session.isLive()) {
+        if (!isDisposed() && session != null && (!session.isLive() || session.needsRenewal())) {
             String text = preparedFonts != null ? preparedFonts : getText();
             replaceSession(text != null ? text : "", preparedFonts != null);
         }

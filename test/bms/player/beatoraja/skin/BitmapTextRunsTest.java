@@ -218,6 +218,47 @@ public final class BitmapTextRunsTest {
         }
     }
 
+    /**
+     * ビットマップ文字の共有代替組は、別々の文字を長く準備し続けても使用中のページが上限を超えない。
+     * The shared fallback pair of bitmap text stays within the active page cap while many distinct characters are prepared.
+     */
+    private static void bitmapActiveAtlasBounded(String fontPath) {
+        com.badlogic.gdx.utils.GdxNativesLoader.load();
+        var previousFiles = com.badlogic.gdx.Gdx.files;
+        com.badlogic.gdx.Gdx.files = new com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files();
+        int originalPageSize = com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.getMaxTextureSize();
+        com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.setMaxTextureSize(64);
+        SkinFontSource shared = new SkinFontSource(new com.badlogic.gdx.files.FileHandle(fontPath), new String[0]);
+        SkinTextBitmap a = text(data(), shared);
+        int maxPages = 0, prepared = 0;
+        try {
+            for (int cp = 0x4E00; cp < 0x4E00 + 600; cp++) {
+                a.prepareFont(new String(Character.toChars(cp)));
+                maxPages = Math.max(maxPages, a.getFallbackAtlasPageCount());
+                prepared++;
+                FontRenderRetirement.drainAfterBatch(null);
+            }
+            check(maxPages <= SystemFallbackAtlas.MAX_ACTIVE_PAGES,
+                    prepared + " distinct characters keep the bitmap fallback pair within the cap (" + maxPages + " pages)");
+        } finally {
+            a.dispose(); shared.dispose();
+            FontRenderRetirement.drainAfterBatch(null);
+            com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.setMaxTextureSize(originalPageSize);
+            com.badlogic.gdx.Gdx.files = previousFiles;
+        }
+        check(SystemFallbackAtlas.fullCount() == 0, "full pairs are released once their borrowers leave");
+    }
+
+    /**
+     * 代替の形式の分け方: .fnt の文字は .fnt の代替を先に、TTF/OTF の代替を後に使い、TTF の文字は .fnt の代替を使わない。
+     * Fallback formats: .fnt text uses .fnt fallbacks before TTF/OTF ones, and TTF text never uses .fnt fallbacks.
+     */
+    private static void fallbackFormatSplit() {
+        check(SkinTextBitmap.isBitmapFontPath("skin/font/fallback.fnt") && SkinTextBitmap.isBitmapFontPath("A.FNT")
+                && !SkinTextBitmap.isBitmapFontPath("skin/font/fallback.ttf") && !SkinTextBitmap.isBitmapFontPath("x.otf")
+                && !SkinTextBitmap.isBitmapFontPath(null), "fallback entries are split by format (.fnt vs TTF/OTF)");
+    }
+
     public static void main(String[] args) {
         if (args.length > 0 && args[0].equals("--review-width")) {
             nominalWidthRegression(); return;
@@ -235,6 +276,8 @@ public final class BitmapTextRunsTest {
         sharedGlobalSource();
         idleGlobalAtlases();
         imageRunsFollowHeight();
+        bitmapActiveAtlasBounded(args.length == 0 ? "font/VL-Gothic-Regular.ttf" : args[0]);
+        fallbackFormatSplit();
         System.out.println("CHECKS=" + checks + " FAILURES=0 SCOPE=CPU_LAYOUT_NO_GL");
     }
 

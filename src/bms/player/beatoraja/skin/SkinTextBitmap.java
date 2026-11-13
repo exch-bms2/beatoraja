@@ -205,6 +205,7 @@ public final class SkinTextBitmap extends SkinText {
 	void updateFallbackFontParameters() { fallback.systemFallback.refresh(); }
 	FreeTypeFontGenerator.FreeTypeFontParameter getFallbackParameter() { return fallback.systemFallback.style(); }
 	GlyphProvider getGlyphProvider() { return fallback.systemFallback.provider(); }
+	int getFallbackAtlasPageCount() { return fallback.systemFallback.atlasPageCount(); }
 	PuaSlotAllocator getPuaSlotAllocator() { return fallback.missingGlyphs.slots(); }
 	long getGlyphRevision() { return fallback.missingGlyphs.revision(); }
 	boolean isFallbackPage(int page) { return fallback.isFallbackPage(page); }
@@ -859,6 +860,17 @@ public final class SkinTextBitmap extends SkinText {
 				reset();
 			}
 		}
+	}
+
+	/**
+	 * スキンの代替指定が .fnt(ビットマップ)か。代替は形式ごとに分けて使う: .fnt の文字は元フォント → .fnt の代替(宣言順)→
+	 * TTF/OTF の代替(宣言順)→ 共通代替 → 欠落記号。TTF の文字は TTF/OTF の代替だけを使い、.fnt の代替は使わない。
+	 * Whether a skin fallback entry is a .fnt (bitmap) font. Fallbacks are used per format: .fnt text tries the original font,
+	 * then the .fnt fallbacks (declaration order), then the TTF/OTF fallbacks (declaration order), then the global fallbacks,
+	 * then the missing marker. TTF text uses only TTF/OTF fallbacks and never .fnt ones.
+	 */
+	public static boolean isBitmapFontPath(String path) {
+		return path != null && path.toLowerCase(java.util.Locale.ROOT).endsWith(".fnt");
 	}
 
 	/**
