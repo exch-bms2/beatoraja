@@ -149,7 +149,7 @@ public class ExecutableBar extends SelectableBar {
                                 return false;
                             }
                         }
-                        return true;
+                        continue;
                     }
                     Object valueArr[] = ((String)this.getFilter().get(key)).split("&&");
                     for (Object value : valueArr) {
