@@ -28,6 +28,7 @@ public final class Lwjgl3LauncherProcessSmokeTest {
             bms.player.beatoraja.launcher.ObsConfigurationViewTest.verify();
             bms.player.beatoraja.launcher.PlayConfigurationViewTest.verify();
             bms.player.beatoraja.launcher.VideoConfigurationViewTest.verify();
+            bms.player.beatoraja.launcher.TableEditorWindowTest.verify();
             stage.setScene(new Scene(bms.player.beatoraja.launcher.SkinConfigurationViewTest.verifyNotesOffsetCenter(), 740, 560));
             stage.show();
             new Thread(() -> {

@@ -244,7 +244,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private IRConfigurationView irController;
 	@FXML
-	private TableEditorView tableController;
+	private Button openTableEditorButton;
+	private Stage tableEditorStage;
 	@FXML
     private StreamEditorView streamController;
 
@@ -385,12 +386,6 @@ public class PlayConfigurationView implements Initializable {
 		}
 		updatePlayer();
 
-		try {
-			tableController.init(getSongDatabaseAccessor());
-			tableController.update(Paths.get(config.getTablepath() + "/" + "default.json"));
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@FXML
@@ -408,10 +403,20 @@ public class PlayConfigurationView implements Initializable {
 	public void changePlayer() {
 		commitPlayer();
 		updatePlayer();
+	}
+
+	@FXML
+	private void openTableEditor() {
+		if (tableEditorStage != null && tableEditorStage.isShowing()) {
+			tableEditorStage.toFront();
+			return;
+		}
 		try {
-			tableController.init(getSongDatabaseAccessor());
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			tableEditorStage = TableEditorView.open(Paths.get(config.getTablepath(), LocalTableFile.FILE_NAME),
+					new TableChartLookup(config.getSongpath()));
+		} catch (IOException | RuntimeException e) {
+			Logger.getGlobal().log(Level.WARNING, "Cannot open local table editor", e);
+			new Alert(Alert.AlertType.ERROR, "Could not open the local table.", ButtonType.OK).showAndWait();
 		}
 	}
 
@@ -530,7 +535,6 @@ public class PlayConfigurationView implements Initializable {
 
 		Config.write(config);
 
-		tableController.commit();
 	}
 
 	@FXML
@@ -692,8 +696,7 @@ public class PlayConfigurationView implements Initializable {
 		try {
 			bms.player.beatoraja.DesktopLauncher.startGame(songUpdated
 					? new String[]{"-s", "--song-updated"} : new String[]{"-s"});
-			Platform.exit();
-			System.exit(0);
+			closeLauncher();
 		} catch (IOException e) {
 			Logger.getGlobal().log(java.util.logging.Level.SEVERE, "Game process launch failed", e);
 			new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK).showAndWait();
@@ -824,6 +827,14 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void exit() {
 		commit();
+		closeLauncher();
+	}
+
+	private void closeLauncher() {
+		if (tableEditorStage != null && tableEditorStage.isShowing()) {
+			openTableEditorButton.getScene().getWindow().hide();
+			return;
+		}
 		Platform.exit();
 		System.exit(0);
 	}

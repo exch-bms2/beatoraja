@@ -243,13 +243,24 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             resetEvents(capture);
         }
         synchronized void event(SdlRawSource.Event event) {
+            if (diagnostics != null) {
+                switch (event.type) {
+                    case SdlRawSource.Event.BUTTON -> diagnostics.trace("button", event.index, event.value, "received");
+                    case SdlRawSource.Event.AXIS -> diagnostics.trace("axis", event.index, event.value, "received");
+                    case SdlRawSource.Event.HAT -> diagnostics.trace("pov", event.index, event.value, "received");
+                    default -> { }
+                }
+            }
             // Native events may predate focus regain even after the Java FIFO was reset.
             if (discardPendingEvents) return;
             if (event.type == SdlRawSource.Event.BUTTON && event.index >= 0 && event.index < physical.length) {
                 physical[event.index] = event.value != 0;
                 long targets = mapping.buttonTargets[event.index];
                 int alias = mapped ? SdlGamepadCompatibility.dpadAlias(event.index) : -1;
-                if (alias >= 0) targets |= 1L << alias;
+                if (alias >= 0) {
+                    targets |= 1L << alias;
+                    if (diagnostics != null) diagnostics.trace("pov", alias - 28, event.value, "mapped-dpad");
+                }
                 while (targets != 0) {
                     int i = Long.numberOfTrailingZeros(targets); targets &= targets - 1;
                     boolean value = digital(i);
@@ -344,6 +355,11 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
                 if (button ? (down ? listener.buttonDown(this, index) : listener.buttonUp(this, index))
                         : listener.axisMoved(this, index, value)) break;
             }
+        }
+        @Override public synchronized void readSelectionButtons(boolean[] state) {
+            if (!connected) return;
+            for (int i = 0; i < Math.min(state.length, physical.length); i++)
+                state[i] = physical[i] && (!mapped || SdlGamepadCompatibility.dpadAlias(i) < 0);
         }
         public synchronized boolean getButton(int i) { return connected && i >= 0 && i < 32 && buttons[i]; }
         public synchronized float getAxis(int i) { return connected && i >= 0 && i < 8 ? axes[i] : 0; }

@@ -179,7 +179,11 @@ public final class SdlControllerManager implements ControllerManager, Controller
                 if (continuous) events.offer(i, value);
                 if (buttons[i] != value) {
                     buttons[i] = value;
-                    if (diagnostics != null) diagnostics.event(i, value ? 1 : 0);
+                    if (diagnostics != null) {
+                        if (mapping != null && i >= 28)
+                            diagnostics.trace("pov", i - 28, value ? 1 : 0, "mapped-dpad");
+                        diagnostics.event(i, value ? 1 : 0);
+                    }
                     notifyChange(i, true, value, 0);
                 }
             }
@@ -227,6 +231,11 @@ public final class SdlControllerManager implements ControllerManager, Controller
                 ControllerListener listener = list.get(i);
                 if (button ? (down ? listener.buttonDown(this, index) : listener.buttonUp(this, index)) : listener.axisMoved(this, index, value)) break;
             }
+        }
+        @Override public synchronized void readSelectionButtons(boolean[] state) {
+            if (!connected) return;
+            for (int i = 0; i < Math.min(state.length, buttons.length); i++)
+                state[i] = i < 28 && SdlGamepadCompatibility.dpadAlias(i) < 0 && buttons[i];
         }
         public synchronized boolean getButton(int index) { return connected && index >= 0 && index < 32 && buttons[index]; }
         public synchronized float getAxis(int index) { return connected && index >= 0 && index < axes.length ? axes[index] : 0; }

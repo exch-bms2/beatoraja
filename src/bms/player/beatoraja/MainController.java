@@ -707,9 +707,14 @@ public final class MainController {
 	}
 
 	public void saveConfig(){
+		saveConfigAndReportPlayerResult();
+	}
+
+	public boolean saveConfigAndReportPlayerResult() {
 		Config.write(config);
-		PlayerConfig.write(config.getPlayerpath(), player);
-		Logger.getGlobal().info("設定情報を保存");
+		boolean saved = PlayerConfig.writeWithResult(config.getPlayerpath(), player);
+		if (saved) Logger.getGlobal().info("設定情報を保存");
+		return saved;
 	}
 
 	public void exit() {

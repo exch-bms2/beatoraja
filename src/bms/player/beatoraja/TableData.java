@@ -132,20 +132,23 @@ public class TableData implements Validatable {
 			}
 			
 			if(os != null) {
-				Json json = new Json();
-				json.setElementType(TableData.class, "folder", ArrayList.class);
-				json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
-				json.setElementType(TableData.class, "course", ArrayList.class);
-				json.setElementType(CourseData.class, "trophy", ArrayList.class);
-				json.setOutputType(OutputType.json);
-				OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(os), "UTF-8");
-				fw.write(json.prettyPrint(td));
-				fw.flush();
-				fw.close();				
+				try (var fw = new OutputStreamWriter(new BufferedOutputStream(os), java.nio.charset.StandardCharsets.UTF_8)) {
+					fw.write(toJson(td));
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	static String toJson(TableData td) {
+		Json json = new Json();
+		json.setElementType(TableData.class, "folder", ArrayList.class);
+		json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
+		json.setElementType(TableData.class, "course", ArrayList.class);
+		json.setElementType(CourseData.class, "trophy", ArrayList.class);
+		json.setOutputType(OutputType.json);
+		return json.prettyPrint(td);
 	}
 
 	public static class TableFolder implements Validatable {

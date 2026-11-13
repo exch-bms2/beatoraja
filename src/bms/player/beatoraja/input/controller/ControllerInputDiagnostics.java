@@ -66,7 +66,33 @@ final class ControllerInputDiagnostics implements AutoCloseable {
         if (channel < buttons) buttonEdges++;
         else if (channel < buttons + axes) axisEvents++;
         else povEdges++;
+        if (traceRemaining > 0) trace(channel < buttons ? "button" : channel < buttons + axes ? "axis" : "pov",
+                channel < buttons ? channel : channel < buttons + axes ? channel - buttons : channel - buttons - axes,
+                value, "backend-channel");
     }
+
+    private int traceRemaining;
+    private int logicalTraceRemaining;
+
+    synchronized void setAssignmentTrace(boolean enabled) {
+        traceRemaining = enabled ? 256 : 0;
+        logicalTraceRemaining = enabled ? 32 : 0;
+    }
+
+    synchronized void traceLogicalPress(int button) {
+        if (closed || logicalTraceRemaining == 0) return;
+        logicalTraceRemaining--;
+        Logger.getGlobal().info("KeyConfig controller input: device=" + id + ", stage=logical, index=" + button);
+    }
+
+    synchronized void trace(String kind, int index, float value, String stage) {
+        if (closed || traceRemaining == 0) return;
+        Logger.getGlobal().info("KeyConfig controller input: device=" + id + ", stage=" + stage
+                + ", kind=" + kind + ", index=" + index + ", value=" + value);
+        if (--traceRemaining == 0) Logger.getGlobal().info("KeyConfig controller input trace limit reached: device=" + id);
+    }
+
+    String traceId() { return id; }
 
     synchronized void endPoll(long now, boolean success) {
         if (closed) return;

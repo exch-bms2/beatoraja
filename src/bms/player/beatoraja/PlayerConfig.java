@@ -1333,13 +1333,17 @@ public final class PlayerConfig {
 	}
 
 	public static void write(String playerpath, PlayerConfig player) {
+		writeWithResult(playerpath, player);
+	}
+
+	public static boolean writeWithResult(String playerpath, PlayerConfig player) {
 		if (player == null) {
-			return;
+			return false;
 		}
 		Path directory = getPlayerDirectory(playerpath, player.getId());
 		if (directory == null) {
 			Logger.getGlobal().warning("Refusing to write player config with an invalid path or id");
-			return;
+			return false;
 		}
 		player.validate();
 		try (Writer writer = Files.newBufferedWriter(directory.resolve(configpath), StandardCharsets.UTF_8)) {
@@ -1350,7 +1354,9 @@ public final class PlayerConfig {
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 
 	public int getMineMode() {

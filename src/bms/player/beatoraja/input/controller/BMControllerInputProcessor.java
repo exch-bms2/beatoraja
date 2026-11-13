@@ -67,6 +67,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	 * 最後に押したボタン
 	 */
 	private int lastPressedButton = -1;
+	private DeviceButtonCapture deviceButtonCapture;
+	private boolean deviceSelectionActive;
+	private long selectionReleasedAt = Long.MIN_VALUE;
     private long inputGeneration = -1;
     private int gatedSamples, acceptedEdges, forwardedEdges;
 	/**
@@ -138,6 +141,14 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		if (!enabled || !windowActive) return;
         var queued = rawController();
         boolean rebaseline = queued != null && connectionGeneration != queued.connectionGeneration();
+        if (deviceButtonCapture != null && queued != null) {
+            if (windowBaseline || rebaseline) deviceButtonCapture.reset();
+            deviceButtonCapture.sample(queued);
+            if (deviceButtonCapture.anyDown()) selectionReleasedAt = Long.MIN_VALUE;
+            else if (selectionReleasedAt == Long.MIN_VALUE) selectionReleasedAt = microtime;
+            else if (!deviceSelectionActive && microtime >= selectionReleasedAt + duration * 1000L)
+                deviceButtonCapture = null;
+        }
         if (rebaseline) {
             connectionGeneration = queued.connectionGeneration();
             inputGeneration = queued.inputGeneration();
@@ -365,12 +376,44 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 		}
 	}
 
-	public int getLastPressedButton() {
+	public synchronized int getLastPressedButton() {
 		return lastPressedButton;
 	}
 
-	public void setLastPressedButton(int lastPressedButton) {
+	public synchronized void setLastPressedButton(int lastPressedButton) {
+		if (lastPressedButton >= 0 && deviceButtonCapture != null) return;
 		this.lastPressedButton = lastPressedButton;
+		var diagnostics = getDiagnostics();
+		if (lastPressedButton >= 0 && diagnostics != null) diagnostics.traceLogicalPress(lastPressedButton);
+	}
+
+	public synchronized int takeLastPressedButton() {
+		int button = lastPressedButton;
+		lastPressedButton = -1;
+		return button;
+	}
+
+	public synchronized void setDeviceSelectionCapture(boolean enabled) {
+		deviceSelectionActive = enabled && rawController() != null;
+		if (deviceSelectionActive) {
+			deviceButtonCapture = new DeviceButtonCapture();
+			selectionReleasedAt = Long.MIN_VALUE;
+		}
+		lastPressedButton = -1;
+	}
+
+	public synchronized int takeDeviceSelectionButton() {
+		return !deviceSelectionActive ? -1 : deviceButtonCapture.take();
+	}
+
+	public void setAssignmentTrace(boolean enabled) {
+		var diagnostics = getDiagnostics();
+		if (diagnostics != null) diagnostics.setAssignmentTrace(enabled);
+	}
+
+	public String getAssignmentTraceId() {
+		var diagnostics = getDiagnostics();
+		return diagnostics != null ? diagnostics.traceId() : controller.getUniqueId();
 	}
 
 	public synchronized void setEnable(boolean enabled) {
