@@ -52,6 +52,7 @@ public final class FontLifetimeTest {
         coverageLookup();
         fallbackBaselineAlignment();
         variationSelectorsAreZeroWidth();
+        activeAtlasRenewal(args.length == 0 ? "font/VL-Gothic-Regular.ttf" : args[0]);
         faceIndexLeases();
         sharedGlobalChoice();
         generatorLeases();
@@ -390,6 +391,48 @@ public final class FontLifetimeTest {
         for (int i = 0; i < run.xAdvances.size; i++) width += run.xAdvances.get(i);
         if (run.glyphs.size != text.length()) throw new AssertionError("one glyph slot per UTF-16 unit: " + text);
         return width;
+    }
+
+    /**
+     * 長く使う画面フォントの代替ページは上限に達したら新しい組へ移り、ページ数は実行時間に比例して増えない。
+     * Long-lived screen-font fallback pages move to a fresh atlas at the cap, so the page count does not grow with run time.
+     */
+    private static void activeAtlasRenewal(String path) {
+        int originalPageSize = FreeTypeFontGenerator.getMaxTextureSize();
+        FreeTypeFontGenerator.setMaxTextureSize(64);
+        ControlledGenerator generator = new ControlledGenerator(path);
+        FreeTypeFontParameter p = new FreeTypeFontParameter(); p.size = 47;
+        com.badlogic.gdx.graphics.Pixmap pixels = new com.badlogic.gdx.graphics.Pixmap(38, 48,
+                com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        FontSession session = FontSession.open(generator, p);
+        int renewals = 0, maxPages = 0, maxOwners = 0;
+        try {
+            for (int i = 0; i < 2000; i++) {
+                FallbackAtlas atlas = session.atlas();
+                atlas.packer.pack(atlas.nextName(), pixels); // 一字形 = 一ページ / one glyph per page
+                atlas.notePacked();
+                maxPages = Math.max(maxPages, atlas.pageCount());
+                if (atlas.isFull()) {
+                    FallbackAtlas probe = FallbackAtlas.acquire(p);
+                    check(probe != atlas, "a full atlas is not handed to new borrowers");
+                    probe.release();
+                    session.renewFallbackAtlas();
+                    renewals++;
+                    drain();
+                    check(session.atlas() != atlas && session.atlas().isLive() && !session.atlas().isFull(),
+                            "renewal " + renewals + " moves to a fresh atlas");
+                }
+                maxOwners = Math.max(maxOwners, FallbackAtlas.liveOwnerCount());
+            }
+            check(renewals > 100 && maxPages <= FallbackAtlas.MAX_ACTIVE_PAGES,
+                    "2000 distinct glyphs never hold more than the active page cap (" + maxPages + " pages, " + renewals + " renewals)");
+            check(maxOwners <= 2, "old atlases are released after each renewal (owners " + maxOwners + ")");
+        } finally {
+            session.dispose(); pixels.dispose(); drain(); generator.dispose();
+            FreeTypeFontGenerator.setMaxTextureSize(originalPageSize);
+        }
+        check(FallbackAtlas.liveOwnerCount() == 0 && FontRenderRetirement.pendingCount() == 0,
+                "renewed atlases are all released at the end");
     }
 
     private static void coverageLookup() {

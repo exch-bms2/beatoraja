@@ -175,6 +175,7 @@ public final class SystemFontFactory {
         private final FontSession session;
         private final Set<Integer> failedCodePoints = new HashSet<>();
         private final IntMap<BitmapFont.Glyph> supplementaryGlyphs = new IntMap<>();
+        private boolean renewalScheduled;
         /**
          * Dummy glyph for low surrogate halves, clipped pairs and invisible controls with zero advance.
          * <p>
@@ -279,6 +280,7 @@ public final class SystemFontFactory {
                 }
                 if (resolved != null) {
                     setGlyph(ch, resolved);
+                    scheduleRenewal();
                     return resolved;
                 } else {
                     failedCodePoints.add((int) ch);
@@ -287,6 +289,34 @@ public final class SystemFontFactory {
                 failedCodePoints.add((int) ch);
             }
             return null;
+        }
+
+        /**
+         * 代替ページが上限に達したら、フレームの区切りで新しい代替ページへ移る。レイアウトの途中ではページを捨てない。
+         * When the fallback pages reach their cap, move to fresh ones at the frame boundary; pages are never dropped mid-layout.
+         */
+        private void scheduleRenewal() {
+            if (renewalScheduled || session == null || !session.isLive() || !session.atlas().isFull() || Gdx.app == null) {
+                return;
+            }
+            renewalScheduled = true;
+            Gdx.app.postRunnable(this::renewFallbackPages);
+        }
+
+        /** 代替ページ上のグリフを捨てて新しい代替ページへ移る。捨てた文字は次に必要になったとき作り直す。 / Drops glyphs on fallback pages and moves to fresh ones; dropped characters are rebuilt when next needed. */
+        synchronized void renewFallbackPages() {
+            renewalScheduled = false;
+            if (session == null) {
+                return;
+            }
+            session.renewFallbackAtlas();
+            com.badlogic.gdx.utils.IntArray dropped = new com.badlogic.gdx.utils.IntArray();
+            for (IntMap.Entry<BitmapFont.Glyph> entry : supplementaryGlyphs.entries()) {
+                if (session.isFallbackPage(entry.value.page)) dropped.add(entry.key);
+            }
+            for (int i = 0; i < dropped.size; i++) {
+                supplementaryGlyphs.remove(dropped.get(i));
+            }
         }
 
         /**
@@ -320,6 +350,7 @@ public final class SystemFontFactory {
                 }
                 if (resolved != null) {
                     supplementaryGlyphs.put(codePoint, resolved);
+                    scheduleRenewal();
                     return resolved;
                 } else {
                     failedCodePoints.add(codePoint);

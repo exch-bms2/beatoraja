@@ -37,7 +37,13 @@ final class FontSession {
     private final FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private BitmapFont font;
     private final PixmapPacker packer;
-    private final FallbackAtlas fallbackAtlas;
+    private FallbackAtlas fallbackAtlas;
+    /**
+     * 空の代替ページから始めたか。自分の準備だけで上限に達したなら、移っても同じだけ詰め直すので移らない。
+     * Whether this session started on empty fallback pages; if its own preparation alone reached the cap, moving would
+     * only refill the same amount, so it stays.
+     */
+    private boolean startedOnEmptyAtlas;
     private final int fallbackPageOffset;
     private final Array<TextureRegion> fallbackRegions = new Array<>();
     private static long nextGeneration;
@@ -50,6 +56,7 @@ final class FontSession {
         this.font = font;
         this.packer = packer;
         this.fallbackAtlas = fallbackAtlas;
+        this.startedOnEmptyAtlas = fallbackAtlas.isEmpty();
         fallbackPageOffset = font.getRegions().size;
     }
 
@@ -130,6 +137,43 @@ final class FontSession {
     long generation() { return generation; }
     FallbackAtlas atlas() { return fallbackAtlas; }
     boolean isLive() { return !disposed && fallbackAtlas.isLive(); }
+
+    /**
+     * 代替ページが上限に達した。描画の区切りで新しい代替ページへ移る(セッションを作り直すか {@link #renewFallbackAtlas()})。
+     * The fallback pages reached their cap; move to fresh fallback pages at a drawing boundary (a new session or
+     * {@link #renewFallbackAtlas()}).
+     */
+    boolean needsRenewal() { return !disposed && fallbackAtlas.isFull() && !startedOnEmptyAtlas; }
+
+    /**
+     * 上限に達した代替ページを手放し、新しい代替ページを借りる。主ページとそのグリフは残し、代替ページ上のグリフだけを捨てる。
+     * レイアウトの途中では呼ばない(フレームの区切りで呼ぶ)。長く使う画面フォント用で、捨てたグリフは必要になったとき作り直す。
+     * Lets go of full fallback pages and borrows fresh ones. Primary pages and their glyphs stay; only glyphs on fallback
+     * pages are dropped. Never call this in the middle of a layout (call it between frames). For long-lived screen fonts,
+     * whose dropped glyphs are rebuilt on demand.
+     */
+    void renewFallbackAtlas() {
+        if (disposed || !fallbackAtlas.isFull() || !fallbackAtlas.isLive()) {
+            return;
+        }
+        FallbackAtlas previous = fallbackAtlas;
+        fallbackAtlas = FallbackAtlas.acquire(parameter, previous);
+        startedOnEmptyAtlas = fallbackAtlas.isEmpty();
+        fallbackRegions.clear();
+        if (font != null) {
+            font.getRegions().truncate(fallbackPageOffset);
+            for (BitmapFont.Glyph[] glyphPage : font.getData().glyphs) {
+                if (glyphPage == null) continue;
+                for (int i = 0; i < glyphPage.length; i++) {
+                    if (glyphPage[i] != null && glyphPage[i].page >= fallbackPageOffset) glyphPage[i] = null;
+                }
+            }
+        }
+        previous.release();
+    }
+
+    /** 代替ページ上のグリフか。 / Whether the glyph lives on a fallback page. */
+    boolean isFallbackPage(int page) { return page >= fallbackPageOffset; }
     static void invalidateSharedAtlases() { FallbackAtlas.invalidateAll(); SystemFallbackAtlas.invalidateAll(); }
 
     private void updateFallbackRegions() {
@@ -169,6 +213,7 @@ final class FontSession {
             if (page < 0) {
                 return null;
             }
+            fallbackAtlas.notePacked();
             updateFallbackRegions();
 
             BitmapFont.Glyph glyph = copyGlyph(raster.glyph, mappedCodePoint);
@@ -204,6 +249,7 @@ final class FontSession {
             if (page < 0) {
                 return null;
             }
+            fallbackAtlas.notePacked();
             updateFallbackRegions();
 
             BitmapFont.Glyph glyph = new BitmapFont.Glyph();
@@ -284,6 +330,14 @@ final class FontSession {
      * Shared owned fallback pages only. Font data, glyph tables and PUA slots remain borrower-local. Render thread only.
      */
     static final class FallbackAtlas {
+        /**
+         * 使用中の一組が持てるページ数の上限(調整用、1 ページ = 最大テクスチャ寸法の RGBA)。達したら新しい借り手には渡さず、
+         * 借り手は描画の区切りで新しい組へ移る。進行中の準備は終わるまで同じ組に詰めるので、超過はその分だけ。
+         * Page cap for one atlas in use (tuning knob; one page is an RGBA texture of the max texture size). Once reached the
+         * atlas is not handed to new borrowers and borrowers move to a fresh one at a drawing boundary. A preparation in
+         * progress keeps packing into it until it ends, so any excess is bounded by that preparation.
+         */
+        static final int MAX_ACTIVE_PAGES = 4;
         private static final Map<Key, FallbackAtlas> LIVE = new HashMap<>();
         // 他の借り手がまだ借りている置換済みの所有者も含む(コンテキスト無効化と寿命管理のため)。
         // Includes displaced owners still leased by other borrowers, for context invalidation and lifetime accounting.
@@ -295,6 +349,7 @@ final class FontSession {
         private int borrowers;
         private int sequence;
         private boolean retired;
+        private boolean full;
 
         private FallbackAtlas(Key key, FreeTypeFontParameter p) {
             this.key = key;
@@ -338,8 +393,20 @@ final class FontSession {
         }
 
         boolean isLive() { return !retired; }
+        boolean isFull() { return full; }
+        boolean isEmpty() { return sequence == 0; }
+
+        /** 詰めた後に呼ぶ。ページ数が上限に達したら新しい借り手に渡さない。 / Call after packing; at the page cap the atlas stops taking new borrowers. */
+        void notePacked() {
+            if (!full && packer.getPages().size >= MAX_ACTIVE_PAGES) {
+                full = true;
+                LIVE.remove(key, this);
+            }
+        }
+
         int borrowerCount() { return borrowers; }
         static int liveOwnerCount() { return OWNERS.size(); }
+        int pageCount() { return packer.getPages().size; }
 
         /** 描画・コンテキストの所有者がコンテキスト喪失時、置き換えセッションを準備する前に呼ぶ。 / The render/context owner calls this on context loss, before preparing replacement sessions. */
         static void invalidateAll() {

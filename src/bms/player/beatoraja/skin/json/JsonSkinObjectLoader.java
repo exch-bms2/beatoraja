@@ -640,7 +640,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 						SkinTextBitmap.SkinTextBitmapSource.FallbackFont[] fallbackFonts =
 								new SkinTextBitmap.SkinTextBitmapSource.FallbackFont[font.fallback.length];
 						for (int i = 0; i < font.fallback.length; i++) {
-							if (font.fallback[i] == null || font.fallback[i].path == null) {
+							// .fnt の代替だけをビットマップのページとして読む。TTF/OTF は下で別に渡す(順序は SkinTextBitmap.isBitmapFontPath)。
+							// Only .fnt fallbacks are read as bitmap pages; TTF/OTF ones are passed below (order: SkinTextBitmap.isBitmapFontPath).
+							if (font.fallback[i] == null || !SkinTextBitmap.isBitmapFontPath(font.fallback[i].path)) {
 								continue;
 							}
 							fallbackFonts[i] = new SkinTextBitmap.SkinTextBitmapSource.FallbackFont(
@@ -658,7 +660,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 								continue;
 							}
 							String fb = skinPath.getParent().resolve(font.fallback[i].path).toString();
-							if (!fb.toLowerCase().endsWith(".fnt")) {
+							if (!SkinTextBitmap.isBitmapFontPath(fb)) {
 								vectorFallbacks.add(fb);
 							}
 						}
@@ -671,7 +673,9 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 				} else {
 					String[] fallbackPaths = new String[font.fallback.length];
 					for (int i = 0; i < font.fallback.length; i++) {
-						if (font.fallback[i] == null || font.fallback[i].path == null) {
+						// TTF の文字は .fnt の代替を使わない(FreeType では開けない)。 / TTF text never uses .fnt fallbacks (FreeType cannot open them).
+						if (font.fallback[i] == null || font.fallback[i].path == null
+								|| SkinTextBitmap.isBitmapFontPath(font.fallback[i].path)) {
 							continue;
 						}
 						fallbackPaths[i] = skinPath.getParent().resolve(font.fallback[i].path).toString();

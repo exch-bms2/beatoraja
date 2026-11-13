@@ -2,12 +2,14 @@ package bms.player.beatoraja.skin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -128,6 +130,11 @@ final class SystemFallbackGlyphs {
         return source;
     }
 
+    /** 今借りている組のページ数(試験・診断用)。 / Page count of the pair currently borrowed (tests and diagnostics). */
+    int atlasPageCount() {
+        return atlas != null ? atlas.pageCount() : 0;
+    }
+
     GlyphProvider provider() {
         return provider;
     }
@@ -190,6 +197,12 @@ final class SystemFallbackGlyphs {
      */
     void refresh() {
         ensureLive();
+        // 上限に達した組からは準備の区切りで新しい組へ移り、作ったグリフを捨てて作り直す。
+        // At the preparation boundary, leave a full pair for a fresh one and rebuild the glyphs.
+        if (atlas != null && atlas.isFull()) {
+            releaseAtlasIfPresent();
+            owner.invalidate();
+        }
         if (usesGlobalSource) {
             SkinFontSource global = globalSource();
             if (global != source) {
@@ -340,10 +353,19 @@ final class SystemFallbackGlyphs {
         static final int MAX_IDLE = 8;
         /** 使われていない組のページ合計の上限(調整用)。 / Cap on the total pages of unused pairs (tuning knob). */
         static final int MAX_IDLE_PAGES = 16;
+        /**
+         * 使用中の組のページ数の上限({@link FallbackAtlas#MAX_ACTIVE_PAGES} と同じ)。達したら新しい借り手には渡さず、
+         * 借り手は次の準備({@link SystemFallbackGlyphs#refresh()})で新しい組へ移る。
+         * Page cap for a pair in use (same as {@link FallbackAtlas#MAX_ACTIVE_PAGES}). Once reached the pair is not handed to
+         * new borrowers, and borrowers move to a fresh pair at their next preparation ({@link SystemFallbackGlyphs#refresh()}).
+         */
+        static final int MAX_ACTIVE_PAGES = FallbackAtlas.MAX_ACTIVE_PAGES;
 
         private static final Map<Key, SystemFallbackAtlas> LIVE = new HashMap<>();
         /** 使われていない組。古い順。 / Unused pairs, oldest first. */
         private static final LinkedHashMap<Key, SystemFallbackAtlas> IDLE = new LinkedHashMap<>();
+        /** 上限に達し、残る借り手が移るのを待つ組(文脈喪失のときも捨てるため)。 / Full pairs waiting for their borrowers to move (also dropped on context loss). */
+        private static final Set<SystemFallbackAtlas> FULL = new HashSet<>();
 
         /** 供給元は同一性で比べる。 / The source is compared by identity. */
         private record Key(FallbackAtlas.Key style, SkinFontSource source) {
@@ -395,6 +417,7 @@ final class SystemFallbackGlyphs {
         private boolean dirty;
         private long version;
         private boolean retired;
+        private boolean full;
         private boolean disposed;
 
         private SystemFallbackAtlas(Key key, FreeTypeFontParameter style, boolean keepWhenIdle) {
@@ -421,7 +444,7 @@ final class SystemFallbackGlyphs {
             if (--borrowers > 0) {
                 return;
             }
-            if (keepWhenIdle && !retired) {
+            if (keepWhenIdle && !retired && !full) {
                 IDLE.put(key, this);
                 trimIdle();
             } else {
@@ -431,9 +454,12 @@ final class SystemFallbackGlyphs {
         }
 
         boolean isLive() { return !retired; }
+        boolean isFull() { return full; }
+        int pageCount() { return packer.getPages().size; }
         int borrowerCount() { return borrowers; }
         int glyphCount() { return glyphs.size + fallbackOnlyGlyphs.size; }
         static int idleCount() { return IDLE.size(); }
+        static int fullCount() { return FULL.size(); }
 
         /**
          * 文字のグリフを返す。まだなければ provider でラスタ化して詰める。どの代替フォントにもなければ null。
@@ -466,6 +492,11 @@ final class SystemFallbackGlyphs {
             }
             cached = new Cached(res.glyph, used[0], info[0], info[1]);
             targetMap.put(codePoint, cached);
+            if (!full && packer.getPages().size >= MAX_ACTIVE_PAGES) {
+                full = true;
+                LIVE.remove(key, this);
+                FULL.add(this);
+            }
             if (!fallbackOnly && (key.source == null || used[0] != key.source.getPrimaryGenerator())) {
                 fallbackOnlyGlyphs.put(codePoint, cached);
             }
@@ -491,7 +522,9 @@ final class SystemFallbackGlyphs {
 
         /** GL 文脈を失ったときに呼ぶ。すべての組を捨てる。 / Called when the GL context is lost; drops every pair. */
         static void invalidateAll() {
-            for (SystemFallbackAtlas atlas : new ArrayList<>(LIVE.values())) {
+            List<SystemFallbackAtlas> all = new ArrayList<>(LIVE.values());
+            all.addAll(FULL);
+            for (SystemFallbackAtlas atlas : all) {
                 atlas.retired = true;
                 if (atlas.borrowers == 0) {
                     atlas.dispose();
@@ -523,6 +556,7 @@ final class SystemFallbackGlyphs {
             }
             disposed = true;
             retired = true;
+            FULL.remove(this);
             glyphs.clear();
             fallbackOnlyGlyphs.clear();
             FontRenderRetirement.retire(() -> FontResourceDisposer.disposeAll(FontSession.resources(null, packer), null));
