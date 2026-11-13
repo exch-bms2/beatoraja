@@ -512,7 +512,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				if (values[2] < fontlist.size && fontlist.get(values[2]) != null) {
 					bartext = new SkinTextImage(fontlist.get(values[2]));
 				} else {
-					bartext = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
+					bartext = new SkinTextFont("font/VL-Gothic-Regular.ttf", 0, 48, 2);
 				}
 				bartext.setAlign(values[4]);
 				skinbar.setText(values[1], bartext);

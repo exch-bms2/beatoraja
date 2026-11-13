@@ -6,6 +6,8 @@ defaultsound/guide-gr.wav
 defaultsound/guide-pg.wav
 defaultsound/landmine.wav
 folder/default.json
+font/NotoEmoji-VariableFont_wght.ttf
+font/OFL-NotoEmoji.txt
 font/VL-Gothic-Regular.ttf
 manual/extension.txt
 manual/hotkeys.txt

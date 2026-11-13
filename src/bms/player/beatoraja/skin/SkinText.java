@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import java.text.Normalizer;
+
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.StringProperty;
@@ -7,6 +9,8 @@ import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.skin.property.StringWriter;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
@@ -18,10 +22,49 @@ import com.badlogic.gdx.utils.Align;
  */
 public abstract class SkinText extends SkinObject {
 
+    /** 準備済みのグリフをスキンの文字規則で配置する。 / Lays out prepared glyphs using the skin's text rules. */
+    protected final void setLayout(GlyphLayout target, BitmapFont font, String text, float width) {
+        if (isWrapping()) {
+            target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], true);
+        } else {
+            switch (getOverflow()) {
+                case OVERFLOW_OVERFLOW, OVERFLOW_SHRINK ->
+                        target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], false);
+                case OVERFLOW_TRUNCATE ->
+                        target.setText(font, text, 0, text.length(), Color.WHITE, width, ALIGN[getAlign()], false, "");
+            }
+        }
+    }
+
+    public static final String PROPERTY_NORMALIZE_NFC = "beatoraja.text.normalize.nfc";
+    public static final String PROPERTY_NORMALIZE_NFC_FALLBACK = "beatoraja.font.normalize.nfc";
+
+    static boolean isNormalizeNfc() {
+        String prop = System.getProperty(PROPERTY_NORMALIZE_NFC);
+        if (prop == null) {
+            prop = System.getProperty(PROPERTY_NORMALIZE_NFC_FALLBACK, "true");
+        }
+        return Boolean.parseBoolean(prop);
+    }
+
+    static String normalizeDisplay(String text) {
+        if (text == null) {
+            return null;
+        }
+        return isNormalizeNfc() ? Normalizer.normalize(text, Normalizer.Form.NFC) : text;
+    }
+
     /**
      * A text layout prepared for callers that render many independent values with one SkinText.
      */
     public interface CachedTextLayout {
+        default float getWidth() {
+            return 0;
+        }
+    }
+
+    SkinFontSource getFontSource() {
+        return null;
     }
 
     private int align = ALIGN_LEFT;
@@ -38,6 +81,7 @@ public abstract class SkinText extends SkinObject {
     private final StringProperty ref;
     
     private String text = "";
+    private String rawText = "";
     private String constantText;
 
     private boolean editable;
@@ -75,8 +119,11 @@ public abstract class SkinText extends SkinObject {
     }
 
     public void setText(String text) {
+        this.rawText = text;
         if(text == null) {
             text = " ";
+        } else {
+            text = normalizeDisplay(text);
         }
     	this.text = text;
         prepareText(text);
@@ -110,7 +157,7 @@ public abstract class SkinText extends SkinObject {
     }
 
     public void draw(SkinObjectRenderer sprite) {
-        if(!currentText.equals(text)) {
+        if(!currentText.equals(rawText) && !currentText.equals(text)) {
             setText(currentText);
         }
         draw(sprite, 0,0);

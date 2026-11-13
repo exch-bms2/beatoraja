@@ -3,25 +3,21 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.BitmapFontData;
+import bms.player.beatoraja.skin.MissingGlyphMapper.PuaSlotAllocator;
+import bms.player.beatoraja.skin.FontRenderRetirement.FontResourceDisposer;
 
 /**
  * フォントデータをソースとして持つスキン用テキスト
@@ -34,6 +30,8 @@ public final class SkinTextFont extends SkinText {
      * ビットマップフォント
      */
     private BitmapFont font;
+    /** 生成したフォントと専用packerの所有者。本クラスは参照だけ持つ */
+    private FontSession session;
 
     private GlyphLayout layout;
     private final GlyphLayout shadowLayout = new GlyphLayout();
@@ -41,15 +39,10 @@ public final class SkinTextFont extends SkinText {
     private final SkinFontSource source;
     private final boolean ownsSource;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
+    private GlyphProvider glyphProvider;
     private String preparedFonts;
-    private final Set<Integer> activeBmpFallbackGlyphs = new HashSet<>();
-    private final Set<Integer> requiredSupplementaryGlyphs = new HashSet<>();
-    private final Map<Integer, Character> activeSupplementaryGlyphMap = new HashMap<>();
-    private final Map<Character, Integer> activePrivateUseGlyphMap = new HashMap<>();
-    private int packedGlyphSequence;
-    private static final int PRIVATE_USE_AREA_START = 0xe000;
-    private static final int PRIVATE_USE_AREA_END = 0xf8ff;
-    private static final int[] MISSING_GLYPH_CANDIDATES = { 0x25a1, 0x25a2, 0x2610, 0x25a0, '?' }; // □, ▢, ☐, ■, ?
+    /** 元フォントにない文字の代替処理(PUA 割り当て・成功/失敗の記録・グリフ版)。 / Missing-glyph handling (PUA mapping, bookkeeping, glyph revision). */
+    private final MissingGlyphMapper missingGlyphs = new MissingGlyphMapper(new FallbackGlyphHost(), "Glyph generation failed");
     
     private final Color shadowcolor = new Color();
     private String layoutText;
@@ -61,7 +54,7 @@ public final class SkinTextFont extends SkinText {
     private boolean layoutWrapping;
     private boolean layoutHasShadow;
     private boolean layoutValid;
-    private long glyphRevision;
+    private long layoutGlyphRevision = -1;
 
     public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
         this(fontpath, new String[0], cycle, size, shadow, StringPropertyFactory.getStringProperty(-1));
@@ -86,7 +79,8 @@ public final class SkinTextFont extends SkinText {
         this.ownsSource = ownsSource;
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.characters = "";
-        parameter.incremental = true;
+        glyphProvider = new GlyphProvider(source, parameter, missingGlyphs::reportFailure, true);
+        parameter.incremental = false;
 //      this.setCycle(cycle);
         parameter.size = size;
         setShadowOffset(new Vector2(shadow, shadow));
@@ -105,56 +99,75 @@ public final class SkinTextFont extends SkinText {
     }
 
     public void prepareFont(String text) {
-        if(font != null) {
-            font.dispose();                	
-            font = null;
-        }
-        
-        FreeTypeFontGenerator generator = source.getGenerator();
-        if (generator == null) {
+        if (isDisposed() || text == null) {
             return;
         }
-        try {
-            parameter.characters = toBmpCharacters(text);
-            font = generator.generateFont(parameter);
-            disableIncrementalGlyphGeneration();
-            layout = new GlyphLayout(font, "");
-            preparedFonts = text;
-            clearSupplementaryGlyphs();
-            invalidateLayout();
-        } catch (GdxRuntimeException e) {
-    		Logger.getGlobal().warning("Font準備失敗 : " + text + " - " + e.getMessage());
-    	}
+        text = normalizeDisplay(text);
+        replaceSession(text, true);
     }    
 
 	@Override
 	protected void prepareText(String text) {
+        if (isDisposed()) {
+            return;
+        }
         invalidateLayout();
-        if(preparedFonts != null) {
+        if(preparedFonts != null && session != null && session.isLive() && !session.needsRenewal()) {
         	return;
         }
-        if(font != null) {
-            font.dispose();
-            font = null;
-        }
-        
+        replaceSession(preparedFonts != null ? preparedFonts : text, preparedFonts != null);
+    }
+
+    /**
+     * 公開前に完全に作り終える。準備に失敗したら直前の READY セッションと対応表を保つ。
+     * Build completely before publishing. Preparation failures preserve the previous READY session and mappings.
+     */
+    private void replaceSession(String text, boolean prepared) {
         FreeTypeFontGenerator generator = source.getGenerator();
         if (generator == null) {
             return;
         }
+        String previousCharacters = parameter.characters;
+        com.badlogic.gdx.graphics.g2d.PixmapPacker previousPacker = parameter.packer;
+        FontSession candidate = null;
+        GlyphLayout candidateLayout;
         try {
             parameter.characters = toBmpCharacters(text);
-            font = generator.generateFont(parameter);
-            disableIncrementalGlyphGeneration();
-            layout = new GlyphLayout(font, "");
-            clearSupplementaryGlyphs();
-    	} catch (GdxRuntimeException e) {
-    		Logger.getGlobal().warning("Font準備失敗 : " + text + " - " + e.getMessage());
-    	}
-	}
+            candidate = FontSession.open(generator, parameter, session);
+            disableMissingGlyph(candidate.font());
+            candidateLayout = new GlyphLayout(candidate.font(), "");
+        } catch (RuntimeException e) {
+            parameter.characters = previousCharacters;
+            parameter.packer = previousPacker;
+            if (candidate != null) {
+                try { candidate.dispose(); } catch (RuntimeException cleanup) { e.addSuppressed(cleanup); }
+            }
+            if (!(e instanceof GdxRuntimeException)) throw e;
+            Logger.getGlobal().warning("Font準備失敗 : " + text + " - " + e.getMessage());
+            return;
+        }
+        FontSession previous = session;
+        session = candidate;
+        font = candidate.font();
+        layout = candidateLayout;
+        if (prepared) preparedFonts = text;
+        clearSupplementaryGlyphs();
+        missingGlyphs.reserveNativeGlyphs(font.getData());
+        missingGlyphs.bumpRevision();
+        invalidateLayout();
+        if (previous != null) previous.dispose();
+    }
 	
 	@Override
     public void draw(SkinObjectRenderer sprite, float offsetX, float offsetY) {
+        recoverSession();
+        if (font == null || session == null || !session.isLive()) return;
+        try (FontScaleSnapshot ignored = new FontScaleSnapshot(font.getData())) {
+            drawScaled(sprite, offsetX, offsetY);
+        }
+    }
+
+    private void drawScaled(SkinObjectRenderer sprite, float offsetX, float offsetY) {
         if (font == null || layout == null) {
             return;
         }
@@ -176,44 +189,63 @@ public final class SkinTextFont extends SkinText {
 
     @Override
     public CachedTextLayout createCachedTextLayout(String text) {
-        if (font == null) {
+        recoverSession();
+        if (font == null || session == null || !session.isLive()) return null;
+        try (FontScaleSnapshot ignored = new FontScaleSnapshot(font.getData())) {
+            return createScaledTextLayout(text);
+        }
+    }
+
+    private CachedTextLayout createScaledTextLayout(String text) {
+        if (font == null || text == null) {
             return null;
         }
+        text = normalizeDisplay(text);
 
-        float scaleY = region.height / parameter.size;
+        float scaleY = (region.height > 0 && parameter.size > 0) ? region.height / parameter.size : 1.0f;
         boolean hasShadow = !getShadowOffset().isZero();
         String remappedText = remapMissingGlyphs(text);
         float scaleX = scaleY;
         GlyphLayout cachedLayout = new GlyphLayout();
         font.getData().setScale(scaleX, scaleY);
-        setLayout(cachedLayout, remappedText, region.width);
+        setLayout(cachedLayout, font, remappedText, region.width);
         if (!isWrapping() && getOverflow() == OVERFLOW_SHRINK && cachedLayout.width > region.width) {
             scaleX *= region.width / cachedLayout.width;
             font.getData().setScale(scaleX, scaleY);
-            setLayout(cachedLayout, remappedText, region.width);
+            setLayout(cachedLayout, font, remappedText, region.width);
         }
         GlyphLayout cachedShadowLayout = null;
         if (hasShadow) {
             cachedShadowLayout = new GlyphLayout();
-            setLayout(cachedShadowLayout, remappedText, region.width);
+            setLayout(cachedShadowLayout, font, remappedText, region.width);
         }
-        return new FontTextLayout(cachedLayout, cachedShadowLayout, region.width, scaleX, scaleY, glyphRevision,
+        return new FontTextLayout(this, session.generation(), cachedLayout, cachedShadowLayout, region.width, scaleX, scaleY, missingGlyphs.revision(),
                 getAlign(), getOverflow(), isWrapping());
     }
 
     @Override
     public boolean isCachedTextLayoutValid(CachedTextLayout layout) {
-        if (!(layout instanceof FontTextLayout cached) || font == null) {
+        if (!(layout instanceof FontTextLayout cached) || font == null || session == null || !session.isLive()
+                || cached.owner != this || cached.generation != session.generation()) {
             return false;
         }
-        return cached.width == region.width && cached.scaleY == region.height / parameter.size
-                && cached.glyphRevision == glyphRevision && cached.align == getAlign()
+        float scaleY = (region.height > 0 && parameter.size > 0) ? region.height / parameter.size : 1.0f;
+        return cached.width == region.width && cached.scaleY == scaleY
+                && cached.glyphRevision == missingGlyphs.revision() && cached.align == getAlign()
                 && cached.overflow == getOverflow() && cached.wrapping == isWrapping()
                 && (cached.shadowLayout != null) == !getShadowOffset().isZero();
     }
 
     @Override
     public boolean drawCachedTextLayout(SkinObjectRenderer sprite, CachedTextLayout layout, float offsetX, float offsetY) {
+        recoverSession();
+        if (font == null || session == null || !session.isLive()) return false;
+        try (FontScaleSnapshot ignored = new FontScaleSnapshot(font.getData())) {
+            return drawScaledCachedTextLayout(sprite, layout, offsetX, offsetY);
+        }
+    }
+
+    private boolean drawScaledCachedTextLayout(SkinObjectRenderer sprite, CachedTextLayout layout, float offsetX, float offsetY) {
         if (!(layout instanceof FontTextLayout cached) || !isCachedTextLayoutValid(cached)) {
             return false;
         }
@@ -234,25 +266,25 @@ public final class SkinTextFont extends SkinText {
 
     private void updateLayout(Rectangle r) {
         String text = getText();
-        float scaleY = r.height / parameter.size;
+        float scaleY = (r.height > 0 && parameter.size > 0) ? r.height / parameter.size : 1.0f;
         boolean hasShadow = !getShadowOffset().isZero();
         if (layoutValid && text.equals(layoutText) && layoutWidth == r.width && layoutScaleY == scaleY
                 && layoutAlign == getAlign() && layoutOverflow == getOverflow() && layoutWrapping == isWrapping()
-                && layoutHasShadow == hasShadow) {
+                && layoutHasShadow == hasShadow && layoutGlyphRevision == missingGlyphs.revision()) {
             return;
         }
 
         String remappedText = remapMissingGlyphs(text);
         float scaleX = scaleY;
         font.getData().setScale(scaleX, scaleY);
-        setLayout(layout, remappedText, r.width);
+        setLayout(layout, font, remappedText, r.width);
         if (!isWrapping() && getOverflow() == OVERFLOW_SHRINK && layout.width > r.width) {
             scaleX *= r.width / layout.width;
             font.getData().setScale(scaleX, scaleY);
-            setLayout(layout, remappedText, r.width);
+            setLayout(layout, font, remappedText, r.width);
         }
         if (hasShadow) {
-            setLayout(shadowLayout, remappedText, r.width);
+            setLayout(shadowLayout, font, remappedText, r.width);
         } else {
             shadowLayout.reset();
         }
@@ -265,18 +297,8 @@ public final class SkinTextFont extends SkinText {
         layoutOverflow = getOverflow();
         layoutWrapping = isWrapping();
         layoutHasShadow = hasShadow;
+        layoutGlyphRevision = missingGlyphs.revision();
         layoutValid = true;
-    }
-
-    private void setLayout(GlyphLayout target, String text, float width) {
-        if (isWrapping()) {
-            target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], true);
-        } else {
-            switch (getOverflow()) {
-                case OVERFLOW_OVERFLOW, OVERFLOW_SHRINK -> target.setText(font, text, Color.WHITE, width, ALIGN[getAlign()], false);
-                case OVERFLOW_TRUNCATE -> target.setText(font, text, 0, text.length(), Color.WHITE, width, ALIGN[getAlign()], false, "");
-            }
-        }
     }
 
     private static void applyColor(GlyphLayout target, Color color) {
@@ -288,6 +310,37 @@ public final class SkinTextFont extends SkinText {
 
     private void invalidateLayout() {
         layoutValid = false;
+        layoutGlyphRevision = -1;
+    }
+
+    /** libGDX の暗黙の豆腐を無効にし、欠けたグリフを独自の代替チェーンで解決する。 / Disable libgdx's implicit tofu so that missing glyphs are resolved by our own fallback chain. */
+    private static void disableMissingGlyph(BitmapFont target) {
+        if (target != null && target.getData() != null) {
+            target.getData().missingGlyph = null;
+        }
+    }
+
+    /**
+     * フォント自身がその文字の実グリフを持つときだけ true(暗黙の欠落グリフや .notdef は含めない)。
+     * True only if the font itself holds a real glyph for the char (never the implicit missing glyph / .notdef).
+     */
+    static boolean hasNativeGlyph(BitmapFont.BitmapFontData data, char codePoint) {
+        if (data == null) {
+            return false;
+        }
+        BitmapFont.Glyph glyph = data.getGlyph(codePoint);
+        return glyph != null && glyph != data.missingGlyph;
+    }
+
+    static boolean hasNativeGlyph(BitmapFont.BitmapFontData data, int codePoint) {
+        if (data == null || codePoint < 0 || codePoint > Character.MAX_VALUE) {
+            return false;
+        }
+        return hasNativeGlyph(data, (char) codePoint);
+    }
+
+    boolean hasNativeGlyph(int codePoint) {
+        return font != null && hasNativeGlyph(font.getData(), codePoint);
     }
 
     private String toBmpCharacters(String text) {
@@ -307,256 +360,131 @@ public final class SkinTextFont extends SkinText {
         return result != null ? result.toString() : text;
     }
 
+    /** 元の LibGdxCompatibilityTest がこの名前で呼ぶので残す。 / Kept under this name because the existing LibGdxCompatibilityTest calls it. */
     private String remapMissingGlyphs(String text) {
-        StringBuilder result = null;
-        requiredSupplementaryGlyphs.clear();
-        for (int index = 0; index < text.length();) {
-            int codePoint = text.codePointAt(index);
-            if (codePoint > Character.MAX_VALUE) {
-                if (result == null) {
-                    result = new StringBuilder(text.length());
-                    result.append(text, 0, index);
-                }
-                requiredSupplementaryGlyphs.add(codePoint);
-                Character mapped = ensureSupplementaryGlyphMapped(codePoint, requiredSupplementaryGlyphs);
-                if (mapped == null) {
-                    index += Character.charCount(codePoint);
-                    continue;
-                }
-                result.append(mapped.charValue());
-            } else if (result != null) {
-                ensureBmpFallbackGlyph(codePoint);
-                result.append((char) codePoint);
-            } else {
-                ensureBmpFallbackGlyph(codePoint);
-            }
-            index += Character.charCount(codePoint);
+        if (text == null) {
+            return "";
         }
-        return result != null ? result.toString() : text;
+        return missingGlyphs.remap(text);
     }
 
-    private void ensureBmpFallbackGlyph(int codePoint) {
-        if (activeBmpFallbackGlyphs.contains(codePoint) || font.getData().getGlyph((char) codePoint) != null) {
-            return;
+    /**
+     * FreeType 版の代替グリフの探し方と登録先。グリフは生成中のフォントへ直接登録する。
+     * FreeType-side lookup and install target for fallback glyphs; glyphs go straight into the generated font.
+     */
+    private final class FallbackGlyphHost implements MissingGlyphMapper.Host {
+        @Override
+        public boolean hasNativeGlyph(int codePoint) {
+            return font != null && SkinTextFont.hasNativeGlyph(font.getData(), codePoint);
         }
 
-        try {
-            BitmapFont.Glyph glyph = createGlyph(codePoint, codePoint, true);
-            if (glyph == null) {
-                glyph = createMissingGlyph(codePoint);
-            }
-            if (glyph != null) {
-                font.getData().setGlyph(codePoint, glyph);
-                activeBmpFallbackGlyphs.add(codePoint);
-                glyphRevision++;
-            }
-        } catch (Exception e) {
-        }
-    }
-
-    private Character ensureSupplementaryGlyphMapped(int codePoint, Set<Integer> requiredCodePoints) {
-        Character mapped = activeSupplementaryGlyphMap.get(codePoint);
-        if (mapped != null) {
-            return mapped;
+        /** 供給元の代替列(スキン指定の後に共通代替が付いている)。 / The source's fallback chain (skin-specified, then the global fallbacks). */
+        @Override
+        public BitmapFont.Glyph resolveFallbackGlyph(int codePoint, int mappedCodePoint, boolean supplementary) {
+            // 元の文字集合で既に試した BMP 文字は代替フォントだけを探す。 / BMP characters already tried in the primary set only search the fallbacks.
+            boolean alreadyTriedPrimary = !supplementary && parameter.characters != null && parameter.characters.indexOf(codePoint) >= 0;
+            return glyphProvider.resolve(codePoint, alreadyTriedPrimary,
+                    (raster, renderedCodePoint) -> session.pack(raster, renderedCodePoint, mappedCodePoint)).glyph;
         }
 
-        mapped = findPrivateUseSlot(requiredCodePoints);
-        if (mapped == null) {
-            return null;
+        @Override
+        public BitmapFont.Glyph resolveMarkerGlyph(int mappedCodePoint) {
+            return createMissingGlyph(mappedCodePoint);
         }
 
-        try {
-            BitmapFont.Glyph glyph = createGlyph(codePoint, mapped.charValue(), false);
-            if (glyph == null) {
-                glyph = createMissingGlyph(mapped.charValue());
-            }
-            if (glyph == null) {
-            	return null;
-            }
-            font.getData().setGlyph(mapped.charValue(), glyph);
-            activeSupplementaryGlyphMap.put(codePoint, mapped);
-            activePrivateUseGlyphMap.put(mapped, codePoint);
-            glyphRevision++;
-            return mapped;
-        } catch (Exception e) {
-            return null;
+        @Override
+        public boolean installUnresolved(int codePoint) {
+            return false;
         }
-    }
 
-    private Character findPrivateUseSlot(Set<Integer> requiredCodePoints) {
-        for (int codePoint = PRIVATE_USE_AREA_START; codePoint <= PRIVATE_USE_AREA_END; codePoint++) {
-            Character slot = Character.valueOf((char) codePoint);
-            if (!activePrivateUseGlyphMap.containsKey(slot)) {
-                return slot;
+        @Override
+        public boolean hasDrawableGlyph(int codePoint) {
+            return font != null && font.getData().getGlyph((char) codePoint) != null;
+        }
+
+        @Override
+        public void installGlyph(int key, BitmapFont.Glyph glyph) {
+            font.getData().setGlyph(key, glyph);
+        }
+
+        @Override
+        public void removeGlyph(int slot, int evictedCodePoint) {
+            if (font != null && font.getData() != null) {
+                font.getData().setGlyph(slot, null);
             }
         }
 
-        for (int codePoint = PRIVATE_USE_AREA_START; codePoint <= PRIVATE_USE_AREA_END; codePoint++) {
-            Character slot = Character.valueOf((char) codePoint);
-            Integer activeCodePoint = activePrivateUseGlyphMap.get(slot);
-            if (!requiredCodePoints.contains(activeCodePoint)) {
-                font.getData().setGlyph(slot.charValue(), null);
-                activePrivateUseGlyphMap.remove(slot);
-                activeSupplementaryGlyphMap.remove(activeCodePoint);
-                glyphRevision++;
-                return slot;
-            }
-        }
-        return null;
-    }
-
-    private BitmapFont.Glyph createMissingGlyph(int mappedCodePoint) throws Exception {
-        FreeTypeFontGenerator generator = source.getGenerator();
-        if (generator == null) {
-            return null;
-        }
-        for (int candidate : MISSING_GLYPH_CANDIDATES) {
-            BitmapFont.Glyph glyph = createGlyph(generator, candidate, mappedCodePoint);
-            if (glyph != null) {
-                return glyph;
-            }
-            for (FreeTypeFontGenerator fallbackGenerator : source.getFallbackGenerators()) {
-                glyph = createGlyph(fallbackGenerator, candidate, mappedCodePoint);
-                if (glyph != null) {
-                    return glyph;
-                }
-            }
-        }
-
-        PixmapPacker packer = getFontDataPacker();
-        if (packer == null) {
-            return null;
-        }
-
-        int height = Math.max(8, parameter.size);
-        int width = Math.max(6, Math.round(height * 0.75f));
-        int stroke = Math.max(1, height / 12);
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        try {
-            pixmap.setColor(0, 0, 0, 0);
-            pixmap.fill();
-            Color c = parameter.color != null ? parameter.color : Color.WHITE;
-            pixmap.setColor(c);
-            for (int i = 0; i < stroke; i++) {
-                pixmap.drawRectangle(i, i, width - i * 2, height - i * 2);
-            }
-
-            String glyphName = "missing-" + mappedCodePoint + "-" + packedGlyphSequence++;
-            var packed = packer.pack(glyphName, pixmap);
-            int page = packer.getPageIndex(glyphName);
-            if (page < 0) {
+        private BitmapFont.Glyph createMissingGlyph(int mappedCodePoint) {
+            if (session == null) {
                 return null;
             }
-            packer.updateTextureRegions(font.getRegions(), parameter.minFilter, parameter.magFilter, parameter.genMipMaps);
-
-            BitmapFont.Glyph glyph = new BitmapFont.Glyph();
-            glyph.id = mappedCodePoint;
-            glyph.srcX = packed.getX();
-            glyph.srcY = packed.getY();
-            glyph.width = width;
-            glyph.height = height;
-            glyph.xoffset = 0;
-            glyph.yoffset = -height;
-            glyph.xadvance = width + Math.max(1, stroke);
-            glyph.page = page;
-            font.getData().setGlyphRegion(glyph, font.getRegion(glyph.page));
-            return glyph;
-        } finally {
-            pixmap.dispose();
+            BitmapFont.Glyph glyph = glyphProvider.resolveMissingMarker(
+                    (raster, renderedCodePoint) -> session.pack(raster, renderedCodePoint, mappedCodePoint)).glyph;
+            return glyph != null ? glyph : session.packMissingBox(mappedCodePoint);
         }
-    }
-
-    private BitmapFont.Glyph createGlyph(int codePoint, int mappedCodePoint, boolean fallbackOnly) throws Exception {
-        FreeTypeFontGenerator generator = source.getGenerator();
-        if (generator == null) {
-            return null;
-        }
-        if (!fallbackOnly) {
-            BitmapFont.Glyph glyph = createGlyph(generator, codePoint, mappedCodePoint);
-            if (glyph != null) {
-                return glyph;
-            }
-        }
-        for (FreeTypeFontGenerator fallbackGenerator : source.getFallbackGenerators()) {
-            BitmapFont.Glyph glyph = createGlyph(fallbackGenerator, codePoint, mappedCodePoint);
-            if (glyph != null) {
-                return glyph;
-            }
-        }
-        return null;
-    }
-
-    private BitmapFont.Glyph createGlyph(FreeTypeFontGenerator generator, int codePoint, int mappedCodePoint) throws Exception {
-        FreeTypeFontGenerator.GlyphAndBitmap glyphAndBitmap =
-                generator.generateGlyphAndBitmap(codePoint, parameter.size, parameter.flip);
-        if (glyphAndBitmap == null || glyphAndBitmap.glyph == null || glyphAndBitmap.bitmap == null
-                || glyphAndBitmap.bitmap.getWidth() == 0 || glyphAndBitmap.bitmap.getRows() == 0) {
-            return null;
-        }
-
-        Pixmap pixmap = glyphAndBitmap.bitmap.getPixmap(Pixmap.Format.RGBA8888, parameter.color, parameter.gamma);
-        try {
-            PixmapPacker packer = getFontDataPacker();
-            if (packer == null) {
-                return null;
-            }
-            String glyphName = "fallback-" + mappedCodePoint + "-" + codePoint + "-" + packedGlyphSequence++;
-            var packed = packer.pack(glyphName, pixmap);
-            int page = packer.getPageIndex(glyphName);
-            if (page < 0) {
-                return null;
-            }
-            packer.updateTextureRegions(font.getRegions(), parameter.minFilter, parameter.magFilter, parameter.genMipMaps);
-
-            BitmapFont.Glyph glyph = copyGlyph(glyphAndBitmap.glyph, mappedCodePoint);
-            glyph.page = page;
-            glyph.srcX = packed.getX();
-            glyph.srcY = packed.getY();
-            font.getData().setGlyphRegion(glyph, font.getRegion(glyph.page));
-            return glyph;
-        } finally {
-            pixmap.dispose();
-        }
-    }
-
-    private PixmapPacker getFontDataPacker() throws Exception {
-        Field packerField = font.getData().getClass().getDeclaredField("packer");
-        packerField.setAccessible(true);
-        return (PixmapPacker) packerField.get(font.getData());
-    }
-
-    private void disableIncrementalGlyphGeneration() {
-        try {
-            Field generatorField = font.getData().getClass().getDeclaredField("generator");
-            generatorField.setAccessible(true);
-            generatorField.set(font.getData(), null);
-        } catch (Exception e) {
-        }
-    }
-
-    private BitmapFont.Glyph copyGlyph(BitmapFont.Glyph source, int mappedCodePoint) {
-        BitmapFont.Glyph glyph = new BitmapFont.Glyph();
-        glyph.id = mappedCodePoint;
-        glyph.srcX = source.srcX;
-        glyph.srcY = source.srcY;
-        glyph.width = source.width;
-        glyph.height = source.height;
-        glyph.xoffset = source.xoffset;
-        glyph.yoffset = source.yoffset;
-        glyph.xadvance = source.xadvance;
-        glyph.page = source.page;
-        return glyph;
     }
 
     private void clearSupplementaryGlyphs() {
-        activeBmpFallbackGlyphs.clear();
-        activeSupplementaryGlyphMap.clear();
-        activePrivateUseGlyphMap.clear();
-        packedGlyphSequence = 0;
-        glyphRevision++;
+        missingGlyphs.clearMappings();
+        if (session != null) {
+            session.resetSequence();
+        }
+        missingGlyphs.bumpRevision();
+    }
+
+    PuaSlotAllocator getPuaSlotAllocator() {
+        return missingGlyphs.slots();
+    }
+
+    long getGlyphRevision() {
+        return missingGlyphs.revision();
+    }
+
+    @Override
+    SkinFontSource getFontSource() {
+        return source;
+    }
+
+    BitmapFont getFont() {
+        return font;
+    }
+
+    /**
+     * 指定されたテキストの描画幅を現在のフォントスケールで計算して返します。
+     * Computes and returns the layout advance width for the given text under the current scale.
+     */
+    float getTextWidth(String text) {
+        recoverSession();
+        if (font == null || session == null || !session.isLive()) return 0;
+        try (FontScaleSnapshot ignored = new FontScaleSnapshot(font.getData())) {
+            return getScaledTextWidth(text);
+        }
+    }
+
+    private float getScaledTextWidth(String text) {
+        if (text == null || text.isEmpty() || font == null) {
+            return 0;
+        }
+        text = normalizeDisplay(text);
+        String remapped = remapMissingGlyphs(text);
+        GlyphLayout gl = new GlyphLayout();
+        float scaleY = (region.height > 0 && parameter.size > 0) ? region.height / parameter.size : 1.0f;
+        font.getData().setScale(scaleY, scaleY);
+        gl.setText(font, remapped);
+        return gl.width;
+    }
+
+    /** 無効になった、または代替ページが上限に達したセッションを描画の前に作り直す。 / Rebuilds a dead session, or one whose fallback pages hit the cap, before drawing. */
+    private void recoverSession() {
+        if (!isDisposed() && session != null && (!session.isLive() || session.needsRenewal())) {
+            String text = preparedFonts != null ? preparedFonts : getText();
+            replaceSession(text != null ? text : "", preparedFonts != null);
+        }
     }
 
     private static final class FontTextLayout implements CachedTextLayout {
+        private final SkinTextFont owner;
+        private final long generation;
         private final GlyphLayout layout;
         private final GlyphLayout shadowLayout;
         private final float width;
@@ -567,8 +495,10 @@ public final class SkinTextFont extends SkinText {
         private final int overflow;
         private final boolean wrapping;
 
-        private FontTextLayout(GlyphLayout layout, GlyphLayout shadowLayout, float width, float scaleX, float scaleY,
+        private FontTextLayout(SkinTextFont owner, long generation, GlyphLayout layout, GlyphLayout shadowLayout, float width, float scaleX, float scaleY,
                 long glyphRevision, int align, int overflow, boolean wrapping) {
+            this.owner = owner;
+            this.generation = generation;
             this.layout = layout;
             this.shadowLayout = shadowLayout;
             this.width = width;
@@ -579,13 +509,48 @@ public final class SkinTextFont extends SkinText {
             this.overflow = overflow;
             this.wrapping = wrapping;
         }
+
+        @Override
+        public float getWidth() {
+            return width;
+        }
     }
 
     public void dispose() {
-    	Optional.ofNullable(font).ifPresent(BitmapFont::dispose);
-        if (ownsSource) {
-            source.dispose();
+        if (isDisposed()) {
+            return;
         }
-    	setDisposed();
+        // 失敗や再入の経路も含め、解放前に無効化する。 / Invalidate before cleanup, including failure and reentrant paths.
+        setDisposed();
+        missingGlyphs.reset();
+        FontSession ownedSession = session;
+        session = null;
+        font = null;
+        layout = null;
+        FontResourceDisposer.disposeAll(ownedSession != null ? ownedSession.resources() : new Disposable[0],
+                ownsSource ? source : null);
+    }
+
+    /**
+     * 同梱の BitmapFontData.setScale が変える公開フィールドだけを正確に戻す(逆算による丸めをしない)。
+     * Restores exactly the public fields mutated by the bundled BitmapFontData.setScale (no inverse rounding).
+     */
+    static final class FontScaleSnapshot implements AutoCloseable {
+        private final BitmapFontData data;
+        private final float scaleX, scaleY, lineHeight, spaceXadvance, xHeight, capHeight, ascent, descent, down;
+        private final float padTop, padLeft, padBottom, padRight;
+
+        FontScaleSnapshot(BitmapFontData d) {
+            data = d;
+            scaleX = d.scaleX; scaleY = d.scaleY; lineHeight = d.lineHeight; spaceXadvance = d.spaceXadvance;
+            xHeight = d.xHeight; capHeight = d.capHeight; ascent = d.ascent; descent = d.descent; down = d.down;
+            padTop = d.padTop; padLeft = d.padLeft; padBottom = d.padBottom; padRight = d.padRight;
+        }
+
+        @Override public void close() {
+            data.scaleX = scaleX; data.scaleY = scaleY; data.lineHeight = lineHeight; data.spaceXadvance = spaceXadvance;
+            data.xHeight = xHeight; data.capHeight = capHeight; data.ascent = ascent; data.descent = descent; data.down = down;
+            data.padTop = padTop; data.padLeft = padLeft; data.padBottom = padBottom; data.padRight = padRight;
+        }
     }
 }

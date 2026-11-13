@@ -416,7 +416,7 @@ public class JSONSkinLoader extends SkinLoader {
 	}
 
 	private static String createFontSourceKey(String fontPath, String[] fallbackFontPaths) {
-		var key = new java.lang.StringBuilder(fontPath).append('\0');
+		var key = new java.lang.StringBuilder(fontPath == null ? "" : fontPath).append('\0');
 		if (fallbackFontPaths != null) {
 			for (var fallbackFontPath : fallbackFontPaths) {
 				key.append(fallbackFontPath == null ? "" : fallbackFontPath).append('\0');
