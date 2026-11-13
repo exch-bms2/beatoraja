@@ -83,7 +83,10 @@ public class KeyConfiguration extends MainState {
 
 	private int mode = 0;
 	private int modeSlot;
-	private static final int[] RIGHT_MODES = {0, 1, 5};
+	private static final int[] INDEPENDENT_MODE_ORDER = {
+			0, MODE.length, 1, MODE.length + 1, 2, 3, 4, 5, MODE.length + 5, 6
+	};
+	private boolean editingRightSide;
 
 	private ShapeRenderer shape;
 	private FreeTypeFontGenerator fontGenerator;
@@ -316,7 +319,7 @@ public class KeyConfiguration extends MainState {
 		sprite.begin();
 		if(titlefont != null) {
 			titlefont.setColor(Color.CYAN);
-			titlefont.draw(sprite, "<-- " + MODE[mode] + (modeSlot >= KEYS.length ? " (2P)" : "") + " -->", 80 * scaleX, 650 * scaleY);
+			titlefont.draw(sprite, "<-- " + MODE[mode] + (editingRightSide ? " (2P)" : "") + " -->", 80 * scaleX, 650 * scaleY);
 			titlefont.setColor(Color.YELLOW);
 			titlefont.draw(sprite, "Keyboard", 180 * scaleX, 620 * scaleY);
 			titlefont.draw(sprite, "Controller1", 330 * scaleX, 620 * scaleY);
@@ -466,15 +469,20 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private int modeCount() {
-		return KEYS.length + (config.isIndependentPlaySides() ? RIGHT_MODES.length : 0);
+		return config.isIndependentPlaySides() ? INDEPENDENT_MODE_ORDER.length : MODE.length;
+	}
+
+	static int modeIdAt(int slot, boolean independentSides) {
+		return independentSides ? INDEPENDENT_MODE_ORDER[slot] : slot;
 	}
 
 	private void setMode(int slot) {
 		modeSlot = slot;
-		boolean right = slot >= KEYS.length;
-		int mode = this.mode = right ? RIGHT_MODES[slot - KEYS.length] : slot;
 		config = main.getPlayerResource().getPlayerConfig();
-		pc = config.getPlayInputConfig(MODE_HINT[mode], right ? bms.player.beatoraja.PlaySide.P2 : bms.player.beatoraja.PlaySide.P1);
+		int modeId = modeIdAt(slot, config.isIndependentPlaySides());
+		editingRightSide = modeId >= MODE.length;
+		int mode = this.mode = modeId % MODE.length;
+		pc = config.getPlayInputConfig(MODE_HINT[mode], editingRightSide ? PlaySide.P2 : PlaySide.P1);
 		keyboardConfig = pc.getKeyboardConfig();
 		controllerConfigs = pc.getController();
 		midiconfig = pc.getMidiConfig();
