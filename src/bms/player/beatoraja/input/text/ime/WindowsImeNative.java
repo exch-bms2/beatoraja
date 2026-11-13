@@ -76,6 +76,7 @@ final class WindowsImeNative implements WindowsImePlatform {
             throw new IllegalStateException("SetWindowSubclass failed");
         }
         installed=true;
+        this.session = bridge;
     }
     public long forward(int message,long w,long l) { return callPPPP(hwnd,message,w,l,defSubclass); }
     public Composition composition(long flags) {
@@ -136,11 +137,14 @@ final class WindowsImeNative implements WindowsImePlatform {
             } finally { callPPI(hwnd,context,releaseContext); }
         }
     }
+    private WindowsImeSession session;
+
     public void detach(boolean windowDestroyed) {
         if (disposed) return;
         destroyed |= windowDestroyed;
         if (installed) {
             boolean removed=callPPPI(hwnd,callback.address(),callback.address(),removeSubclass)!=0;
+            if (session != null) session.nativeRemovalResult(removed);
             if (!removed && !destroyed) { WindowsImeSession.warn("detach refused; retaining callback until window destruction",null); return; }
             installed=false;
         }
@@ -155,6 +159,7 @@ final class WindowsImeNative implements WindowsImePlatform {
         if (disposed || installed) return;
         if (depth!=0) throw new IllegalStateException("Cannot free an executing SUBCLASSPROC");
         disposed=true; ROOTS.remove(this);
+        session=null;
         if (callback!=null) { callback.free(); callback=null; }
         freeLibraries();
     }

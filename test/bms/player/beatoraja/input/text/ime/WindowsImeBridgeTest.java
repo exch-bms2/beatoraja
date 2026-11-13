@@ -9,6 +9,7 @@ import java.util.Arrays;
 /** Synthetic IMM ordering/model/lifecycle tests, runnable on every supported OS. */
 public final class WindowsImeBridgeTest {
     public static void main(String[] args) throws Exception {
+        lifecycleDiagnostics();
         var json = new com.badlogic.gdx.utils.Json();
         var config = json.fromJson(bms.player.beatoraja.Config.class, "{}");
         check(config.isImeBridgeEnabled(), "Older configurations enable the IME bridge by default");
@@ -64,6 +65,50 @@ public final class WindowsImeBridgeTest {
         next.close();
         editing(); asynchronousFinish(); inheritedKeys(); geometry();
         System.out.println("WindowsImeBridgeTest passed (synthetic IMM, Enter/cancel, editing, focus/stale callbacks, bounded finish, HiDPI math; NO Win32 runtime)");
+    }
+
+    private static void lifecycleDiagnostics() {
+        String flag = "beatoraja.windowsImeDiagnostics";
+        String previous = System.getProperty(flag);
+        var messages = new java.util.ArrayList<String>();
+        var logger = java.util.logging.Logger.getGlobal();
+        var handler = new java.util.logging.Handler() {
+            public void publish(java.util.logging.LogRecord record) { messages.add(record.getMessage()); }
+            public void flush() {}
+            public void close() {}
+        };
+        logger.addHandler(handler);
+        try {
+            System.clearProperty(flag);
+            WindowsImeDiagnostics.event(1, "disabled probe");
+            check(messages.isEmpty(), "Diagnostics default to off");
+            System.setProperty(flag, "true");
+            var support = new WindowsImeTestSupport();
+            var session = new TextInputSession(support.bridge, new TextInputSession.EditorState("private-review", 0, 0));
+            var nativeIme = support.current;
+            nativeIme.key(RETURN, true);
+            nativeIme.text("\r");
+            session.drain();
+            check(session.isFinished() && nativeIme.detached == 0, "Review submit retains the hook until release");
+            nativeIme.key(RETURN, false);
+            var next = new TextInputSession(support.bridge, new TextInputSession.EditorState("", 0, 0));
+            support.current.send(KILLFOCUS, 0, 0);
+            support.current.send(SETFOCUS, 0, 0);
+            next.close();
+            String trace = String.join("\n", messages);
+            int index = -1;
+            for (String event : new String[]{"hook attach begin", "hook attach succeeded", "session close begin (Enter held)",
+                    "hook retained", "Enter released (passive)", "hook detach begin", "hook detach returned",
+                    "Win32 focus lost (active)", "Win32 focus gained"}) {
+                int found = trace.indexOf(event, index + 1);
+                check(found > index, "Lifecycle event missing or out of order: " + event);
+                index = found;
+            }
+            check(!trace.contains("private-review"), "Lifecycle trace must not contain editor text");
+        } finally {
+            logger.removeHandler(handler);
+            if (previous == null) System.clearProperty(flag); else System.setProperty(flag, previous);
+        }
     }
     private static void editing() {
         var support=new WindowsImeTestSupport();

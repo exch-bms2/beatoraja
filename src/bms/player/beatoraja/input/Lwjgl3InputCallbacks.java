@@ -96,9 +96,11 @@ final class Lwjgl3InputCallbacks {
         });
         originalCharacter = GLFW.glfwSetCharCallback(handle, character);
         focus = GLFWWindowFocusCallback.create((window, focused) -> {
+            bms.player.beatoraja.input.text.ime.WindowsImeDiagnostics.windowFocus(focused, false);
             if (originalFocus != null) originalFocus.invoke(window, focused);
             input.windowFocus(focused);
             if (!focused) releaseFallbackKeys();
+            bms.player.beatoraja.input.text.ime.WindowsImeDiagnostics.windowFocus(focused, true);
         });
         iconify = GLFWWindowIconifyCallback.create((window, minimized) -> {
             if (originalIconify != null) originalIconify.invoke(window, minimized);

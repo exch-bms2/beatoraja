@@ -168,6 +168,9 @@ tasks.named<JavaExec>("run") {
     providers.gradleProperty("textInputDiagnostics").orNull?.let {
         systemProperty("beatoraja.textInputDiagnostics", it)
     }
+    providers.gradleProperty("windowsImeDiagnostics").orNull?.let {
+        systemProperty("beatoraja.windowsImeDiagnostics", it)
+    }
     providers.gradleProperty("inputDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
     }
