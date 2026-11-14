@@ -15,6 +15,7 @@ public final class StartupDiagnostics {
 
     public enum Step {
         START, GAME_CHILD_START, GAME_ENTRY, SELECT_FIRST_FRAME, SELECT_INPUT_READY,
+        SYSTEM_FONT, INPUT_DEVICES, SELECT_BAR_INIT, SELECT_BAR_BUILD, SELECT_SKIN_LOAD,
         IR_METADATA, IR_METADATA_WORKER_START, IR_METADATA_RESPONSE_WAIT, IR_METADATA_EXIT_WAIT,
         IR_METADATA_CLEANUP, IR_CHART_CHECK, IR_CHART_DB_LOOKUP, IR_LOGIN, IR_REQUEST_LOCK_WAIT,
         IR_WORKER_START, IR_RESPONSE_WAIT, IR_WORKER_EXIT_WAIT
@@ -66,6 +67,7 @@ public final class StartupDiagnostics {
     private static void milestone(Step step) { log(step, null, -1, -1); }
 
     public static Span measure(Step step) { return measure(step, -1); }
+    public static Span measure(Step step, boolean include) { return include ? measure(step) : Span.DISABLED; }
     public static Span measure(Step step, long workerPid) {
         return enabled() ? new Span(step, workerPid) : Span.DISABLED;
     }

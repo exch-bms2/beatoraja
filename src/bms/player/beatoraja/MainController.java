@@ -375,18 +375,22 @@ public final class MainController {
 				config.getResolution().width, config.getResolution().height);
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
-		try {
+		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.SYSTEM_FONT)) {
 			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 			systemfont = generator.generateFont(parameter);
 			generator.dispose();
+			timing.outcome(StartupDiagnostics.Outcome.OK);
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("System Font読み込み失敗");
 		}
 		messageRenderer = new MessageRenderer(config.getMessagefontpath());
 
-		input = new BMSPlayerInputProcessor(config, player);
+		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.INPUT_DEVICES)) {
+			input = new BMSPlayerInputProcessor(config, player);
+			timing.outcome(StartupDiagnostics.Outcome.OK);
+		}
 		switch(config.getAudioConfig().getDriver()) {
 		case OpenAL:
 			audio = new GdxSoundDriver(config);
