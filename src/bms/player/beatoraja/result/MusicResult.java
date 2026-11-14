@@ -33,6 +33,7 @@ public class MusicResult extends AbstractResult {
 
 	private ResultKeyProperty property;
 	private LevelReviewTarget levelReviewTarget;
+	private IRChartData resultChart;
 
 	public record LevelReviewTarget(SongData song, int lnmode) {}
 	
@@ -71,6 +72,7 @@ public class MusicResult extends AbstractResult {
 		
 		gaugeType = resource.getGrooveGauge().getType();
 
+		resultChart = createResultChart(resource.getSongdata(), resource.getBMSModel());
 		prepareLevelReview();
 		loadSkin(SkinType.RESULT);
 	}
@@ -88,10 +90,19 @@ public class MusicResult extends AbstractResult {
 				|| !song.getSha256().equals(model.getSHA256())) {
 			return;
 		}
-		int lnmode = song.hasUndefinedLongNote() ? model.getLntype() : 0;
+		IRChartData chart = resultChart != null && song.getSha256().equals(resultChart.sha256)
+				? resultChart : createResultChart(song, model);
+		int lnmode = chart.hasUndefinedLN ? chart.lntype : 0;
 		if (lnmode < 0 || lnmode > 2) return;
 		song.setSongReview(database.getSongReview(song.getSha256()));
 		levelReviewTarget = new LevelReviewTarget(song, lnmode);
+	}
+
+	static IRChartData createResultChart(SongData song, BMSModel model) {
+		if (song == null) return null;
+		// A random branch can replace the model in SongData for this play.
+		BMSModel played = song.getBMSModel() != null ? song.getBMSModel() : model;
+		return new IRChartData(song, played != null ? played.getLntype() : 0);
 	}
 
 	public LevelReviewTarget getEditableLevelReview() {
@@ -124,7 +135,7 @@ public class MusicResult extends AbstractResult {
     			}
     			
     			if(send) {
-    				irSendStatus.add(new IRSendStatus(irc.connection, resource.getSongdata(), newscore));
+					irSendStatus.add(new IRSendStatus(irc.connection, resultChart, newscore));
     			}
         	}
 			
@@ -155,7 +166,7 @@ public class MusicResult extends AbstractResult {
 				if(irsend > 0) {
 					timer.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 					try {
-						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
+						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, resultChart);
 						if(response.isSucceeded()) {
 							ranking.updateScore(ir[0].player, main.getRivalDataAccessor(), response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
 							rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
@@ -502,22 +513,22 @@ public class MusicResult extends AbstractResult {
 
 	static class IRSendStatus {
 		public final IRConnection ir;
-		public final SongData song;
+		public final IRChartData chart;
 		public final ScoreData score;
 		public int retry = 0;
 		
-		public IRSendStatus(IRConnection ir, SongData song, ScoreData score) {
+		public IRSendStatus(IRConnection ir, IRChartData chart, ScoreData score) {
 			this.ir = ir;
-			this.song = song;
+			this.chart = chart;
 			this.score = score;
 		}
 		
 		public boolean send() {
 			if (retry < 0) return retry == -255;
-			Logger.getGlobal().info("IRへスコア送信中 : " + song.getTitle());
-            IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
+			Logger.getGlobal().info("IRへスコア送信中 : " + chart.title);
+            IRResponse<Object> send1 = ir.sendPlayData(chart, new bms.player.beatoraja.ir.IRScoreData(score));
             if(send1.isSucceeded()) {
-                Logger.getGlobal().info("IRスコア送信完了 : " + song.getTitle());
+                Logger.getGlobal().info("IRスコア送信完了 : " + chart.title);
                 retry = -255;
                 return true;
             } else {
