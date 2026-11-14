@@ -14,6 +14,7 @@ import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 public final class KeyboardJudgeCompatibilityTest {
     private static int eventSource;
     public static void main(String[] args) throws Exception {
+        testSplitJudgeOptionNames();
         for (eventSource = 0; eventSource < 3; eventSource++) {
             testNormalAndShortTap();
             testTimingWindows();
@@ -25,6 +26,20 @@ public final class KeyboardJudgeCompatibilityTest {
             testSplitJudgeDisplay();
         }
         System.out.println("KeyboardJudgeCompatibilityTest passed (normal/LN/CN/HCN, chords, legacy/new replay paths)");
+    }
+
+    private static void testSplitJudgeOptionNames() {
+        int[] earlyIds = {1244, 1264, 1364, 1246, 1266, 1366};
+        for (int slot = 0; slot < earlyIds.length; slot++) {
+            String name = "judge_" + (slot < 3 ? "k" : "s") + (slot % 3 + 1);
+            int earlyId = earlyIds[slot];
+            check(BooleanPropertyFactory.getBooleanProperty(earlyId) != null
+                    && BooleanPropertyFactory.getBooleanProperty(earlyId) == BooleanPropertyFactory.getBooleanProperty(name + "_early"),
+                    name + "_early resolves to " + earlyId);
+            check(BooleanPropertyFactory.getBooleanProperty(earlyId + 1) != null
+                    && BooleanPropertyFactory.getBooleanProperty(earlyId + 1) == BooleanPropertyFactory.getBooleanProperty(name + "_late"),
+                    name + "_late resolves to " + (earlyId + 1));
+        }
     }
 
     private static void testSplitJudgeDisplay() throws Exception {

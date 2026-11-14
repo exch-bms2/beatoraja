@@ -166,7 +166,9 @@ public class MainLoader extends Application {
 		SongDatabaseAccessor songdb;
 		try {
 			songdb = new SongDatabaseAccessorProvider().get(config, player.getId());
-			detectIllegalSongs(songdb, player);
+			try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.IR_CHART_CHECK)) {
+				timing.outcome(detectIllegalSongs(songdb, player));
+			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
@@ -322,8 +324,9 @@ public class MainLoader extends Application {
 		return illegalSongs.size();
 	}
 
-	private static void detectIllegalSongs(SongDatabaseAccessor songdb, PlayerConfig player) {
+	private static StartupDiagnostics.Outcome detectIllegalSongs(SongDatabaseAccessor songdb, PlayerConfig player) {
 		illegalSongs.clear();
+		boolean failed = false;
 
 		Set<String> hashes = new LinkedHashSet<>();
 		addIllegalSongHashes(hashes, SongUtils.illegalsongs);
@@ -341,6 +344,7 @@ public class MainLoader extends Application {
 					addIllegalSongHashes(hashes, response.getData());
 				} else if(response.getMessage() != null && response.getMessage().length() > 0
 						&& !"Not supported".equals(response.getMessage())) {
+					failed = true;
 					Logger.getGlobal().warning("IR illegal song list取得失敗 - " + irconfig.getIrname() + " : "
 							+ response.getMessage());
 				}
@@ -350,13 +354,19 @@ public class MainLoader extends Application {
 		}
 
 		if(hashes.isEmpty()) {
-			return;
+			return failed ? StartupDiagnostics.Outcome.FAILED : StartupDiagnostics.Outcome.OK;
 		}
-		for(SongData song : songdb.getSongDatas(hashes.toArray(String[]::new))) {
+		SongData[] matches;
+		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.IR_CHART_DB_LOOKUP)) {
+			matches = songdb.getSongDatas(hashes.toArray(String[]::new));
+			timing.outcome(StartupDiagnostics.Outcome.OK);
+		}
+		for(SongData song : matches) {
 			if(song != null && song.getSha256() != null && song.getSha256().length() > 0) {
 				MainLoader.putIllegalSong(song.getSha256());
 			}
 		}
+		return failed ? StartupDiagnostics.Outcome.FAILED : StartupDiagnostics.Outcome.OK;
 	}
 
 	private static void addIllegalSongHashes(Set<String> hashes, String[] candidates) {

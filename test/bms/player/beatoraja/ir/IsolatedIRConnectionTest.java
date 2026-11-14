@@ -5,10 +5,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /** Actual child JVM/pipe regressions, no network, IR accounts, GUI or production data. */
 public final class IsolatedIRConnectionTest {
     public static void main(String[] args) throws Exception {
+        verifyStartupTimings();
         verifyReviews();
         for (String fault : List.of("crash", "timeout")) {
             try (var f = new Fixture(fault)) {
@@ -97,6 +101,36 @@ public final class IsolatedIRConnectionTest {
             } finally { allowStart.countDown(); executor.shutdownNow(); executor.awaitTermination(4, TimeUnit.SECONDS); }
         }
         System.out.println("IsolatedIRConnectionTest passed (legacy and review-capable workers, reauthentication, crash/read/write timeout, concurrent close/requests, unknown submission outcome)");
+    }
+
+    private static void verifyStartupTimings() throws Exception {
+        String property = "beatoraja.startupDiagnostics";
+        String previous = System.getProperty(property);
+        var messages = new ArrayList<String>();
+        var logger = Logger.getGlobal();
+        var capture = new Handler() {
+            public void publish(LogRecord record) {
+                if (record.getMessage().startsWith("Startup diagnostics:")) messages.add(record.getMessage());
+            }
+            public void flush() { }
+            public void close() { }
+        };
+        logger.addHandler(capture);
+        System.setProperty(property, "true");
+        try {
+            try (var f = new Fixture("timeout")) {
+                check(f.connection.login(new IRAccount("user-a", "startup-test-secret", "")).isSucceeded(), "Fixture login");
+                check(!f.connection.getRivals().isSucceeded(), "Fixture response timeout");
+            }
+            String output = String.join("\n", messages);
+            check(output.contains("step=IR_WORKER_START") && output.contains("step=IR_WORKER_EXIT_WAIT"), "Worker lifecycle timing");
+            check(messages.stream().anyMatch(s -> s.contains("step=IR_RESPONSE_WAIT") && s.contains("outcome=TIMEOUT")),
+                    "Record response timeout separately from exit wait");
+            check(!output.contains("user-a") && !output.contains("startup-test-secret"), "No account or secret in timings");
+        } finally {
+            logger.removeHandler(capture);
+            if (previous == null) System.clearProperty(property); else System.setProperty(property, previous);
+        }
     }
 
     private static void verifyReviews() throws Exception {

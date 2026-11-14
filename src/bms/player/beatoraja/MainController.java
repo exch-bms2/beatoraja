@@ -181,7 +181,11 @@ public final class MainController {
 			if(ir != null) {
 				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
 				} else {
-					IRResponse<IRPlayerData> response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
+						IRResponse<IRPlayerData> response;
+						try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.IR_LOGIN)) {
+							response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
+							timing.outcome(response.isSucceeded() ? StartupDiagnostics.Outcome.OK : StartupDiagnostics.Outcome.FAILED);
+						}
 					if(response.isSucceeded()) {
 						irarray.add(new IRStatus(irconfig, ir, response.getData()));
 					} else {
@@ -569,6 +573,10 @@ public final class MainController {
 			}
 		}
 		sprite.end();
+
+		if (current == drawnState && current instanceof MusicSelector && current.getSkin() != null && StartupDiagnostics.enabled()) {
+			StartupDiagnostics.selectionFrame(timer.isTimerOn(bms.player.beatoraja.skin.SkinProperty.TIMER_STARTINPUT));
+		}
 
 		// TODO renderループに入れるのではなく、MusicDownloadProcessorのListenerとして実装したほうがいいのでは
 		if(download != null && download.isDownload()){

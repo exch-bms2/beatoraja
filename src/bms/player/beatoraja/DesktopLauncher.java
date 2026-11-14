@@ -45,6 +45,7 @@ public final class DesktopLauncher {
             }
             return;
         }
+        if (Boolean.getBoolean(GAME_PROCESS)) StartupDiagnostics.gameEntry();
         MainLoader.main(args);
     }
 
@@ -90,6 +91,8 @@ public final class DesktopLauncher {
         return startGame(Config.readSystemConfig(), args);
     }
 
+    public static void markGameStart() { StartupDiagnostics.start(); }
+
     public static Process startGame(Config config, String... args) throws IOException {
         String os = System.getProperty("os.name");
         var child = new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
@@ -98,7 +101,14 @@ public final class DesktopLauncher {
         if (configureGameEnvironment(child.environment(), os, config.isNvidiaWaylandWorkaroundEnabled())) {
             DistributionDiagnostics.event("NVIDIA Wayland workaround applied to game child: " + NVIDIA_THREADED_OPTIMIZATIONS + "=0");
         }
-        return DistributionDiagnostics.observe(child.start(), "game");
+        StartupDiagnostics.configureGameEnvironment(child.environment());
+        Process process;
+        try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.GAME_CHILD_START)) {
+            process = child.start();
+            timing.worker(process.pid());
+            timing.outcome(StartupDiagnostics.Outcome.OK);
+        }
+        return DistributionDiagnostics.observe(process, "game");
     }
 
     static boolean configureGameEnvironment(Map<String, String> environment, String os, boolean workaroundEnabled) {
