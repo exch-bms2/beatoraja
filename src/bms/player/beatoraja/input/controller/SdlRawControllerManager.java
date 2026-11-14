@@ -8,6 +8,7 @@ import com.badlogic.gdx.LifecycleListener;
 import com.badlogic.gdx.controllers.*;
 import com.badlogic.gdx.utils.Array;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -31,8 +32,12 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
     private volatile boolean disposed, hasListeners;
     private boolean workerStarted;
     private long inventoryVersion = -1;
-    private long controllerVersion;
+    private volatile ControllerInventory controllerInventory = new ControllerInventory(0, List.of());
     private volatile Controller current;
+
+    public record ControllerInventory(long version, List<Controller> controllers) {
+        public ControllerInventory { controllers = List.copyOf(controllers); }
+    }
 
     public SdlRawControllerManager() {
         this(false);
@@ -136,10 +141,10 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
     private void refreshDevices() {
         if (inventoryVersion == source.inventoryVersion()) return;
         var devices = source.devices();
+        int oldSize = controllers.size;
         for (int i = 0; i < devices.length; i++) {
             if (i == controllers.size) {
                 controllers.add(new RawController(devices[i], i));
-                controllerVersion++;
             }
             else {
                 var raw = (RawController) controllers.get(i);
@@ -151,6 +156,10 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             }
         }
         inventoryVersion = source.inventoryVersion();
+        if (controllers.size != oldSize) {
+            controllerInventory = new ControllerInventory(controllerInventory.version() + controllers.size - oldSize,
+                    Arrays.asList(controllers.toArray(Controller.class)));
+        }
     }
 
     private final class PollRunner implements ControllerBackendManager.PollRunner {
@@ -195,8 +204,15 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             }
         }
     }
-    public synchronized Array<Controller> getControllers() { return new Array<>(controllers); }
-    public synchronized long controllerVersion() { return controllerVersion; }
+    // SDL can dispatch a focus callback inside poll() while holding the manager lock.
+    // The input thread must be able to read both values together without acquiring that lock.
+    public ControllerInventory controllerInventory() { return controllerInventory; }
+    public Array<Controller> getControllers() {
+        var snapshot = controllerInventory.controllers();
+        var copy = new Array<Controller>(snapshot.size());
+        for (Controller controller : snapshot) copy.add(controller);
+        return copy;
+    }
     public Controller getCurrentController() { return current; }
     public Array<ControllerListener> getListeners() { return listeners; }
     public synchronized void addListener(ControllerListener listener) { listeners.add(listener); hasListeners = listeners.notEmpty(); }
