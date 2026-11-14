@@ -19,14 +19,15 @@ import java.util.concurrent.TimeUnit;
 /** Late attachment and instance-ID changes through production BM, judgment and replay paths. */
 public final class SdlHotplugTest {
     public static void main(String[] args) throws Exception {
-        focusRegainDuringSdlUpdate();
+        focusRegainDuringSdlRead(false);
+        focusRegainDuringSdlRead(true);
         for (var backend : new ControllerBackend[]{ControllerBackend.SDL_RAW, ControllerBackend.SDL_RAW_ASYNC, ControllerBackend.SDL_ASYNC}) {
             reconnect(backend);
         }
         System.out.println("SdlHotplugTest passed (focus reentry, inventory snapshots, reconnect, saved bindings, FIFO/replay)");
     }
 
-    private static void focusRegainDuringSdlUpdate() throws Exception {
+    private static void focusRegainDuringSdlRead(boolean deviceRead) throws Exception {
         var sdlUpdating = new CountDownLatch(1);
         var inputLocked = new CountDownLatch(1);
         var owner = new FutureTask<Void>(() -> {
@@ -51,9 +52,7 @@ public final class SdlHotplugTest {
                     source.press(slot, 3, true); manager.poll(); input.poll();
                     check(input.getKeyState(0), "Held controller input before focus loss");
                     var batch = new JudgeEventQueue.Batch(); input.getJudgeEventQueue().drain(batch);
-                    KeyboardQueueTestSupport.windowActivityChanged(input, false);
-                    input.getJudgeEventQueue().drain(batch);
-                    check(!input.getKeyState(0) && batch.size == 1 && !batch.pressed[0], "Focus loss releases the held key");
+                    if (!deviceRead) KeyboardQueueTestSupport.windowActivityChanged(input, false);
 
                     var worker = new FutureTask<Void>(() -> {
                         await(sdlUpdating);
@@ -64,15 +63,31 @@ public final class SdlHotplugTest {
                         return null;
                     });
                     startDaemon(worker, "test-input-polling");
-                    source.onUpdate = () -> {
+                    Runnable focus = () -> {
                         sdlUpdating.countDown();
                         await(inputLocked);
-                        // Model SDL calling back into GLFW before releasing the manager monitor.
+                        if (deviceRead) KeyboardQueueTestSupport.windowActivityChanged(input, false);
                         KeyboardQueueTestSupport.windowActivityChanged(input, true);
                     };
+                    if (deviceRead) {
+                        // The last native read is interrupted after the buttons have already been sampled.
+                        source.onHat = focus;
+                        source.buttons.get(slot)[4] = true;
+                    } else source.onUpdate = focus;
                     manager.poll();
                     source.onUpdate = () -> { };
+                    source.onHat = () -> { };
                     worker.get(5, TimeUnit.SECONDS);
+                    input.getJudgeEventQueue().drain(batch);
+                    check(!input.getKeyState(0) && batch.size == 1 && !batch.pressed[0], "Focus loss releases the held key");
+                    if (deviceRead) {
+                        var device = (QueuedController) manager.getControllers().first();
+                        check(!device.getButton(4) && !device.windowBaselineReady(), "Discard the interrupted SDL_RAW snapshot");
+                        input.poll();
+                        check(!device.windowBaselineReady(), "Do not baseline from the pre-focus cache");
+                        manager.poll();
+                        check(device.getButton(4) && device.windowBaselineReady(), "Next complete SDL_RAW sample is published");
+                    }
                     input.poll(); input.getJudgeEventQueue().drain(batch);
                     check(!input.getKeyState(0) && batch.size == 0, "Still-held input is suppressed on regain");
                     source.press(slot, 3, false); manager.poll(); input.poll();
@@ -89,13 +104,13 @@ public final class SdlHotplugTest {
         owner.get(10, TimeUnit.SECONDS);
     }
 
-    private static void startDaemon(Runnable task, String name) {
+    static void startDaemon(Runnable task, String name) {
         var thread = new Thread(task, name);
         thread.setDaemon(true);
         thread.start();
     }
 
-    private static void await(CountDownLatch latch) {
+    static void await(CountDownLatch latch) {
         try { check(latch.await(5, TimeUnit.SECONDS), "Timed out arranging SDL focus reentry"); }
         catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new AssertionError(e); }
     }
@@ -219,6 +234,7 @@ public final class SdlHotplugTest {
         final ArrayList<boolean[]> buttons = new ArrayList<>();
         final ArrayDeque<Event> pending = new ArrayDeque<>();
         Runnable onUpdate = () -> { };
+        Runnable onHat = () -> { };
         int add(int id, String identity) {
             registry.add(new Device(id, "Hotplug device", 32, 4, 1, identity), id);
             var devices = registry.devices();
@@ -243,7 +259,7 @@ public final class SdlHotplugTest {
         public boolean connected(int slot) { return registry.handle(slot) != 0; }
         public boolean button(int slot, int button) { return buttons.get(slot)[button]; }
         public float axis(int slot, int axis) { return 0; }
-        public int hat(int slot) { return 0; }
+        public int hat(int slot) { onHat.run(); return 0; }
         public void close() { registry.close(); }
     }
     private static void check(boolean value, String message) { if (!value) throw new AssertionError(message); }

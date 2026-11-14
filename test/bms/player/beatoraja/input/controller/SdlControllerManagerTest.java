@@ -14,13 +14,62 @@ import com.badlogic.gdx.utils.Json;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Synthetic SDL producer frames through the real common FIFO/BM/replay consumers. */
 public final class SdlControllerManagerTest {
     public static void main(String[] args) throws Exception {
         shortTapReplay(); durationAndPov(); scratchAndFocus(); scratchParity(); fullInputLifecycle(); lifecycle(); overflow();
+        focusRegainDuringDeviceRead();
         System.out.println("SdlControllerManagerTest passed (shared FIFO/time/duration, POV OR, JKOC, analog v1/v2, focus/disconnect, replay versions, thread ownership and shutdown)");
+    }
+
+    private static void focusRegainDuringDeviceRead() throws Exception {
+        var reading = new CountDownLatch(1);
+        var inputLocked = new CountDownLatch(1);
+        var owner = new FutureTask<Void>(() -> {
+            try (var f = new Fixture(new int[]{0, 1}, 0)) {
+                f.fake.buttons[0] = true; f.sample(); f.controller.poll(1000); f.drain();
+                check(f.input.getKeyState(0), "Held Jamepad input before focus loss");
+                var worker = new FutureTask<Void>(() -> {
+                    SdlHotplugTest.await(reading);
+                    synchronized (f.input.getKeyBoardInputProcesseor()) {
+                        inputLocked.countDown();
+                        f.controller.poll(2000);
+                    }
+                    return null;
+                });
+                SdlHotplugTest.startDaemon(worker, "test-jamepad-input");
+                f.fake.buttons[1] = true;
+                f.fake.onAxis = () -> {
+                    f.fake.onAxis = () -> { };
+                    reading.countDown();
+                    SdlHotplugTest.await(inputLocked);
+                    synchronized (f.input.getKeyBoardInputProcesseor()) {
+                        f.controller.setWindowActive(false);
+                        f.controller.setWindowActive(true);
+                    }
+                };
+                f.sample();
+                worker.get(5, TimeUnit.SECONDS);
+                var device = (QueuedController) f.device;
+                check(!device.getButton(1) && !device.windowBaselineReady(), "Discard interrupted Jamepad sample");
+                f.controller.poll(3000);
+                f.sample(); f.controller.poll(4000);
+                check(device.getButton(1) && f.drain().size == 0, "Baseline does not forward held buttons");
+                f.fake.buttons[1] = false; f.sample(); f.controller.poll(5000); f.drain();
+                f.fake.buttons[1] = true; f.sample(); f.controller.poll(6000);
+                var batch = f.drain();
+                check(batch.size == 1 && batch.keys[0] == 1 && batch.pressed[0] && batch.times[0] == 6000,
+                        "Fresh Jamepad press keeps its binding and poll timestamp");
+            }
+            return null;
+        });
+        SdlHotplugTest.startDaemon(owner, "test-jamepad-owner");
+        owner.get(10, TimeUnit.SECONDS);
     }
 
     private static void shortTapReplay() throws Exception {
@@ -174,6 +223,7 @@ public final class SdlControllerManagerTest {
 
     private static final class Fake {
         final boolean[] buttons = new boolean[32]; final float[] axes = new float[4]; boolean connected = true;
+        Runnable onAxis = () -> { };
         final Thread owner = Thread.currentThread();
         final ControllerMapping mapping = new ControllerMapping(0, 1, 2, 3, 0, 1, 2, 3, 8, 9, 4, 5, 6, 7, 10, 11, 26, 24, 27, 25) { };
         final Controller controller = (Controller) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[]{Controller.class}, (p, m, args) -> {
@@ -184,7 +234,7 @@ public final class SdlControllerManagerTest {
                 case "getMaxButtonIndex" -> 31;
                 case "getMinButtonIndex" -> 0;
                 case "getButton" -> buttons[(int) args[0]];
-                case "getAxis" -> axes[(int) args[0]];
+                case "getAxis" -> { onAxis.run(); yield axes[(int) args[0]]; }
                 case "isConnected" -> connected;
                 case "getMapping" -> mapping;
                 default -> null;

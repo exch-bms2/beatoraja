@@ -147,11 +147,11 @@ public final class SdlControllerManager implements ControllerManager, Controller
         private final String name, id;
         private final ControllerMapping mapping;
         private final boolean[] buttons = new boolean[32], sample = new boolean[32];
-        private final float[] axes;
+        private final float[] axes, sampledAxes;
         private final ControllerEventQueue events = new ControllerEventQueue();
         private final ControllerInputDiagnostics diagnostics;
         private final Array<ControllerListener> localListeners = new Array<>();
-        private boolean capture, overflowReported;
+        private boolean capture, overflowReported, needsWindowSample;
         private volatile boolean connected;
         private volatile boolean hasLocalListeners;
         private long generation;
@@ -159,21 +159,48 @@ public final class SdlControllerManager implements ControllerManager, Controller
         CachedController(Controller device, int slot) {
             delegate = device; name = device.getName(); id = "SDL:" + name + ":" + slot;
             mapping = device.getMapping(); axes = new float[Math.min(8, Math.max(0, device.getAxisCount()))];
+            sampledAxes = new float[axes.length];
             diagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics") ? new ControllerInputDiagnostics("SDL:" + slot, 32, axes.length, true) : null;
             Logger.getGlobal().info("Controller backend=SDL/Jamepad, name=" + name + ", axes=" + axes.length + "; bindings are separate from JInput");
             sample();
         }
 
-        synchronized void sample() {
-            if (delegate == null) return;
-            if (diagnostics != null) diagnostics.beginPoll(System.nanoTime());
-            if (!delegate.isConnected()) { disconnect(); if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), false); return; }
-            boolean continuous = connected;
-            for (int i = 0; i < 32; i++) sample[i] = i <= delegate.getMaxButtonIndex() && delegate.getButton(i);
-            if (mapping != null) {
-                sample[28] |= pressed(mapping.buttonDpadLeft); sample[29] |= pressed(mapping.buttonDpadUp);
-                sample[30] |= pressed(mapping.buttonDpadRight); sample[31] |= pressed(mapping.buttonDpadDown);
+        void sample() {
+            final Controller device;
+            final long sampleGeneration;
+            synchronized (this) {
+                device = delegate;
+                sampleGeneration = generation;
             }
+            if (device == null) return;
+            if (diagnostics != null) diagnostics.beginPoll(System.nanoTime());
+            // A native read can dispatch focus on this thread. Do not hold the device monitor.
+            boolean present = device.isConnected();
+            if (present) {
+                int maxButton = device.getMaxButtonIndex();
+                for (int i = 0; i < sample.length; i++) sample[i] = pressed(device, maxButton, i);
+                if (mapping != null) {
+                    sample[28] |= pressed(device, maxButton, mapping.buttonDpadLeft);
+                    sample[29] |= pressed(device, maxButton, mapping.buttonDpadUp);
+                    sample[30] |= pressed(device, maxButton, mapping.buttonDpadRight);
+                    sample[31] |= pressed(device, maxButton, mapping.buttonDpadDown);
+                }
+                for (int i = 0; i < sampledAxes.length; i++) {
+                    float value = device.getAxis(i);
+                    sampledAxes[i] = Float.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
+                }
+            }
+            publishSample(present, sampleGeneration);
+        }
+
+        private synchronized void publishSample(boolean present, long sampleGeneration) {
+            if (disposed || generation != sampleGeneration) {
+                if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), false);
+                return;
+            }
+            needsWindowSample = false;
+            if (!present) { disconnect(); if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), false); return; }
+            boolean continuous = connected;
             for (int i = 0; i < 32; i++) {
                 boolean value = sample[i];
                 if (continuous) events.offer(i, value);
@@ -188,7 +215,7 @@ public final class SdlControllerManager implements ControllerManager, Controller
                 }
             }
             for (int i = 0; i < axes.length; i++) {
-                float value = delegate.getAxis(i); value = Float.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
+                float value = sampledAxes[i];
                 if (axes[i] != value) {
                     axes[i] = value; if (diagnostics != null) diagnostics.event(32 + i, value);
                     notifyChange(i, false, false, value);
@@ -204,7 +231,9 @@ public final class SdlControllerManager implements ControllerManager, Controller
             }
         }
 
-        private boolean pressed(int button) { return button >= 0 && button <= delegate.getMaxButtonIndex() && delegate.getButton(button); }
+        private boolean pressed(Controller device, int maxButton, int button) {
+            return button >= 0 && button <= maxButton && device.getButton(button);
+        }
         synchronized void disconnect() {
             boolean wasConnected = connected; connected = false; Arrays.fill(buttons, false); Arrays.fill(axes, 0);
             if (current == this) current = null;
@@ -212,6 +241,8 @@ public final class SdlControllerManager implements ControllerManager, Controller
         }
         public synchronized void resetEvents(boolean active) { capture = active; events.reset(active, buttons); generation++; }
         public synchronized long inputGeneration() { return generation; }
+        public synchronized void windowActivityChanged() { needsWindowSample = true; }
+        public synchronized boolean windowBaselineReady() { return !needsWindowSample; }
         public ControllerEventQueue events() { return events; }
         public ControllerInputDiagnostics diagnostics() { return diagnostics; }
 

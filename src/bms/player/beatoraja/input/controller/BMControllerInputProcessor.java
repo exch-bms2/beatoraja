@@ -140,6 +140,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice {
 	public synchronized void poll(final long microtime) {
 		if (!enabled || !windowActive) return;
         var queued = rawController();
+        if (windowBaseline && queued != null && !queued.windowBaselineReady()) return;
         boolean rebaseline = queued != null && connectionGeneration != queued.connectionGeneration();
         if (deviceButtonCapture != null && queued != null) {
             if (windowBaseline || rebaseline) deviceButtonCapture.reset();

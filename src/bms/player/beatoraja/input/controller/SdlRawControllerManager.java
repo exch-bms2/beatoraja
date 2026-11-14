@@ -227,6 +227,8 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         private final int slot;
         private final boolean[] physical, buttons = new boolean[32];
         private final float[] physicalAxes, axes = new float[8];
+        private final boolean[] sampledButtons;
+        private final float[] sampledAxes;
         private int pov;
         private SdlRawMapping mapping;
         private final ControllerEventQueue events = new ControllerEventQueue();
@@ -241,6 +243,7 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             this.device = device; this.slot = slot;
             mapping = new SdlRawMapping(new ControllerConfig(), device.buttons(), device.axes());
             physical = new boolean[device.buttons()]; physicalAxes = new float[device.axes()];
+            sampledButtons = new boolean[physical.length]; sampledAxes = new float[physicalAxes.length];
             diagnostics = Boolean.getBoolean("beatoraja.inputDiagnostics")
                     ? new ControllerInputDiagnostics(backend + ":" + slot, 32, 8, true) : null;
             Logger.getGlobal().info("Controller backend=" + backend + ", name=" + device.name() + ", buttons=" + device.buttons()
@@ -297,19 +300,37 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
             return (mapping.buttons[i] >= 0 && physical[mapping.buttons[i]]) || SdlRawMapping.hat(i, pov)
                     || (dpad >= 0 && dpad < physical.length && physical[dpad]);
         }
-        synchronized void snapshot() {
-            if (!source.connected(slot)) {
+        void snapshot() {
+            long sampleGeneration = inputGeneration();
+            // Native SDL reads can reenter the window focus callback; only lock for publication.
+            boolean present = source.connected(slot);
+            int sampledPov = 0;
+            if (present) {
+                for (int i = 0; i < sampledButtons.length; i++) sampledButtons[i] = source.button(slot, i);
+                for (int i = 0; i < sampledAxes.length; i++) {
+                    float value = source.axis(slot, i);
+                    sampledAxes[i] = Float.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
+                }
+                sampledPov = source.hat(slot);
+            }
+            publishSnapshot(present, sampledPov, sampleGeneration);
+        }
+
+        private synchronized void publishSnapshot(boolean present, int sampledPov, long sampleGeneration) {
+            if (generation != sampleGeneration) {
+                if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), false);
+                return;
+            }
+            if (!present) {
                 disconnect();
+                discardPendingEvents = false;
                 if (diagnostics != null) diagnostics.endPoll(System.nanoTime(), false);
                 return;
             }
             boolean continuous = connected;
-            for (int i = 0; i < physical.length; i++) physical[i] = source.button(slot, i);
-            for (int i = 0; i < physicalAxes.length; i++) {
-                float value = source.axis(slot, i);
-                physicalAxes[i] = Float.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
-            }
-            pov = source.hat(slot);
+            System.arraycopy(sampledButtons, 0, physical, 0, physical.length);
+            System.arraycopy(sampledAxes, 0, physicalAxes, 0, physicalAxes.length);
+            pov = sampledPov;
             publish(continuous || previouslyConnected);
             discardPendingEvents = false;
             if (!continuous && previouslyConnected) connectionGeneration++;
@@ -353,6 +374,7 @@ public class SdlRawControllerManager implements ControllerManager, ControllerBac
         }
         public synchronized void resetEvents(boolean active) { capture = active; events.reset(active, buttons); generation++; }
         public synchronized void windowActivityChanged() { discardPendingEvents = true; }
+        public synchronized boolean windowBaselineReady() { return !discardPendingEvents; }
         public synchronized long inputGeneration() { return generation; }
         public synchronized long connectionGeneration() { return connectionGeneration; }
         public ControllerEventQueue events() { return events; }
