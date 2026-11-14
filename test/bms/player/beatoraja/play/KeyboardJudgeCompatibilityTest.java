@@ -7,6 +7,8 @@ import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.*;
+import bms.player.beatoraja.skin.property.BooleanPropertyFactory;
+import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
 /** Exercises the real JudgeManager with inert application/audio fixtures, never player data. */
 public final class KeyboardJudgeCompatibilityTest {
@@ -20,8 +22,52 @@ public final class KeyboardJudgeCompatibilityTest {
             testSameTimeChord();
             testScratchEnds();
             testReplayLegacy();
+            testSplitJudgeDisplay();
         }
         System.out.println("KeyboardJudgeCompatibilityTest passed (normal/LN/CN/HCN, chords, legacy/new replay paths)");
+    }
+
+    private static void testSplitJudgeDisplay() throws Exception {
+        var model = model();
+        var scratch = line(1_000_000);
+        var key = line(2_000_000);
+        scratch.setNote(7, new NormalNote(0));
+        key.setNote(0, new NormalNote(1));
+        model.setAllTimeLine(new TimeLine[] {scratch, key});
+        var f = new Fixture(model, true);
+        var player = f.player;
+        ((PlaySkin) player.getSkin()).setJudgeregion(1);
+        f.judge.init(model, player.resource);
+
+        var scratchDuration = IntegerPropertyFactory.getIntegerProperty("judge_duration_s1");
+        var keyDuration = IntegerPropertyFactory.getIntegerProperty(528);
+        var scratchFast = BooleanPropertyFactory.getBooleanProperty(1246);
+        var keySlow = BooleanPropertyFactory.getBooleanProperty(1245);
+        var legacySlow = BooleanPropertyFactory.getBooleanProperty(1243);
+        check(!player.timer.isTimerOn(240) && !player.timer.isTimerOn(243)
+                && scratchDuration.get(player) == Integer.MIN_VALUE
+                && !scratchFast.get(player), "Split properties are inactive before the first judgement");
+
+        f.input.setKeyState(7, true, 960_000);
+        f.judge.update(960_000);
+        check(scratchFast.get(player) && scratchDuration.get(player) == 40
+                && player.timer.isTimerOn(243) && !player.timer.isTimerOn(240),
+                "Scratch FAST only starts the scratch channel");
+        player.timer.setMicroTimer(243, 123);
+
+        f.input.setKeyState(0, true, 2_030_000);
+        f.judge.update(2_030_000);
+        check(keySlow.get(player) && keyDuration.get(player) == -30 && player.timer.isTimerOn(240),
+                "Key SLOW starts the key channel");
+        check(scratchFast.get(player) && scratchDuration.get(player) == 40
+                && player.timer.getMicroTimer(243) == 123, "Key judgement leaves the scratch channel intact");
+        check(legacySlow.get(player) && IntegerPropertyFactory.getIntegerProperty(525).get(player) == -30
+                && player.timer.isTimerOn(46), "Legacy properties still follow the latest judgement");
+
+        f.judge.init(model, player.resource);
+        check(!player.timer.isTimerOn(240) && !player.timer.isTimerOn(243)
+                && keyDuration.get(player) == Integer.MIN_VALUE && !scratchFast.get(player),
+                "Reinitializing the judge clears split display state");
     }
 
     private static void testNormalAndShortTap() throws Exception {
@@ -183,6 +229,7 @@ public final class KeyboardJudgeCompatibilityTest {
     private static final class Fixture {
         final BMSPlayerInputProcessor input;
         final JudgeManager judge;
+        final TestPlayer player;
         Fixture(BMSModel model, boolean queued) throws Exception {
             var config = new Config();
             config.setAudioConfig(new AudioConfig());
@@ -209,7 +256,7 @@ public final class KeyboardJudgeCompatibilityTest {
             set(resource, PlayerResource.class, "pconfig", playerConfig);
             set(resource, PlayerResource.class, "orgmode", Mode.BEAT_7K);
             set(resource, PlayerResource.class, "mode", BMSPlayerMode.PLAY);
-            var player = KeyboardQueueTestSupport.allocate(TestPlayer.class);
+            player = KeyboardQueueTestSupport.allocate(TestPlayer.class);
             set(player, MainState.class, "main", controller);
             set(player, MainState.class, "timer", new TimerManager());
             set(player, MainState.class, "resource", resource);

@@ -248,6 +248,17 @@ public class BooleanPropertyFactory {
 
 	}
 
+	private static DrawProperty createSplitNowJudge(int region, boolean scratch, boolean early) {
+		return new DrawProperty(DrawConditionProperty.TYPE_NO_STATIC, state -> {
+			if (state instanceof BMSPlayer player) {
+				var judgement = player.getJudgeManager().getSplitJudgement(region, scratch);
+				return judgement != null && judgement.rank() > 1
+						&& (early ? judgement.timingMs() > 0 : judgement.timingMs() < 0);
+			}
+			return false;
+		});
+	}
+
 	private static class SongDataBooleanProperty extends DrawConditionProperty {
 
 		public final Predicate<SongData> bool;
@@ -550,6 +561,18 @@ public class BooleanPropertyFactory {
 		judge_3p_perfect(361, createNowJudge(2, 0)),
 		judge_3p_early(1362, createNowJudge(2, 1)),
 		judge_3p_late(1363, createNowJudge(2, 2)),
+		judge_1p_keys_early(OPTION_1P_KEYS_EARLY, createSplitNowJudge(0, false, true)),
+		judge_1p_keys_late(OPTION_1P_KEYS_LATE, createSplitNowJudge(0, false, false)),
+		judge_2p_keys_early(OPTION_2P_KEYS_EARLY, createSplitNowJudge(1, false, true)),
+		judge_2p_keys_late(OPTION_2P_KEYS_LATE, createSplitNowJudge(1, false, false)),
+		judge_3p_keys_early(OPTION_3P_KEYS_EARLY, createSplitNowJudge(2, false, true)),
+		judge_3p_keys_late(OPTION_3P_KEYS_LATE, createSplitNowJudge(2, false, false)),
+		judge_1p_scratch_early(OPTION_1P_SCRATCH_EARLY, createSplitNowJudge(0, true, true)),
+		judge_1p_scratch_late(OPTION_1P_SCRATCH_LATE, createSplitNowJudge(0, true, false)),
+		judge_2p_scratch_early(OPTION_2P_SCRATCH_EARLY, createSplitNowJudge(1, true, true)),
+		judge_2p_scratch_late(OPTION_2P_SCRATCH_LATE, createSplitNowJudge(1, true, false)),
+		judge_3p_scratch_early(OPTION_3P_SCRATCH_EARLY, createSplitNowJudge(2, true, true)),
+		judge_3p_scratch_late(OPTION_3P_SCRATCH_LATE, createSplitNowJudge(2, true, false)),
 		
 		judge_perfect_exist(OPTION_PERFECT_EXIST, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT,
 				(state) -> (state.getJudgeCount(0, true) + state.getJudgeCount(0, false) > 0))),

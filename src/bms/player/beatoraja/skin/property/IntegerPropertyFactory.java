@@ -469,6 +469,12 @@ public class IntegerPropertyFactory {
 		judge_duration1(525, createJudgeduration(0)),
 		judge_duration2(526, createJudgeduration(1)),
 		judge_duration3(527, createJudgeduration(2)),
+		judge_duration_k1(VALUE_JUDGE_1P_KEYS_DURATION, createSplitJudgeDuration(0, false)),
+		judge_duration_k2(VALUE_JUDGE_2P_KEYS_DURATION, createSplitJudgeDuration(1, false)),
+		judge_duration_k3(VALUE_JUDGE_3P_KEYS_DURATION, createSplitJudgeDuration(2, false)),
+		judge_duration_s1(VALUE_JUDGE_1P_SCRATCH_DURATION, createSplitJudgeDuration(0, true)),
+		judge_duration_s2(VALUE_JUDGE_2P_SCRATCH_DURATION, createSplitJudgeDuration(1, true)),
+		judge_duration_s3(VALUE_JUDGE_3P_SCRATCH_DURATION, createSplitJudgeDuration(2, true)),
 
 		chartlength_minute(1163, (state) -> (state.resource.getSongdata() != null
 			? (state.resource.getSongdata().getLength() / 60000) % 60
@@ -913,6 +919,18 @@ public class IntegerPropertyFactory {
 					return (int) judge.getRecentJudgeTiming(player);
 				}
 				return 0;
+			};
+		}
+
+		private static IntegerProperty createSplitJudgeDuration(int region, boolean scratch) {
+			return state -> {
+				if (state instanceof BMSPlayer player) {
+					var judgement = player.getJudgeManager().getSplitJudgement(region, scratch);
+					if (judgement != null) {
+						return judgement.timingMs();
+					}
+				}
+				return Integer.MIN_VALUE;
 			};
 		}
 	}
