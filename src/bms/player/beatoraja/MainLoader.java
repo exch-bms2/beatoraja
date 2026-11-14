@@ -31,7 +31,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Input;
@@ -190,7 +189,7 @@ public class MainLoader extends Application {
 			Lwjgl3ApplicationConfiguration cfg = createApplicationConfiguration(config);
 			FramePacingDiagnostics frames = FramePacingDiagnostics.createIfEnabled(config);
 			try {
-				new Lwjgl3Application(FramePacingDiagnostics.wrap(new ApplicationListener() {
+				new Lwjgl3GameApplication(FramePacingDiagnostics.wrap(new ApplicationListener() {
 
 					public void resume() {
 						main.resume();
@@ -615,6 +614,12 @@ public class MainLoader extends Application {
 		@Override
 		public void publish(LogRecord record) {
 			if (closed.get() || !isLoggable(record)) {
+				return;
+			}
+
+			if (record instanceof Lwjgl3GameApplication.BeforeCleanupLogRecord) {
+				publishToDelegate(record);
+				delegate.flush();
 				return;
 			}
 

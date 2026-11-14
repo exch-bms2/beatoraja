@@ -611,7 +611,16 @@ tasks.register<JavaExec>("glDiagnosticFailureTest") {
     systemProperty("beatoraja.glTest.output", file(glTestOutput).absolutePath)
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
-val glIntegrationTasks = listOf("lwjgl3BgaSkinIntegrationTest", "lwjgl3StageFramebufferTest",
+tasks.register<JavaExec>("lwjgl3GameCleanupTest") {
+    group = "verification"
+    description = "Verify early game-loop failure logging and GLFW error callback cleanup with real GL."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3GameCleanupTest")
+    timeout.set(Duration.ofMinutes(2))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+val glIntegrationTasks = listOf("lwjgl3BgaSkinIntegrationTest", "lwjgl3StageFramebufferTest", "lwjgl3GameCleanupTest",
     "lwjgl3TextInputTest", "lwjgl3WindowInputLifecycleTest", "lwjgl3StateEnduranceTest",
     "lwjgl3StateEnduranceFailureTest", "glDiagnosticFailureTest", "packagedGameIntegrationTest")
 tasks.withType<JavaExec>().configureEach {
