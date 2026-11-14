@@ -29,6 +29,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private final MouseDeltas scratch = new MouseDeltas();
     private volatile boolean scratchEnabled;
     private volatile boolean windowInputActive = true;
+    private boolean focused;
     private boolean iconified;
     private final boolean[] suppressedKeys = new boolean[256];
     private volatile java.util.function.Consumer<Boolean> activityListener;
@@ -65,16 +66,22 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         this.window = window;
         this.windowPositionSupported = windowPositionSupported;
         this.windowsKeyboard = windowsKeyboard;
-        windowInputActive = window.isFocused();
+        long handle = window.getWindowHandle();
+        focused = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE;
+        iconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
+        windowInputActive = focused && !iconified;
         callbacks = new Lwjgl3InputCallbacks(window.getWindowHandle(), this, diagnostics);
     }
 
     @Override public void update() {
         long started = frameDiagnostics != null ? System.nanoTime() : 0;
-        if (callbacks != null) callbacks.attachWindowCallbacks();
+        if (callbacks != null && callbacks.attachWindowCallbacks()) {
+            // Fullscreen can acquire focus before libGDX installs its window callbacks.
+            long handle = window.getWindowHandle();
+            windowActivity(GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE,
+                    GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE);
+        }
         super.update();
-        // Never invoke the listener while holding diagnostics: polling takes keyboard -> diagnostics.
-        windowActivity(window.isFocused(), iconified);
         if (windowDiagnostics != null) windowDiagnostics.sample();
         if (keyboardEvents.isOverflowed() && !overflowReported) {
             overflowReported = true;
@@ -84,7 +91,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         if (diagnostics == null) publishState();
         else synchronized (diagnostics) {
             publishState();
-            diagnostics.publish(keys, buttons, window.isFocused(), System.nanoTime());
+            diagnostics.publish(keys, buttons, focused, System.nanoTime());
         }
         if (frameDiagnostics != null) frameDiagnostics.inputUpdated(started, System.nanoTime());
     }
@@ -184,6 +191,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     /** Called on the GLFW owner thread, including loss/regain within one event-loop iteration. */
     void windowActivity(boolean focused, boolean minimized) {
+        this.focused = focused;
         iconified = minimized;
         boolean active = focused && !minimized;
         if (active == windowInputActive) return;
@@ -202,7 +210,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     void windowFocus(boolean focused) { windowActivity(focused, iconified); }
-    void windowIconified(boolean minimized) { windowActivity(window.isFocused(), minimized); }
+    void windowIconified(boolean minimized) { windowActivity(focused, minimized); }
 
     void keyboardEdge(int key, boolean down, long time) {
         if (key < 0 || key >= suppressedKeys.length) return;

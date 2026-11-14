@@ -1036,6 +1036,7 @@ tasks.register<JavaExec>("lwjgl3WindowInputLifecycleTest") {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3WindowInputLifecycleTest")
     systemProperty("beatoraja.inputDiagnostics", "true")
+    systemProperty("beatoraja.inputLifecycleTest.fullscreen", providers.gradleProperty("inputLifecycleFullscreen").getOrElse("false"))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 
