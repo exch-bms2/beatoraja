@@ -17,7 +17,6 @@ import com.badlogic.gdx.utils.Json;
 /** Non-JavaFX entry point; keeps the GLFW event loop out of the Launcher JVM. */
 public final class DesktopLauncher {
     static final String GAME_PROCESS = "beatoraja.gameProcess";
-    private static final String NVIDIA_WAYLAND_WORKAROUND = "beatoraja.nvidiaWaylandWorkaround";
     private static final String NVIDIA_THREADED_OPTIMIZATIONS = "__GL_THREADED_OPTIMIZATIONS";
 
     private DesktopLauncher() { }
@@ -88,11 +87,15 @@ public final class DesktopLauncher {
     }
 
     public static Process startGame(String... args) throws IOException {
+        return startGame(Config.readSystemConfig(), args);
+    }
+
+    public static Process startGame(Config config, String... args) throws IOException {
         String os = System.getProperty("os.name");
         var child = new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
                 os, ManagementFactory.getRuntimeMXBean().getInputArguments(), args))
                 .directory(Path.of(System.getProperty("user.dir")).toFile()).inheritIO();
-        if (configureGameEnvironment(child.environment(), os, Boolean.getBoolean(NVIDIA_WAYLAND_WORKAROUND))) {
+        if (configureGameEnvironment(child.environment(), os, config.isNvidiaWaylandWorkaroundEnabled())) {
             DistributionDiagnostics.event("NVIDIA Wayland workaround applied to game child: " + NVIDIA_THREADED_OPTIMIZATIONS + "=0");
         }
         return DistributionDiagnostics.observe(child.start(), "game");

@@ -694,7 +694,7 @@ public class PlayConfigurationView implements Initializable {
 	public void start() {
 		commit();
 		try {
-			bms.player.beatoraja.DesktopLauncher.startGame(songUpdated
+			bms.player.beatoraja.DesktopLauncher.startGame(config, songUpdated
 					? new String[]{"-s", "--song-updated"} : new String[]{"-s"});
 			closeLauncher();
 		} catch (IOException e) {

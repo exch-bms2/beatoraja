@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
+import com.badlogic.gdx.utils.Json;
 import bms.player.beatoraja.input.PollingLwjgl3Input.MouseDeltas;
 
 /** Headless coverage for process separation, configuration translation and mouse deltas. */
@@ -27,6 +28,7 @@ public final class Lwjgl3MigrationTest {
         }
         check(!javafx.application.Application.class.isAssignableFrom(DesktopLauncher.class), "Non-JavaFX entry point");
         verifyNvidiaWaylandWorkaround();
+        verifyNvidiaWaylandConfig();
 
         Graphics.DisplayMode[] modes = {mode(1280,720,60), mode(1920,1080,60), mode(1920,1080,144)};
         check(MainLoader.selectDisplayMode(modes, 1920, 1080).refreshRate == 144, "Highest matching refresh rate");
@@ -65,6 +67,31 @@ public final class Lwjgl3MigrationTest {
         check((int)(packed >> 32) == 7 && (int)packed == -5, "Mouse motion accumulated across frames");
         check(deltas.drain() == 0, "High-frequency polling must not repeat frame motion");
         System.out.println("Lwjgl3MigrationTest passed");
+    }
+
+    private static void verifyNvidiaWaylandConfig() {
+        String property = "beatoraja.nvidiaWaylandWorkaround";
+        String previous = System.getProperty(property);
+        try {
+            System.clearProperty(property);
+            var json = new Json();
+            var config = json.fromJson(Config.class, "{}");
+            check(!new Config().isNvidiaWaylandWorkaroundEnabled() && !config.isNvidiaWaylandWorkaroundEnabled(),
+                    "New and legacy configs default to off");
+            System.setProperty(property, "true");
+            check(config.isNvidiaWaylandWorkaroundEnabled() && !config.isNvidiaWaylandWorkaround(),
+                    "Legacy VM option enables the workaround without changing the saved value");
+            config.setNvidiaWaylandWorkaround(true);
+            config = json.fromJson(Config.class, json.toJson(config));
+            System.clearProperty(property);
+            check(config.isNvidiaWaylandWorkaroundEnabled(), "Saved opt-in survives a reload");
+            System.setProperty(property, "false");
+            check(!config.isNvidiaWaylandWorkaroundEnabled() && config.isNvidiaWaylandWorkaround(),
+                    "Explicit VM opt-out overrides the saved setting without clearing it");
+        } finally {
+            if (previous == null) System.clearProperty(property);
+            else System.setProperty(property, previous);
+        }
     }
 
     private static void verifyNvidiaWaylandWorkaround() {

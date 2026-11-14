@@ -110,6 +110,7 @@ public class Config implements Validatable {
 	 */
 	private boolean vsync;
 	private boolean notePositionSmoothing;
+	private boolean nvidiaWaylandWorkaround;
 	/**
 	 * 解像度
 	 */
@@ -302,6 +303,19 @@ public class Config implements Validatable {
 	public boolean isNotePositionSmoothingEnabled() {
 		String override = System.getProperty("beatoraja.notePositionSmoothing");
 		return override == null ? notePositionSmoothing : Boolean.parseBoolean(override);
+	}
+
+	public boolean isNvidiaWaylandWorkaround() {
+		return nvidiaWaylandWorkaround;
+	}
+
+	public void setNvidiaWaylandWorkaround(boolean enabled) {
+		nvidiaWaylandWorkaround = enabled;
+	}
+
+	boolean isNvidiaWaylandWorkaroundEnabled() {
+		String override = System.getProperty("beatoraja.nvidiaWaylandWorkaround");
+		return override == null ? nvidiaWaylandWorkaround : Boolean.parseBoolean(override);
 	}
 
 	public int getBga() {
@@ -766,6 +780,12 @@ public class Config implements Validatable {
 	}
 
 	public static Config read() {
+		Config config = readSystemConfig();
+		PlayerConfig.init(config);
+		return config;
+	}
+
+	static Config readSystemConfig() {
 		Config config = null;
 		if (Files.exists(configpath)) {
 			config = read(configpath, StandardCharsets.UTF_8);
@@ -777,8 +797,6 @@ public class Config implements Validatable {
 			config = new Config();
 		}
 		config.validate();
-
-		PlayerConfig.init(config);
 
 		return config;
 	}

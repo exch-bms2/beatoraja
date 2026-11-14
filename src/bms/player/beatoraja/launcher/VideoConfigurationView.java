@@ -33,6 +33,8 @@ public class VideoConfigurationView implements Initializable {
 	private CheckBox vSync;
 	@FXML
 	private CheckBox notePositionSmoothing;
+	@FXML
+	private CheckBox nvidiaWaylandWorkaround;
 
 	@FXML
 	private Spinner<Integer> maxFps;
@@ -48,6 +50,9 @@ public class VideoConfigurationView implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 		this.resources = resources;
+		boolean linux = "Linux".equals(System.getProperty("os.name"));
+		nvidiaWaylandWorkaround.setVisible(linux);
+		nvidiaWaylandWorkaround.setManaged(linux);
 		screens = MainLoader.getLauncherScreenInfo();
 		populateMonitors(null);
 		displayMode.getItems().setAll(Config.DisplayMode.values());
@@ -83,6 +88,7 @@ public class VideoConfigurationView implements Initializable {
 		resolution.setValue(config.getResolution());
 		vSync.setSelected(config.isVsync());
 		notePositionSmoothing.setSelected(config.isNotePositionSmoothing());
+		nvidiaWaylandWorkaround.setSelected(config.isNvidiaWaylandWorkaround());
 		bgaOp.getSelectionModel().select(config.getBga());
 		bgaExpand.getSelectionModel().select(config.getBgaExpand());
 		maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
@@ -99,6 +105,9 @@ public class VideoConfigurationView implements Initializable {
 		config.setStartupMonitor(monitor != null ? monitor.selection() : null);
 		config.setVsync(vSync.isSelected());
 		config.setNotePositionSmoothing(notePositionSmoothing.isSelected());
+		if (nvidiaWaylandWorkaround.isVisible()) {
+			config.setNvidiaWaylandWorkaround(nvidiaWaylandWorkaround.isSelected());
+		}
 		config.setBga(bgaOp.getSelectionModel().getSelectedIndex());
 		config.setBgaExpand(bgaExpand.getSelectionModel().getSelectedIndex());
 		config.setMaxFramePerSecond(maxFps.getValue());
