@@ -1,6 +1,8 @@
 package bms.player.beatoraja;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
@@ -24,6 +26,7 @@ public final class Lwjgl3MigrationTest {
             check(!command.contains("-XstartOnFirstThread"), "No Mac flag on " + os);
         }
         check(!javafx.application.Application.class.isAssignableFrom(DesktopLauncher.class), "Non-JavaFX entry point");
+        verifyNvidiaWaylandWorkaround();
 
         Graphics.DisplayMode[] modes = {mode(1280,720,60), mode(1920,1080,60), mode(1920,1080,144)};
         check(MainLoader.selectDisplayMode(modes, 1920, 1080).refreshRate == 144, "Highest matching refresh rate");
@@ -62,6 +65,34 @@ public final class Lwjgl3MigrationTest {
         check((int)(packed >> 32) == 7 && (int)packed == -5, "Mouse motion accumulated across frames");
         check(deltas.drain() == 0, "High-frequency polling must not repeat frame motion");
         System.out.println("Lwjgl3MigrationTest passed");
+    }
+
+    private static void verifyNvidiaWaylandWorkaround() {
+        String variable = "__GL_THREADED_OPTIMIZATIONS";
+        var inherited = Map.of("WAYLAND_DISPLAY", "wayland-0", "XDG_SESSION_TYPE", "wayland", "DISPLAY", ":0");
+        var child = new HashMap<>(inherited);
+        check(!DesktopLauncher.configureGameEnvironment(child, "Linux", false) && child.equals(inherited),
+                "Disabled workaround must not change the child environment");
+        for (String os : List.of("Windows 11", "Mac OS X")) {
+            check(!DesktopLauncher.configureGameEnvironment(child, os, true) && child.equals(inherited),
+                    "Workaround must not change the environment on " + os);
+        }
+        child.put("XDG_SESSION_TYPE", "x11");
+        var x11 = Map.copyOf(child);
+        check(!DesktopLauncher.configureGameEnvironment(child, "Linux", true) && child.equals(x11),
+                "Do not change explicitly selected X11, even when a Wayland socket is available");
+        child.remove("WAYLAND_DISPLAY");
+        child.put("XDG_SESSION_TYPE", "wayland");
+        var noWaylandDisplay = Map.copyOf(child);
+        check(!DesktopLauncher.configureGameEnvironment(child, "Linux", true) && child.equals(noWaylandDisplay),
+                "A session label without a Wayland display is insufficient");
+        child.putAll(inherited);
+        child.put(variable, "1");
+        check(!DesktopLauncher.configureGameEnvironment(child, "Linux", true) && "1".equals(child.get(variable)),
+                "An explicit inherited value must be preserved");
+        child.remove(variable);
+        check(DesktopLauncher.configureGameEnvironment(child, "Linux", true) && "0".equals(child.remove(variable))
+                        && child.equals(inherited), "Only the NVIDIA variable is added for the opted-in game child");
     }
 
     private static Object field(Object instance, String name) throws Exception {
