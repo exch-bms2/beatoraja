@@ -8,7 +8,7 @@ import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 
 /** Legacy settings must remain readable without retaining retired credentials. */
 public final class TwitterIntegrationRemovalTest {
@@ -52,8 +52,8 @@ public final class TwitterIntegrationRemovalTest {
             check(!fxml.toLowerCase(Locale.ROOT).contains("twitter") && !fxml.contains("#startPINAuth"),
                     "Retired authentication UI or event handler");
         }
-        check(KeyCommand.valueOf("SAVE_SCREENSHOT") != null, "Screenshot command must remain");
-        for (KeyCommand command : KeyCommand.values()) {
+        check(KeyboardShortcut.valueOf("SAVE_SCREENSHOT") != null, "Screenshot command must remain");
+        for (KeyboardShortcut command : KeyboardShortcut.values()) {
             check(!command.name().contains("TWITTER"), "Retired posting command");
         }
         System.out.println("TwitterIntegrationRemovalTest passed");
