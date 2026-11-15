@@ -32,6 +32,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 	 */
 	private boolean[] judgeVanish;
 	private boolean autoplay = false;
+	private boolean guideSEAtLNStart;
 	/**
 	 * オートプレイでキーを押下する最小時間(ms)
 	 */
@@ -70,6 +71,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
 		final PlayerConfig config = resource.getPlayerConfig();
+		guideSEAtLNStart = config.isGuideSEAtLNStart();
 		final long[] nmjudge = rule.getJudgeWindow(NoteType.NOTE, judgerank, keyJudgeWindowRate);
 		nreleasemargin = config.isCustomJudge() ? rule.longnoteMargin * config.getLongnoteMarginRate() / 100L : rule.longnoteMargin;
 		final long[] smjudge = rule.getJudgeWindow(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate);
@@ -147,6 +149,9 @@ public final class JudgeManager extends AbstractJudgeManager {
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								state.mpassingcount = 0;
+								if (guideSEAtLNStart) {
+									keysound.play(0, true);
+								}
 								//LN時のレーザー色変更処理
 								setLaneJudgement(state, 8);
 							} else {
@@ -314,6 +319,9 @@ public final class JudgeManager extends AbstractJudgeManager {
 								if(judgeVanish[judge]) {
 									state.lnstartJudge = judge;
 									state.lnstartDuration = dmtime;
+									if (guideSEAtLNStart) {
+										keysound.play(judge, dmtime >= 0);
+									}
 									state.processing = ln.getPair();
 									state.releasetime = Long.MIN_VALUE;
 									state.lnendJudge = Integer.MIN_VALUE;
@@ -425,7 +433,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 								state.releasetime = pmtime;
 								state.lnendJudge = judge >= 3 ? 3 : judge;
 							} else {
-								this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime, true);
+								this.updateMicro(state, state.processing.getPair(), mtime, judge, dmtime, true, !guideSEAtLNStart);
 								keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 								state.processing = null;
 								state.releasetime = Long.MIN_VALUE;
@@ -454,7 +462,8 @@ public final class JudgeManager extends AbstractJudgeManager {
 					|| state.processing.getType() == LongNote.TYPE_LONGNOTE) {
 					if(state.releasetime != Long.MIN_VALUE && state.lnendJudge >= 3 && state.releasetime + releasemargin <= mtime) {
 						keysound.setVolume(state.processing.getPair(), 0.0f);
-						this.updateMicro(state, state.processing.getPair(), mtime, state.lnendJudge, state.processing.getMicroTime() - state.releasetime, true);
+						this.updateMicro(state, state.processing.getPair(), mtime, state.lnendJudge,
+								state.processing.getMicroTime() - state.releasetime, true, !guideSEAtLNStart);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 						state.processing = null;
 						state.releasetime = Long.MIN_VALUE;
@@ -462,7 +471,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 					} else if(state.processing.getMicroTime() < mtime) {
 						final int judge = state.lnendJudge != Integer.MIN_VALUE ? state.lnendJudge : state.lnstartJudge;
 						final long duration = state.lnendJudge != Integer.MIN_VALUE ? state.processing.getMicroTime() - state.releasetime : state.lnstartDuration;
-						this.updateMicro(state, state.processing.getPair(), mtime, judge, duration, true);
+						this.updateMicro(state, state.processing.getPair(), mtime, judge, duration, true, !guideSEAtLNStart);
 						keysound.play(state.processing, config.getAudioConfig().getKeyvolume(), 0);
 						state.processing = null;
 						state.releasetime = Long.MIN_VALUE;

@@ -37,6 +37,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
+	private static final int LN_GUIDE_SE_END = 0;
+	private static final int LN_GUIDE_SE_START = 1;
 
 
 	// TODO スキンプレビュー機能
@@ -188,6 +190,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox guidese;
 	@FXML
+	private ComboBox<Integer> lnGuideSETiming;
+	@FXML
 	private CheckBox independentPlaySides;
 	@FXML
 	private CheckBox windowhold;
@@ -298,6 +302,8 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
+		initComboBox(lnGuideSETiming, new String[] { arg1.getString("LN_GUIDE_SE_END"), arg1.getString("LN_GUIDE_SE_START") });
+		lnGuideSETiming.disableProperty().bind(guidese.selectedProperty().not());
 
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
@@ -455,6 +461,7 @@ public class PlayConfigurationView implements Initializable {
 		exitpressduration.getValueFactory().setValue(player.getExitPressDuration());
 		chartpreview.setSelected(player.isChartPreview());
 		guidese.setSelected(player.isGuideSE());
+		lnGuideSETiming.getSelectionModel().select(player.isGuideSEAtLNStart() ? LN_GUIDE_SE_START : LN_GUIDE_SE_END);
 		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
@@ -564,6 +571,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setExitPressDuration(getValue(exitpressduration));
 		player.setChartPreview(chartpreview.isSelected());
 		player.setGuideSE(guidese.isSelected());
+		player.setGuideSEAtLNStart(lnGuideSETiming.getSelectionModel().getSelectedIndex() == LN_GUIDE_SE_START);
 		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());

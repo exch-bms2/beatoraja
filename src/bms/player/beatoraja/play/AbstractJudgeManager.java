@@ -266,6 +266,11 @@ public abstract class AbstractJudgeManager {
 	private final int[] COMBO_TIMER = { TIMER_COMBO_1P, TIMER_COMBO_2P, TIMER_COMBO_3P };
 
 	final void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish) {
+		updateMicro(state, n, mtime, judge, mfast, judgeVanish, true);
+	}
+
+	final void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish,
+			boolean playGuideSE) {
 		if (judgeVanish) {
 			if (score.getPassnotes() < ghostJudge.length) {
 				ghostJudge[score.getPassnotes()] = judge;
@@ -333,7 +338,9 @@ public abstract class AbstractJudgeManager {
 			main.timer.setTimerOn(TIMER_JUDGE_1P_KEYS + slot);
 		}
 		main.update(judge, mtime / 1000);
-		keysound.play(judge, mfast >= 0);
+		if (playGuideSE) {
+			keysound.play(judge, mfast >= 0);
+		}
 
 		final PlayerConfig player = main.main.getPlayerConfig();
 		if(player.isNotesDisplayTimingAutoAdjust()) {
