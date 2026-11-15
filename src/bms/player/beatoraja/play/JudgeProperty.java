@@ -53,6 +53,42 @@ public enum JudgeProperty {
             new boolean[]{true, true, true, true, true, false },
             JudgeWindowRule.NORMAL
 			),
+    /** raindrop's default BMS/BMSON timing windows at a 100% judge rank. */
+    RAINDROP(new long[]{ -22000, 22000, -55000, 55000, -137500, 137500, -250000, 250000, -250000, 625000 },
+            new long[]{ -22000, 22000, -55000, 55000, -137500, 137500, -250000, 250000, -250000, 625000 },
+            new long[]{ -22000, 22000, -55000, 55000, -137500, 137500, -250000, 250000, -250000, 625000 },
+            0,
+            new long[]{ -22000, 22000, -55000, 55000, -137500, 137500, -250000, 250000, -250000, 625000 },
+            0,
+            new boolean[]{true, true, true, false, false, false },
+            MissCondition.ALWAYS,
+            new boolean[]{true, true, true, true, true, false },
+            JudgeWindowRule.NORMAL
+            ),
+    /** Pulsus's default LR2 NORMAL-compatible timing windows. */
+    PULSUS(new long[]{ -18000, 18000, -40000, 40000, -100000, 100000, -200000, 200000, -200000, 1000000 },
+            new long[]{ -18000, 18000, -40000, 40000, -100000, 100000, -200000, 200000, -200000, 1000000 },
+            new long[]{ -18000, 18000, -40000, 40000, -100000, 100000, -200000, 200000, -200000, 1000000 },
+            0,
+            new long[]{ -18000, 18000, -40000, 40000, -100000, 100000, -200000, 200000, -200000, 1000000 },
+            0,
+            new boolean[]{true, true, true, false, false, false },
+            MissCondition.ALWAYS,
+            new boolean[]{true, true, true, true, true, false },
+            JudgeWindowRule.NORMAL
+            ),
+    /** Bemuse's normal timegates for level 6 and above. */
+    BEMUSE(new long[]{ -20000, 20000, -50000, 50000, -100000, 100000, -200000, 200000 },
+            new long[]{ -20000, 20000, -50000, 50000, -100000, 100000, -200000, 200000 },
+            new long[]{ -40000, 40000, -100000, 100000, -200000, 200000, -200000, 200000 },
+            0,
+            new long[]{ -40000, 40000, -100000, 100000, -200000, 200000, -200000, 200000 },
+            0,
+            new boolean[]{true, true, true, false, false, false },
+            MissCondition.ALWAYS,
+            new boolean[]{true, true, true, true, true, false },
+            JudgeWindowRule.NORMAL
+            ),
 	;
 
     /**
