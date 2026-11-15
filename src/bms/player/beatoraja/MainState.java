@@ -112,7 +112,7 @@ public abstract class MainState {
 		e.event.exec(this, arg1, arg2);
 	}
 	
-	public final ScoreDataProperty getScoreDataProperty() {
+	public ScoreDataProperty getScoreDataProperty() {
 		return score;
 	}
 

@@ -16,6 +16,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import bms.model.BMSModel;
+import bms.model.Mode;
 import bms.model.TimeLine;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
@@ -97,6 +98,23 @@ public final class PlayDataAccessor {
 
 		public int exscore() {
 			return (judgeCounts.get(0) + judgeCounts.get(1)) * 2 + judgeCounts.get(2) + judgeCounts.get(3);
+		}
+
+		public ScoreData toScoreData(Mode playMode) {
+			var score = new ScoreData(playMode);
+			score.setSha256(sha256);
+			score.setMode(mode);
+			score.setNotes(notes);
+			score.setPassnotes(passed);
+			score.setCombo(combo);
+			score.setMinbp(minbp);
+			score.setClear(clear.id);
+			score.setGauge(gauge);
+			for (int i = 0; i < 6; i++) {
+				score.addJudgeCount(i, true, judgeCounts.get(i * 2));
+				score.addJudgeCount(i, false, judgeCounts.get(i * 2 + 1));
+			}
+			return score;
 		}
 
 		boolean canUpdateBest() {

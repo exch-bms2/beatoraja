@@ -209,6 +209,11 @@ public abstract class AbstractResult extends MainState {
 	public int getGaugeType() {
 		return gaugeType;
 	}
+
+	public float getDisplayGaugeValue() {
+		var values = resource.getGauge()[getGaugeType()];
+		return values.get(values.size - 1);
+	}
 	
 	public int getState() {
 		return state;
@@ -239,6 +244,14 @@ public abstract class AbstractResult extends MainState {
 	public ScoreData getOldScore() {
 		return oldscore;
 	}	
+
+	public ScoreData getDisplayScore() {
+		return getNewScore();
+	}
+
+	public ScoreData getDisplayOldScore() {
+		return getOldScore();
+	}
 	
 	public TimingDistribution getTimingDistribution() {
 		return timingDistribution;

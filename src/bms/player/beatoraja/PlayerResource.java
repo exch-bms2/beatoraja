@@ -68,6 +68,7 @@ public final class PlayerResource {
 	 * スコア
 	 */
 	private ScoreData score;
+	private AlternateResultScore alternateResultScore;
 	/**
 	 * ライバルスコア
 	 */
@@ -152,6 +153,7 @@ public final class PlayerResource {
 		courseindex = 0;
 		cscore = null;
 		score = null;
+		alternateResultScore = null;
 //		rscore = null;
 		tscore = null;
 		gauge = null;
@@ -165,6 +167,7 @@ public final class PlayerResource {
 	}
 
 	public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
+		alternateResultScore = null;
 		// TODO play mode, リプレイデータでの読み込み分岐をここで行う
 		this.mode = mode;
 		replay = new ReplayData();
@@ -300,6 +303,19 @@ public final class PlayerResource {
 
 	public ScoreData getScoreData() {
 		return score;
+	}
+
+	public record AlternateResultScore(ScoreData score, ScoreData previousBest, GaugeHistory gaugeHistory) {}
+
+	/** Samples transferred to the result screen after the judgment thread has stopped. */
+	public record GaugeHistory(AbstractGrooveGauge gauge, FloatArray[] values, LongArray timesUs, long durationUs) {}
+
+	public AlternateResultScore getAlternateResultScore() {
+		return alternateResultScore;
+	}
+
+	public void setAlternateResultScore(AlternateResultScore score) {
+		alternateResultScore = score;
 	}
 
 	public void setScoreData(ScoreData score) {

@@ -34,6 +34,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.external.ScreenShotExporter;
 import bms.player.beatoraja.result.AbstractResult;
+import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
 public final class DiscordWebhook {
@@ -105,8 +106,11 @@ public final class DiscordWebhook {
                 + StringPropertyFactory.getStringProperty(STRING_FULLTITLE).get(result)).strip();
         int end = title.offsetByCodePoints(0, Math.min(256, title.codePointCount(0, title.length())));
         return scoreCard(title.isEmpty() ? "beatoraja" : title.substring(0, end),
-                scoreDescription(score, result.getOldScore(), ScreenShotExporter.getRankTypeName(result),
-                        ScreenShotExporter.getClearTypeName(result), result.getIRRank(),
+                scoreDescription(score, result.getOldScore(),
+                        result instanceof MusicResult musicResult
+                                ? ScreenShotExporter.getRankTypeName(musicResult.getPrimaryScoreDataProperty())
+                                : ScreenShotExporter.getRankTypeName(result),
+                        ScreenShotExporter.getClearTypeName(score.getClear()), result.getIRRank(),
                         result.getIRTotalPlayer(), result.getOldIRRank()));
     }
 

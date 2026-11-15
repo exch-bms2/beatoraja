@@ -89,19 +89,8 @@ final class RuleScoreStore {
 
 	private void save(Connection connection, ScoreAttempt attempt, boolean allowed, long date) throws SQLException {
 		boolean eligible = allowed && attempt.canUpdateBest();
-		var score = new ScoreData();
-		score.setSha256(attempt.sha256());
-		score.setMode(attempt.mode());
-		score.setNotes(attempt.notes());
-		score.setPassnotes(attempt.passed());
-		score.setCombo(attempt.combo());
-		score.setMinbp(attempt.minbp());
-		score.setClear(attempt.clear().id);
+		var score = attempt.toScoreData(null);
 		score.setDate(date);
-		for (int i = 0; i < 6; i++) {
-			score.addJudgeCount(i, true, attempt.judgeCounts().get(i * 2));
-			score.addJudgeCount(i, false, attempt.judgeCounts().get(i * 2 + 1));
-		}
 		if (eligible) {
 			var best = scores.getScoreData(connection, score.getSha256(), score.getMode());
 			if (best == null) {

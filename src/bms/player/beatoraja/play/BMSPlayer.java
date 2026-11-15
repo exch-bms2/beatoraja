@@ -392,6 +392,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void create() {
+		resource.setAlternateResultScore(null);
 		final BMSPlayerMode autoplay = resource.getPlayMode();
 		final PlayerConfig config = resource.getPlayerConfig();
 		laneProperty = new LaneProperty(model.getMode());
@@ -1072,7 +1073,16 @@ public class BMSPlayer extends MainState {
 		if (secondary != null) {
 			Logger.getGlobal().info("LunaticRave2 secondary result: " + secondary);
 			try {
-				main.getPlayDataAccessor().writeLunaticRave2Attempt(secondary.toLocalAttempt(model), resource.isUpdateScore());
+				var data = main.getPlayDataAccessor();
+				var attempt = secondary.toLocalAttempt(model);
+				if (secondary.outcome() != SecondaryJudging.Outcome.ERROR
+						&& secondary.outcome() != SecondaryJudging.Outcome.INPUT_LOST) {
+					var previous = data.readLunaticRave2Best(attempt.sha256(), attempt.mode());
+					var score = attempt.toScoreData(model.getMode());
+					score.setRule(BMSPlayerRule.LunaticRave2);
+					resource.setAlternateResultScore(new PlayerResource.AlternateResultScore(score, previous, secondary.gaugeHistory()));
+				}
+				data.writeLunaticRave2Attempt(attempt, resource.isUpdateScore());
 			} catch (IllegalArgumentException e) {
 				Logger.getGlobal().warning("Could not save the local LunaticRave2 score: " + e.getMessage());
 			}

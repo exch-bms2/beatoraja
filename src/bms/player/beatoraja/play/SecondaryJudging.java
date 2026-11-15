@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.LongArray;
+
 import bms.model.BMSModel;
 import bms.model.LongNote;
 import bms.model.Mode;
@@ -16,14 +19,17 @@ import bms.player.beatoraja.PlayDataAccessor.ScoreAttempt;
 import bms.player.beatoraja.PlayDataAccessor.ScoreOutcome;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.PlayerResource.GaugeHistory;
 import bms.player.beatoraja.input.JudgeEventQueue;
 
 /** In-memory, silent 7KEY LR2 run. The judge thread owns it until it joins. */
 final class SecondaryJudging {
+	private static final long GAUGE_INTERVAL_US = 500_000;
 	enum Outcome { RUNNING, FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
 
 	record Result(Outcome outcome, int passed, int exScore, int maxCombo,
-			List<Integer> judgeCounts, int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear) {
+			List<Integer> judgeCounts, int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear,
+			GaugeHistory gaugeHistory) {
 		ScoreAttempt toLocalAttempt(BMSModel model) {
 			int mode = model.containsUndefinedLongNote() ? model.getLntype() : 0;
 			var localOutcome = switch (outcome) {
@@ -43,6 +49,9 @@ final class SecondaryJudging {
 	private final AbstractGrooveGauge gauge;
 	private final PlayerConfig config;
 	private final long endUs;
+	private final FloatArray[] gaugeSamples;
+	private final LongArray gaugeTimesUs = new LongArray();
+	private long lastProcessedUs;
 	private final int[] legacyKeys;
 	private final long[] legacyTimes;
 	private final boolean[] legacyPressed;
@@ -64,6 +73,8 @@ final class SecondaryJudging {
 		this.endUs = endUs;
 		var chart = copyChart(model);
 		gauge = new LunaticRave2GrooveGauge(chart, config.getGauge(), resource);
+		gaugeSamples = new FloatArray[gauge.getGaugeTypeLength()];
+		for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i] = new FloatArray();
 		judge = new LunaticRave2JudgeManager(player, gauge);
 		judge.init(chart, resource);
 		int keys = player.getLaneProperty().getKeyLaneAssign().length;
@@ -92,6 +103,7 @@ final class SecondaryJudging {
 				outcome = Outcome.INPUT_LOST;
 				return;
 			}
+			if (gaugeTimesUs.size == 0) sampleGauge(0);
 			judge.processFifoEvents(nowUs, batch, null, null);
 			for (int i = 0; i < legacySize; i++) {
 				judge.processKeyEvent(legacyKeys[i], legacyTimes[i], legacyPressed[i], nowUs);
@@ -101,6 +113,10 @@ final class SecondaryJudging {
 				outcome = Outcome.FAILED;
 			} else if (nowUs >= endUs) {
 				outcome = Outcome.FINISHED;
+			}
+			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, nowUs));
+			if (!isRunning() || lastProcessedUs - gaugeTimesUs.peek() >= GAUGE_INTERVAL_US) {
+				sampleGauge(lastProcessedUs);
 			}
 		} catch (RuntimeException e) {
 			outcome = Outcome.ERROR;
@@ -112,6 +128,7 @@ final class SecondaryJudging {
 
 	Result finish() {
 		if (isRunning()) outcome = Outcome.INTERRUPTED;
+		sampleGauge(lastProcessedUs);
 		var counts = new ArrayList<Integer>(12);
 		for (int i = 0; i < 6; i++) {
 			counts.add(judge.getJudgeCount(i, true));
@@ -122,7 +139,19 @@ final class SecondaryJudging {
 		int minbp = judge.getJudgeCount(3) + judge.getJudgeCount(4) + judge.getJudgeCount(5)
 				+ score.getNotes() - passed;
 		return new Result(outcome, passed, score.getExscore(), score.getCombo(),
-				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(passed));
+				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(passed),
+				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs));
+	}
+
+	private void sampleGauge(long timeUs) {
+		if (gaugeTimesUs.size > 0 && gaugeTimesUs.peek() == timeUs) {
+			for (int i = 0; i < gaugeSamples.length; i++) {
+				gaugeSamples[i].set(gaugeTimesUs.size - 1, gauge.getValue(i));
+			}
+		} else {
+			gaugeTimesUs.add(timeUs);
+			for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i].add(gauge.getValue(i));
+		}
 	}
 
 	private ClearType clearType(int passed) {
