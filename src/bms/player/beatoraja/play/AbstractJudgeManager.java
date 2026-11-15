@@ -245,6 +245,11 @@ public abstract class AbstractJudgeManager {
 		return PlayEnd.UNSYNCHRONIZED;
 	}
 
+	/** Optional full-combo lamp override for a completed, unassisted single song. */
+	ClearType getCompletedComboClear() {
+		return null;
+	}
+
 	final void setLaneJudgement(LaneState state, int value) {
 		judge[state.player][state.offset] = value;
 	}

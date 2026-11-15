@@ -141,7 +141,7 @@ class KeyInputProccessor {
 		}
 	}
 
-	public SecondaryJudging.Result stopJudge() {
+	public SecondaryJudging.Result stopJudge(boolean primaryFinished) {
 		if (judge != null) {
 			keyBeamStop = true;
 			isJudgeStarted = false;
@@ -152,7 +152,7 @@ class KeyInputProccessor {
 			player.main.getInputProcessor().endInputJudge();
 			judge = null;
 			if (secondaryJudging != null) {
-				var result = secondaryJudging.finish();
+				var result = secondaryJudging.finish(primaryFinished);
 				secondaryJudging = null;
 				return result;
 			}

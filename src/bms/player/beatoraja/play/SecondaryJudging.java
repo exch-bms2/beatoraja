@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.LongArray;
 
 import bms.model.BMSModel;
 import bms.model.LongNote;
-import bms.model.Mode;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.ClearType;
@@ -22,7 +21,7 @@ import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.GaugeHistory;
 import bms.player.beatoraja.input.JudgeEventQueue;
 
-/** In-memory, silent 7KEY LR2 run. The judge thread owns it until it joins. */
+/** In-memory, silent LR2 run. The judge thread owns it until it joins. */
 final class SecondaryJudging {
 	private static final long GAUGE_INTERVAL_US = 500_000;
 	enum Outcome { RUNNING, FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
@@ -61,7 +60,7 @@ final class SecondaryJudging {
 	static SecondaryJudging create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
 		var config = resource.getPlayerConfig();
 		int startGauge = LunaticRave2GrooveGauge.mapBeatorajaGauge(config.getGauge());
-		if (model.getMode() != Mode.BEAT_7K || BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model,
+		if (BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model,
 				resource.getOriginalMode(), resource.getPlayMode(), resource.getCourseBMSModels() != null,
 				startGauge, resource.getChartRuleParameters()) != BMSPlayerRule.LunaticRave2) {
 			return null;
@@ -105,17 +104,13 @@ final class SecondaryJudging {
 				return;
 			}
 			if (gaugeTimesUs.size == 0) sampleGauge(0);
-			judge.processFifoEvents(nowUs, batch, null, null);
-			for (int i = 0; i < legacySize; i++) {
-				judge.processKeyEvent(legacyKeys[i], legacyTimes[i], legacyPressed[i], nowUs);
-			}
-			judge.finishTime(nowUs);
+			judge.processCapturedInput(nowUs, batch, legacyKeys, legacyTimes, legacyPressed, legacySize);
 			if (BMSPlayer.updateGaugeAutoShift(gauge, config, gauge.isFailed())) {
 				outcome = Outcome.FAILED;
 			} else if (nowUs >= endUs) {
 				outcome = Outcome.FINISHED;
 			}
-			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, nowUs));
+			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, judge.processedThroughUs(nowUs)));
 			if (!isRunning() || lastProcessedUs - gaugeTimesUs.peek() >= GAUGE_INTERVAL_US) {
 				sampleGauge(lastProcessedUs);
 			}
@@ -128,19 +123,27 @@ final class SecondaryJudging {
 	}
 
 	Result finish() {
-		if (isRunning()) outcome = Outcome.INTERRUPTED;
+		return finish(false);
+	}
+
+	Result finish(boolean primaryFinished) {
+		var score = judge.getScoreData();
+		int passed = judge.getPastNotes();
+		if (isRunning()) {
+			// A manual exit can skip the post-song margin after all judgments are settled.
+			outcome = primaryFinished && score.getNotes() > 0 && passed == score.getNotes()
+					? Outcome.FINISHED : Outcome.INTERRUPTED;
+		}
 		sampleGauge(lastProcessedUs);
 		var counts = new ArrayList<Integer>(12);
 		for (int i = 0; i < 6; i++) {
 			counts.add(judge.getJudgeCount(i, true));
 			counts.add(judge.getJudgeCount(i, false));
 		}
-		var score = judge.getScoreData();
-		int passed = judge.getPastNotes();
 		int minbp = judge.getJudgeCount(3) + judge.getJudgeCount(4) + judge.getJudgeCount(5)
 				+ score.getNotes() - passed;
 		return new Result(outcome, passed, score.getExscore(), score.getCombo(),
-				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(passed),
+				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(),
 				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs));
 	}
 
@@ -155,13 +158,11 @@ final class SecondaryJudging {
 		}
 	}
 
-	private ClearType clearType(int passed) {
-		if (outcome != Outcome.FINISHED || !gauge.isQualified()) return ClearType.Failed;
-		if (passed > 0 && passed == judge.getCombo()) {
-			if (judge.getJudgeCount(2) > 0) return ClearType.FullCombo;
-			return judge.getJudgeCount(1) == 0 ? ClearType.Max : ClearType.Perfect;
-		}
-		return gauge.getClearType();
+	private ClearType clearType() {
+		if (outcome != Outcome.FINISHED) return ClearType.Failed;
+		var comboClear = judge.getCompletedComboClear();
+		if (comboClear != null) return comboClear;
+		return gauge.isQualified() ? gauge.getClearType() : ClearType.Failed;
 	}
 
 	private static BMSModel copyChart(BMSModel source) {

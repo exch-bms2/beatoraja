@@ -271,6 +271,7 @@ public final class KeyboardJudgeCompatibilityTest {
             var config = new Config();
             config.setAudioConfig(new AudioConfig());
             playerConfig = new PlayerConfig();
+            playerConfig.setGauge(gaugeType);
             playerConfig.setNotesDisplayTimingAutoAdjust(false);
             var mode = model.getMode();
             var lanes = new LaneProperty(mode);

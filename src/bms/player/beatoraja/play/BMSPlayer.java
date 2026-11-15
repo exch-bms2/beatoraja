@@ -982,8 +982,10 @@ public class BMSPlayer extends MainState {
 			return null;
 		}
 
-		ClearType clear = ClearType.Failed;
-		if (state != STATE_FAILED && gauge.isQualified()) {
+		ClearType comboClear = state == STATE_FINISHED && assist == 0 && resource.getCourseBMSModels() == null
+				? judge.getCompletedComboClear() : null;
+		ClearType clear = comboClear != null ? comboClear : ClearType.Failed;
+		if (comboClear == null && state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
 				if(resource.getCourseBMSModels() == null) clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
@@ -1069,7 +1071,7 @@ public class BMSPlayer extends MainState {
 
 	private void stopJudging() {
 		if (keyinput == null) return;
-		var secondary = keyinput.stopJudge();
+		var secondary = keyinput.stopJudge(state == STATE_FINISHED);
 		if (secondary != null) {
 			Logger.getGlobal().info("LunaticRave2 secondary result: " + secondary);
 			try {

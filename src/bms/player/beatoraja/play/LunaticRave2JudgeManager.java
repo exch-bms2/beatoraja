@@ -7,6 +7,7 @@ import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.JudgeEventQueue;
+import bms.player.beatoraja.input.JudgeEventQueue.Batch;
 
 /** The experimental LunaticRave2 judgment engine for eligible single-song play. */
 final class LunaticRave2JudgeManager extends AbstractJudgeManager {
@@ -64,8 +65,49 @@ final class LunaticRave2JudgeManager extends AbstractJudgeManager {
 
 	@Override
 	void processInput(long mtime, BMSPlayerInputProcessor input, JudgeEventQueue queue) {
-		if (lr2DpLanes != null) updateLunaticRave2Dp(mtime, input);
-		else super.processInput(mtime, input, queue);
+		if (lr2DpLanes == null) {
+			super.processInput(mtime, input, queue);
+			return;
+		}
+		if (lr2DpFailed) return;
+		long nowMs = mtime / 1_000;
+		int count = packDpQueue(nowMs, eventBatch);
+		for (int key = 0; key < keyassign.length; key++) {
+			if (queue.isQueued(key) || keyassign[key] < 0) continue;
+			long time = input.getKeyChangedTime(key);
+			if (time == Long.MIN_VALUE) continue;
+			lr2DpEvents[count++] = packDpLegacy(nowMs, key, time, input.getKeyState(key));
+		}
+		processDpBatch(nowMs, eventBatch, count, input, queue);
+	}
+
+	void processCapturedInput(long mtime, Batch batch, int[] keys, long[] times, boolean[] pressed, int size) {
+		if (lr2DpLanes == null) {
+			processFifoEvents(mtime, batch, null, null);
+			for (int i = 0; i < size; i++) processKeyEvent(keys[i], times[i], pressed[i], mtime);
+			finishTime(mtime);
+			return;
+		}
+		if (lr2DpFailed) return;
+		long nowMs = mtime / 1_000;
+		int count = packDpQueue(nowMs, batch);
+		for (int i = 0; i < size; i++) {
+			int key = keys[i];
+			if (keyassign[key] >= 0) lr2DpEvents[count++] = packDpLegacy(nowMs, key, times[i], pressed[i]);
+		}
+		processDpBatch(nowMs, batch, count, null, null);
+	}
+
+	long processedThroughUs(long mtime) {
+		return lr2DpFailed ? lr2DpProcessedMs * 1_000 : mtime;
+	}
+
+	@Override
+	ClearType getCompletedComboClear() {
+		var score = getScoreData();
+		if (score.getNotes() <= 0 || score.getCombo() != score.getNotes()) return null;
+		if (!gauge().isQualified() || score.getJudgeCount(2) > 0) return ClearType.FullCombo;
+		return score.getJudgeCount(1) == 0 ? ClearType.Max : ClearType.Perfect;
 	}
 
 	@Override
@@ -97,24 +139,24 @@ final class LunaticRave2JudgeManager extends AbstractJudgeManager {
 		return playMs > endMs && processed > endMs ? PlayEnd.FINISHED : PlayEnd.PLAYING;
 	}
 
-	private void updateLunaticRave2Dp(long nowUs, BMSPlayerInputProcessor input) {
-		if (lr2DpFailed) return;
-		long nowMs = nowUs / 1_000;
+	private int packDpQueue(long nowMs, Batch batch) {
 		int count = 0;
 		// Pack the chart millisecond and source index to retain FIFO order within each lane.
-		for (int i = 0; i < eventBatch.size; i++) {
-			int key = eventBatch.keys[i];
+		for (int i = 0; i < batch.size; i++) {
+			int key = batch.keys[i];
 			if (key >= keyassign.length || keyassign[key] < 0) continue;
-			lr2DpEvents[count++] = (Math.min(nowMs, eventBatch.times[i] / 1_000) << DP_EVENT_BITS) | i;
+			lr2DpEvents[count++] = (Math.min(nowMs, batch.times[i] / 1_000) << DP_EVENT_BITS) | i;
 		}
-		for (int key = 0; key < keyassign.length; key++) {
-			if (input.getJudgeEventQueue().isQueued(key) || keyassign[key] < 0) continue;
-			long time = input.getKeyChangedTime(key);
-			if (time == Long.MIN_VALUE) continue;
-			lr2LegacyTimes[key] = time;
-			lr2LegacyPressed[key] = input.getKeyState(key);
-			lr2DpEvents[count++] = (Math.min(nowMs, time / 1_000) << DP_EVENT_BITS) | (eventBatch.keys.length + key);
-		}
+		return count;
+	}
+
+	private long packDpLegacy(long nowMs, int key, long time, boolean pressed) {
+		lr2LegacyTimes[key] = time;
+		lr2LegacyPressed[key] = pressed;
+		return (Math.min(nowMs, time / 1_000) << DP_EVENT_BITS) | (eventBatch.keys.length + key);
+	}
+
+	private void processDpBatch(long nowMs, Batch batch, int count, BMSPlayerInputProcessor input, JudgeEventQueue queue) {
 		Arrays.sort(lr2DpEvents, 0, count);
 		float volume = main.resource.getConfig().getAudioConfig().getKeyvolume();
 		for (int from = 0; from < count && !lr2DpFailed;) {
@@ -126,14 +168,13 @@ final class LunaticRave2JudgeManager extends AbstractJudgeManager {
 			for (Lr2Lane lane : lr2DpLanes) {
 				for (int i = from; i < to; i++) {
 					int index = (int) lr2DpEvents[i] & DP_EVENT_MASK;
-					boolean queued = index < eventBatch.keys.length;
-					int key = queued ? eventBatch.keys[index] : index - eventBatch.keys.length;
+					boolean queued = index < batch.keys.length;
+					int key = queued ? batch.keys[index] : index - batch.keys.length;
 					if (keyassign[key] != lane.lane) continue;
-					boolean pressed = queued ? eventBatch.pressed[index] : lr2LegacyPressed[key];
-					long originalUs = queued ? eventBatch.times[index] : lr2LegacyTimes[key];
-					if (queued) input.getJudgeEventQueue().apply(key, pressed);
+					boolean pressed = queued ? batch.pressed[index] : lr2LegacyPressed[key];
+					if (queued && queue != null) queue.apply(key, pressed);
 					processLunaticRave2Event(lane, key, pressed, tick * 1_000, tick * 1_000, volume);
-					input.clearQueuedInputTime(key, originalUs, pressed);
+					if (input != null) input.clearQueuedInputTime(key, queued ? batch.times[index] : lr2LegacyTimes[key], pressed);
 				}
 				finishLunaticRave2Lane(lane, tick, tick * 1_000, volume);
 			}
