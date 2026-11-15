@@ -3,6 +3,7 @@ package bms.player.beatoraja.launcher;
 import bms.player.beatoraja.song.SongData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -12,6 +13,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
@@ -28,7 +30,8 @@ final class TableEditorChartDrag extends StackPane {
     record Position(int index, double sceneY) {}
 
     TableEditorChartDrag(TableView<SongData> charts, TableView<SongData> results,
-                         ObservableValue<?> destination, ObjIntConsumer<List<SongData>> insert) {
+                         ObservableValue<?> destination, ObjIntConsumer<List<SongData>> insert,
+                         Consumer<SongData> openDetails) {
         this.charts = charts;
         this.destination = destination;
         this.insert = insert;
@@ -39,8 +42,8 @@ final class TableEditorChartDrag extends StackPane {
         marker.setMouseTransparent(true);
         marker.setVisible(false);
         getChildren().addAll(charts, marker);
-        installSource(charts);
-        installSource(results);
+        installSource(charts, openDetails);
+        installSource(results, openDetails);
         destination.addListener((obs, old, current) -> clear());
         charts.getItems().addListener((ListChangeListener<SongData>) change -> clear());
         charts.setOnDragOver(event -> {
@@ -62,9 +65,16 @@ final class TableEditorChartDrag extends StackPane {
         });
     }
 
-    private void installSource(TableView<SongData> table) {
+    private void installSource(TableView<SongData> table, Consumer<SongData> openDetails) {
         table.setRowFactory(ignored -> {
             var row = new TableRow<SongData>();
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.isStillSincePress() && event.getButton() == MouseButton.PRIMARY
+                        && event.getClickCount() == 2) {
+                    openDetails.accept(row.getItem());
+                    event.consume();
+                }
+            });
             row.setOnDragDetected(event -> {
                 if (row.isEmpty() || destination.getValue() == null) return;
                 if (!table.getSelectionModel().isSelected(row.getIndex()))

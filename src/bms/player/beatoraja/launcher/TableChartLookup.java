@@ -7,6 +7,12 @@ import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /** The editor can query charts without migrating or updating either game database. */
@@ -33,9 +39,38 @@ final class TableChartLookup {
                 + " GROUP BY sha256", "%" + text + "%");
     }
 
-    private SongData[] find(String sql, String parameter) {
+    static String chartHash(SongData song) {
+        String sha256 = song.getSha256();
+        if (sha256 != null && !sha256.isEmpty()) return normalizedHash(sha256, 64);
+        return normalizedHash(song.getMd5(), 32);
+    }
+
+    private static String normalizedHash(String hash, int length) {
+        return hash != null && hash.length() == length && TableEditorView.isMd5OrSha256Hash(hash)
+                ? hash.toLowerCase(Locale.ROOT) : null;
+    }
+
+    Map<String, SongData> byHashes(Set<String> hashes) {
+        var found = new HashMap<String, SongData>();
+        for (int length : new int[]{64, 32}) {
+            List<String> keys = hashes.stream().filter(hash -> hash.length() == length).toList();
+            String column = length == 64 ? "sha256" : "md5";
+            for (int start = 0; start < keys.size(); start += 500) {
+                if (Thread.currentThread().isInterrupted()) return found;
+                var batch = keys.subList(start, Math.min(start + 500, keys.size()));
+                var placeholders = String.join(",", Collections.nCopies(batch.size(), "?"));
+                for (var song : find("SELECT * FROM song WHERE " + column + " IN (" + placeholders + ")", batch.toArray())) {
+                    var key = normalizedHash(length == 64 ? song.getSha256() : song.getMd5(), length);
+                    if (key != null) found.putIfAbsent(key, song);
+                }
+            }
+        }
+        return found;
+    }
+
+    private SongData[] find(String sql, Object... parameters) {
         try {
-            return query.query(sql, handler, parameter).toArray(SongData[]::new);
+            return query.query(sql, handler, parameters).toArray(SongData[]::new);
         } catch (SQLException e) {
             Logger.getGlobal().warning("Table editor chart search failed: " + e.getClass().getSimpleName());
             return SongData.EMPTY;

@@ -8,7 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -51,6 +54,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
 
@@ -62,8 +66,11 @@ public class TableEditorView {
 
 	private TableData loaded;
 	private final ListView<Entry> entries = new ListView<>();
-	private final TableView<SongData> charts = chartTable("editingCharts");
-	private final TableView<SongData> results = chartTable("searchResults");
+	private final TableView<SongData> charts = chartTable("editingCharts", song -> {
+		var resolved = resolveChart(song);
+		return resolved == null ? "\u2014 / \u2014" : modeLevel(resolved);
+	});
+	private final TableView<SongData> results = chartTable("searchResults", TableEditorView::modeLevel);
 	private final TextField query = new TextField();
 	private final Label searchStatus = new Label();
 	private final java.util.concurrent.ExecutorService searchWorker = Executors.newSingleThreadExecutor(task -> {
@@ -73,6 +80,10 @@ public class TableEditorView {
 	});
 	private Future<?> searchTask;
 	private long searchVersion;
+	private Future<?> chartLookupTask;
+	private long chartLookupVersion;
+	private long detailVersion;
+	private Map<String, SongData> chartMetadata = Map.of();
 
 	@FXML
 	private TextField tableName;
@@ -96,8 +107,10 @@ public class TableEditorView {
 		var selected = entries.getSelectionModel().selectedItemProperty();
 		selected.addListener((obs, before, after) -> {
 			if (before != null) storeCharts(before);
+			chartMetadata = Map.of();
 			charts.getItems().clear();
 			if (after != null) charts.getItems().setAll(after.songs());
+			loadChartMetadata(lookup);
 		});
 		var rename = button("Rename", () -> {
 			var entry = selected.get();
@@ -150,7 +163,8 @@ public class TableEditorView {
 		});
 		removeChart.disableProperty().bind(charts.getSelectionModel().selectedItemProperty().isNull());
 		var drag = new TableEditorChartDrag(charts, results, selected,
-				(songs, index) -> insertCharts(charts.getItems(), songs, index, selected.get().course != null));
+				(songs, index) -> insertCharts(charts.getItems(), songs, index, selected.get().course != null),
+				song -> openChartDetails(lookup, song));
 		var center = pane("Charts", drag, new HBox(4, removeChart, button("Up", () -> moveChart(-1)),
 				button("Down", () -> moveChart(1)), settings));
 
@@ -186,15 +200,24 @@ public class TableEditorView {
 		return button;
 	}
 
-	private static TableView<SongData> chartTable(String id) {
+	private static TableView<SongData> chartTable(String id, Function<SongData, String> modeLevel) {
 		var table = new TableView<SongData>();
 		table.setId(id);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		table.getColumns().add(column("Title", SongData::getFullTitle));
-		table.getColumns().add(column("Artist", SongData::getFullArtist));
-		table.getColumns().add(column("Mode / Level", song -> song.getMode() + " / " + song.getLevel()));
+		table.getColumns().add(column("Title", song -> displayName(song.getTitle(), song.getSubtitle())));
+		table.getColumns().add(column("Artist", song -> displayName(song.getArtist(), song.getSubartist())));
+		table.getColumns().add(column("Mode / Level", modeLevel));
 		return table;
+	}
+
+	private static String modeLevel(SongData song) {
+		return song.getMode() + " / " + song.getLevel();
+	}
+
+	private static String displayName(String main, String sub) {
+		// SongData's full-name getters cache fields included in the editor's dirty snapshot.
+		return sub == null || sub.isEmpty() ? main : main + " " + sub;
 	}
 
 	private static TableColumn<SongData, String> column(String title, Function<SongData, String> value) {
@@ -262,6 +285,48 @@ public class TableEditorView {
 
 	private static boolean hasHash(String hash) { return hash != null && !hash.isEmpty(); }
 
+	private SongData resolveChart(SongData song) {
+		if (song.getPath() != null) return song;
+		String hash = TableChartLookup.chartHash(song);
+		return hash == null ? null : chartMetadata.get(hash);
+	}
+
+	private void loadChartMetadata(TableChartLookup lookup) {
+		long version = ++chartLookupVersion;
+		if (chartLookupTask != null) chartLookupTask.cancel(true);
+		var hashes = new HashSet<String>();
+		for (var song : charts.getItems()) {
+			String hash = TableChartLookup.chartHash(song);
+			if (song.getPath() == null && hash != null) hashes.add(hash);
+		}
+		if (hashes.isEmpty()) return;
+		chartLookupTask = searchWorker.submit(() -> {
+			var found = lookup.byHashes(hashes);
+			Platform.runLater(() -> {
+				if (chartLookupVersion != version) return;
+				chartMetadata = found;
+				charts.refresh();
+			});
+		});
+	}
+
+	private void openChartDetails(TableChartLookup lookup, SongData song) {
+		long version = ++detailVersion;
+		var owner = workspace.getScene().getWindow();
+		var resolved = resolveChart(song);
+		String hash = TableChartLookup.chartHash(song);
+		if (resolved != null || hash == null) {
+			showChartDetailsDialog(owner, song, resolved);
+			return;
+		}
+		searchWorker.submit(() -> {
+			var found = lookup.byHashes(Set.of(hash)).get(hash);
+			Platform.runLater(() -> {
+				if (detailVersion == version && owner.isShowing()) showChartDetailsDialog(owner, song, found);
+			});
+		});
+	}
+
 	private void search(TableChartLookup lookup) {
 		long version = ++searchVersion;
 		if (searchTask != null) searchTask.cancel(true);
@@ -281,6 +346,8 @@ public class TableEditorView {
 
 	private void closeSearch() {
 		searchVersion++;
+		chartLookupVersion++;
+		detailVersion++;
 		searchWorker.shutdownNow();
 	}
 
@@ -442,7 +509,16 @@ public class TableEditorView {
 
 	protected static void displayChartDetailsDialog(TableChartLookup songdb, SongData song, String... extraData) {
 		if (song == null) return;
+		var resolved = song;
+		if (song.getPath() == null && songdb != null) {
+			var found = songdb.byHash(song.getSha256());
+			if (found.length == 0) found = songdb.byHash(song.getMd5());
+			if (found.length > 0) resolved = found[0];
+		}
+		showChartDetailsDialog(null, song, resolved, extraData);
+	}
 
+	private static void showChartDetailsDialog(Window owner, SongData entry, SongData song, String... extraData) {
 		GridPane gridPane = new GridPane();
 		gridPane.getColumnConstraints().addAll(
 			new ColumnConstraints(90),
@@ -451,27 +527,13 @@ public class TableEditorView {
 		);
 		gridPane.setMaxWidth(Double.MAX_VALUE);
 
-		dialogAddCopiableRow(gridPane, 0, "Title", song.getFullTitle());
-		dialogAddCopiableRow(gridPane, 1, "Artist", song.getFullArtist());
-		dialogAddCopiableRow(gridPane, 2, "Genre", song.getGenre());
+		dialogAddCopiableRow(gridPane, 0, "Title", displayName(entry.getTitle(), entry.getSubtitle()));
+		dialogAddCopiableRow(gridPane, 1, "Artist", displayName(entry.getArtist(), entry.getSubartist()));
+		dialogAddCopiableRow(gridPane, 2, "Genre", entry.getGenre());
+		dialogAddCopiableRow(gridPane, 3, "MD5 Hash", hasHash(entry.getMd5()) || song == null ? entry.getMd5() : song.getMd5());
+		dialogAddCopiableRow(gridPane, 4, "SHA256 Hash", hasHash(entry.getSha256()) || song == null ? entry.getSha256() : song.getSha256());
 
-		dialogAddCopiableRow(gridPane, 3, "MD5 Hash", song.getMd5());
-		dialogAddCopiableRow(gridPane, 4, "SHA256 Hash", song.getSha256());
-
-		if (song.getPath() == null && songdb != null) {
-			// Try to find actual song in songdb, if songdata was not retrieved from songdb
-			SongData[] foundSongs = songdb.byHash(song.getSha256());
-			if (foundSongs.length != 0) {
-				song = foundSongs[0];
-			} else {
-				foundSongs = songdb.byHash(song.getMd5());
-				if (foundSongs.length != 0) {
-					song = foundSongs[0];
-				}
-			}
-		}
-
-		if (song.getPath() != null) {
+		if (song != null && song.getPath() != null) {
 			// Display song details, if song can be found in songdb (otherwise details are inaccessible)
 			String levelString = "UNKNOWN";
 			switch(song.getDifficulty()) {
@@ -528,7 +590,8 @@ public class TableEditorView {
 			gridPane.add(extraLabel, 0, 6+i, 3, 1);
 		}
 
-		Dialog dialog = new Dialog();
+		var dialog = new Dialog<ButtonType>();
+		if (owner != null) dialog.initOwner(owner);
 		dialog.setTitle("Chart Details");
 		dialog.getDialogPane().setMinWidth(500);
 		dialog.getDialogPane().setMaxWidth(500);
