@@ -292,6 +292,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.SecondaryJudgingTest",
     "bms.player.beatoraja.LunaticRave2ScoreDatabaseTest",
     "bms.player.beatoraja.input.keyboard.KeyboardEventQueueTest",
+    "bms.player.beatoraja.input.keyboard.SelectShortcutTest",
     "bms.player.beatoraja.input.keyboard.WindowsKeyboardMappingTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
     "bms.player.beatoraja.input.controller.ControllerInputDiagnosticsTest",

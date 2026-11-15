@@ -3,7 +3,8 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.SystemSoundManager.SoundType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
+
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
@@ -62,13 +63,14 @@ public final class MusicSelectInputProcessor {
     public void input() {
     	final MainController main = select.main;
         final BMSPlayerInputProcessor input = main.getInputProcessor();
+        final var keyboard = input.getKeyBoardInputProcesseor();
         final PlayerResource resource = main.getPlayerResource();
         final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
         final BarManager barManager = select.getBarManager();
         final Bar current = select.getBarManager().getSelected();
 
-        if (input.isControlKeyPressed(ControlKeys.NUM0)) {
+        if (keyboard.consumeShortcut(KeyboardShortcut.SEARCH)) {
             // 検索用ポップアップ表示。これ必要？
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
@@ -83,21 +85,21 @@ public final class MusicSelectInputProcessor {
         }
 
         // KEYフィルターの切り替え
-        if (input.isControlKeyPressed(ControlKeys.NUM1)) {
+        if (keyboard.consumeShortcut(KeyboardShortcut.MODE_FILTER)) {
             select.executeEvent(EventType.mode);
         }
         // ソートの切り替え
-        if (input.isControlKeyPressed(ControlKeys.NUM2)) {
+        if (keyboard.consumeShortcut(KeyboardShortcut.SORT)) {
             select.executeEvent(EventType.sort);
         }
         // LNモードの切り替え
-        if (input.isControlKeyPressed(ControlKeys.NUM3)) {
+        if (keyboard.consumeShortcut(KeyboardShortcut.LN_MODE)) {
             select.executeEvent(EventType.lnmode);
         }
 
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
-        if(!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)){
+        if(!input.startPressed() && !input.isSelectPressed() && !keyboard.isShortcutHeld(KeyboardShortcut.OPTIONS)){
             //オプションキー入力なし
             isOptionKeyReleased = true;
             if(isOptionKeyPressed) {
@@ -106,8 +108,8 @@ public final class MusicSelectInputProcessor {
             }
         }
 
-        if (input.isControlKeyPressed(ControlKeys.NUM4)
-                || (!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5) && property.isPressed(input, NEXT_REPLAY, true))) {
+        if (keyboard.consumeShortcut(KeyboardShortcut.NEXT_REPLAY)
+                || (!input.startPressed() && !input.isSelectPressed() && !keyboard.isShortcutHeld(KeyboardShortcut.OPTIONS) && property.isPressed(input, NEXT_REPLAY, true))) {
             // change replay
             select.execute(MusicSelectCommand.NEXT_REPLAY);
         }
@@ -238,7 +240,7 @@ public final class MusicSelectInputProcessor {
                 config.setMineMode(config.getMineMode() == 1 ? 0 : 1);
                 select.play(OPTION_CHANGE);
             }
-        } else if (input.getControlKeyState(ControlKeys.NUM5) || (input.startPressed() && input.isSelectPressed())) {
+        } else if (keyboard.isShortcutHeld(KeyboardShortcut.OPTIONS) || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
             // show detail option
             select.setPanelState(3);
@@ -313,13 +315,13 @@ public final class MusicSelectInputProcessor {
                 }
             }
 
-            if (input.isControlKeyPressed(ControlKeys.NUM7)) {
+            if (keyboard.consumeShortcut(KeyboardShortcut.RIVAL)) {
                 select.executeEvent(EventType.rival);
             }
-            if (input.isControlKeyPressed(ControlKeys.NUM8)) {
+            if (keyboard.consumeShortcut(KeyboardShortcut.SAME_FOLDER)) {
                 select.execute(MusicSelectCommand.SHOW_SONGS_ON_SAME_FOLDER);
             }
-            if (input.isControlKeyPressed(ControlKeys.NUM9)) {
+            if (keyboard.consumeShortcut(KeyboardShortcut.OPEN_DOCUMENT)) {
                 select.executeEvent(EventType.open_document);
             }
             // close folder
@@ -328,18 +330,18 @@ public final class MusicSelectInputProcessor {
                 select.getBarManager().close();
             }
 
-    		if(input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
+            if (input.isActivated(KeyboardShortcut.AUTOPLAY_FOLDER)) {
     			if(current instanceof DirectoryBar) {
     				select.selectSong(BMSPlayerMode.AUTOPLAY);
     			}
     		}
-    		if(input.isActivated(KeyCommand.OPEN_IR)) {
+            if (input.isActivated(KeyboardShortcut.OPEN_IR)) {
                 select.executeEvent(EventType.open_ir);
             }
-    		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
+            if (input.isActivated(KeyboardShortcut.ADD_FAVORITE_SONG)) {
                 select.executeEvent(EventType.favorite_song);
     		}
-    		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
+            if (input.isActivated(KeyboardShortcut.ADD_FAVORITE_CHART)) {
                 select.executeEvent(EventType.favorite_chart);
     		}
 
@@ -351,19 +353,19 @@ public final class MusicSelectInputProcessor {
         }
         select.timer.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
-		if(input.isActivated(KeyCommand.UPDATE_FOLDER)) {
+		if(input.isActivated(KeyboardShortcut.UPDATE_FOLDER)) {
             select.executeEvent(EventType.update_folder);
         }
         // open explorer with selected song
-		if(input.isActivated(KeyCommand.OPEN_EXPLORER)) {
+		if(input.isActivated(KeyboardShortcut.OPEN_EXPLORER)) {
             select.executeEvent(EventType.open_with_explorer);
         }
         // copy song MD5 hash
-        if(input.isActivated(KeyCommand.COPY_SONG_MD5_HASH)) {
+        if(input.isActivated(KeyboardShortcut.COPY_SONG_MD5_HASH)) {
             select.execute(MusicSelectCommand.COPY_MD5_HASH);
         }
         // copy song SHA256 hash
-        if(input.isActivated(KeyCommand.COPY_SONG_SHA256_HASH)) {
+        if(input.isActivated(KeyboardShortcut.COPY_SONG_SHA256_HASH)) {
             select.execute(MusicSelectCommand.COPY_SHA256_HASH);
         }
 

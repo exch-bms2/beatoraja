@@ -10,6 +10,8 @@ import java.util.Arrays;
 
 import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.MainState.MainStateType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntArray;
@@ -30,6 +32,14 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
 			Keys.BACKSLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
 	private int[] control = new int[] { Keys.Q, Keys.W };
+	private int[] configuredKeys;
+	private KeyboardConfig keyboardConfig;
+	private PlayerConfig shortcutProfile;
+	private MainStateType shortcutScreen;
+	private boolean shortcutEditorActive;
+	private boolean livePlay;
+	private final boolean[] heldDigitsAtEntry = new boolean[10];
+	private final KeyboardShortcutInput shortcuts = new KeyboardShortcutInput();
 
 	private MouseScratchInput mouseScratchInput;
 
@@ -38,6 +48,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 * 最後に押されたキー
 	 */
 	private int lastPressedKey = -1;
+	private int lastPressedModifiers;
 
 	private boolean textmode = false;
 	private final boolean[] suppressedTextControlKeys = new boolean[256];
@@ -80,10 +91,21 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public synchronized void setConfig(KeyboardConfig config) {
-		this.keys = config.getKeyAssign().clone();
+		this.keyboardConfig = config;
+		this.configuredKeys = config.getKeyAssign().clone();
 		this.duration = config.getDuration();
 		this.control = new int[] { config.getStart(), config.getSelect() };
 		mouseScratchInput.setConfig(config);
+		configureShortcuts();
+		rebuildLaneKeys(config);
+	}
+
+	private void rebuildLaneKeys(KeyboardConfig config) {
+		keys = configuredKeys.clone();
+		for (int i = 0; i < keys.length; i++) {
+			if ((!livePlay && KeyboardShortcut.isDigit(keys[i]))
+					|| (shortcutScreen == MainStateType.MUSICSELECT && shortcuts.owns(keys[i]))) keys[i] = -1;
+		}
 		var mouse = config.getMouseScratchConfig();
 		queuedGameKeys = java.util.stream.IntStream.range(0, keys.length)
 				.filter(i -> keys[i] >= 0 && (!mouse.isMouseScratchEnabled()
@@ -91,7 +113,73 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		if (Gdx.input instanceof PollingLwjgl3Input input) input.configureKeyboardEvents(textmode ? new int[0] : keys);
 	}
 
+	public synchronized void setShortcutContext(PlayerConfig profile, MainStateType screen, boolean livePlay) {
+		if (this.livePlay == livePlay && shortcutProfile == profile && shortcutScreen == screen) return;
+		boolean resetDigits = this.livePlay != livePlay || screen == MainStateType.MUSICSELECT
+				|| shortcutScreen == MainStateType.MUSICSELECT;
+		shortcutProfile = profile;
+		shortcutScreen = screen;
+		shortcutEditorActive = false;
+		this.livePlay = livePlay;
+		configureShortcuts();
+		for (int i = 0; i < keys.length; i++) {
+			int key = keys[i];
+			if (key < 0 || !((resetDigits && KeyboardShortcut.isDigit(key))
+					|| (screen == MainStateType.MUSICSELECT && shortcuts.owns(key)))) continue;
+			if (keystate[key]) bmsPlayerInputProcessor.setKeyState(i, false, Long.MIN_VALUE);
+			keystate[key] = false;
+			keytime[key] = keyboardEventTimes[key] = Long.MIN_VALUE;
+		}
+		if (resetDigits) for (int key = Keys.NUM_0; key <= Keys.NUM_9; key++) {
+			keystate[key] = false;
+			keytime[key] = Long.MIN_VALUE;
+			keyboardEventTimes[key] = Long.MIN_VALUE;
+			boolean held = physicalPressed(key);
+			heldDigitsAtEntry[key - Keys.NUM_0] = livePlay && held;
+			suppressedTextControlKeys[key] = !livePlay && held;
+		}
+		rebuildLaneKeys(keyboardConfig);
+	}
+
+	private void configureShortcuts() {
+		shortcuts.configure(shortcutProfile, shortcutScreen, key -> {
+			// A conflicting profile edited outside KeyConfig must not steal gameplay or result input.
+			if (shortcutScreen == MainStateType.MUSICSELECT || shortcutScreen == MainStateType.CONFIG
+					|| shortcutScreen == MainStateType.SKINCONFIG) return true;
+			for (int assigned : configuredKeys) if (key == assigned) return false;
+			return key != control[0] && key != control[1];
+		}, KeyBoardInputProcesseor::physicalPressed);
+	}
+
+	public synchronized void setShortcutEditorActive(boolean active) {
+		shortcutEditorActive = active;
+		configureShortcuts();
+	}
+
+	private static boolean physicalPressed(int key) {
+		return Gdx.input != null && Gdx.input.isKeyPressed(key);
+	}
+
+	public synchronized boolean isShortcutHeld(KeyboardShortcut action) {
+		return !textmode && !shortcutEditorActive && shortcutProfile != null
+				&& shortcuts.held(action, shortcutProfile.getShortcutBinding(action));
+	}
+
+	public synchronized boolean consumeShortcut(KeyboardShortcut action) {
+		return !imeTextMode && !shortcutEditorActive && shortcuts.consume(action);
+	}
+
+	/** The overlay owns the render-thread input while ordinary polling is suspended. */
+	public synchronized boolean isOverlayTogglePressed() {
+		if (textmode || shortcutProfile == null) return false;
+		int binding = shortcutProfile.getShortcutBinding(KeyboardShortcut.ADJUST_SKIN);
+		int key = KeyboardShortcut.key(binding);
+		return binding >= 0 && Gdx.input.isKeyJustPressed(key)
+				&& shortcuts.match(key, currentlyHeldModifiers()) == KeyboardShortcut.ADJUST_SKIN;
+	}
+
 	public boolean keyDown(int keycode) {
+		lastPressedModifiers = currentlyHeldModifiers();
 		setLastPressedKey(keycode);
 		return true;
 	}
@@ -118,6 +206,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
     public synchronized void resetWindowInput() {
         clear();
+        shortcuts.reset(KeyBoardInputProcesseor::physicalPressed);
         mouseScratchInput.resetWindowInput();
         Arrays.fill(keystate, false);
         Arrays.fill(keymodifiers, 0);
@@ -125,13 +214,22 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public synchronized void poll(final long microtime) {
 		final InputDiagnostics diagnostics = Gdx.input instanceof PollingLwjgl3Input input ? input.getDiagnostics() : null;
+		if (!imeTextMode && !shortcutEditorActive)
+			shortcuts.poll(KeyBoardInputProcesseor::physicalPressed, KeyBoardInputProcesseor::currentlyHeldModifiers, textmode);
 		if (!textmode) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
 				}
+				int digit = KeyboardShortcut.isDigit(keys[i]) ? keys[i] - Keys.NUM_0 : -1;
 				if (Gdx.input instanceof PollingLwjgl3Input input) {
 					int value;
+					if (digit >= 0 && heldDigitsAtEntry[digit]) {
+						// Discard the held baseline, but keep a new press after its release in the same FIFO.
+						if (input.getKeyboardEvents().pollReady(keys[i], true, microtime, Long.MIN_VALUE, 0) != 0)
+							continue;
+						heldDigitsAtEntry[digit] = false;
+					}
 					while ((value = input.getKeyboardEvents().pollReady(keys[i], keystate[keys[i]], microtime,
 							keyboardEventTimes[keys[i]], duration)) >= 0) {
 						if (diagnostics != null) {
@@ -149,6 +247,10 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 					continue;
 				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
+				if (digit >= 0 && heldDigitsAtEntry[digit]) {
+					if (!pressed) heldDigitsAtEntry[digit] = false;
+					continue;
+				}
 				if (diagnostics != null && pressed != keystate[keys[i]])
 					diagnostics.keyboardDecision(keys[i], microtime >= keytime[keys[i]] + duration * 1000, System.nanoTime());
 				if (pressed != keystate[keys[i]] && microtime >= keytime[keys[i]] + duration * 1000) {
@@ -172,6 +274,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		}
 		
 		for (ControlKeys key : ControlKeys.values()) {
+			if (livePlay && KeyboardShortcut.isDigit(key.keycode)) continue;
 			final boolean pressed = controlState(key.keycode);
 			if (suppressedTextControlKeys[key.keycode]) {
 				if (!pressed) {
@@ -202,6 +305,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	private boolean unsuppressedControlState(int key) {
+		if ((!livePlay && KeyboardShortcut.isDigit(key))
+				|| (shortcutScreen == MainStateType.MUSICSELECT && shortcuts.owns(key))) return false;
 		if (suppressedTextControlKeys[key]) {
 			if (!Gdx.input.isKeyPressed(key)) suppressedTextControlKeys[key] = false;
 			return false;
@@ -210,16 +315,21 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public synchronized void suppressHeldControlKeys() {
-		for (ControlKeys key : ControlKeys.values())
+		shortcuts.reset(KeyBoardInputProcesseor::physicalPressed);
+		for (ControlKeys key : ControlKeys.values()) {
+			if (livePlay && KeyboardShortcut.isDigit(key.keycode)) continue;
 			suppressedTextControlKeys[key.keycode] = Gdx.input.isKeyPressed(key.keycode);
+			if (KeyboardShortcut.isDigit(key.keycode))
+				keytime[key.keycode] = Long.MIN_VALUE;
+		}
 		for (int key : control)
 			suppressedTextControlKeys[key] = Gdx.input.isKeyPressed(key);
 	}
 
-	private int currentlyHeldModifiers() {
-		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
-		boolean ctrl = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
-		boolean alt = Gdx.input.isKeyPressed(Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Keys.ALT_RIGHT);
+	private static int currentlyHeldModifiers() {
+		boolean shift = physicalPressed(Keys.SHIFT_LEFT) || physicalPressed(Keys.SHIFT_RIGHT);
+		boolean ctrl = physicalPressed(Keys.CONTROL_LEFT) || physicalPressed(Keys.CONTROL_RIGHT);
+		boolean alt = physicalPressed(Keys.ALT_LEFT) || physicalPressed(Keys.ALT_RIGHT);
 		return (shift ? MASK_SHIFT : 0) | (ctrl ? MASK_CTRL : 0) | (alt ? MASK_ALT : 0);
 	}
 
@@ -296,6 +406,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		return lastPressedKey;
 	}
 
+	public int getLastPressedModifiers() { return lastPressedModifiers; }
+
 	public void setLastPressedKey(int lastPressedKey) {
 		this.lastPressedKey = lastPressedKey;
 	}
@@ -312,6 +424,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	/** Native IME sessions reserve function keys too; legacy editing keeps its shortcuts. */
 	public synchronized void setTextInputMode(boolean textmode, boolean ime) {
+		if (this.textmode != textmode) shortcuts.reset(KeyBoardInputProcesseor::physicalPressed);
 		if (textmode) imeTextMode = ime;
 		if (!this.textmode && textmode) {
 			for (ControlKeys key : ControlKeys.values()) if (isEditingControl(key)) {
@@ -342,6 +455,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 	
 	private boolean isEditingControl(ControlKeys key) {
+		if (livePlay && KeyboardShortcut.isDigit(key.keycode)) return false;
 		return imeTextMode || key.text || switch (key) {
 			case UP, DOWN, LEFT, RIGHT, DEL, ESCAPE -> true;
 			default -> false;

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.config;
 
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
@@ -103,6 +104,13 @@ public class KeyConfiguration extends MainState {
 	private MidiConfig midiconfig;
 
 	private boolean deletepressed = false;
+	private static final KeyboardShortcut[] SHORTCUTS = KeyboardShortcut.values();
+	private static final int SHORTCUT_VISIBLE_ROWS = 10;
+	private boolean editingShortcuts;
+	private boolean capturingShortcut;
+	private int shortcutCursor;
+	private int shortcutScroll;
+	private String shortcutStatus = "";
 
 	public KeyConfiguration(MainController main) {
 		super(main, MainStateType.CONFIG);
@@ -111,6 +119,9 @@ public class KeyConfiguration extends MainState {
 
 	public void create() {
 		keyinput = false;
+		editingShortcuts = capturingShortcut = false;
+		shortcutCursor = shortcutScroll = 0;
+		shortcutStatus = "";
 		deviceSelectionSlot = -1;
 		assignmentDevice = "";
 		assignmentResult = "";
@@ -152,8 +163,18 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void render() {
+		if (editingShortcuts) {
+			renderShortcuts();
+			return;
+		}
 		if (!keyinput && deviceSelectionSlot < 0 && input.isControlKeyPressed(ControlKeys.ESCAPE)) {
 			returnToMusicSelect();
+			return;
+		}
+		if (!keyinput && deviceSelectionSlot < 0 && input.isControlKeyPressed(ControlKeys.NUM0)) {
+			editingShortcuts = true;
+			keyboard.setShortcutEditorActive(true);
+			renderShortcuts();
 			return;
 		}
 		var detectedControllers = input.getBMInputProcessor();
@@ -207,9 +228,8 @@ public class KeyConfiguration extends MainState {
 				assignmentResult = "Assignment cancelled";
 			}
 			if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
-				setKeyboardKeyAssign(keysa[cursorpos]);
-				// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
-				keyinput = false;
+				keyinput = !setKeyboardKeyAssign(keysa[cursorpos]);
+				if (!keyinput) keyboard.suppressHeldControlKeys();
 			}
 			if (keyinput && input.getKeyBoardInputProcesseor().getMouseScratchInput().getLastMouseScratch() != -1) {
 				setMouseScratchKeyAssign(keysa[cursorpos], input.getKeyBoardInputProcesseor());
@@ -341,6 +361,7 @@ public class KeyConfiguration extends MainState {
 			titlefont.draw(sprite, "[7] Restore to Default (Keyboard)", 750 * scaleX, 150 * scaleY);
 			titlefont.draw(sprite, "[8] Restore to Default (Controller)", 750 * scaleX, 120 * scaleY);
 			titlefont.draw(sprite, "[9] Restore to Default (MIDI)", 750 * scaleX, 90 * scaleY);			
+			titlefont.draw(sprite, "[0] Shortcut Keys", 750 * scaleX, 60 * scaleY);
 			if (!assignmentResult.isEmpty()) {
 				titlefont.setColor(keyinput ? Color.YELLOW : Color.WHITE);
 				titlefont.draw(sprite, assignmentDevice, 750 * scaleX, 420 * scaleY, 0, assignmentDevice.length(),
@@ -388,6 +409,123 @@ public class KeyConfiguration extends MainState {
 		}
 	}
 
+	private void renderShortcuts() {
+		var action = SHORTCUTS[shortcutCursor];
+		if (capturingShortcut) {
+			int key = keyboard.getLastPressedKey();
+			boolean cancel = input.isControlKeyPressed(ControlKeys.ESCAPE);
+			if (cancel || key == Keys.ESCAPE) {
+				capturingShortcut = false;
+				shortcutStatus = "Assignment cancelled";
+				keyboard.suppressHeldControlKeys();
+			} else if (key != -1 && !KeyboardShortcut.isModifier(key)) {
+				setShortcut(action, KeyboardShortcut.chord(key, keyboard.getLastPressedModifiers()));
+			}
+			if (key != -1) keyboard.setLastPressedKey(-1);
+		} else if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
+			editingShortcuts = false;
+			shortcutStatus = "";
+			keyboard.suppressHeldControlKeys();
+			keyboard.setShortcutEditorActive(false);
+			return;
+		} else if (input.isControlKeyPressed(ControlKeys.UP)) {
+			shortcutCursor = Math.floorMod(shortcutCursor - 1, SHORTCUTS.length);
+		} else if (input.isControlKeyPressed(ControlKeys.DOWN)) {
+			shortcutCursor = (shortcutCursor + 1) % SHORTCUTS.length;
+		} else if (input.isControlKeyPressed(ControlKeys.ENTER)) {
+			keyboard.setLastPressedKey(-1);
+			capturingShortcut = true;
+			shortcutStatus = "Press a key with optional Ctrl, Shift or Alt (Esc to cancel)";
+		} else if (input.isControlKeyPressed(ControlKeys.DEL)) {
+			setShortcut(action, KeyboardShortcut.DISABLED);
+		} else if (input.isControlKeyPressed(ControlKeys.LEFT)) {
+			setShortcut(action, action.defaultBinding());
+		} else if (input.isControlKeyPressed(ControlKeys.RIGHT)) {
+			config.resetShortcuts();
+			shortcutStatus = "All shortcuts restored";
+		}
+
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		if (titlefont == null) return;
+		var sprite = main.getSpriteBatch();
+		float sx = (float) getSkin().getScaleX(), sy = (float) getSkin().getScaleY();
+		sprite.begin();
+		titlefont.setColor(Color.CYAN);
+		titlefont.draw(sprite, "Shortcut Keys", 80 * sx, 650 * sy);
+		titlefont.draw(sprite, (shortcutCursor + 1) + " / " + SHORTCUTS.length, 1010 * sx, 650 * sy);
+		shortcutScroll = Math.max(shortcutCursor - SHORTCUT_VISIBLE_ROWS + 1, Math.min(shortcutCursor, shortcutScroll));
+		for (int i = shortcutScroll; i < Math.min(SHORTCUTS.length, shortcutScroll + SHORTCUT_VISIBLE_ROWS); i++) {
+			var shortcut = SHORTCUTS[i];
+			int binding = config.getShortcutBinding(shortcut);
+			float y = (590 - (i - shortcutScroll) * 39) * sy;
+			titlefont.setColor(i == shortcutCursor ? Color.YELLOW : Color.WHITE);
+			titlefont.draw(sprite, (i == shortcutCursor ? "> " : "   ") + shortcut.label(), 80 * sx, y);
+			titlefont.draw(sprite, formatShortcut(binding), 570 * sx, y);
+			titlefont.draw(sprite, shortcut.scopeLabel(), 855 * sx, y);
+		}
+		titlefont.setColor(Color.WHITE);
+		titlefont.draw(sprite, shortcutStatus, 80 * sx, 175 * sy);
+		titlefont.draw(sprite, "[Enter] Assign   [Delete] Disable   [Left] Default   [Right] Reset all   [Esc] Back",
+				80 * sx, 112 * sy);
+		titlefont.draw(sprite, "Open KeyConfig: Ctrl+6 (fixed fallback)", 80 * sx, 78 * sy);
+		sprite.end();
+	}
+
+	public boolean isEditingShortcuts() {
+		return editingShortcuts;
+	}
+
+	private static String formatShortcut(int binding) {
+		if (binding == KeyboardShortcut.DISABLED) return "Disabled";
+		int mods = KeyboardShortcut.modifiers(binding);
+		return ((mods & KeyBoardInputProcesseor.MASK_CTRL) != 0 ? "Ctrl+" : "")
+				+ ((mods & KeyBoardInputProcesseor.MASK_SHIFT) != 0 ? "Shift+" : "")
+				+ ((mods & KeyBoardInputProcesseor.MASK_ALT) != 0 ? "Alt+" : "")
+				+ keyboardKeyName(KeyboardShortcut.key(binding));
+	}
+
+	private void setShortcut(KeyboardShortcut action, int binding) {
+		var conflict = config.getShortcutConflict(action, binding);
+		if (conflict != null) {
+			shortcutStatus = "Already assigned: " + conflict.label();
+		} else if (binding >= 0 && conflictsWithLayout(config, action, KeyboardShortcut.key(binding))) {
+			shortcutStatus = "Already used by a keyboard layout in this screen";
+		} else if (config.setShortcutBinding(action, binding)) {
+			capturingShortcut = false;
+			shortcutStatus = binding == KeyboardShortcut.DISABLED ? "Shortcut disabled" : "Shortcut updated";
+			keyboard.suppressHeldControlKeys();
+		} else {
+			shortcutStatus = "This key is reserved";
+		}
+	}
+
+	static boolean conflictsWithLayout(PlayerConfig config, KeyboardShortcut action, int key) {
+		if (action.activeIn(MainStateType.MUSICSELECT) && conflictsWithSelectLayout(config, key)) return true;
+		if (action.activeIn(MainStateType.PLAY) || action.activeIn(MainStateType.RESULT)
+				|| action.activeIn(MainStateType.COURSERESULT)) {
+			for (Mode mode : MODE_HINT) {
+				if (usesKeyboardKey(config.getPlayInputConfig(mode, PlaySide.P1).getKeyboardConfig(), key)
+						|| (config.isIndependentPlaySides()
+								&& usesKeyboardKey(config.getPlayInputConfig(mode, PlaySide.P2).getKeyboardConfig(), key))) return true;
+			}
+		}
+		return false;
+	}
+
+	static boolean conflictsWithSelectLayout(PlayerConfig config, int key) {
+		if (key < 0 || KeyboardShortcut.isDigit(key)) return false;
+		return usesKeyboardKey(config.getMusicSelectInputConfig(PlaySide.P1).getKeyboardConfig(), key)
+				|| (config.isIndependentPlaySides() && usesKeyboardKey(
+						config.getMusicSelectInputConfig(PlaySide.P2).getKeyboardConfig(), key));
+	}
+
+	private static boolean usesKeyboardKey(KeyboardConfig config, int key) {
+		if (config.getStart() == key || config.getSelect() == key) return true;
+		for (int assigned : config.getKeyAssign()) if (assigned == key) return true;
+		return false;
+	}
+
 	void returnToMusicSelect() {
 		boolean saved = main.saveConfigAndReportPlayerResult();
 		if (assignmentDiagnostics) Logger.getGlobal().info("KeyConfig controller assignment: player config "
@@ -396,7 +534,7 @@ public class KeyConfiguration extends MainState {
 	}
 	
 	public void setKeyAssignMode(final int index) {
-		if (deviceSelectionSlot >= 0) return;
+		if (deviceSelectionSlot >= 0 || editingShortcuts) return;
 		input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
 		input.getKeyBoardInputProcesseor().getMouseScratchInput().setLastMouseScratch(-1);
 		for (BMControllerInputProcessor bmc : controllers) {
@@ -512,18 +650,49 @@ public class KeyConfiguration extends MainState {
 		return Gdx.input instanceof PollingLwjgl3Input input ? input.keyName(key) : Keys.toString(key);
 	}
 
-	private void setKeyboardKeyAssign(int index) {
-		if (keyboard.isReservedKey(keyboard.getLastPressedKey())) {
-			return;
+	private boolean setKeyboardKeyAssign(int index) {
+		int key = keyboard.getLastPressedKey();
+		if (!KeyboardShortcut.isDigit(key)) {
+			for (var shortcut : SHORTCUTS) {
+				int binding = config.getShortcutBinding(shortcut);
+				if (binding < 0 || KeyboardShortcut.key(binding) != key) continue;
+				if (!shortcut.activeIn(MainStateType.PLAY) && !shortcut.activeIn(MainStateType.RESULT)
+						&& !shortcut.activeIn(MainStateType.COURSERESULT)
+						&& !(shortcut.activeIn(MainStateType.MUSICSELECT)
+								&& (keyboardConfig == config.getMusicSelectInputConfig(PlaySide.P1).getKeyboardConfig()
+										|| keyboardConfig == config.getMusicSelectInputConfig(PlaySide.P2).getKeyboardConfig()))) continue;
+				assignmentResult = "Already used by a shortcut: " + shortcut.label();
+				keyboard.setLastPressedKey(-1);
+				return false;
+			}
+		}
+		if (index >= 0 && KeyboardShortcut.isDigit(key)) {
+			var assigned = keyboardConfig.getKeyAssign();
+			for (int i = 0; i < assigned.length; i++) {
+				if (i == index || assigned[i] != key) continue;
+				assignmentResult = "This number is already assigned to another lane";
+				keyboard.setLastPressedKey(-1);
+				return false;
+			}
+			if (key == keyboardConfig.getStart() || key == keyboardConfig.getSelect()) {
+				assignmentResult = "This number is already assigned to START / SELECT";
+				keyboard.setLastPressedKey(-1);
+				return false;
+			}
+		} else if (keyboard.isReservedKey(key)) {
+			assignmentResult = "This key is reserved";
+			keyboard.setLastPressedKey(-1);
+			return false;
 		}
 		resetKeyAssign(index);
 		if (index >= 0) {
-			keyboardConfig.getKeyAssign()[index] = keyboard.getLastPressedKey();
+			keyboardConfig.getKeyAssign()[index] = key;
 		} else if (index == -1) {
-			keyboardConfig.setStart(keyboard.getLastPressedKey());
+			keyboardConfig.setStart(key);
 		} else if (index == -2) {
-			keyboardConfig.setSelect(keyboard.getLastPressedKey());
+			keyboardConfig.setSelect(key);
 		}
+		return true;
 	}
 
 	private String getMouseScratchKeyString(int index, String defaultKeyString) {

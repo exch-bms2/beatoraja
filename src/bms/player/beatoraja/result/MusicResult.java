@@ -7,7 +7,7 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.utils.Array;
@@ -383,7 +383,7 @@ public class MusicResult extends AbstractResult {
 
 	public void input() {
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
-		final boolean switchPressed = canSwitchScoreDisplay() && inputProcessor.isControlKeyPressed(ControlKeys.F7);
+		final boolean switchPressed = canSwitchScoreDisplay() && inputProcessor.isActivated(KeyboardShortcut.SWITCH_RESULT_SCORE);
 		if (getSkin() != null && getSkin().isTextInputActive()) return;
 		super.input();
 		long time = timer.getNowTime();
@@ -436,7 +436,7 @@ public class MusicResult extends AbstractResult {
 					saveReplayData(3);				
 				}
 
-				if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
+				if(inputProcessor.isActivated(KeyboardShortcut.OPEN_IR)) {
 					this.executeEvent(EventType.open_ir);
 				}
 			}
