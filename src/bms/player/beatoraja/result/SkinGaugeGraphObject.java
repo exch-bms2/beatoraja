@@ -5,7 +5,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.*;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.PlayerResource.GaugeHistory;
+import bms.player.beatoraja.play.AbstractGrooveGauge.Gauge;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
 
@@ -55,6 +56,8 @@ public class SkinGaugeGraphObject extends SkinObject {
 	private int currentType = -1;
 	private int color;
 	private FloatArray gaugehistory;
+	private FloatArray[] currentSource;
+	private GaugeHistory timedHistory;
 	private IntArray section;
 	private Gauge gg;
 
@@ -112,17 +115,23 @@ public class SkinGaugeGraphObject extends SkinObject {
 
 	public void prepare(long time, MainState state) {
 		render = time >= delay ? 1.0f : (float) time / delay;
+		updateGraphData(state);
+		super.prepare(time, state);
+	}
 
+	boolean updateGraphData(MainState state) {
 		final PlayerResource resource = state.resource;
-		int type = resource.getGrooveGauge().getType();
-		if(state instanceof AbstractResult) {
-			type = ((AbstractResult) state).gaugeType;
-		}
+		var timed = state instanceof MusicResult result ? result.getDisplayGaugeHistory() : null;
+		var gauge = timed == null ? resource.getGrooveGauge() : timed.gauge();
+		var source = timed == null ? resource.getGauge() : timed.values();
+		int type = state instanceof AbstractResult result ? result.getGaugeType() : gauge.getType();
 
-		if(currentType != type) {
+		if (currentType != type || currentSource != source || timedHistory != timed) {
 			redraw = true;
 			currentType = type;
-			gaugehistory = resource.getGauge()[currentType];
+			currentSource = source;
+			timedHistory = timed;
+			gaugehistory = source[currentType];
 			section = new IntArray();
 			if (state instanceof CourseResult) {
 				gaugehistory = new FloatArray();
@@ -131,9 +140,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l[currentType].size);
 				}
 			}
-			gg = resource.getGrooveGauge().getGauge(currentType);
+			gg = gauge.getGauge(currentType);
+			return true;
 		}
-		super.prepare(time, state);
+		return false;
 	}
 
 	@Override
@@ -167,61 +177,11 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shape.dispose();
 
 			shape = new Pixmap((int) region.width, (int) region.height, Pixmap.Format.RGBA8888);
-			Float f1 = null;
-			float lastGauge = -1;
-			int lastX = -1;
-			int lastY = -1;
-
-			for (int i = 0; i < gaugehistory.size; i++) {
-				if (section.contains(i)) {
-					shape.setColor(Color.valueOf("ffffff"));
-					shape.drawLine((int) (region.width * (i - 1) / gaugehistory.size), 0,
-							(int) (region.width * (i - 1) / gaugehistory.size), (int) region.height);
-				}
-				Float f2 = gaugehistory.get(i);
-				if (f1 != null) {
-					final int x1 = (int) (region.width * (i - 1) / gaugehistory.size);
-					final int y1 = (int) ((f1 / max) * (region.height - lineWidth));
-					final int x2 = (int) (region.width * i / gaugehistory.size);
-					final int y2 = (int) ((f2 / max) * (region.height - lineWidth));
-					final int yb = (int) ((border / max) * (region.height - lineWidth));
-					lastGauge = f2;
-					lastX = x2;
-					lastY = y2;
-					if (f1 < border) {
-						if (f2 < border) {
-							shape.setColor(graphline[color]);
-							shape.fillRectangle(x1, Math.min(y1, y2), lineWidth, Math.abs(y2 - y1) + lineWidth);
-							shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
-						} else {
-							shape.setColor(graphline[color]);
-							shape.fillRectangle(x1, y1, lineWidth, yb - y1);
-							shape.setColor(borderline[color]);
-							shape.fillRectangle(x1, yb, lineWidth, y2 - yb + lineWidth);
-							shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
-						}
-					} else {
-						if (f2 >= border) {
-							shape.setColor(borderline[color]);
-							shape.fillRectangle(x1, Math.min(y1, y2), lineWidth, Math.abs(y2 - y1) + lineWidth);
-							shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
-						} else {
-							shape.setColor(borderline[color]);
-							shape.fillRectangle(x1, yb, lineWidth, y1 - yb + lineWidth);
-							shape.setColor(graphline[color]);
-							shape.fillRectangle(x1, y2, lineWidth, yb - y2);
-							shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
-						}
-					}
-				}
-				f1 = f2;
+			if (timedHistory != null) {
+				drawTimedHistory(shape);
+			} else {
+				drawLegacyHistory(shape, border, max);
 			}
-
-			if (lastGauge != -1) {
-				shape.setColor(lastGauge < border ? graphline[color] : borderline[color]);
-				shape.fillRectangle(lastX, lastY, (int) (region.width - lastX), lineWidth);
-			}
-
 			shapetex = new TextureRegion(new Texture(shape));
 			shape.dispose();
 		}
@@ -230,6 +190,102 @@ public class SkinGaugeGraphObject extends SkinObject {
 		// setRegionにfloatを渡すと表示がおかしくなる
 		shapetex.setRegion(0, 0, (int)(region.width * render), (int)region.height);
 		draw(sprite, shapetex, region.x, region.y + region.height, (int)(region.width * render), -region.height);
+	}
+
+	private void drawLegacyHistory(Pixmap shape, float border, float max) {
+		Float f1 = null;
+		float lastGauge = -1;
+		int lastX = -1;
+		int lastY = -1;
+
+		for (int i = 0; i < gaugehistory.size; i++) {
+			if (section.contains(i)) {
+				shape.setColor(Color.valueOf("ffffff"));
+				shape.drawLine((int) (region.width * (i - 1) / gaugehistory.size), 0,
+						(int) (region.width * (i - 1) / gaugehistory.size), (int) region.height);
+			}
+			Float f2 = gaugehistory.get(i);
+			if (f1 != null) {
+				final int x1 = (int) (region.width * (i - 1) / gaugehistory.size);
+				final int y1 = (int) ((f1 / max) * (region.height - lineWidth));
+				final int x2 = (int) (region.width * i / gaugehistory.size);
+				final int y2 = (int) ((f2 / max) * (region.height - lineWidth));
+				final int yb = (int) ((border / max) * (region.height - lineWidth));
+				lastGauge = f2;
+				lastX = x2;
+				lastY = y2;
+				if (f1 < border) {
+					if (f2 < border) {
+						shape.setColor(graphline[color]);
+						shape.fillRectangle(x1, Math.min(y1, y2), lineWidth, Math.abs(y2 - y1) + lineWidth);
+						shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
+					} else {
+						shape.setColor(graphline[color]);
+						shape.fillRectangle(x1, y1, lineWidth, yb - y1);
+						shape.setColor(borderline[color]);
+						shape.fillRectangle(x1, yb, lineWidth, y2 - yb + lineWidth);
+						shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
+					}
+				} else {
+					if (f2 >= border) {
+						shape.setColor(borderline[color]);
+						shape.fillRectangle(x1, Math.min(y1, y2), lineWidth, Math.abs(y2 - y1) + lineWidth);
+						shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
+					} else {
+						shape.setColor(borderline[color]);
+						shape.fillRectangle(x1, yb, lineWidth, y1 - yb + lineWidth);
+						shape.setColor(graphline[color]);
+						shape.fillRectangle(x1, y2, lineWidth, yb - y2);
+						shape.fillRectangle(x1, y2, x2 - x1, lineWidth);
+					}
+				}
+			}
+			f1 = f2;
+		}
+
+		if (lastGauge != -1) {
+			shape.setColor(lastGauge < border ? graphline[color] : borderline[color]);
+			shape.fillRectangle(lastX, lastY, (int) (region.width - lastX), lineWidth);
+		}
+
+	}
+
+	void drawTimedHistory(Pixmap shape) {
+		if (gaugehistory.size == 0) return;
+		int width = shape.getWidth();
+		int height = shape.getHeight();
+		int color = typetable[currentType];
+		float max = gg.getProperty().max;
+		float border = gg.getProperty().border;
+		int borderY = (int) (border / max * (height - lineWidth));
+		int lastX = 0;
+		float last = gaugehistory.first();
+		int lastY = (int) (last / max * (height - lineWidth));
+		shape.setColor(last < border ? graphline[color] : borderline[color]);
+		shape.fillRectangle(0, lastY, 1, lineWidth);
+
+		for (int i = 1; i < gaugehistory.size; i++) {
+			int x = (int) (timedHistory.timesUs().get(i) / (double) timedHistory.durationUs() * (width - 1));
+			float value = gaugehistory.get(i);
+			int y = (int) (value / max * (height - lineWidth));
+			shape.setColor(last < border ? graphline[color] : borderline[color]);
+			shape.fillRectangle(lastX, lastY, x - lastX, lineWidth);
+			int left = Math.max(0, x - lineWidth + 1);
+			int thickness = x - left + 1;
+			int low = Math.min(y, lastY);
+			int high = Math.max(y, lastY) + lineWidth;
+			if (low < borderY) {
+				shape.setColor(graphline[color]);
+				shape.fillRectangle(left, low, thickness, Math.min(high, borderY) - low);
+			}
+			if (high > borderY) {
+				shape.setColor(borderline[color]);
+				shape.fillRectangle(left, Math.max(low, borderY), thickness, high - Math.max(low, borderY));
+			}
+			lastX = x;
+			lastY = y;
+			last = value;
+		}
 	}
 
 	public int getDelay() {

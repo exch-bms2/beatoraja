@@ -11,6 +11,8 @@ public final class Lwjgl3WindowInputLifecycleTest {
         var config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("beatoraja focus lifecycle test");
         config.setWindowedMode(320, 240); config.disableAudio(true); config.setForegroundFPS(60);
+        boolean fullscreen = Boolean.getBoolean("beatoraja.inputLifecycleTest.fullscreen");
+        if (fullscreen) config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
         new Lwjgl3Application(bms.player.beatoraja.build.GlTestDiagnostics.wrap("input-lifecycle", new ApplicationAdapter() {
             int frames;
             @Override public void render() {
@@ -18,6 +20,17 @@ public final class Lwjgl3WindowInputLifecycleTest {
                 var source = (PollingLwjgl3Input) Gdx.input;
                 long handle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
                 try {
+                    if (fullscreen) {
+                        check(GLFW.glfwGetWindowMonitor(handle) != 0, "Real fullscreen window");
+                        check(GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE
+                                && source.isWindowInputActive(), "Focused fullscreen accepts input before any synthetic focus event");
+                        try (var f = new WindowInputLifecycleTest.Fixture(0, true)) {
+                            source.update(); f.input.poll(); f.consume();
+                            edge(handle, GLFW.GLFW_PRESS); source.update(); f.input.poll();
+                            check(f.input.getKeyState(0), "Fullscreen startup keyboard press reaches judgment input");
+                            edge(handle, GLFW.GLFW_RELEASE); source.update(); f.input.poll();
+                        }
+                    }
                     for (int mode = 0; mode < 2; mode++) test(source, handle, mode);
                 } catch (Exception e) { throw new AssertionError(e); }
                 Gdx.app.exit();

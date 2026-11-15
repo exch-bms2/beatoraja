@@ -450,9 +450,8 @@ public class FloatPropertyFactory {
 			if (state instanceof BMSPlayer) {
 				return ((BMSPlayer) state).getGauge().getValue();
 			}
-			if (state instanceof AbstractResult) {
-				final int gaugeType = ((AbstractResult) state).getGaugeType();
-				return state.resource.getGauge()[gaugeType].get(state.resource.getGauge()[gaugeType].size - 1);
+			if (state instanceof AbstractResult result) {
+				return result.getDisplayGaugeValue();
 			}
 			return Float.MIN_VALUE;
 		}),

@@ -107,6 +107,7 @@ public final class MusicSelector extends MainState {
 	private PixmapResourcePool banners;
 
 	private PixmapResourcePool stagefiles;
+	private boolean firstCreation = true;
 
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main, MainStateType.MUSICSELECT);
@@ -128,7 +129,10 @@ public final class MusicSelector extends MainState {
 			}
 		};
 		
-		bar = new BarRenderer(this, manager);
+		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.SELECT_BAR_INIT)) {
+			bar = new BarRenderer(this, manager);
+			timing.outcome(StartupDiagnostics.Outcome.OK);
+		}
 		banners = new PixmapResourcePool(resource.getConfig().getBannerPixmapGen());
 		stagefiles = new PixmapResourcePool(resource.getConfig().getStagefilePixmapGen());
 		musicinput = new MusicSelectInputProcessor(this);
@@ -160,6 +164,8 @@ public final class MusicSelector extends MainState {
 	}
 
 	public void create() {
+		boolean initial = firstCreation;
+		firstCreation = false;
 		main.getSoundManager().shuffle();
 
 		play = null;
@@ -189,9 +195,15 @@ public final class MusicSelector extends MainState {
 			input.setControllerConfig(bindings.getController());
 			input.setMidiConfig(bindings.getMidiConfig());
 		}
-		manager.updateBar();
+		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.SELECT_BAR_BUILD, initial)) {
+			boolean built = manager.updateBar();
+			timing.outcome(built ? StartupDiagnostics.Outcome.OK : StartupDiagnostics.Outcome.FAILED);
+		}
 
-		loadSkin(SkinType.MUSIC_SELECT);
+		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.SELECT_SKIN_LOAD, initial)) {
+			loadSkin(SkinType.MUSIC_SELECT);
+			timing.outcome(getSkin() != null ? StartupDiagnostics.Outcome.OK : StartupDiagnostics.Outcome.FAILED);
+		}
 	}
 
 	public void prepare() {

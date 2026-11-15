@@ -157,12 +157,10 @@ public final class NoteOffsetCenterTest {
             player = KeyboardQueueTestSupport.allocate(Player.class);
             set(player, MainState.class, "main", controller); set(player, MainState.class, "timer", timer);
             set(player, MainState.class, "skin", skin);
-            player.judge = KeyboardQueueTestSupport.allocate(JudgeManager.class);
-            var stateClass = Class.forName(JudgeManager.class.getName() + "$LaneState");
-            var states = java.lang.reflect.Array.newInstance(stateClass, 1);
-            java.lang.reflect.Array.set(states, 0, KeyboardQueueTestSupport.allocate(stateClass));
-            set(player.judge, JudgeManager.class, "states", states);
-            set(player.judge, JudgeManager.class, "window", new JudgeProperty.JudgeWindow(JudgeProperty.SEVENKEYS, 100, new int[]{100,100,100}));
+            var judge = KeyboardQueueTestSupport.allocate(JudgeManager.class);
+            player.judge = judge;
+            set(judge, AbstractJudgeManager.class, "states", judge.initLanes(new LaneProperty(Mode.BEAT_7K), new Lane[1]));
+            set(player.judge, AbstractJudgeManager.class, "window", new JudgeProperty.JudgeWindow(JudgeProperty.SEVENKEYS, 100, new int[]{100,100,100}));
             renderer = KeyboardQueueTestSupport.allocate(LaneRenderer.class);
             set(renderer, LaneRenderer.class, "main", player);
             set(renderer, LaneRenderer.class, "config", playerConfig); set(renderer, LaneRenderer.class, "playconfig", playConfig);
@@ -197,11 +195,11 @@ public final class NoteOffsetCenterTest {
         }
     }
     private static final class Player extends BMSPlayer {
-        JudgeManager judge;
+        AbstractJudgeManager judge;
         private Player() { super(null, null); }
         @Override public int getState() { return STATE_PLAY; }
         @Override public long getNowQuarterNoteTime() { return 0; }
-        @Override public JudgeManager getJudgeManager() { return judge; }
+        @Override public AbstractJudgeManager getJudgeManager() { return judge; }
     }
     private static void set(Object value, Class<?> owner, String field, Object data) throws Exception {
         KeyboardQueueTestSupport.set(value, owner, field, data);

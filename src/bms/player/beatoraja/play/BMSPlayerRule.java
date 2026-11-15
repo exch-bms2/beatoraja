@@ -1,7 +1,11 @@
 package bms.player.beatoraja.play;
 
 import bms.model.BMSModel;
+import bms.model.LongNote;
+import bms.model.MineNote;
 import bms.model.Mode;
+import bms.model.NormalNote;
+import bms.player.beatoraja.BMSPlayerMode;
 
 /**
  * プレイヤールール
@@ -16,10 +20,57 @@ public enum BMSPlayerRule {
 	Beatoraja_24(GaugeProperty.KEYBOARD, JudgeProperty.KEYBOARD, Mode.KEYBOARD_24K, Mode.KEYBOARD_24K_DOUBLE),
 	Beatoraja_Other(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
 
-	LR2(GaugeProperty.LR2, JudgeProperty.SEVENKEYS),
+	LunaticRave2(GaugeProperty.LR2, JudgeProperty.SEVENKEYS,
+			Mode.BEAT_5K, Mode.BEAT_7K, Mode.POPN_9K, Mode.BEAT_10K, Mode.BEAT_14K),
 
 	Default(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
 ;
+
+    // Experimental opt-in: change to LunaticRave2 and rebuild to compare locally.
+    static final BMSPlayerRule SINGLE_SONG_RULE = Default;
+
+    /** Source values captured before the standard rule normalizes RANK and TOTAL. */
+    public record ChartParameters(int rank, double total) {
+        public static ChartParameters fromBms(BMSModel model) {
+            Integer rank = model.getJudgeType().bmsRank();
+            return new ChartParameters(rank != null ? rank : 2,
+                    model.getTotalType() == BMSModel.TotalType.BMS ? model.getTotal() : 0);
+        }
+    }
+
+    static BMSPlayerRule select(BMSPlayerRule requested, BMSModel model, Mode originalMode,
+                                BMSPlayerMode playMode, boolean course, int gauge, ChartParameters chart) {
+        if (requested == LunaticRave2 && originalMode == model.getMode() && LunaticRave2.supports(originalMode)
+                && playMode != null && playMode.mode == BMSPlayerMode.Mode.PLAY && !course && chart != null
+                && (gauge == GrooveGauge.NORMAL || gauge == GrooveGauge.EASY || gauge == GrooveGauge.HARD)) {
+            for (var timeline : model.getAllTimeLines()) {
+                for (int lane = 0; lane < originalMode.key; lane++) {
+                    var note = timeline.getNote(lane);
+                    if (note == null || note instanceof NormalNote || note instanceof MineNote) continue;
+                    if (!(note instanceof LongNote ln) || !isSupportedLongNote(model, ln)) {
+                        return getBMSPlayerRule(originalMode);
+                    }
+                }
+            }
+            return LunaticRave2;
+        }
+        return getBMSPlayerRule(originalMode);
+    }
+
+    private boolean supports(Mode mode) {
+        for (Mode candidate : this.mode) {
+            if (candidate == mode) return true;
+        }
+        return false;
+    }
+
+    private static boolean isSupportedLongNote(BMSModel model, LongNote note) {
+        boolean ordinary = note.getType() == LongNote.TYPE_LONGNOTE
+                || (note.getType() == LongNote.TYPE_UNDEFINED && model.getLntype() == BMSModel.LNTYPE_LONGNOTE);
+        var pair = note.getPair();
+        return ordinary && pair != null && pair.getPair() == note && (note.isEnd()
+                ? pair.getMicroTime() < note.getMicroTime() : note.getMicroTime() < pair.getMicroTime());
+    }
 
 	/**
 	 * ゲージ仕様
@@ -91,7 +142,7 @@ public enum BMSPlayerRule {
 enum BMSPlayerRuleSet {
 	
 	Beatoraja(BMSPlayerRule.Beatoraja_5, BMSPlayerRule.Beatoraja_7, BMSPlayerRule.Beatoraja_9, BMSPlayerRule.Beatoraja_24,  BMSPlayerRule.Beatoraja_Other),
-	LR2(BMSPlayerRule.LR2);
+	LunaticRave2(BMSPlayerRule.LunaticRave2);
 	
 	public final BMSPlayerRule[] ruleset;
 	

@@ -7,11 +7,14 @@ import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.*;
+import bms.player.beatoraja.skin.property.BooleanPropertyFactory;
+import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
-/** Exercises the real JudgeManager with inert application/audio fixtures, never player data. */
+/** Exercises the real AbstractJudgeManager with inert application/audio fixtures, never player data. */
 public final class KeyboardJudgeCompatibilityTest {
     private static int eventSource;
     public static void main(String[] args) throws Exception {
+        testSplitJudgeOptionNames();
         for (eventSource = 0; eventSource < 3; eventSource++) {
             testNormalAndShortTap();
             testTimingWindows();
@@ -20,8 +23,77 @@ public final class KeyboardJudgeCompatibilityTest {
             testSameTimeChord();
             testScratchEnds();
             testReplayLegacy();
+            testSplitJudgeDisplay();
         }
         System.out.println("KeyboardJudgeCompatibilityTest passed (normal/LN/CN/HCN, chords, legacy/new replay paths)");
+    }
+
+    private static void testSplitJudgeOptionNames() {
+        int[] earlyIds = {1244, 1264, 1364, 1246, 1266, 1366};
+        for (int slot = 0; slot < earlyIds.length; slot++) {
+            String name = "judge_" + (slot < 3 ? "k" : "s") + (slot % 3 + 1);
+            int earlyId = earlyIds[slot];
+            check(BooleanPropertyFactory.getBooleanProperty(earlyId) != null
+                    && BooleanPropertyFactory.getBooleanProperty(earlyId) == BooleanPropertyFactory.getBooleanProperty(name + "_early"),
+                    name + "_early resolves to " + earlyId);
+            check(BooleanPropertyFactory.getBooleanProperty(earlyId + 1) != null
+                    && BooleanPropertyFactory.getBooleanProperty(earlyId + 1) == BooleanPropertyFactory.getBooleanProperty(name + "_late"),
+                    name + "_late resolves to " + (earlyId + 1));
+        }
+    }
+
+    private static void testSplitJudgeDisplay() throws Exception {
+        var model = model();
+        var scratch = line(1_000_000);
+        var key = line(2_000_000);
+        scratch.setNote(7, new NormalNote(0));
+        key.setNote(0, new NormalNote(1));
+        model.setAllTimeLine(new TimeLine[] {scratch, key});
+        var f = new Fixture(model, true);
+        var player = f.player;
+        ((PlaySkin) player.getSkin()).setJudgeregion(1);
+        f.judge.init(model, player.resource);
+
+        var scratchDuration = IntegerPropertyFactory.getIntegerProperty("judge_duration_s1");
+        var keyDuration = IntegerPropertyFactory.getIntegerProperty(528);
+        var scratchFast = BooleanPropertyFactory.getBooleanProperty(1246);
+        var keySlow = BooleanPropertyFactory.getBooleanProperty(1245);
+        var legacySlow = BooleanPropertyFactory.getBooleanProperty(1243);
+        check(!player.timer.isTimerOn(240) && !player.timer.isTimerOn(243)
+                && scratchDuration.get(player) == Integer.MIN_VALUE
+                && !scratchFast.get(player), "Split properties are inactive before the first judgement");
+
+        f.input.setKeyState(7, true, 960_000);
+        f.judge.update(960_000);
+        check(scratchFast.get(player) && scratchDuration.get(player) == 40
+                && player.timer.isTimerOn(243) && !player.timer.isTimerOn(240),
+                "Scratch FAST only starts the scratch channel");
+        player.timer.setMicroTimer(243, 123);
+
+        f.input.setKeyState(0, true, 2_030_000);
+        f.judge.update(2_030_000);
+        check(keySlow.get(player) && keyDuration.get(player) == -30 && player.timer.isTimerOn(240),
+                "Key SLOW starts the key channel");
+        check(scratchFast.get(player) && scratchDuration.get(player) == 40
+                && player.timer.getMicroTimer(243) == 123, "Key judgement leaves the scratch channel intact");
+        check(legacySlow.get(player) && IntegerPropertyFactory.getIntegerProperty(525).get(player) == -30
+                && player.timer.isTimerOn(46), "Legacy properties still follow the latest judgement");
+
+        var practiceModel = model();
+        var practiceNote = line(1_000_000);
+        practiceNote.setNote(0, new NormalNote(0));
+        practiceModel.setAllTimeLine(new TimeLine[]{practiceNote});
+        player.resource.setPlayMode(BMSPlayerMode.PRACTICE);
+        f.judge.init(practiceModel, player.resource);
+        check(f.judge instanceof JudgeManager && f.judge.getPastNotes() == 0
+                && !player.timer.isTimerOn(240) && !player.timer.isTimerOn(243)
+                && keyDuration.get(player) == Integer.MIN_VALUE && !scratchFast.get(player),
+                "Practice reinitializes the same default judge and clears split display state");
+        f.input.setKeyState(0, false, 900_000);
+        f.input.setKeyState(0, true, 1_000_000);
+        f.judge.update(1_000_000);
+        check(f.judge.getJudgeCount(0) == 1 && player.timer.isTimerOn(240),
+                "Practice scores and displays judgments for the replacement chart");
     }
 
     private static void testNormalAndShortTap() throws Exception {
@@ -180,21 +252,40 @@ public final class KeyboardJudgeCompatibilityTest {
 
     private static TimeLine line(long time) { return new TimeLine(0, time, Mode.BEAT_7K.key); }
 
-    private static final class Fixture {
+    static final class Fixture {
         final BMSPlayerInputProcessor input;
-        final JudgeManager judge;
+        final AbstractJudgeManager judge;
+        final AbstractGrooveGauge gauge;
+        final TestPlayer player;
+        final PlayerConfig playerConfig;
+        final java.util.List<String> audioEvents = new java.util.ArrayList<>();
+        final PlayerResource resource;
+        final BMSModel model;
         Fixture(BMSModel model, boolean queued) throws Exception {
+            this(model, queued, BMSPlayerRule.getBMSPlayerRule(model.getMode()), null, GrooveGauge.NORMAL);
+        }
+
+        Fixture(BMSModel model, boolean queued, BMSPlayerRule rule,
+                BMSPlayerRule.ChartParameters chart, int gaugeType) throws Exception {
+            this.model = model;
             var config = new Config();
             config.setAudioConfig(new AudioConfig());
-            var playerConfig = new PlayerConfig();
+            playerConfig = new PlayerConfig();
             playerConfig.setNotesDisplayTimingAutoAdjust(false);
-            input = KeyboardQueueTestSupport.input(playerConfig.getMode7().getKeyboardConfig());
-            int[] keys = queued ? java.util.stream.IntStream.range(0, 9).toArray() : null;
+            var mode = model.getMode();
+            var lanes = new LaneProperty(mode);
+            input = KeyboardQueueTestSupport.input(playerConfig.getPlayConfig(mode).getKeyboardConfig());
+            int[] keys = queued ? java.util.stream.IntStream.range(0, lanes.getKeyLaneAssign().length).toArray() : null;
             if (eventSource == 2) input.beginInputJudge(null, null, keys, true);
             else if (eventSource == 1) input.beginInputJudge(null, keys, true);
             else input.beginKeyboardJudge(keys, true);
             var audio = (AudioDriver) Proxy.newProxyInstance(AudioDriver.class.getClassLoader(), new Class<?>[] {AudioDriver.class},
                     (proxy, method, values) -> {
+                        if (method.getName().equals("play") || method.getName().equals("stop") || method.getName().equals("setVolume")) {
+                            var args = java.util.Arrays.stream(values).map(v -> v instanceof Note note
+                                    ? note.getClass().getSimpleName() + ":" + note.getMicroTime() : String.valueOf(v)).toList();
+                            audioEvents.add(method.getName() + args);
+                        }
                         if (method.getReturnType() == boolean.class) return false;
                         if (method.getReturnType() == float.class) return 1f;
                         return null;
@@ -204,35 +295,36 @@ public final class KeyboardJudgeCompatibilityTest {
             set(controller, MainController.class, "audio", audio);
             set(controller, MainController.class, "config", config);
             set(controller, MainController.class, "player", playerConfig);
-            var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
+            resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
             set(resource, PlayerResource.class, "config", config);
             set(resource, PlayerResource.class, "pconfig", playerConfig);
-            set(resource, PlayerResource.class, "orgmode", Mode.BEAT_7K);
+            set(resource, PlayerResource.class, "orgmode", mode);
             set(resource, PlayerResource.class, "mode", BMSPlayerMode.PLAY);
-            var player = KeyboardQueueTestSupport.allocate(TestPlayer.class);
+            set(resource, PlayerResource.class, "chartRuleParameters", chart);
+            player = KeyboardQueueTestSupport.allocate(TestPlayer.class);
             set(player, MainState.class, "main", controller);
             set(player, MainState.class, "timer", new TimerManager());
             set(player, MainState.class, "resource", resource);
             set(player, MainState.class, "skin", KeyboardQueueTestSupport.allocate(PlaySkin.class));
-            player.lanes = new LaneProperty(Mode.BEAT_7K);
-            player.gauge = new GrooveGauge(model, GrooveGauge.NORMAL, GaugeProperty.SEVENKEYS);
+            player.lanes = lanes;
+            player.gauge = gauge = AbstractGrooveGauge.create(model, gaugeType, resource, rule);
             player.input = KeyboardQueueTestSupport.allocate(TestKeyInput.class);
-            judge = player.judge = new JudgeManager(player);
+            judge = player.judge = AbstractJudgeManager.create(player, rule);
             judge.init(model, resource);
         }
     }
 
     private static final class TestPlayer extends BMSPlayer {
         LaneProperty lanes;
-        GrooveGauge gauge;
+        AbstractGrooveGauge gauge;
         TestKeyInput input;
-        JudgeManager judge;
+        AbstractJudgeManager judge;
         private TestPlayer() { super(null, null); }
-        @Override public void update(int judge, long time) {}
+        @Override public void update(int judge, long time) { gauge.update(judge); }
         @Override public LaneProperty getLaneProperty() { return lanes; }
-        @Override public GrooveGauge getGauge() { return gauge; }
+        @Override public AbstractGrooveGauge getGauge() { return gauge; }
         @Override public KeyInputProccessor getKeyinput() { return input; }
-        @Override public JudgeManager getJudgeManager() { return judge; }
+        @Override public AbstractJudgeManager getJudgeManager() { return judge; }
     }
 
     private static final class TestKeyInput extends KeyInputProccessor {

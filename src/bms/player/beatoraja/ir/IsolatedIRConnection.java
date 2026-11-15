@@ -1,5 +1,9 @@
 package bms.player.beatoraja.ir;
 
+import bms.player.beatoraja.StartupDiagnostics;
+import bms.player.beatoraja.StartupDiagnostics.Outcome;
+import bms.player.beatoraja.StartupDiagnostics.Step;
+
 import static bms.player.beatoraja.ir.IRWorkerProtocol.*;
 
 import java.io.*;
@@ -210,8 +214,12 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 		Worker session = null;
 		boolean locked = false, attempted = false;
 		try {
-			requests.lockInterruptibly();
-			locked = true;
+			try (var timing = StartupDiagnostics.measure(Step.IR_REQUEST_LOCK_WAIT)) {
+				try { requests.lockInterruptibly(); }
+				catch (InterruptedException e) { timing.outcome(Outcome.INTERRUPTED); throw e; }
+				locked = true;
+				timing.outcome(Outcome.OK);
+			}
 			Account account;
 			synchronized (lifecycle) {
 				if (closed) return new Invocation(Response.error("IR connection closed"), false);
@@ -268,11 +276,15 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 			session.writer.write(payload); session.writer.newLine(); session.writer.flush();
 			return session.reader.readLine();
 		});
-		try {
-			String line = future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+		try (var timing = StartupDiagnostics.measure(Step.IR_RESPONSE_WAIT, session.process.pid())) {
+			String line;
+			try { line = future.get(timeoutMillis, TimeUnit.MILLISECONDS); }
+			catch (TimeoutException e) { timing.outcome(Outcome.TIMEOUT); throw e; }
+			catch (InterruptedException e) { timing.outcome(Outcome.INTERRUPTED); throw e; }
 			if (line == null) throw new EOFException();
 			Response response = json.fromJson(Response.class, line);
 			if (response == null) throw new IOException("Empty worker response");
+			timing.outcome(response.succeeded ? Outcome.OK : Outcome.FAILED);
 			return response;
 		} finally { if (!future.isDone()) future.cancel(true); }
 	}
@@ -286,7 +298,12 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 			old = worker; worker = null;
 		}
 		if (old != null) old.stop();
-		Worker fresh = new Worker(workerFactory.start(), ++generation);
+		Worker fresh;
+		try (var timing = StartupDiagnostics.measure(Step.IR_WORKER_START)) {
+			fresh = new Worker(workerFactory.start(), ++generation);
+			timing.worker(fresh.process.pid());
+			timing.outcome(Outcome.OK);
+		}
 		synchronized (lifecycle) {
 			if (!closed) worker = fresh;
 		}
@@ -336,11 +353,17 @@ public class IsolatedIRConnection implements IRConnection, AutoCloseable {
 				closeQuietly(writer); closeQuietly(reader); closeQuietly(process.getErrorStream());
 			}, "isolated-ir-cleanup-" + irName);
 			cleanup.setDaemon(true); cleanup.start();
-			try {
-				process.waitFor(1, TimeUnit.SECONDS);
-				cleanup.join(1000);
-				io.awaitTermination(1, TimeUnit.SECONDS);
-			} catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+			try (var timing = StartupDiagnostics.measure(Step.IR_WORKER_EXIT_WAIT, process.pid())) {
+				try {
+					process.waitFor(1, TimeUnit.SECONDS);
+					cleanup.join(1000);
+					io.awaitTermination(1, TimeUnit.SECONDS);
+					timing.outcome(process.isAlive() || cleanup.isAlive() || !io.isTerminated() ? Outcome.TIMEOUT : Outcome.OK);
+				} catch (InterruptedException e) {
+					timing.outcome(Outcome.INTERRUPTED);
+					Thread.currentThread().interrupt();
+				}
+			}
 			if (process.isAlive() || cleanup.isAlive() || !io.isTerminated())
 				Logger.getGlobal().warning("IR worker cleanup still pending : " + irName);
 		}

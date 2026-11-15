@@ -96,9 +96,11 @@ final class Lwjgl3InputCallbacks {
         });
         originalCharacter = GLFW.glfwSetCharCallback(handle, character);
         focus = GLFWWindowFocusCallback.create((window, focused) -> {
+            bms.player.beatoraja.input.text.ime.WindowsImeDiagnostics.windowFocus(focused, false);
             if (originalFocus != null) originalFocus.invoke(window, focused);
             input.windowFocus(focused);
             if (!focused) releaseFallbackKeys();
+            bms.player.beatoraja.input.text.ime.WindowsImeDiagnostics.windowFocus(focused, true);
         });
         iconify = GLFWWindowIconifyCallback.create((window, minimized) -> {
             if (originalIconify != null) originalIconify.invoke(window, minimized);
@@ -115,12 +117,13 @@ final class Lwjgl3InputCallbacks {
         if ((fallbackPressed & 2) != 0) key.invoke(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7d, GLFW.GLFW_RELEASE, 0);
     }
 
-    void attachWindowCallbacks() {
+    boolean attachWindowCallbacks() {
         // Lwjgl3Window installs its callbacks after createInput(), so chain them on the first update.
-        if (windowCallbacksAttached) return;
+        if (windowCallbacksAttached) return false;
         originalFocus = GLFW.glfwSetWindowFocusCallback(handle, focus);
         originalIconify = GLFW.glfwSetWindowIconifyCallback(handle, iconify);
         windowCallbacksAttached = true;
+        return true;
     }
 
     void close(boolean restore) {

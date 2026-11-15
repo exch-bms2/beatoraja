@@ -12,6 +12,7 @@ import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.graphics.Color;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
@@ -19,6 +20,7 @@ import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
+import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
@@ -33,6 +35,13 @@ public class MusicResult extends AbstractResult {
 
 	private ResultKeyProperty property;
 	private LevelReviewTarget levelReviewTarget;
+	private IRChartData resultChart;
+	private PlayerResource.AlternateResultScore alternateScore;
+	private ScoreData alternateOldScore;
+	private ScoreDataProperty alternateProperties;
+	private boolean showAlternateScore;
+	private int alternateGaugeType;
+	private MessageRenderer.Message scoreRuleNotice;
 
 	public record LevelReviewTarget(SongData song, int lnmode) {}
 	
@@ -43,6 +52,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void create() {
+		prepareScoreDisplay();
 		for(int i = 0;i < REPLAY_SIZE;i++) {
 			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), i) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
@@ -71,14 +81,90 @@ public class MusicResult extends AbstractResult {
 		
 		gaugeType = resource.getGrooveGauge().getType();
 
+		resultChart = createResultChart(resource.getSongdata(), resource.getBMSModel());
 		prepareLevelReview();
 		loadSkin(SkinType.RESULT);
+	}
+
+	void prepareScoreDisplay() {
+		showAlternateScore = false;
+		alternateScore = null;
+		alternateProperties = null;
+		alternateOldScore = null;
+		var candidate = resource.getAlternateResultScore();
+		var model = resource.getBMSModel();
+		if (candidate == null || model == null || resource.getScoreData() == null
+				|| resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
+				|| resource.getCourseBMSModels() != null || !candidate.score().getSha256().equals(model.getSHA256())) {
+			return;
+		}
+		alternateScore = candidate;
+		alternateGaugeType = candidate.score().getGauge();
+		alternateOldScore = candidate.previousBest() != null ? candidate.previousBest() : new ScoreData();
+		alternateProperties = new ScoreDataProperty();
+		alternateProperties.setTargetScore(alternateOldScore.getExscore(), 0, candidate.score().getNotes());
+		alternateProperties.update(candidate.score());
+	}
+
+	public boolean canSwitchScoreDisplay() {
+		return alternateScore != null;
+	}
+
+	public boolean isShowingLr2Score() {
+		return showAlternateScore;
+	}
+
+	public PlayerResource.GaugeHistory getDisplayGaugeHistory() {
+		return showAlternateScore ? alternateScore.gaugeHistory() : null;
+	}
+
+	@Override
+	public int getGaugeType() {
+		return getDisplayGaugeHistory() != null ? alternateGaugeType : super.getGaugeType();
+	}
+
+	@Override
+	public float getDisplayGaugeValue() {
+		var history = getDisplayGaugeHistory();
+		if (history == null) return super.getDisplayGaugeValue();
+		return history.values()[alternateGaugeType].peek();
+	}
+
+	private void changeGaugeGraph() {
+		int type = getGaugeType();
+		int next = type >= GrooveGauge.ASSISTEASY && type <= GrooveGauge.HAZARD
+				? (type + 1) % 6 : (type - 5) % 3 + 6;
+		if (getDisplayGaugeHistory() != null) {
+			alternateGaugeType = next;
+		} else {
+			gaugeType = next;
+		}
+	}
+
+	public ScoreDataProperty getPrimaryScoreDataProperty() {
+		return super.getScoreDataProperty();
+	}
+
+	@Override
+	public ScoreDataProperty getScoreDataProperty() {
+		return showAlternateScore ? alternateProperties : getPrimaryScoreDataProperty();
+	}
+
+	@Override
+	public ScoreData getDisplayScore() {
+		return showAlternateScore ? alternateScore.score() : getNewScore();
+	}
+
+	@Override
+	public ScoreData getDisplayOldScore() {
+		return showAlternateScore ? alternateOldScore : getOldScore();
 	}
 
 	void prepareLevelReview() {
 		levelReviewTarget = null;
 		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
-				|| resource.getCourseBMSModels() != null || resource.getScoreData() == null) {
+				|| resource.getCourseBMSModels() != null || resource.getScoreData() == null
+				|| resource.getScoreData().getRule() == BMSPlayerRule.LunaticRave2) {
 			return;
 		}
 		var song = resource.getSongdata();
@@ -88,10 +174,19 @@ public class MusicResult extends AbstractResult {
 				|| !song.getSha256().equals(model.getSHA256())) {
 			return;
 		}
-		int lnmode = song.hasUndefinedLongNote() ? model.getLntype() : 0;
+		IRChartData chart = resultChart != null && song.getSha256().equals(resultChart.sha256)
+				? resultChart : createResultChart(song, model);
+		int lnmode = chart.hasUndefinedLN ? chart.lntype : 0;
 		if (lnmode < 0 || lnmode > 2) return;
 		song.setSongReview(database.getSongReview(song.getSha256()));
 		levelReviewTarget = new LevelReviewTarget(song, lnmode);
+	}
+
+	static IRChartData createResultChart(SongData song, BMSModel model) {
+		if (song == null) return null;
+		// A random branch can replace the model in SongData for this play.
+		BMSModel played = song.getBMSModel() != null ? song.getBMSModel() : model;
+		return new IRChartData(song, played != null ? played.getLntype() : 0);
 	}
 
 	public LevelReviewTarget getEditableLevelReview() {
@@ -124,7 +219,7 @@ public class MusicResult extends AbstractResult {
     			}
     			
     			if(send) {
-    				irSendStatus.add(new IRSendStatus(irc.connection, resource.getSongdata(), newscore));
+					irSendStatus.add(new IRSendStatus(irc.connection, resultChart, newscore));
     			}
         	}
 			
@@ -155,7 +250,7 @@ public class MusicResult extends AbstractResult {
 				if(irsend > 0) {
 					timer.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 					try {
-						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
+						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, resultChart);
 						if(response.isSucceeded()) {
 							ranking.updateScore(ir[0].player, main.getRivalDataAccessor(), response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
 							rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
@@ -287,21 +382,27 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public void input() {
+		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
+		final boolean switchPressed = canSwitchScoreDisplay() && inputProcessor.isControlKeyPressed(ControlKeys.F7);
 		if (getSkin() != null && getSkin().isTextInputActive()) return;
 		super.input();
 		long time = timer.getNowTime();
-		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
 		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
+				if (switchPressed) {
+					showAlternateScore = !showAlternateScore;
+					var renderer = main.getMessageRenderer();
+					if (renderer != null) {
+						if (scoreRuleNotice != null) scoreRuleNotice.stop();
+						scoreRuleNotice = renderer.addMessage(showAlternateScore ? "LunaticRave2" : "beatoraja",
+								1_500, Color.CYAN, 1);
+					}
+				}
 				boolean ok = false;
 				for (int i = 0; i < property.getAssignLength(); i++) {
 					if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
-						if(gaugeType >= GrooveGauge.ASSISTEASY && gaugeType <= GrooveGauge.HAZARD) {
-							gaugeType = (gaugeType + 1) % 6;
-						} else {
-							gaugeType = (gaugeType - 5) % 3 + 6;
-						}
+						changeGaugeGraph();
 					} else if (property.getAssign(i) != null && inputProcessor.getKeyState(i) && inputProcessor.resetKeyChangedTime(i)) {
 						ok = true;
 					}
@@ -473,22 +574,27 @@ public class MusicResult extends AbstractResult {
 			newscore = cscore;
 		}
 
-		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
+		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY
+				&& newscore.getRule() != BMSPlayerRule.LunaticRave2) {
 			main.getPlayDataAccessor().writeScoreData(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
-		} else {
+		} else if (resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY) {
 			Logger.getGlobal().info("プレイモードが" + resource.getPlayMode().mode.name() + "のため、スコア登録はされません");
 		}
 
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		final ScoreData score = resource.getScoreData();
+		final ScoreData score = getDisplayScore();
 		return score != null ? score.getJudgeCount(judge, fast) : 0;
 	}
 
 	@Override
 	public void dispose() {
+		if (scoreRuleNotice != null) {
+			scoreRuleNotice.stop();
+			scoreRuleNotice = null;
+		}
 		super.dispose();
 	}
 
@@ -502,22 +608,22 @@ public class MusicResult extends AbstractResult {
 
 	static class IRSendStatus {
 		public final IRConnection ir;
-		public final SongData song;
+		public final IRChartData chart;
 		public final ScoreData score;
 		public int retry = 0;
 		
-		public IRSendStatus(IRConnection ir, SongData song, ScoreData score) {
+		public IRSendStatus(IRConnection ir, IRChartData chart, ScoreData score) {
 			this.ir = ir;
-			this.song = song;
+			this.chart = chart;
 			this.score = score;
 		}
 		
 		public boolean send() {
 			if (retry < 0) return retry == -255;
-			Logger.getGlobal().info("IRへスコア送信中 : " + song.getTitle());
-            IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
+			Logger.getGlobal().info("IRへスコア送信中 : " + chart.title);
+            IRResponse<Object> send1 = ir.sendPlayData(chart, new bms.player.beatoraja.ir.IRScoreData(score));
             if(send1.isSucceeded()) {
-                Logger.getGlobal().info("IRスコア送信完了 : " + song.getTitle());
+                Logger.getGlobal().info("IRスコア送信完了 : " + chart.title);
                 retry = -255;
                 return true;
             } else {

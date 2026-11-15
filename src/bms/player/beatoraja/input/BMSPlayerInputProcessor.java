@@ -738,9 +738,9 @@ public class BMSPlayerInputProcessor {
 	}
 
     private void registerSdlControllers(SdlRawControllerManager manager) {
-        long version = manager.controllerVersion();
-        if (sdlControllerVersion == version) return;
-        for (Controller controller : manager.getControllers()) {
+        var inventory = manager.controllerInventory();
+        if (sdlControllerVersion == inventory.version()) return;
+        for (Controller controller : inventory.controllers()) {
             boolean known = false;
             for (var existing : bminput) if (existing.getController() == controller) { known = true; break; }
             if (known) continue;
@@ -764,7 +764,7 @@ public class BMSPlayerInputProcessor {
             }
             Logger.getGlobal().info("SDL3 controller attached: " + name);
         }
-        sdlControllerVersion = version;
+        sdlControllerVersion = inventory.version();
     }
 
     private void applyNewControllerConfig(BMControllerInputProcessor added) {

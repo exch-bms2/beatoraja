@@ -168,6 +168,9 @@ tasks.named<JavaExec>("run") {
     providers.gradleProperty("textInputDiagnostics").orNull?.let {
         systemProperty("beatoraja.textInputDiagnostics", it)
     }
+    providers.gradleProperty("windowsImeDiagnostics").orNull?.let {
+        systemProperty("beatoraja.windowsImeDiagnostics", it)
+    }
     providers.gradleProperty("inputDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
     }
@@ -221,9 +224,11 @@ val fatJar by tasks.registering(Jar::class) {
 
 // The existing regression tests are standalone Java programs, not JUnit tests.
 val regressionClasses = listOf(
+    "bms.player.beatoraja.select.bar.RandomFolderFilterTest",
     "bms.player.beatoraja.RivalDataAccessorTest",
     "bms.player.beatoraja.skin.lr2.PlayerReviewLevelTest",
     "bms.player.beatoraja.result.MusicResultReviewTest",
+    "bms.player.beatoraja.result.MusicResultScoreDisplayTest",
     "bms.player.beatoraja.external.discord.DiscordWebhookTest",
     "bms.player.beatoraja.external.obs.ObsControllerTest",
     "bms.player.beatoraja.external.obs.ObsWebSocketTest",
@@ -279,6 +284,13 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.WindowDiagnosticsTest",
     "bms.player.beatoraja.input.mouse.WaylandCompatibilityTest",
     "bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest",
+    "bms.player.beatoraja.play.LunaticRave2ComparisonTest",
+    "bms.player.beatoraja.play.LunaticRave2LongNoteComparisonTest",
+    "bms.player.beatoraja.play.LunaticRave2MineComparisonTest",
+    "bms.player.beatoraja.play.LunaticRave2ModeComparisonTest",
+    "bms.player.beatoraja.play.LunaticRave2DpOrderTest",
+    "bms.player.beatoraja.play.SecondaryJudgingTest",
+    "bms.player.beatoraja.LunaticRave2ScoreDatabaseTest",
     "bms.player.beatoraja.input.keyboard.KeyboardEventQueueTest",
     "bms.player.beatoraja.input.keyboard.WindowsKeyboardMappingTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
@@ -291,6 +303,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.InputDataValidationTest",
     "bms.player.beatoraja.Lwjgl3MigrationTest",
     "bms.player.beatoraja.DistributionDiagnosticsTest",
+    "bms.player.beatoraja.StartupDiagnosticsTest",
     "bms.player.beatoraja.TwitterIntegrationRemovalTest",
     "bms.player.beatoraja.CourseDataAccessorTest",
     "bms.player.beatoraja.play.PracticeConfigurationTest",
@@ -607,7 +620,16 @@ tasks.register<JavaExec>("glDiagnosticFailureTest") {
     systemProperty("beatoraja.glTest.output", file(glTestOutput).absolutePath)
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
-val glIntegrationTasks = listOf("lwjgl3BgaSkinIntegrationTest", "lwjgl3StageFramebufferTest",
+tasks.register<JavaExec>("lwjgl3GameCleanupTest") {
+    group = "verification"
+    description = "Verify early game-loop failure logging and GLFW error callback cleanup with real GL."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.Lwjgl3GameCleanupTest")
+    timeout.set(Duration.ofMinutes(2))
+    if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
+}
+val glIntegrationTasks = listOf("lwjgl3BgaSkinIntegrationTest", "lwjgl3StageFramebufferTest", "lwjgl3GameCleanupTest",
     "lwjgl3TextInputTest", "lwjgl3WindowInputLifecycleTest", "lwjgl3StateEnduranceTest",
     "lwjgl3StateEnduranceFailureTest", "glDiagnosticFailureTest", "packagedGameIntegrationTest")
 tasks.withType<JavaExec>().configureEach {
@@ -1022,6 +1044,7 @@ tasks.register<JavaExec>("lwjgl3WindowInputLifecycleTest") {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.Lwjgl3WindowInputLifecycleTest")
     systemProperty("beatoraja.inputDiagnostics", "true")
+    systemProperty("beatoraja.inputLifecycleTest.fullscreen", providers.gradleProperty("inputLifecycleFullscreen").getOrElse("false"))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }
 

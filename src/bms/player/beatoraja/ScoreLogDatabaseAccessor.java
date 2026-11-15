@@ -1,5 +1,6 @@
 package bms.player.beatoraja;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
@@ -68,6 +69,10 @@ public final class ScoreLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	void setScoreLog(Connection connection, ScoreLog log) throws SQLException {
+		insert(qr, connection, "bestlog", TABLE_NAME, log);
 	}
 
 	private void migrateLegacyPrimaryKey() throws SQLException {

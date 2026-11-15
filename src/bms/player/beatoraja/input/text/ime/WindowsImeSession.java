@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 final class WindowsImeSession implements ImeBridge {
     static final int KEYDOWN=0x100, KEYUP=0x101, CHAR=0x102, SYSKEYDOWN=0x104, SYSKEYUP=0x105,
             UNICHAR=0x109, START=0x10d, END=0x10e, COMPOSITION=0x10f, SETCONTEXT=0x281,
-            IMECHAR=0x286, NOTIFY=0x282, KILLFOCUS=8, DESTROY=0x82;
+            IMECHAR=0x286, NOTIFY=0x282, SETFOCUS=7, KILLFOCUS=8, DESTROY=0x82;
     static final int RESULT=0x800, PREEDIT=8, CURSOR=0x80;
     static final int RETURN=13, ESCAPE=27, SHIFT=16, CONTROL=17, PROCESS=0xe5;
     private final WindowsImePlatform platform;
@@ -44,7 +44,14 @@ final class WindowsImeSession implements ImeBridge {
         held.clear(); consumed.clear(); inherited.clear(); undo.clear(); redo.clear();
         active=true;
         try {
-            platform.attach(this);
+            trace("hook attach begin");
+            try {
+                platform.attach(this);
+                trace("hook attach succeeded");
+            } catch (RuntimeException | Error e) {
+                trace("hook attach failed");
+                throw e;
+            }
             // Mouse buttons never produce WM_KEYUP. Generic modifier states duplicate left/right VKs.
             for (int key=8; key<256; key++) if (key!=SHIFT && key!=CONTROL && key!=18 && platform.keyDown(key)) {
                 held.set(key); inherited.set(key);
@@ -52,7 +59,7 @@ final class WindowsImeSession implements ImeBridge {
             }
         } catch (RuntimeException | Error e) {
             active=false; this.sink=null;
-            try { platform.detach(false); } catch (RuntimeException | Error cleanup) { e.addSuppressed(cleanup); }
+            try { detach(false); } catch (RuntimeException | Error cleanup) { e.addSuppressed(cleanup); }
             throw e;
         }
     }
@@ -103,12 +110,30 @@ final class WindowsImeSession implements ImeBridge {
     public void close(long id) {
         checkThread();
         if (!current(id)) return;
+        trace(held.get(RETURN) ? "session close begin (Enter held)" : "session close begin");
         try { if (composing && !fault) platform.complete(true); }
         finally {
             active=false; sink=null; composing=false; highSurrogate=0;
             blockCharacter=!held.isEmpty();
-            if (held.isEmpty()) platform.detach(false);
+            if (held.isEmpty()) detach(false);
+            else trace("session closed; hook retained for key release or focus loss");
         }
+    }
+    private void trace(String event) { WindowsImeDiagnostics.event(session, event); }
+
+    private void detach(boolean destroyed) {
+        trace("hook detach begin");
+        try {
+            platform.detach(destroyed);
+            trace("hook detach returned");
+        } catch (RuntimeException | Error e) {
+            trace("hook detach failed");
+            throw e;
+        }
+    }
+
+    void nativeRemovalResult(boolean removed) {
+        trace(removed ? "RemoveWindowSubclass succeeded" : "RemoveWindowSubclass returned false");
     }
     private boolean current(long id) { return active && id==session && sink!=null; }
     private void checkThread() { if (Thread.currentThread()!=owner) throw new IllegalStateException("IME requires GLFW owner thread"); }
@@ -116,16 +141,19 @@ final class WindowsImeSession implements ImeBridge {
     /** Called only by the per-HWND subclass on its owner thread. */
     long message(int message, long w, long l) {
         checkThread();
+        if (message == SETFOCUS) trace("Win32 focus gained");
+        if (message == KILLFOCUS) trace(active ? "Win32 focus lost (active)" : "Win32 focus lost (passive)");
         if (message==DESTROY) {
             try { return platform.forward(message,w,l); }
-            finally { active=false; composing=false; fault=true; sink=null; held.clear(); platform.detach(true); }
+            finally { active=false; composing=false; fault=true; sink=null; held.clear(); detach(true); }
         }
         if (!active) {
-            if (message==KILLFOCUS) { held.clear(); platform.detach(false); }
+            if (message==KILLFOCUS) { held.clear(); detach(false); }
             if (message==KEYUP || message==SYSKEYUP) {
                 int key=platform.physicalKey((int)w,l); held.clear(key);
+                if (key==RETURN) trace("Enter released (passive)");
                 blockCharacter=false;
-                if (held.isEmpty()) platform.detach(false);
+                if (held.isEmpty()) detach(false);
                 return platform.forward(message,w,l);
             }
             if (message==KEYDOWN || message==SYSKEYDOWN) {
@@ -159,6 +187,7 @@ final class WindowsImeSession implements ImeBridge {
             }
             case KEYUP, SYSKEYUP -> {
                 int key=platform.physicalKey((int)w,l);
+                if (key==RETURN) trace("Enter released (active)");
                 held.clear(key); consumed.clear(key); inherited.clear(key); blockCharacter=false;
             }
             case KEYDOWN, SYSKEYDOWN -> {

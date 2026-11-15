@@ -45,10 +45,15 @@
             </valueFactory>
         </NumericSpinner>
 
-        <Label text="%BGA" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+        <CheckBox fx:id="nvidiaWaylandWorkaround" text="%NVIDIA_WAYLAND_WORKAROUND" mnemonicParsing="false"
+                  GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2">
+            <tooltip><Tooltip text="%NVIDIA_WAYLAND_WORKAROUND_TOOLTIP"/></tooltip>
+        </CheckBox>
 
-        <Label text="%BGA" GridPane.rowIndex="8" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <ComboBox fx:id="bgaOp" GridPane.rowIndex="8" GridPane.columnIndex="1">
+        <Label text="%BGA" GridPane.rowIndex="8" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+
+        <Label text="%BGA" GridPane.rowIndex="9" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="bgaOp" GridPane.rowIndex="9" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="On"/>
@@ -58,12 +63,12 @@
             </items>
         </ComboBox>
 
-        <Label text="%MISSLAYER_DURATION" GridPane.rowIndex="9" GridPane.columnIndex="0" styleClass="optionLabel">
+        <Label text="%MISSLAYER_DURATION" GridPane.rowIndex="10" GridPane.columnIndex="0" styleClass="optionLabel">
             <tooltip>
                 <Tooltip text="Set miss layer display time (ms)" textAlignment="CENTER"/>
             </tooltip>
         </Label>
-        <NumericSpinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="9" GridPane.columnIndex="1">
+        <NumericSpinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="10" GridPane.columnIndex="1">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500">
                     <min><PlayerConfig fx:constant="MISS_LAYER_DURATION_MIN" /></min>
@@ -72,8 +77,8 @@
             </valueFactory>
         </NumericSpinner>
 
-        <Label text="%BGA_EXPAND" GridPane.rowIndex="10" GridPane.columnIndex="0" styleClass="optionLabel"/>
-        <ComboBox fx:id="bgaExpand" GridPane.rowIndex="10" GridPane.columnIndex="1">
+        <Label text="%BGA_EXPAND" GridPane.rowIndex="11" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="bgaExpand" GridPane.rowIndex="11" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Full"/>

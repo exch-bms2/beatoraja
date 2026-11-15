@@ -22,6 +22,7 @@ class KeyInputProccessor {
 	private final BMSPlayer player;
 
 	private JudgeThread judge;
+	private SecondaryJudging secondaryJudging;
 
 	private long prevtime = -1;
 	private int[] scratch;
@@ -44,6 +45,10 @@ class KeyInputProccessor {
 
 	public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime) {
 		startJudge(model, keylog, milliMarginTime, null);
+	}
+
+	void setSecondaryJudging(SecondaryJudging secondaryJudging) {
+		this.secondaryJudging = secondaryJudging;
 	}
 
 	public void startJudge(BMSModel model, KeyInputLog[] keylog, long milliMarginTime, int[] keyboardKeys) {
@@ -136,7 +141,7 @@ class KeyInputProccessor {
 		}
 	}
 
-	public void stopJudge() {
+	public SecondaryJudging.Result stopJudge() {
 		if (judge != null) {
 			keyBeamStop = true;
 			isJudgeStarted = false;
@@ -146,7 +151,13 @@ class KeyInputProccessor {
 			if (judge.isAlive()) throw new IllegalStateException("Judgment thread did not stop");
 			player.main.getInputProcessor().endInputJudge();
 			judge = null;
+			if (secondaryJudging != null) {
+				var result = secondaryJudging.finish();
+				secondaryJudging = null;
+				return result;
+			}
 		}
+		return null;
 	}
 
 	public void setKeyBeamStop(boolean inputStop) {
@@ -180,7 +191,7 @@ class KeyInputProccessor {
 
 			long frametime = 1;
 			final BMSPlayerInputProcessor input = player.main.getInputProcessor();
-			final JudgeManager judge = player.getJudgeManager();
+			final AbstractJudgeManager judge = player.getJudgeManager();
 			final long lasttime = timelines[timelines.length - 1].getMicroTime() + BMSPlayer.TIME_MARGIN * 1000;
 
 			long prevtime = -1;
@@ -203,7 +214,7 @@ class KeyInputProccessor {
 						}
 					}
 
-					judge.update(mtime);
+					judge.update(mtime, secondaryJudging);
 
 					if (prevtime != -1) {
 						final long nowtime = mtime - prevtime;

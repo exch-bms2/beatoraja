@@ -8,8 +8,8 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.ScoreData.SongTrophy;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.play.JudgeManager;
-import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.play.AbstractJudgeManager;
+import bms.player.beatoraja.play.AbstractGrooveGauge.Gauge;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -217,7 +217,8 @@ public class BooleanPropertyFactory {
 
 		public static final BProperty TYPE_NO_STATIC = (state) -> (false);
 		public static final BProperty TYPE_STATIC_WITHOUT_MUSICSELECT = (state) -> !(state instanceof MusicSelector);
-		public static final BProperty TYPE_STATIC_ON_RESULT = (state) -> (state instanceof MusicResult) || (state instanceof CourseResult);
+		public static final BProperty TYPE_STATIC_ON_RESULT = state -> state instanceof CourseResult
+				|| (state instanceof MusicResult result && !result.canSwitchScoreDisplay());
 		public static final BProperty TYPE_STATIC_ALL = (state) -> (true);
 
 		public DrawConditionProperty(BProperty type) {
@@ -234,7 +235,7 @@ public class BooleanPropertyFactory {
 	private static DrawProperty createNowJudge(final int player, final int type) {
 		return new DrawProperty(DrawConditionProperty.TYPE_NO_STATIC, (state) -> {
 			if (state instanceof BMSPlayer) {
-				JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+				AbstractJudgeManager judge = ((BMSPlayer) state).getJudgeManager();
 				if (type == 0) {
 					return judge.getNowJudge(player) == 1;
 				} else if (type == 1) {
@@ -246,6 +247,17 @@ public class BooleanPropertyFactory {
 			return false;
 		});
 
+	}
+
+	private static DrawProperty createSplitNowJudge(int region, boolean scratch, boolean early) {
+		return new DrawProperty(DrawConditionProperty.TYPE_NO_STATIC, state -> {
+			if (state instanceof BMSPlayer player) {
+				var judgement = player.getJudgeManager().getSplitJudgement(region, scratch);
+				return judgement != null && judgement.rank() > 1
+						&& (early ? judgement.timingMs() > 0 : judgement.timingMs() < 0);
+			}
+			return false;
+		});
 	}
 
 	private static class SongDataBooleanProperty extends DrawConditionProperty {
@@ -323,7 +335,8 @@ public class BooleanPropertyFactory {
 	private static class TrophyDrawCondition extends DrawProperty {
 
 		public TrophyDrawCondition(final SongTrophy trophy) {
-			super(TYPE_STATIC_WITHOUT_MUSICSELECT, (state) -> {
+			super(state -> TYPE_STATIC_WITHOUT_MUSICSELECT.get(state)
+					&& !(state instanceof MusicResult result && result.canSwitchScoreDisplay()), (state) -> {
 				final ScoreData score = state.getScoreDataProperty().getScoreData();
 				return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;				
 			});
@@ -550,6 +563,18 @@ public class BooleanPropertyFactory {
 		judge_3p_perfect(361, createNowJudge(2, 0)),
 		judge_3p_early(1362, createNowJudge(2, 1)),
 		judge_3p_late(1363, createNowJudge(2, 2)),
+		judge_k1_early(OPTION_1P_KEYS_EARLY, createSplitNowJudge(0, false, true)),
+		judge_k1_late(OPTION_1P_KEYS_LATE, createSplitNowJudge(0, false, false)),
+		judge_k2_early(OPTION_2P_KEYS_EARLY, createSplitNowJudge(1, false, true)),
+		judge_k2_late(OPTION_2P_KEYS_LATE, createSplitNowJudge(1, false, false)),
+		judge_k3_early(OPTION_3P_KEYS_EARLY, createSplitNowJudge(2, false, true)),
+		judge_k3_late(OPTION_3P_KEYS_LATE, createSplitNowJudge(2, false, false)),
+		judge_s1_early(OPTION_1P_SCRATCH_EARLY, createSplitNowJudge(0, true, true)),
+		judge_s1_late(OPTION_1P_SCRATCH_LATE, createSplitNowJudge(0, true, false)),
+		judge_s2_early(OPTION_2P_SCRATCH_EARLY, createSplitNowJudge(1, true, true)),
+		judge_s2_late(OPTION_2P_SCRATCH_LATE, createSplitNowJudge(1, true, false)),
+		judge_s3_early(OPTION_3P_SCRATCH_EARLY, createSplitNowJudge(2, true, true)),
+		judge_s3_late(OPTION_3P_SCRATCH_LATE, createSplitNowJudge(2, true, false)),
 		
 		judge_perfect_exist(OPTION_PERFECT_EXIST, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT,
 				(state) -> (state.getJudgeCount(0, true) + state.getJudgeCount(0, false) > 0))),
@@ -627,35 +652,37 @@ public class BooleanPropertyFactory {
 		rank_e(OPTION_E, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT, (state) -> (state.getScoreDataProperty().qualifyRank(6)))),
 		rank_f(OPTION_F, new DrawProperty(DrawProperty.TYPE_STATIC_ON_RESULT, (state) -> (state.getScoreDataProperty().qualifyRank(0)))),
 		update_score(OPTION_UPDATE_SCORE, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getExscore() > ((AbstractResult) state).getOldScore().getExscore() : false))),
+				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getDisplayScore().getExscore() > ((AbstractResult) state).getDisplayOldScore().getExscore() : false))),
 		draw_score(OPTION_DRAW_SCORE, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getExscore() == ((AbstractResult) state).getOldScore().getExscore() : false))),
+				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getDisplayScore().getExscore() == ((AbstractResult) state).getDisplayOldScore().getExscore() : false))),
 		update_maxcombo(OPTION_UPDATE_MAXCOMBO, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getCombo() > ((AbstractResult) state).getOldScore().getCombo() : false))),
+				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getDisplayScore().getCombo() > ((AbstractResult) state).getDisplayOldScore().getCombo() : false))),
 		draw_maxcombo(OPTION_DRAW_MAXCOMBO, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getCombo() == ((AbstractResult) state).getOldScore().getCombo() : false))),
+				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getDisplayScore().getCombo() == ((AbstractResult) state).getDisplayOldScore().getCombo() : false))),
 		update_misscount(OPTION_UPDATE_MISSCOUNT, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getMinbp() < ((AbstractResult) state).getOldScore().getMinbp() : false))),
+				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getDisplayScore().getMinbp() < ((AbstractResult) state).getDisplayOldScore().getMinbp() : false))),
 		draw_misscount(OPTION_DRAW_MISSCOUNT, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getNewScore().getMinbp() == ((AbstractResult) state).getOldScore().getMinbp() : false))),
+				(state) -> ((state instanceof AbstractResult) ? ((AbstractResult) state).getDisplayScore().getMinbp() == ((AbstractResult) state).getDisplayOldScore().getMinbp() : false))),
 		update_scorerank(OPTION_UPDATE_SCORERANK, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> (state.getScoreDataProperty().getNowRate() > state.getScoreDataProperty().getBestScoreRate()))),
 		draw_scorerank(OPTION_DRAW_SCORERANK, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> (state.getScoreDataProperty().getNowRate() == state.getScoreDataProperty().getBestScoreRate()))),
 		update_target(OPTION_UPDATE_TARGET, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() > state.getScoreDataProperty().getRivalScore() : false))),
+				(state) -> state instanceof AbstractResult && !(state instanceof MusicResult result && result.isShowingLr2Score())
+						&& state.main.getPlayerResource().getScoreData().getExscore() > state.getScoreDataProperty().getRivalScore())),
 		draw_target(OPTION_DRAW_TARGET, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> ((state instanceof AbstractResult) ? state.main.getPlayerResource().getScoreData().getExscore() == state.getScoreDataProperty().getRivalScore() : false))),
+				(state) -> state instanceof AbstractResult && !(state instanceof MusicResult result && result.isShowingLr2Score())
+						&& state.main.getPlayerResource().getScoreData().getExscore() == state.getScoreDataProperty().getRivalScore())),
 
 		result_clear(OPTION_RESULT_CLEAR,new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
-			final ScoreData score = state.main.getPlayerResource().getScoreData();
+			final ScoreData score = state instanceof MusicResult result ? result.getDisplayScore() : state.main.getPlayerResource().getScoreData();
 			final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
-			return score.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id);
+			return score != null && score.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id);
 		})),
 		result_fail(OPTION_RESULT_FAIL,new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {
-			final ScoreData score = state.main.getPlayerResource().getScoreData();
+			final ScoreData score = state instanceof MusicResult result ? result.getDisplayScore() : state.main.getPlayerResource().getScoreData();
 			final ScoreData cscore = state.main.getPlayerResource().getCourseScoreData();
-			return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
+			return (score != null && score.getClear() == Failed.id) || (cscore != null && cscore.getClear() == Failed.id);
 		})),
 		result_1pwin(352,DrawProperty.TYPE_NO_STATIC,
 				(state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore())),

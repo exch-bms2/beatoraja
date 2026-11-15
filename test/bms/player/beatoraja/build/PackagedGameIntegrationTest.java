@@ -32,6 +32,7 @@ public final class PackagedGameIntegrationTest {
         var command = new java.util.ArrayList<String>();
         command.add(args[1]); command.add("-Xmx768m");
         command.add("-Dbeatoraja.distributionDiagnostics=true");
+        command.add("-Dbeatoraja.startupDiagnostics=true");
         command.add("-Dbeatoraja.distributionDiagnostics.awaitChildren=true");
         command.add("-Dbeatoraja.packagedGameTest.requireMesa=" + Boolean.getBoolean("beatoraja.glTest.requireMesa"));
         command.add("-Duser.home=" + root.resolve("home")); command.add("-Djava.io.tmpdir=" + root.resolve("tmp"));
@@ -62,6 +63,7 @@ public final class PackagedGameIntegrationTest {
             PackagedGameSupport.check(launcher.exitValue() == 0, "Actual Launcher exit=" + launcher.exitValue());
             discover(root, observed);
             validate(root, launcher.pid());
+            verifyStartupSpans(Files.readString(diagnostics.resolve("launcher-game.log")));
             if (config.getControllerBackend() == bms.player.beatoraja.input.controller.ControllerBackend.SDL) {
                 String gameLog = Files.readString(diagnostics.resolve("launcher-game.log"));
                 PackagedGameSupport.check(gameLog.contains("Controller backend=SDL/Jamepad, devices=")
@@ -141,6 +143,21 @@ public final class PackagedGameIntegrationTest {
             if (text.matches("[0-9]+")) ProcessHandle.of(Long.parseLong(text)).ifPresent(p -> observed.putIfAbsent(p.pid(), p));
         }
     }
+    private static void verifyStartupSpans(String log) {
+        int previous = -1;
+        for (String step : new String[]{"SYSTEM_FONT", "INPUT_DEVICES", "SELECT_BAR_INIT", "SELECT_BAR_BUILD", "SELECT_SKIN_LOAD"}) {
+            String marker = "Startup diagnostics: step=" + step + " ";
+            int index = log.indexOf(marker);
+            PackagedGameSupport.check(index > previous && index == log.lastIndexOf(marker),
+                    "Expected one startup span in order: " + step);
+            String line = log.substring(index).lines().findFirst().orElseThrow();
+            PackagedGameSupport.check(line.matches(".* outcome=OK durationUs=[0-9]+.*"), "Missing successful duration: " + step);
+            previous = index;
+        }
+        PackagedGameSupport.check(log.indexOf("Startup diagnostics: step=SELECT_FIRST_FRAME ") > previous,
+                "Startup spans must complete before the first selection frame");
+    }
+
     static void validate(Path root, long launcherPid) throws Exception {
         Path evidence = root.resolve("test-evidence");
         long gamePid = Long.parseLong(Files.readString(evidence.resolve("game.pid")).trim());

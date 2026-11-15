@@ -37,7 +37,10 @@ public abstract class SQLiteDatabaseAccessor {
 	 * @throws SQLException
 	 */
 	public void validate(QueryRunner qr) throws SQLException {
-		
+		validate(qr, tables);
+	}
+
+	protected void validate(QueryRunner qr, Table... tables) throws SQLException {
 		for(Table table : tables) {
 			List<Column> pk = new ArrayList<Column>();
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), table.getName())
@@ -92,6 +95,11 @@ public abstract class SQLiteDatabaseAccessor {
 
 	protected void insert(QueryRunner qr, Connection con, String tablename,
 			Object entity) throws SQLException {
+		insert(qr, con, null, tablename, entity);
+	}
+
+	protected void insert(QueryRunner qr, Connection con, String schema, String tablename,
+			Object entity) throws SQLException {
 		Column[] columns = null;
 		for(Table table : tables) {
 			if(table.getName().equals(tablename)) {
@@ -103,7 +111,8 @@ public abstract class SQLiteDatabaseAccessor {
 			return;
 		}
 		
-		StringBuilder sql = new StringBuilder("INSERT OR REPLACE INTO " + tablename + " (");
+		String target = schema == null ? tablename : schema + "." + tablename;
+		StringBuilder sql = new StringBuilder("INSERT OR REPLACE INTO " + target + " (");
 		boolean comma = false;
 		for (Column column : columns) {
 			sql.append(comma ? "," : "").append(column.getName());

@@ -395,14 +395,14 @@ public class IntegerPropertyFactory {
 		}), 
 		clear(NUMBER_CLEAR, (state) -> {
 			if (state instanceof AbstractResult) {
-				final ScoreData score = ((AbstractResult) state).getNewScore();
+				final ScoreData score = ((AbstractResult) state).getDisplayScore();
 				return score != null ? score.getClear() : Integer.MIN_VALUE;
 			}
 			return Integer.MIN_VALUE;
 		}),
 		target_clear(NUMBER_TARGET_CLEAR, (state) -> {
 			if (state instanceof AbstractResult) {
-				return ((AbstractResult) state).getOldScore().getClear();
+				return ((AbstractResult) state).getDisplayOldScore().getClear();
 			}
 			return Integer.MIN_VALUE;
 		}),
@@ -469,6 +469,12 @@ public class IntegerPropertyFactory {
 		judge_duration1(525, createJudgeduration(0)),
 		judge_duration2(526, createJudgeduration(1)),
 		judge_duration3(527, createJudgeduration(2)),
+		judge_duration_k1(VALUE_JUDGE_1P_KEYS_DURATION, createSplitJudgeDuration(0, false)),
+		judge_duration_k2(VALUE_JUDGE_2P_KEYS_DURATION, createSplitJudgeDuration(1, false)),
+		judge_duration_k3(VALUE_JUDGE_3P_KEYS_DURATION, createSplitJudgeDuration(2, false)),
+		judge_duration_s1(VALUE_JUDGE_1P_SCRATCH_DURATION, createSplitJudgeDuration(0, true)),
+		judge_duration_s2(VALUE_JUDGE_2P_SCRATCH_DURATION, createSplitJudgeDuration(1, true)),
+		judge_duration_s3(VALUE_JUDGE_3P_SCRATCH_DURATION, createSplitJudgeDuration(2, true)),
 
 		chartlength_minute(1163, (state) -> (state.resource.getSongdata() != null
 			? (state.resource.getSongdata().getLength() / 60000) % 60
@@ -606,7 +612,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createScoreProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getDisplayScore();
 					return score != null ? score.getExscore() : Integer.MIN_VALUE;
 				}
 				return state.getScoreDataProperty().getScoreData() != null
@@ -618,7 +624,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createHighScoreProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					return ((AbstractResult) state).getOldScore().getExscore();
+					return ((AbstractResult) state).getDisplayOldScore().getExscore();
 				}
 				return state.getScoreDataProperty().getBestScore();
 			};
@@ -634,7 +640,7 @@ public class IntegerPropertyFactory {
 					return ((BMSPlayer) state).getJudgeManager().getScoreData().getCombo();
 				}
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getDisplayScore();
 					return score != null ? score.getCombo() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -648,7 +654,7 @@ public class IntegerPropertyFactory {
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getNewScore();
+					final ScoreData score = ((AbstractResult) state).getDisplayScore();
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -660,10 +666,8 @@ public class IntegerPropertyFactory {
 				if (state instanceof BMSPlayer) {
 					return (int) (((BMSPlayer) state).getGauge().getValue());
 				}
-				if (state instanceof AbstractResult) {
-					final int gaugeType = ((AbstractResult) state).getGaugeType();
-					return (int) state.resource.getGauge()[gaugeType]
-							.get(state.resource.getGauge()[gaugeType].size - 1);
+				if (state instanceof AbstractResult result) {
+					return (int) result.getDisplayGaugeValue();
 				}
 				return Integer.MIN_VALUE;
 			};
@@ -672,13 +676,11 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createGrooveGaugeAfterDotProperty() {
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
-					final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
+					final AbstractGrooveGauge gauge = ((BMSPlayer) state).getGauge();
 					return gauge.getValue() > 0 && gauge.getValue() < 0.1 ? 1 : ((int) (gauge.getValue() * 10)) % 10;
 				}
-				if (state instanceof AbstractResult) {
-					final int gaugeType = ((AbstractResult) state).getGaugeType();
-					float value = state.resource.getGauge()[gaugeType]
-							.get(state.resource.getGauge()[gaugeType].size - 1) * 10;
+				if (state instanceof AbstractResult result) {
+					float value = result.getDisplayGaugeValue() * 10;
 					if (value > 0 && value < 1)
 						value = 1;
 					return ((int) value) % 10;
@@ -712,7 +714,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createTargetMissCountProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getDisplayOldScore();
 					return score.getMinbp() != Integer.MAX_VALUE ? score.getMinbp() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -722,9 +724,9 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createDiffMissCountProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getDisplayOldScore();
 					return score.getMinbp() != Integer.MAX_VALUE
-							? ((AbstractResult) state).getNewScore().getMinbp() - score.getMinbp()
+							? ((AbstractResult) state).getDisplayScore().getMinbp() - score.getMinbp()
 							: Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -734,7 +736,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createTargetMaxComboProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getOldScore();
+					final ScoreData score = ((AbstractResult) state).getDisplayOldScore();
 					return score.getCombo() > 0 ? score.getCombo() : Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -744,8 +746,8 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createDiffMaxComboProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					final ScoreData score = ((AbstractResult) state).getOldScore();
-					return score.getCombo() > 0 ? ((AbstractResult) state).getNewScore().getCombo() - score.getCombo()
+					final ScoreData score = ((AbstractResult) state).getDisplayOldScore();
+					return score.getCombo() > 0 ? ((AbstractResult) state).getDisplayScore().getCombo() - score.getCombo()
 							: Integer.MIN_VALUE;
 				}
 				return Integer.MIN_VALUE;
@@ -909,10 +911,22 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createJudgeduration(int player) {
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
-					final JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+					final AbstractJudgeManager judge = ((BMSPlayer) state).getJudgeManager();
 					return (int) judge.getRecentJudgeTiming(player);
 				}
 				return 0;
+			};
+		}
+
+		private static IntegerProperty createSplitJudgeDuration(int region, boolean scratch) {
+			return state -> {
+				if (state instanceof BMSPlayer player) {
+					var judgement = player.getJudgeManager().getSplitJudgement(region, scratch);
+					if (judgement != null) {
+						return judgement.timingMs();
+					}
+				}
+				return Integer.MIN_VALUE;
 			};
 		}
 	}
@@ -1328,7 +1342,7 @@ public class IntegerPropertyFactory {
 				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;
 			} else if (state instanceof AbstractResult) {
-				final ScoreData score = ((AbstractResult) state).getNewScore();
+				final ScoreData score = ((AbstractResult) state).getDisplayScore();
 				if (score != null) {
 					return score.getClear();
 				}
@@ -1341,7 +1355,7 @@ public class IntegerPropertyFactory {
 				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				return selected.getRivalScore() != null ? selected.getRivalScore().getClear() : Integer.MIN_VALUE;
 			} else if (state instanceof AbstractResult) {
-				return ((AbstractResult) state).getOldScore().getClear();
+				return ((AbstractResult) state).getDisplayOldScore().getClear();
 			}
 			return Integer.MIN_VALUE;
 		}),

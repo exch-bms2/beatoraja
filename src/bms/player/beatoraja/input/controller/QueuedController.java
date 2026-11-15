@@ -11,5 +11,6 @@ interface QueuedController extends Controller {
     ControllerInputDiagnostics diagnostics();
     default void configure(bms.player.beatoraja.PlayModeConfig.ControllerConfig config) { }
     default void windowActivityChanged() { }
+    default boolean windowBaselineReady() { return true; }
     default void readSelectionButtons(boolean[] state) { }
 }

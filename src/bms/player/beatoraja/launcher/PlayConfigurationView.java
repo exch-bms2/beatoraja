@@ -692,9 +692,10 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void start() {
+		bms.player.beatoraja.DesktopLauncher.markGameStart();
 		commit();
 		try {
-			bms.player.beatoraja.DesktopLauncher.startGame(songUpdated
+			bms.player.beatoraja.DesktopLauncher.startGame(config, songUpdated
 					? new String[]{"-s", "--song-updated"} : new String[]{"-s"});
 			closeLauncher();
 		} catch (IOException e) {

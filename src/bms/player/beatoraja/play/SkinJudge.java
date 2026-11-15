@@ -1,7 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.play.AbstractGrooveGauge.Gauge;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 

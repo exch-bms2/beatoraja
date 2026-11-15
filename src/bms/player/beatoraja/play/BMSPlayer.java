@@ -88,6 +88,7 @@ public class BMSPlayer extends MainState {
 
 	private RhythmTimerProcessor rhythm;
 	private boolean preparingSkinPreview;
+	private final BMSPlayerRule playRule;
 	private long startpressedtime;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
@@ -366,6 +367,12 @@ public class BMSPlayer extends MainState {
 		}
 		if(replay != null && main.getInputProcessor().getKeyState(5)) {
 		}
+		playRule = BMSPlayerRule.select(BMSPlayerRule.SINGLE_SONG_RULE, model, resource.getOriginalMode(),
+				autoplay, resource.getCourseBMSModels() != null, config.getGauge(), resource.getChartRuleParameters());
+		if (playRule == BMSPlayerRule.LunaticRave2) {
+			score = false;
+			Logger.getGlobal().info("Experimental LunaticRave2 rule: score, replay and IR submission disabled");
+		}
 		Logger.getGlobal().info("アシストレベル : " + assist + " - スコア保存 : " + score);
 
 		resource.setUpdateScore(score);
@@ -385,19 +392,20 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void create() {
+		resource.setAlternateResultScore(null);
 		final BMSPlayerMode autoplay = resource.getPlayMode();
 		final PlayerConfig config = resource.getPlayerConfig();
 		laneProperty = new LaneProperty(model.getMode());
 		keysound = new KeySoundProcessor(this);
 		// プレイゲージ、初期値設定
-		final GrooveGauge gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource);
+		final AbstractGrooveGauge gauge = AbstractGrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource, playRule);
 		// ゲージログ初期化
 		final FloatArray[] gaugelog = new FloatArray[gauge.getGaugeTypeLength()];
 		for(int i = 0; i < gaugelog.length; i++) {
 			gaugelog[i] = new FloatArray(playtime / 500 + 2);
 		}
 
-		final JudgeManager judge = new JudgeManager(this);
+		final AbstractJudgeManager judge = AbstractJudgeManager.create(this, playRule);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, laneProperty);
 
@@ -434,6 +442,9 @@ public class BMSPlayer extends MainState {
 		players[0] = new PlayerProperty(lanerender, judge, gauge, gaugelog);
 
 		judge.init(model, resource);
+		if (judge instanceof JudgeManager && Boolean.getBoolean("beatoraja.lr2Shadow")) {
+			keyinput.setSecondaryJudging(SecondaryJudging.create(this, model, resource, playtime * 1_000L));
+		}
 
 		rhythm = new RhythmTimerProcessor(model,
 				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
@@ -640,11 +651,14 @@ public class BMSPlayer extends MainState {
 				timer.setMicroTimer(TIMER_PLAY, timer.getMicroTimer(TIMER_PLAY) + deltaplay);
 				final long ptime = timer.getNowTime(TIMER_PLAY);
 				playTimeTracker.update(micronow, timer.getNowMicroTime(TIMER_PLAY));
+				final var judgeEnd = players[0].judge.playEnd(ptime, playtime);
+				final boolean judgementSettlesEnd = judgeEnd != AbstractJudgeManager.PlayEnd.UNSYNCHRONIZED;
 
 				for(PlayerProperty p : players) {
 					rhythm.update(this, deltatime, p.lanerender.getNowBPM(), property.freq);
 
-					final float g = p.gauge.getValue();
+					final boolean gaugeFailed = judgementSettlesEnd ? judgeEnd == AbstractJudgeManager.PlayEnd.FAILED
+							: p.gauge.isFailed();
 					for(int i = 0; i < p.gaugelog.length; i++) {
 						if (p.gaugelog[i].size <= ptime / 500) {
 							p.gaugelog[i].add(p.gauge.getValue(i));
@@ -652,49 +666,22 @@ public class BMSPlayer extends MainState {
 					}
 					timer.switchTimer(TIMER_GAUGE_MAX_1P, p.gauge.getGauge().isMax());
 					
-					// stage failed判定
-					if (config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR || config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_SELECT_TO_UNDER) {
-						final int len = config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR
-								? (p.gauge.getType() >= GrooveGauge.CLASS ? GrooveGauge.EXHARDCLASS + 1 : GrooveGauge.HAZARD + 1)
-								: (p.gauge.isCourseGauge() ? Math.min(Math.max(config.getGauge(), GrooveGauge.NORMAL) + GrooveGauge.CLASS - GrooveGauge.NORMAL, GrooveGauge.EXHARDCLASS) + 1 : config.getGauge() + 1);
-						int type = p.gauge.isCourseGauge() ? GrooveGauge.CLASS
-								: p.gauge.getType() < config.getBottomShiftableGauge() ? p.gauge.getType() : config.getBottomShiftableGauge();
-						for (int i = type; i < len; i++) {
-							if (p.gauge.getGauge(i).getValue() > 0f && p.gauge.getGauge(i).isQualified()) {
-								type = i;
-							}
+					if (updateGaugeAutoShift(p.gauge, config, gaugeFailed)) {
+						state = STATE_FAILED;
+						playTimeTracker.stop(micronow, timer.getNowMicroTime(TIMER_PLAY));
+						timer.setTimerOn(TIMER_FAILED);
+						if (resource.mediaLoadFinished()) {
+							main.getAudioProcessor().stop((Note) null);
 						}
-						p.gauge.setType(type);
-					} else if (g == 0) {
-						switch(config.getGaugeAutoShift()) {
-						case PlayerConfig.GAUGEAUTOSHIFT_NONE:
-							// FAILED移行
-							state = STATE_FAILED;
-							playTimeTracker.stop(micronow, timer.getNowMicroTime(TIMER_PLAY));
-							timer.setTimerOn(TIMER_FAILED);
-							if (resource.mediaLoadFinished()) {
-								main.getAudioProcessor().stop((Note) null);
-							}
-							play(PLAY_STOP);
-							Logger.getGlobal().info("STATE_FAILEDに移行");
-							break;
-						case PlayerConfig.GAUGEAUTOSHIFT_CONTINUE:
-							break;
-						case PlayerConfig.GAUGEAUTOSHIFT_SURVIVAL_TO_GROOVE:
-							if(!p.gauge.isCourseGauge()) {
-								// GAS処理
-								p.gauge.setType(GrooveGauge.NORMAL);
-							}
-							break;
-						}
+						play(PLAY_STOP);
+						Logger.getGlobal().info("STATE_FAILEDに移行");
 					}
 
 				}
 
 				skin.pomyu.updateTimer(this);
 
-				// System.out.println("playing time : " + time);
-				if (playtime < ptime) {
+				if (shouldFinishSong(state, judgeEnd, ptime, playtime)) {
 					state = STATE_FINISHED;
 					playTimeTracker.stop(micronow, timer.getNowMicroTime(TIMER_PLAY));
 					timer.setTimerOn(TIMER_MUSIC_END);
@@ -711,7 +698,7 @@ public class BMSPlayer extends MainState {
 			// 閉店処理
 			case STATE_FAILED -> {
 				notifyObsPlayEnd();
-				keyinput.stopJudge();
+				stopJudging();
 				keysound.stopBGPlay();
 				if ((input.startPressed() ^ input.isSelectPressed()) && resource.getCourseBMSModels() == null
 						&& autoplay.mode == BMSPlayerMode.Mode.PLAY) {
@@ -764,7 +751,7 @@ public class BMSPlayer extends MainState {
 			// 完奏処理
 			case STATE_FINISHED -> {
 				notifyObsPlayEnd();
-				keyinput.stopJudge();
+				stopJudging();
 				keysound.stopBGPlay();
 				if (timer.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
 					timer.switchTimer(TIMER_FADEOUT, true);
@@ -985,8 +972,8 @@ public class BMSPlayer extends MainState {
 	}
 
 	public ScoreData createScoreData(int player) {
-		final JudgeManager judge = players[player].judge;
-		final GrooveGauge gauge = players[player].gauge;
+		final AbstractJudgeManager judge = players[player].judge;
+		final AbstractGrooveGauge gauge = players[player].gauge;
 		final PlayerConfig config = resource.getPlayerConfig();
 		ScoreData score = judge.getScoreData();
 		score.setPlaytime(playTimeTracker.getPlaytime());
@@ -1080,6 +1067,68 @@ public class BMSPlayer extends MainState {
 		}
 	}
 
+	private void stopJudging() {
+		if (keyinput == null) return;
+		var secondary = keyinput.stopJudge();
+		if (secondary != null) {
+			Logger.getGlobal().info("LunaticRave2 secondary result: " + secondary);
+			try {
+				var data = main.getPlayDataAccessor();
+				var attempt = secondary.toLocalAttempt(model);
+				if (secondary.outcome() != SecondaryJudging.Outcome.ERROR
+						&& secondary.outcome() != SecondaryJudging.Outcome.INPUT_LOST) {
+					var previous = data.readLunaticRave2Best(attempt.sha256(), attempt.mode());
+					var score = attempt.toScoreData(model.getMode());
+					score.setRule(BMSPlayerRule.LunaticRave2);
+					resource.setAlternateResultScore(new PlayerResource.AlternateResultScore(score, previous, secondary.gaugeHistory()));
+				}
+				data.writeLunaticRave2Attempt(attempt, resource.isUpdateScore());
+			} catch (IllegalArgumentException e) {
+				Logger.getGlobal().warning("Could not save the local LunaticRave2 score: " + e.getMessage());
+			}
+		}
+	}
+
+	static boolean shouldFinishSong(int state, AbstractJudgeManager.PlayEnd judgeEnd, long playMs, long endMs) {
+		return state == STATE_PLAY && switch (judgeEnd) {
+			case UNSYNCHRONIZED -> playMs > endMs;
+			case FINISHED -> true;
+			case PLAYING, FAILED -> false;
+		};
+	}
+
+	static boolean updateGaugeAutoShift(AbstractGrooveGauge gauge, PlayerConfig config, boolean failureForClosure) {
+		final int autoShift = config.getGaugeAutoShift();
+		switch (autoShift) {
+			case PlayerConfig.GAUGEAUTOSHIFT_NONE:
+				return failureForClosure;
+			case PlayerConfig.GAUGEAUTOSHIFT_SURVIVAL_TO_GROOVE:
+				if (!gauge.isCourseGauge() && gauge.isFailed()) {
+					gauge.setType(GrooveGauge.NORMAL);
+				}
+				break;
+			case PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR:
+			case PlayerConfig.GAUGEAUTOSHIFT_SELECT_TO_UNDER:
+				final boolean course = gauge.isCourseGauge();
+				final int limit = autoShift == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR
+						? (course ? GrooveGauge.EXHARDCLASS : GrooveGauge.HAZARD)
+						: (course ? Math.min(Math.max(config.getGauge(), GrooveGauge.NORMAL)
+								+ GrooveGauge.CLASS - GrooveGauge.NORMAL, GrooveGauge.EXHARDCLASS) : config.getGauge());
+				int type = course ? GrooveGauge.CLASS : Math.min(gauge.getType(), config.getBottomShiftableGauge());
+				for (int i = type; i <= limit; i++) {
+					var candidate = gauge.getGauge(i);
+					if (candidate.getValue() > 0f && candidate.isQualified()) {
+						type = i;
+					}
+				}
+				gauge.setType(type);
+				break;
+			default:
+				break;
+		}
+		return false;
+	}
+
 	public void stopPlay() {
 		if (state == STATE_PRACTICE) {
 			practice.saveProperty();
@@ -1117,7 +1166,7 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public void dispose() {
-		if (keyinput != null) keyinput.stopJudge();
+		stopJudging();
 		super.dispose();
 		for(PlayerProperty p : players) {
 			p.lanerender.dispose();			
@@ -1147,11 +1196,11 @@ public class BMSPlayer extends MainState {
 	}
 
 	// TODO 廃止予定
-	public JudgeManager getJudgeManager() {
+	public AbstractJudgeManager getJudgeManager() {
 		return getJudgeManager(0);
 	}
 	
-	public JudgeManager getJudgeManager(int player) {
+	public AbstractJudgeManager getJudgeManager(int player) {
 		return players[player].judge;
 	}
 	
@@ -1164,7 +1213,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void update(int player, int judge, long time) {
-		final JudgeManager judgem = players[player].judge;
+		final AbstractJudgeManager judgem = players[player].judge;
 		if (judgem.getCombo() == 0) {
 			bga.setMisslayerTme(time);
 		}
@@ -1186,11 +1235,11 @@ public class BMSPlayer extends MainState {
 		((PlaySkin)getSkin()).pomyu.PMcharaJudge = judge + 1;
 	}
 
-	public GrooveGauge getGauge() {
+	public AbstractGrooveGauge getGauge() {
 		return getGauge(0);
 	}
 
-	public GrooveGauge getGauge(int player) {
+	public AbstractGrooveGauge getGauge(int player) {
 		return players[player].gauge;
 	}
 
@@ -1265,11 +1314,11 @@ public class BMSPlayer extends MainState {
 	public static class PlayerProperty {
 		
 		public final  LaneRenderer lanerender;
-		public final  JudgeManager judge;
-		public GrooveGauge gauge;
+		public final  AbstractJudgeManager judge;
+		public AbstractGrooveGauge gauge;
 		public final FloatArray[] gaugelog;
 		
-		public PlayerProperty(LaneRenderer lanerender, JudgeManager judge, GrooveGauge gauge, FloatArray[] gaugelog) {
+		public PlayerProperty(LaneRenderer lanerender, AbstractJudgeManager judge, AbstractGrooveGauge gauge, FloatArray[] gaugelog) {
 			this.lanerender = lanerender;
 			this.judge = judge;
 			this.gauge = gauge;

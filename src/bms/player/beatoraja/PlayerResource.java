@@ -12,7 +12,7 @@ import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayerRule;
-import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.AbstractGrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongResource;
@@ -31,6 +31,7 @@ public final class PlayerResource {
 	private BMSModel model;
 	/** Original resource of {@link #model}; it also supplies random re-decodes. */
 	private SongResource chartResource;
+	private BMSPlayerRule.ChartParameters chartRuleParameters;
 	
 	private long marginTime;
 	/**
@@ -67,6 +68,7 @@ public final class PlayerResource {
 	 * スコア
 	 */
 	private ScoreData score;
+	private AlternateResultScore alternateResultScore;
 	/**
 	 * ライバルスコア
 	 */
@@ -82,7 +84,7 @@ public final class PlayerResource {
 	 */
 	private boolean updateScore = true;
 	private boolean updateCourseScore = true;
-	private GrooveGauge grooveGauge;
+	private AbstractGrooveGauge grooveGauge;
 	/**
 	 * ゲージの遷移ログ
 	 */
@@ -151,6 +153,7 @@ public final class PlayerResource {
 		courseindex = 0;
 		cscore = null;
 		score = null;
+		alternateResultScore = null;
 //		rscore = null;
 		tscore = null;
 		gauge = null;
@@ -164,11 +167,12 @@ public final class PlayerResource {
 	}
 
 	public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
+		alternateResultScore = null;
 		// TODO play mode, リプレイデータでの読み込み分岐をここで行う
 		this.mode = mode;
 		replay = new ReplayData();
 		chartResource = SongResources.fromPath(f);
-		model = loadBMSModel(chartResource, pconfig.getLnmode());
+		model = loadBMSModel(new ChartInformation(chartSource(chartResource), pconfig.getLnmode(), null), true);
 		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
@@ -203,15 +207,20 @@ public final class PlayerResource {
 		if(model != null) {
 			if (chartResource != null) {
 				return loadBMSModel(new ChartInformation(chartSource(chartResource),
-						model.getChartInformation().lntype, selectedRandom));
+						model.getChartInformation().lntype, selectedRandom), true);
 			}
 			ChartInformation info = model.getChartInformation();
-			return loadBMSModel(new ChartInformation(info.path, info.lntype, selectedRandom));			
+			return loadBMSModel(new ChartInformation(info.path, info.lntype, selectedRandom), true);
 		}
 		return null;
 	}
 
 	public BMSModel loadBMSModel(ChartInformation info) {
+		return loadBMSModel(info, false);
+	}
+
+	private BMSModel loadBMSModel(ChartInformation info, boolean forPlay) {
+		if (forPlay) chartRuleParameters = null;
 		ChartDecoder decoder = info.source != null ? ChartDecoder.getDecoder(info.source) : ChartDecoder.getDecoder(info.path);
 		if(decoder == null) {
 			return null;
@@ -221,6 +230,7 @@ public final class PlayerResource {
 			return null;
 		}
 
+		if (forPlay && decoder instanceof BMSDecoder) chartRuleParameters = BMSPlayerRule.ChartParameters.fromBms(model);
 		marginTime = BMSModelUtils.setStartNoteTime(model, 1000);
 		BMSPlayerRule.validate(model);
 
@@ -239,6 +249,10 @@ public final class PlayerResource {
 		}
 
 		return model;
+	}
+
+	public BMSPlayerRule.ChartParameters getChartRuleParameters() {
+		return chartRuleParameters;
 	}
 
 	private static ChartSource chartSource(SongResource resource) {
@@ -289,6 +303,19 @@ public final class PlayerResource {
 
 	public ScoreData getScoreData() {
 		return score;
+	}
+
+	public record AlternateResultScore(ScoreData score, ScoreData previousBest, GaugeHistory gaugeHistory) {}
+
+	/** Samples transferred to the result screen after the judgment thread has stopped. */
+	public record GaugeHistory(AbstractGrooveGauge gauge, FloatArray[] values, LongArray timesUs, long durationUs) {}
+
+	public AlternateResultScore getAlternateResultScore() {
+		return alternateResultScore;
+	}
+
+	public void setAlternateResultScore(AlternateResultScore score) {
+		alternateResultScore = score;
 	}
 
 	public void setScoreData(ScoreData score) {
@@ -380,7 +407,8 @@ public final class PlayerResource {
 
 	public void reloadBMSFile() {
 		if (model != null) {
-			model = loadBMSModel(Paths.get(model.getPath()), pconfig.getLnmode());
+			SongResource source = SongResources.fromPath(Paths.get(model.getPath()));
+			model = loadBMSModel(new ChartInformation(chartSource(source), pconfig.getLnmode(), null), true);
 		}
 		final String name = tablename;
 		final String lev = tablelevel;
@@ -397,11 +425,11 @@ public final class PlayerResource {
 		this.gauge = gauge;
 	}
 
-	public GrooveGauge getGrooveGauge() {
+	public AbstractGrooveGauge getGrooveGauge() {
 		return grooveGauge;
 	}
 
-	public void setGrooveGauge(GrooveGauge grooveGauge) {
+	public void setGrooveGauge(AbstractGrooveGauge grooveGauge) {
 		this.grooveGauge = grooveGauge;
 	}
 

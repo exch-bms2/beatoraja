@@ -14,7 +14,7 @@ public final class IRSubmissionRetryTest {
                 public IRResponse<Object> sendCoursePlayData(IRCourseData chart, IRScoreData score) { course[0]++; return response(unknown); }
             };
             var song = new SongData(); song.setTitle("fixture");
-            var chart = new MusicResult.IRSendStatus(ir, song, new ScoreData());
+            var chart = new MusicResult.IRSendStatus(ir, new IRChartData(song), new ScoreData());
             var data = new CourseData(); data.setName("fixture"); data.setSong(new SongData[]{song});
             var group = new CourseResult.IRSendStatus(ir, data, 0, new ScoreData());
             check(!chart.send() && !group.send(), "Submission fails");

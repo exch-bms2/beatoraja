@@ -12,14 +12,112 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /** Late attachment and instance-ID changes through production BM, judgment and replay paths. */
 public final class SdlHotplugTest {
     public static void main(String[] args) throws Exception {
+        focusRegainDuringSdlRead(false);
+        focusRegainDuringSdlRead(true);
         for (var backend : new ControllerBackend[]{ControllerBackend.SDL_RAW, ControllerBackend.SDL_RAW_ASYNC, ControllerBackend.SDL_ASYNC}) {
             reconnect(backend);
         }
-        System.out.println("SdlHotplugTest passed (late attach, debounce-free unplug, same-poll reconnect, saved banks, duplicate names, FIFO/replay)");
+        System.out.println("SdlHotplugTest passed (focus reentry, inventory snapshots, reconnect, saved bindings, FIFO/replay)");
+    }
+
+    private static void focusRegainDuringSdlRead(boolean deviceRead) throws Exception {
+        var sdlUpdating = new CountDownLatch(1);
+        var inputLocked = new CountDownLatch(1);
+        var owner = new FutureTask<Void>(() -> {
+            var oldInput = Gdx.input;
+            var oldRunner = BMSPlayerInputProcessor.controllerPollRunner;
+            var source = new Source();
+            int slot = source.add(101, "serial-A");
+            var manager = new SdlRawControllerManager(source, Runnable::run);
+            try {
+                Gdx.input = fakeInput();
+                BMSPlayerInputProcessor.controllerPollRunner = SdlRawAsyncControllerTest.runner(manager);
+                var player = new PlayerConfig();
+                player.selectControllerBackend(ControllerBackend.SDL_RAW);
+                var play = player.getMode14();
+                Arrays.fill(play.getKeyboardConfig().getKeyAssign(), -1);
+                configure(play.getController()[0], "Hotplug device", 0);
+                play.getController()[0].setDuration(0); // Isolate focus handling from the debounce interval.
+                var config = new Config(); config.setControllerBackend(ControllerBackend.SDL_RAW);
+                var input = KeyboardQueueTestSupport.input(config, player, manager.getControllers());
+                try {
+                    input.setPlayConfig(play); input.setStartTime(1); input.beginInputJudge(null, null, false);
+                    source.press(slot, 3, true); manager.poll(); input.poll();
+                    check(input.getKeyState(0), "Held controller input before focus loss");
+                    var batch = new JudgeEventQueue.Batch(); input.getJudgeEventQueue().drain(batch);
+                    if (!deviceRead) KeyboardQueueTestSupport.windowActivityChanged(input, false);
+
+                    var worker = new FutureTask<Void>(() -> {
+                        await(sdlUpdating);
+                        synchronized (input.getKeyBoardInputProcesseor()) {
+                            inputLocked.countDown();
+                            input.poll();
+                        }
+                        return null;
+                    });
+                    startDaemon(worker, "test-input-polling");
+                    Runnable focus = () -> {
+                        sdlUpdating.countDown();
+                        await(inputLocked);
+                        if (deviceRead) KeyboardQueueTestSupport.windowActivityChanged(input, false);
+                        KeyboardQueueTestSupport.windowActivityChanged(input, true);
+                    };
+                    if (deviceRead) {
+                        // The last native read is interrupted after the buttons have already been sampled.
+                        source.onHat = focus;
+                        source.buttons.get(slot)[4] = true;
+                    } else source.onUpdate = focus;
+                    manager.poll();
+                    source.onUpdate = () -> { };
+                    source.onHat = () -> { };
+                    worker.get(5, TimeUnit.SECONDS);
+                    input.getJudgeEventQueue().drain(batch);
+                    check(!input.getKeyState(0) && batch.size == 1 && !batch.pressed[0], "Focus loss releases the held key");
+                    if (deviceRead) {
+                        var device = (QueuedController) manager.getControllers().first();
+                        check(!device.getButton(4) && !device.windowBaselineReady(), "Discard the interrupted SDL_RAW snapshot");
+                        input.poll();
+                        check(!device.windowBaselineReady(), "Do not baseline from the pre-focus cache");
+                        manager.poll();
+                        check(device.getButton(4) && device.windowBaselineReady(), "Next complete SDL_RAW sample is published");
+                    }
+                    input.poll(); input.getJudgeEventQueue().drain(batch);
+                    check(!input.getKeyState(0) && batch.size == 0, "Still-held input is suppressed on regain");
+                    source.press(slot, 3, false); manager.poll(); input.poll();
+                    source.press(slot, 3, true); manager.poll(); input.poll();
+                    check(input.getKeyState(0), "Fresh controller press works after regain");
+                } finally { input.dispose(); }
+            } finally {
+                manager.dispose();
+                Gdx.input = oldInput; BMSPlayerInputProcessor.controllerPollRunner = oldRunner;
+            }
+            return null;
+        });
+        startDaemon(owner, "test-sdl-owner");
+        owner.get(10, TimeUnit.SECONDS);
+    }
+
+    static void startDaemon(Runnable task, String name) {
+        var thread = new Thread(task, name);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    static void await(CountDownLatch latch) {
+        try { check(latch.await(5, TimeUnit.SECONDS), "Timed out arranging SDL focus reentry"); }
+        catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new AssertionError(e); }
+    }
+
+    private static Input fakeInput() {
+        return (Input) Proxy.newProxyInstance(SdlHotplugTest.class.getClassLoader(), new Class<?>[]{Input.class},
+                (p, m, a) -> m.getReturnType() == boolean.class ? false : m.getReturnType() == int.class ? 0 : null);
     }
 
     private static void reconnect(ControllerBackend backend) throws Exception {
@@ -30,8 +128,7 @@ public final class SdlHotplugTest {
         var manager = new SdlRawControllerManager(source, posted::add, backend);
         BMSPlayerInputProcessor input = null;
         try {
-            Gdx.input = (Input) Proxy.newProxyInstance(SdlHotplugTest.class.getClassLoader(), new Class<?>[]{Input.class},
-                    (p, m, a) -> m.getReturnType() == boolean.class ? false : m.getReturnType() == int.class ? 0 : null);
+            Gdx.input = fakeInput();
             BMSPlayerInputProcessor.controllerPollRunner = SdlRawAsyncControllerTest.runner(manager);
             var player = new PlayerConfig();
             player.selectControllerBackend(backend);
@@ -45,8 +142,15 @@ public final class SdlHotplugTest {
             // Pending unrelated judgment events must survive registration of an additional device.
             KeyboardQueueTestSupport.includeJudgeKeys(input.getJudgeEventQueue(), new int[]{8}, new boolean[256]);
             input.setKeyState(8, true, 10);
+            var empty = manager.controllerInventory();
             int slot = source.add(101, "serial-A");
             poll(manager, input, backend);
+            var first = manager.controllerInventory();
+            check(empty.controllers().isEmpty() && first.version() == empty.version() + 1 && first.controllers().size() == 1,
+                    "Each publication pairs its version with an unchanged device list");
+            manager.getControllers().clear();
+            check(manager.controllerInventory() == first && first.controllers().size() == 1,
+                    "The mutable ControllerManager view does not alter the published inventory");
             check(input.getBMInputProcessor().length == 1, "Device connected after BMS startup registered");
             var processor = input.getBMInputProcessor()[0];
             var controller = manager.getControllers().first();
@@ -65,6 +169,7 @@ public final class SdlHotplugTest {
             check(source.closed.size() == 1, "Unplug closes native handle once");
             slot = source.add(202, "serial-A");
             poll(manager, input, backend);
+            check(manager.controllerInventory() == first, "Reconnecting an existing slot does not republish the inventory");
             check(input.getBMInputProcessor()[0] == processor && manager.getControllers().size == 1
                     && controller == manager.getControllers().first(), "Instance-ID change reuses binding slot and processor");
             source.press(slot, 3, true); poll(manager, input, backend);
@@ -128,6 +233,8 @@ public final class SdlHotplugTest {
         final SdlDeviceRegistry registry = new SdlDeviceRegistry(closed::add);
         final ArrayList<boolean[]> buttons = new ArrayList<>();
         final ArrayDeque<Event> pending = new ArrayDeque<>();
+        Runnable onUpdate = () -> { };
+        Runnable onHat = () -> { };
         int add(int id, String identity) {
             registry.add(new Device(id, "Hotplug device", 32, 4, 1, identity), id);
             var devices = registry.devices();
@@ -144,7 +251,7 @@ public final class SdlHotplugTest {
         }
         public Device[] devices() { return registry.devices(); }
         public long inventoryVersion() { return registry.version(); }
-        public void update() { }
+        public void update() { onUpdate.run(); }
         public boolean next(Event target) {
             var event = pending.poll(); if (event == null) return false;
             target.type = event.type; target.device = event.device; target.index = event.index; target.value = event.value; return true;
@@ -152,7 +259,7 @@ public final class SdlHotplugTest {
         public boolean connected(int slot) { return registry.handle(slot) != 0; }
         public boolean button(int slot, int button) { return buttons.get(slot)[button]; }
         public float axis(int slot, int axis) { return 0; }
-        public int hat(int slot) { return 0; }
+        public int hat(int slot) { onHat.run(); return 0; }
         public void close() { registry.close(); }
     }
     private static void check(boolean value, String message) { if (!value) throw new AssertionError(message); }

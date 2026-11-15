@@ -1,5 +1,9 @@
 package bms.player.beatoraja.ir;
 
+import bms.player.beatoraja.StartupDiagnostics;
+import bms.player.beatoraja.StartupDiagnostics.Outcome;
+import bms.player.beatoraja.StartupDiagnostics.Step;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -52,9 +56,14 @@ public class IRConnectionManager {
 
     private static synchronized IRWorkerProtocol.Metadata[] metadata() {
         if (connections == null) {
-            try {
-                if (IRProcessSupport.classpaths().plugins().isEmpty() && !BundledIR.isPresent()) connections = new IRWorkerProtocol.Metadata[0];
-                else connections = discover(30_000);
+            try (var timing = StartupDiagnostics.measure(Step.IR_METADATA)) {
+                if (IRProcessSupport.classpaths().plugins().isEmpty() && !BundledIR.isPresent()) {
+                    connections = new IRWorkerProtocol.Metadata[0];
+                    timing.outcome(Outcome.SKIPPED);
+                } else {
+                    connections = discover(30_000);
+                    timing.outcome(Outcome.OK);
+                }
             } catch (IOException | RuntimeException e) {
                 Logger.getGlobal().warning("IR metadata discovery failed : " + e.getMessage());
                 connections = new IRWorkerProtocol.Metadata[0];
@@ -64,7 +73,12 @@ public class IRConnectionManager {
     }
 
     static IRWorkerProtocol.Metadata[] discover(long timeoutMillis) throws IOException {
-        Process process = IRProcessSupport.startWorker("--metadata");
+        Process process;
+        try (var timing = StartupDiagnostics.measure(Step.IR_METADATA_WORKER_START)) {
+            process = IRProcessSupport.startWorker("--metadata");
+            timing.worker(process.pid());
+            timing.outcome(Outcome.OK);
+        }
         var reader = Executors.newSingleThreadExecutor(task -> {
             Thread thread = new Thread(task, "ir-metadata-reader");
             thread.setDaemon(true);
@@ -78,10 +92,23 @@ public class IRConnectionManager {
                 if (bytes.length > 1024 * 1024) throw new IOException("IR metadata exceeds 1 MiB");
                 return new String(bytes, StandardCharsets.UTF_8);
             });
+            String output;
             long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
-            String output = result.get(timeoutMillis, TimeUnit.MILLISECONDS);
-            if (!process.waitFor(Math.max(1, deadline - System.nanoTime()), TimeUnit.NANOSECONDS) || process.exitValue() != 0)
-                throw new IOException("IR metadata worker failed");
+            try (var response = StartupDiagnostics.measure(Step.IR_METADATA_RESPONSE_WAIT, process.pid())) {
+                try { output = result.get(timeoutMillis, TimeUnit.MILLISECONDS); }
+                catch (TimeoutException e) { response.outcome(Outcome.TIMEOUT); throw e; }
+                catch (InterruptedException e) { response.outcome(Outcome.INTERRUPTED); throw e; }
+                response.outcome(Outcome.OK);
+            }
+            try (var exit = StartupDiagnostics.measure(Step.IR_METADATA_EXIT_WAIT, process.pid())) {
+                boolean exited;
+                try { exited = process.waitFor(Math.max(1, deadline - System.nanoTime()), TimeUnit.NANOSECONDS); }
+                catch (InterruptedException e) { exit.outcome(Outcome.INTERRUPTED); throw e; }
+                if (!exited) exit.outcome(Outcome.TIMEOUT);
+                if (!exited || process.exitValue() != 0)
+                    throw new IOException("IR metadata worker failed");
+                exit.outcome(Outcome.OK);
+            }
             IRWorkerProtocol.Discovery discovery = IsolatedIRConnection.createJson().fromJson(IRWorkerProtocol.Discovery.class, output);
             if (discovery == null || discovery.connections == null) throw new IOException("Missing IR metadata");
             return Arrays.stream(discovery.connections).filter(value -> value != null && value.name != null && !value.name.isBlank())
@@ -92,15 +119,19 @@ public class IRConnectionManager {
         } catch (ExecutionException | TimeoutException | RuntimeException e) {
             throw new IOException("IR metadata discovery failed", e);
         } finally {
-            process.descendants().forEach(child -> child.destroyForcibly());
-            if (process.isAlive()) process.destroyForcibly();
-            try { process.waitFor(5, TimeUnit.SECONDS); }
-            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-            reader.shutdownNow();
-            try { process.getInputStream().close(); process.getErrorStream().close(); }
-            catch (IOException ignored) { }
-            try { reader.awaitTermination(1, TimeUnit.SECONDS); }
-            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            try (var cleanup = StartupDiagnostics.measure(Step.IR_METADATA_CLEANUP, process.pid())) {
+                process.descendants().forEach(child -> child.destroyForcibly());
+                if (process.isAlive()) process.destroyForcibly();
+                try { process.waitFor(5, TimeUnit.SECONDS); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                reader.shutdownNow();
+                try { process.getInputStream().close(); process.getErrorStream().close(); }
+                catch (IOException ignored) { }
+                try { reader.awaitTermination(1, TimeUnit.SECONDS); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                cleanup.outcome(Thread.currentThread().isInterrupted() ? Outcome.INTERRUPTED
+                        : process.isAlive() || !reader.isTerminated() ? Outcome.TIMEOUT : Outcome.OK);
+            }
         }
     }
 }

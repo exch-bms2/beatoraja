@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Graphics;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.utils.Json;
 /** Non-JavaFX entry point; keeps the GLFW event loop out of the Launcher JVM. */
 public final class DesktopLauncher {
     static final String GAME_PROCESS = "beatoraja.gameProcess";
+    private static final String NVIDIA_THREADED_OPTIMIZATIONS = "__GL_THREADED_OPTIMIZATIONS";
 
     private DesktopLauncher() { }
 
@@ -43,6 +45,7 @@ public final class DesktopLauncher {
             }
             return;
         }
+        if (Boolean.getBoolean(GAME_PROCESS)) StartupDiagnostics.gameEntry();
         MainLoader.main(args);
     }
 
@@ -85,9 +88,36 @@ public final class DesktopLauncher {
     }
 
     public static Process startGame(String... args) throws IOException {
-        return DistributionDiagnostics.observe(new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
-                System.getProperty("os.name"), ManagementFactory.getRuntimeMXBean().getInputArguments(), args))
-                .directory(Path.of(System.getProperty("user.dir")).toFile()).inheritIO().start(), "game");
+        return startGame(Config.readSystemConfig(), args);
+    }
+
+    public static void markGameStart() { StartupDiagnostics.start(); }
+
+    public static Process startGame(Config config, String... args) throws IOException {
+        String os = System.getProperty("os.name");
+        var child = new ProcessBuilder(gameCommand(System.getProperty("java.home"), System.getProperty("java.class.path"),
+                os, ManagementFactory.getRuntimeMXBean().getInputArguments(), args))
+                .directory(Path.of(System.getProperty("user.dir")).toFile()).inheritIO();
+        if (configureGameEnvironment(child.environment(), os, config.isNvidiaWaylandWorkaroundEnabled())) {
+            DistributionDiagnostics.event("NVIDIA Wayland workaround applied to game child: " + NVIDIA_THREADED_OPTIMIZATIONS + "=0");
+        }
+        StartupDiagnostics.configureGameEnvironment(child.environment());
+        Process process;
+        try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.GAME_CHILD_START)) {
+            process = child.start();
+            timing.worker(process.pid());
+            timing.outcome(StartupDiagnostics.Outcome.OK);
+        }
+        return DistributionDiagnostics.observe(process, "game");
+    }
+
+    static boolean configureGameEnvironment(Map<String, String> environment, String os, boolean workaroundEnabled) {
+        if (!workaroundEnabled || !os.equals("Linux") || "x11".equals(environment.get("XDG_SESSION_TYPE"))
+                || environment.getOrDefault("WAYLAND_DISPLAY", "").isBlank()) {
+            return false;
+        }
+        // The NVIDIA driver reads this at load time; do not modify the launcher or display probe.
+        return environment.putIfAbsent(NVIDIA_THREADED_OPTIMIZATIONS, "0") == null;
     }
 
     static List<String> gameCommand(String javaHome, String classpath, String os, List<String> vmArgs, String... args) {

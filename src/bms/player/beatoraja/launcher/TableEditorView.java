@@ -149,7 +149,9 @@ public class TableEditorView {
 			for (int i = indices.size() - 1; i >= 0; i--) charts.getItems().remove((int) indices.get(i));
 		});
 		removeChart.disableProperty().bind(charts.getSelectionModel().selectedItemProperty().isNull());
-		var center = pane("Charts", charts, new HBox(4, removeChart, button("Up", () -> moveChart(-1)),
+		var drag = new TableEditorChartDrag(charts, results, selected,
+				(songs, index) -> insertCharts(charts.getItems(), songs, index, selected.get().course != null));
+		var center = pane("Charts", drag, new HBox(4, removeChart, button("Up", () -> moveChart(-1)),
 				button("Down", () -> moveChart(1)), settings));
 
 		query.setId("chartQuery");
@@ -239,12 +241,17 @@ public class TableEditorView {
 	private void addSelectedCharts() {
 		var entry = entries.getSelectionModel().getSelectedItem();
 		if (entry == null) return;
-		for (int index : results.getSelectionModel().getSelectedIndices().stream().sorted().toList()) {
-			var song = results.getItems().get(index);
-			if (entry.course != null || charts.getItems().stream().noneMatch(existing -> sameChart(existing, song))) {
-				charts.getItems().add(song);
-			}
+		insertCharts(charts.getItems(), TableEditorChartDrag.selectedRows(results).stream()
+				.map(results.getItems()::get).toList(), charts.getItems().size(), entry.course != null);
+	}
+
+	static void insertCharts(List<SongData> target, List<SongData> songs, int index, boolean allowDuplicates) {
+		var additions = new ArrayList<SongData>();
+		for (var song : songs) {
+			if (allowDuplicates || (target.stream().noneMatch(existing -> sameChart(existing, song))
+					&& additions.stream().noneMatch(existing -> sameChart(existing, song)))) additions.add(song);
 		}
+		target.addAll(index, additions);
 	}
 
 	private static boolean sameChart(SongData first, SongData second) {
