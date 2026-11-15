@@ -1025,6 +1025,7 @@ tasks.register<JavaExec>("lwjgl3WindowsKeyboardTest") {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.keyboard.Lwjgl3WindowsKeyboardTest")
     systemProperty("beatoraja.inputDiagnostics", "true")
+    systemProperty("beatoraja.windowsCapsLockDiagnostics", "true")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

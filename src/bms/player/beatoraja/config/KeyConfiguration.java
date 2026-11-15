@@ -652,6 +652,11 @@ public class KeyConfiguration extends MainState {
 
 	private boolean setKeyboardKeyAssign(int index) {
 		int key = keyboard.getLastPressedKey();
+		if (key <= Keys.UNKNOWN || key > Keys.MAX_KEYCODE) {
+			assignmentResult = "Unrecognized key";
+			keyboard.setLastPressedKey(-1);
+			return false;
+		}
 		if (!KeyboardShortcut.isDigit(key)) {
 			for (var shortcut : SHORTCUTS) {
 				int binding = config.getShortcutBinding(shortcut);

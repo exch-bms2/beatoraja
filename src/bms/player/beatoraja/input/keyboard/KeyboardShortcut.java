@@ -87,7 +87,8 @@ public enum KeyboardShortcut {
         if (binding == DISABLED) return true;
         if (binding < 0 || binding >= CHORD_COUNT) return false;
         int key = key(binding);
-        if (key <= Keys.UNKNOWN || isModifier(key) || key == Keys.TAB || Keys.toString(key) == null) return false;
+        if (key <= Keys.UNKNOWN || isModifier(key) || key == Keys.TAB
+                || (Keys.toString(key) == null && !WindowsKeyboardMapping.isConversionKey(key))) return false;
         if (isRecoveryChord(key, modifiers(binding))) return false;
         if (isDigit(key) && (activeIn(PLAY) || activeIn(RESULT) || activeIn(COURSERESULT) || activeIn(CONFIG))) return false;
         for (var fixed : ControlKeys.values())

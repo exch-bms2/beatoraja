@@ -433,6 +433,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			}
 		}
 		if (this.textmode && !textmode) {
+			if (Gdx.input instanceof PollingLwjgl3Input input) input.suppressHeldConversionKeys();
 			for (ControlKeys key : ControlKeys.values()) {
 				if (isEditingControl(key) && Gdx.input.isKeyPressed(key.keycode)) {
 					suppressedTextControlKeys[key.keycode] = true;

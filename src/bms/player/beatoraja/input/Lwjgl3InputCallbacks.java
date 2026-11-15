@@ -32,12 +32,15 @@ final class Lwjgl3InputCallbacks {
 
     Lwjgl3InputCallbacks(long handle, PollingLwjgl3Input input, InputDiagnostics diagnostics) {
         this.handle = handle;
+        boolean windowsKeyboard = input.usesWindowsKeyboard();
+        boolean capsLockDiagnostics = WindowsCapsLockDiagnostics.enable(windowsKeyboard);
         key = GLFWKeyCallback.create((window, code, scancode, action, mods) -> {
             int resolved = input.resolveKeyboardKey(code, scancode);
             int mapped = input.getGdxKeyCode(resolved);
-            if (input.isWindowsKeyboardAlias(mapped)) {
+            if (capsLockDiagnostics) WindowsCapsLockDiagnostics.key(code, scancode, mapped, action, mods);
+            int bit = WindowsKeyboardMapping.aliasBit(windowsKeyboard, mapped);
+            if (bit != 0) {
                 // GLFW cannot track/repeat UNKNOWN keys itself. Mirror its known-key bookkeeping.
-                int bit = mapped == WindowsKeyboardMapping.RO ? 1 : 2;
                 boolean fallback = resolved != code;
                 int held = fallback ? fallbackPressed : knownAliasPressed;
                 boolean wasPressed = input.isKeyPressed(mapped);
@@ -113,8 +116,10 @@ final class Lwjgl3InputCallbacks {
 
     private void releaseFallbackKeys() {
         // GLFW's focus-loss releases cover only keys in its own known-key table.
-        if ((fallbackPressed & 1) != 0) key.invoke(handle, GLFW.GLFW_KEY_UNKNOWN, 0x73, GLFW.GLFW_RELEASE, 0);
-        if ((fallbackPressed & 2) != 0) key.invoke(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7d, GLFW.GLFW_RELEASE, 0);
+        for (int remaining = fallbackPressed; remaining != 0; remaining &= remaining - 1) {
+            int scan = WindowsKeyboardMapping.aliasScancode(Integer.lowestOneBit(remaining));
+            key.invoke(handle, GLFW.GLFW_KEY_UNKNOWN, scan, GLFW.GLFW_RELEASE, 0);
+        }
     }
 
     boolean attachWindowCallbacks() {

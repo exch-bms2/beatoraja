@@ -312,9 +312,25 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     }
 
     public InputDiagnostics getDiagnostics() { return diagnostics; }
+    boolean usesWindowsKeyboard() { return windowsKeyboard; }
     int resolveKeyboardKey(int key, int scancode) { return WindowsKeyboardMapping.resolve(windowsKeyboard, key, scancode); }
-    boolean isWindowsKeyboardAlias(int key) {
-        return WindowsKeyboardMapping.isAlias(windowsKeyboard, key);
+
+    @Override public int getGdxKeyCode(int key) {
+        if (windowsKeyboard && key < GLFW.GLFW_KEY_UNKNOWN) return WindowsKeyboardMapping.conversionKey(key);
+        return super.getGdxKeyCode(key);
+    }
+
+    public void suppressHeldConversionKeys() {
+        if (!windowsKeyboard) return;
+        suppressHeldConversionKey(WindowsKeyboardMapping.NONCONVERT);
+        suppressHeldConversionKey(WindowsKeyboardMapping.CONVERT);
+    }
+
+    private void suppressHeldConversionKey(int key) {
+        if (super.isKeyPressed(key)) {
+            suppressedKeys[key] = true;
+            keys.set(key, 0);
+        }
     }
     public String keyName(int key) { return WindowsKeyboardMapping.keyName(windowsKeyboard, key); }
     public FramePacingDiagnostics getFrameDiagnostics() { return frameDiagnostics; }
