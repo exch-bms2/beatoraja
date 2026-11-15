@@ -42,7 +42,8 @@ public enum BMSPlayerRule {
                                 BMSPlayerMode playMode, boolean course, int gauge, ChartParameters chart) {
         if (requested == LunaticRave2 && originalMode == model.getMode() && LunaticRave2.supports(originalMode)
                 && playMode != null && playMode.mode == BMSPlayerMode.Mode.PLAY && !course && chart != null
-                && (gauge == GrooveGauge.NORMAL || gauge == GrooveGauge.EASY || gauge == GrooveGauge.HARD)) {
+                && (gauge == GrooveGauge.NORMAL || gauge == GrooveGauge.EASY || gauge == GrooveGauge.HARD
+                        || gauge == GrooveGauge.HAZARD)) {
             for (var timeline : model.getAllTimeLines()) {
                 for (int lane = 0; lane < originalMode.key; lane++) {
                     var note = timeline.getNote(lane);

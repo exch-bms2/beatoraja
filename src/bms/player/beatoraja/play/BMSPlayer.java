@@ -1109,19 +1109,7 @@ public class BMSPlayer extends MainState {
 				break;
 			case PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR:
 			case PlayerConfig.GAUGEAUTOSHIFT_SELECT_TO_UNDER:
-				final boolean course = gauge.isCourseGauge();
-				final int limit = autoShift == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR
-						? (course ? GrooveGauge.EXHARDCLASS : GrooveGauge.HAZARD)
-						: (course ? Math.min(Math.max(config.getGauge(), GrooveGauge.NORMAL)
-								+ GrooveGauge.CLASS - GrooveGauge.NORMAL, GrooveGauge.EXHARDCLASS) : config.getGauge());
-				int type = course ? GrooveGauge.CLASS : Math.min(gauge.getType(), config.getBottomShiftableGauge());
-				for (int i = type; i <= limit; i++) {
-					var candidate = gauge.getGauge(i);
-					if (candidate.getValue() > 0f && candidate.isQualified()) {
-						type = i;
-					}
-				}
-				gauge.setType(type);
+				gauge.selectAutoShiftGauge(config, autoShift == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR);
 				break;
 			default:
 				break;

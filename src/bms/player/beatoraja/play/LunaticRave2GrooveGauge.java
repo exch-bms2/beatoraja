@@ -2,14 +2,38 @@ package bms.player.beatoraja.play;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 
 /** LunaticRave2 single-song gauge rules. Unsupported gauges retain their standard calculation. */
 public final class LunaticRave2GrooveGauge extends AbstractGrooveGauge {
 
+	private static final int[] AUTO_SHIFT_ORDER = {HAZARD, HARD, NORMAL, EASY};
+
 	LunaticRave2GrooveGauge(BMSModel model, int type, PlayerResource resource) {
 		super(type, createGauges(model, resource));
+	}
+
+	static int mapBeatorajaGauge(int type) {
+		return switch (type) {
+			case ASSISTEASY -> EASY;
+			case EXHARD -> HARD;
+			default -> type;
+		};
+	}
+
+	@Override
+	void selectAutoShiftGauge(PlayerConfig config, boolean bestClear) {
+		int bottom = Math.min(getType(), mapBeatorajaGauge(config.getBottomShiftableGauge()));
+		int limit = bestClear ? HAZARD : mapBeatorajaGauge(config.getGauge());
+		for (int candidate : AUTO_SHIFT_ORDER) {
+			if (candidate <= limit && candidate >= bottom && isAutoShiftCandidate(candidate)) {
+				setType(candidate);
+				return;
+			}
+		}
+		setType(bottom);
 	}
 
 	private static Gauge[] createGauges(BMSModel model, PlayerResource resource) {

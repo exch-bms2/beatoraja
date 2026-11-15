@@ -60,19 +60,20 @@ final class SecondaryJudging {
 
 	static SecondaryJudging create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
 		var config = resource.getPlayerConfig();
+		int startGauge = LunaticRave2GrooveGauge.mapBeatorajaGauge(config.getGauge());
 		if (model.getMode() != Mode.BEAT_7K || BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model,
 				resource.getOriginalMode(), resource.getPlayMode(), resource.getCourseBMSModels() != null,
-				config.getGauge(), resource.getChartRuleParameters()) != BMSPlayerRule.LunaticRave2) {
+				startGauge, resource.getChartRuleParameters()) != BMSPlayerRule.LunaticRave2) {
 			return null;
 		}
-		return new SecondaryJudging(player, model, resource, endUs);
+		return new SecondaryJudging(player, model, resource, endUs, startGauge);
 	}
 
-	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
+	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int startGauge) {
 		config = resource.getPlayerConfig();
 		this.endUs = endUs;
 		var chart = copyChart(model);
-		gauge = new LunaticRave2GrooveGauge(chart, config.getGauge(), resource);
+		gauge = new LunaticRave2GrooveGauge(chart, startGauge, resource);
 		gaugeSamples = new FloatArray[gauge.getGaugeTypeLength()];
 		for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i] = new FloatArray();
 		judge = new LunaticRave2JudgeManager(player, gauge);
