@@ -12,7 +12,8 @@ import bms.model.Mode;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.LunaticRave2ScoreDatabaseAccessor;
+import bms.player.beatoraja.PlayDataAccessor.ScoreAttempt;
+import bms.player.beatoraja.PlayDataAccessor.ScoreOutcome;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.input.JudgeEventQueue;
@@ -23,18 +24,18 @@ final class SecondaryJudging {
 
 	record Result(Outcome outcome, int passed, int exScore, int maxCombo,
 			List<Integer> judgeCounts, int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear) {
-		LunaticRave2ScoreDatabaseAccessor.Attempt toLocalAttempt(BMSModel model) {
+		ScoreAttempt toLocalAttempt(BMSModel model) {
 			int mode = model.containsUndefinedLongNote() ? model.getLntype() : 0;
 			var localOutcome = switch (outcome) {
-				case FINISHED -> LunaticRave2ScoreDatabaseAccessor.Outcome.FINISHED;
-				case FAILED -> LunaticRave2ScoreDatabaseAccessor.Outcome.FAILED;
-				case INTERRUPTED -> LunaticRave2ScoreDatabaseAccessor.Outcome.INTERRUPTED;
-				case INPUT_LOST -> LunaticRave2ScoreDatabaseAccessor.Outcome.INPUT_LOST;
-				case ERROR -> LunaticRave2ScoreDatabaseAccessor.Outcome.ERROR;
+				case FINISHED -> ScoreOutcome.FINISHED;
+				case FAILED -> ScoreOutcome.FAILED;
+				case INTERRUPTED -> ScoreOutcome.INTERRUPTED;
+				case INPUT_LOST -> ScoreOutcome.INPUT_LOST;
+				case ERROR -> ScoreOutcome.ERROR;
 				case RUNNING -> throw new IllegalStateException("Cannot save a running judgment");
 			};
-			return new LunaticRave2ScoreDatabaseAccessor.Attempt(model.getSHA256(), mode, localOutcome,
-					notes, passed, exScore, maxCombo, minbp, clear, gaugeType, gaugeValue, judgeCounts);
+			return new ScoreAttempt(model.getSHA256(), mode, localOutcome,
+					notes, passed, maxCombo, minbp, clear, gaugeType, gaugeValue, judgeCounts);
 		}
 	}
 

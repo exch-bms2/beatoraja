@@ -24,6 +24,7 @@ import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.ScoreData.SongTrophy;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
+import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.Json;
@@ -38,8 +39,6 @@ public final class PlayDataAccessor {
 
 	// TODO スコアハッシュを付与するかどうかの判定(前のスコアハッシュの正当性を確認できなかった時)
 	// TODO BATTLEは別ハッシュで登録したい}			
-
-	private final String hashkey;
 
 	/**
 	 * プレイヤー名
@@ -61,7 +60,7 @@ public final class PlayDataAccessor {
 	 * スコアデータログアクセサ
 	 */
 	private ScoreDataLogDatabaseAccessor scoredatalogdb;
-	private LunaticRave2ScoreDatabaseAccessor lunaticRave2Scores;
+	private RuleScoreStore lunaticRave2Scores;
 
 
 	private static final String[] replay = { "", "C", "H" };
@@ -80,33 +79,60 @@ public final class PlayDataAccessor {
 			e.printStackTrace();
 		}
 
-		hashkey = "";
 	}
 
-	private synchronized LunaticRave2ScoreDatabaseAccessor getLunaticRave2Scores(boolean create) throws SQLException {
+	public enum ScoreOutcome { FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
+
+	/** One rule's actual judgments, not an aggregate personal best. */
+	public record ScoreAttempt(String sha256, int mode, ScoreOutcome outcome, int notes, int passed,
+			int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts) {
+		public ScoreAttempt {
+			Objects.requireNonNull(outcome);
+			Objects.requireNonNull(clear);
+			judgeCounts = List.copyOf(judgeCounts);
+			if (sha256 == null || sha256.length() != 64 || mode < 0 || mode > 2 || judgeCounts.size() != 12) {
+				throw new IllegalArgumentException("Invalid score identity or judgment counts");
+			}
+		}
+
+		public int exscore() {
+			return (judgeCounts.get(0) + judgeCounts.get(1)) * 2 + judgeCounts.get(2) + judgeCounts.get(3);
+		}
+
+		boolean canUpdateBest() {
+			return outcome == ScoreOutcome.FINISHED || outcome == ScoreOutcome.FAILED;
+		}
+	}
+
+	private synchronized RuleScoreStore getLunaticRave2Scores(boolean create) throws SQLException, ClassNotFoundException {
 		if (lunaticRave2Scores == null) {
-			var path = Path.of(playerpath, player, LunaticRave2ScoreDatabaseAccessor.FILE_NAME);
-			if (!create && !Files.exists(path)) return null;
-			lunaticRave2Scores = new LunaticRave2ScoreDatabaseAccessor(path);
+			var profile = Path.of(playerpath, player);
+			var legacy = profile.resolve("score-lunaticrave2.db");
+			if (!create && !Files.exists(legacy) && !Files.exists(profile.resolve("score_lr2.db"))) return null;
+			var store = new RuleScoreStore(profile, "_lr2");
+			store.importLegacyLr2(legacy);
+			lunaticRave2Scores = store;
 		}
 		return lunaticRave2Scores;
 	}
 
 	/** Read a local LR2 best without falling back to a beatoraja score. Mode is the effective LN key. */
-	public LunaticRave2ScoreDatabaseAccessor.Best readLunaticRave2Best(String sha256, int mode) {
+	public ScoreData readLunaticRave2Best(String sha256, int mode) {
 		try {
 			var scores = getLunaticRave2Scores(false);
-			return scores == null ? null : scores.readBest(sha256, mode);
-		} catch (SQLException e) {
+			var best = scores == null ? null : scores.readBest(sha256, mode);
+			if (best != null) best.setRule(BMSPlayerRule.LunaticRave2);
+			return best;
+		} catch (SQLException | ClassNotFoundException e) {
 			Logger.getGlobal().log(Level.WARNING, "Could not read the local LunaticRave2 score", e);
 			return null;
 		}
 	}
 
-	public void writeLunaticRave2Attempt(LunaticRave2ScoreDatabaseAccessor.Attempt attempt, boolean scoreAllowed) {
+	public void writeLunaticRave2Attempt(ScoreAttempt attempt, boolean scoreAllowed) {
 		try {
 			getLunaticRave2Scores(true).write(attempt, scoreAllowed);
-		} catch (SQLException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 			Logger.getGlobal().log(Level.WARNING, "Could not save the local LunaticRave2 score", e);
 		}
 	}
@@ -433,11 +459,11 @@ public final class PlayDataAccessor {
 
 	}
 
-	private String getScoreHash(ScoreData score) {
+	static String getScoreHash(ScoreData score) {
 		byte[] cipher_byte;
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update((hashkey + score.getSha256() + "," + score.getExscore() + "," + score.getEpg() + ","
+			md.update((score.getSha256() + "," + score.getExscore() + "," + score.getEpg() + ","
 					+ score.getLpg() + "," + score.getEgr() + "," + score.getLgr() + "," + score.getEgd() + ","
 					+ score.getLgd() + "," + score.getEbd() + "," + score.getLbd() + "," + score.getEpr() + ","
 					+ score.getLpr() + "," + score.getEms() + "," + score.getLms() + "," + score.getClear() + ","
@@ -456,7 +482,7 @@ public final class PlayDataAccessor {
 		return null;
 	}
 
-	private ScoreLog updateScore(ScoreData score, ScoreData newscore, String hash, boolean updateScore) {
+	static ScoreLog updateScore(ScoreData score, ScoreData newscore, String hash, boolean updateScore) {
 		ScoreLog log = new ScoreLog();
 		
 		log.setOldclear(score.getClear());

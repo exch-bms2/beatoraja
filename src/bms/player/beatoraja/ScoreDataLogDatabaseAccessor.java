@@ -93,6 +93,21 @@ public class ScoreDataLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		}
 	}
 
+	void createAttemptColumns() throws SQLException {
+		validate(qr, new Table(TABLE_NAME,
+				new Column("outcome", "TEXT"), new Column("best_eligible", "INTEGER"),
+				new Column("passed", "INTEGER"), new Column("gauge", "INTEGER"), new Column("gauge_value", "REAL")));
+	}
+
+	void setScoreDataLog(Connection connection, ScoreData score, PlayDataAccessor.ScoreAttempt attempt,
+			boolean eligible) throws SQLException {
+		insert(qr, connection, "history", TABLE_NAME, score);
+		qr.update(connection, """
+				UPDATE history.scoredatalog SET outcome = ?, best_eligible = ?, passed = ?, gauge = ?, gauge_value = ?
+				WHERE rowid = last_insert_rowid()
+				""", attempt.outcome().name(), eligible ? 1 : 0, attempt.passed(), attempt.gauge(), attempt.gaugeValue());
+	}
+
 	private void migrateLegacyPrimaryKey() throws SQLException {
 		if (!existsTable(TABLE_NAME)) {
 			return;

@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.sqlite.SQLiteConfig;
@@ -223,12 +224,21 @@ public class ScoreDatabaseAccessor extends SQLiteDatabaseAccessor {
 		try (Connection con = qr.getDataSource().getConnection()) {
 			con.setAutoCommit(false);
 			for (ScoreData score : scores) {
-				this.insert(qr, con, "score", score);
+				setScoreData(con, score);
 			}
 			con.commit();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア更新時の例外:" + e.getMessage());
 		}
+	}
+
+	void setScoreData(Connection connection, ScoreData score) throws SQLException {
+		insert(qr, connection, "score", score);
+	}
+
+	ScoreData getScoreData(Connection connection, String hash, int mode) throws SQLException {
+		return qr.query(connection, "SELECT * FROM main.score WHERE sha256 = ? AND mode = ?",
+				new BeanHandler<>(ScoreData.class), hash, mode);
 	}
 
 	public void setScoreData(Map<String, Map<String, Object>> map) {
