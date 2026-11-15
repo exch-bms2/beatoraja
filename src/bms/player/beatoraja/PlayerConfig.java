@@ -203,6 +203,7 @@ public final class PlayerConfig {
 	 * Guide SE
 	 */
 	private boolean isGuideSE = false;
+	private boolean guideSEAtLNStart;
 
 	/**
 	 * Window Hold
@@ -893,6 +894,14 @@ public final class PlayerConfig {
 
 	public void setGuideSE(boolean isGuideSE) {
 		this.isGuideSE = isGuideSE;
+	}
+
+	public boolean isGuideSEAtLNStart() {
+		return guideSEAtLNStart;
+	}
+
+	public void setGuideSEAtLNStart(boolean guideSEAtLNStart) {
+		this.guideSEAtLNStart = guideSEAtLNStart;
 	}
 
 	public boolean isWindowHold() {

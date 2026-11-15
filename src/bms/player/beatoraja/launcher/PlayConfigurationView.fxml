@@ -300,7 +300,11 @@
                                          <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                          <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                         <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                         <HBox alignment="CENTER_LEFT" spacing="8.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                             <Label text="LN GUIDE SE" />
+                                             <ComboBox fx:id="lnGuideSETiming" accessibleText="LN GUIDE SE" />
+                                         </HBox>
+                                         <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                          <Label text="%EXTRA_NOTE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                          <NumericSpinner fx:id="extranotedepth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                              <valueFactory>
