@@ -6,7 +6,7 @@ import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.MusicResult;
 
-import static bms.player.beatoraja.play.GrooveGauge.*;
+import static bms.player.beatoraja.play.AbstractGrooveGauge.*;
 
 import java.util.Optional;
 
@@ -96,7 +96,7 @@ public final class SkinGauge extends SkinObject {
 	@Override
 	public void prepare(long time, MainState state) {
 		super.prepare(time, state);
-		GrooveGauge gauge = null;
+		AbstractGrooveGauge gauge = null;
 		if(state instanceof BMSPlayer player) {
 			gauge = player.getGauge();
 		} else if(state instanceof AbstractResult) {

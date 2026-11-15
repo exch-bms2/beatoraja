@@ -678,7 +678,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createGrooveGaugeAfterDotProperty() {
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
-					final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
+					final AbstractGrooveGauge gauge = ((BMSPlayer) state).getGauge();
 					return gauge.getValue() > 0 && gauge.getValue() < 0.1 ? 1 : ((int) (gauge.getValue() * 10)) % 10;
 				}
 				if (state instanceof AbstractResult) {
@@ -915,7 +915,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createJudgeduration(int player) {
 			return (state) -> {
 				if (state instanceof BMSPlayer) {
-					final JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+					final AbstractJudgeManager judge = ((BMSPlayer) state).getJudgeManager();
 					return (int) judge.getRecentJudgeTiming(player);
 				}
 				return 0;

@@ -678,7 +678,7 @@ public class LaneRenderer {
 						}
 					} else if (note instanceof MineNote) {
 						// draw mine note
-						if (tl.getMicroTime() >= microtime) {
+						if (note.getState() == 0 && tl.getMicroTime() >= microtime) {
 							sprite.draw(lanes[lane].mineImage, dstx, dsty, dstw, dsth);
 						}
 					}
@@ -801,7 +801,7 @@ public class LaneRenderer {
 		if ((model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 			// HCN
-			final JudgeManager judge = main.getJudgeManager();
+			final AbstractJudgeManager judge = main.getJudgeManager();
 			sprite.draw(
 					longImage[judge.getProcessingLongNote(lane) == ln.getPair() ? 6
 							: (judge.getPassingLongNote(lane) == ln && ln.getState() != 0

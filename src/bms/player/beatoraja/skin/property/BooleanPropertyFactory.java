@@ -8,8 +8,8 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.ScoreData.SongTrophy;
 import bms.player.beatoraja.ir.RankingData;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.play.JudgeManager;
-import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.play.AbstractJudgeManager;
+import bms.player.beatoraja.play.AbstractGrooveGauge.Gauge;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -234,7 +234,7 @@ public class BooleanPropertyFactory {
 	private static DrawProperty createNowJudge(final int player, final int type) {
 		return new DrawProperty(DrawConditionProperty.TYPE_NO_STATIC, (state) -> {
 			if (state instanceof BMSPlayer) {
-				JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+				AbstractJudgeManager judge = ((BMSPlayer) state).getJudgeManager();
 				if (type == 0) {
 					return judge.getNowJudge(player) == 1;
 				} else if (type == 1) {

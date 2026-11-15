@@ -19,6 +19,7 @@ import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.MainState.MainStateType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
+import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
@@ -80,7 +81,8 @@ public class MusicResult extends AbstractResult {
 	void prepareLevelReview() {
 		levelReviewTarget = null;
 		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
-				|| resource.getCourseBMSModels() != null || resource.getScoreData() == null) {
+				|| resource.getCourseBMSModels() != null || resource.getScoreData() == null
+				|| resource.getScoreData().getRule() == BMSPlayerRule.LunaticRave2) {
 			return;
 		}
 		var song = resource.getSongdata();
@@ -484,10 +486,11 @@ public class MusicResult extends AbstractResult {
 			newscore = cscore;
 		}
 
-		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
+		if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY
+				&& newscore.getRule() != BMSPlayerRule.LunaticRave2) {
 			main.getPlayDataAccessor().writeScoreData(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
-		} else {
+		} else if (resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY) {
 			Logger.getGlobal().info("プレイモードが" + resource.getPlayMode().mode.name() + "のため、スコア登録はされません");
 		}
 

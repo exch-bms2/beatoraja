@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -59,6 +61,7 @@ public final class PlayDataAccessor {
 	 * スコアデータログアクセサ
 	 */
 	private ScoreDataLogDatabaseAccessor scoredatalogdb;
+	private LunaticRave2ScoreDatabaseAccessor lunaticRave2Scores;
 
 
 	private static final String[] replay = { "", "C", "H" };
@@ -78,6 +81,34 @@ public final class PlayDataAccessor {
 		}
 
 		hashkey = "";
+	}
+
+	private synchronized LunaticRave2ScoreDatabaseAccessor getLunaticRave2Scores(boolean create) throws SQLException {
+		if (lunaticRave2Scores == null) {
+			var path = Path.of(playerpath, player, LunaticRave2ScoreDatabaseAccessor.FILE_NAME);
+			if (!create && !Files.exists(path)) return null;
+			lunaticRave2Scores = new LunaticRave2ScoreDatabaseAccessor(path);
+		}
+		return lunaticRave2Scores;
+	}
+
+	/** Read a local LR2 best without falling back to a beatoraja score. Mode is the effective LN key. */
+	public LunaticRave2ScoreDatabaseAccessor.Best readLunaticRave2Best(String sha256, int mode) {
+		try {
+			var scores = getLunaticRave2Scores(false);
+			return scores == null ? null : scores.readBest(sha256, mode);
+		} catch (SQLException e) {
+			Logger.getGlobal().log(Level.WARNING, "Could not read the local LunaticRave2 score", e);
+			return null;
+		}
+	}
+
+	public void writeLunaticRave2Attempt(LunaticRave2ScoreDatabaseAccessor.Attempt attempt, boolean scoreAllowed) {
+		try {
+			getLunaticRave2Scores(true).write(attempt, scoreAllowed);
+		} catch (SQLException e) {
+			Logger.getGlobal().log(Level.WARNING, "Could not save the local LunaticRave2 score", e);
+		}
 	}
 
 	public PlayerData readPlayerData() {

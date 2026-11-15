@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.*;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.play.AbstractGrooveGauge.Gauge;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
 

@@ -103,7 +103,7 @@ public final class ControlInputProcessorTest {
             var model = new BMSModel(); model.setMode(mode);
             set(player, MainState.class, "main", main); set(player, MainState.class, "resource", resource);
             set(player, MainState.class, "timer", new TimerManager()); set(player, BMSPlayer.class, "model", model);
-            var judge = allocate(JudgeManager.class); set(judge, JudgeManager.class, "score", new ScoreData());
+            var judge = allocate(JudgeManager.class); set(judge, AbstractJudgeManager.class, "score", new ScoreData());
             set(player, BMSPlayer.class, "players", new BMSPlayer.PlayerProperty[]{
                     new BMSPlayer.PlayerProperty(renderer, judge, null, null)});
             controls = new ControlInputProcessor(player, BMSPlayerMode.PLAY);
