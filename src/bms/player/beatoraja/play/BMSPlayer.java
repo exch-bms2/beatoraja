@@ -392,7 +392,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void create() {
-		resource.setAlternateResultScore(null);
+		resource.setAlternateResultScores(List.of());
 		final BMSPlayerMode autoplay = resource.getPlayMode();
 		final PlayerConfig config = resource.getPlayerConfig();
 		laneProperty = new LaneProperty(model.getMode());
@@ -442,8 +442,8 @@ public class BMSPlayer extends MainState {
 		players[0] = new PlayerProperty(lanerender, judge, gauge, gaugelog);
 
 		judge.init(model, resource);
-		if (judge instanceof JudgeManager && Boolean.getBoolean("beatoraja.lr2Shadow")) {
-			keyinput.setSecondaryJudging(SecondaryJudging.create(this, model, resource, playtime * 1_000L));
+		if (judge instanceof JudgeManager) {
+			keyinput.setSecondaryJudging(SecondaryJudgingGroup.create(this, model, resource, playtime * 1_000L));
 		}
 
 		rhythm = new RhythmTimerProcessor(model,
@@ -1071,24 +1071,30 @@ public class BMSPlayer extends MainState {
 
 	private void stopJudging() {
 		if (keyinput == null) return;
-		var secondary = keyinput.stopJudge(state == STATE_FINISHED);
-		if (secondary != null) {
-			Logger.getGlobal().info("LunaticRave2 secondary result: " + secondary);
+		var results = keyinput.stopJudge(state == STATE_FINISHED);
+		if (results.isEmpty()) return;
+		var display = new ArrayList<PlayerResource.AlternateResultScore>(results.size());
+		for (var result : results) {
+			var rule = result.rule();
+			var secondary = result.judgment();
+			Logger.getGlobal().info(rule.displayName() + " secondary result: " + secondary.outcome());
 			try {
 				var data = main.getPlayDataAccessor();
 				var attempt = secondary.toLocalAttempt(model);
-				if (secondary.outcome() != SecondaryJudging.Outcome.ERROR
-						&& secondary.outcome() != SecondaryJudging.Outcome.INPUT_LOST) {
-					var previous = data.readLunaticRave2Best(attempt.sha256(), attempt.mode());
+				if (secondary.outcome() != SecondaryJudgingGroup.Outcome.ERROR
+						&& secondary.outcome() != SecondaryJudgingGroup.Outcome.INPUT_LOST) {
+					var previous = data.readRuleBest(rule, attempt.sha256(), attempt.mode());
 					var score = attempt.toScoreData(model.getMode());
-					score.setRule(BMSPlayerRule.LunaticRave2);
-					resource.setAlternateResultScore(new PlayerResource.AlternateResultScore(score, previous, secondary.gaugeHistory()));
+					score.setRule(rule.scoreRule());
+					display.add(new PlayerResource.AlternateResultScore(rule.id(), rule.displayName(),
+							score, previous, secondary.gaugeHistory()));
 				}
-				data.writeLunaticRave2Attempt(attempt, resource.isUpdateScore());
+				data.writeRuleAttempt(rule, attempt, resource.isUpdateScore());
 			} catch (IllegalArgumentException e) {
-				Logger.getGlobal().warning("Could not save the local LunaticRave2 score: " + e.getMessage());
+				Logger.getGlobal().warning("Could not save the local " + rule.displayName() + " score: " + e.getMessage());
 			}
 		}
+		resource.setAlternateResultScores(display);
 	}
 
 	static boolean shouldFinishSong(int state, AbstractJudgeManager.PlayEnd judgeEnd, long playMs, long endMs) {

@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.select.DifficultyFilter;
 import bms.player.beatoraja.select.ModeFilter;
@@ -55,6 +56,7 @@ public final class PlayerConfig {
 	static final Path configpath = Paths.get("config_player.json");	
 
 	private String id;
+	private String[] secondaryScoringRuleIds = new String[0];
 	// Keep the existing JSON field and unmodified key codes for older profiles.
 	private HashMap<String, Integer> selectShortcuts = new HashMap<>();
     /**
@@ -1030,7 +1032,21 @@ public final class PlayerConfig {
 		}
 	}
 
+	public String[] getSecondaryScoringRuleIds() {
+		return secondaryScoringRuleIds.clone();
+	}
+
+	public void setSecondaryScoringRuleIds(String[] ids) {
+		var rules = new LinkedHashSet<String>();
+		if (ids != null) for (String id : ids) {
+			var rule = SecondaryScoringRule.byId(id);
+			if (rule != null) rules.add(rule.id());
+		}
+		secondaryScoringRuleIds = rules.toArray(String[]::new);
+	}
+
 	public void validate() {
+		setSecondaryScoringRuleIds(secondaryScoringRuleIds);
 		validateShortcuts();
 		if(skin == null) {
 			skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];

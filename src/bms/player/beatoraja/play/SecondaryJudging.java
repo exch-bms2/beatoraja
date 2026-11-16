@@ -14,35 +14,16 @@ import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.PlayDataAccessor.ScoreAttempt;
-import bms.player.beatoraja.PlayDataAccessor.ScoreOutcome;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.GaugeHistory;
 import bms.player.beatoraja.input.JudgeEventQueue;
+import bms.player.beatoraja.play.SecondaryJudgingGroup.Judgment;
+import bms.player.beatoraja.play.SecondaryJudgingGroup.Outcome;
 
 /** In-memory, silent LR2 run. The judge thread owns it until it joins. */
-final class SecondaryJudging {
+final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	private static final long GAUGE_INTERVAL_US = 500_000;
-	enum Outcome { RUNNING, FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
-
-	record Result(Outcome outcome, int passed, int exScore, int maxCombo,
-			List<Integer> judgeCounts, int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear,
-			GaugeHistory gaugeHistory) {
-		ScoreAttempt toLocalAttempt(BMSModel model) {
-			int mode = model.containsUndefinedLongNote() ? model.getLntype() : 0;
-			var localOutcome = switch (outcome) {
-				case FINISHED -> ScoreOutcome.FINISHED;
-				case FAILED -> ScoreOutcome.FAILED;
-				case INTERRUPTED -> ScoreOutcome.INTERRUPTED;
-				case INPUT_LOST -> ScoreOutcome.INPUT_LOST;
-				case ERROR -> ScoreOutcome.ERROR;
-				case RUNNING -> throw new IllegalStateException("Cannot save a running judgment");
-			};
-			return new ScoreAttempt(model.getSHA256(), mode, localOutcome,
-					notes, passed, maxCombo, minbp, clear, gaugeType, gaugeValue, judgeCounts);
-		}
-	}
 
 	private final LunaticRave2JudgeManager judge;
 	private final AbstractGrooveGauge gauge;
@@ -83,7 +64,7 @@ final class SecondaryJudging {
 		legacyPressed = new boolean[keys];
 	}
 
-	boolean isRunning() {
+	public boolean isRunning() {
 		return outcome == Outcome.RUNNING;
 	}
 
@@ -91,13 +72,13 @@ final class SecondaryJudging {
 		return gauge;
 	}
 
-	void addLegacyEvent(int key, long time, boolean pressed) {
+	public void addLegacyEvent(int key, long time, boolean pressed) {
 		legacyKeys[legacySize] = key;
 		legacyTimes[legacySize] = time;
 		legacyPressed[legacySize++] = pressed;
 	}
 
-	void advance(long nowUs, JudgeEventQueue.Batch batch, boolean overflow) {
+	public void advance(long nowUs, JudgeEventQueue.Batch batch, boolean overflow) {
 		try {
 			if (overflow) {
 				outcome = Outcome.INPUT_LOST;
@@ -122,11 +103,11 @@ final class SecondaryJudging {
 		}
 	}
 
-	Result finish() {
+	Judgment finish() {
 		return finish(false);
 	}
 
-	Result finish(boolean primaryFinished) {
+	public Judgment finish(boolean primaryFinished) {
 		var score = judge.getScoreData();
 		int passed = judge.getPastNotes();
 		if (isRunning()) {
@@ -142,7 +123,7 @@ final class SecondaryJudging {
 		}
 		int minbp = judge.getJudgeCount(3) + judge.getJudgeCount(4) + judge.getJudgeCount(5)
 				+ score.getNotes() - passed;
-		return new Result(outcome, passed, score.getExscore(), score.getCombo(),
+		return new Judgment(outcome, passed, score.getExscore(), score.getCombo(),
 				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(),
 				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs));
 	}

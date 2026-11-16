@@ -26,6 +26,7 @@ import bms.player.beatoraja.ScoreData.SongTrophy;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
 import bms.player.beatoraja.play.BMSPlayerRule;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.Json;
@@ -61,7 +62,7 @@ public final class PlayDataAccessor {
 	 * スコアデータログアクセサ
 	 */
 	private ScoreDataLogDatabaseAccessor scoredatalogdb;
-	private RuleScoreStore lunaticRave2Scores;
+	private final Map<SecondaryScoringRule, RuleScoreStore> ruleScores = new EnumMap<>(SecondaryScoringRule.class);
 
 
 	private static final String[] replay = { "", "C", "H" };
@@ -122,36 +123,45 @@ public final class PlayDataAccessor {
 		}
 	}
 
-	private synchronized RuleScoreStore getLunaticRave2Scores(boolean create) throws SQLException, ClassNotFoundException {
-		if (lunaticRave2Scores == null) {
-			var profile = Path.of(playerpath, player);
-			var legacy = profile.resolve("score-lunaticrave2.db");
-			if (!create && !Files.exists(legacy) && !Files.exists(profile.resolve("score_lr2.db"))) return null;
-			var store = new RuleScoreStore(profile, "_lr2");
-			store.importLegacyLr2(legacy);
-			lunaticRave2Scores = store;
-		}
-		return lunaticRave2Scores;
+	private synchronized RuleScoreStore getRuleScores(SecondaryScoringRule rule, boolean create) throws SQLException, ClassNotFoundException {
+		var store = ruleScores.get(rule);
+		if (store != null) return store;
+		var profile = Path.of(playerpath, player);
+		var legacy = rule == SecondaryScoringRule.LR2 ? profile.resolve("score-lunaticrave2.db") : null;
+		String suffix = rule.databaseSuffix();
+		if (!create && (legacy == null || !Files.exists(legacy)) && !Files.exists(profile.resolve("score" + suffix + ".db"))) return null;
+		store = new RuleScoreStore(profile, suffix);
+		if (legacy != null) store.importLegacyLr2(legacy);
+		ruleScores.put(rule, store);
+		return store;
 	}
 
 	/** Read a local LR2 best without falling back to a beatoraja score. Mode is the effective LN key. */
 	public ScoreData readLunaticRave2Best(String sha256, int mode) {
+		return readRuleBest(SecondaryScoringRule.LR2, sha256, mode);
+	}
+
+	public ScoreData readRuleBest(SecondaryScoringRule rule, String sha256, int mode) {
 		try {
-			var scores = getLunaticRave2Scores(false);
+			var scores = getRuleScores(rule, false);
 			var best = scores == null ? null : scores.readBest(sha256, mode);
-			if (best != null) best.setRule(BMSPlayerRule.LunaticRave2);
+			if (best != null) best.setRule(rule.scoreRule());
 			return best;
 		} catch (SQLException | ClassNotFoundException e) {
-			Logger.getGlobal().log(Level.WARNING, "Could not read the local LunaticRave2 score", e);
+			Logger.getGlobal().log(Level.WARNING, "Could not read local score for " + rule.id(), e);
 			return null;
 		}
 	}
 
 	public void writeLunaticRave2Attempt(ScoreAttempt attempt, boolean scoreAllowed) {
+		writeRuleAttempt(SecondaryScoringRule.LR2, attempt, scoreAllowed);
+	}
+
+	public void writeRuleAttempt(SecondaryScoringRule rule, ScoreAttempt attempt, boolean scoreAllowed) {
 		try {
-			getLunaticRave2Scores(true).write(attempt, scoreAllowed);
+			getRuleScores(rule, true).write(attempt, scoreAllowed);
 		} catch (SQLException | ClassNotFoundException e) {
-			Logger.getGlobal().log(Level.WARNING, "Could not save the local LunaticRave2 score", e);
+			Logger.getGlobal().log(Level.WARNING, "Could not save local score for " + rule.id(), e);
 		}
 	}
 

@@ -17,6 +17,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 
 /** Real FXML injection and per-mode commits, run on the launcher smoke test's JavaFX thread. */
 public final class PlayConfigurationViewTest {
@@ -25,6 +27,7 @@ public final class PlayConfigurationViewTest {
             var view = new PlayConfigurationView() {
                 @Override public void initialize(URL location, ResourceBundle resources) {
                     // This fixture only edits play settings, without loading players or checking versions online.
+                    initSecondaryScoringRules(resources);
                 }
             };
             var loader = new FXMLLoader(PlayConfigurationView.class.getResource("PlayConfigurationView.fxml"),
@@ -46,6 +49,7 @@ public final class PlayConfigurationViewTest {
             var field = PlayConfigurationView.class.getDeclaredField("player");
             field.setAccessible(true); field.set(view, player);
             verifyControllerBackendSwitch(view, loader, player);
+            verifySecondaryScoring(view, loader, player, locale);
             var option = (CheckBox) loader.getNamespace().get("analogScratchHispeed");
             if (option == null || option.getText().contains("%") || option.getTooltip().getText().isBlank())
                 throw new AssertionError("Localized checkbox and tooltip missing: " + locale);
@@ -74,6 +78,33 @@ public final class PlayConfigurationViewTest {
                 throw new AssertionError("Explicitly selecting existing cover controls must persist");
         }
         System.out.println("PlayConfigurationViewTest passed (real FXML, English/Japanese, mode-specific checkbox save/restore)");
+    }
+
+    private static void verifySecondaryScoring(PlayConfigurationView view, FXMLLoader loader,
+                                               PlayerConfig player, Locale locale) {
+        var group = (VBox) loader.getNamespace().get("secondaryScoringRules");
+        var section = (VBox) group.getParent();
+        var tabContent = (VBox) section.getParent();
+        var mode = (ComboBox<?>) loader.getNamespace().get("playconfig");
+        var bundle = loader.getResources();
+        if (tabContent.getChildren().indexOf(section) >= tabContent.getChildren().indexOf(mode.getParent())
+                || !((Label) section.getChildren().get(0)).getText().equals(bundle.getString("SECONDARY_SCORING"))
+                || !((Label) section.getChildren().get(1)).getText().contains("beatoraja")
+                || group.getChildren().size() != 1)
+            throw new AssertionError("Scoring settings must be profile-wide, with a fixed primary and one secondary rule: " + locale);
+        var lr2 = (CheckBox) group.getChildren().get(0);
+        view.updateSecondaryScoring(player);
+        if (lr2.isSelected() || !lr2.getId().equals("secondaryScoring-lr2")) throw new AssertionError("LR2 is opt-in");
+        lr2.setSelected(true);
+        view.commitSecondaryScoring(player);
+        if (!List.of(player.getSecondaryScoringRuleIds()).equals(List.of("lr2"))) throw new AssertionError("Store stable ID");
+        view.updateSecondaryScoring(new PlayerConfig());
+        if (lr2.isSelected()) throw new AssertionError("Switching profiles must not inherit a previous selection");
+        view.updateSecondaryScoring(player);
+        if (!lr2.isSelected()) throw new AssertionError("Restore the player's selection");
+        lr2.setSelected(false);
+        view.commitSecondaryScoring(player);
+        if (player.getSecondaryScoringRuleIds().length != 0) throw new AssertionError("Unchecking turns off secondary scoring");
     }
 
     private static void verifyControllerBackendSwitch(PlayConfigurationView view, FXMLLoader loader,

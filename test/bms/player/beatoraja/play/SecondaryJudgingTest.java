@@ -8,12 +8,15 @@ import java.util.Objects;
 import bms.model.*;
 import bms.player.beatoraja.ClearType;
 import bms.player.beatoraja.PlayDataAccessor.ScoreOutcome;
+import bms.player.beatoraja.BMSPlayerMode;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.play.KeyboardJudgeCompatibilityTest.Fixture;
+import com.badlogic.gdx.utils.Json;
 
 import static bms.player.beatoraja.PlayerConfig.*;
 import static bms.player.beatoraja.play.AbstractGrooveGauge.*;
 import static bms.player.beatoraja.play.BMSPlayerRule.*;
-import static bms.player.beatoraja.play.SecondaryJudging.Outcome.*;
+import static bms.player.beatoraja.play.SecondaryJudgingGroup.Outcome.*;
 
 public final class SecondaryJudgingTest {
     private static final long END = 6_500_000;
@@ -29,6 +32,8 @@ public final class SecondaryJudgingTest {
         checkFullComboBelowClearBorder();
         checkStartGaugeMapping();
         checkAutoShiftOrder();
+        checkConfiguration();
+        checkMultipleRuns();
         System.out.println("SecondaryJudgingTest passed (primary parity, LR2 parity, FIFO/legacy, LN, mine, closure and auto shift)");
     }
 
@@ -55,7 +60,7 @@ public final class SecondaryJudgingTest {
     }
 
     private static void checkFullComboBelowClearBorder() throws Exception {
-        for (var expected : new SecondaryJudging.Outcome[]{FINISHED, INTERRUPTED, FAILED}) {
+        for (var expected : new SecondaryJudgingGroup.Outcome[]{FINISHED, INTERRUPTED, FAILED}) {
             var primary = fixture(Beatoraja_7, true, GAUGEAUTOSHIFT_NONE, 100);
             var secondary = makeSecondary(primary);
             playThroughFinalNote(primary, secondary);
@@ -192,7 +197,7 @@ public final class SecondaryJudgingTest {
         checkGaugeHistory(result, 801_000);
     }
 
-    private static void checkGaugeHistory(SecondaryJudging.Result result, long cutoff) {
+    private static void checkGaugeHistory(SecondaryJudgingGroup.Judgment result, long cutoff) {
         var history = result.gaugeHistory();
         check(history.durationUs() == END && history.timesUs().first() == 0 && history.timesUs().peek() == cutoff,
                 "history preserves the full time axis and stops at the exact judgment cutoff");
@@ -248,8 +253,53 @@ public final class SecondaryJudgingTest {
     }
 
     private static void drive(Fixture f, SecondaryJudging secondary, Tick tick) {
+        driveGroup(f, secondary == null ? null : group(secondary), tick);
+    }
+
+    private static void driveGroup(Fixture f, SecondaryJudgingGroup group, Tick tick) {
         if (tick.press != null) f.input.setKeyState(KEY, tick.press, tick.time);
-        f.judge.update(tick.time, secondary);
+        f.judge.update(tick.time, group);
+    }
+
+    static SecondaryJudgingGroup group(SecondaryJudging run) {
+        return new SecondaryJudgingGroup(List.of(new SecondaryJudgingGroup.Entry(SecondaryScoringRule.LR2, run)));
+    }
+
+    private static void checkConfiguration() throws Exception {
+        var f = fixture(Beatoraja_7, true, GAUGEAUTOSHIFT_NONE, 100);
+        check(SecondaryJudgingGroup.create(f.judge.main, f.model, f.resource, END) == null, "Opt-in is off by default");
+        f.playerConfig.setSecondaryScoringRuleIds(new String[]{null, "lr2", "unknown", "lr2"});
+        var json = new Json();
+        var saved = json.fromJson(PlayerConfig.class, json.toJson(f.playerConfig));
+        saved.validate();
+        check(Arrays.equals(saved.getSecondaryScoringRuleIds(), new String[]{"lr2"}), "Stable IDs survive reload");
+        var ids = saved.getSecondaryScoringRuleIds();
+        ids[0] = "invalid";
+        check(saved.getSecondaryScoringRuleIds()[0].equals("lr2"), "Callers cannot modify the saved array");
+        check(SecondaryJudgingGroup.create(f.judge.main, f.model, f.resource, END) != null, "Selected LR2 runs for eligible songs");
+        f.resource.setPlayMode(BMSPlayerMode.PRACTICE);
+        check(SecondaryJudgingGroup.create(f.judge.main, f.model, f.resource, END) == null, "Practice remains excluded");
+        f.resource.setPlayMode(BMSPlayerMode.PLAY);
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(f.resource, bms.player.beatoraja.PlayerResource.class,
+                "course", new BMSModel[]{f.model});
+        check(SecondaryJudgingGroup.create(f.judge.main, f.model, f.resource, END) == null, "Course remains excluded");
+    }
+
+    private static void checkMultipleRuns() throws Exception {
+        for (boolean queued : new boolean[]{true, false}) {
+            var f = fixture(Beatoraja_7, queued, GAUGEAUTOSHIFT_NONE, 100);
+            var closes = makeSecondary(f, 11);
+            var completes = makeSecondary(f, 100);
+            var group = new SecondaryJudgingGroup(List.of(
+                    new SecondaryJudgingGroup.Entry(SecondaryScoringRule.LR2, closes),
+                    new SecondaryJudgingGroup.Entry(SecondaryScoringRule.LR2, completes)));
+            for (var tick : ticks()) driveGroup(f, group, tick);
+            var results = group.finish(true);
+            check(results.size() == 2 && results.get(0).judgment().outcome() == FAILED
+                    && results.get(1).judgment().outcome() == FINISHED
+                    && results.get(0).judgment().passed() == 2 && results.get(1).judgment().passed() == 3
+                    && f.judge.getPastNotes() == 3, "Closure of one secondary does not remove input from any other run");
+        }
     }
 
     private record Score(int passed, int exScore, int maxCombo, List<Integer> counts, int type, float value) {}

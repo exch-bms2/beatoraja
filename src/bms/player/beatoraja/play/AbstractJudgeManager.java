@@ -176,7 +176,7 @@ public abstract class AbstractJudgeManager {
 		update(mtime, null);
 	}
 
-	final void update(long mtime, SecondaryJudging secondary) {
+	final void update(long mtime, SecondaryJudgingGroup secondary) {
 		final BMSPlayerInputProcessor input = main.main.getInputProcessor();
 		final JudgeEventQueue queue = input.getJudgeEventQueue();
 		queue.drain(eventBatch);
@@ -196,7 +196,7 @@ public abstract class AbstractJudgeManager {
 		updateFifo(mtime, input, queue, null);
 	}
 
-	private void updateFifo(long mtime, BMSPlayerInputProcessor input, JudgeEventQueue queue, SecondaryJudging secondary) {
+	private void updateFifo(long mtime, BMSPlayerInputProcessor input, JudgeEventQueue queue, SecondaryJudgingGroup secondary) {
 		processFifoEvents(mtime, eventBatch, input, queue);
 		for (int key = 0; key < keyassign.length; key++) {
 			if (queue.isQueued(key)) continue;

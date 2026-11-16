@@ -668,10 +668,10 @@ public class BooleanPropertyFactory {
 		draw_scorerank(OPTION_DRAW_SCORERANK, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 				(state) -> (state.getScoreDataProperty().getNowRate() == state.getScoreDataProperty().getBestScoreRate()))),
 		update_target(OPTION_UPDATE_TARGET, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> state instanceof AbstractResult && !(state instanceof MusicResult result && result.isShowingLr2Score())
+				(state) -> state instanceof AbstractResult && !(state instanceof MusicResult result && result.isShowingSecondaryScore())
 						&& state.main.getPlayerResource().getScoreData().getExscore() > state.getScoreDataProperty().getRivalScore())),
 		draw_target(OPTION_DRAW_TARGET, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-				(state) -> state instanceof AbstractResult && !(state instanceof MusicResult result && result.isShowingLr2Score())
+				(state) -> state instanceof AbstractResult && !(state instanceof MusicResult result && result.isShowingSecondaryScore())
 						&& state.main.getPlayerResource().getScoreData().getExscore() == state.getScoreDataProperty().getRivalScore())),
 
 		result_clear(OPTION_RESULT_CLEAR,new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> {

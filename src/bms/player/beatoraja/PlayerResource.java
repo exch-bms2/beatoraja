@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.*;
@@ -68,7 +69,7 @@ public final class PlayerResource {
 	 * スコア
 	 */
 	private ScoreData score;
-	private AlternateResultScore alternateResultScore;
+	private List<AlternateResultScore> alternateResultScores = List.of();
 	/**
 	 * ライバルスコア
 	 */
@@ -153,7 +154,7 @@ public final class PlayerResource {
 		courseindex = 0;
 		cscore = null;
 		score = null;
-		alternateResultScore = null;
+		alternateResultScores = List.of();
 //		rscore = null;
 		tscore = null;
 		gauge = null;
@@ -167,7 +168,7 @@ public final class PlayerResource {
 	}
 
 	public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
-		alternateResultScore = null;
+		alternateResultScores = List.of();
 		// TODO play mode, リプレイデータでの読み込み分岐をここで行う
 		this.mode = mode;
 		replay = new ReplayData();
@@ -305,17 +306,18 @@ public final class PlayerResource {
 		return score;
 	}
 
-	public record AlternateResultScore(ScoreData score, ScoreData previousBest, GaugeHistory gaugeHistory) {}
+	public record AlternateResultScore(String ruleId, String ruleName, ScoreData score, ScoreData previousBest,
+			GaugeHistory gaugeHistory) {}
 
 	/** Samples transferred to the result screen after the judgment thread has stopped. */
 	public record GaugeHistory(AbstractGrooveGauge gauge, FloatArray[] values, LongArray timesUs, long durationUs) {}
 
-	public AlternateResultScore getAlternateResultScore() {
-		return alternateResultScore;
+	public List<AlternateResultScore> getAlternateResultScores() {
+		return alternateResultScores == null ? List.of() : alternateResultScores;
 	}
 
-	public void setAlternateResultScore(AlternateResultScore score) {
-		alternateResultScore = score;
+	public void setAlternateResultScores(List<AlternateResultScore> scores) {
+		alternateResultScores = List.copyOf(scores);
 	}
 
 	public void setScoreData(ScoreData score) {

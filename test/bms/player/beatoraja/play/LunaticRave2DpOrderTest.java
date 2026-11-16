@@ -82,11 +82,12 @@ public final class LunaticRave2DpOrderTest {
             var secondary = Objects.requireNonNull(SecondaryJudging.create(primary.judge.main, primary.model,
                     primary.resource, TICK + 20_000));
             secondary.gauge().setValue(NORMAL, 100);
+            var group = SecondaryJudgingTest.group(secondary);
             primary.input.setKeyState(scratch, true, 2_050_000);
-            primary.judge.update(2_050_000, secondary);
+            primary.judge.update(2_050_000, group);
             primary.input.setKeyState(reverse ? right : LEFT, true, TICK + 100);
             primary.input.setKeyState(reverse ? LEFT : right, true, TICK + 900);
-            primary.judge.update(TICK + 999, secondary);
+            primary.judge.update(TICK + 999, group);
             var result = secondary.finish();
             var counts = result.judgeCounts();
             check(result.gaugeType() == NORMAL && result.gaugeValue() == 100 && counts.get(0) + counts.get(1) == 1
@@ -99,12 +100,13 @@ public final class LunaticRave2DpOrderTest {
         var secondary = Objects.requireNonNull(SecondaryJudging.create(primary.judge.main, primary.model,
                 primary.resource, TICK + 20_000));
         secondary.gauge().setValue(HARD, 11);
+        var group = SecondaryJudgingTest.group(secondary);
         primary.input.setKeyState(scratch, true, 2_050_000);
-        primary.judge.update(2_050_000, secondary);
+        primary.judge.update(2_050_000, group);
         primary.input.setKeyState(right, true, TICK + 1_000);
-        primary.judge.update(TICK + 10_000, secondary);
+        primary.judge.update(TICK + 10_000, group);
         var result = secondary.finish();
-        check(result.outcome() == SecondaryJudging.Outcome.FAILED
+        check(result.outcome() == SecondaryJudgingGroup.Outcome.FAILED
                         && result.gaugeValue() == 1 && result.exScore() == 0
                         && result.gaugeHistory().timesUs().peek() == TICK
                         && !primary.gauge.isFailed() && primary.judge.getJudgeCount(0) == 1,

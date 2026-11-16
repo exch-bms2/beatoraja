@@ -71,23 +71,24 @@ public final class LunaticRave2ModeComparisonTest {
                     long end = 6_500_000;
                     var secondary = Objects.requireNonNull(SecondaryJudging.create(
                             primary.judge.main, primary.model, primary.resource, end), chart + " secondary eligible");
+                    var group = SecondaryJudgingTest.group(secondary);
                     for (var f : List.of(primary, baseline, standalone)) {
                         boolean shadow = f == primary;
                         f.input.setKeyState(chart.left(), true, 1_982_000);
-                        f.judge.update(1_982_000, shadow ? secondary : null);
+                        f.judge.update(1_982_000, shadow ? group : null);
                         f.input.setKeyState(chart.right(), true, 2_018_000);
-                        f.judge.update(2_018_000, shadow ? secondary : null);
+                        f.judge.update(2_018_000, shadow ? group : null);
                         f.input.setKeyState(chart.left(), false, 2_100_000);
                         f.input.setKeyState(chart.right(), false, 2_100_000);
                         f.input.setKeyState(chart.leftHold(), true, 4_000_000);
                         if (chart.isDp()) f.input.setKeyState(chart.rightHold(), true, 4_000_000);
-                        f.judge.update(5_001_000, shadow ? secondary : null);
+                        f.judge.update(5_001_000, shadow ? group : null);
                         f.input.setKeyState(chart.leftHold(), false, 5_200_000);
-                        f.judge.update(6_001_000, shadow ? secondary : null);
-                        f.judge.update(end, shadow ? secondary : null);
+                        f.judge.update(6_001_000, shadow ? group : null);
+                        f.judge.update(end, shadow ? group : null);
                     }
                     var result = secondary.finish();
-                    check(result.outcome() == SecondaryJudging.Outcome.FINISHED
+                    check(result.outcome() == SecondaryJudgingGroup.Outcome.FINISHED
                                     && result.passed() == standalone.judge.getPastNotes()
                                     && result.gaugeValue() == standalone.gauge.getValue()
                                     && result.maxCombo() == standalone.judge.getScoreData().getCombo()

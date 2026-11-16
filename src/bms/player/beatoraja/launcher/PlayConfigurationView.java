@@ -15,6 +15,7 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.controller.ControllerBackend;
 import bms.player.beatoraja.play.JudgeAlgorithm;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.song.*;
 import javafx.application.Platform;
@@ -84,6 +85,9 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	private ComboBox<PlayMode> playconfig;
+	@FXML
+	private VBox secondaryScoringRules;
+	private final Map<SecondaryScoringRule, CheckBox> secondaryScoringChecks = new LinkedHashMap<>();
 	/**
 	 * ハイスピード
 	 */
@@ -276,7 +280,31 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+	void initSecondaryScoringRules(ResourceBundle resources) {
+		for (var rule : SecondaryScoringRule.values()) {
+			var check = new CheckBox(rule.displayName() + " (" + resources.getString("SECONDARY_SCORING_" + rule.name()) + ")");
+			check.setId("secondaryScoring-" + rule.id());
+			secondaryScoringChecks.put(rule, check);
+			secondaryScoringRules.getChildren().add(check);
+		}
+	}
+
+	void updateSecondaryScoring(PlayerConfig player) {
+		var enabled = Set.of(player.getSecondaryScoringRuleIds());
+		secondaryScoringChecks.forEach((rule, check) -> check.setSelected(enabled.contains(rule.id())));
+	}
+
+	void commitSecondaryScoring(PlayerConfig player) {
+		var rules = new LinkedHashSet<>(Arrays.asList(player.getSecondaryScoringRuleIds()));
+		secondaryScoringChecks.forEach((rule, check) -> {
+			if (check.isSelected()) rules.add(rule.id());
+			else rules.remove(rule.id());
+		});
+		player.setSecondaryScoringRuleIds(rules.toArray(String[]::new));
+	}
+
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		initSecondaryScoringRules(arg1);
 		controllerBackend.getItems().setAll(ControllerBackend.values());
 		final long t = System.currentTimeMillis();
 		lr2configuration.setHgap(25);
@@ -449,6 +477,7 @@ public class PlayConfigurationView implements Initializable {
 		player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), players.getValue(), config.getControllerBackend());
 		playername.setText(player.getName());
 		independentPlaySides.setSelected(player.isIndependentPlaySides());
+		updateSecondaryScoring(player);
 
 		videoController.updatePlayer(player);
 		musicselectController.updatePlayer(player);
@@ -559,6 +588,7 @@ public class PlayConfigurationView implements Initializable {
 		if(playername.getText().length() > 0) {
 			player.setName(playername.getText());
 		}
+		commitSecondaryScoring(player);
 
 		videoController.commitPlayer(player);
 		musicselectController.commitPlayer();

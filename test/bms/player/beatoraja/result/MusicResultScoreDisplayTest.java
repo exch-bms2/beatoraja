@@ -1,6 +1,7 @@
 package bms.player.beatoraja.result;
 
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -96,7 +97,8 @@ public final class MusicResultScoreDisplayTest {
         result.prepareScoreDisplay();
         press(result, keyboard, states);
         check(!result.isShowingLr2Score() && rank.isStatic(result), "unavailable without a secondary result");
-        resource.setAlternateResultScore(new PlayerResource.AlternateResultScore(secondary, secondaryBest, timedHistory));
+        var lr2 = new PlayerResource.AlternateResultScore("lr2", "Lunatic Rave 2", secondary, secondaryBest, timedHistory);
+        resource.setAlternateResultScores(List.of(lr2));
         result.prepareScoreDisplay();
         var graph = new SkinGaugeGraphObject();
         var gaugeNumber = FloatPropertyFactory.getFloatProperty("groovegauge_1p");
@@ -143,12 +145,36 @@ public final class MusicResultScoreDisplayTest {
         press(result, keyboard, states);
         check(result.getGaugeType() == HARD && graph.updateGraphData(result), "LR2 gauge selection is retained");
 
+        var third = score(mode, 42, ClearType.Easy, rule);
+        third.setGauge(NORMAL);
+        var thirdHistory = new PlayerResource.GaugeHistory(secondaryGauge, gaugeSamples(secondaryGauge, 50),
+                new LongArray(new long[]{0, 500_000}), 4_000_000);
+        var stale = score(mode, 60, ClearType.Normal, rule);
+        stale.setSha256("2".repeat(64));
+        resource.setAlternateResultScores(List.of(lr2,
+                new PlayerResource.AlternateResultScore("stale", "Stale", stale, null, null),
+                new PlayerResource.AlternateResultScore("fixture", "Fixture", third, null, thirdHistory)));
+        result.prepareScoreDisplay();
+        press(result, keyboard, states);
+        check(result.isShowingLr2Score() && result.getDisplayGaugeHistory() == timedHistory, "First alternate is LR2");
+        input.setKeyState(5, true, 7);
+        result.input();
+        input.setKeyState(5, false, 8);
+        press(result, keyboard, states);
+        check(result.isShowingSecondaryScore() && !result.isShowingLr2Score()
+                && result.getDisplayScore() == third && result.getGaugeType() == NORMAL
+                && result.getDisplayGaugeHistory() == thirdHistory, "Skip stale scores, and use the next rule's gauge and score");
+        press(result, keyboard, states);
+        check(!result.isShowingSecondaryScore() && result.getDisplayScore() == primary, "Wrap to primary");
+        press(result, keyboard, states);
+        check(result.getGaugeType() == HARD, "Alternate gauge selection stays independent across multiple rules");
+
         set(resource, PlayerResource.class, "course", new BMSModel[]{model});
         result.prepareScoreDisplay();
         press(result, keyboard, states);
         check(!result.canSwitchScoreDisplay() && !result.isShowingLr2Score(), "a course is not switchable");
         set(resource, PlayerResource.class, "course", null);
-        model.setSHA256("2".repeat(64));
+        model.setSHA256("3".repeat(64));
         result.prepareScoreDisplay();
         check(!result.canSwitchScoreDisplay(), "a result belonging to another chart is ignored");
     }
