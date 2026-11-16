@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.LongArray;
 
 import bms.model.BMSModel;
 import bms.model.LongNote;
+import bms.model.Mode;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.ClearType;
@@ -67,7 +68,10 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 			judge = new LunaticRave2JudgeManager(player, gauge);
 		} else {
 			gauge = new GrooveGauge(chart, startGauge, BMSPlayerRule.getBMSPlayerRule(chart.getMode()).gauge);
-			judge = new JudgeManager(player, gauge, rule);
+			var pulsusTaps = rule == BMSPlayerRule.Pulsus && model.getMode() == Mode.BEAT_7K
+					&& resource.getOriginalMode() == Mode.BEAT_7K
+					? PulsusTapRules.forRank(model.getJudgeType().bmsRank()) : null;
+			judge = new JudgeManager(player, gauge, rule, pulsusTaps);
 		}
 		gaugeSamples = new FloatArray[gauge.getGaugeTypeLength()];
 		for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i] = new FloatArray();

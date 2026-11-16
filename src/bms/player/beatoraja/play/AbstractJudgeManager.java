@@ -272,6 +272,10 @@ public abstract class AbstractJudgeManager {
 		updateMicro(state, n, mtime, judge, mfast, judgeVanish, true);
 	}
 
+	boolean keepsCombo(Note note, int judge) {
+		return combocond[judge];
+	}
+
 	final void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish,
 			boolean playGuideSE) {
 		if (judgeVanish) {
@@ -294,13 +298,14 @@ public abstract class AbstractJudgeManager {
 			microrecentJudges[recentJudgesIndex] = mfast;
 		}
 
-		if (combocond[judge] && judge < 5) {
+		boolean keepCombo = keepsCombo(n, judge);
+		if (keepCombo && judge < 5) {
 			combo++;
 			score.setCombo(Math.max(score.getCombo(), combo));
 			coursecombo++;
 			coursemaxcombo = coursemaxcombo > coursecombo ? coursemaxcombo : coursecombo;
 		}
-		if (!combocond[judge]) {
+		if (!keepCombo) {
 			combo = 0;
 			coursecombo = 0;
 		}

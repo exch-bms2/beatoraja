@@ -41,15 +41,17 @@ public final class JudgeManager extends AbstractJudgeManager {
 
 	private JudgeAlgorithm algorithm;
 	private final BMSPlayerRule timingProfile;
+	private final PulsusTapRules pulsusTaps;
 	private boolean[] capturedHeld;
 
 	JudgeManager(BMSPlayer main) {
-		this(main, null, null);
+		this(main, null, null, null);
 	}
 
-	JudgeManager(BMSPlayer main, AbstractGrooveGauge gauge, BMSPlayerRule timingProfile) {
+	JudgeManager(BMSPlayer main, AbstractGrooveGauge gauge, BMSPlayerRule timingProfile, PulsusTapRules pulsusTaps) {
 		super(main, gauge);
 		this.timingProfile = timingProfile;
+		this.pulsusTaps = pulsusTaps;
 	}
 
 	@Override
@@ -120,6 +122,11 @@ public final class JudgeManager extends AbstractJudgeManager {
 	@Override
 	boolean suppressMiss(Note note, int judgement) {
 		return miss == MissCondition.ONE && judgement == 4 && note.getPlayTime() != 0;
+	}
+
+	@Override
+	boolean keepsCombo(Note note, int judge) {
+		return (pulsusTaps != null && judge == 5 && note instanceof NormalNote) || super.keepsCombo(note, judge);
 	}
 
 	@Override
@@ -265,6 +272,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 			if (lane == -1) {
 				return;
 			}
+			if (pulsusTaps != null) expirePulsusTaps(pmtime);
 			final StandardLane state = states[lane];
 			state.lanemodel.reset();
 			final int sc = state.sckey;
@@ -337,6 +345,12 @@ public final class JudgeManager extends AbstractJudgeManager {
 								}
 							}
 						}
+					}
+
+					// Keep the legacy LN start selection and all hold/release processing.
+					if (pulsusTaps != null && !(tnote instanceof LongNote)) {
+						tnote = closestPulsusTap(state, pmtime);
+						if (tnote != null) judge = pulsusTaps.judge(tnote.getMicroTime() - pmtime);
 					}
 
 					if (tnote != null) {
@@ -479,8 +493,40 @@ public final class JudgeManager extends AbstractJudgeManager {
 		}
 	}
 
+	private Note closestPulsusTap(StandardLane state, long inputUs) {
+		Note closest = null;
+		long distance = Long.MAX_VALUE;
+		Note[] notes = state.lanemodel.getNotes();
+		for (int i = state.pulsusTapCursor; i < notes.length; i++) {
+			Note note = notes[i];
+			long delta = note.getMicroTime() - inputUs;
+			if (!PulsusTapRules.isCandidate(delta)) break;
+			if (note instanceof NormalNote && note.getState() == 0 && Math.abs(delta) < distance) {
+				closest = note;
+				distance = Math.abs(delta);
+			}
+		}
+		return closest;
+	}
+
+	private void expirePulsusTaps(long nowUs) {
+		for (StandardLane state : states) {
+			Note[] notes = state.lanemodel.getNotes();
+			while (state.pulsusTapCursor < notes.length) {
+				Note note = notes[state.pulsusTapCursor];
+				if (note instanceof NormalNote && note.getState() == 0) {
+					long delta = note.getMicroTime() - nowUs;
+					if (delta >= -PulsusTapRules.LATE_LIMIT_US) break;
+					updateMicro(state, note, nowUs, 4, delta, true);
+				}
+				state.pulsusTapCursor++;
+			}
+		}
+	}
+
 	@Override
 	void finishTime(long mtime) {
+		if (pulsusTaps != null) expirePulsusTaps(mtime);
 		final TimerManager timer = main.timer;
 		final Config config = main.resource.getConfig();
 		// ノート通過系判定
@@ -527,7 +573,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 			for (Note note = state.lanemodel.getNote(); note != null
 					&& note.getMicroTime() < mtime + getJudgeWindow().getTime(noteType, 3, false); note = state.lanemodel.getNote()) {
 				final int mjud = (int) (note.getMicroTime() - mtime);
-				if (note instanceof NormalNote && note.getState() == 0) {
+				if (pulsusTaps == null && note instanceof NormalNote && note.getState() == 0) {
 					this.updateMicro(state, note, mtime, 4, mjud, true);
 				} else if (note instanceof LongNote ln) {
 					if (!ln.isEnd() && ln.getState() == 0) {
@@ -582,6 +628,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 		boolean inclease;
 		long mpassingcount;
 		int lnendJudge = Integer.MIN_VALUE;
+		int pulsusTapCursor;
 
 		StandardLane(int lane, LaneProperty property, Lane lanemodel) {
 			super(lane, property, lanemodel);

@@ -24,6 +24,9 @@ public enum BMSPlayerRule {
 			Mode.BEAT_5K, Mode.BEAT_7K, Mode.POPN_9K, Mode.BEAT_10K, Mode.BEAT_14K),
 
 	Default(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
+	Pulsus(GaugeProperty.SEVENKEYS, JudgeProperty.PULSUS),
+	Raindrop(GaugeProperty.SEVENKEYS, JudgeProperty.RAINDROP),
+	Bemuse(GaugeProperty.SEVENKEYS, JudgeProperty.BEMUSE),
 ;
 
     // Experimental opt-in: change to LunaticRave2 and rebuild to compare locally.

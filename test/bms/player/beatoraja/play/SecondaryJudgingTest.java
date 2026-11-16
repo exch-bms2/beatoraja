@@ -35,6 +35,7 @@ public final class SecondaryJudgingTest {
         checkConfiguration();
         checkMultipleRuns();
         checkTimingProfiles();
+        checkPulsusIsolation();
         System.out.println("SecondaryJudgingTest passed (primary parity, LR2 parity, FIFO/legacy, LN, mine, closure and auto shift)");
     }
 
@@ -355,6 +356,60 @@ public final class SecondaryJudgingTest {
         model.setAllTimeLine(new TimeLine[]{line(1, 1_000_000, new NormalNote(0)),
                 line(2, 2_000_000, new NormalNote(0)), line(3, 3_000_000, new NormalNote(0))});
         return new Fixture(model, queued);
+    }
+
+    private static void checkPulsusIsolation() throws Exception {
+        for (boolean queued : new boolean[]{true, false}) {
+            var baseline = denseFixture(queued);
+            var withPulsus = denseFixture(queued);
+            var otherRules = new String[]{"lr2", "raindrop", "bemuse"};
+            baseline.playerConfig.setSecondaryScoringRuleIds(otherRules);
+            withPulsus.playerConfig.setSecondaryScoringRuleIds(new String[]{"pulsus", "lr2", "raindrop", "bemuse"});
+            var baselineGroup = Objects.requireNonNull(SecondaryJudgingGroup.create(
+                    baseline.player, baseline.model, baseline.resource, END));
+            var pulsusGroup = Objects.requireNonNull(SecondaryJudgingGroup.create(
+                    withPulsus.player, withPulsus.model, withPulsus.resource, END));
+            for (var tick : List.of(new Tick(799_999, true), new Tick(820_000, false),
+                    new Tick(1_055_000, true), new Tick(1_055_500, false), new Tick(1_056_000, true),
+                    new Tick(1_057_000, false), new Tick(END, null))) {
+                driveGroup(baseline, baselineGroup, tick);
+                driveGroup(withPulsus, pulsusGroup, tick);
+                check(snapshot(baseline).equals(snapshot(withPulsus))
+                                && Arrays.equals(baseline.judge.getGhost(), withPulsus.judge.getGhost())
+                                && baseline.audioEvents.equals(withPulsus.audioEvents),
+                        "Pulsus must not affect primary scoring, ghost or audio at " + tick.time());
+            }
+            var expected = baselineGroup.finish(true);
+            var actual = pulsusGroup.finish(true);
+            check(expected.size() == 3 && actual.size() == 4 && actual.get(0).rule() == SecondaryScoringRule.PULSUS,
+                    "All selected rules ran");
+            var pulsus = actual.get(0).judgment();
+            check(pulsus.outcome() == FINISHED && pulsus.exScore() == 2 && pulsus.maxCombo() == 2,
+                    "Pulsus used nearest-note selection in the shared input path");
+            for (int i = 0; i < expected.size(); i++) {
+                var previous = expected.get(i);
+                var current = actual.get(i + 1);
+                var oldJudgment = previous.judgment();
+                var newJudgment = current.judgment();
+                var oldHistory = oldJudgment.gaugeHistory();
+                var newHistory = newJudgment.gaugeHistory();
+                check(previous.rule() == current.rule()
+                                && oldJudgment.toLocalAttempt(baseline.model).equals(newJudgment.toLocalAttempt(withPulsus.model))
+                                && oldHistory.timesUs().equals(newHistory.timesUs())
+                                && Arrays.equals(oldHistory.values(), newHistory.values()),
+                        "Pulsus must not affect scores or gauge history for " + previous.rule());
+            }
+        }
+    }
+
+    private static Fixture denseFixture(boolean queued) throws Exception {
+        var model = new BMSModel();
+        model.setMode(Mode.BEAT_7K);
+        model.setSHA256("3".repeat(64));
+        model.setTotal(120);
+        model.setAllTimeLine(new TimeLine[]{line(1, 1_000_000, new NormalNote(0)),
+                line(2, 1_062_500, new NormalNote(0))});
+        return new Fixture(model, queued, Beatoraja_7, new BMSPlayerRule.ChartParameters(2, 120), NORMAL);
     }
 
     private record Score(int passed, int exScore, int maxCombo, List<Integer> counts, int type, float value) {}
