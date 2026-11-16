@@ -11,6 +11,7 @@ import bms.model.BMSModel;
 import bms.model.Mode;
 import bms.player.beatoraja.PlayDataAccessor.ScoreAttempt;
 import bms.player.beatoraja.PlayDataAccessor.ScoreOutcome;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 
 public final class LunaticRave2ScoreDatabaseTest {
     private static final String HASH = "1".repeat(64);
@@ -94,6 +95,16 @@ public final class LunaticRave2ScoreDatabaseTest {
                         && Files.isRegularFile(historyFile) && Files.isRegularFile(bestLogFile), "separate LR2 files");
 
         var reopened = new PlayDataAccessor(config);
+        int next = 100;
+        for (var rule : SecondaryScoringRule.values()) {
+            if (rule == SecondaryScoringRule.LR2) continue;
+            scores.writeRuleAttempt(rule, attempt(HASH, 0, ScoreOutcome.FINISHED, next, 50, 6, ClearType.Normal), true);
+            var separate = reopened.readRuleBest(rule, HASH, 0);
+            check(separate != null && separate.getExscore() == next && separate.getRule() == rule.scoreRule()
+                    && Files.isRegularFile(profile.resolve("score" + rule.databaseSuffix() + ".db")),
+                    "Each timing profile has a separate best and database: " + rule.id());
+            next += 10;
+        }
         var best = reopened.readLunaticRave2Best(HASH, 0);
         check(best.getClear() == ClearType.Normal.id && best.getExscore() == 220 && best.getCombo() == 110
                         && best.getMinbp() == 5 && best.getPlaycount() == 2 && best.getClearcount() == 1,

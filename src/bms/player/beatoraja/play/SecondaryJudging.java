@@ -14,6 +14,7 @@ import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.GaugeHistory;
@@ -21,11 +22,11 @@ import bms.player.beatoraja.input.JudgeEventQueue;
 import bms.player.beatoraja.play.SecondaryJudgingGroup.Judgment;
 import bms.player.beatoraja.play.SecondaryJudgingGroup.Outcome;
 
-/** In-memory, silent LR2 run. The judge thread owns it until it joins. */
+/** In-memory, silent run. The judge thread owns it until it joins. */
 final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	private static final long GAUGE_INTERVAL_US = 500_000;
 
-	private final LunaticRave2JudgeManager judge;
+	private final AbstractJudgeManager judge;
 	private final AbstractGrooveGauge gauge;
 	private final PlayerConfig config;
 	private final long endUs;
@@ -46,17 +47,30 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 				startGauge, resource.getChartRuleParameters()) != BMSPlayerRule.LunaticRave2) {
 			return null;
 		}
-		return new SecondaryJudging(player, model, resource, endUs, startGauge);
+		return new SecondaryJudging(player, model, resource, endUs, startGauge, BMSPlayerRule.LunaticRave2);
 	}
 
-	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int startGauge) {
+	static SecondaryJudging createTimingProfile(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs,
+			SecondaryScoringRule rule) {
+		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
+				|| resource.getCourseBMSModels() != null) return null;
+		return new SecondaryJudging(player, model, resource, endUs, resource.getPlayerConfig().getGauge(), rule.scoreRule());
+	}
+
+	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int startGauge,
+			BMSPlayerRule rule) {
 		config = resource.getPlayerConfig();
 		this.endUs = endUs;
 		var chart = copyChart(model);
-		gauge = new LunaticRave2GrooveGauge(chart, startGauge, resource);
+		if (rule == BMSPlayerRule.LunaticRave2) {
+			gauge = new LunaticRave2GrooveGauge(chart, startGauge, resource);
+			judge = new LunaticRave2JudgeManager(player, gauge);
+		} else {
+			gauge = new GrooveGauge(chart, startGauge, BMSPlayerRule.getBMSPlayerRule(chart.getMode()).gauge);
+			judge = new JudgeManager(player, gauge, rule);
+		}
 		gaugeSamples = new FloatArray[gauge.getGaugeTypeLength()];
 		for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i] = new FloatArray();
-		judge = new LunaticRave2JudgeManager(player, gauge);
 		judge.init(chart, resource);
 		int keys = player.getLaneProperty().getKeyLaneAssign().length;
 		legacyKeys = new int[keys];
@@ -85,19 +99,26 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 				return;
 			}
 			if (gaugeTimesUs.size == 0) sampleGauge(0);
-			judge.processCapturedInput(nowUs, batch, legacyKeys, legacyTimes, legacyPressed, legacySize);
+			long processedUs = nowUs;
+			if (judge instanceof LunaticRave2JudgeManager lr2) {
+				lr2.processCapturedInput(nowUs, batch, legacyKeys, legacyTimes, legacyPressed, legacySize);
+				processedUs = lr2.processedThroughUs(nowUs);
+			} else if (judge instanceof JudgeManager timing) {
+				timing.processCapturedInput(nowUs, batch, legacyKeys, legacyTimes, legacyPressed, legacySize);
+			}
 			if (BMSPlayer.updateGaugeAutoShift(gauge, config, gauge.isFailed())) {
 				outcome = Outcome.FAILED;
 			} else if (nowUs >= endUs) {
 				outcome = Outcome.FINISHED;
 			}
-			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, judge.processedThroughUs(nowUs)));
+			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, processedUs));
 			if (!isRunning() || lastProcessedUs - gaugeTimesUs.peek() >= GAUGE_INTERVAL_US) {
 				sampleGauge(lastProcessedUs);
 			}
 		} catch (RuntimeException e) {
 			outcome = Outcome.ERROR;
-			Logger.getGlobal().log(Level.WARNING, "LR2 secondary judging stopped", e);
+			Logger.getGlobal().log(Level.WARNING,
+					judge.getScoreData().getRule() + " secondary judging stopped", e);
 		} finally {
 			legacySize = 0;
 		}
@@ -143,7 +164,13 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 		if (outcome != Outcome.FINISHED) return ClearType.Failed;
 		var comboClear = judge.getCompletedComboClear();
 		if (comboClear != null) return comboClear;
-		return gauge.isQualified() ? gauge.getClearType() : ClearType.Failed;
+		if (!gauge.isQualified()) return ClearType.Failed;
+		if (judge instanceof JudgeManager && judge.getPastNotes() > 0 && judge.getPastNotes() == judge.getCombo()
+				&& judge.getPastNotes() == judge.getScoreData().getNotes()) {
+			if (judge.getJudgeCount(2) != 0) return ClearType.FullCombo;
+			return judge.getJudgeCount(1) == 0 ? ClearType.Max : ClearType.Perfect;
+		}
+		return gauge.getClearType();
 	}
 
 	private static BMSModel copyChart(BMSModel source) {

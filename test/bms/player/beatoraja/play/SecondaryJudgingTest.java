@@ -34,6 +34,7 @@ public final class SecondaryJudgingTest {
         checkAutoShiftOrder();
         checkConfiguration();
         checkMultipleRuns();
+        checkTimingProfiles();
         System.out.println("SecondaryJudgingTest passed (primary parity, LR2 parity, FIFO/legacy, LN, mine, closure and auto shift)");
     }
 
@@ -300,6 +301,60 @@ public final class SecondaryJudgingTest {
                     && results.get(0).judgment().passed() == 2 && results.get(1).judgment().passed() == 3
                     && f.judge.getPastNotes() == 3, "Closure of one secondary does not remove input from any other run");
         }
+    }
+
+    private static void checkTimingProfiles() throws Exception {
+        for (boolean queued : new boolean[]{true, false}) {
+            var primary = timingFixture(queued);
+            var baseline = timingFixture(queued);
+            primary.playerConfig.setSecondaryScoringRuleIds(new String[]{"pulsus", "raindrop", "bemuse"});
+            primary.playerConfig.setCustomJudge(true);
+            primary.playerConfig.setKeyJudgeWindowRatePerfectGreat(10);
+            var group = Objects.requireNonNull(SecondaryJudgingGroup.create(
+                    primary.judge.main, primary.model, primary.resource, END));
+            for (var tick : List.of(
+                    new Tick(981_000, true), new Tick(990_000, false),
+                    new Tick(1_979_000, true), new Tick(1_990_000, false),
+                    new Tick(2_880_000, true), new Tick(2_990_000, false), new Tick(END, null))) {
+                driveGroup(primary, group, tick);
+                driveGroup(baseline, null, tick);
+                check(snapshot(primary).equals(snapshot(baseline)) && primary.audioEvents.equals(baseline.audioEvents),
+                        "Timing profiles must not change beatoraja scoring or audio");
+            }
+            var results = group.finish(true);
+            check(results.stream().map(result -> result.rule().id()).toList().equals(List.of("pulsus", "raindrop", "bemuse")),
+                    "Use the configured order and distinct rule identities");
+            var pulsus = results.get(0).judgment();
+            var raindrop = results.get(1).judgment();
+            var bemuse = results.get(2).judgment();
+            check(pulsus.judgeCounts().get(2) == 2 && pulsus.judgeCounts().get(6) == 1,
+                    "Pulsus: 19/21 ms GREAT and 120 ms BAD");
+            check(raindrop.judgeCounts().get(0) == 2 && raindrop.judgeCounts().get(4) == 1,
+                    "raindrop: 19/21 ms PGREAT and 120 ms GOOD, independent of chart/custom judge rank");
+            check(bemuse.judgeCounts().get(0) == 1 && bemuse.judgeCounts().get(2) == 1
+                    && bemuse.judgeCounts().get(6) == 1 && bemuse.judgeCounts().get(10) == 0,
+                    "Bemuse: 19 ms PGREAT, 21 ms GREAT, 120 ms BAD and no fifth press window");
+            check(pulsus.gaugeHistory().gauge() != bemuse.gaugeHistory().gauge()
+                    && bemuse.gaugeHistory().gauge() != primary.gauge, "Each timing profile owns its gauge");
+        }
+        var primary = timingFixture(true);
+        primary.playerConfig.setSecondaryScoringRuleIds(new String[]{"bemuse"});
+        var group = Objects.requireNonNull(SecondaryJudgingGroup.create(
+                primary.judge.main, primary.model, primary.resource, END));
+        driveGroup(primary, group, new Tick(795_000, true));
+        check(group.finish(false).get(0).judgment().judgeCounts().get(10) == 0,
+                "An early press beyond the Bemuse BAD window does not become an empty POOR");
+    }
+
+    private static Fixture timingFixture(boolean queued) throws Exception {
+        var model = new BMSModel();
+        model.setMode(Mode.BEAT_7K);
+        model.setSHA256("2".repeat(64));
+        model.setTotal(120);
+        model.setJudgerank(50);
+        model.setAllTimeLine(new TimeLine[]{line(1, 1_000_000, new NormalNote(0)),
+                line(2, 2_000_000, new NormalNote(0)), line(3, 3_000_000, new NormalNote(0))});
+        return new Fixture(model, queued);
     }
 
     private record Score(int passed, int exScore, int maxCombo, List<Integer> counts, int type, float value) {}

@@ -223,6 +223,10 @@ public enum JudgeProperty {
         	for (; judge < mjudge.length / 2 && !(difftime >= mjudge[judge * 2] && difftime <= mjudge[judge * 2 + 1]); judge++);
         	return judge;
         }
+
+        final boolean hasWindow(NoteType type, int judge) {
+            return judge * 2 < getJudgeWindow(type).length;
+        }
         
         private final long[] getJudgeWindow(NoteType type) {
         	return switch(type) {

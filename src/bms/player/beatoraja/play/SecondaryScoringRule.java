@@ -2,7 +2,10 @@ package bms.player.beatoraja.play;
 
 /** Registry of implemented rules that may run alongside beatoraja scoring. */
 public enum SecondaryScoringRule {
-	LR2("lr2", "Lunatic Rave 2", BMSPlayerRule.LunaticRave2);
+	LR2("lr2", "Lunatic Rave 2", BMSPlayerRule.LunaticRave2),
+	PULSUS("pulsus", "Pulsus", BMSPlayerRule.Pulsus),
+	RAINDROP("raindrop", "raindrop", BMSPlayerRule.Raindrop),
+	BEMUSE("bemuse", "Bemuse", BMSPlayerRule.Bemuse);
 
 	private final String id;
 	private final String displayName;

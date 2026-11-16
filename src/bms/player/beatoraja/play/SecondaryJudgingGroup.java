@@ -63,6 +63,7 @@ final class SecondaryJudgingGroup {
 			try {
 				Run run = switch (rule) {
 					case LR2 -> SecondaryJudging.create(player, model, resource, endUs);
+					case PULSUS, RAINDROP, BEMUSE -> SecondaryJudging.createTimingProfile(player, model, resource, endUs, rule);
 				};
 				if (run != null) entries.add(new Entry(rule, run));
 			} catch (RuntimeException e) {

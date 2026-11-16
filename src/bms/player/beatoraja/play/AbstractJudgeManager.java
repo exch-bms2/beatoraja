@@ -136,12 +136,12 @@ public abstract class AbstractJudgeManager {
 		auto_presstime = new long[keyassign.length];
 		Arrays.fill(auto_presstime, Long.MIN_VALUE);
 		states = initLanes(lanes, model.getLanes());
-		final int judgerank = model.getJudgerank();
+		final int judgerank = isHeadless() ? 100 : model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] keyJudgeWindowRate = config.isCustomJudge()
+		final int[] keyJudgeWindowRate = !isHeadless() && config.isCustomJudge()
 				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
-		final int[] scratchJudgeWindowRate = config.isCustomJudge()
+		final int[] scratchJudgeWindowRate = !isHeadless() && config.isCustomJudge()
 				? new int[]{config.getScratchJudgeWindowRatePerfectGreat(), config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
@@ -217,6 +217,8 @@ public abstract class AbstractJudgeManager {
 			while (to < batch.size && batch.times[to] == batch.times[from]) to++;
 			if (queue != null) {
 				for (int i = from; i < to; i++) queue.apply(batch.keys[i], batch.pressed[i]);
+			} else if (this instanceof JudgeManager) {
+				for (int i = from; i < to; i++) captureHeldState(batch.keys[i], batch.pressed[i]);
 			}
 			long checkpoint = Math.min(mtime, Math.max(prevmtime, batch.times[from]));
 			beforeFifoCheckpoint(checkpoint);
@@ -231,6 +233,7 @@ public abstract class AbstractJudgeManager {
 		advancePassing(mtime);
 	}
 	void beforeFifoCheckpoint(long checkpoint) {}
+	void captureHeldState(int key, boolean pressed) {}
 
 	void advancePassing(long mtime) {
 		prevmtime = mtime;
