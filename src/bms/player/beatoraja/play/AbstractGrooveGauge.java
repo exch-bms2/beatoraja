@@ -44,6 +44,10 @@ public abstract class AbstractGrooveGauge {
 		this.update(judge, 1);
 	}
 
+	void updateJudgment(int judge, long noteMinusInputUs) {
+		update(judge);
+	}
+
 	/**
 	 * 判定に応じてゲージを更新する
 	 *

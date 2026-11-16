@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play;
 
+import java.util.Arrays;
+
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -41,22 +43,35 @@ public final class JudgeManager extends AbstractJudgeManager {
 
 	private JudgeAlgorithm algorithm;
 	private final BMSPlayerRule timingProfile;
-	private final PulsusTapRules pulsusTaps;
+	private final PulsusNoteRules pulsusRules;
 	private boolean[] capturedHeld;
 
 	JudgeManager(BMSPlayer main) {
 		this(main, null, null, null);
 	}
 
-	JudgeManager(BMSPlayer main, AbstractGrooveGauge gauge, BMSPlayerRule timingProfile, PulsusTapRules pulsusTaps) {
+	JudgeManager(BMSPlayer main, AbstractGrooveGauge gauge, BMSPlayerRule timingProfile, PulsusNoteRules pulsusRules) {
 		super(main, gauge);
 		this.timingProfile = timingProfile;
-		this.pulsusTaps = pulsusTaps;
+		this.pulsusRules = pulsusRules;
 	}
 
 	@Override
 	BMSPlayerRule ruleFor(Mode mode) {
 		return timingProfile != null ? timingProfile : BMSPlayerRule.getBMSPlayerRule(mode);
+	}
+
+	@Override
+	int scoringNoteCount(BMSModel model) {
+		if (pulsusRules == null) return super.scoringNoteCount(model);
+		// Count both hold endpoints without changing the chart count used by GrooveGauge.
+		int notes = 0;
+		for (var timeline : model.getAllTimeLines()) {
+			for (int lane = 0; lane < model.getMode().key; lane++) {
+				if (isPulsusNote(timeline.getNote(lane))) notes++;
+			}
+		}
+		return notes;
 	}
 
 	@Override
@@ -68,7 +83,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 	@Override
 	LaneState[] initLanes(LaneProperty property, Lane[] lanes) {
 		states = new StandardLane[lanes.length];
-		for (int i = 0; i < lanes.length; i++) states[i] = new StandardLane(i, property, lanes[i]);
+		for (int i = 0; i < lanes.length; i++) states[i] = new StandardLane(i, property, lanes[i], pulsusRules != null);
 		return states;
 	}
 
@@ -126,7 +141,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 
 	@Override
 	boolean keepsCombo(Note note, int judge) {
-		return (pulsusTaps != null && judge == 5 && note instanceof NormalNote) || super.keepsCombo(note, judge);
+		return (pulsusRules != null && judge == 5) || super.keepsCombo(note, judge);
 	}
 
 	@Override
@@ -155,8 +170,8 @@ public final class JudgeManager extends AbstractJudgeManager {
 				}
 				if (note instanceof LongNote lnote) {
 					// HCN判定
-					if ((lnote.getType() == LongNote.TYPE_UNDEFINED && lntype == BMSModel.LNTYPE_HELLCHARGENOTE)
-							|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+					if (pulsusRules == null && ((lnote.getType() == LongNote.TYPE_UNDEFINED && lntype == BMSModel.LNTYPE_HELLCHARGENOTE)
+							|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE)) {
 						if (lnote.isEnd()) {
 							state.passing = null;
 							state.mpassingcount = 0;
@@ -266,14 +281,17 @@ public final class JudgeManager extends AbstractJudgeManager {
 	}
 	@Override
 	void processKeyEvent(int key, long pmtime, boolean pressed, long mtime) {
-		final Config config = main.resource.getConfig();
 		if (key >= 0 && key < keyassign.length) {
 			final int lane = keyassign[key];
 			if (lane == -1) {
 				return;
 			}
-			if (pulsusTaps != null) expirePulsusTaps(pmtime);
 			final StandardLane state = states[lane];
+			if (pulsusRules != null) {
+				processPulsusInput(state, pmtime, pressed);
+				return;
+			}
+			final Config config = main.resource.getConfig();
 			state.lanemodel.reset();
 			final int sc = state.sckey;
 			if (pressed) {
@@ -345,12 +363,6 @@ public final class JudgeManager extends AbstractJudgeManager {
 								}
 							}
 						}
-					}
-
-					// Keep the legacy LN start selection and all hold/release processing.
-					if (pulsusTaps != null && !(tnote instanceof LongNote)) {
-						tnote = closestPulsusTap(state, pmtime);
-						if (tnote != null) judge = pulsusTaps.judge(tnote.getMicroTime() - pmtime);
 					}
 
 					if (tnote != null) {
@@ -493,40 +505,87 @@ public final class JudgeManager extends AbstractJudgeManager {
 		}
 	}
 
-	private Note closestPulsusTap(StandardLane state, long inputUs) {
+	private static boolean isPulsusNote(Note note) {
+		return note instanceof NormalNote || (note instanceof LongNote ln && ln.getPair() != null);
+	}
+
+	private void processPulsusInput(StandardLane state, long inputUs, boolean pressed) {
+		expirePulsusNotes(inputUs);
+		if (!pressed) {
+			releasePulsusNote(state, inputUs);
+			return;
+		}
 		Note closest = null;
 		long distance = Long.MAX_VALUE;
 		Note[] notes = state.lanemodel.getNotes();
-		for (int i = state.pulsusTapCursor; i < notes.length; i++) {
+		for (int i = state.pulsusCursor; i < notes.length; i++) {
 			Note note = notes[i];
 			long delta = note.getMicroTime() - inputUs;
-			if (!PulsusTapRules.isCandidate(delta)) break;
-			if (note instanceof NormalNote && note.getState() == 0 && Math.abs(delta) < distance) {
+			if (delta >= PulsusNoteRules.EARLY_LIMIT_US) break;
+			if (delta >= 0 && delta >= distance) break;
+			if (!isPulsusNote(note) || note.getState() != 0) continue;
+			if (note instanceof LongNote ln && ln.isEnd()) continue;
+			if (Math.abs(delta) < distance) {
 				closest = note;
 				distance = Math.abs(delta);
 			}
 		}
-		return closest;
+		if (closest == null) return;
+		long delta = closest.getMicroTime() - inputUs;
+		int judge = pulsusRules.judge(delta, false);
+		updateMicro(state, closest, inputUs, judge, delta, judge != 5);
 	}
 
-	private void expirePulsusTaps(long nowUs) {
+	private void releasePulsusNote(StandardLane state, long inputUs) {
+		var tails = state.pulsusTails;
+		while (state.pulsusTailCursor < tails.length && tails[state.pulsusTailCursor].getState() != 0) {
+			state.pulsusTailCursor++;
+		}
+		LongNote closest = null;
+		long distance = Long.MAX_VALUE;
+		for (int i = state.pulsusTailCursor; i < tails.length; i++) {
+			var tail = tails[i];
+			// Tails become candidates in head order, even for a very long hold.
+			if (tail.getPair().getMicroTime() - inputUs > PulsusNoteRules.EARLY_LIMIT_US) break;
+			if (tail.getState() != 0) continue;
+			long delta = Math.abs(tail.getMicroTime() - inputUs);
+			if (delta < distance) {
+				closest = tail;
+				distance = delta;
+			}
+		}
+		if (closest == null || closest.getPair().getState() == 0) return;
+		long delta = closest.getMicroTime() - inputUs;
+		updateMicro(state, closest, inputUs, pulsusRules.judge(delta, true), delta, true);
+	}
+
+	private void expirePulsusNotes(long nowUs) {
 		for (StandardLane state : states) {
 			Note[] notes = state.lanemodel.getNotes();
-			while (state.pulsusTapCursor < notes.length) {
-				Note note = notes[state.pulsusTapCursor];
-				if (note instanceof NormalNote && note.getState() == 0) {
+			while (state.pulsusCursor < notes.length) {
+				Note note = notes[state.pulsusCursor];
+				if (isPulsusNote(note) && note.getState() == 0) {
 					long delta = note.getMicroTime() - nowUs;
-					if (delta >= -PulsusTapRules.LATE_LIMIT_US) break;
+					if (delta >= -PulsusNoteRules.LATE_LIMIT_US) break;
 					updateMicro(state, note, nowUs, 4, delta, true);
+					if (note instanceof LongNote head && !head.isEnd() && head.getPair().getState() == 0) {
+						// A missed head resolves the paired tail at the same timestamp.
+						var tail = head.getPair();
+						long tailDelta = tail.getMicroTime() - nowUs;
+						updateMicro(state, tail, nowUs, pulsusRules.judge(tailDelta, true), tailDelta, true);
+					}
 				}
-				state.pulsusTapCursor++;
+				state.pulsusCursor++;
 			}
 		}
 	}
 
 	@Override
 	void finishTime(long mtime) {
-		if (pulsusTaps != null) expirePulsusTaps(mtime);
+		if (pulsusRules != null) {
+			expirePulsusNotes(mtime);
+			return;
+		}
 		final TimerManager timer = main.timer;
 		final Config config = main.resource.getConfig();
 		// ノート通過系判定
@@ -573,7 +632,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 			for (Note note = state.lanemodel.getNote(); note != null
 					&& note.getMicroTime() < mtime + getJudgeWindow().getTime(noteType, 3, false); note = state.lanemodel.getNote()) {
 				final int mjud = (int) (note.getMicroTime() - mtime);
-				if (pulsusTaps == null && note instanceof NormalNote && note.getState() == 0) {
+				if (note instanceof NormalNote && note.getState() == 0) {
 					this.updateMicro(state, note, mtime, 4, mjud, true);
 				} else if (note instanceof LongNote ln) {
 					if (!ln.isEnd() && ln.getState() == 0) {
@@ -628,12 +687,17 @@ public final class JudgeManager extends AbstractJudgeManager {
 		boolean inclease;
 		long mpassingcount;
 		int lnendJudge = Integer.MIN_VALUE;
-		int pulsusTapCursor;
+		final LongNote[] pulsusTails;
+		int pulsusCursor;
+		int pulsusTailCursor;
 
-		StandardLane(int lane, LaneProperty property, Lane lanemodel) {
+		StandardLane(int lane, LaneProperty property, Lane lanemodel, boolean pulsus) {
 			super(lane, property, lanemodel);
 			timerActive = SkinPropertyMapper.hcnActiveTimerId(player, offset);
 			timerDamage = SkinPropertyMapper.hcnDamageTimerId(player, offset);
+			pulsusTails = pulsus ? Arrays.stream(lanemodel.getNotes())
+					.filter(note -> note instanceof LongNote ln && !ln.isEnd() && ln.getPair() != null)
+					.map(note -> ((LongNote) note).getPair()).toArray(LongNote[]::new) : null;
 		}
 	}
 }

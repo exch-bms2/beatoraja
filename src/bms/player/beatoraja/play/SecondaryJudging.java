@@ -67,11 +67,13 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 			gauge = new LunaticRave2GrooveGauge(chart, startGauge, resource);
 			judge = new LunaticRave2JudgeManager(player, gauge);
 		} else {
-			gauge = new GrooveGauge(chart, startGauge, BMSPlayerRule.getBMSPlayerRule(chart.getMode()).gauge);
-			var pulsusTaps = rule == BMSPlayerRule.Pulsus && model.getMode() == Mode.BEAT_7K
+			var pulsusRules = rule == BMSPlayerRule.Pulsus && model.getMode() == Mode.BEAT_7K
 					&& resource.getOriginalMode() == Mode.BEAT_7K
-					? PulsusTapRules.forRank(model.getJudgeType().bmsRank()) : null;
-			judge = new JudgeManager(player, gauge, rule, pulsusTaps);
+					? PulsusNoteRules.forRank(model.getJudgeType().bmsRank()) : null;
+			gauge = pulsusRules != null
+					? new PulsusGrooveGauge(model, startGauge, resource.getChartRuleParameters())
+					: new GrooveGauge(chart, startGauge, BMSPlayerRule.getBMSPlayerRule(chart.getMode()).gauge);
+			judge = new JudgeManager(player, gauge, rule, pulsusRules);
 		}
 		gaugeSamples = new FloatArray[gauge.getGaugeTypeLength()];
 		for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i] = new FloatArray();

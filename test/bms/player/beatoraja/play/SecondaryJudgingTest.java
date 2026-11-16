@@ -371,7 +371,8 @@ public final class SecondaryJudgingTest {
                     withPulsus.player, withPulsus.model, withPulsus.resource, END));
             for (var tick : List.of(new Tick(799_999, true), new Tick(820_000, false),
                     new Tick(1_055_000, true), new Tick(1_055_500, false), new Tick(1_056_000, true),
-                    new Tick(1_057_000, false), new Tick(END, null))) {
+                    new Tick(1_057_000, false), new Tick(3_000_000, true),
+                    new Tick(3_500_000, false), new Tick(END, null))) {
                 driveGroup(baseline, baselineGroup, tick);
                 driveGroup(withPulsus, pulsusGroup, tick);
                 check(snapshot(baseline).equals(snapshot(withPulsus))
@@ -384,8 +385,9 @@ public final class SecondaryJudgingTest {
             check(expected.size() == 3 && actual.size() == 4 && actual.get(0).rule() == SecondaryScoringRule.PULSUS,
                     "All selected rules ran");
             var pulsus = actual.get(0).judgment();
-            check(pulsus.outcome() == FINISHED && pulsus.exScore() == 2 && pulsus.maxCombo() == 2,
-                    "Pulsus used nearest-note selection in the shared input path");
+            check(pulsus.outcome() == FINISHED && pulsus.notes() == 4 && pulsus.passed() == 4
+                            && pulsus.exScore() == 4 && pulsus.maxCombo() == 3,
+                    "Pulsus used nearest-note selection and scored both LN endpoints in the shared input path");
             for (int i = 0; i < expected.size(); i++) {
                 var previous = expected.get(i);
                 var current = actual.get(i + 1);
@@ -407,8 +409,12 @@ public final class SecondaryJudgingTest {
         model.setMode(Mode.BEAT_7K);
         model.setSHA256("3".repeat(64));
         model.setTotal(120);
+        var head = new LongNote(0);
+        head.setType(LongNote.TYPE_LONGNOTE);
+        var tail = new LongNote(0);
         model.setAllTimeLine(new TimeLine[]{line(1, 1_000_000, new NormalNote(0)),
-                line(2, 1_062_500, new NormalNote(0))});
+                line(2, 1_062_500, new NormalNote(0)), line(3, 3_000_000, head), line(4, 4_000_000, tail)});
+        head.setPair(tail);
         return new Fixture(model, queued, Beatoraja_7, new BMSPlayerRule.ChartParameters(2, 120), NORMAL);
     }
 

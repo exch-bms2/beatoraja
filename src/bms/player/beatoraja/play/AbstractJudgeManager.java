@@ -119,10 +119,11 @@ public abstract class AbstractJudgeManager {
 			}
 		}
 		score = new ScoreData(orgmode);
-		score.setNotes(model.getTotalNotes());
+		int scoringNotes = scoringNoteCount(model);
+		score.setNotes(scoringNotes);
 		score.setSha256(model.getSHA256());
-		ghostJudge = new int[model.getTotalNotes()];
-		ghostDuration = new int[model.getTotalNotes()];
+		ghostJudge = new int[scoringNotes];
+		ghostDuration = new int[scoringNotes];
 		Arrays.fill(ghostJudge, 4);
 		Arrays.fill(ghostDuration, 1000000);
 
@@ -167,6 +168,10 @@ public abstract class AbstractJudgeManager {
 		this.recentJudgesIndex = 0;
 	}
 	abstract BMSPlayerRule ruleFor(Mode mode);
+	int scoringNoteCount(BMSModel model) {
+		return model.getTotalNotes();
+	}
+
 	abstract JudgeAlgorithm judgeAlgorithm(PlayerResource resource);
 	abstract LaneState[] initLanes(LaneProperty property, Lane[] lanes);
 	abstract void initRule(BMSModel model, PlayerResource resource, JudgeProperty rule,
@@ -311,7 +316,7 @@ public abstract class AbstractJudgeManager {
 		}
 
 		if (isHeadless()) {
-			gauge().update(judge);
+			gauge().updateJudgment(judge, mfast);
 			return;
 		}
 
