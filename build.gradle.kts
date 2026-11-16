@@ -165,6 +165,9 @@ tasks.named<JavaExec>("run") {
     providers.gradleProperty("inputDiagnostics").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics", it)
     }
+    providers.gradleProperty("windowsKeyboardTiming").orNull?.let {
+        systemProperty("beatoraja.windowsKeyboardTiming", it)
+    }
     providers.gradleProperty("textInputDiagnostics").orNull?.let {
         systemProperty("beatoraja.textInputDiagnostics", it)
     }
@@ -297,8 +300,10 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.LunaticRave2DpOrderTest",
     "bms.player.beatoraja.play.SecondaryJudgingTest",
     "bms.player.beatoraja.play.PulsusComparisonTest",
+    "bms.player.beatoraja.play.Nanasi1552ComparisonTest",
     "bms.player.beatoraja.LunaticRave2ScoreDatabaseTest",
     "bms.player.beatoraja.input.keyboard.KeyboardEventQueueTest",
+    "bms.player.beatoraja.input.keyboard.KeyboardTimingTraceTest",
     "bms.player.beatoraja.input.keyboard.SelectShortcutTest",
     "bms.player.beatoraja.input.keyboard.WindowsKeyboardMappingTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
@@ -366,7 +371,18 @@ val regressionTasks = regressionClasses.map { className ->
         enableAssertions = true
         maxHeapSize = "1g"
         systemProperty("java.awt.headless", "true")
+        if (className.endsWith(".Nanasi1552ComparisonTest")) {
+            providers.gradleProperty("nanasi1552Observations").orNull?.let { args("--observations", it) }
+        }
     }
+}
+tasks.register<JavaExec>("exportNanasi1552Fixtures") {
+    group = "verification"
+    description = "Export Nanasi 1.552 BMS charts, WAV cues and fixed input vectors."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.play.Nanasi1552ComparisonTest")
+    args("--export", layout.buildDirectory.dir("nanasi-1552").get().asFile.absolutePath)
 }
 tasks.register<JavaExec>("tableEditorWindowTest") {
     group = "verification"

@@ -2,12 +2,14 @@ package bms.player.beatoraja.input;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
+import bms.player.beatoraja.input.keyboard.KeyboardTimingTrace;
 
 /** Bounded logical stream shared by keyboard, controller and recorded replay edges. */
 public class JudgeEventQueue {
     private final int[] keys;
     private final boolean[] pressed;
     private final long[] times;
+    private KeyboardTimingTrace.Accepted[] timing;
     private final boolean[] enabled = new boolean[256];
     private final boolean[] held = new boolean[256];
     private int head, size;
@@ -29,6 +31,7 @@ public class JudgeEventQueue {
         Arrays.fill(held, false);
         System.arraycopy(initial, 0, held, 0, Math.min(initial.length, held.length));
         head = size = 0;
+        if (timing != null) Arrays.fill(timing, null);
         overflow = false;
         active = true;
     }
@@ -46,13 +49,19 @@ public class JudgeEventQueue {
         }
     }
 
-    public synchronized void offer(int key, boolean down, long time) {
+    public void offer(int key, boolean down, long time) {
+        offer(key, down, time, null);
+    }
+
+    synchronized void offer(int key, boolean down, long time, KeyboardTimingTrace.Accepted trace) {
         if (!isQueued(key) || overflow) return;
         if (size == keys.length) { overflow = true; return; }
         int index = (head + size) % keys.length;
         keys[index] = key;
         pressed[index] = down;
         times[index] = time;
+        if (trace != null && timing == null) timing = new KeyboardTimingTrace.Accepted[keys.length];
+        if (timing != null) timing[index] = trace;
         size++;
     }
 
@@ -60,11 +69,18 @@ public class JudgeEventQueue {
     public synchronized int available() { return active ? size : 0; }
 
     public synchronized void drain(Batch batch) {
+        if (batch.timing != null) Arrays.fill(batch.timing, 0, batch.size, null);
         batch.size = active && !overflow ? Math.min(size, batch.keys.length) : 0;
+        if (timing != null && batch.timing == null)
+            batch.timing = new KeyboardTimingTrace.Accepted[batch.keys.length];
         for (int i = 0; i < batch.size; i++) {
             batch.keys[i] = keys[head];
             batch.pressed[i] = pressed[head];
             batch.times[i] = times[head];
+            if (timing != null) {
+                batch.timing[i] = timing[head];
+                timing[head] = null;
+            }
             head = (head + 1) % keys.length;
             size--;
         }
@@ -78,6 +94,7 @@ public class JudgeEventQueue {
 
     public synchronized void clear() {
         head = size = 0;
+        if (timing != null) Arrays.fill(timing, null);
         Arrays.fill(held, false);
     }
 
@@ -93,6 +110,13 @@ public class JudgeEventQueue {
         public final int[] keys = new int[8192];
         public final boolean[] pressed = new boolean[8192];
         public final long[] times = new long[8192];
+        private KeyboardTimingTrace.Accepted[] timing;
         public int size;
+
+        public void traceKeyboardDispatch(int index) {
+            if (timing != null && timing[index] != null) {
+                timing[index].dispatch(pressed[index], times[index], System.nanoTime());
+            }
+        }
     }
 }

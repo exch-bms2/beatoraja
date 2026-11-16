@@ -5,6 +5,7 @@ import bms.player.beatoraja.input.mouse.MouseScratchGeometry;
 import bms.player.beatoraja.input.mouse.MouseScratchPosition;
 
 import bms.player.beatoraja.input.keyboard.KeyboardEventQueue;
+import bms.player.beatoraja.input.keyboard.KeyboardTimingTrace;
 import bms.player.beatoraja.input.keyboard.WindowsKeyboardMapping;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -35,7 +36,8 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     private volatile java.util.function.Consumer<Boolean> activityListener;
     private final InputDiagnostics diagnostics = InputDiagnostics.createIfEnabled();
     private Lwjgl3InputCallbacks callbacks;
-    private final KeyboardEventQueue keyboardEvents = new KeyboardEventQueue(diagnostics != null);
+    private final KeyboardTimingTrace keyboardTrace;
+    private final KeyboardEventQueue keyboardEvents;
     private boolean overflowReported;
     private boolean scratchOverflowReported;
     private final WindowDiagnostics windowDiagnostics = WindowDiagnostics.createIfEnabled();
@@ -66,6 +68,8 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         this.window = window;
         this.windowPositionSupported = windowPositionSupported;
         this.windowsKeyboard = windowsKeyboard;
+        keyboardTrace = KeyboardTimingTrace.createIfEnabled(windowsKeyboard);
+        keyboardEvents = new KeyboardEventQueue(diagnostics != null, keyboardTrace != null);
         long handle = window.getWindowHandle();
         focused = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE;
         iconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
@@ -196,6 +200,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
         boolean active = focused && !minimized;
         if (active == windowInputActive) return;
         windowInputActive = active;
+        if (callbacks != null) callbacks.clearKeyboardMessage();
         for (int i = 0; i < keys.length(); i++) {
             suppressedKeys[i] = super.isKeyPressed(i);
             keys.set(i, 0);
@@ -213,10 +218,16 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     void windowIconified(boolean minimized) { windowActivity(focused, minimized); }
 
     void keyboardEdge(int key, boolean down, long time) {
+        keyboardEdge(key, down, time, null);
+    }
+
+    void keyboardEdge(int key, boolean down, long time, KeyboardTimingTrace.Edge trace) {
         if (key < 0 || key >= suppressedKeys.length) return;
         if (!down) suppressedKeys[key] = false;
-        if (windowInputActive && !overlayActive && !suppressedKeys[key]) keyboardEvents.offer(key, down, time);
+        if (windowInputActive && !overlayActive && !suppressedKeys[key]) keyboardEvents.offer(key, down, time, trace);
     }
+
+    KeyboardTimingTrace keyboardTrace() { return keyboardTrace; }
 
     @Override public boolean isKeyPressed(int key) {
         if (Thread.currentThread() == owner) return super.isKeyPressed(key);
@@ -362,6 +373,7 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
             }
         } finally {
             if (diagnostics != null) diagnostics.close();
+            if (keyboardTrace != null) keyboardTrace.close();
             super.dispose();
         }
     }

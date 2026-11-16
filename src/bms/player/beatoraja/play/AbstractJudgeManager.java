@@ -229,6 +229,7 @@ public abstract class AbstractJudgeManager {
 			beforeFifoCheckpoint(checkpoint);
 			advancePassing(checkpoint);
 			for (int i = from; i < to; i++) {
+				if (input != null) batch.traceKeyboardDispatch(i);
 				processKeyEvent(batch.keys[i], batch.times[i], batch.pressed[i], checkpoint);
 				if (input != null) input.clearQueuedInputTime(batch.keys[i], batch.times[i], batch.pressed[i]);
 			}

@@ -6,6 +6,7 @@ import bms.player.beatoraja.input.mouse.SkinMouseInput;
 
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
 import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
+import bms.player.beatoraja.input.keyboard.KeyboardTimingTrace;
 
 import bms.player.beatoraja.input.controller.BMControllerInputProcessor;
 import bms.player.beatoraja.input.controller.ControllerBackendManager;
@@ -455,7 +456,12 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void keyboardKeyChanged(long presstime, int key, boolean pressed) {
-        queuedKeyChanged(kbinput, presstime, key, pressed);
+        keyboardKeyChanged(presstime, key, pressed, null);
+    }
+
+    public void keyboardKeyChanged(long presstime, int key, boolean pressed,
+            KeyboardTimingTrace.Accepted trace) {
+        queuedKeyChanged(kbinput, presstime, key, pressed, trace);
     }
 
     /** Accepts a translated controller edge on the input polling thread. */
@@ -468,10 +474,15 @@ public class BMSPlayerInputProcessor {
     }
 
     private void queuedKeyChanged(BMSPlayerInputDevice device, long presstime, int key, boolean pressed) {
+        queuedKeyChanged(device, presstime, key, pressed, null);
+    }
+
+    private void queuedKeyChanged(BMSPlayerInputDevice device, long presstime, int key, boolean pressed,
+            KeyboardTimingTrace.Accepted trace) {
 		synchronized (keyboardJudgeQueue) {
 			if (enable && (!overlayInput || !pressed) && keystate[key] != pressed) {
 				keyChanged(device, presstime, key, pressed);
-				keyboardJudgeQueue.offer(key, pressed, presstime);
+				keyboardJudgeQueue.offer(key, pressed, presstime, replayInput ? null : trace);
 				checkKeyboardQueueOverflow();
 			}
 		}

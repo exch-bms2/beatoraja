@@ -240,7 +240,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 						keystate[keys[i]] = value != 0;
 						keytime[keys[i]] = microtime;
 						keyboardEventTimes[keys[i]] = microtime;
-						bmsPlayerInputProcessor.keyboardKeyChanged(microtime, i, value != 0);
+						var timing = input.getKeyboardEvents().lastTrace(keys[i]);
+						bmsPlayerInputProcessor.keyboardKeyChanged(microtime, i, value != 0,
+								timing != null ? new KeyboardTimingTrace.Accepted(timing, System.nanoTime()) : null);
 						bmsPlayerInputProcessor.setAnalogState(i, false, 0);
 					}
 					if (value == -2 && diagnostics != null) diagnostics.keyboardDecision(keys[i], false, System.nanoTime());

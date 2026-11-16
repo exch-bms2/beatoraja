@@ -1,6 +1,8 @@
 package bms.player.beatoraja.input;
 
 import bms.player.beatoraja.input.keyboard.WindowsKeyboardMapping;
+import bms.player.beatoraja.input.keyboard.KeyboardTimingTrace;
+import bms.player.beatoraja.input.keyboard.WindowsKeyboardMessageClock;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
@@ -29,10 +31,13 @@ final class Lwjgl3InputCallbacks {
     private int lastSupplementary;
     private int fallbackPressed;
     private int knownAliasPressed;
+    private final WindowsKeyboardMessageClock messageClock;
 
     Lwjgl3InputCallbacks(long handle, PollingLwjgl3Input input, InputDiagnostics diagnostics) {
         this.handle = handle;
         boolean windowsKeyboard = input.usesWindowsKeyboard();
+        var trace = input.keyboardTrace();
+        messageClock = trace != null ? WindowsKeyboardMessageClock.attach(handle) : null;
         boolean capsLockDiagnostics = WindowsCapsLockDiagnostics.enable(windowsKeyboard);
         key = GLFWKeyCallback.create((window, code, scancode, action, mods) -> {
             int resolved = input.resolveKeyboardKey(code, scancode);
@@ -57,10 +62,15 @@ final class Lwjgl3InputCallbacks {
                 if (action == GLFW.GLFW_RELEASE && (!wasPressed || ((fallbackPressed | knownAliasPressed) & bit) != 0)) return;
                 if ((action == GLFW.GLFW_PRESS && wasPressed) || (action == GLFW.GLFW_REPEAT && !wasPressed)) return;
             }
-            long eventTime = diagnostics != null ? System.nanoTime() : 0;
+            long eventTime = diagnostics != null || trace != null ? System.nanoTime() : 0;
             if (mapped != com.badlogic.gdx.Input.Keys.UNKNOWN
-                    && (action == GLFW.GLFW_PRESS || action == GLFW.GLFW_RELEASE))
-                input.keyboardEdge(mapped, action == GLFW.GLFW_PRESS, eventTime);
+                    && (action == GLFW.GLFW_PRESS || action == GLFW.GLFW_RELEASE)) {
+                boolean down = action == GLFW.GLFW_PRESS;
+                var edge = trace == null ? null : messageClock == null
+                        ? trace.unmatched(eventTime)
+                        : messageClock.edge(trace, scancode, down, eventTime);
+                input.keyboardEdge(mapped, down, eventTime, edge);
+            }
             if (diagnostics != null) {
                 if (mapped == com.badlogic.gdx.Input.Keys.UNKNOWN) diagnostics.unknownKey();
                 else if (action == GLFW.GLFW_REPEAT) diagnostics.repeat();
@@ -131,7 +141,10 @@ final class Lwjgl3InputCallbacks {
         return true;
     }
 
+    void clearKeyboardMessage() { if (messageClock != null) messageClock.clear(); }
+
     void close(boolean restore) {
+        if (messageClock != null) messageClock.close();
         releaseFallbackKeys();
         if (restore) {
             GLFW.glfwSetKeyCallback(handle, originalKey);
