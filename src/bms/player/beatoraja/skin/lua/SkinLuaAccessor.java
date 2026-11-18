@@ -1,12 +1,12 @@
 package bms.player.beatoraja.skin.lua;
 
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -278,19 +278,19 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			}
 
 			@Override
-			public int peek() throws IOException, EOFException {
+			public int peek() throws IOException {
 				checkClosed();
 				if (pos >= data.length) {
-					throw new EOFException();
+					return -1;
 				}
 				return data[pos] & 0xff;
 			}
 
 			@Override
-			public int read() throws IOException, EOFException {
+			public int read() throws IOException {
 				checkClosed();
 				if (pos >= data.length) {
-					throw new EOFException();
+					return -1;
 				}
 				return data[pos++] & 0xff;
 			}
@@ -411,7 +411,11 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 		}
 
 		private class RestrictedFile extends File {
+			private static final int READ_BUFFER_SIZE = 8192;
 			private final RandomAccessFile file;
+			private final byte[] readBuffer = new byte[READ_BUFFER_SIZE];
+			private int bufferPos;
+			private int bufferLimit;
 			private boolean closed;
 
 			private RestrictedFile(RandomAccessFile file) {
@@ -421,6 +425,7 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			@Override
 			public void write(LuaString string) throws IOException {
 				checkClosed();
+				syncFilePointerToLogicalPosition();
 				file.write(string.m_bytes, string.m_offset, string.m_length);
 			}
 
@@ -438,6 +443,7 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			@Override
 			public void close() throws IOException {
 				closed = true;
+				invalidateReadBuffer();
 				file.close();
 			}
 
@@ -451,12 +457,15 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 				checkClosed();
 				long base = switch (option) {
 					case "set" -> 0;
-					case "cur" -> file.getFilePointer();
+					case "cur" -> logicalPosition();
 					case "end" -> file.length();
 					default -> throw new IOException("invalid seek option: " + option);
 				};
 				long position = Math.max(0, base + bytecount);
-				file.seek(position);
+				if (!("cur".equals(option) && bytecount == 0)) {
+					invalidateReadBuffer();
+					file.seek(position);
+				}
 				return (int) Math.min(position, Integer.MAX_VALUE);
 			}
 
@@ -467,35 +476,82 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			@Override
 			public int remaining() throws IOException {
 				checkClosed();
-				return (int) Math.min(Math.max(0, file.length() - file.getFilePointer()), Integer.MAX_VALUE);
+				return (int) Math.min(Math.max(0, file.length() - logicalPosition()), Integer.MAX_VALUE);
 			}
 
 			@Override
-			public int peek() throws IOException, EOFException {
+			public int peek() throws IOException {
 				checkClosed();
-				long position = file.getFilePointer();
-				int value = file.read();
-				file.seek(position);
-				if (value < 0) {
-					throw new EOFException();
+				if (bufferPos >= bufferLimit && !fillReadBuffer()) {
+					return -1;
 				}
-				return value;
+				return readBuffer[bufferPos] & 0xFF;
 			}
 
 			@Override
-			public int read() throws IOException, EOFException {
+			public int read() throws IOException {
 				checkClosed();
-				int value = file.read();
-				if (value < 0) {
-					throw new EOFException();
+				if (bufferPos >= bufferLimit && !fillReadBuffer()) {
+					return -1;
 				}
-				return value;
+				return readBuffer[bufferPos++] & 0xFF;
 			}
 
 			@Override
 			public int read(byte[] bytes, int offset, int length) throws IOException {
 				checkClosed();
-				return file.read(bytes, offset, length);
+				Objects.checkFromIndexSize(offset, length, bytes.length);
+				if (length == 0) {
+					return 0;
+				}
+				int totalRead = 0;
+				while (totalRead < length) {
+					if (bufferPos >= bufferLimit) {
+						int remainingToRead = length - totalRead;
+						if (remainingToRead >= READ_BUFFER_SIZE) {
+							int count = file.read(bytes, offset + totalRead, remainingToRead);
+							if (count <= 0) {
+								break;
+							}
+							totalRead += count;
+							continue;
+						}
+						if (!fillReadBuffer()) {
+							break;
+						}
+					}
+					int count = Math.min(bufferLimit - bufferPos, length - totalRead);
+					System.arraycopy(readBuffer, bufferPos, bytes, offset + totalRead, count);
+					bufferPos += count;
+					totalRead += count;
+				}
+				return totalRead > 0 ? totalRead : -1;
+			}
+
+			private boolean fillReadBuffer() throws IOException {
+				invalidateReadBuffer();
+				int read = file.read(readBuffer, 0, readBuffer.length);
+				if (read <= 0) {
+					return false;
+				}
+				bufferLimit = read;
+				return true;
+			}
+
+			private long logicalPosition() throws IOException {
+				return file.getFilePointer() - (bufferLimit - bufferPos);
+			}
+
+			private void syncFilePointerToLogicalPosition() throws IOException {
+				if (bufferPos < bufferLimit) {
+					file.seek(logicalPosition());
+				}
+				invalidateReadBuffer();
+			}
+
+			private void invalidateReadBuffer() {
+				bufferPos = 0;
+				bufferLimit = 0;
 			}
 
 			private void checkClosed() throws IOException {
@@ -573,19 +629,19 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			}
 
 			@Override
-			public int peek() throws IOException, EOFException {
+			public int peek() throws IOException {
 				checkClosed();
 				if (pos >= data.length) {
-					throw new EOFException();
+					return -1;
 				}
 				return data[pos] & 0xff;
 			}
 
 			@Override
-			public int read() throws IOException, EOFException {
+			public int read() throws IOException {
 				checkClosed();
 				if (pos >= data.length) {
-					throw new EOFException();
+					return -1;
 				}
 				return data[pos++] & 0xff;
 			}
