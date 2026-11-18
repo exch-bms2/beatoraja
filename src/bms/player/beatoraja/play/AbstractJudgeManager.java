@@ -119,10 +119,11 @@ public abstract class AbstractJudgeManager {
 			}
 		}
 		score = new ScoreData(orgmode);
-		score.setNotes(model.getTotalNotes());
+		int scoringNotes = scoringNoteCount(model);
+		score.setNotes(scoringNotes);
 		score.setSha256(model.getSHA256());
-		ghostJudge = new int[model.getTotalNotes()];
-		ghostDuration = new int[model.getTotalNotes()];
+		ghostJudge = new int[scoringNotes];
+		ghostDuration = new int[scoringNotes];
 		Arrays.fill(ghostJudge, 4);
 		Arrays.fill(ghostDuration, 1000000);
 
@@ -136,12 +137,12 @@ public abstract class AbstractJudgeManager {
 		auto_presstime = new long[keyassign.length];
 		Arrays.fill(auto_presstime, Long.MIN_VALUE);
 		states = initLanes(lanes, model.getLanes());
-		final int judgerank = model.getJudgerank();
+		final int judgerank = isHeadless() ? 100 : model.getJudgerank();
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] keyJudgeWindowRate = config.isCustomJudge()
+		final int[] keyJudgeWindowRate = !isHeadless() && config.isCustomJudge()
 				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
-		final int[] scratchJudgeWindowRate = config.isCustomJudge()
+		final int[] scratchJudgeWindowRate = !isHeadless() && config.isCustomJudge()
 				? new int[]{config.getScratchJudgeWindowRatePerfectGreat(), config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
@@ -167,6 +168,10 @@ public abstract class AbstractJudgeManager {
 		this.recentJudgesIndex = 0;
 	}
 	abstract BMSPlayerRule ruleFor(Mode mode);
+	int scoringNoteCount(BMSModel model) {
+		return model.getTotalNotes();
+	}
+
 	abstract JudgeAlgorithm judgeAlgorithm(PlayerResource resource);
 	abstract LaneState[] initLanes(LaneProperty property, Lane[] lanes);
 	abstract void initRule(BMSModel model, PlayerResource resource, JudgeProperty rule,
@@ -176,7 +181,7 @@ public abstract class AbstractJudgeManager {
 		update(mtime, null);
 	}
 
-	final void update(long mtime, SecondaryJudging secondary) {
+	final void update(long mtime, SecondaryJudgingGroup secondary) {
 		final BMSPlayerInputProcessor input = main.main.getInputProcessor();
 		final JudgeEventQueue queue = input.getJudgeEventQueue();
 		queue.drain(eventBatch);
@@ -196,7 +201,7 @@ public abstract class AbstractJudgeManager {
 		updateFifo(mtime, input, queue, null);
 	}
 
-	private void updateFifo(long mtime, BMSPlayerInputProcessor input, JudgeEventQueue queue, SecondaryJudging secondary) {
+	private void updateFifo(long mtime, BMSPlayerInputProcessor input, JudgeEventQueue queue, SecondaryJudgingGroup secondary) {
 		processFifoEvents(mtime, eventBatch, input, queue);
 		for (int key = 0; key < keyassign.length; key++) {
 			if (queue.isQueued(key)) continue;
@@ -217,11 +222,14 @@ public abstract class AbstractJudgeManager {
 			while (to < batch.size && batch.times[to] == batch.times[from]) to++;
 			if (queue != null) {
 				for (int i = from; i < to; i++) queue.apply(batch.keys[i], batch.pressed[i]);
+			} else if (this instanceof JudgeManager) {
+				for (int i = from; i < to; i++) captureHeldState(batch.keys[i], batch.pressed[i]);
 			}
 			long checkpoint = Math.min(mtime, Math.max(prevmtime, batch.times[from]));
 			beforeFifoCheckpoint(checkpoint);
 			advancePassing(checkpoint);
 			for (int i = from; i < to; i++) {
+				if (input != null) batch.traceKeyboardDispatch(i);
 				processKeyEvent(batch.keys[i], batch.times[i], batch.pressed[i], checkpoint);
 				if (input != null) input.clearQueuedInputTime(batch.keys[i], batch.times[i], batch.pressed[i]);
 			}
@@ -231,6 +239,7 @@ public abstract class AbstractJudgeManager {
 		advancePassing(mtime);
 	}
 	void beforeFifoCheckpoint(long checkpoint) {}
+	void captureHeldState(int key, boolean pressed) {}
 
 	void advancePassing(long mtime) {
 		prevmtime = mtime;
@@ -243,6 +252,11 @@ public abstract class AbstractJudgeManager {
 
 	PlayEnd playEnd(long playMs, long endMs) {
 		return PlayEnd.UNSYNCHRONIZED;
+	}
+
+	/** Optional full-combo lamp override for a completed, unassisted single song. */
+	ClearType getCompletedComboClear() {
+		return null;
 	}
 
 	final void setLaneJudgement(LaneState state, int value) {
@@ -261,6 +275,15 @@ public abstract class AbstractJudgeManager {
 	private final int[] COMBO_TIMER = { TIMER_COMBO_1P, TIMER_COMBO_2P, TIMER_COMBO_3P };
 
 	final void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish) {
+		updateMicro(state, n, mtime, judge, mfast, judgeVanish, true);
+	}
+
+	boolean keepsCombo(Note note, int judge) {
+		return combocond[judge];
+	}
+
+	final void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish,
+			boolean playGuideSE) {
 		if (judgeVanish) {
 			if (score.getPassnotes() < ghostJudge.length) {
 				ghostJudge[score.getPassnotes()] = judge;
@@ -281,19 +304,20 @@ public abstract class AbstractJudgeManager {
 			microrecentJudges[recentJudgesIndex] = mfast;
 		}
 
-		if (combocond[judge] && judge < 5) {
+		boolean keepCombo = keepsCombo(n, judge);
+		if (keepCombo && judge < 5) {
 			combo++;
 			score.setCombo(Math.max(score.getCombo(), combo));
 			coursecombo++;
 			coursemaxcombo = coursemaxcombo > coursecombo ? coursemaxcombo : coursecombo;
 		}
-		if (!combocond[judge]) {
+		if (!keepCombo) {
 			combo = 0;
 			coursecombo = 0;
 		}
 
 		if (isHeadless()) {
-			gauge().update(judge);
+			gauge().updateJudgment(judge, mfast);
 			return;
 		}
 
@@ -328,7 +352,9 @@ public abstract class AbstractJudgeManager {
 			main.timer.setTimerOn(TIMER_JUDGE_1P_KEYS + slot);
 		}
 		main.update(judge, mtime / 1000);
-		keysound.play(judge, mfast >= 0);
+		if (playGuideSE) {
+			keysound.play(judge, mfast >= 0);
+		}
 
 		final PlayerConfig player = main.main.getPlayerConfig();
 		if(player.isNotesDisplayTimingAutoAdjust()) {

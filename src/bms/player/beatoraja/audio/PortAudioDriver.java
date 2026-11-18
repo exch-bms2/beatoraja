@@ -163,6 +163,11 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		return requestedFrames;
 	}
 
+	private static boolean isWriteTimeout(Throwable failure) {
+		// The bundled JNI binding reports PortAudio's paTimedOut as a RuntimeException with this message.
+		return failure instanceof RuntimeException && "Wait timed out".equals(failure.getMessage());
+	}
+
 	/** Owns one native stream and releases PortAudio only after that stream is closed. */
 	static final class StreamLifecycle {
 		private static final long STARTUP_WAIT_NANOS = TimeUnit.MILLISECONDS.toNanos(500);
@@ -210,6 +215,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			int available = -1;
 			boolean completed = false;
 			boolean cancelled = false;
+			boolean timedOut = false;
 			boolean transitioned = false;
 			long started = System.nanoTime();
 			boolean startup = !outputProgressObserved;
@@ -253,6 +259,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 						cancelled = true;
 						return false;
 					}
+					timedOut = isWriteTimeout(e);
 					throw e;
 				}
 				writesCompleted++;
@@ -271,7 +278,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 				if (transitioned) {
 					Logger.getGlobal().info("PortAudio startup complete : switching to native blocking writes");
 				}
-				if (attempt <= 4 || !completed) {
+				if (attempt <= 4 || (!completed && !timedOut)) {
 					Logger.getGlobal().info("PortAudio write : attempt=" + attempt + ", frames=" + frames
 							+ ", mode=" + (startup ? "STARTUP" : "NATIVE_BLOCKING")
 							+ ", availableBefore=" + availableBefore + ", availableAtWrite=" + available
@@ -919,6 +926,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	}
 
 	private void runMixer() {
+		final int frames = buffer.length / 2;
+		final long bufferDurationNanos = TimeUnit.SECONDS.toNanos(1) * frames / getSampleRate();
+		int consecutiveTimeouts = 0;
 		while(!stop) {
 			long started = diagnostics != null ? System.nanoTime() : 0;
 			final float gpitch = getGlobalPitch();
@@ -961,7 +971,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 				}						
 			}
 			
-			long writeStarted = diagnostics != null ? System.nanoTime() : 0;
+			long writeStarted = System.nanoTime();
 			int outcome = AudioDiagnostics.FAILED;
 			try {
 				StreamLifecycle currentStream = stream;
@@ -970,20 +980,33 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					stop = true;
 					break;
 				}
-				if (!currentStream.write(buffer, buffer.length / 2)) {
+				if (!currentStream.write(buffer, frames)) {
 					outcome = AudioDiagnostics.CANCELLED;
 					stop = true;
 					break;
 				}
 				outcome = AudioDiagnostics.RETURNED;
+				if (consecutiveTimeouts > 0) {
+					Logger.getGlobal().info("PortAudio stream write recovered after " + consecutiveTimeouts + " timeout(s)");
+					consecutiveTimeouts = 0;
+				}
 			} catch(Throwable e) {
+				if (!stop && isWriteTimeout(e)) {
+					if (++consecutiveTimeouts == 1) {
+						Logger.getGlobal().warning("PortAudio stream write timed out; continuing on the same stream");
+					}
+					// Move on to the next buffer, paced even when the native write returns immediately.
+					long remaining = bufferDurationNanos - (System.nanoTime() - writeStarted);
+					if (remaining > 0) LockSupport.parkNanos(remaining);
+					continue;
+				}
 				if(!stop) {
 					Logger.getGlobal().log(java.util.logging.Level.WARNING, "PortAudio stream write failed : " + e.getMessage(), e);
 				}
 				stop = true;
 				break;
 			} finally {
-				if (diagnostics != null) diagnostics.stream(started, writeStarted, System.nanoTime(), buffer.length / 2,
+				if (diagnostics != null) diagnostics.stream(started, writeStarted, System.nanoTime(), frames,
 						outcome, gpitch, getTimeStretchRate());
 			}
 			

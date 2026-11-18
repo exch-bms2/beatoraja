@@ -12,12 +12,16 @@ import java.util.logging.Logger;
 import com.portaudio.BlockingStream;
 import com.portaudio.StreamInfo;
 
+import static bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate;
+import static bms.player.beatoraja.input.KeyboardQueueTestSupport.set;
+
 /** Native-free regression tests for PortAudio stream startup, failure, and shutdown. */
 public final class PortAudioStreamLifecycleTest {
     public static void main(String[] args) throws Exception {
         assertAsioMinimumBufferSize();
         assertStartFailure();
         assertWriteFailure();
+        assertMixerRecoversFromWriteTimeout();
         assertCloseFailure();
         assertShutdownDuringWrite();
         assertStreamInfoLogging();
@@ -306,6 +310,45 @@ public final class PortAudioStreamLifecycleTest {
         stream.close();
         check(events.equals(List.of("start", "write", "abort", "close", "release")),
                 "Write failure must close before releasing PortAudio");
+    }
+
+    private static void assertMixerRecoversFromWriteTimeout() throws Exception {
+        var submitted = new ArrayList<Float>();
+        var nativeStream = new FakeStream() {
+            @Override public boolean write(float[] buffer, int frames) {
+                events.add("write");
+                submitted.add(buffer[0]);
+                return switch (submitted.size()) {
+                    case 1, 2 -> throw new RuntimeException("Wait timed out");
+                    case 3 -> false;
+                    default -> throw new RuntimeException("Device unavailable");
+                };
+            }
+        };
+        var stream = new PortAudioDriver.StreamLifecycle(nativeStream, () -> nativeStream.events.add("release"));
+        var driver = allocate(PortAudioDriver.class);
+        var input = new PortAudioDriver.MixerInput();
+        float[] samples = {0.125f, 0.125f, 0.25f, 0.25f, 0.5f, 0.5f};
+        input.pcm = new FloatPCM(2, 48_000, 0, samples.length, samples);
+        input.pos = 0;
+        input.volume = 1;
+        input.pitch = 1;
+        set(driver, PortAudioDriver.class, "stream", stream);
+        set(driver, PortAudioDriver.class, "inputs", new PortAudioDriver.MixerInput[]{input});
+        set(driver, PortAudioDriver.class, "buffer", new float[2]);
+        driver.setSampleRate(48_000);
+        driver.setGlobalPitch(1);
+
+        stream.start();
+        driver.run();
+
+        check(submitted.equals(List.of(0.125f, 0.25f, 0.5f, 0f)),
+                "Mixer must advance to the next block after a timeout on the same stream");
+        check(nativeStream.events.equals(List.of("start", "write", "write", "write", "write", "abort", "close", "release")),
+                "Only the fatal error should stop the mixer and close the original stream");
+        var statistics = stream.getWriteStatistics();
+        check(statistics.completed() == 1 && statistics.failed() == 3 && statistics.cancelled() == 0,
+                "Timeouts and fatal errors must count as failed writes");
     }
 
     private static void assertCloseFailure() {

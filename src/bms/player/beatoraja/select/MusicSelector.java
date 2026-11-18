@@ -2,6 +2,7 @@ package bms.player.beatoraja.select;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
+import static bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.MASK_CTRL;
 
 import java.nio.file.*;
 import java.util.logging.Logger;
@@ -15,7 +16,8 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SongPreview;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
+
 import bms.player.beatoraja.input.text.TextInputDiagnostics;
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 import bms.player.beatoraja.ir.*;
@@ -316,7 +318,8 @@ public final class MusicSelector extends MainState {
 
 	public void input() {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		if (config.isIndependentPlaySides() && !getSkin().isTextInputActive() && input.isControlKeyPressed(ControlKeys.F5)) {
+		if (config.isIndependentPlaySides() && !getSkin().isTextInputActive()
+				&& input.isActivated(KeyboardShortcut.SWITCH_PLAY_SIDE)) {
 			selectedPlaySide = getSelectedPlaySide().other();
 			if (usesSideSelectionInput()) {
 				input.rebindMusicSelectInputs(config.getMusicSelectInputConfig(selectedPlaySide));
@@ -325,10 +328,13 @@ public final class MusicSelector extends MainState {
 			}
 		}
 
-		if (input.getControlKeyState(ControlKeys.NUM6)) {
+		if (!getSkin().isTextInputActive() && (input.getKeyBoardInputProcesseor().consumeShortcut(KeyboardShortcut.KEY_CONFIG)
+				|| input.isControlKeyPressed(ControlKeys.NUM6, MASK_CTRL))) {
 			main.changeState(MainStateType.CONFIG);
-		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
+			return;
+		} else if (input.isActivated(KeyboardShortcut.OPEN_SKIN_CONFIGURATION)) {
 			main.changeState(MainStateType.SKINCONFIG);
+			return;
 		}
 
 		musicinput.input();

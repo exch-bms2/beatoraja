@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -22,7 +23,7 @@ class KeyInputProccessor {
 	private final BMSPlayer player;
 
 	private JudgeThread judge;
-	private SecondaryJudging secondaryJudging;
+	private SecondaryJudgingGroup secondaryJudging;
 
 	private long prevtime = -1;
 	private int[] scratch;
@@ -47,7 +48,7 @@ class KeyInputProccessor {
 		startJudge(model, keylog, milliMarginTime, null);
 	}
 
-	void setSecondaryJudging(SecondaryJudging secondaryJudging) {
+	void setSecondaryJudging(SecondaryJudgingGroup secondaryJudging) {
 		this.secondaryJudging = secondaryJudging;
 	}
 
@@ -141,7 +142,7 @@ class KeyInputProccessor {
 		}
 	}
 
-	public SecondaryJudging.Result stopJudge() {
+	public List<SecondaryJudgingGroup.Result> stopJudge(boolean primaryFinished) {
 		if (judge != null) {
 			keyBeamStop = true;
 			isJudgeStarted = false;
@@ -151,13 +152,12 @@ class KeyInputProccessor {
 			if (judge.isAlive()) throw new IllegalStateException("Judgment thread did not stop");
 			player.main.getInputProcessor().endInputJudge();
 			judge = null;
-			if (secondaryJudging != null) {
-				var result = secondaryJudging.finish();
-				secondaryJudging = null;
-				return result;
-			}
+			var secondary = secondaryJudging;
+			secondaryJudging = null;
+			return secondary != null ? secondary.finish(primaryFinished) : List.of();
 		}
-		return null;
+		secondaryJudging = null;
+		return List.of();
 	}
 
 	public void setKeyBeamStop(boolean inputStop) {

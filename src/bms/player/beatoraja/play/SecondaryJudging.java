@@ -15,37 +15,19 @@ import bms.model.Mode;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.PlayDataAccessor.ScoreAttempt;
-import bms.player.beatoraja.PlayDataAccessor.ScoreOutcome;
+import bms.player.beatoraja.BMSPlayerMode;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.GaugeHistory;
 import bms.player.beatoraja.input.JudgeEventQueue;
+import bms.player.beatoraja.play.SecondaryJudgingGroup.Judgment;
+import bms.player.beatoraja.play.SecondaryJudgingGroup.Outcome;
 
-/** In-memory, silent 7KEY LR2 run. The judge thread owns it until it joins. */
-final class SecondaryJudging {
+/** In-memory, silent run. The judge thread owns it until it joins. */
+final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	private static final long GAUGE_INTERVAL_US = 500_000;
-	enum Outcome { RUNNING, FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
 
-	record Result(Outcome outcome, int passed, int exScore, int maxCombo,
-			List<Integer> judgeCounts, int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear,
-			GaugeHistory gaugeHistory) {
-		ScoreAttempt toLocalAttempt(BMSModel model) {
-			int mode = model.containsUndefinedLongNote() ? model.getLntype() : 0;
-			var localOutcome = switch (outcome) {
-				case FINISHED -> ScoreOutcome.FINISHED;
-				case FAILED -> ScoreOutcome.FAILED;
-				case INTERRUPTED -> ScoreOutcome.INTERRUPTED;
-				case INPUT_LOST -> ScoreOutcome.INPUT_LOST;
-				case ERROR -> ScoreOutcome.ERROR;
-				case RUNNING -> throw new IllegalStateException("Cannot save a running judgment");
-			};
-			return new ScoreAttempt(model.getSHA256(), mode, localOutcome,
-					notes, passed, maxCombo, minbp, clear, gaugeType, gaugeValue, judgeCounts);
-		}
-	}
-
-	private final LunaticRave2JudgeManager judge;
+	private final AbstractJudgeManager judge;
 	private final AbstractGrooveGauge gauge;
 	private final PlayerConfig config;
 	private final long endUs;
@@ -60,22 +42,41 @@ final class SecondaryJudging {
 
 	static SecondaryJudging create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
 		var config = resource.getPlayerConfig();
-		if (model.getMode() != Mode.BEAT_7K || BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model,
+		int startGauge = LunaticRave2GrooveGauge.mapBeatorajaGauge(config.getGauge());
+		if (BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model,
 				resource.getOriginalMode(), resource.getPlayMode(), resource.getCourseBMSModels() != null,
-				config.getGauge(), resource.getChartRuleParameters()) != BMSPlayerRule.LunaticRave2) {
+				startGauge, resource.getChartRuleParameters()) != BMSPlayerRule.LunaticRave2) {
 			return null;
 		}
-		return new SecondaryJudging(player, model, resource, endUs);
+		return new SecondaryJudging(player, model, resource, endUs, startGauge, BMSPlayerRule.LunaticRave2);
 	}
 
-	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
+	static SecondaryJudging createTimingProfile(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs,
+			SecondaryScoringRule rule) {
+		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
+				|| resource.getCourseBMSModels() != null) return null;
+		return new SecondaryJudging(player, model, resource, endUs, resource.getPlayerConfig().getGauge(), rule.scoreRule());
+	}
+
+	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int startGauge,
+			BMSPlayerRule rule) {
 		config = resource.getPlayerConfig();
 		this.endUs = endUs;
 		var chart = copyChart(model);
-		gauge = new LunaticRave2GrooveGauge(chart, config.getGauge(), resource);
+		if (rule == BMSPlayerRule.LunaticRave2) {
+			gauge = new LunaticRave2GrooveGauge(chart, startGauge, resource);
+			judge = new LunaticRave2JudgeManager(player, gauge);
+		} else {
+			var pulsusRules = rule == BMSPlayerRule.Pulsus && model.getMode() == Mode.BEAT_7K
+					&& resource.getOriginalMode() == Mode.BEAT_7K
+					? PulsusNoteRules.forRank(model.getJudgeType().bmsRank()) : null;
+			gauge = pulsusRules != null
+					? new PulsusGrooveGauge(model, startGauge, resource.getChartRuleParameters())
+					: new GrooveGauge(chart, startGauge, BMSPlayerRule.getBMSPlayerRule(chart.getMode()).gauge);
+			judge = new JudgeManager(player, gauge, rule, pulsusRules);
+		}
 		gaugeSamples = new FloatArray[gauge.getGaugeTypeLength()];
 		for (int i = 0; i < gaugeSamples.length; i++) gaugeSamples[i] = new FloatArray();
-		judge = new LunaticRave2JudgeManager(player, gauge);
 		judge.init(chart, resource);
 		int keys = player.getLaneProperty().getKeyLaneAssign().length;
 		legacyKeys = new int[keys];
@@ -83,7 +84,7 @@ final class SecondaryJudging {
 		legacyPressed = new boolean[keys];
 	}
 
-	boolean isRunning() {
+	public boolean isRunning() {
 		return outcome == Outcome.RUNNING;
 	}
 
@@ -91,55 +92,66 @@ final class SecondaryJudging {
 		return gauge;
 	}
 
-	void addLegacyEvent(int key, long time, boolean pressed) {
+	public void addLegacyEvent(int key, long time, boolean pressed) {
 		legacyKeys[legacySize] = key;
 		legacyTimes[legacySize] = time;
 		legacyPressed[legacySize++] = pressed;
 	}
 
-	void advance(long nowUs, JudgeEventQueue.Batch batch, boolean overflow) {
+	public void advance(long nowUs, JudgeEventQueue.Batch batch, boolean overflow) {
 		try {
 			if (overflow) {
 				outcome = Outcome.INPUT_LOST;
 				return;
 			}
 			if (gaugeTimesUs.size == 0) sampleGauge(0);
-			judge.processFifoEvents(nowUs, batch, null, null);
-			for (int i = 0; i < legacySize; i++) {
-				judge.processKeyEvent(legacyKeys[i], legacyTimes[i], legacyPressed[i], nowUs);
+			long processedUs = nowUs;
+			if (judge instanceof LunaticRave2JudgeManager lr2) {
+				lr2.processCapturedInput(nowUs, batch, legacyKeys, legacyTimes, legacyPressed, legacySize);
+				processedUs = lr2.processedThroughUs(nowUs);
+			} else if (judge instanceof JudgeManager timing) {
+				timing.processCapturedInput(nowUs, batch, legacyKeys, legacyTimes, legacyPressed, legacySize);
 			}
-			judge.finishTime(nowUs);
 			if (BMSPlayer.updateGaugeAutoShift(gauge, config, gauge.isFailed())) {
 				outcome = Outcome.FAILED;
 			} else if (nowUs >= endUs) {
 				outcome = Outcome.FINISHED;
 			}
-			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, nowUs));
+			lastProcessedUs = Math.min(endUs, Math.max(lastProcessedUs, processedUs));
 			if (!isRunning() || lastProcessedUs - gaugeTimesUs.peek() >= GAUGE_INTERVAL_US) {
 				sampleGauge(lastProcessedUs);
 			}
 		} catch (RuntimeException e) {
 			outcome = Outcome.ERROR;
-			Logger.getGlobal().log(Level.WARNING, "LR2 secondary judging stopped", e);
+			Logger.getGlobal().log(Level.WARNING,
+					judge.getScoreData().getRule() + " secondary judging stopped", e);
 		} finally {
 			legacySize = 0;
 		}
 	}
 
-	Result finish() {
-		if (isRunning()) outcome = Outcome.INTERRUPTED;
+	Judgment finish() {
+		return finish(false);
+	}
+
+	public Judgment finish(boolean primaryFinished) {
+		var score = judge.getScoreData();
+		int passed = judge.getPastNotes();
+		if (isRunning()) {
+			// A manual exit can skip the post-song margin after all judgments are settled.
+			outcome = primaryFinished && score.getNotes() > 0 && passed == score.getNotes()
+					? Outcome.FINISHED : Outcome.INTERRUPTED;
+		}
 		sampleGauge(lastProcessedUs);
 		var counts = new ArrayList<Integer>(12);
 		for (int i = 0; i < 6; i++) {
 			counts.add(judge.getJudgeCount(i, true));
 			counts.add(judge.getJudgeCount(i, false));
 		}
-		var score = judge.getScoreData();
-		int passed = judge.getPastNotes();
 		int minbp = judge.getJudgeCount(3) + judge.getJudgeCount(4) + judge.getJudgeCount(5)
 				+ score.getNotes() - passed;
-		return new Result(outcome, passed, score.getExscore(), score.getCombo(),
-				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(passed),
+		return new Judgment(outcome, passed, score.getExscore(), score.getCombo(),
+				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(),
 				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs));
 	}
 
@@ -154,10 +166,14 @@ final class SecondaryJudging {
 		}
 	}
 
-	private ClearType clearType(int passed) {
-		if (outcome != Outcome.FINISHED || !gauge.isQualified()) return ClearType.Failed;
-		if (passed > 0 && passed == judge.getCombo()) {
-			if (judge.getJudgeCount(2) > 0) return ClearType.FullCombo;
+	private ClearType clearType() {
+		if (outcome != Outcome.FINISHED) return ClearType.Failed;
+		var comboClear = judge.getCompletedComboClear();
+		if (comboClear != null) return comboClear;
+		if (!gauge.isQualified()) return ClearType.Failed;
+		if (judge instanceof JudgeManager && judge.getPastNotes() > 0 && judge.getPastNotes() == judge.getCombo()
+				&& judge.getPastNotes() == judge.getScoreData().getNotes()) {
+			if (judge.getJudgeCount(2) != 0) return ClearType.FullCombo;
 			return judge.getJudgeCount(1) == 0 ? ClearType.Max : ClearType.Perfect;
 		}
 		return gauge.getClearType();

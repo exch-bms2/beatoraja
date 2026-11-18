@@ -12,12 +12,21 @@ import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import bms.player.beatoraja.PlayModeConfig.MidiConfig;
 import bms.player.beatoraja.ReplayData;
+import bms.player.beatoraja.MainState.MainStateType;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.utils.Json;
 import org.lwjgl.glfw.GLFW;
+import java.util.ArrayList;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
+import static bms.player.beatoraja.input.keyboard.WindowsKeyboardMapping.CONVERT;
+import static bms.player.beatoraja.input.keyboard.WindowsKeyboardMapping.NONCONVERT;
 
 /** Real libGDX callbacks with injected Windows scancodes, NOT physical Windows keyboard validation. */
 public final class Lwjgl3WindowsKeyboardTest {
@@ -56,6 +65,8 @@ public final class Lwjgl3WindowsKeyboardTest {
         source.setInputProcessor(keyboard);
         source.update();
         var screen = KeyboardQueueTestSupport.allocate(KeyConfiguration.class);
+        var player = new PlayerConfig();
+        KeyboardQueueTestSupport.set(screen, KeyConfiguration.class, "config", player);
         KeyboardQueueTestSupport.set(screen, KeyConfiguration.class, "keyboard", keyboard);
         KeyboardQueueTestSupport.set(screen, KeyConfiguration.class, "keyboardConfig", config);
         KeyboardQueueTestSupport.set(screen, KeyConfiguration.class, "controllerConfigs", new ControllerConfig[0]);
@@ -85,6 +96,19 @@ public final class Lwjgl3WindowsKeyboardTest {
         source.update();
         check(!read(source, 240) && !read(source, 73), "Both published releases are visible");
         check(!source.isKeyPressed(Keys.ANY_KEY), "Balanced libGDX press count");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7b, GLFW.GLFW_PRESS);
+        source.update();
+        check(keyboard.getLastPressedKey() == NONCONVERT && read(source, NONCONVERT), "Muhenkan reaches KeyConfig and polling");
+        check((boolean) assign.invoke(screen, 3) && screen.getKeyAssign(3).equals("Muhenkan"), "Assign Muhenkan to a note");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_PRESS);
+        source.update();
+        check(keyboard.getLastPressedKey() == CONVERT && read(source, CONVERT) && read(source, NONCONVERT),
+                "Both conversion keys are independent");
+        check((boolean) assign.invoke(screen, 4) && screen.getKeyAssign(4).equals("Henkan"), "Assign Henkan to a note");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7b, GLFW.GLFW_RELEASE);
+        check(!source.isKeyPressed(NONCONVERT) && source.isKeyPressed(CONVERT), "One release cannot release the other key");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_RELEASE);
+        source.update();
         config.getKeyAssign()[2] = Keys.Z;
         keyboard.setConfig(config);
         keyboard.clear();
@@ -94,11 +118,13 @@ public final class Lwjgl3WindowsKeyboardTest {
         tap(handle, 0x7d);
         edge(handle, GLFW.GLFW_KEY_Z, 0x73, GLFW.GLFW_PRESS);
         edge(handle, GLFW.GLFW_KEY_Z, 0x73, GLFW.GLFW_RELEASE);
+        tap(handle, 0x7b);
+        tap(handle, 0x79);
         source.update();
         poll(keyboard, 123_456);
         var batch = new KeyboardJudgeQueue.Batch();
         input.getKeyboardJudgeQueue().drain(batch);
-        check(batch.size == 6, "Two short JIS taps and an existing assignment survive the FIFO");
+        check(batch.size == 10, "Four short JIS taps and an existing assignment survive the FIFO");
         for (int i = 0; i < batch.size; i++) check(batch.keys[i] == i / 2
                 && batch.pressed[i] == (i % 2 == 0) && batch.times[i] == 123_456,
                 "Existing per-key ordering, duration=0 and poll-time timestamps");
@@ -138,14 +164,20 @@ public final class Lwjgl3WindowsKeyboardTest {
         keyboard.setConfig(config);
         keyboard.clear();
         edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x73, GLFW.GLFW_PRESS);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7b, GLFW.GLFW_PRESS);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_PRESS);
         source.update();
         focus(handle, false);
         source.update();
         check(!read(source, 240) && !source.isKeyPressed(240), "Focus loss releases owner and published alias state");
+        check(!read(source, NONCONVERT) && !read(source, CONVERT)
+                && !source.isKeyPressed(NONCONVERT) && !source.isKeyPressed(CONVERT), "Focus loss releases both conversion aliases");
         focus(handle, true);
         source.update();
         check(!read(source, 240), "Held aliases are suppressed on focus return");
         edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x73, GLFW.GLFW_RELEASE);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7b, GLFW.GLFW_RELEASE);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_RELEASE);
         source.update();
         check(!source.isKeyPressed(Keys.ANY_KEY), "Late physical release cannot decrement the count twice");
         tap(handle, 0x73);
@@ -214,6 +246,8 @@ public final class Lwjgl3WindowsKeyboardTest {
         });
         tap(handle, 0x73);
         tap(handle, 0x7d);
+        tap(handle, 0x7b);
+        tap(handle, 0x79);
         source.update();
         check(text.isEmpty(), "Scancode aliases do not fabricate a second character stream");
         var callback = GLFW.glfwSetCharCallback(handle, null);
@@ -223,6 +257,81 @@ public final class Lwjgl3WindowsKeyboardTest {
         check(text.toString().equals("\\"), "Original GLFW character/IME path unchanged");
         if (source.getDiagnostics() != null) check(source.getDiagnostics().snapshot().unknownKeys() == 0,
                 "Resolved JIS keys are not counted as unsupported input");
+
+        source.setInputProcessor(keyboard);
+        input.endKeyboardJudge();
+        input.resetAllKeyState();
+        config.getKeyAssign()[0] = CONVERT;
+        keyboard.setConfig(config);
+        keyboard.setShortcutContext(player, MainStateType.PLAY, true);
+        input.beginKeyboardJudge(null, false);
+        keyboard.setTextInputMode(true, true);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_PRESS);
+        source.update();
+        poll(keyboard, 500_000);
+        keyboard.setTextInputMode(false);
+        source.update();
+        poll(keyboard, 501_000);
+        input.getKeyboardJudgeQueue().drain(batch);
+        check(!input.getKeyState(0) && batch.size == 0, "Held IME conversion cannot become a note on editor exit");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_RELEASE);
+        tap(handle, 0x79);
+        source.update();
+        poll(keyboard, 502_000);
+        input.getKeyboardJudgeQueue().drain(batch);
+        check(batch.size == 2 && batch.pressed[0] && !batch.pressed[1], "Fresh conversion tap after IME is accepted");
+
+        input.endKeyboardJudge();
+        var shortcut = KeyConfiguration.class.getDeclaredMethod("setShortcut", KeyboardShortcut.class, int.class);
+        shortcut.setAccessible(true);
+        shortcut.invoke(screen, KeyboardShortcut.SEARCH, NONCONVERT);
+        shortcut.invoke(screen, KeyboardShortcut.SORT, CONVERT);
+        keyboard.setShortcutContext(player, MainStateType.MUSICSELECT, false);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7b, GLFW.GLFW_PRESS);
+        source.update();
+        poll(keyboard, 503_000);
+        check(input.isActivated(KeyboardShortcut.SEARCH) && !input.isActivated(KeyboardShortcut.SORT),
+                "Muhenkan executes its configured shortcut");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x7b, GLFW.GLFW_RELEASE);
+        keyboard.setTextInputMode(true, true);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_PRESS);
+        source.update();
+        poll(keyboard, 504_000);
+        check(!input.isActivated(KeyboardShortcut.SORT), "IME suppresses the Henkan shortcut");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_RELEASE);
+        source.update();
+        keyboard.setTextInputMode(false);
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_PRESS);
+        source.update();
+        poll(keyboard, 505_000);
+        check(input.isActivated(KeyboardShortcut.SORT), "Henkan executes its own shortcut outside IME");
+        edge(handle, GLFW.GLFW_KEY_UNKNOWN, 0x79, GLFW.GLFW_RELEASE);
+        verifyCapsLockDiagnostics(handle);
+    }
+
+    private static void verifyCapsLockDiagnostics(long handle) {
+        var messages = new ArrayList<String>();
+        var handler = new Handler() {
+            @Override public void publish(LogRecord record) {
+                if (record.getMessage().startsWith("Windows Caps Lock input:")) messages.add(record.getMessage());
+            }
+            @Override public void flush() {}
+            @Override public void close() {}
+        };
+        Logger.getGlobal().addHandler(handler);
+        try {
+            edge(handle, GLFW.GLFW_KEY_CAPS_LOCK, 0x3a, GLFW.GLFW_PRESS);
+            edge(handle, GLFW.GLFW_KEY_CAPS_LOCK, 0x3a, GLFW.GLFW_RELEASE);
+            edge(handle, GLFW.GLFW_KEY_CAPS_LOCK, 0x3a, GLFW.GLFW_PRESS, GLFW.GLFW_MOD_SHIFT);
+            edge(handle, GLFW.GLFW_KEY_CAPS_LOCK, 0x3a, GLFW.GLFW_RELEASE, GLFW.GLFW_MOD_SHIFT);
+            tap(handle, 0x7b);
+            check(messages.size() == 4 && messages.get(0).contains("action=press, shift=false")
+                    && messages.get(2).contains("action=press, shift=true")
+                    && messages.get(2).contains("glfwKey=280, scan=0x3a, gdxKey=" + Keys.CAPS_LOCK),
+                    "Diagnostics distinguish plain and Shift+Caps Lock without logging other keys");
+        } finally {
+            Logger.getGlobal().removeHandler(handler);
+        }
     }
 
     private static void tap(long handle, int scan) {
@@ -233,9 +342,13 @@ public final class Lwjgl3WindowsKeyboardTest {
     }
 
     private static void edge(long handle, int key, int scan, int action) {
+        edge(handle, key, scan, action, 0);
+    }
+
+    private static void edge(long handle, int key, int scan, int action, int mods) {
         var callback = GLFW.glfwSetKeyCallback(handle, null);
         GLFW.glfwSetKeyCallback(handle, callback);
-        callback.invoke(handle, key, scan, action, 0);
+        callback.invoke(handle, key, scan, action, mods);
     }
 
     private static void focus(long handle, boolean focused) {

@@ -1449,12 +1449,21 @@ public class IntegerPropertyFactory {
 		 */
 		private static IntegerProperty getAssignedLane(int key, boolean is2PSide){
 			return (state) -> {
-				if (!(state instanceof MusicResult)){
+				ReplayData rd;
+				Mode mode;
+				if (state instanceof BMSPlayer player) {
+					rd = player.getOptionInformation();
+					mode = player.getMode();
+				} else if (state instanceof MusicResult) {
+					rd = state.resource.getReplayData();
+					mode = state.resource.getBMSModel().getMode();
+				} else {
 					return 0;
 				}
 
-				ReplayData rd = state.resource.getReplayData();
-				Mode mode = state.resource.getBMSModel().getMode();
+				if (rd == null || rd.laneShufflePattern == null) {
+					return 0;
+				}
 				Random type = Random.getRandom(is2PSide? rd.randomoption2: rd.randomoption, mode);
 
 				switch (type){
@@ -1467,11 +1476,8 @@ public class IntegerPropertyFactory {
 						return 0;
 				}
 
-				if(rd.laneShufflePattern == null){ // patternModifyLogで再現されたリプレイの場合が該当
-					return 0;
-				}
-
-				if(mode.player == 1 && is2PSide){
+				int side = is2PSide ? 1 : 0;
+				if (side >= mode.player || side >= rd.laneShufflePattern.length) {
 					return 0;
 				}
 				int keyNum = mode.key / mode.player;
@@ -1488,8 +1494,8 @@ public class IntegerPropertyFactory {
 					index = key;
 				}
 
-				int[] pattern = rd.laneShufflePattern[is2PSide? 1 : 0];
-				if (pattern == null){
+				int[] pattern = rd.laneShufflePattern[side];
+				if (pattern == null || index >= pattern.length) {
 					return 0;
 				}
 				return pattern[index] + 1 - (is2PSide? keyNum: 0);

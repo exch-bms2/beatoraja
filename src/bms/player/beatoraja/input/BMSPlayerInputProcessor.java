@@ -5,7 +5,8 @@ import bms.player.beatoraja.input.mouse.MouseCoordinates;
 import bms.player.beatoraja.input.mouse.SkinMouseInput;
 
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor;
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
+import bms.player.beatoraja.input.keyboard.KeyboardTimingTrace;
 
 import bms.player.beatoraja.input.controller.BMControllerInputProcessor;
 import bms.player.beatoraja.input.controller.ControllerBackendManager;
@@ -455,7 +456,12 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void keyboardKeyChanged(long presstime, int key, boolean pressed) {
-        queuedKeyChanged(kbinput, presstime, key, pressed);
+        keyboardKeyChanged(presstime, key, pressed, null);
+    }
+
+    public void keyboardKeyChanged(long presstime, int key, boolean pressed,
+            KeyboardTimingTrace.Accepted trace) {
+        queuedKeyChanged(kbinput, presstime, key, pressed, trace);
     }
 
     /** Accepts a translated controller edge on the input polling thread. */
@@ -468,10 +474,15 @@ public class BMSPlayerInputProcessor {
     }
 
     private void queuedKeyChanged(BMSPlayerInputDevice device, long presstime, int key, boolean pressed) {
+        queuedKeyChanged(device, presstime, key, pressed, null);
+    }
+
+    private void queuedKeyChanged(BMSPlayerInputDevice device, long presstime, int key, boolean pressed,
+            KeyboardTimingTrace.Accepted trace) {
 		synchronized (keyboardJudgeQueue) {
 			if (enable && (!overlayInput || !pressed) && keystate[key] != pressed) {
 				keyChanged(device, presstime, key, pressed);
-				keyboardJudgeQueue.offer(key, pressed, presstime);
+				keyboardJudgeQueue.offer(key, pressed, presstime, replayInput ? null : trace);
 				checkKeyboardQueueOverflow();
 			}
 		}
@@ -576,37 +587,8 @@ public class BMSPlayerInputProcessor {
 		return startPressed;
 	}
 
-	public boolean isActivated(KeyCommand key) {
-		final int MASK_CTRL = KeyBoardInputProcesseor.MASK_CTRL;
-		final int MASK_CTRL_SHIFT = KeyBoardInputProcesseor.MASK_CTRL|KeyBoardInputProcesseor.MASK_SHIFT;
-
-		switch(key) {
-		case SHOW_FPS:
-			return isControlKeyPressed(ControlKeys.F1);
-		case UPDATE_FOLDER:
-			return isControlKeyPressed(ControlKeys.F2);
-		case OPEN_EXPLORER:
-			return isControlKeyPressed(ControlKeys.F3, 0, MASK_CTRL, MASK_CTRL_SHIFT);
-		case COPY_SONG_MD5_HASH:
-			return isControlKeyPressed(ControlKeys.F3, MASK_CTRL, MASK_CTRL_SHIFT);
-		case COPY_SONG_SHA256_HASH:
-			return isControlKeyPressed(ControlKeys.F3, MASK_CTRL_SHIFT);
-		case SWITCH_SCREEN_MODE:
-			return isControlKeyPressed(ControlKeys.F4);
-		case SAVE_SCREENSHOT:
-			return isControlKeyPressed(ControlKeys.F6);
-		case ADD_FAVORITE_SONG:
-			return isControlKeyPressed(ControlKeys.F8);
-		case ADD_FAVORITE_CHART:
-			return isControlKeyPressed(ControlKeys.F9);
-		case AUTOPLAY_FOLDER:
-			return isControlKeyPressed(ControlKeys.F10);
-		case OPEN_IR:
-			return isControlKeyPressed(ControlKeys.F11);
-		case OPEN_SKIN_CONFIGURATION:
-			return isControlKeyPressed(ControlKeys.F12);
-		}
-		return false;
+	public boolean isActivated(KeyboardShortcut action) {
+		return kbinput.consumeShortcut(action);
 	}
 	
 	public boolean isSelectPressed() {

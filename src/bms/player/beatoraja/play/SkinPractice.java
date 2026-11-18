@@ -6,6 +6,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.SystemFontFactory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -79,11 +80,11 @@ public final class SkinPractice extends SkinObject {
 		}
 		legacyResourcesInitialized = true;
 		try {
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
+
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 18;
-			legacyFont = generator.generateFont(parameter);
-			generator.dispose();
+			legacyFont = SystemFontFactory.createFont(Gdx.files.internal(config.getSystemfontpath()), parameter);
+
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().warning("Practice Font読み込み失敗");
 		}

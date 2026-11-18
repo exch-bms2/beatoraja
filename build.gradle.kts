@@ -165,6 +165,9 @@ tasks.named<JavaExec>("run") {
     providers.gradleProperty("inputDiagnostics").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics", it)
     }
+    providers.gradleProperty("windowsKeyboardTiming").orNull?.let {
+        systemProperty("beatoraja.windowsKeyboardTiming", it)
+    }
     providers.gradleProperty("textInputDiagnostics").orNull?.let {
         systemProperty("beatoraja.textInputDiagnostics", it)
     }
@@ -226,6 +229,12 @@ val fatJar by tasks.registering(Jar::class) {
 val regressionClasses = listOf(
     "bms.player.beatoraja.select.bar.RandomFolderFilterTest",
     "bms.player.beatoraja.RivalDataAccessorTest",
+    "bms.player.beatoraja.skin.FontCoverageTest",
+    "bms.player.beatoraja.skin.property.AssignedLanePropertyTest",
+    "bms.player.beatoraja.skin.FallbackOrderTest",
+    "bms.player.beatoraja.skin.BitmapTextRunsTest",
+    "bms.player.beatoraja.skin.FontLifetimeTest",
+    "bms.player.beatoraja.skin.BitmapFontLoaderTest",
     "bms.player.beatoraja.skin.lr2.PlayerReviewLevelTest",
     "bms.player.beatoraja.result.MusicResultReviewTest",
     "bms.player.beatoraja.result.MusicResultScoreDisplayTest",
@@ -290,8 +299,12 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.LunaticRave2ModeComparisonTest",
     "bms.player.beatoraja.play.LunaticRave2DpOrderTest",
     "bms.player.beatoraja.play.SecondaryJudgingTest",
+    "bms.player.beatoraja.play.PulsusComparisonTest",
+    "bms.player.beatoraja.play.Nanasi1552ComparisonTest",
     "bms.player.beatoraja.LunaticRave2ScoreDatabaseTest",
     "bms.player.beatoraja.input.keyboard.KeyboardEventQueueTest",
+    "bms.player.beatoraja.input.keyboard.KeyboardTimingTraceTest",
+    "bms.player.beatoraja.input.keyboard.SelectShortcutTest",
     "bms.player.beatoraja.input.keyboard.WindowsKeyboardMappingTest",
     "bms.player.beatoraja.input.InputDiagnosticsTest",
     "bms.player.beatoraja.input.controller.ControllerInputDiagnosticsTest",
@@ -358,7 +371,18 @@ val regressionTasks = regressionClasses.map { className ->
         enableAssertions = true
         maxHeapSize = "1g"
         systemProperty("java.awt.headless", "true")
+        if (className.endsWith(".Nanasi1552ComparisonTest")) {
+            providers.gradleProperty("nanasi1552Observations").orNull?.let { args("--observations", it) }
+        }
     }
+}
+tasks.register<JavaExec>("exportNanasi1552Fixtures") {
+    group = "verification"
+    description = "Export Nanasi 1.552 BMS charts, WAV cues and fixed input vectors."
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.play.Nanasi1552ComparisonTest")
+    args("--export", layout.buildDirectory.dir("nanasi-1552").get().asFile.absolutePath)
 }
 tasks.register<JavaExec>("tableEditorWindowTest") {
     group = "verification"
@@ -1024,6 +1048,7 @@ tasks.register<JavaExec>("lwjgl3WindowsKeyboardTest") {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("bms.player.beatoraja.input.keyboard.Lwjgl3WindowsKeyboardTest")
     systemProperty("beatoraja.inputDiagnostics", "true")
+    systemProperty("beatoraja.windowsCapsLockDiagnostics", "true")
     timeout.set(Duration.ofMinutes(3))
     if (System.getProperty("os.name").startsWith("Mac")) jvmArgs("-XstartOnFirstThread")
 }

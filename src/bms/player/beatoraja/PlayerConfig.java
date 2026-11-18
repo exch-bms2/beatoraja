@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.controller.ControllerBackend;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.ir.IRConnectionManager;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 import bms.player.beatoraja.select.BarSorter;
 import bms.player.beatoraja.select.DifficultyFilter;
 import bms.player.beatoraja.select.ModeFilter;
@@ -54,6 +56,9 @@ public final class PlayerConfig {
 	static final Path configpath = Paths.get("config_player.json");	
 
 	private String id;
+	private String[] secondaryScoringRuleIds = new String[0];
+	// Keep the existing JSON field and unmodified key codes for older profiles.
+	private HashMap<String, Integer> selectShortcuts = new HashMap<>();
     /**
      * プレイヤーネーム
      */
@@ -203,6 +208,7 @@ public final class PlayerConfig {
 	 * Guide SE
 	 */
 	private boolean isGuideSE = false;
+	private boolean guideSEAtLNStart;
 
 	/**
 	 * Window Hold
@@ -895,6 +901,14 @@ public final class PlayerConfig {
 		this.isGuideSE = isGuideSE;
 	}
 
+	public boolean isGuideSEAtLNStart() {
+		return guideSEAtLNStart;
+	}
+
+	public void setGuideSEAtLNStart(boolean guideSEAtLNStart) {
+		this.guideSEAtLNStart = guideSEAtLNStart;
+	}
+
 	public boolean isWindowHold() {
 		return isWindowHold;
 	}
@@ -977,7 +991,63 @@ public final class PlayerConfig {
         this.maxRequestCount = maxRequestCount;
     }
 
+	public int getShortcutBinding(KeyboardShortcut action) {
+		return selectShortcuts.getOrDefault(action.name(), action.defaultBinding());
+	}
+
+	public KeyboardShortcut getShortcutConflict(KeyboardShortcut action, int binding) {
+		if (binding != KeyboardShortcut.DISABLED) for (var other : KeyboardShortcut.values())
+			if (other != action && action.overlaps(other) && getShortcutBinding(other) == binding) return other;
+		return null;
+	}
+
+	public boolean setShortcutBinding(KeyboardShortcut action, int key) {
+		if (!action.isAssignable(key) || getShortcutConflict(action, key) != null) return false;
+		if (key == action.defaultBinding()) selectShortcuts.remove(action.name());
+		else selectShortcuts.put(action.name(), key);
+		return true;
+	}
+
+	public void resetShortcuts() {
+		selectShortcuts.clear();
+	}
+
+	private void validateShortcuts() {
+		var overrides = new HashMap<String, Integer>();
+		if (selectShortcuts != null) for (var action : KeyboardShortcut.values()) {
+			Integer key = selectShortcuts.get(action.name());
+			if (key != null && key != action.defaultBinding() && action.isAssignable(key))
+				overrides.put(action.name(), key);
+		}
+		selectShortcuts = overrides;
+		// Restore invalid collisions without rejecting intentional swaps of defaults.
+		while (true) {
+			var collisions = EnumSet.noneOf(KeyboardShortcut.class);
+			for (var action : KeyboardShortcut.values())
+				if (overrides.containsKey(action.name())
+						&& getShortcutConflict(action, getShortcutBinding(action)) != null)
+					collisions.add(action);
+			if (collisions.isEmpty()) break;
+			for (var action : collisions) overrides.remove(action.name());
+		}
+	}
+
+	public String[] getSecondaryScoringRuleIds() {
+		return secondaryScoringRuleIds.clone();
+	}
+
+	public void setSecondaryScoringRuleIds(String[] ids) {
+		var rules = new LinkedHashSet<String>();
+		if (ids != null) for (String id : ids) {
+			var rule = SecondaryScoringRule.byId(id);
+			if (rule != null) rules.add(rule.id());
+		}
+		secondaryScoringRuleIds = rules.toArray(String[]::new);
+	}
+
 	public void validate() {
+		setSecondaryScoringRuleIds(secondaryScoringRuleIds);
+		validateShortcuts();
 		if(skin == null) {
 			skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 		}

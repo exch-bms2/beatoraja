@@ -7,7 +7,7 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
 
 import com.badlogic.gdx.utils.Array;
@@ -22,6 +22,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import bms.player.beatoraja.song.SongData;
@@ -36,12 +37,24 @@ public class MusicResult extends AbstractResult {
 	private ResultKeyProperty property;
 	private LevelReviewTarget levelReviewTarget;
 	private IRChartData resultChart;
-	private PlayerResource.AlternateResultScore alternateScore;
-	private ScoreData alternateOldScore;
-	private ScoreDataProperty alternateProperties;
-	private boolean showAlternateScore;
-	private int alternateGaugeType;
+	private List<SecondaryScoreDisplay> alternateScores = List.of();
+	private int scoreDisplayIndex;
 	private MessageRenderer.Message scoreRuleNotice;
+
+	private static final class SecondaryScoreDisplay {
+		final PlayerResource.AlternateResultScore result;
+		final ScoreData previousBest;
+		final ScoreDataProperty properties = new ScoreDataProperty();
+		int gaugeType;
+
+		SecondaryScoreDisplay(PlayerResource.AlternateResultScore result) {
+			this.result = result;
+			gaugeType = result.score().getGauge();
+			previousBest = result.previousBest() != null ? result.previousBest() : new ScoreData();
+			properties.setTargetScore(previousBest.getExscore(), 0, result.score().getNotes());
+			properties.update(result.score());
+		}
+	}
 
 	public record LevelReviewTarget(SongData song, int lnmode) {}
 	
@@ -87,55 +100,62 @@ public class MusicResult extends AbstractResult {
 	}
 
 	void prepareScoreDisplay() {
-		showAlternateScore = false;
-		alternateScore = null;
-		alternateProperties = null;
-		alternateOldScore = null;
-		var candidate = resource.getAlternateResultScore();
+		scoreDisplayIndex = 0;
+		alternateScores = List.of();
 		var model = resource.getBMSModel();
-		if (candidate == null || model == null || resource.getScoreData() == null
+		if (model == null || resource.getScoreData() == null
 				|| resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
-				|| resource.getCourseBMSModels() != null || !candidate.score().getSha256().equals(model.getSHA256())) {
+				|| resource.getCourseBMSModels() != null) {
 			return;
 		}
-		alternateScore = candidate;
-		alternateGaugeType = candidate.score().getGauge();
-		alternateOldScore = candidate.previousBest() != null ? candidate.previousBest() : new ScoreData();
-		alternateProperties = new ScoreDataProperty();
-		alternateProperties.setTargetScore(alternateOldScore.getExscore(), 0, candidate.score().getNotes());
-		alternateProperties.update(candidate.score());
+		alternateScores = resource.getAlternateResultScores().stream()
+				.filter(candidate -> Objects.equals(candidate.score().getSha256(), model.getSHA256()))
+				.map(SecondaryScoreDisplay::new).toList();
 	}
 
 	public boolean canSwitchScoreDisplay() {
-		return alternateScore != null;
+		return !alternateScores.isEmpty();
+	}
+
+	public boolean isShowingSecondaryScore() {
+		return scoreDisplayIndex != 0;
 	}
 
 	public boolean isShowingLr2Score() {
-		return showAlternateScore;
+		var display = secondaryDisplay();
+		return display != null && SecondaryScoringRule.LR2.id().equals(display.result.ruleId());
+	}
+
+	private SecondaryScoreDisplay secondaryDisplay() {
+		return isShowingSecondaryScore() ? alternateScores.get(scoreDisplayIndex - 1) : null;
 	}
 
 	public PlayerResource.GaugeHistory getDisplayGaugeHistory() {
-		return showAlternateScore ? alternateScore.gaugeHistory() : null;
+		var display = secondaryDisplay();
+		return display != null ? display.result.gaugeHistory() : null;
 	}
 
 	@Override
 	public int getGaugeType() {
-		return getDisplayGaugeHistory() != null ? alternateGaugeType : super.getGaugeType();
+		var display = secondaryDisplay();
+		return display != null && display.result.gaugeHistory() != null ? display.gaugeType : super.getGaugeType();
 	}
 
 	@Override
 	public float getDisplayGaugeValue() {
 		var history = getDisplayGaugeHistory();
 		if (history == null) return super.getDisplayGaugeValue();
-		return history.values()[alternateGaugeType].peek();
+		return history.values()[getGaugeType()].peek();
 	}
 
 	private void changeGaugeGraph() {
 		int type = getGaugeType();
 		int next = type >= GrooveGauge.ASSISTEASY && type <= GrooveGauge.HAZARD
 				? (type + 1) % 6 : (type - 5) % 3 + 6;
-		if (getDisplayGaugeHistory() != null) {
-			alternateGaugeType = next;
+		var display = secondaryDisplay();
+		if (display != null) {
+			var history = display.result.gaugeHistory();
+			if (history != null) display.gaugeType = next < history.values().length ? next : 0;
 		} else {
 			gaugeType = next;
 		}
@@ -147,17 +167,20 @@ public class MusicResult extends AbstractResult {
 
 	@Override
 	public ScoreDataProperty getScoreDataProperty() {
-		return showAlternateScore ? alternateProperties : getPrimaryScoreDataProperty();
+		var display = secondaryDisplay();
+		return display != null ? display.properties : getPrimaryScoreDataProperty();
 	}
 
 	@Override
 	public ScoreData getDisplayScore() {
-		return showAlternateScore ? alternateScore.score() : getNewScore();
+		var display = secondaryDisplay();
+		return display != null ? display.result.score() : getNewScore();
 	}
 
 	@Override
 	public ScoreData getDisplayOldScore() {
-		return showAlternateScore ? alternateOldScore : getOldScore();
+		var display = secondaryDisplay();
+		return display != null ? display.previousBest : getOldScore();
 	}
 
 	void prepareLevelReview() {
@@ -277,6 +300,10 @@ public class MusicResult extends AbstractResult {
 		stop(RESULT_CLEAR);
 		stop(RESULT_FAIL);
 		stop(RESULT_CLOSE);
+		scoreDisplayIndex = 0;
+		alternateScores = List.of();
+		resource.setAlternateResultScores(List.of());
+		clearScoreRuleNotice();
 	}
 
 	public void render() {
@@ -383,7 +410,7 @@ public class MusicResult extends AbstractResult {
 
 	public void input() {
 		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
-		final boolean switchPressed = canSwitchScoreDisplay() && inputProcessor.isControlKeyPressed(ControlKeys.F7);
+		final boolean switchPressed = canSwitchScoreDisplay() && inputProcessor.isActivated(KeyboardShortcut.SWITCH_RESULT_SCORE);
 		if (getSkin() != null && getSkin().isTextInputActive()) return;
 		super.input();
 		long time = timer.getNowTime();
@@ -391,11 +418,12 @@ public class MusicResult extends AbstractResult {
 		if (!timer.isTimerOn(TIMER_FADEOUT) && timer.isTimerOn(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
 				if (switchPressed) {
-					showAlternateScore = !showAlternateScore;
+					scoreDisplayIndex = (scoreDisplayIndex + 1) % (alternateScores.size() + 1);
 					var renderer = main.getMessageRenderer();
 					if (renderer != null) {
 						if (scoreRuleNotice != null) scoreRuleNotice.stop();
-						scoreRuleNotice = renderer.addMessage(showAlternateScore ? "LunaticRave2" : "beatoraja",
+						var display = secondaryDisplay();
+						scoreRuleNotice = renderer.addMessage(display != null ? display.result.ruleName() : "beatoraja",
 								1_500, Color.CYAN, 1);
 					}
 				}
@@ -436,7 +464,7 @@ public class MusicResult extends AbstractResult {
 					saveReplayData(3);				
 				}
 
-				if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
+				if(inputProcessor.isActivated(KeyboardShortcut.OPEN_IR)) {
 					this.executeEvent(EventType.open_ir);
 				}
 			}
@@ -591,11 +619,15 @@ public class MusicResult extends AbstractResult {
 
 	@Override
 	public void dispose() {
+		clearScoreRuleNotice();
+		super.dispose();
+	}
+
+	private void clearScoreRuleNotice() {
 		if (scoreRuleNotice != null) {
 			scoreRuleNotice.stop();
 			scoreRuleNotice = null;
 		}
-		super.dispose();
 	}
 
 	public int getTotalNotes() {

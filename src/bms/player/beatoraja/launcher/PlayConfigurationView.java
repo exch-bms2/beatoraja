@@ -15,6 +15,7 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.controller.ControllerBackend;
 import bms.player.beatoraja.play.JudgeAlgorithm;
+import bms.player.beatoraja.play.SecondaryScoringRule;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.song.*;
 import javafx.application.Platform;
@@ -37,6 +38,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
+	private static final int LN_GUIDE_SE_END = 0;
+	private static final int LN_GUIDE_SE_START = 1;
 
 
 	// TODO スキンプレビュー機能
@@ -82,6 +85,9 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	private ComboBox<PlayMode> playconfig;
+	@FXML
+	private VBox secondaryScoringRules;
+	private final Map<SecondaryScoringRule, CheckBox> secondaryScoringChecks = new LinkedHashMap<>();
 	/**
 	 * ハイスピード
 	 */
@@ -188,6 +194,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox guidese;
 	@FXML
+	private ComboBox<Integer> lnGuideSETiming;
+	@FXML
 	private CheckBox independentPlaySides;
 	@FXML
 	private CheckBox windowhold;
@@ -272,7 +280,31 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+	void initSecondaryScoringRules(ResourceBundle resources) {
+		for (var rule : SecondaryScoringRule.values()) {
+			var check = new CheckBox(rule.displayName() + " (" + resources.getString("SECONDARY_SCORING_" + rule.name()) + ")");
+			check.setId("secondaryScoring-" + rule.id());
+			secondaryScoringChecks.put(rule, check);
+			secondaryScoringRules.getChildren().add(check);
+		}
+	}
+
+	void updateSecondaryScoring(PlayerConfig player) {
+		var enabled = Set.of(player.getSecondaryScoringRuleIds());
+		secondaryScoringChecks.forEach((rule, check) -> check.setSelected(enabled.contains(rule.id())));
+	}
+
+	void commitSecondaryScoring(PlayerConfig player) {
+		var rules = new LinkedHashSet<>(Arrays.asList(player.getSecondaryScoringRuleIds()));
+		secondaryScoringChecks.forEach((rule, check) -> {
+			if (check.isSelected()) rules.add(rule.id());
+			else rules.remove(rule.id());
+		});
+		player.setSecondaryScoringRuleIds(rules.toArray(String[]::new));
+	}
+
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		initSecondaryScoringRules(arg1);
 		controllerBackend.getItems().setAll(ControllerBackend.values());
 		final long t = System.currentTimeMillis();
 		lr2configuration.setHgap(25);
@@ -298,6 +330,8 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(minemode, new String[] { "OFF", "REMOVE", "ADD RANDOM", "ADD NEAR", "ADD ALL" });
 		initComboBox(scrollmode, new String[] { "OFF", "REMOVE", "ADD" });
 		initComboBox(longnotemode, new String[] { "OFF", "REMOVE", "ADD LN", "ADD CN", "ADD HCN", "ADD ALL" });
+		initComboBox(lnGuideSETiming, new String[] { arg1.getString("LN_GUIDE_SE_END"), arg1.getString("LN_GUIDE_SE_START") });
+		lnGuideSETiming.disableProperty().bind(guidese.selectedProperty().not());
 
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
@@ -443,6 +477,7 @@ public class PlayConfigurationView implements Initializable {
 		player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), players.getValue(), config.getControllerBackend());
 		playername.setText(player.getName());
 		independentPlaySides.setSelected(player.isIndependentPlaySides());
+		updateSecondaryScoring(player);
 
 		videoController.updatePlayer(player);
 		musicselectController.updatePlayer(player);
@@ -455,6 +490,7 @@ public class PlayConfigurationView implements Initializable {
 		exitpressduration.getValueFactory().setValue(player.getExitPressDuration());
 		chartpreview.setSelected(player.isChartPreview());
 		guidese.setSelected(player.isGuideSE());
+		lnGuideSETiming.getSelectionModel().select(player.isGuideSEAtLNStart() ? LN_GUIDE_SE_START : LN_GUIDE_SE_END);
 		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
@@ -552,6 +588,7 @@ public class PlayConfigurationView implements Initializable {
 		if(playername.getText().length() > 0) {
 			player.setName(playername.getText());
 		}
+		commitSecondaryScoring(player);
 
 		videoController.commitPlayer(player);
 		musicselectController.commitPlayer();
@@ -564,6 +601,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setExitPressDuration(getValue(exitpressduration));
 		player.setChartPreview(chartpreview.isSelected());
 		player.setGuideSE(guidese.isSelected());
+		player.setGuideSEAtLNStart(lnGuideSETiming.getSelectionModel().getSelectedIndex() == LN_GUIDE_SE_START);
 		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());

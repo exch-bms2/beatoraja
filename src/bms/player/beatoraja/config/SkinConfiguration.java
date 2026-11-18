@@ -9,6 +9,7 @@ import bms.player.beatoraja.PlaySide;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.keyboard.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
@@ -73,7 +74,7 @@ public class SkinConfiguration extends MainState {
 	public void input() {
 		BMSPlayerInputProcessor input = main.getInputProcessor();
 		if (player.isIndependentPlaySides() && PlaySide.supports(type) && !getSkin().isTextInputActive()
-				&& input.isControlKeyPressed(ControlKeys.F5)) {
+				&& input.isActivated(KeyboardShortcut.SWITCH_SKIN_SIDE)) {
 			changeSkinType(type, side.other());
 		}
 		int mov = -input.getScroll();

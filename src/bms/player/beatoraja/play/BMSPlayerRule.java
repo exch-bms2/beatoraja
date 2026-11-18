@@ -24,6 +24,9 @@ public enum BMSPlayerRule {
 			Mode.BEAT_5K, Mode.BEAT_7K, Mode.POPN_9K, Mode.BEAT_10K, Mode.BEAT_14K),
 
 	Default(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
+	Pulsus(GaugeProperty.SEVENKEYS, JudgeProperty.PULSUS),
+	Raindrop(GaugeProperty.SEVENKEYS, JudgeProperty.RAINDROP),
+	Bemuse(GaugeProperty.SEVENKEYS, JudgeProperty.BEMUSE),
 ;
 
     // Experimental opt-in: change to LunaticRave2 and rebuild to compare locally.
@@ -42,7 +45,8 @@ public enum BMSPlayerRule {
                                 BMSPlayerMode playMode, boolean course, int gauge, ChartParameters chart) {
         if (requested == LunaticRave2 && originalMode == model.getMode() && LunaticRave2.supports(originalMode)
                 && playMode != null && playMode.mode == BMSPlayerMode.Mode.PLAY && !course && chart != null
-                && (gauge == GrooveGauge.NORMAL || gauge == GrooveGauge.EASY || gauge == GrooveGauge.HARD)) {
+                && (gauge == GrooveGauge.NORMAL || gauge == GrooveGauge.EASY || gauge == GrooveGauge.HARD
+                        || gauge == GrooveGauge.HAZARD)) {
             for (var timeline : model.getAllTimeLines()) {
                 for (int lane = 0; lane < originalMode.key; lane++) {
                     var note = timeline.getNote(lane);

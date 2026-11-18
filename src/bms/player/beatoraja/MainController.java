@@ -28,7 +28,7 @@ import bms.player.beatoraja.external.discord.DiscordListener;
 import bms.player.beatoraja.external.discord.DiscordWebhook;
 import bms.player.beatoraja.external.obs.ObsController;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 import bms.player.beatoraja.input.PollingLwjgl3Input;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.BMSPlayer;
@@ -42,6 +42,8 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
+import bms.player.beatoraja.skin.SystemFontFactory;
+import bms.player.beatoraja.skin.FontRenderRetirement;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
@@ -299,7 +301,14 @@ public final class MainController {
 				current.shutdown();
 				current.setSkin(null);
 			}
+			var keyboard = input.getKeyBoardInputProcesseor();
+			keyboard.setShortcutContext(player, state, false);
 			newState.create();
+			if (state == MainStateType.PLAY) {
+				var mode = resource.getPlayMode().mode;
+				if (mode == BMSPlayerMode.Mode.PLAY || mode == BMSPlayerMode.Mode.PRACTICE)
+					keyboard.setShortcutContext(player, state, true);
+			}
 			if(newState.getSkin() != null) {
 				newState.getSkin().prepare(newState);
 			}
@@ -376,11 +385,9 @@ public final class MainController {
 		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.SYSTEM_FONT)) {
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
-			systemfont = generator.generateFont(parameter);
-			generator.dispose();
+			systemfont = SystemFontFactory.createFont(Gdx.files.internal(config.getSystemfontpath()), parameter);
 			timing.outcome(StartupDiagnostics.Outcome.OK);
 		} catch (GdxRuntimeException e) {
 			Logger.getGlobal().severe("System Font読み込み失敗");
@@ -466,7 +473,8 @@ public final class MainController {
 
 	public void render() {
 		if (windowMode != null && windowMode.isSwitching()) return;
-		final boolean toggleAdjustment = Gdx.input.isKeyJustPressed(Input.Keys.F12);
+		final boolean toggleAdjustment = current instanceof BMSPlayer
+				&& input.getKeyBoardInputProcesseor().isOverlayTogglePressed();
 		final boolean adjustmentWasOpen = skinAdjustment != null;
 		if (!adjustmentWasOpen && toggleAdjustment && current instanceof BMSPlayer play && play.canAdjustSkin()
 				&& (play.getStage() == null || play.getStage().getKeyboardFocus() == null)) {
@@ -485,7 +493,7 @@ public final class MainController {
 		current.render();
 		final MainState drawnState = current;
 		sprite.begin();
-		if (current.getSkin() != null) {
+		if (current.getSkin() != null && (current != keyconfig || !keyconfig.isEditingShortcuts())) {
 			current.getSkin().updateCustomObjects(current);
 			current.getSkin().drawAllObjects(sprite, current);
 		}
@@ -605,12 +613,14 @@ public final class MainController {
             // event - move pressed
             if (input.isMousePressed()) {
                 input.setMousePressed();
-                current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+                if (current != keyconfig || !keyconfig.isEditingShortcuts())
+                    current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
             }
             // event - move dragged
             if (input.isMouseDragged()) {
                 input.setMouseDragged();
-                current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+                if (current != keyconfig || !keyconfig.isEditingShortcuts())
+                    current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
             }
 
             // マウスカーソル表示判定
@@ -625,11 +635,11 @@ public final class MainController {
 			if (Gdx.input.isCursorCatched() != catchCursor) Gdx.input.setCursorCatched(catchCursor);
 
 			// FPS表示切替
-            if (input.isActivated(KeyCommand.SHOW_FPS)) {
+            if (input.isActivated(KeyboardShortcut.SHOW_FPS)) {
                 showfps = !showfps;
             }
             // fullscrees - windowed
-            if (input.isActivated(KeyCommand.SWITCH_SCREEN_MODE)) {
+            if (input.isActivated(KeyboardShortcut.SWITCH_SCREEN_MODE)) {
                 if (windowMode.toggle()) config.setDisplaymode(Gdx.graphics.isFullscreen() ? Config.DisplayMode.FULLSCREEN : Config.DisplayMode.WINDOW);
             }
 
@@ -651,7 +661,7 @@ public final class MainController {
             // }
 
             // screen shot
-            if (input.isActivated(KeyCommand.SAVE_SCREENSHOT)) {
+            if (input.isActivated(KeyboardShortcut.SAVE_SCREENSHOT)) {
                 if (screenshot == null || !screenshot.isAlive()) {
             		final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight(), true);
                     final MainState screenshotState = current;
@@ -699,6 +709,13 @@ public final class MainController {
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
 		Optional.ofNullable(download).ifPresent(MusicDownloadProcessor::dispose);
+		Optional.ofNullable(systemfont).ifPresent(BitmapFont::dispose);
+		systemfont = null;
+		Optional.ofNullable(messageRenderer).ifPresent(MessageRenderer::dispose);
+		messageRenderer = null;
+		// 終了処理では次の postRunnable が実行されないことがある。共有アトラスと共通代替フォントを手放し、ネイティブのフォント資源をここで解放する。
+		// Shutdown may never run another postRunnable: release the shared atlases and global fallbacks, then native font resources.
+		FontRenderRetirement.drainAtShutdown(sprite);
 
 		Logger.getGlobal().info("全リソース破棄完了");
 	}

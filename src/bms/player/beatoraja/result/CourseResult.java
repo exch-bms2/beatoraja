@@ -7,7 +7,7 @@ import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.input.keyboard.KeyCommand;
+import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
@@ -233,7 +233,7 @@ public class CourseResult extends AbstractResult {
 				saveReplayData(3);				
 			}
 
-			if(inputProcessor.isActivated(KeyCommand.OPEN_IR)) {
+			if(inputProcessor.isActivated(KeyboardShortcut.OPEN_IR)) {
 				this.executeEvent(EventType.open_ir);
 			}
 		}

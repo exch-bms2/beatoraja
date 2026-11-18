@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import com.badlogic.gdx.math.MathUtils;
@@ -41,6 +42,10 @@ public abstract class AbstractGrooveGauge {
 	 */
 	public void update(int judge) {
 		this.update(judge, 1);
+	}
+
+	void updateJudgment(int judge, long noteMinusInputUs) {
+		update(judge);
 	}
 
 	/**
@@ -96,6 +101,23 @@ public abstract class AbstractGrooveGauge {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	void selectAutoShiftGauge(PlayerConfig config, boolean bestClear) {
+		final boolean course = isCourseGauge();
+		final int limit = bestClear ? (course ? EXHARDCLASS : HAZARD)
+				: (course ? Math.min(Math.max(config.getGauge(), NORMAL) + CLASS - NORMAL, EXHARDCLASS)
+						: config.getGauge());
+		int selected = course ? CLASS : Math.min(getType(), config.getBottomShiftableGauge());
+		for (int i = selected; i <= limit; i++) {
+			if (isAutoShiftCandidate(i)) selected = i;
+		}
+		setType(selected);
+	}
+
+	final boolean isAutoShiftCandidate(int type) {
+		var candidate = getGauge(type);
+		return candidate.getValue() > 0f && candidate.isQualified();
 	}
 
 	public boolean isTypeChanged() {

@@ -3,6 +3,8 @@ package bms.player.beatoraja.play;
 import java.lang.reflect.Proxy;
 import java.nio.file.Path;
 
+import com.badlogic.gdx.utils.Json;
+
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioDriver;
@@ -15,6 +17,9 @@ public final class KeyboardJudgeCompatibilityTest {
     private static int eventSource;
     public static void main(String[] args) throws Exception {
         testSplitJudgeOptionNames();
+        testGuideSEConfigRoundTrip();
+        testLongNoteProvisionalGuideSE();
+        testLongNoteAutoplayGuideSE();
         for (eventSource = 0; eventSource < 3; eventSource++) {
             testNormalAndShortTap();
             testTimingWindows();
@@ -121,9 +126,11 @@ public final class KeyboardJudgeCompatibilityTest {
         var queued = longNote(true, type);
         legacy.input.setKeyState(0, true, 1_000_000);
         legacy.judge.update(1_000_000);
+        if (type == LongNote.TYPE_LONGNOTE) checkGuideSounds(legacy, "Default LN start");
         legacy.input.setKeyState(0, false, 2_000_000);
         legacy.judge.update(2_000_000);
         legacy.judge.update(3_000_000);
+        if (type == LongNote.TYPE_LONGNOTE) checkGuideSounds(legacy, "Default LN end", "play[0, true]");
         queued.input.setKeyState(0, true, 1_000_000);
         queued.input.setKeyState(0, false, 2_000_000);
         queued.judge.update(3_000_000);
@@ -132,15 +139,70 @@ public final class KeyboardJudgeCompatibilityTest {
                 && queued.judge.getPastNotes() == legacy.judge.getPastNotes(), "Backlogged LN edges retain judgment times: " + type);
 
         var early = longNote(true, type);
+        early.playerConfig.setGuideSEAtLNStart(true);
+        early.judge.init(early.model, early.resource);
         early.input.setKeyState(0, true, 1_000_000);
         early.judge.update(1_000_000);
+        checkGuideSounds(early, "Long note start, type=" + type, "play[0, true]");
         early.input.setKeyState(0, false, 1_500_000);
-        early.input.setKeyState(0, true, 1_510_000);
-        early.judge.update(1_510_000);
+        early.input.setKeyState(0, true, 1_500_000);
+        early.judge.update(1_500_000);
+        checkGuideSounds(early, "Long note re-press, type=" + type, "play[0, true]");
         early.input.setKeyState(0, false, 2_000_000);
         early.judge.update(2_000_000);
         early.judge.update(3_000_000);
         check(early.judge.getPastNotes() == legacy.judge.getPastNotes(), "Release/repress margin does not duplicate LN endpoints: " + type);
+        if (type == LongNote.TYPE_LONGNOTE) {
+            checkGuideSounds(early, "LN end", "play[0, true]");
+        } else {
+            checkGuideSounds(early, "CN/HCN end, type=" + type, "play[0, true]", "play[0, true]");
+        }
+    }
+
+    private static void testGuideSEConfigRoundTrip() {
+        var json = new Json();
+        var config = json.fromJson(PlayerConfig.class, "{\"isGuideSE\":true}");
+        check(config.isGuideSE() && !config.isGuideSEAtLNStart(), "Existing profiles default to LN end Guide SE");
+        config.setGuideSEAtLNStart(true);
+        check(json.fromJson(PlayerConfig.class, json.toJson(config)).isGuideSEAtLNStart(), "LN start Guide SE is saved");
+    }
+
+    private static void testLongNoteProvisionalGuideSE() throws Exception {
+        var fixture = longNote(true, LongNote.TYPE_LONGNOTE);
+        fixture.playerConfig.setGuideSEAtLNStart(true);
+        fixture.judge.init(fixture.model, fixture.resource);
+        fixture.input.setKeyState(0, true, 1_030_000);
+        fixture.judge.update(1_030_000);
+        checkGuideSounds(fixture, "LN start 30 ms late", "play[1, false]");
+        check(fixture.judge.getPastNotes() == 0, "LN start does not finalize the score");
+
+        fixture.input.setKeyState(0, false, 1_500_000);
+        fixture.judge.update(1_500_000);
+        fixture.judge.update(2_000_001);
+        check(fixture.judge.getJudgeCount(3) == 1, "An early release is still graded BAD");
+        checkGuideSounds(fixture, "LN early release", "play[1, false]");
+    }
+
+    private static void testLongNoteAutoplayGuideSE() throws Exception {
+        for (boolean atStart : new boolean[] {false, true}) {
+            var fixture = longNote(true, LongNote.TYPE_LONGNOTE);
+            fixture.playerConfig.setGuideSEAtLNStart(atStart);
+            fixture.resource.setPlayMode(BMSPlayerMode.AUTOPLAY);
+            fixture.judge.init(fixture.model, fixture.resource);
+            fixture.judge.update(1_000_000);
+            if (atStart) checkGuideSounds(fixture, "Autoplay LN start", "play[0, true]");
+            else checkGuideSounds(fixture, "Autoplay LN start with the end setting");
+            fixture.judge.update(2_000_001);
+            check(fixture.judge.getJudgeCount(0) == 1, "Autoplay LN is still graded PG");
+            checkGuideSounds(fixture, "Autoplay LN end", "play[0, true]");
+        }
+    }
+
+    private static void checkGuideSounds(Fixture fixture, String phase, String... expected) {
+        var guideSounds = fixture.audioEvents.stream()
+                .filter(event -> event.matches("play\\[[0-5], (?:true|false)\\]"))
+                .toList();
+        check(guideSounds.equals(java.util.List.of(expected)), phase + " expected Guide SE " + java.util.List.of(expected) + ", got " + fixture.audioEvents);
     }
 
     private static void testSameTimeChord() throws Exception {
@@ -250,7 +312,10 @@ public final class KeyboardJudgeCompatibilityTest {
         return model;
     }
 
-    private static TimeLine line(long time) { return new TimeLine(0, time, Mode.BEAT_7K.key); }
+    private static TimeLine line(long time) {
+        // At 120 BPM one measure spans two seconds.
+        return new TimeLine(time / 2_000_000.0, time, Mode.BEAT_7K.key);
+    }
 
     static final class Fixture {
         final BMSPlayerInputProcessor input;
@@ -271,6 +336,7 @@ public final class KeyboardJudgeCompatibilityTest {
             var config = new Config();
             config.setAudioConfig(new AudioConfig());
             playerConfig = new PlayerConfig();
+            playerConfig.setGauge(gaugeType);
             playerConfig.setNotesDisplayTimingAutoAdjust(false);
             var mode = model.getMode();
             var lanes = new LaneProperty(mode);
