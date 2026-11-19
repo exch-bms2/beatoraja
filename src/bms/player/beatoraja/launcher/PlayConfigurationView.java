@@ -540,8 +540,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private void changeIndependentPlaySides() {
 		if (player == null || player.isIndependentPlaySides() == independentPlaySides.isSelected()) return;
+		inputController.commit();
 		skinController.commit();
 		player.setIndependentPlaySides(independentPlaySides.isSelected());
+		inputController.refreshSlots();
 		skinController.update(player);
 	}
 

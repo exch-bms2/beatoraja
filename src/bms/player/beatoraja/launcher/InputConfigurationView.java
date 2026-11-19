@@ -3,6 +3,7 @@ package bms.player.beatoraja.launcher;
 import bms.model.Mode;
 import bms.player.beatoraja.PlayModeConfig;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlaySide;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +21,7 @@ import javafx.util.converter.IntegerStringConverter;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -30,7 +32,7 @@ public class InputConfigurationView implements Initializable {
     // TODO 各デバイス毎の最小入力間隔設定
 
     @FXML
-    private ComboBox<PlayConfigurationView.PlayMode> inputconfig;
+    private ComboBox<InputSlot> inputconfig;
 
     @FXML
     private Spinner<Integer> inputduration;
@@ -60,24 +62,33 @@ public class InputConfigurationView implements Initializable {
     private PlayerConfig player;
 
     private PlayConfigurationView.PlayMode mode;
+    private PlaySide side = PlaySide.P1;
+    private boolean updating;
+
+    private record InputSlot(PlayConfigurationView.PlayMode mode, PlaySide side) {
+        @Override public String toString() { return mode + (side == PlaySide.P2 ? " (2P)" : ""); }
+    }
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        inputconfig.getItems().setAll(PlayConfigurationView.PlayMode.values());
+        refreshSlots();
         PlayConfigurationView.initComboBox(mouseScratchMode, new String[] { "Ver. 2 (Newest)", "Ver. 1 (~0.8.3)" });
     }
 
     @FXML
     public void changeMode() {
+        if (updating || player == null || inputconfig.getValue() == null) return;
         commitMode();
-        updateMode(inputconfig.getValue());
+        var slot = inputconfig.getValue();
+        updateMode(slot.mode(), slot.side());
     }
 
     public void update(PlayerConfig player) {
         commitMode();
         this.player = player;
-        updateMode(PlayConfigurationView.PlayMode.BEAT_7K);
-        inputconfig.setValue(PlayConfigurationView.PlayMode.BEAT_7K);
+        mode = PlayConfigurationView.PlayMode.BEAT_7K;
+        side = PlaySide.P1;
+        refreshSlots();
     }
 
     public void commit() {
@@ -85,12 +96,33 @@ public class InputConfigurationView implements Initializable {
     }
 
     void refreshMode() {
-        if (mode != null) updateMode(mode);
+        if (mode != null) updateMode(mode, side);
+    }
+
+    void refreshSlots() {
+        updating = true;
+        try {
+            var slots = new ArrayList<InputSlot>();
+            for (var value : PlayConfigurationView.PlayMode.values()) {
+                slots.add(new InputSlot(value, PlaySide.P1));
+                if (player != null && player.isIndependentPlaySides() && PlaySide.supports(Mode.valueOf(value.name())))
+                    slots.add(new InputSlot(value, PlaySide.P2));
+            }
+            if (player == null || !player.isIndependentPlaySides()) side = PlaySide.P1;
+            inputconfig.getItems().setAll(slots);
+            if (mode != null) inputconfig.setValue(new InputSlot(mode, side));
+        } finally { updating = false; }
+        if (player != null) refreshMode();
     }
 
     public void updateMode(PlayConfigurationView.PlayMode mode) {
+        updateMode(mode, PlaySide.P1);
+    }
+
+    private void updateMode(PlayConfigurationView.PlayMode mode, PlaySide side) {
 	this.mode = mode;
-	PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(mode.name()));
+        this.side = side;
+	PlayModeConfig conf = player.getPlayInputConfig(Mode.valueOf(mode.name()), side);
 	List<ControllerConfigViewModel> listControllerConfigViewModel = Arrays.asList(conf.getController()).stream()
 		.map(config -> new ControllerConfigViewModel(config)).collect(Collectors.toList());
 	
@@ -111,7 +143,7 @@ public class InputConfigurationView implements Initializable {
 
 	// Display "1P" or "2P"
 	playsideCol.setCellValueFactory(col -> new SimpleStringProperty(col != null && col.getValue() != null
-		? Integer.toString(listControllerConfigViewModel.indexOf(col.getValue()) + 1) + "P"
+		? (side == PlaySide.P2 ? "2P" : Integer.toString(listControllerConfigViewModel.indexOf(col.getValue()) + 1) + "P")
 		: ""));
 	nameCol.setCellValueFactory(col -> col.getValue().getNameProperty());
 	isAnalogCol.setCellValueFactory(col -> col.getValue().getIsAnalogScratchProperty());
@@ -157,8 +189,8 @@ public class InputConfigurationView implements Initializable {
     }
     
     public void commitMode() {
-        if (mode != null) {
-            PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(mode.name()));
+        if (player != null && mode != null) {
+            PlayModeConfig conf = player.getPlayInputConfig(Mode.valueOf(mode.name()), side);
             conf.getKeyboardConfig().setDuration(inputduration.getValue());
             conf.getKeyboardConfig().getMouseScratchConfig().setMouseScratchEnabled(mouseScratch.isSelected());
             conf.getKeyboardConfig().getMouseScratchConfig().setMouseScratchTimeThreshold(mouseScratchTimeThreshold.getValue());
