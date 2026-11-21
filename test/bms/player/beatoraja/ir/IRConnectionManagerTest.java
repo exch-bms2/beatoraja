@@ -40,6 +40,7 @@ public final class IRConnectionManagerTest {
 		testClassNameConversion();
 		testDirectoryDiscovery();
 		testJarDiscovery();
+		testClosePreservesInterrupt();
 	}
 
 	private static void testClassNameConversion() throws Exception {
@@ -85,6 +86,30 @@ public final class IRConnectionManagerTest {
 			}
 		} finally {
 			Files.deleteIfExists(archive);
+		}
+	}
+
+	private static void testClosePreservesInterrupt() {
+		IRConnectionManager.close(null);
+
+		boolean[] closed = { false };
+		boolean[] interruptedInsideClose = { true };
+		final class InterruptProbe extends TestIRConnectionBase implements AutoCloseable {
+			@Override
+			public void close() {
+				interruptedInsideClose[0] = Thread.currentThread().isInterrupted();
+				closed[0] = true;
+			}
+		}
+
+		Thread.currentThread().interrupt();
+		try {
+			IRConnectionManager.close(new InterruptProbe());
+			assertEquals(Boolean.TRUE, closed[0]);
+			assertEquals(Boolean.FALSE, interruptedInsideClose[0]);
+			assertEquals(Boolean.TRUE, Thread.currentThread().isInterrupted());
+		} finally {
+			Thread.interrupted();
 		}
 	}
 

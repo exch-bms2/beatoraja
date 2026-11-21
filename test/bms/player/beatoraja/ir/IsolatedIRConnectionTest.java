@@ -14,6 +14,7 @@ public final class IsolatedIRConnectionTest {
     public static void main(String[] args) throws Exception {
         verifyStartupTimings();
         verifyReviews();
+        verifyIllegalSongsAndLoginReuseSingleWorker();
         for (String fault : List.of("crash", "timeout")) {
             try (var f = new Fixture(fault)) {
                 f.login();
@@ -156,6 +157,16 @@ public final class IsolatedIRConnectionTest {
             check(IRSubmissionResponse.isOutcomeUnknown(f.connection.setReview(review)), "Review timeout is ambiguous");
             check(f.connection.getTableDatas().isSucceeded() && f.count("review:" + hash + ":12.5:null:null:2") == 1,
                     "Recover without automatically resending the timed-out review");
+        }
+    }
+
+    private static void verifyIllegalSongsAndLoginReuseSingleWorker() throws Exception {
+        try (var f = new Fixture("normal")) {
+            var illegalSongs = f.connection.getIllegalSongs();
+            check(!illegalSongs.isSucceeded() && "Not supported".equals(illegalSongs.getMessage()),
+                    "Legacy plugin inherits Not supported for getIllegalSongs");
+            f.login();
+            check(f.processes.size() == 1, "getIllegalSongs followed by login must reuse one worker process");
         }
     }
     private static final class Fixture implements AutoCloseable {

@@ -166,27 +166,34 @@ public class MainLoader extends Application {
 		SongDatabaseAccessor songdb;
 		try {
 			songdb = new SongDatabaseAccessorProvider().get(config, player.getId());
-			try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.IR_CHART_CHECK)) {
-				timing.outcome(detectIllegalSongs(songdb, player));
-			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
 			return;
 		}
-		if(illegalSongs.size() > 0) {
-			String message = "This Application detects " + illegalSongs.size()
-					+ " illegal BMS songs. Remove them, update song database and restart.";
-			Logger.getGlobal().severe(message);
-			if (!Boolean.getBoolean(DesktopLauncher.GAME_PROCESS))
-				JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
 
-		try {
+		final MainController main;
+		try (var irStartup = new IRStartup(player.getIrconfig())) {
+			try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.IR_CHART_CHECK)) {
+				timing.outcome(detectIllegalSongs(songdb, irStartup));
+			}
+			if(illegalSongs.size() > 0) {
+				irStartup.close();
+				String message = "This Application detects " + illegalSongs.size()
+						+ " illegal BMS songs. Remove them, update song database and restart.";
+				Logger.getGlobal().severe(message);
+				if (!Boolean.getBoolean(DesktopLauncher.GAME_PROCESS))
+					JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+
 			config.getControllerBackend().configure();
 			player.selectControllerBackend(config.getControllerBackend());
-			final MainController main = new MainController(f, config, player, auto, songUpdated, songdb);
+			main = new MainController(f, config, player, auto, songUpdated, songdb, irStartup);
+		}
+
+		final boolean[] listenerDisposed = { false };
+		try {
 
 			Lwjgl3ApplicationConfiguration cfg = createApplicationConfiguration(config);
 			FramePacingDiagnostics frames = FramePacingDiagnostics.createIfEnabled(config);
@@ -211,6 +218,7 @@ public class MainLoader extends Application {
 
 					public void dispose() {
 						main.dispose();
+						listenerDisposed[0] = true;
 						DistributionDiagnostics.event("game-dispose-complete");
 					}
 
@@ -224,8 +232,10 @@ public class MainLoader extends Application {
 			} finally {
 				main.disposeInput();
 			}
+			if (!listenerDisposed[0]) main.closeIRConnections();
 			if (forceExit) System.exit(0);
 		} catch (Throwable e) {
+			if (!listenerDisposed[0]) main.closeIRConnections();
 			e.printStackTrace();
 			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 			if (forceExit) System.exit(1);
@@ -324,34 +334,12 @@ public class MainLoader extends Application {
 		return illegalSongs.size();
 	}
 
-	private static StartupDiagnostics.Outcome detectIllegalSongs(SongDatabaseAccessor songdb, PlayerConfig player) {
+	private static StartupDiagnostics.Outcome detectIllegalSongs(SongDatabaseAccessor songdb, IRStartup irStartup) {
 		illegalSongs.clear();
-		boolean failed = false;
 
 		Set<String> hashes = new LinkedHashSet<>();
 		addIllegalSongHashes(hashes, SongUtils.illegalsongs);
-		for(IRConfig irconfig : player.getIrconfig()) {
-			if(irconfig == null || irconfig.getIrname() == null || irconfig.getIrname().length() == 0) {
-				continue;
-			}
-			IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
-			if(ir == null) {
-				continue;
-			}
-			try {
-				IRResponse<String[]> response = ir.getIllegalSongs();
-				if(response.isSucceeded()) {
-					addIllegalSongHashes(hashes, response.getData());
-				} else if(response.getMessage() != null && response.getMessage().length() > 0
-						&& !"Not supported".equals(response.getMessage())) {
-					failed = true;
-					Logger.getGlobal().warning("IR illegal song list取得失敗 - " + irconfig.getIrname() + " : "
-							+ response.getMessage());
-				}
-			} finally {
-				closeIRConnection(ir);
-			}
-		}
+		boolean failed = irStartup.collectIllegalSongs(candidates -> addIllegalSongHashes(hashes, candidates));
 
 		if(hashes.isEmpty()) {
 			return failed ? StartupDiagnostics.Outcome.FAILED : StartupDiagnostics.Outcome.OK;
@@ -376,15 +364,6 @@ public class MainLoader extends Application {
 		for(String candidate : candidates) {
 			if(candidate != null && candidate.length() == 64) {
 				hashes.add(candidate);
-			}
-		}
-	}
-
-	private static void closeIRConnection(IRConnection ir) {
-		if(ir instanceof AutoCloseable closeable) {
-			try {
-				closeable.close();
-			} catch(Exception e) {
 			}
 		}
 	}
@@ -514,7 +493,7 @@ public class MainLoader extends Application {
 								+ response.getMessage());
 					}
 				} finally {
-					closeIRConnection(ir);
+					IRConnectionManager.close(ir);
 				}
 			}
 			return null;
