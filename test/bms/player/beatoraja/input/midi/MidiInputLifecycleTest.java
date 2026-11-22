@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Fake MIDI transmitters/devices only; never opens the host's MIDI devices. */
 public final class MidiInputLifecycleTest {
     public static void main(String[] args) throws Exception {
-        orderedClose(); openFailure(); activeCallback();
-        System.out.println("MidiInputLifecycleTest passed (callback gate, transmitter/device order, partial initialization and cleanup failures)");
+        orderedClose(); openFailure(); skipsOutputOnlyDevices(); activeCallback();
+        System.out.println("MidiInputLifecycleTest passed (callback gate, transmitter/device order, output-only filtering, partial initialization and cleanup failures)");
     }
     private static void orderedClose() throws Exception {
         var events = new ArrayList<String>();
@@ -38,6 +38,19 @@ public final class MidiInputLifecycleTest {
         try { failed.open(); throw new AssertionError(); } catch (IllegalStateException expected) { }
         failed.close();
         check(events.containsAll(List.of("tx-valid", "tx-bad", "device-valid", "device-bad")), "Failure attaching a receiver releases all acquired resources");
+    }
+    private static void skipsOutputOnlyDevices() {
+        var events = new ArrayList<String>();
+        var outputOnly = new Device("output-only", events); outputOnly.maxTransmitters = 0;
+        var valid = new Device("valid", events); valid.maxTransmitters = 1;
+        check(!MidiInputProcessor.isInputCapable(null), "Null device is not input-capable");
+        check(!MidiInputProcessor.isInputCapable(outputOnly), "Device with maxTransmitters == 0 is not input-capable");
+        check(MidiInputProcessor.isInputCapable(valid), "Device with positive maxTransmitters is input-capable");
+        var midi = new MidiInputProcessor(null, List.of(outputOnly, valid));
+        midi.open();
+        midi.close();
+        check(events.equals(List.of("open-valid", "tx-valid", "device-valid")),
+                "Skip opening output-only devices: " + events);
     }
     private static void activeCallback() throws Exception {
         var events = new CopyOnWriteArrayList<String>();
@@ -76,6 +89,7 @@ public final class MidiInputLifecycleTest {
         final String name;
         final Sender transmitter = new Sender();
         boolean open, unavailable, failReceiver, failTransmitClose, failDeviceClose;
+        int maxTransmitters = -1;
         Device(String name, List<String> events) { this.name = name; this.events = events; info = new Info(name, "test", "test", "1") { }; }
         @Override public Info getDeviceInfo() { return info; }
         @Override public void open() throws MidiUnavailableException {
@@ -88,7 +102,7 @@ public final class MidiInputLifecycleTest {
         @Override public boolean isOpen() { return open; }
         @Override public long getMicrosecondPosition() { return -1; }
         @Override public int getMaxReceivers() { return 0; }
-        @Override public int getMaxTransmitters() { return -1; }
+        @Override public int getMaxTransmitters() { return maxTransmitters; }
         @Override public Receiver getReceiver() throws MidiUnavailableException { throw new MidiUnavailableException(); }
         @Override public List<Receiver> getReceivers() { return List.of(); }
         @Override public Transmitter getTransmitter() { return transmitter; }

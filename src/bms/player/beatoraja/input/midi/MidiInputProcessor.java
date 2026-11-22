@@ -59,7 +59,9 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 		for (MidiDevice.Info info : infos) {
 			try {
 				MidiDevice device = MidiSystem.getMidiDevice(info);
-				devices.add(device);
+				if (isInputCapable(device)) {
+					devices.add(device);
+				}
 			} catch (MidiUnavailableException e) {
 			}
 		}
@@ -67,11 +69,19 @@ public final class MidiInputProcessor extends BMSPlayerInputDevice implements Au
 		return devices;
 	}
 
+	/** Returns whether {@code device} can transmit incoming MIDI messages (excludes output-only devices). */
+	static boolean isInputCapable(MidiDevice device) {
+		return device != null && device.getMaxTransmitters() != 0;
+	}
+
 	public synchronized void open() {
 		if (opened || closed) return;
 		opened = true;
 		try {
 			for (MidiDevice device : devices) {
+				if (!isInputCapable(device)) {
+					continue;
+				}
 				openedDevices.add(device);
 				try {
 					device.open();
