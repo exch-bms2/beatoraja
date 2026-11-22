@@ -208,44 +208,76 @@ public abstract class SkinLoader {
     }
 
     public static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
-        final PixmapResourcePool temporary = previewResources.get();
-        final PixmapResourcePool resource = temporary == null ? SkinLoader.getResource() : temporary;
-        if(resource.exists(path)) {
-            return new Texture(resource.getPixmap(path), useMipMaps);
+        Pixmap pixmap = loadPixmap(capturePixmapLoadContext(usecim), path);
+        if (pixmap == null) {
+            return null;
         }
         try {
-            boolean usePixmapCache = temporary == null && usecim && !path.toLowerCase(Locale.ROOT).endsWith(".webp");
-            long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
-            String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
-            if(usePixmapCache && resource.exists(cim)) {
-                return new Texture(resource.getPixmap(cim), useMipMaps);
+            return new Texture(pixmap, useMipMaps);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // ワーカースレッドが ThreadLocal を読まずに済むよう、呼び出し元のプールとキャッシュ可否を保持する
+    static final class PixmapLoadContext {
+        final PixmapResourcePool resource;
+        final boolean allowCim;
+
+        PixmapLoadContext(PixmapResourcePool resource, boolean allowCim) {
+            this.resource = resource;
+            this.allowCim = allowCim;
+        }
+    }
+
+    static PixmapLoadContext capturePixmapLoadContext(boolean usecim) {
+        final PixmapResourcePool temporary = previewResources.get();
+        final PixmapResourcePool resource = temporary == null ? SkinLoader.getResource() : temporary;
+        return new PixmapLoadContext(resource, temporary == null && usecim);
+    }
+
+    // .cim 書き込みは非アトミックなので、並列利用時は呼び出し側で同一パスを重複排除すること
+    static Pixmap loadPixmap(PixmapLoadContext context, String path) {
+        final PixmapResourcePool resource = context.resource;
+        if (resource.exists(path)) {
+            return resource.getPixmap(path);
+        }
+        try {
+            boolean usePixmapCache = context.allowCim && !path.toLowerCase(Locale.ROOT).endsWith(".webp");
+            if (!usePixmapCache) {
+                return resource.getPixmap(path);
             }
-
-            if (usePixmapCache && Files.exists(Paths.get(cim))) {
-                Pixmap pixmap = resource.getPixmap(cim);
-                return new Texture(pixmap, useMipMaps);
-            } else if(usePixmapCache){
-                Pixmap pixmap = resource.getPixmap(path);
-
-                try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(path).getParent())) {
+            long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
+            int dot = path.lastIndexOf('.');
+            String prefix = dot >= 0 ? path.substring(0, dot) : path;
+            String cim = prefix + "__" + modifiedtime + ".cim";
+            if (resource.exists(cim)) {
+                return resource.getPixmap(cim);
+            }
+            if (Files.exists(Paths.get(cim))) {
+                return resource.getPixmap(cim);
+            }
+            Pixmap pixmap = resource.getPixmap(path);
+            if (pixmap == null) {
+                return null;
+            }
+            Path parent = Paths.get(path).getParent();
+            if (parent != null) {
+                try (DirectoryStream<Path> paths = Files.newDirectoryStream(parent)) {
                     for (Path p : paths) {
                         final String filename = p.toString();
-                        if(filename.startsWith(path.substring(0, path.lastIndexOf('.')) + "__") && filename.endsWith(".cim")) {
+                        if (filename.startsWith(prefix + "__") && filename.endsWith(".cim")) {
                             Files.deleteIfExists(p);
                             break;
                         }
                     }
-                } catch(Throwable e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
-                PixmapIO.writeCIM(Gdx.files.local(cim), pixmap);
-
-                Texture tex = new Texture(pixmap, useMipMaps);
-                return tex;
-            } else {
-                Pixmap pixmap = resource.getPixmap(path);
-                return new Texture(pixmap, useMipMaps);
             }
+            PixmapIO.writeCIM(Gdx.files.local(cim), pixmap);
+            return pixmap;
         } catch (Throwable e) {
             e.printStackTrace();
         }

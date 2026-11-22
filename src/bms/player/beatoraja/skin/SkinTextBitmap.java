@@ -82,15 +82,19 @@ public final class SkinTextBitmap extends SkinText {
 		this.size = size;
 		if (getShadowOffset() == null) { setShadowOffset(new Vector2()); }
 
+		boolean preboundGlyphs = false;
 		if (source != null) {
 			BitmapFont srcFont = source.getFont();
 			BitmapFont.BitmapFontData srcData = source.getFontData() != null
 					? source.getFontData()
 					: (srcFont != null ? srcFont.getData() : null);
-			this.fontData = BitmapFontDataCopy.copyFontData(srcData);
 			this.regions = source.getRegions() != null
 					? new Array<>(source.getRegions())
 					: (srcFont != null && srcFont.getRegions() != null ? new Array<>(srcFont.getRegions()) : new Array<>());
+			preboundGlyphs = srcFont != null && srcData != null && this.regions.size > 0;
+			this.fontData = preboundGlyphs
+					? BitmapFontDataCopy.shareGlyphs(srcData)
+					: BitmapFontDataCopy.copyFontData(srcData);
 			this.fontType = source.getType();
 		} else {
 			this.fontData = null;
@@ -98,7 +102,7 @@ public final class SkinTextBitmap extends SkinText {
 			this.fontType = SkinTextBitmapSource.TYPE_STANDARD;
 		}
 		this.basePageCount = this.regions.size;
-		initializeFonts(fallbackSource);
+		initializeFonts(fallbackSource, preboundGlyphs);
 	}
 
 	public SkinTextBitmap(BitmapFont.BitmapFontData sharedData, Array<TextureRegion> sharedRegions, float size) {
@@ -115,18 +119,27 @@ public final class SkinTextBitmap extends SkinText {
 		this.fontData = BitmapFontDataCopy.copyFontData(sharedData);
 		this.regions = sharedRegions != null ? new Array<>(sharedRegions) : new Array<>();
 		this.basePageCount = this.regions.size;
-		initializeFonts(fallbackSource);
+		initializeFonts(fallbackSource, false);
 	}
 
 	/**
 	 * 両コンストラクタ共通の後処理。元フォントを作り、代替の層を用意する。
 	 * Shared constructor tail: builds the original font and prepares the fallback layer.
 	 */
-	private void initializeFonts(SkinFontSource fallbackSource) {
+	private void initializeFonts(SkinFontSource fallbackSource, boolean preboundGlyphs) {
 		if (fontData != null) {
-			font = new BitmapFont(fontData, regions, false);
+			font = preboundGlyphs ? createPreboundBitmapFont(fontData, regions) : new BitmapFont(fontData, regions, false);
 		}
 		fallback.initialize(fallbackSource);
+	}
+
+	// UV 設定済みの BitmapFontData から、コンストラクタの全グリフ再走査を省いて BitmapFont を作る
+	private static BitmapFont createPreboundBitmapFont(BitmapFont.BitmapFontData data, Array<TextureRegion> regions) {
+		return new BitmapFont(data, regions, false) {
+			@Override
+			protected void load(BitmapFont.BitmapFontData fontData) {
+			}
+		};
 	}
 
 	/**
@@ -965,7 +978,11 @@ public final class SkinTextBitmap extends SkinText {
 			}
 			CacheableBitmapFont cached = getPrimaryCacheableFont();
 
-			fontData = cached != null ? BitmapFontDataCopy.copyFontData(cached.fontData) : null;
+			boolean prebound = cached != null && cached.fontData != null && cached.font != null
+					&& cached.regions != null && cached.regions.size > 0;
+			fontData = prebound
+					? BitmapFontDataCopy.shareGlyphs(cached.fontData)
+					: (cached != null ? BitmapFontDataCopy.copyFontData(cached.fontData) : null);
 			regions = cached != null && cached.regions != null ? new Array<>(cached.regions) : new Array<>();
 			originalSize = cached != null ? cached.originalSize : 0;
 			type = cached != null ? cached.type : 0;
@@ -976,7 +993,9 @@ public final class SkinTextBitmap extends SkinText {
 			fallbackPageOffsets.clear();
 			activeFallbackPages.clear();
 			attachFallbackFonts();
-			font = fontData != null ? new BitmapFont(fontData, regions, false) : null;
+			font = fontData != null
+					? (prebound ? createPreboundBitmapFont(fontData, regions) : new BitmapFont(fontData, regions, false))
+					: null;
 
 			return font;
 		}

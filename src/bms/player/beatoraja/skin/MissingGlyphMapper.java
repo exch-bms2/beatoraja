@@ -343,12 +343,24 @@ final class MissingGlyphMapper {
          * Reserves every PUA glyph already present in the original BitmapFontData (e.g. rhythm-game icons).
          */
         void reserveNativeGlyphs(BitmapFont.BitmapFontData data) {
-            if (data == null) {
+            if (data == null || data.glyphs == null) {
                 return;
             }
-            for (int c = PUA_START; c <= PUA_END; c++) {
-                if (data.getGlyph((char) c) != null) {
-                    reserveSlot((char) c, null);
+            int startPage = PUA_START / 512;
+            int endPage = PUA_END / 512;
+            int maxPage = Math.min(endPage, data.glyphs.length - 1);
+            for (int pageIndex = startPage; pageIndex <= maxPage; pageIndex++) {
+                BitmapFont.Glyph[] page = data.glyphs[pageIndex];
+                if (page == null) {
+                    continue;
+                }
+                int pageBase = pageIndex * 512;
+                int from = Math.max(0, PUA_START - pageBase);
+                int to = Math.min(page.length - 1, PUA_END - pageBase);
+                for (int offset = from; offset <= to; offset++) {
+                    if (page[offset] != null) {
+                        reserveSlot((char) (pageBase + offset), null);
+                    }
                 }
             }
         }
