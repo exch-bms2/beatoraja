@@ -1,14 +1,15 @@
 package bms.player.beatoraja.video;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,6 +79,10 @@ public class FFmpegProcessor implements VideoProcessor {
 	@Override
 	public Texture getFrame(long time) {
 		this.time = time;
+		MovieSeekThread worker = movieseek;
+		if (worker != null && time * 1000 >= worker.wakeAtMicros) {
+			worker.signalPlaybackUpdate();
+		}
 		if (processorStatus == ProcessorStatus.TEXTURE_ACTIVE) {
 			return showingtex;
 		} else {
@@ -157,10 +162,12 @@ public class FFmpegProcessor implements VideoProcessor {
 		private volatile long uploadCount;
 		private volatile long restartCount;
 		private volatile long waitMillis;
+		private volatile long wakeAtMicros = Long.MAX_VALUE;
 
 		private Pixmap pixmap;
-		private byte[] frameRow;
+		private boolean uploadPending;
 		private volatile byte[] movieBytes;
+		private File movieFile;
 
 		private final SongResource resource;
 		
@@ -176,8 +183,11 @@ public class FFmpegProcessor implements VideoProcessor {
 			boolean cleanupFailed = false;
 			try {
 				if (haltRequested) return;
-				try (InputStream input = resource.openStream()) {
-					movieBytes = input.readAllBytes();
+				movieFile = resource.localPath().map(Path::toFile).orElse(null);
+				if (movieFile == null) {
+					try (InputStream input = resource.openStream()) {
+						movieBytes = input.readAllBytes();
+					}
 				}
 				if (haltRequested) return;
 				phase = "initialize";
@@ -187,7 +197,7 @@ public class FFmpegProcessor implements VideoProcessor {
 						.info("movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat()
 								+ " size : " + grabber.getImageWidth() + " x " + grabber.getImageHeight()
 								+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
-								+ grabber.getLengthInTime() + " memory : " + movieBytes.length + " bytes");
+								+ grabber.getLengthInTime() + " memory : " + getRetainedMovieBytes() + " bytes");
 
 				offset = grabber.getTimestamp();
 				Frame frame = null;
@@ -224,6 +234,7 @@ public class FFmpegProcessor implements VideoProcessor {
 							Frame converted = converter.convert(frame);
 							try {
 								phase = "pixmap-copy";
+								final boolean queueUpload;
 								synchronized (pixmapLock) {
 									if (pixmap == null || pixmap.getWidth() != converted.imageWidth || pixmap.getHeight() != converted.imageHeight) {
 										if (pixmap != null) {
@@ -232,46 +243,18 @@ public class FFmpegProcessor implements VideoProcessor {
 										pixmap = new Pixmap(converted.imageWidth, converted.imageHeight, Pixmap.Format.RGB888);
 									}
 									copyFrameToPixmap(converted, pixmap);
+									queueUpload = !uploadPending;
+									uploadPending = true;
 								}
-								Gdx.app.postRunnable(() -> {
-									try {
-										synchronized (pixmapLock) {
-											final Pixmap p = pixmap;
-											// dispose()を呼び出した後にshowingtexを使えばEXCEPTION_ACCESS_VIOLATIONが発生
-											if (p == null || processorStatus == ProcessorStatus.DISPOSED || uploadFailure != null) {
-												return;
-											}
-											preparePixmapForDraw(p);
-											if (showingtex != null && showingtex.getWidth() == p.getWidth() && showingtex.getHeight() == p.getHeight()) {
-												showingtex.draw(p, 0, 0);
-											} else {
-												if (showingtex != null) {
-													showingtex.dispose();
-												}
-												showingtex = new Texture(p);
-											}
-											processorStatus = ProcessorStatus.TEXTURE_ACTIVE;
-											uploadCount++;
-										}
-									} catch (Throwable e) {
-										uploadFailure = e;
-										logFailure("texture-upload", e);
-										exec(Command.HALT);
-										throw new GdxRuntimeException("Movie texture upload failed: " + resource.displayPath(), e);
-									}
-								});
-								// System.out.println("movie pixmap created : " + time);
+								if (queueUpload) {
+									Gdx.app.postRunnable(this::uploadLatestFrame);
+								}
 							} catch (Throwable e) {
 								throw new GdxRuntimeException("Couldn't load pixmap from image data", e);
 							}
 						}
 					} else {
-						final long sleeptime = (grabber.getTimestamp() - microtime) / 1000 - 1;
-						if (sleeptime > 0) {
-							waitMillis = sleeptime;
-							phase = "frame-wait";
-							command = commands.pollFirst(sleeptime, TimeUnit.MILLISECONDS);
-						}
+						awaitFrameTime(grabber.getTimestamp() - offset);
 					}
 
 					if (command == null) {
@@ -323,7 +306,6 @@ public class FFmpegProcessor implements VideoProcessor {
 						catch (Throwable e) { cleanupFailed = true; logFailure("converter-cleanup", e); }
 						converter = null;
 						movieBytes = null;
-						frameRow = null;
 						synchronized (this) {
 							finished = true;
 							commands.clear();
@@ -339,6 +321,52 @@ public class FFmpegProcessor implements VideoProcessor {
 			}
 		}
 
+		private synchronized void awaitFrameTime(long frameTimeMicros) throws InterruptedException {
+			phase = "frame-wait";
+			waitMillis = (frameTimeMicros - time * 1000) / 1000;
+			wakeAtMicros = frameTimeMicros;
+			try {
+				// Only getFrame or a playback command can advance the externally supplied clock.
+				while (!haltRequested && commands.isEmpty() && time * 1000 < frameTimeMicros) {
+					wait();
+				}
+			} finally {
+				wakeAtMicros = Long.MAX_VALUE;
+			}
+		}
+
+		private synchronized void signalPlaybackUpdate() {
+			notifyAll();
+		}
+
+		private void uploadLatestFrame() {
+			try {
+				synchronized (pixmapLock) {
+					uploadPending = false;
+					final Pixmap p = pixmap;
+					if (p == null || processorStatus == ProcessorStatus.DISPOSED || uploadFailure != null) {
+						return;
+					}
+					preparePixmapForDraw(p);
+					if (showingtex != null && showingtex.getWidth() == p.getWidth() && showingtex.getHeight() == p.getHeight()) {
+						showingtex.draw(p, 0, 0);
+					} else {
+						if (showingtex != null) {
+							showingtex.dispose();
+						}
+						showingtex = new Texture(p);
+					}
+					processorStatus = ProcessorStatus.TEXTURE_ACTIVE;
+					uploadCount++;
+				}
+			} catch (Throwable e) {
+				uploadFailure = e;
+				logFailure("texture-upload", e);
+				exec(Command.HALT);
+				throw new GdxRuntimeException("Movie texture upload failed: " + resource.displayPath(), e);
+			}
+		}
+
 		private void logFailure(String failurePhase, Throwable error) {
 			// XMLFormatter records only the outer exception; retain causes and suppressed failures too.
 			StringWriter details = new StringWriter();
@@ -349,7 +377,8 @@ public class FFmpegProcessor implements VideoProcessor {
 		}
 
 		private void openGrabber() throws Exception {
-			grabber = new FFmpegFrameGrabber(new ByteArrayInputStream(movieBytes));
+			grabber = movieFile != null ? new FFmpegFrameGrabber(movieFile)
+					: new FFmpegFrameGrabber(new ByteArrayInputStream(movieBytes));
 			grabber.setImageMode(ImageMode.RAW);
 			grabber.start();
 			while (!haltRequested && grabber.getVideoBitrate() < 10) {
@@ -411,38 +440,22 @@ public class FFmpegProcessor implements VideoProcessor {
 		}
 
 		private void copyFrameToPixmap(Frame frame, Pixmap pixmap) {
-			final ByteBuffer source = ((ByteBuffer) frame.image[0]).duplicate();
+			final ByteBuffer source = (ByteBuffer) frame.image[0];
 			final ByteBuffer pixels = pixmap.getPixels();
-			final int sourceChannels = frame.imageChannels > 0 ? frame.imageChannels : 3;
-			final int sourceStride = frame.imageStride > 0 ? frame.imageStride : frame.imageWidth * sourceChannels;
-			final int targetChannels = 3;
-			final int targetRowBytes = frame.imageWidth * targetChannels;
-			final byte[] row = getFrameRow(targetRowBytes);
+			// BgrFrameConverter produces BGR24 with an aligned stride.
+			final int rowBytes = frame.imageWidth * 3;
+			final int sourceStride = frame.imageStride;
+			final int byteCount = rowBytes * frame.imageHeight;
 
 			pixels.clear();
-			for (int y = 0; y < frame.imageHeight; y++) {
-				source.position(y * sourceStride);
-				if (sourceChannels == targetChannels) {
-					source.get(row, 0, targetRowBytes);
-				} else {
-					for (int x = 0; x < frame.imageWidth; x++) {
-						int sourceIndex = y * sourceStride + x * sourceChannels;
-						int targetIndex = x * targetChannels;
-						row[targetIndex] = source.get(sourceIndex);
-						row[targetIndex + 1] = source.get(sourceIndex + 1);
-						row[targetIndex + 2] = source.get(sourceIndex + 2);
-					}
+			if (sourceStride == rowBytes) {
+				pixels.put(0, source, 0, byteCount);
+			} else {
+				for (int y = 0; y < frame.imageHeight; y++) {
+					pixels.put(y * rowBytes, source, y * sourceStride, rowBytes);
 				}
-				pixels.put(row);
 			}
-			pixels.flip();
-		}
-
-		private byte[] getFrameRow(int targetRowBytes) {
-			if (frameRow == null || frameRow.length < targetRowBytes) {
-				frameRow = new byte[targetRowBytes];
-			}
-			return frameRow;
+			pixels.limit(byteCount);
 		}
 
 		private long getRetainedMovieBytes() {
@@ -459,13 +472,14 @@ public class FFmpegProcessor implements VideoProcessor {
 		public synchronized void exec(Command com) {
 			if (haltRequested || finished) return;
 			if (com == Command.HALT) {
-				// Queue signaling also wakes timed waits without interrupting JavaCPP/file I/O.
+				// Wake both idle and frame-clock waits without interrupting JavaCPP/file I/O.
 				haltRequested = true;
 				commands.clear();
 				commands.offerFirst(Command.HALT);
 			} else {
 				commands.offerLast(com);
 			}
+			notifyAll();
 		}
 	}
 
