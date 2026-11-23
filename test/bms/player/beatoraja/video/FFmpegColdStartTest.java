@@ -25,7 +25,7 @@ public final class FFmpegColdStartTest {
         Path run = Files.createTempDirectory(root, "cold video ");
         Path fixture = run.resolve("colors.avi");
         Lwjgl3BgaSkinIntegrationTest.generateMovie(fixture, true);
-        for (String mode : List.of("eof-wait", "frame-wait", "upload-failure")) {
+        for (String mode : List.of("eof-wait", "frame-wait", "coalesced-upload", "upload-failure")) {
             Path output = run.resolve(mode + ".log");
             Path xml = run.resolve(mode + ".xml");
             Path cache = Files.createDirectory(run.resolve(mode + "-native-cache"));
@@ -49,7 +49,7 @@ public final class FFmpegColdStartTest {
                     && log.contains("phase=texture-upload") && log.contains("<exception>"), "Upload failure XML");
             System.out.println("Cold video " + mode + " passed: " + output);
         }
-        System.out.println("FFmpegColdStartTest passed (fresh JVM/cache, immediate PLAY, timed/EOF wake, restart/seek/loop, upload error, cleanup/XML)");
+        System.out.println("FFmpegColdStartTest passed (fresh JVM/cache, immediate PLAY, frame-clock/EOF wake, restart/seek/loop, coalesced uploads, upload error, cleanup/XML)");
     }
 
     private static void child(Path fixture, Path xml, String mode) throws Exception {
@@ -91,12 +91,20 @@ public final class FFmpegColdStartTest {
                     check(expected.getCause() instanceof IllegalStateException, "Original upload error retained");
                 }
                 worker.join(5000); check(!worker.isAlive(), "Upload failure halts decoder");
+            } else if (mode.equals("coalesced-upload")) {
+                verifyCoalescedUpload(processor, worker, uploads);
             } else {
                 final FFmpegProcessor movie = processor; final Thread thread = worker;
                 await(() -> movie.getFrame(0) != null, uploads, thread);
-                movie.getFrame(-60_000);
-                await(() -> number(thread, "waitMillis") > 50_000 && thread.getState() == Thread.State.TIMED_WAITING,
-                        uploads, thread);
+                await(() -> frameWaiting(thread), uploads, thread);
+                long nextFrame = number(thread, "wakeAtMicros");
+                movie.getFrame((nextFrame - 1) / 1000);
+                long decoded = number(thread, "framecount");
+                Thread.sleep(100);
+                check(frameWaiting(thread) && number(thread, "framecount") == decoded,
+                        "Worker must remain parked just before the next frame timestamp");
+                movie.getFrame((nextFrame + 999) / 1000);
+                await(() -> number(thread, "framecount") > decoded, uploads, thread);
                 if (mode.equals("eof-wait")) {
                     movie.stop();
                     await(() -> number(thread, "waitMillis") == -1 && thread.getState() == Thread.State.WAITING, uploads, thread);
@@ -116,9 +124,9 @@ public final class FFmpegColdStartTest {
                 }
                 long closing = System.nanoTime();
                 movie.dispose(); thread.join(2000);
-                check(!thread.isAlive() && System.nanoTime() - closing < TimeUnit.SECONDS.toNanos(2), "HALT wakes long waits promptly");
+                check(!thread.isAlive() && System.nanoTime() - closing < TimeUnit.SECONDS.toNanos(2), "HALT wakes playback waits promptly");
             }
-            for (String name : new String[]{"grabber", "pixmap", "converter", "movieBytes", "frameRow"})
+            for (String name : new String[]{"grabber", "pixmap", "converter", "movieBytes"})
                 check(FFmpegProcessorLifecycleTest.field(worker, name) == null, "Released " + name);
             processor.dispose();
             Runnable pending; while ((pending = uploads.poll()) != null) pending.run();
@@ -133,6 +141,44 @@ public final class FFmpegColdStartTest {
                 Logger.getGlobal().removeHandler(handler); handler.close();
             }
         }
+    }
+
+    private static boolean frameWaiting(Thread worker) {
+        return worker.getState() == Thread.State.WAITING && number(worker, "waitMillis") >= 0;
+    }
+
+    private static void verifyCoalescedUpload(FFmpegProcessor processor, Thread worker,
+                                             LinkedBlockingQueue<Runnable> uploads) throws Exception {
+        Runnable first = uploads.poll(30, TimeUnit.SECONDS);
+        check(first != null, "First decoded frame was queued");
+        long decoded = number(worker, "framecount");
+        for (long time : new long[]{300, 600}) {
+            processor.getFrame(time);
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (number(worker, "framecount") <= decoded || !waitingForPlayback(worker)) {
+                check(worker.isAlive() && System.nanoTime() < deadline, "Decoder must advance while upload is held");
+                Thread.sleep(5);
+            }
+            decoded = number(worker, "framecount");
+        }
+        System.out.println("Queued uploads after three decoded batches: " + (1 + uploads.size()));
+        check(uploads.isEmpty(), "Only one callback may be pending while newer frames overwrite its Pixmap");
+        first.run();
+        check(number(worker, "uploadCount") == 1 && processor.getFrame(600) != null, "Held callback uploads the current Pixmap once");
+        processor.getFrame(850);
+        Runnable next = uploads.poll(5, TimeUnit.SECONDS);
+        check(next != null, "A new frame queues after the previous upload");
+        next.run();
+        check(number(worker, "uploadCount") == 2, "New upload completes");
+        processor.dispose();
+        worker.join(2000);
+        check(!worker.isAlive(), "Disposal wakes the decoder after coalesced uploads");
+    }
+
+    private static boolean waitingForPlayback(Thread worker) {
+        Thread.State state = worker.getState();
+        return (state == Thread.State.WAITING || state == Thread.State.TIMED_WAITING)
+                && number(worker, "waitMillis") >= 0;
     }
 
     private static long number(Thread worker, String name) {

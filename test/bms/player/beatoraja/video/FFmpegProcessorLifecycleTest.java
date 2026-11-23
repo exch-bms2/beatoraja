@@ -7,6 +7,7 @@ import java.lang.reflect.Proxy;
 import java.nio.channels.FileLockInterruptionException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -131,6 +132,7 @@ public final class FFmpegProcessorLifecycleTest {
         return (SongResource) Proxy.newProxyInstance(SongResource.class.getClassLoader(), new Class<?>[]{SongResource.class},
                 (proxy, method, args) -> switch (method.getName()) {
                     case "openStream" -> input.open();
+                    case "localPath" -> Optional.empty();
                     case "displayPath", "name", "cacheKey" -> "synthetic & movie.mp4";
                     default -> throw new UnsupportedOperationException(method.getName());
                 });
@@ -144,7 +146,7 @@ public final class FFmpegProcessorLifecycleTest {
         var field = worker.getClass().getDeclaredField(name); field.setAccessible(true); return field.get(worker);
     }
     private static void released(Thread worker) throws Exception {
-        for (String name : new String[]{"grabber", "pixmap", "converter", "movieBytes", "frameRow"})
+        for (String name : new String[]{"grabber", "pixmap", "converter", "movieBytes"})
             check(field(worker, name) == null, "Released " + name);
     }
     private static void join(Thread worker) throws InterruptedException {

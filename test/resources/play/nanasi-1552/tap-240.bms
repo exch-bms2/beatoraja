@@ -1,0 +1,15 @@
+#PLAYER 1
+#TITLE Nanasi 1.552 Single Tap 240
+#ARTIST beatoraja test
+#BPM 240
+#PLAYLEVEL 1
+#RANK 2
+#TOTAL 400
+#OPTION 774:EXTRA_OFF
+#OPTION 774:GAMELEVEL_NORMAL
+#WAV01 note-a.wav
+#WAV02 clock.wav
+#WAV03 note-b.wav
+
+#00201:02
+#00419:01
