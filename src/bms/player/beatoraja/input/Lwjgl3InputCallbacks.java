@@ -42,6 +42,8 @@ final class Lwjgl3InputCallbacks {
         key = GLFWKeyCallback.create((window, code, scancode, action, mods) -> {
             int resolved = input.resolveKeyboardKey(code, scancode);
             int mapped = input.getGdxKeyCode(resolved);
+            bms.player.beatoraja.input.keyboard.WindowsConversionKeyDiagnostics.callback(
+                    windowsKeyboard, code, scancode, mapped, action, mods);
             if (capsLockDiagnostics) WindowsCapsLockDiagnostics.key(code, scancode, mapped, action, mods);
             int bit = WindowsKeyboardMapping.aliasBit(windowsKeyboard, mapped);
             if (bit != 0) {

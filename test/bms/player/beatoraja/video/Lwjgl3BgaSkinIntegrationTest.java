@@ -1,12 +1,16 @@
 package bms.player.beatoraja.video;
 
 import java.lang.reflect.*;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -26,6 +30,7 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongResources;
+import bms.player.beatoraja.song.archive.SongArchives;
 
 /** Real FFmpeg/GL integration, isolated from MainController, player databases and external skins. */
 public final class Lwjgl3BgaSkinIntegrationTest {
@@ -36,18 +41,20 @@ public final class Lwjgl3BgaSkinIntegrationTest {
         Path fixture = output.resolve("generated-colors.avi");
         generateMovie(fixture, false);
         Path compressed = output.resolve("generated-compressed.avi");
-        generateMovie(compressed, true);
+        generateMovie(compressed, true, 96);
         Path narrow = output.resolve("generated-narrow-compressed.avi");
         generateMovie(narrow, true, 66);
         var config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("beatoraja BGA/skin resource integration test");
         config.setWindowedMode(WIDTH, HEIGHT); config.disableAudio(true); config.setForegroundFPS(120);
-        var test = new Harness(new Path[] {fixture, compressed, narrow}, output, Integer.getInteger("beatoraja.glIntegration.cycles", 8));
+        Path archived = SongArchives.virtualPath(output.resolve("test movies.zip"), "set/" + narrow.getFileName());
+        var test = new Harness(new Path[] {fixture, compressed, narrow, archived}, output, Integer.getInteger("beatoraja.glIntegration.cycles", 8));
         new Lwjgl3Application(bms.player.beatoraja.build.GlTestDiagnostics.wrap("bga-skin", test), config);
         if (test.failure != null) throw new AssertionError("GL integration failed", test.failure);
         check(test.completed, "Integration test must complete all phases");
         System.out.println("Lwjgl3BgaSkinIntegrationTest passed: " + test.cycles
-                + " synthetic skin/BGA lifetimes; real pixels, restart/forward seek/loop, queued-upload disposal, GL ledger and native references");
+                + " synthetic skin/BGA lifetimes; local and ZIP videos, packed and padded rows, real pixels,"
+                + " restart/forward seek/loop, queued-upload disposal, GL ledger and native references");
     }
 
     static void generateMovie(Path path, boolean compressed) throws Exception {
@@ -94,13 +101,13 @@ public final class Lwjgl3BgaSkinIntegrationTest {
         Throwable failure;
 
         Harness(Path[] fixtures, Path output, int cycles) {
-            this.fixtures = fixtures; this.output = output; this.cycles = Math.max(2, Math.min(100, cycles));
+            this.fixtures = fixtures; this.output = output; this.cycles = Math.max(fixtures.length, Math.min(100, cycles));
         }
         @Override public void create() {
             try { initialize(); }
             catch (Throwable e) { failure = e; dispose(); throw new AssertionError(e); }
         }
-        private void initialize() {
+        private void initialize() throws IOException {
             app = Gdx.app;
             Gdx.app = (Application) Proxy.newProxyInstance(Application.class.getClassLoader(), new Class<?>[] {Application.class},
                     (proxy, method, values) -> {
@@ -114,13 +121,27 @@ public final class Lwjgl3BgaSkinIntegrationTest {
             renderer = new SkinObjectRenderer(batch, camera);
             check(ShaderManager.getShader("bilinear") != null, "Bilinear shader compiles on the real GL backend");
             var transparent = new Pixmap(16, 16, Pixmap.Format.RGBA8888);
+            Path stillImage = output.resolve("generated-transparent.png");
             try {
                 transparent.setColor(0, 0, 0, 0); transparent.fill();
-                PixmapIO.writePNG(new com.badlogic.gdx.files.FileHandle(output.resolve("generated-transparent.png").toFile()), transparent);
+                PixmapIO.writePNG(new com.badlogic.gdx.files.FileHandle(stillImage.toFile()), transparent);
             } finally { transparent.dispose(); }
+            writeZipFixture(SongArchives.archivePath(fixtures[3]), fixtures[2], stillImage);
             baseline = ledger.liveCount();
             inputStreamBaseline = inputStreamCount();
             newScene();
+        }
+        private void writeZipFixture(Path archive, Path movie, Path stillImage) throws IOException {
+            try (var zip = new ZipOutputStream(Files.newOutputStream(archive))) {
+                for (Path file : List.of(movie, stillImage)) {
+                    zip.putNextEntry(new ZipEntry("set/" + file.getFileName()));
+                    Files.copy(file, zip);
+                    zip.closeEntry();
+                }
+                zip.putNextEntry(new ZipEntry("set/synthetic.bms"));
+                zip.write("#TITLE Archived BGA fixture\n".getBytes(StandardCharsets.UTF_8));
+                zip.closeEntry();
+            }
         }
         private void newScene() {
             scene = new Scene();
@@ -158,7 +179,8 @@ public final class Lwjgl3BgaSkinIntegrationTest {
                 return;
             }
             if (!hasColor(80, 85, wanted) || !hasColor(260, 85, wanted)) return;
-            check(hasColor(138, 85, wanted), "Right edge has no RGB stride noise: cycle=" + cycle
+            check(hasColor(138, 45, wanted) && hasColor(138, 85, wanted) && hasColor(138, 124, wanted),
+                    "Right edge has no RGB stride noise: cycle=" + cycle
                     + ", phase=" + phase + ", edge=" + Arrays.toString(pixel(138, 85))
                     + ", center=" + Arrays.toString(pixel(80, 85)));
             verifySkinPixels();
@@ -167,7 +189,10 @@ public final class Lwjgl3BgaSkinIntegrationTest {
             var grabber = (org.bytedeco.javacv.FFmpegFrameGrabber)get(scene.worker, "grabber");
             check(texture.getWidth() == grabber.getImageWidth() && texture.getHeight() == grabber.getImageHeight(),
                     "Buffer alignment must not resize or pad the displayed texture");
-            if (phase == 0 && (cycle == 0 || cycle == cycles - 1)) capture("scene-" + cycle + ".png");
+            if (phase == 0) {
+                verifyVideoSource(fixtures[cycle % fixtures.length]);
+                if (cycle == 0 || cycle == cycles - 1) capture("scene-" + cycle + ".png");
+            }
             switch (phase) {
                 case 0 -> { movieTime = 550; next(1); }
                 case 1 -> { movieTime = 950; next(2); }
@@ -177,6 +202,24 @@ public final class Lwjgl3BgaSkinIntegrationTest {
                 case 6 -> { movieTime = 1600; next(7); }
                 case 7 -> { holdUploads.set(true); movieTime += 550; next(8); }
             }
+        }
+        private void verifyVideoSource(Path fixture) {
+            boolean archived = SongArchives.isVirtualPath(fixture);
+            var converter = get(scene.worker, "converter");
+            var converted = (Frame) get(converter, "result");
+            int rowBytes = converted.imageWidth * 3;
+            check(converted.imageWidth == 96 ? converted.imageStride == rowBytes : converted.imageStride > rowBytes,
+                    "Fixture exercises the expected packed or padded rows: " + fixture);
+            check(((ByteBuffer) converted.image[0]).isDirect() && ((Pixmap) get(scene.worker, "pixmap")).getPixels().isDirect(),
+                    "Converted pixels and Pixmap both use direct buffers");
+            check(inputStreamCount() == inputStreamBaseline + (archived ? 1 : 0),
+                    "Only archived videos use JavaCV's InputStream route: " + fixture);
+            long retained = scene.movie.getRetainedMovieBytes();
+            try {
+                check(retained == (archived ? SongResources.fromPath(fixture).size() : 0),
+                        "Only archived videos retain compressed bytes: " + fixture);
+            } catch (IOException e) { throw new AssertionError(e); }
+            check(SongResources.getMaterializedStatistics().fileCount() == 0, "ZIP video plays without extraction");
         }
         private void next(int phase) { this.phase = phase; deadline = System.nanoTime() + 10_000_000_000L; }
         private void verifySkinPixels() {
@@ -201,9 +244,9 @@ public final class Lwjgl3BgaSkinIntegrationTest {
             try { scene.worker.join(5000); } catch (InterruptedException e) { throw new AssertionError(e); }
             check(!scene.worker.isAlive(), "Movie worker exits on transition");
             check(get(scene.worker, "grabber") == null && get(scene.worker, "pixmap") == null
-                    && get(scene.worker, "movieBytes") == null && get(scene.worker, "frameRow") == null
+                    && get(scene.worker, "movieBytes") == null
                     && get(scene.worker, "converter") == null,
-                    "Native grabber/Pixmap and compressed/copy buffers released");
+                    "Native grabber/Pixmap and compressed buffers released");
             for (Pixmap p : scene.fontPixmaps) check(p.isDisposed(), "Font atlas backing pixmap freed");
             check(scene.imagePixmap.isDisposed(), "BGA image-cache backing Pixmap freed");
             check(!scene.fontSource.isAvailable(), "Shared font source released by skin owner");

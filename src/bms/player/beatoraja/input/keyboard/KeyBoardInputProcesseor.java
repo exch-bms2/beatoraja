@@ -179,6 +179,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public boolean keyDown(int keycode) {
+		if (WindowsConversionKeyDiagnostics.enabledFor(keycode))
+			WindowsConversionKeyDiagnostics.log("keyDown", keycode,
+					"textMode=" + textmode + ", ime=" + imeTextMode);
 		lastPressedModifiers = currentlyHeldModifiers();
 		setLastPressedKey(keycode);
 		return true;

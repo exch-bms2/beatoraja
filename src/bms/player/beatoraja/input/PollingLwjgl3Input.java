@@ -224,7 +224,12 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
     void keyboardEdge(int key, boolean down, long time, KeyboardTimingTrace.Edge trace) {
         if (key < 0 || key >= suppressedKeys.length) return;
         if (!down) suppressedKeys[key] = false;
-        if (windowInputActive && !overlayActive && !suppressedKeys[key]) keyboardEvents.offer(key, down, time, trace);
+        boolean accepted = windowInputActive && !overlayActive && !suppressedKeys[key];
+        if (bms.player.beatoraja.input.keyboard.WindowsConversionKeyDiagnostics.enabledFor(key))
+            bms.player.beatoraja.input.keyboard.WindowsConversionKeyDiagnostics.log("fifo", key,
+                "down=" + down + ", accepted=" + accepted + ", active=" + windowInputActive
+                        + ", overlay=" + overlayActive + ", heldSuppressed=" + suppressedKeys[key]);
+        if (accepted) keyboardEvents.offer(key, down, time, trace);
     }
 
     KeyboardTimingTrace keyboardTrace() { return keyboardTrace; }
@@ -339,6 +344,8 @@ public final class PollingLwjgl3Input extends DefaultLwjgl3Input {
 
     private void suppressHeldConversionKey(int key) {
         if (super.isKeyPressed(key)) {
+            bms.player.beatoraja.input.keyboard.WindowsConversionKeyDiagnostics.log("ime-exit", key,
+                    "heldSuppressed=true");
             suppressedKeys[key] = true;
             keys.set(key, 0);
         }

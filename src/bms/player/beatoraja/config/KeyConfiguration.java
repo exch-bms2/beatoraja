@@ -652,40 +652,11 @@ public class KeyConfiguration extends MainState {
 
 	private boolean setKeyboardKeyAssign(int index) {
 		int key = keyboard.getLastPressedKey();
-		if (key <= Keys.UNKNOWN || key > Keys.MAX_KEYCODE) {
-			assignmentResult = "Unrecognized key";
-			keyboard.setLastPressedKey(-1);
-			return false;
-		}
-		if (!KeyboardShortcut.isDigit(key)) {
-			for (var shortcut : SHORTCUTS) {
-				int binding = config.getShortcutBinding(shortcut);
-				if (binding < 0 || KeyboardShortcut.key(binding) != key) continue;
-				if (!shortcut.activeIn(MainStateType.PLAY) && !shortcut.activeIn(MainStateType.RESULT)
-						&& !shortcut.activeIn(MainStateType.COURSERESULT)
-						&& !(shortcut.activeIn(MainStateType.MUSICSELECT)
-								&& (keyboardConfig == config.getMusicSelectInputConfig(PlaySide.P1).getKeyboardConfig()
-										|| keyboardConfig == config.getMusicSelectInputConfig(PlaySide.P2).getKeyboardConfig()))) continue;
-				assignmentResult = "Already used by a shortcut: " + shortcut.label();
-				keyboard.setLastPressedKey(-1);
-				return false;
-			}
-		}
-		if (index >= 0 && KeyboardShortcut.isDigit(key)) {
-			var assigned = keyboardConfig.getKeyAssign();
-			for (int i = 0; i < assigned.length; i++) {
-				if (i == index || assigned[i] != key) continue;
-				assignmentResult = "This number is already assigned to another lane";
-				keyboard.setLastPressedKey(-1);
-				return false;
-			}
-			if (key == keyboardConfig.getStart() || key == keyboardConfig.getSelect()) {
-				assignmentResult = "This number is already assigned to START / SELECT";
-				keyboard.setLastPressedKey(-1);
-				return false;
-			}
-		} else if (keyboard.isReservedKey(key)) {
-			assignmentResult = "This key is reserved";
+		String rejection = keyboardAssignmentRejection(config, keyboardConfig, index, key);
+		bms.player.beatoraja.input.keyboard.WindowsConversionKeyDiagnostics.log("assignment", key,
+				"target=" + index + ", result=" + (rejection == null ? "accepted" : rejection));
+		if (rejection != null) {
+			assignmentResult = rejection;
 			keyboard.setLastPressedKey(-1);
 			return false;
 		}
@@ -698,6 +669,37 @@ public class KeyConfiguration extends MainState {
 			keyboardConfig.setSelect(key);
 		}
 		return true;
+	}
+
+	static String keyboardAssignmentRejection(PlayerConfig config, KeyboardConfig keyboardConfig, int index, int key) {
+		if (key <= Keys.UNKNOWN || key > Keys.MAX_KEYCODE) {
+			return "Unrecognized key";
+		}
+		for (var shortcut : SHORTCUTS) {
+			int binding = config.getShortcutBinding(shortcut);
+			if (binding < 0 || KeyboardShortcut.key(binding) != key) continue;
+			if (!shortcut.activeIn(MainStateType.PLAY) && !shortcut.activeIn(MainStateType.RESULT)
+					&& !shortcut.activeIn(MainStateType.COURSERESULT)
+					&& !(!KeyboardShortcut.isDigit(key) && shortcut.activeIn(MainStateType.MUSICSELECT)
+							&& (keyboardConfig == config.getMusicSelectInputConfig(PlaySide.P1).getKeyboardConfig()
+									|| keyboardConfig == config.getMusicSelectInputConfig(PlaySide.P2).getKeyboardConfig()))) continue;
+			return "Already used by a shortcut: " + shortcut.label();
+		}
+		if (KeyboardShortcut.isDigit(key)) {
+			var assigned = keyboardConfig.getKeyAssign();
+			for (int i = 0; i < assigned.length; i++) {
+				if (i == index || assigned[i] != key) continue;
+				return "This number is already assigned to another lane";
+			}
+			if ((index != -1 && key == keyboardConfig.getStart()) || (index != -2 && key == keyboardConfig.getSelect())) {
+				return "This number is already assigned to START / SELECT";
+			}
+		} else if (key < Keys.F1 || key > Keys.F12) {
+			for (var control : ControlKeys.values()) {
+				if (control.keycode == key) return "This key is reserved: " + control.name();
+			}
+		}
+		return null;
 	}
 
 	private String getMouseScratchKeyString(int index, String defaultKeyString) {

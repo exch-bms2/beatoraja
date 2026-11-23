@@ -123,6 +123,7 @@ public enum GaugeProperty {
         CLASS_LR2(null ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -2f, -3f, -2f}, new float[][]{{30, 0.6f}}),
         EXCLASS_LR2(null ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -6.0f, -10.0f, -2.0f}, new float[][]{{30, 0.6f}}),
         EXHARDCLASS_LR2(null ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -12.0f, -20.0f, -2.0f}, new float[][]{}),
+        ANGOLMOIS(null, -Float.MAX_VALUE, 100, 50, 150 * 100f / 512, new float[6], new float[][]{}),
         PULSUS_DEFAULT(null, 2, 100, 20, 80, new float[]{1, 1, 0.5f, -2, -6, -2}, new float[][]{}),
         PULSUS_EASY(null, 2, 100, 20, 80, new float[]{1, 1, 0.5f, -1.6f, -4.8f, -1.6f}, new float[][]{}),
         PULSUS_HARD(null, 0, 100, 100, 2, new float[]{0.16f, 0.16f, 0, -5, -9, -5}, new float[][]{}),

@@ -13,6 +13,15 @@ import org.lwjgl.glfw.GLFW;
 /** Platform-gated fixed aliases, without a window or Windows DLLs. */
 public final class WindowsKeyboardMappingTest {
     public static void main(String[] args) throws Exception {
+        check(WindowsConversionKeyDiagnostics.isRelevant(0x79, Keys.UNKNOWN)
+                && WindowsConversionKeyDiagnostics.isRelevant(0x7b, Keys.UNKNOWN)
+                && WindowsConversionKeyDiagnostics.isRelevant(0, WindowsKeyboardMapping.CONVERT)
+                && !WindowsConversionKeyDiagnostics.isRelevant(0x179, Keys.UNKNOWN)
+                && !WindowsConversionKeyDiagnostics.isRelevant(0x1e, Keys.A),
+                "Diagnose conversion scancodes even if mapping failed, without tracking normal typing");
+        check(WindowsConversionKeyDiagnostics.callbackDetails(-1, 0x79, 245, 1, 0).equals(
+                "glfwKey=-1, scan=0x79, logicalKey=245, action=1, mods=0"),
+                "Diagnostic payload contains numeric routing metadata only");
         var input = KeyboardQueueTestSupport.allocate(PollingLwjgl3Input.class);
         KeyboardQueueTestSupport.set(input, PollingLwjgl3Input.class, "windowsKeyboard", true);
         check(WindowsKeyboardMapping.RO == 240 && WindowsKeyboardMapping.YEN == 73, "Stable IDs; keep legacy Backslash");
