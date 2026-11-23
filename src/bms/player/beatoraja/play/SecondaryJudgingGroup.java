@@ -19,7 +19,12 @@ final class SecondaryJudgingGroup {
 
 	record Judgment(Outcome outcome, int passed, int exScore, int maxCombo,
 			List<Integer> judgeCounts, int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear,
-			GaugeHistory gaugeHistory) {
+			GaugeHistory gaugeHistory, int nativeScore, int nativeMaxScore) {
+		Judgment(Outcome outcome, int passed, int exScore, int maxCombo, List<Integer> judgeCounts,
+				int gaugeType, float gaugeValue, int notes, int minbp, ClearType clear, GaugeHistory gaugeHistory) {
+			this(outcome, passed, exScore, maxCombo, judgeCounts, gaugeType, gaugeValue, notes, minbp, clear,
+					gaugeHistory, -1, -1);
+		}
 		ScoreAttempt toLocalAttempt(BMSModel model) {
 			int mode = model.containsUndefinedLongNote() ? model.getLntype() : 0;
 			var localOutcome = switch (outcome) {
@@ -31,7 +36,7 @@ final class SecondaryJudgingGroup {
 				case RUNNING -> throw new IllegalStateException("Cannot save a running judgment");
 			};
 			return new ScoreAttempt(model.getSHA256(), mode, localOutcome,
-					notes, passed, maxCombo, minbp, clear, gaugeType, gaugeValue, judgeCounts);
+					notes, passed, maxCombo, minbp, clear, gaugeType, gaugeValue, judgeCounts, nativeScore, nativeMaxScore);
 		}
 	}
 
@@ -63,6 +68,7 @@ final class SecondaryJudgingGroup {
 			try {
 				Run run = switch (rule) {
 					case LR2 -> SecondaryJudging.create(player, model, resource, endUs);
+					case ANGOLMOIS -> AngolmoisSecondary.create(player, model, resource, endUs);
 					case PULSUS, RAINDROP, BEMUSE -> SecondaryJudging.createTimingProfile(player, model, resource, endUs, rule);
 				};
 				if (run != null) entries.add(new Entry(rule, run));

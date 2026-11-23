@@ -27,6 +27,7 @@ public enum BMSPlayerRule {
 	Pulsus(GaugeProperty.SEVENKEYS, JudgeProperty.PULSUS),
 	Raindrop(GaugeProperty.SEVENKEYS, JudgeProperty.RAINDROP),
 	Bemuse(GaugeProperty.SEVENKEYS, JudgeProperty.BEMUSE),
+	Angolmois(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
 ;
 
     // Experimental opt-in: change to LunaticRave2 and rebuild to compare locally.

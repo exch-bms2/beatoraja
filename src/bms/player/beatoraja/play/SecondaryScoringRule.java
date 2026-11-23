@@ -5,7 +5,8 @@ public enum SecondaryScoringRule {
 	LR2("lr2", "Lunatic Rave 2", BMSPlayerRule.LunaticRave2),
 	PULSUS("pulsus", "Pulsus", BMSPlayerRule.Pulsus),
 	RAINDROP("raindrop", "raindrop", BMSPlayerRule.Raindrop),
-	BEMUSE("bemuse", "Bemuse", BMSPlayerRule.Bemuse);
+	BEMUSE("bemuse", "Bemuse", BMSPlayerRule.Bemuse),
+	ANGOLMOIS("angolmois", "Angolmois (1 ms)", BMSPlayerRule.Angolmois);
 
 	private final String id;
 	private final String displayName;

@@ -87,7 +87,12 @@ public final class PlayDataAccessor {
 
 	/** One rule's actual judgments, not an aggregate personal best. */
 	public record ScoreAttempt(String sha256, int mode, ScoreOutcome outcome, int notes, int passed,
-			int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts) {
+			int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts,
+			int nativeScore, int nativeMaxScore) {
+		public ScoreAttempt(String sha256, int mode, ScoreOutcome outcome, int notes, int passed,
+				int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts) {
+			this(sha256, mode, outcome, notes, passed, combo, minbp, clear, gauge, gaugeValue, judgeCounts, -1, -1);
+		}
 		public ScoreAttempt {
 			Objects.requireNonNull(outcome);
 			Objects.requireNonNull(clear);
@@ -111,6 +116,8 @@ public final class PlayDataAccessor {
 			score.setMinbp(minbp);
 			score.setClear(clear.id);
 			score.setGauge(gauge);
+			score.setNativeScore(nativeScore);
+			score.setNativeMaxScore(nativeMaxScore);
 			for (int i = 0; i < 6; i++) {
 				score.addJudgeCount(i, true, judgeCounts.get(i * 2));
 				score.addJudgeCount(i, false, judgeCounts.get(i * 2 + 1));
@@ -519,11 +526,11 @@ public final class PlayDataAccessor {
 			log.setSha256(hash);
 			log.setClear(newscore.getClear());
 		}
-		log.setOldscore(score.getExscore());
-		log.setScore(score.getExscore());
-		if (score.getExscore() < newscore.getExscore() && updateScore) {
+		log.setOldscore(score.getRuleScore());
+		log.setScore(score.getRuleScore());
+		if (score.getRuleScore() < newscore.getRuleScore() && updateScore) {
 			log.setSha256(hash);
-			log.setScore(newscore.getExscore());
+			log.setScore(newscore.getRuleScore());
 		}
 		log.setOldminbp(score.getMinbp());
 		log.setMinbp(score.getMinbp());

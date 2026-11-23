@@ -44,11 +44,34 @@ final class RuleScoreStore {
 		config.setTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE);
 		source = new SQLiteDataSource(config);
 		source.setUrl("jdbc:sqlite:" + scorePath);
+		try (var connection = source.getConnection()) {
+			query.update(connection, """
+					CREATE TABLE IF NOT EXISTS native_score (
+					sha256 TEXT NOT NULL, mode INTEGER NOT NULL, native_score INTEGER NOT NULL,
+					native_max_score INTEGER NOT NULL, PRIMARY KEY (sha256, mode))
+					""");
+		}
 	}
 
 	ScoreData readBest(String sha256, int mode) throws SQLException {
 		try (var connection = source.getConnection()) {
-			return scores.getScoreData(connection, sha256, mode);
+			var best = scores.getScoreData(connection, sha256, mode);
+			readNativeScore(connection, best);
+			return best;
+		}
+	}
+
+	private void readNativeScore(Connection connection, ScoreData score) throws SQLException {
+		if (score == null) return;
+		try (var statement = connection.prepareStatement("SELECT native_score, native_max_score FROM native_score WHERE sha256 = ? AND mode = ?")) {
+			statement.setString(1, score.getSha256());
+			statement.setInt(2, score.getMode());
+			try (var rows = statement.executeQuery()) {
+				if (rows.next()) {
+					score.setNativeScore(rows.getInt(1));
+					score.setNativeMaxScore(rows.getInt(2));
+				}
+			}
 		}
 	}
 
@@ -93,6 +116,7 @@ final class RuleScoreStore {
 		score.setDate(date);
 		if (eligible) {
 			var best = scores.getScoreData(connection, score.getSha256(), score.getMode());
+			readNativeScore(connection, best);
 			if (best == null) {
 				best = new ScoreData();
 				best.setSha256(score.getSha256());
@@ -105,6 +129,10 @@ final class RuleScoreStore {
 			best.setDate(Math.max(best.getDate(), date));
 			best.setScorehash(PlayDataAccessor.getScoreHash(best));
 			scores.setScoreData(connection, best);
+			if (best.getNativeScore() >= 0) {
+				query.update(connection, "INSERT OR REPLACE INTO main.native_score VALUES (?, ?, ?, ?)",
+						best.getSha256(), best.getMode(), best.getNativeScore(), best.getNativeMaxScore());
+			}
 			if (diff.getSha256() != null) {
 				diff.setDate(date);
 				diff.setMode(score.getMode());

@@ -423,7 +423,12 @@ public class MusicResult extends AbstractResult {
 					if (renderer != null) {
 						if (scoreRuleNotice != null) scoreRuleNotice.stop();
 						var display = secondaryDisplay();
-						scoreRuleNotice = renderer.addMessage(display != null ? display.result.ruleName() : "beatoraja",
+						String notice = display != null ? display.result.ruleName() : "beatoraja";
+						if (display != null && display.result.score().getNativeScore() >= 0) {
+							var nativeScore = display.result.score();
+							notice += " SCORE " + nativeScore.getNativeScore() + " / " + nativeScore.getNativeMaxScore();
+						}
+						scoreRuleNotice = renderer.addMessage(notice,
 								1_500, Color.CYAN, 1);
 					}
 				}

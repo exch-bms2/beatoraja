@@ -96,16 +96,19 @@ public class ScoreDataLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 	void createAttemptColumns() throws SQLException {
 		validate(qr, new Table(TABLE_NAME,
 				new Column("outcome", "TEXT"), new Column("best_eligible", "INTEGER"),
-				new Column("passed", "INTEGER"), new Column("gauge", "INTEGER"), new Column("gauge_value", "REAL")));
+				new Column("passed", "INTEGER"), new Column("gauge", "INTEGER"), new Column("gauge_value", "REAL"),
+				new Column("native_score", "INTEGER"), new Column("native_max_score", "INTEGER")));
 	}
 
 	void setScoreDataLog(Connection connection, ScoreData score, PlayDataAccessor.ScoreAttempt attempt,
 			boolean eligible) throws SQLException {
 		insert(qr, connection, "history", TABLE_NAME, score);
 		qr.update(connection, """
-				UPDATE history.scoredatalog SET outcome = ?, best_eligible = ?, passed = ?, gauge = ?, gauge_value = ?
+				UPDATE history.scoredatalog SET outcome = ?, best_eligible = ?, passed = ?, gauge = ?, gauge_value = ?,
+				native_score = ?, native_max_score = ?
 				WHERE rowid = last_insert_rowid()
-				""", attempt.outcome().name(), eligible ? 1 : 0, attempt.passed(), attempt.gauge(), attempt.gaugeValue());
+				""", attempt.outcome().name(), eligible ? 1 : 0, attempt.passed(), attempt.gauge(), attempt.gaugeValue(),
+				attempt.nativeScore(), attempt.nativeMaxScore());
 	}
 
 	private void migrateLegacyPrimaryKey() throws SQLException {

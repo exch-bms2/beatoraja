@@ -81,6 +81,14 @@ public final class ScoreData implements Validatable {
 	private int maxcombo = 0;
 	
 	private int notes = 0;
+	private int nativeScore = -1;
+	private int nativeMaxScore = -1;
+
+	public int getNativeScore() { return nativeScore; }
+	public void setNativeScore(int value) { nativeScore = value; }
+	public int getNativeMaxScore() { return nativeMaxScore; }
+	public void setNativeMaxScore(int value) { nativeMaxScore = value; }
+	public int getRuleScore() { return nativeScore >= 0 ? nativeScore : getExscore(); }
 	
 	private int passnotes = 0;
 	
@@ -562,7 +570,10 @@ public final class ScoreData implements Validatable {
 			setSeed(newscore.getSeed());
 			update = true;
 		}
-		if (getExscore() < newscore.getExscore() && updateScore) {
+		if (updateScore && (getRuleScore() < newscore.getRuleScore()
+				|| nativeScore < 0 && newscore.getNativeScore() >= 0)) {
+			setNativeScore(newscore.getNativeScore());
+			setNativeMaxScore(newscore.getNativeMaxScore());
 			setEpg(newscore.getEpg());
 			setLpg(newscore.getLpg());
 			setEgr(newscore.getEgr());
