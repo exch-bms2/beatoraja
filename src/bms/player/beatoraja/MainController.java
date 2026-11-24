@@ -303,6 +303,7 @@ public final class MainController {
 
 		final boolean stateChanged = newState != null && current != newState;
 		if (stateChanged) {
+			bms.player.beatoraja.skin.lua.LuaCallDiagnostics.stateChanging();
 			finishSkinAdjustment(false);
 			if(current != null) {
 				current.shutdown();
@@ -515,6 +516,7 @@ public final class MainController {
 			stage.draw();
 		}
 		if (current == drawnState) memoryDiagnostics.frameRendered(this, current.type.name());
+		if (current == drawnState) bms.player.beatoraja.skin.lua.LuaCallDiagnostics.frameRendered(current.type.name());
 
 		// show fps
 		if (showfps && systemfont != null) {
@@ -698,6 +700,7 @@ public final class MainController {
 	}
 
 	public void dispose() {
+		bms.player.beatoraja.skin.lua.LuaCallDiagnostics.shutdown();
 		finishSkinAdjustment(false);
 		disposeInput();
 		if (obs != null) obs.close();

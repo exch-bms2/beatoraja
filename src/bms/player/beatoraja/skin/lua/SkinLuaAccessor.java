@@ -669,7 +669,7 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	public BooleanProperty loadBooleanProperty(String script) {
 		try {
 			final LuaValue lv = globals.load("return " + script);
-			return loadBooleanProperty(lv.checkfunction());
+			return loadBooleanProperty(lv.checkfunction(), LuaCallDiagnostics.site("boolean", script));
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -677,6 +677,10 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	}
 
 	public BooleanProperty loadBooleanProperty(LuaFunction function) {
+		return loadBooleanProperty(function, LuaCallDiagnostics.site("boolean", function));
+	}
+
+	private BooleanProperty loadBooleanProperty(LuaFunction function, LuaCallDiagnostics.Site site) {
 		return new BooleanProperty() {
 			@Override
 			public boolean isStatic(MainState state) {
@@ -686,7 +690,12 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			@Override
 			public boolean get(MainState state) {
 				try {
-					return function.call().toboolean();
+					final long luaDiagnostics = LuaCallDiagnostics.begin(site);
+					try {
+						return function.call().toboolean();
+					} finally {
+						LuaCallDiagnostics.end(site, luaDiagnostics);
+					}
 				} catch (RuntimeException e) {
 					Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
 					return false;
@@ -698,7 +707,7 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	public IntegerProperty loadIntegerProperty(String script) {
 		try {
 			final LuaValue lv = globals.load("return " + script);
-			return loadIntegerProperty(lv.checkfunction());
+			return loadIntegerProperty(lv.checkfunction(), LuaCallDiagnostics.site("integer", script));
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -706,11 +715,20 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	}
 
 	public IntegerProperty loadIntegerProperty(LuaFunction function) {
+		return loadIntegerProperty(function, LuaCallDiagnostics.site("integer", function));
+	}
+
+	private IntegerProperty loadIntegerProperty(LuaFunction function, LuaCallDiagnostics.Site site) {
 		return new IntegerProperty() {
 			@Override
 			public int get(MainState state) {
 				try{
-					return function.call().toint();
+					final long luaDiagnostics = LuaCallDiagnostics.begin(site);
+					try {
+						return function.call().toint();
+					} finally {
+						LuaCallDiagnostics.end(site, luaDiagnostics);
+					}
 				} catch (RuntimeException e) {
 					Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
 					return 0;
@@ -722,7 +740,7 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	public FloatProperty loadFloatProperty(String script) {
 		try {
 			final LuaValue lv = globals.load("return " + script);
-			return loadFloatProperty(lv.checkfunction());
+			return loadFloatProperty(lv.checkfunction(), LuaCallDiagnostics.site("float", script));
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -730,11 +748,20 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	}
 
 	public FloatProperty loadFloatProperty(LuaFunction function) {
+		return loadFloatProperty(function, LuaCallDiagnostics.site("float", function));
+	}
+
+	private FloatProperty loadFloatProperty(LuaFunction function, LuaCallDiagnostics.Site site) {
 		return new FloatProperty() {
 			@Override
 			public float get(MainState state) {
 				try{
-					return function.call().tofloat();
+					final long luaDiagnostics = LuaCallDiagnostics.begin(site);
+					try {
+						return function.call().tofloat();
+					} finally {
+						LuaCallDiagnostics.end(site, luaDiagnostics);
+					}
 				} catch (RuntimeException e) {
 					Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
 					return 0f;
@@ -746,7 +773,7 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	public StringProperty loadStringProperty(String script) {
 		try {
 			final LuaValue lv = globals.load("return " + script);
-			return loadStringProperty(lv.checkfunction());
+			return loadStringProperty(lv.checkfunction(), LuaCallDiagnostics.site("string", script));
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -754,11 +781,20 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	}
 
 	public StringProperty loadStringProperty(LuaFunction function) {
+		return loadStringProperty(function, LuaCallDiagnostics.site("string", function));
+	}
+
+	private StringProperty loadStringProperty(LuaFunction function, LuaCallDiagnostics.Site site) {
 		return new StringProperty() {
 			@Override
 			public String get(MainState state) {
 				try {
-					return function.call().tojstring();
+					final long luaDiagnostics = LuaCallDiagnostics.begin(site);
+					try {
+						return function.call().tojstring();
+					} finally {
+						LuaCallDiagnostics.end(site, luaDiagnostics);
+					}
 				} catch (RuntimeException e) {
 					Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
 					return "";
@@ -783,10 +819,10 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 			final LuaValue trialCallResult = lv.call();
 			if (trialCallResult.isfunction()) {
 				// タイマー関数を返す場合
-				return loadTimerProperty(trialCallResult.checkfunction());
+				return loadTimerProperty(trialCallResult.checkfunction(), LuaCallDiagnostics.site("timer", script));
 			} else {
 				// 数値を返す場合
-				return loadTimerProperty(lv.checkfunction());
+				return loadTimerProperty(lv.checkfunction(), LuaCallDiagnostics.site("timer", script));
 			}
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
@@ -801,11 +837,20 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	 * @return new timer property
 	 */
 	public TimerProperty loadTimerProperty(LuaFunction timerFunction) {
+		return loadTimerProperty(timerFunction, LuaCallDiagnostics.site("timer", timerFunction));
+	}
+
+	private TimerProperty loadTimerProperty(LuaFunction timerFunction, LuaCallDiagnostics.Site site) {
 		return new TimerProperty() {
 			@Override
 			public long getMicro(MainState state) {
 				try {
-					return timerFunction.call().tolong();
+					final long luaDiagnostics = LuaCallDiagnostics.begin(site);
+					try {
+						return timerFunction.call().tolong();
+					} finally {
+						LuaCallDiagnostics.end(site, luaDiagnostics);
+					}
 				} catch (RuntimeException e) {
 					Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
 					return Long.MIN_VALUE;
