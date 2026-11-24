@@ -93,6 +93,10 @@ public class Skin {
 
 	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
 	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
+	/** ID-ordered snapshots for per-frame updates; rebuilt only after the maps change (#540). */
+	private CustomTimer[] orderedCustomTimers = new CustomTimer[0];
+	private CustomEvent[] orderedCustomEvents = new CustomEvent[0];
+	private boolean customObjectsChanged;
 
 	/**
 	 * デバッグ用
@@ -820,6 +824,7 @@ public class Skin {
 
 	public void addCustomEvent(CustomEvent event) {
 		customEvents.put(event.getId(), event);
+		customObjectsChanged = true;
 	}
 
 	public void executeCustomEvent(MainState state, int id, int arg1, int arg2) {
@@ -830,6 +835,7 @@ public class Skin {
 
 	public void addCustomTimer(CustomTimer timer) {
 		customTimers.put(timer.getId(), timer);
+		customObjectsChanged = true;
 	}
 
 	/**
@@ -860,6 +866,7 @@ public class Skin {
 			CustomTimer timer = new CustomTimer(id, null);
 			timer.setMicroTimer(time);
 			customTimers.put(id, timer);
+			customObjectsChanged = true;
 		}
 	}
 
@@ -870,11 +877,29 @@ public class Skin {
 	 * @param state MainState
 	 */
 	public void updateCustomObjects(MainState state) {
-		for (IntMap.Entry<CustomTimer> timer : customTimers) {
-			timer.value.update(state);
+		// Timer functions and event actions may add timers through setMicroCustomTimer. Iterating the
+		// IntMap while it grows corrupts the iteration, so walk ID-ordered snapshots instead; objects
+		// added during this frame are updated from the next frame.
+		if (customObjectsChanged) {
+			customObjectsChanged = false;
+			orderedCustomTimers = ordered(customTimers, CustomTimer[]::new);
+			orderedCustomEvents = ordered(customEvents, CustomEvent[]::new);
 		}
-		for (IntMap.Entry<CustomEvent> event : customEvents) {
-			event.value.update(state);
+		for (CustomTimer timer : orderedCustomTimers) {
+			timer.update(state);
 		}
+		for (CustomEvent event : orderedCustomEvents) {
+			event.update(state);
+		}
+	}
+
+	private static <T> T[] ordered(IntMap<T> map, java.util.function.IntFunction<T[]> array) {
+		int[] ids = new IntMap.Keys(map).toArray().toArray();
+		Arrays.sort(ids);
+		T[] result = array.apply(ids.length);
+		for (int i = 0; i < ids.length; i++) {
+			result[i] = map.get(ids[i]);
+		}
+		return result;
 	}
 }
