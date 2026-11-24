@@ -46,7 +46,9 @@ val bundledJars = listOf(
 )
 val luaJar = listOf("luaj-jse-3.0.2-custom.jar", "luaj-jse.jar")
     .firstOrNull { file("lib/$it").isFile } ?: "luaj-jse-3.0.2-custom.jar"
-val localLibraries = (bundledJars + luaJar).map { file("lib/$it") }
+// -PluajJar=<path> swaps the Lua VM jar for A/B measurement (see docs/lua-call-diagnostics.md).
+val luaJarOverride = providers.gradleProperty("luajJar").orNull?.let { file(it) }
+val localLibraries = bundledJars.map { file("lib/$it") } + (luaJarOverride ?: file("lib/$luaJar"))
 // A deliberate build-time trust decision, never inferred from arbitrary lib/ or ir/ contents.
 val includeTrustedIr = providers.gradleProperty("includeTrustedIr").map { it.toBooleanStrict() }.getOrElse(false)
 val trustedIrJars = fileTree("trusted_ir") { include("*.jar", "*.JAR") }.files.sortedBy { it.name }
@@ -176,6 +178,13 @@ tasks.named<JavaExec>("run") {
     }
     providers.gradleProperty("inputDiagnosticsIntervalMillis").orNull?.let {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
+    }
+    providers.gradleProperty("luaDiagnostics").orNull?.let { systemProperty("beatoraja.luaDiagnostics", it) }
+    providers.gradleProperty("luaDiagnosticsWarmupMillis").orNull?.let {
+        systemProperty("beatoraja.luaDiagnostics.warmupMillis", it)
+    }
+    providers.gradleProperty("luaDiagnosticsOutput").orNull?.let {
+        systemProperty("beatoraja.luaDiagnostics.output", it)
     }
     providers.gradleProperty("memoryDiagnosticsOutput").orNull?.let {
         systemProperty("beatoraja.memoryDiagnostics.output", it)
@@ -363,7 +372,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.song.archive.SongArchivesTest",
     "bms.player.beatoraja.song.archive.ZipSongArchiveTest",
     "bms.player.beatoraja.song.archive.SongArchiveDepthTest",
-    "bms.player.beatoraja.song.archive.RarSongArchiveTest"
+    "bms.player.beatoraja.song.archive.RarSongArchiveTest",
+    "bms.player.beatoraja.skin.lua.LuaCallDiagnosticsTest"
 )
 val regressionTasks = regressionClasses.map { className ->
     tasks.register<JavaExec>("regression${className.substringAfterLast('.')}") {
