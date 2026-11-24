@@ -24,6 +24,9 @@ public final class IRConnectionManagerTest {
 	private static final String IR_RESOURCE = "bms/player/beatoraja/ir";
 	private static final Class<?>[] FIXTURE_CLASSES = {
 			FooIRConnection.class,
+			KotlinStyleIRConnection.class,
+			KotlinStyleIRConnection.Companion.class,
+			JvmStaticIRConnection.class,
 			TestIRConnectionBase.class,
 			LoginRequest.class,
 			IllegalBmsProvider.class,
@@ -40,6 +43,7 @@ public final class IRConnectionManagerTest {
 		testClassNameConversion();
 		testDirectoryDiscovery();
 		testJarDiscovery();
+		testStaticStrings();
 		testClosePreservesInterrupt();
 	}
 
@@ -70,7 +74,11 @@ public final class IRConnectionManagerTest {
 	}
 
 	private static void testJarDiscovery() throws Exception {
-		Path archive = Files.createTempFile("ir-connection-jar-test", ".jar");
+		// A directory name ending with '!' broke "jar:...!/" URLs (#539).
+		Path directory = Files.createTempDirectory("ir-connection-jar-test");
+		Path pluginDirectory = Files.createDirectories(directory.resolve("plugins!"));
+		Path archive = pluginDirectory.resolve("ir.jar");
+		Path loaderCopy = directory.resolve("loader.jar");
 		try {
 			try(JarOutputStream output = new JarOutputStream(Files.newOutputStream(archive))) {
 				output.putNextEntry(new JarEntry(IR_RESOURCE + "/"));
@@ -79,14 +87,24 @@ public final class IRConnectionManagerTest {
 					writeClass(output, fixtureClass);
 				}
 			}
-			try(URLClassLoader classLoader = new FixtureClassLoader(new URL[] { archive.toUri().toURL() },
+			// The fixture loader reads a copy so the test only exercises discovery's handling of the path.
+			Files.copy(archive, loaderCopy);
+			try(URLClassLoader classLoader = new FixtureClassLoader(new URL[] { loaderCopy.toUri().toURL() },
 					IRConnectionManagerTest.class.getClassLoader())) {
-				assertDiscoveredConnections(loadFromJar(classLoader,
-						new URL("jar:" + archive.toUri().toURL() + "!/" + IR_RESOURCE + "/")));
+				assertDiscoveredConnections(loadFromJar(classLoader, archive));
 			}
 		} finally {
-			Files.deleteIfExists(archive);
+			deleteTree(directory);
 		}
+	}
+
+	private static void testStaticStrings() {
+		assertEquals("Fixture IR", IRWorkerDiscovery.getStaticString(FooIRConnection.class, "NAME"));
+		assertEquals("Kotlin Companion IR", IRWorkerDiscovery.getStaticString(KotlinStyleIRConnection.class, "NAME"));
+		assertEquals("https://kotlin.example/", IRWorkerDiscovery.getStaticString(KotlinStyleIRConnection.class, "HOME"));
+		assertEquals("Kotlin JvmStatic IR", IRWorkerDiscovery.getStaticString(JvmStaticIRConnection.class, "NAME"));
+		assertNull(IRWorkerDiscovery.getStaticString(FooIRConnection.class, "HOME"));
+		assertNull(IRWorkerDiscovery.getStaticString(TestIRConnectionBase.class, "NAME"));
 	}
 
 	private static void testClosePreservesInterrupt() {
@@ -123,16 +141,21 @@ public final class IRConnectionManagerTest {
 		return load("loadFromDirectory", classLoader, url);
 	}
 
-	private static List<Class<IRConnection>> loadFromJar(ClassLoader classLoader, URL url) throws Exception {
-		return load("loadFromJar", classLoader, url);
+	private static List<Class<IRConnection>> loadFromJar(ClassLoader classLoader, Path jar) throws Exception {
+		return load("loadFromJar", classLoader, Path.class, jar);
 	}
 
 	private static List<Class<IRConnection>> load(String methodName, ClassLoader classLoader, URL url) throws Exception {
+		return load(methodName, classLoader, URL.class, url);
+	}
+
+	private static List<Class<IRConnection>> load(String methodName, ClassLoader classLoader, Class<?> type, Object source)
+			throws Exception {
 		List<Class<IRConnection>> connections = new ArrayList<>();
-		Method method = IRWorkerDiscovery.class.getDeclaredMethod(methodName, ClassLoader.class, URL.class, List.class);
+		Method method = IRWorkerDiscovery.class.getDeclaredMethod(methodName, ClassLoader.class, type, List.class);
 		method.setAccessible(true);
 		try {
-			method.invoke(null, classLoader, url, connections);
+			method.invoke(null, classLoader, source, connections);
 		} catch (InvocationTargetException e) {
 			throwAsException(e.getCause());
 		}
@@ -141,7 +164,8 @@ public final class IRConnectionManagerTest {
 
 	private static void assertDiscoveredConnections(List<Class<IRConnection>> connections) {
 		Set<String> names = connections.stream().map(Class::getName).collect(java.util.stream.Collectors.toSet());
-		assertEquals(Set.of(FooIRConnection.class.getName()), names);
+		assertEquals(Set.of(FooIRConnection.class.getName(), KotlinStyleIRConnection.class.getName(),
+				JvmStaticIRConnection.class.getName()), names);
 	}
 
 	private static void copyClass(Path root, Class<?> type) throws IOException {
