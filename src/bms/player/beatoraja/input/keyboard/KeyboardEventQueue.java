@@ -97,12 +97,19 @@ public final class KeyboardEventQueue {
         size[key]--;
     }
 
-    /** Atomically remove one eligible edge. -2 is duration-deferred, -1 is empty. */
+    /**
+     * Atomically remove one eligible edge. -2 is duration-deferred, -1 is empty.
+     * Edges published inside the duration window cancel each other: only the net state survives,
+     * applied once the window ends. This is the chatter filter, not a type-ahead buffer.
+     */
     public synchronized int pollReady(int key, boolean current, long now, long lastTime, int duration) {
         int value;
         while ((value = peek(key)) != -1) {
             if ((value != 0) == current) { remove(key); continue; }
-            if (now < lastTime + duration * 1000L) return -2;
+            if (now < lastTime + duration * 1000L) {
+                collapse(key, current);
+                return peek(key) == -1 ? -1 : -2;
+            }
             if (callbackTimes != null) {
                 lastCallback[key] = callbackTimes[key * capacity + head[key]];
                 lastPublication[key] = publicationTimes[key * capacity + head[key]];
@@ -112,6 +119,12 @@ public final class KeyboardEventQueue {
             return value;
         }
         return -1;
+    }
+
+    /** Keep only the latest committed edge, and drop it too when it returns to the accepted state. */
+    private void collapse(int key, boolean current) {
+        while (committed[key] > 1) remove(key);
+        if (committed[key] == 1 && events[key * capacity + head[key]] == current) remove(key);
     }
 
     public synchronized void reset(AtomicIntegerArray snapshot) {

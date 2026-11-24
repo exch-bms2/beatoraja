@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Json;
 public final class KeyboardEventQueueTest {
     public static void main(String[] args) throws Exception {
         testPublicationAndDuration();
+        testDurationCancelsChatter();
         testLifecycleAndOverflow();
         testJudgmentAndReplay();
         testConcurrentQueue();
@@ -42,6 +43,44 @@ public final class KeyboardEventQueueTest {
         q.publish(true, state);
         check(q.pollReady(29, false, 20000, 17000, 0) == 1
                 && q.pollReady(29, true, 20000, 20000, 0) == 0, "Zero duration preserves both edges at the same time");
+    }
+
+    private static void testDurationCancelsChatter() {
+        var q = new KeyboardEventQueue(16);
+        var state = new AtomicIntegerArray(256);
+        q.configure(new int[] {29}, state);
+        q.publish(true, state);
+        q.pollReady(29, false, 0, Long.MIN_VALUE, 100);
+        q.offer(29, true);
+        state.set(29, 1);
+        q.publish(true, state);
+        check(q.pollReady(29, false, 1_000_000, Long.MIN_VALUE, 100) == 1, "First press is accepted");
+        // Mash inside the 100 ms window and end released: only the net release may survive.
+        for (int i = 0; i < 5; i++) q.offer(29, i % 2 != 0);
+        state.set(29, 0);
+        q.publish(true, state);
+        check(q.pollReady(29, true, 1_050_000, 1_000_000, 100) == -2, "Net release waits for the window");
+        check(q.pollReady(29, true, 1_100_000, 1_000_000, 100) == 0, "Net release is applied once");
+        check(q.pollReady(29, false, 1_300_000, 1_100_000, 100) == -1, "Mashed edges are not replayed later");
+        // An even number of edges inside the window cancels out completely.
+        q.offer(29, true);
+        state.set(29, 1);
+        q.publish(true, state);
+        check(q.pollReady(29, false, 2_000_000, 1_100_000, 100) == 1, "Press after the window is accepted");
+        q.offer(29, false);
+        q.offer(29, true);
+        q.publish(true, state);
+        check(q.pollReady(29, true, 2_010_000, 2_000_000, 100) == -1, "Release+press inside the window cancel");
+        check(q.pollReady(29, true, 2_200_000, 2_000_000, 100) == -1, "Nothing is applied after the window");
+        // Edges captured after the last publication are not collapsed early.
+        q.offer(29, false);
+        state.set(29, 0);
+        q.publish(true, state);
+        q.offer(29, true);
+        check(q.pollReady(29, true, 2_210_000, 2_200_000, 100) == -2, "Committed release waits");
+        state.set(29, 1);
+        q.publish(true, state);
+        check(q.pollReady(29, true, 2_220_000, 2_200_000, 100) == -1, "Later press cancels it after publication");
     }
 
     private static void testLifecycleAndOverflow() {

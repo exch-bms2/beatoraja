@@ -19,6 +19,7 @@ import bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest.F
 public final class ControllerEventQueueTest {
     public static void main(String[] args) throws Exception {
         testFifoAndDuration();
+        testDurationCancelsChatter();
         testOverflowAndReset();
         testRawShortTapAndReplay();
         testPovOr();
@@ -59,6 +60,36 @@ public final class ControllerEventQueueTest {
         times[1] = 2000;
         check(q.deferredCount(states, times, 2000, 10) == 1, "Count pending duration sample");
         check(q.pollNext(states, times, 11000, 10) == 1, "Retain edge until duration boundary");
+    }
+
+    private static void testDurationCancelsChatter() {
+        var q = new ControllerEventQueue(16);
+        var states = new boolean[32];
+        var times = new long[32];
+        Arrays.fill(times, Long.MIN_VALUE);
+        q.reset(true, states);
+        q.offer(0, true);
+        check(q.pollNext(states, times, 1_000_000, 100) == 1, "First press is accepted");
+        states[0] = true;
+        times[0] = 1_000_000;
+        // Mash inside the 100 ms window and end released: only the net release may survive.
+        for (int i = 0; i < 5; i++) q.offer(0, i % 2 != 0);
+        check(q.pollNext(states, times, 1_050_000, 100) == -1, "Nothing is applied inside the window");
+        check(q.deferredCount(states, times, 1_050_000, 100) == 1, "Exactly one net edge is pending");
+        check(q.pollNext(states, times, 1_100_000, 100) == 0, "Net release is applied once");
+        states[0] = false;
+        times[0] = 1_100_000;
+        check(q.pollNext(states, times, 1_300_000, 100) == -1, "Mashed edges are not replayed later");
+        // An even number of edges inside the window cancels out completely.
+        q.offer(0, true);
+        q.offer(0, false);
+        check(q.pollReady(0, false, 1_150_000, 1_100_000, 100) == -1, "Press+release inside the window cancel");
+        check(q.pollNext(states, times, 1_300_000, 100) == -1, "Nothing is applied after the window");
+        // Another button is not affected by a deferred one.
+        q.offer(0, true);
+        q.offer(1, true);
+        times[0] = 1_300_000;
+        check(q.pollNext(states, times, 1_310_000, 100) == 3, "Deferred button does not block another button");
     }
 
     private static void testOverflowAndReset() {
