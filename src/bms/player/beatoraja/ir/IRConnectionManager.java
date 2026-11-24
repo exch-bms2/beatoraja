@@ -33,6 +33,18 @@ public class IRConnectionManager {
         return hasIRConnection(name) ? new IsolatedIRConnection(name) : null;
     }
 
+    public static void close(IRConnection connection) {
+        if (connection instanceof AutoCloseable closeable) {
+            boolean interrupted = Thread.interrupted();
+            try {
+                closeable.close();
+            } catch (Exception ignored) {
+            } finally {
+                if (interrupted) Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     static IRConnection getIRConnectionInProcess(String name) {
         return IRWorkerDiscovery.getIRConnectionInProcess(name);
     }

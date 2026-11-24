@@ -139,6 +139,11 @@ public final class MainController {
 
 	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated,
 			SongDatabaseAccessor songdb) {
+		this(f, config, player, auto, songUpdated, songdb, null);
+	}
+
+	MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated,
+			SongDatabaseAccessor songdb, IRStartup externalStartup) {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
@@ -148,6 +153,9 @@ public final class MainController {
 			offset[i] = new SkinOffset();
 		}
 
+		if (externalStartup != null && player == null) {
+			throw new IllegalArgumentException("player must not be null when externalStartup is provided");
+		}
 		if(player == null) {
 			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername(), config.getControllerBackend());
 		}
@@ -177,58 +185,57 @@ public final class MainController {
 
 		playdata = new PlayDataAccessor(config);
 
-		Array<IRStatus> irarray = new Array<IRStatus>();
-		for(IRConfig irconfig : player.getIrconfig()) {
-			final IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
-			if(ir != null) {
-				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
-				} else {
-						IRResponse<IRPlayerData> response;
-						try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.IR_LOGIN)) {
-							response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
-							timing.outcome(response.isSucceeded() ? StartupDiagnostics.Outcome.OK : StartupDiagnostics.Outcome.FAILED);
-						}
-					if(response.isSucceeded()) {
-						irarray.add(new IRStatus(irconfig, ir, response.getData()));
-					} else {
-						Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+		if (externalStartup != null) {
+			ir = externalStartup.login();
+		} else {
+			try (var irStartup = new IRStartup(player.getIrconfig())) {
+				ir = irStartup.login();
+			}
+		}
+
+		IRReviewSync createdReviewSync = null;
+		boolean constructed = false;
+		try {
+			createdReviewSync = IRReviewSync.forPrimary(player.getIrconfig(), ir);
+
+			rivals.update(this);
+
+			switch(config.getAudioConfig().getDriver()) {
+			case PortAudio:
+					try {
+						audio = new PortAudioDriver(config);
+					} catch(Throwable e) {
+						e.printStackTrace();
+						Logger.getGlobal().severe("PortAudioの初期化に失敗しました : " + PortAudioDriver.getUnavailableMessage(e));
+						config.getAudioConfig().setDriver(DriverType.OpenAL);
 					}
-				}
+				break;
 			}
 
-		}
-		ir = irarray.toArray(IRStatus.class);
-		reviewSync = IRReviewSync.forPrimary(player.getIrconfig(), ir);
-		
-		rivals.update(this);
+			timer = new TimerManager();
+			sound = new SystemSoundManager(this);
 
-		switch(config.getAudioConfig().getDriver()) {
-		case PortAudio:
+			if(config.isUseDiscordRPC()) {
+				stateListener.add(new DiscordListener());
+			}
+			if (config.isUseObsWs()) {
 				try {
-					audio = new PortAudioDriver(config);
-				} catch(Throwable e) {
-					e.printStackTrace();
-					Logger.getGlobal().severe("PortAudioの初期化に失敗しました : " + PortAudioDriver.getUnavailableMessage(e));
-					config.getAudioConfig().setDriver(DriverType.OpenAL);
+					obs = new ObsController(config);
+					stateListener.add(obs);
+					obs.start();
+				} catch (RuntimeException unavailable) {
+					Logger.getGlobal().warning("OBS: could not initialize connection");
 				}
-			break;
-		}
-
-		timer = new TimerManager();
-		sound = new SystemSoundManager(this);
-		
-		if(config.isUseDiscordRPC()) {
-			stateListener.add(new DiscordListener());
-		}
-		if (config.isUseObsWs()) {
-			try {
-				obs = new ObsController(config);
-				stateListener.add(obs);
-				obs.start();
-			} catch (RuntimeException unavailable) {
-				Logger.getGlobal().warning("OBS: could not initialize connection");
+			}
+			constructed = true;
+		} finally {
+			if (!constructed) {
+				if (createdReviewSync != null) createdReviewSync.close();
+				rivals.close();
+				closeIRConnections();
 			}
 		}
+		reviewSync = createdReviewSync;
 	}
 
 	public SkinOffset getOffset(int index) {
@@ -705,6 +712,7 @@ public final class MainController {
 		Optional.ofNullable(gresult).ifPresent(MainState::dispose);
 		Optional.ofNullable(keyconfig).ifPresent(MainState::dispose);
 		Optional.ofNullable(skinconfig).ifPresent(MainState::dispose);
+		closeIRConnections();
 		resource.dispose();
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
@@ -718,6 +726,16 @@ public final class MainController {
 		FontRenderRetirement.drainAtShutdown(sprite);
 
 		Logger.getGlobal().info("全リソース破棄完了");
+	}
+
+	void closeIRConnections() {
+		if (ir != null) {
+			for (IRStatus status : ir) {
+				if (status != null) {
+					status.close();
+				}
+			}
+		}
 	}
 
 	void disposeInput() {
@@ -983,6 +1001,10 @@ public final class MainController {
 			this.config = config;
 			this.connection = connection;
 			this.player = player;
+		}
+
+		void close() {
+			IRConnectionManager.close(connection);
 		}
 	}
 }
