@@ -266,6 +266,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.input.text.TextInputDiagnosticsTest",
     "bms.player.beatoraja.input.text.ime.MacOsImeBridgeTest",
     "bms.player.beatoraja.input.text.ime.WindowsImeBridgeTest",
+    "bms.player.beatoraja.input.text.ime.WindowsGameplayImeTest",
     "bms.player.beatoraja.input.text.ime.X11ImeBridgeTest",
     "bms.player.beatoraja.skin.StageViewportTest",
     "bms.player.beatoraja.input.WindowInputLifecycleTest",
