@@ -123,6 +123,9 @@ public final class BarRenderer {
 			final BarArea ba = bararea[i];
 			boolean on = (i == skin.getCenterBar());
 			if (baro.getBarImages(on, i) == null) {
+				// This skin has no bar at this slot; clear what a previous skin left here (#559).
+				ba.value = -1;
+				ba.sd = null;
 				continue;
 			}
 			float dx = 0;
