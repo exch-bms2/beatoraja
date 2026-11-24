@@ -6,6 +6,7 @@ import bms.player.beatoraja.input.text.ImeBridge;
 import bms.player.beatoraja.input.text.TextInputDiagnostics;
 import bms.player.beatoraja.input.text.TextInputSession;
 import bms.player.beatoraja.input.text.ime.MacOsIme;
+import bms.player.beatoraja.input.text.ime.WindowsGameplayIme;
 import bms.player.beatoraja.input.text.ime.WindowsImeBridge;
 import bms.player.beatoraja.input.text.ime.X11ImeBridge;
 import bms.player.beatoraja.skin.property.StringWriter;
@@ -46,6 +47,8 @@ class SkinTextInput {
 	private TextInputSession session;
 	private Runnable pendingFocus;
 	private Runnable publishImeCaret;
+	/** Whether this field holds the game window's IME (Windows detaches it outside text input). */
+	private boolean imeAttached;
 
 	SkinTextInput(boolean configured) {
 		this(System.getProperty("os.name", "").startsWith("Windows") ? WindowsImeBridge.create(configured)
@@ -82,6 +85,8 @@ class SkinTextInput {
 		textField.setVisible(true);
 		stage.setKeyboardFocus(textField);
 		textField.setCursorPosition(textField.getText().length());
+		// The IME context must exist before a native bridge attaches, and for GLFW fallback composition.
+		attachIme();
 		try {
 			session = new TextInputSession(bridge, editorState());
 		} catch (RuntimeException | Error e) {
@@ -94,6 +99,7 @@ class SkinTextInput {
 				this.writer = null;
 				textField.setVisible(false);
 				stage.setKeyboardFocus(null);
+				detachIme();
 				throw e;
 			}
 		}
@@ -157,13 +163,28 @@ class SkinTextInput {
 			} finally {
 				try {
 					if (owner != null) owner.main.getInputProcessor().getKeyBoardInputProcesseor().setTextInputMode(false);
-				} finally { committing = false; }
+				} finally {
+					committing = false;
+					detachIme();
+				}
 			}
 		}
 		if (next != null) next.run();
 	}
 
 	boolean isFinishing() { return session != null && session.isFinishing() && !session.isFinished(); }
+
+	private void attachIme() {
+		if (imeAttached) return;
+		imeAttached = true;
+		WindowsGameplayIme.textInputBegin();
+	}
+
+	private void detachIme() {
+		if (!imeAttached) return;
+		imeAttached = false;
+		WindowsGameplayIme.textInputEnd();
+	}
 
 	private TextInputSession.EditorState editorState() {
 		String value = textField.getText();

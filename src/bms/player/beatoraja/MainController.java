@@ -405,6 +405,7 @@ public final class MainController {
 			input = new BMSPlayerInputProcessor(config, player);
 			timing.outcome(StartupDiagnostics.Outcome.OK);
 		}
+		bms.player.beatoraja.input.text.ime.WindowsGameplayIme.install();
 		switch(config.getAudioConfig().getDriver()) {
 		case OpenAL:
 			audio = new GdxSoundDriver(config);
@@ -724,6 +725,7 @@ public final class MainController {
 		// 終了処理では次の postRunnable が実行されないことがある。共有アトラスと共通代替フォントを手放し、ネイティブのフォント資源をここで解放する。
 		// Shutdown may never run another postRunnable: release the shared atlases and global fallbacks, then native font resources.
 		FontRenderRetirement.drainAtShutdown(sprite);
+		bms.player.beatoraja.input.text.ime.WindowsGameplayIme.uninstall();
 
 		Logger.getGlobal().info("全リソース破棄完了");
 	}
