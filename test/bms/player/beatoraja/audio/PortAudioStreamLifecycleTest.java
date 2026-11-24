@@ -19,6 +19,7 @@ import static bms.player.beatoraja.input.KeyboardQueueTestSupport.set;
 public final class PortAudioStreamLifecycleTest {
     public static void main(String[] args) throws Exception {
         assertAsioMinimumBufferSize();
+        assertMixerSampleClamp();
         assertStartFailure();
         assertWriteFailure();
         assertMixerRecoversFromWriteTimeout();
@@ -88,6 +89,15 @@ public final class PortAudioStreamLifecycleTest {
             stream.close();
             check(closes.get() == 1 && releases.get() == 1, "Deferred cleanup runs once after " + operation);
         }
+    }
+
+    private static void assertMixerSampleClamp() {
+        check(PortAudioDriver.clampSample(1.7f) == 1f, "Samples above 1.0 must clamp to 1.0");
+        check(PortAudioDriver.clampSample(-2.3f) == -1f, "Samples below -1.0 must clamp to -1.0");
+        check(PortAudioDriver.clampSample(1f) == 1f && PortAudioDriver.clampSample(-1f) == -1f,
+                "Full-scale samples must pass through");
+        check(PortAudioDriver.clampSample(0.25f) == 0.25f && PortAudioDriver.clampSample(0f) == 0f,
+                "In-range samples must pass through unchanged");
     }
 
     private static void assertAsioMinimumBufferSize() {
