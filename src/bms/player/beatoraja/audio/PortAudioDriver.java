@@ -98,7 +98,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		int framesPerBuffer = audioConfig.getDeviceBufferSize();
 //		System.out.println( "  suggestedLatency = " + streamParameters.suggestedLatency );
 
-		int flags = PortAudio.FLAG_CLIP_OFF | PortAudio.FLAG_DITHER_OFF;
+		// Keep PortAudio clipping enabled as a safety net behind the mixer clamp (#903).
+		int flags = PortAudio.FLAG_DITHER_OFF;
 
 		mixer = new Thread(this, "PortAudio Mixer");
 		mixer.setPriority(Thread.MAX_PRIORITY);
@@ -161,6 +162,14 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			return sizes.minimum();
 		}
 		return requestedFrames;
+	}
+
+	/**
+	 * Clamps a mixed sample to [-1, 1]. Integer host formats (e.g. ASIO int24/int32) wrap
+	 * out-of-range floats to the opposite extreme, which is audible as a pop (#903).
+	 */
+	static float clampSample(float sample) {
+		return sample > 1f ? 1f : (sample < -1f ? -1f : sample);
 	}
 
 	private static boolean isWriteTimeout(Throwable failure) {
@@ -966,8 +975,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 							}
 						}
 					}
-					buffer[i] = wav_l;
-					buffer[i+1] = wav_r;
+					buffer[i] = clampSample(wav_l);
+					buffer[i+1] = clampSample(wav_r);
 				}						
 			}
 			
