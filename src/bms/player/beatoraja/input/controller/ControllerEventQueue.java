@@ -46,12 +46,18 @@ final class ControllerEventQueue {
         size[key]++;
     }
 
-    /** -1 empty, -2 duration-deferred, 0 release, 1 press. */
+    /**
+     * -1 empty, -2 duration-deferred, 0 release, 1 press. Edges inside the duration window cancel
+     * each other; only the net state survives, applied once the window ends (chatter filter).
+     */
     synchronized int pollReady(int key, boolean current, long now, long lastTime, int duration) {
         if (!active || overflow) return -1;
         while (size[key] > 0) {
             boolean down = events[key * capacity + head[key]];
-            if (down != current && now < lastTime + duration * 1000L) return -2;
+            if (down != current && now < lastTime + duration * 1000L) {
+                collapse(key, current);
+                return size[key] > 0 ? -2 : -1;
+            }
             head[key] = (head[key] + 1) % capacity;
             size[key]--;
             if (down != current) return down ? 1 : 0;
@@ -69,12 +75,28 @@ final class ControllerEventQueue {
                 head[key] = (head[key] + 1) % capacity;
                 size[key]--;
             }
-            if (size[key] == 0 || now < lastTime[key] + duration * 1000L) continue;
+            if (size[key] == 0) continue;
+            if (now < lastTime[key] + duration * 1000L) {
+                collapse(key, current[key]);
+                continue;
+            }
             long position = order[key * capacity + head[key]];
             if (position < first) { first = position; next = key; }
         }
         if (next == -1) return -1;
         return next * 2 + pollReady(next, current[next], now, lastTime[next], duration);
+    }
+
+    /** Keep only the latest edge, and drop it too when it returns to the accepted state. */
+    private void collapse(int key, boolean current) {
+        while (size[key] > 1) {
+            head[key] = (head[key] + 1) % capacity;
+            size[key]--;
+        }
+        if (size[key] == 1 && events[key * capacity + head[key]] == current) {
+            head[key] = (head[key] + 1) % capacity;
+            size[key]--;
+        }
     }
 
     synchronized int deferredCount(boolean[] current, long[] lastTime, long now, int duration) {
