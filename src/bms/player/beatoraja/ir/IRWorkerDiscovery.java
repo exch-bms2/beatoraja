@@ -1,7 +1,8 @@
 package bms.player.beatoraja.ir;
 
 import java.io.IOException;
-import java.net.JarURLConnection;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -89,7 +90,7 @@ final class IRWorkerDiscovery {
 					Path directory = file.resolve(IR_RESOURCE);
 					if (Files.isDirectory(directory)) loadFromDirectory(cl, directory.toUri().toURL(), classes);
 				} else if (Files.isRegularFile(file)) {
-					loadFromJar(cl, new URL("jar:" + file.toUri().toURL() + "!/"), classes);
+					loadFromJar(cl, file, classes);
 				}
 			}
 		} catch (Throwable e) {
@@ -99,11 +100,13 @@ final class IRWorkerDiscovery {
 		return irconnections;
 	}
 
-	private static void loadFromJar(ClassLoader classLoader, URL url, List<Class<IRConnection>> classes) {
+	/**
+	 * Open the archive by file path. A "jar:" URL treats "!/" as the archive separator, so a
+	 * directory whose name ends with '!' made the archive unreadable (#539).
+	 */
+	private static void loadFromJar(ClassLoader classLoader, Path jar, List<Class<IRConnection>> classes) {
 		try {
-			JarURLConnection jarUrlConnection = (JarURLConnection) url.openConnection();
-			jarUrlConnection.setUseCaches(false);
-			try(JarFile jarFile = jarUrlConnection.getJarFile()) {
+			try(JarFile jarFile = new JarFile(jar.toFile())) {
 				Enumeration<JarEntry> jarEntries = jarFile.entries();
 				while(jarEntries.hasMoreElements()) {
 					String className = toClassName(jarEntries.nextElement().getName());
@@ -113,7 +116,7 @@ final class IRWorkerDiscovery {
 				}
 			}
 		} catch(Throwable e) {
-			Logger.getGlobal().warning("Jarファイル読み込み失敗 - " + url + " : " + e.getMessage());
+			Logger.getGlobal().warning("Jarファイル読み込み失敗 - " + jar + " : " + e.getMessage());
 		}
 	}
 
@@ -164,12 +167,35 @@ final class IRWorkerDiscovery {
 	}
 
 	private static String getConnectionName(Class<?> irClass) {
+		return getStaticString(irClass, "NAME");
+	}
+
+	/**
+	 * Read a static string such as NAME or HOME. Besides a Java static field (also Kotlin
+	 * {@code const val} / {@code @JvmField}), accept a static getter (Kotlin {@code @JvmStatic}) and
+	 * a getter on the Kotlin companion object, where a plain {@code val} is not a public field (#800).
+	 */
+	static String getStaticString(Class<?> irClass, String property) {
+		String getter = "get" + property;
 		try {
-			Object name = irClass.getField("NAME").get(null);
-			return name != null ? name.toString() : null;
-		} catch(Throwable e) {
-			return null;
+			return string(irClass.getField(property).get(null));
+		} catch(Throwable ignored) {
 		}
+		try {
+			Method method = irClass.getMethod(getter);
+			if (Modifier.isStatic(method.getModifiers())) return string(method.invoke(null));
+		} catch(Throwable ignored) {
+		}
+		try {
+			Object companion = irClass.getField("Companion").get(null);
+			if (companion != null) return string(companion.getClass().getMethod(getter).invoke(companion));
+		} catch(Throwable ignored) {
+		}
+		return null;
+	}
+
+	private static String string(Object value) {
+		return value != null ? value.toString() : null;
 	}
 
 	/**
@@ -179,16 +205,7 @@ final class IRWorkerDiscovery {
 	 */
 	public static String getHomeURL(String name) {
 		Class<IRConnection> irClass = getIRConnectionClass(name);
-		if(irClass != null) {
-			try {
-				Object result = irClass.getField("HOME").get(null);
-				if(result != null) {
-					return result.toString();
-				}
-			} catch (Throwable e) {
-			}
-		}
-		return null;
+		return irClass != null ? getStaticString(irClass, "HOME") : null;
 	}
 
 }
