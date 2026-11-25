@@ -792,12 +792,14 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 
 	private StringProperty loadStringProperty(LuaFunction function, LuaCallDiagnostics.Site site) {
 		return new StringProperty() {
+			private final LuaStringResultCache resultCache = new LuaStringResultCache();
+
 			@Override
 			public String get(MainState state) {
 				try {
 					final long luaDiagnostics = LuaCallDiagnostics.begin(site);
 					try {
-						return function.call().tojstring();
+						return resultCache.decode(function.call());
 					} finally {
 						LuaCallDiagnostics.end(site, luaDiagnostics);
 					}
