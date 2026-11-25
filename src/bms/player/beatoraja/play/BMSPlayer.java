@@ -367,12 +367,12 @@ public class BMSPlayer extends MainState {
 		}
 		if(replay != null && main.getInputProcessor().getKeyState(5)) {
 		}
-		playRule = BMSPlayerRule.select(BMSPlayerRule.SINGLE_SONG_RULE, model, resource.getOriginalMode(),
-				autoplay, resource.getCourseBMSModels() != null, config.getGauge(), resource.getChartRuleParameters());
-		if (playRule == BMSPlayerRule.LunaticRave2) {
-			score = false;
-			Logger.getGlobal().info("Experimental LunaticRave2 rule: score, replay and IR submission disabled");
-		}
+		var selection = replay != null ? PrimaryScoringSelection.resolveReplay(replay, model, resource)
+				: PrimaryScoringSelection.resolve(config.getPrimaryScoringRule(resource.getOriginalMode()), model, resource, config.getGauge());
+		resource.setPrimaryScoringSelection(selection);
+		Logger.getGlobal().info("Primary scoring: " + selection.requested().id() + " -> " + selection.effective().id()
+				+ (selection.reason().isEmpty() ? "" : " (" + selection.reason() + ")"));
+		playRule = selection.isStandard() ? BMSPlayerRule.getBMSPlayerRule(model.getMode()) : selection.effective().scoreRule();
 		Logger.getGlobal().info("アシストレベル : " + assist + " - スコア保存 : " + score);
 
 		resource.setUpdateScore(score);
@@ -442,16 +442,18 @@ public class BMSPlayer extends MainState {
 		players[0] = new PlayerProperty(lanerender, judge, gauge, gaugelog);
 
 		judge.init(model, resource);
-		if (judge instanceof JudgeManager) {
-			keyinput.setSecondaryJudging(SecondaryJudgingGroup.create(this, model, resource, playtime * 1_000L));
-		}
+		keyinput.setSecondaryJudging(SecondaryJudgingGroup.create(this, model, resource, playtime * 1_000L,
+				replay != null ? replay.gauge : config.getGauge()));
 
 		rhythm = new RhythmTimerProcessor(model,
 				(getSkin() instanceof PlaySkin) ? ((PlaySkin) getSkin()).getNoteExpansionRate()[0] != 100 || ((PlaySkin) getSkin()).getNoteExpansionRate()[1] != 100 : false);
 
 		bga = resource.getBGAManager();
 
-		ScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
+		ScoreData score = resource.getPrimaryScoringSelection().isStandard()
+				? main.getPlayDataAccessor().readScoreData(model, config.getLnmode())
+				: main.getPlayDataAccessor().readRuleBest(resource.getPrimaryScoringSelection().effective(), model.getSHA256(),
+						model.containsUndefinedLongNote() ? model.getLntype() : 0);
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
 		if (score == null) {
 			score = new ScoreData();
@@ -469,7 +471,7 @@ public class BMSPlayer extends MainState {
 			} else {
 				resource.setTargetScoreData(resource.getRivalScoreData());
 			}
-			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getTargetScoreData() != null ? resource.getTargetScoreData().getExscore() : 0 , null, model.getTotalNotes());
+			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getTargetScoreData() != null ? resource.getTargetScoreData().getExscore() : 0 , null, judge.getScoreData().getNotes());
 		}
 	}
 
@@ -1024,6 +1026,10 @@ public class BMSPlayer extends MainState {
 		replay.laneShufflePattern = playinfo.laneShufflePattern;
 		replay.rand = playinfo.rand;
 		replay.gauge = config.getGauge();
+		replay.primaryScoringRuleId = resource.getPrimaryScoringSelection().effective().id();
+		replay.requestedPrimaryScoringRuleId = resource.getPrimaryScoringSelection().requested().id();
+		replay.primaryScoringFallbackReason = resource.getPrimaryScoringSelection().reason();
+		replay.scoringFrameUs = playRule == BMSPlayerRule.Angolmois ? AngolmoisEngine.FRAME_US : 0;
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
 		replay.randomoption = playinfo.randomoption;
 		replay.randomoptionseed = playinfo.randomoptionseed;
@@ -1033,7 +1039,7 @@ public class BMSPlayer extends MainState {
 		replay.config = replayConfig;
 
 		score.setPassnotes(judge.getPastNotes());
-		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - judge.getPastNotes());
+		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + score.getNotes() - judge.getPastNotes());
 		
 		long count = 0;
 		long avgduration = 0;
@@ -1041,10 +1047,9 @@ public class BMSPlayer extends MainState {
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
-				if (n != null && (n instanceof NormalNote || (n instanceof LongNote ln && 
-						!(((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-								|| ln.getType() == LongNote.TYPE_LONGNOTE)
-								&& ((LongNote) n).isEnd())))) {
+				if (n instanceof NormalNote || n instanceof LongNote ln && (playRule == BMSPlayerRule.Pulsus
+						|| !(((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+						|| ln.getType() == LongNote.TYPE_LONGNOTE) && ln.isEnd()))) {
 					int state = n.getState();
 					long time = n.getMicroPlayTime();
 					avgduration += state >= 1 && state <= 4 ? Math.abs(time) : 1000000;
@@ -1054,7 +1059,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		score.setTotalDuration(avgduration);
-		score.setAvgjudge(avgduration / count);
+		score.setAvgjudge(count > 0 ? avgduration / count : Long.MAX_VALUE);
 //		System.out.println(avgduration + " / " + count + " = " + score.getAvgjudge());
 
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
@@ -1083,13 +1088,15 @@ public class BMSPlayer extends MainState {
 				var attempt = secondary.toLocalAttempt(model);
 				if (secondary.outcome() != SecondaryJudgingGroup.Outcome.ERROR
 						&& secondary.outcome() != SecondaryJudgingGroup.Outcome.INPUT_LOST) {
-					var previous = data.readRuleBest(rule, attempt.sha256(), attempt.mode());
+					var previous = rule == SecondaryScoringRule.BEATORAJA ? data.readScoreData(model, resource.getPlayerConfig().getLnmode())
+							: data.readRuleBest(rule, attempt.sha256(), attempt.mode());
 					var score = attempt.toScoreData(model.getMode());
-					score.setRule(rule.scoreRule());
+					score.setRule(rule == SecondaryScoringRule.BEATORAJA
+							? BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()) : rule.scoreRule());
 					display.add(new PlayerResource.AlternateResultScore(rule.id(), rule.displayName(),
 							score, previous, secondary.gaugeHistory()));
 				}
-				data.writeRuleAttempt(rule, attempt, resource.isUpdateScore());
+				if (rule != SecondaryScoringRule.BEATORAJA) data.writeRuleAttempt(rule, attempt, resource.isUpdateScore());
 			} catch (IllegalArgumentException e) {
 				Logger.getGlobal().warning("Could not save the local " + rule.displayName() + " score: " + e.getMessage());
 			}
@@ -1106,6 +1113,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	static boolean updateGaugeAutoShift(AbstractGrooveGauge gauge, PlayerConfig config, boolean failureForClosure) {
+		if (gauge instanceof AngolmoisGrooveGauge) return failureForClosure;
 		final int autoShift = config.getGaugeAutoShift();
 		switch (autoShift) {
 			case PlayerConfig.GAUGEAUTOSHIFT_NONE:
@@ -1142,7 +1150,7 @@ public class BMSPlayer extends MainState {
 		}
 		playTimeTracker.stop(timer.getNowMicroTime(), timer.getNowMicroTime(TIMER_PLAY));
 		if (state != STATE_FINISHED && 
-				(getPastNotes() == resource.getSongdata().getNotes()
+				(isNoteEnd()
 				|| resource.getPlayMode().mode == BMSPlayerMode.Mode.AUTOPLAY)) {
 			state = STATE_FINISHED;
 			timer.setTimerOn(TIMER_FADEOUT);
@@ -1213,11 +1221,11 @@ public class BMSPlayer extends MainState {
 		if (judgem.getCombo() == 0) {
 			bga.setMisslayerTme(time);
 		}
-		players[player].gauge.update(judge);
+		players[player].gauge.updateJudgment(judge, judgem.lastJudgmentDelta());
 		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
 		//フルコン判定
-		timer.switchTimer(TIMER_FULLCOMBO_1P, judgem.getPastNotes() == resource.getSongdata().getNotes()
+		timer.switchTimer(TIMER_FULLCOMBO_1P, judgem.getPastNotes() == judgem.getScoreData().getNotes()
 				&& judgem.getPastNotes() == judgem.getCombo());
 
 		getScoreDataProperty().update(judgem.getScoreData(), judgem.getPastNotes());
@@ -1244,7 +1252,8 @@ public class BMSPlayer extends MainState {
 	}
 
 	public boolean isNoteEnd(int player) {
-		return players[player].judge.getPastNotes() == resource.getSongdata().getNotes();
+		var judge = players[player].judge;
+		return judge.getPastNotes() == judge.getScoreData().getNotes();
 	}
 
 	public int getPastNotes() {

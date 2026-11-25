@@ -169,6 +169,37 @@ public final class MusicResultScoreDisplayTest {
         press(result, keyboard, states);
         check(result.getGaugeType() == HARD, "Alternate gauge selection stays independent across multiple rules");
 
+        var selectedPrimary = score(mode, 35, ClearType.Normal, BMSPlayerRule.LunaticRave2);
+        primary.setGauge(NORMAL);
+        resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
+                bms.player.beatoraja.play.SecondaryScoringRule.LR2, bms.player.beatoraja.play.SecondaryScoringRule.LR2, ""));
+        resource.setScoreData(selectedPrimary);
+        third.setNativeScore(1234); third.setNativeMaxScore(2000);
+        resource.setAlternateResultScores(List.of(lr2,
+                new PlayerResource.AlternateResultScore("beatoraja", "beatoraja", primary, primaryBest,
+                        new PlayerResource.GaugeHistory(primaryGauge, primaryHistory, new LongArray(new long[]{0, 1_000_000}), 4_000_000)),
+                new PlayerResource.AlternateResultScore("fixture", "Fixture", third, null, thirdHistory)));
+        result.prepareScoreDisplay();
+        check(result.isShowingLr2Score() && result.getDisplayScore() == selectedPrimary
+                        && result.getDisplayScoringSummary().startsWith("Primary: Lunatic Rave 2"), "Configured primary is the initial result");
+        press(result, keyboard, states);
+        check(result.getDisplayScore() == primary && result.getDisplayScoringRuleName().equals("beatoraja")
+                        && result.getDisplayOldScore() == primaryBest && result.getDisplayGaugeValue() == 80,
+                "F7 exposes independently calculated beatoraja with its own best and gauge");
+        press(result, keyboard, states);
+        check(result.getDisplayScoringSummary().contains("SCORE 1234 / 2000"), "Native score and maximum remain visible");
+        press(result, keyboard, states);
+        check(result.getDisplayScore() == selectedPrimary, "No duplicate selected primary in F7 cycle");
+        resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
+                bms.player.beatoraja.play.SecondaryScoringRule.LR2, bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA, "Unsupported gauge"));
+        resource.setScoreData(primary);
+        result.prepareScoreDisplay();
+        check(result.getDisplayScoringSummary().startsWith("Primary: beatoraja")
+                        && result.getPrimaryScoringDetails().contains("Unsupported gauge"), "Show effective fallback and retain requested-rule details");
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty("scoring_rule").get(result)
+                        .equals(result.getDisplayScoringSummary()), "Result skin scoring label");
+        resource.setPrimaryScoringSelection(bms.player.beatoraja.play.PrimaryScoringSelection.standard());
+
         set(resource, PlayerResource.class, "course", new BMSModel[]{model});
         result.prepareScoreDisplay();
         press(result, keyboard, states);

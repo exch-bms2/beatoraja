@@ -33,15 +33,14 @@ and gauge. Both are asserted separately. The **OpenLR2** column contains
 hand-derived expectations from the `v261101` sources, not output from
 running OpenLR2 or original Lunatic Rave 2.
 
-For manual testing, set `BMSPlayerRule.SINGLE_SONG_RULE` to
-`LunaticRave2` and rebuild. Only normal 5/7/9/10/14KEY BMS/PMS single-song play with
-NORMAL, EASY or HARD is eligible. Ordinary LN and long scratch are
-supported when interpreted as LN (not CN or HCN). BMS mines are supported. bmson,
-courses, Practice, autoplay and replays keep the standard rule. The
-prototype uses chart RANK rather than custom judge windows, disables
-gauge auto-shift for that run, and does not save scores or replays or
-submit to IR. The default source setting still selects the existing beatoraja
-rule for each mode. Mode-converted charts (such as SP-to-DP) are excluded.
+For manual testing, choose Lunatic Rave 2 as the primary scoring rule in
+Launcher for the desired key mode. Normal 5/7/9/10/14KEY single-song play with
+NORMAL, EASY, HARD or HAZARD is eligible. Ordinary LN and long scratch use LN
+semantics. Unsupported gauges, modes and LN formats select beatoraja before
+play. Gauge auto-shift stays within LR2's supported gauges. Local primary scores
+use the LR2 rule store, while an independent beatoraja run supplies its own
+canonical score and F7 result. Replays record the effective scoring rule;
+older replays retain beatoraja. Non-beatoraja primary results are kept local.
 
 - [Timing and damage setup](https://github.com/GOMazk/OpenLR2/blob/v261101/LR2/LR2_bmsload.cpp#L3614-L3703):
   at rank 2, the ordinary key windows are 18/40/100/200 ms. For these small

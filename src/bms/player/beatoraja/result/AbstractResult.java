@@ -94,7 +94,7 @@ public abstract class AbstractResult extends MainState {
 		SCORE_UPDATE {
 			@Override
 			public boolean isQualified(ScoreData oldscore, ScoreData newscore) {
-				return newscore.getExscore() > oldscore.getExscore();
+				return newscore.getRuleScore() > oldscore.getRuleScore();
 			}
 		},
 		/**
@@ -103,7 +103,7 @@ public abstract class AbstractResult extends MainState {
 		SCORE_UPDATE_OR_EQUAL {
 			@Override
 			public boolean isQualified(ScoreData oldscore, ScoreData newscore) {
-				return newscore.getExscore() >= oldscore.getExscore();
+				return newscore.getRuleScore() >= oldscore.getRuleScore();
 			}
 		},
 		/**

@@ -87,6 +87,8 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<PlayMode> playconfig;
 	@FXML
 	private VBox secondaryScoringRules;
+	@FXML private ComboBox<SecondaryScoringRule> primaryScoringRule;
+	private boolean updatingPrimaryScoring;
 	private final Map<SecondaryScoringRule, CheckBox> secondaryScoringChecks = new LinkedHashMap<>();
 	/**
 	 * ハイスピード
@@ -281,15 +283,49 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	void initSecondaryScoringRules(ResourceBundle resources) {
+		primaryScoringRule.setConverter(new javafx.util.StringConverter<SecondaryScoringRule>() {
+			@Override public String toString(SecondaryScoringRule rule) {
+				if (rule == null) return "";
+				return rule == SecondaryScoringRule.RAINDROP || rule == SecondaryScoringRule.BEMUSE
+						? rule.displayName() + " (" + resources.getString("SECONDARY_SCORING_" + rule.name()) + ")" : rule.displayName();
+			}
+			@Override public SecondaryScoringRule fromString(String value) { return SecondaryScoringRule.byId(value); }
+		});
+		primaryScoringRule.getItems().add(SecondaryScoringRule.BEATORAJA);
 		for (var rule : SecondaryScoringRule.values()) {
+			if (rule == SecondaryScoringRule.BEATORAJA) continue;
+			primaryScoringRule.getItems().add(rule);
 			var check = new CheckBox(rule.displayName() + " (" + resources.getString("SECONDARY_SCORING_" + rule.name()) + ")");
 			check.setId("secondaryScoring-" + rule.id());
 			secondaryScoringChecks.put(rule, check);
 			secondaryScoringRules.getChildren().add(check);
 		}
+		primaryScoringRule.setValue(SecondaryScoringRule.BEATORAJA);
+		primaryScoringRule.valueProperty().addListener((observable, previous, selected) -> {
+			if (!updatingPrimaryScoring && player != null && selected != null) {
+				var mode = playconfig.getValue() != null ? Mode.valueOf(playconfig.getValue().name()) : Mode.BEAT_7K;
+				player.setPrimaryScoringRule(mode, selected);
+			}
+			updateVisibleScoringRules();
+		});
+	}
+
+	private void updateVisibleScoringRules() {
+		secondaryScoringRules.getChildren().setAll(secondaryScoringChecks.entrySet().stream()
+				.filter(entry -> entry.getKey() != primaryScoringRule.getValue()).map(Map.Entry::getValue).toList());
+	}
+
+	private void updatePrimaryScoring(PlayerConfig player) {
+		updatingPrimaryScoring = true;
+		try {
+			var mode = playconfig.getValue() != null ? Mode.valueOf(playconfig.getValue().name()) : Mode.BEAT_7K;
+			primaryScoringRule.setValue(player.getPrimaryScoringRule(mode));
+			updateVisibleScoringRules();
+		} finally { updatingPrimaryScoring = false; }
 	}
 
 	void updateSecondaryScoring(PlayerConfig player) {
+		updatePrimaryScoring(player);
 		var enabled = Set.of(player.getSecondaryScoringRuleIds());
 		secondaryScoringChecks.forEach((rule, check) -> check.setSelected(enabled.contains(rule.id())));
 	}
@@ -703,6 +739,7 @@ public class PlayConfigurationView implements Initializable {
 			conf.setAnalogScratchHispeed(analogScratchHispeed.isSelected());
 		}
 		pc = playconfig.getValue();
+		updatePrimaryScoring(player);
 		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());

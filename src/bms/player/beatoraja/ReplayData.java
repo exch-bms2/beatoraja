@@ -53,6 +53,12 @@ public final class ReplayData implements Validatable {
 	 * ゲージの種類
 	 */
 	public int gauge;
+	/** Missing in older replays, which always use beatoraja. */
+	public String primaryScoringRuleId;
+	public String requestedPrimaryScoringRuleId;
+	public String primaryScoringFallbackReason;
+	public int scoringRuleVersion = 1;
+	public long scoringFrameUs;
 	/**
 	 * 譜面オプションによる変更ログ。旧データとの互換性維持用
 	 */

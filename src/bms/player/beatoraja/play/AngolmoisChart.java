@@ -111,7 +111,11 @@ final class AngolmoisChart {
                 throw new IllegalArgumentException("Invalid Angolmois timing");
             }
             for (int lane = 0; lane < 8; lane++) {
-                if (tl.getHiddenNote(lane) != null) objects.add(new AngolmoisEngine.ChartObject(position, lane, AngolmoisEngine.HIDDEN, 0));
+                if (tl.getHiddenNote(lane) != null) {
+                    var hidden = new AngolmoisEngine.ChartObject(position, lane, AngolmoisEngine.HIDDEN, 0);
+                    hidden.note = tl.getHiddenNote(lane);
+                    objects.add(hidden);
+                }
                 var note = tl.getNote(lane);
                 if (note == null) continue;
                 int type;
@@ -126,7 +130,9 @@ final class AngolmoisChart {
                 } else if (note instanceof NormalNote) {
                     type = AngolmoisEngine.NOTE;
                 } else throw new IllegalArgumentException("Unsupported Angolmois note");
-                objects.add(new AngolmoisEngine.ChartObject(position, lane, type, value));
+                var object = new AngolmoisEngine.ChartObject(position, lane, type, value);
+                object.note = note;
+                objects.add(object);
             }
             // These objects also participate in C's global miss cursor, even though they are never scored.
             for (var ignored : tl.getBackGroundNotes()) objects.add(new AngolmoisEngine.ChartObject(position, AngolmoisEngine.BGM, 0, 0));

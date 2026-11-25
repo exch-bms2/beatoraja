@@ -93,8 +93,9 @@
                                 <VBox.margin>
                                     <Insets left="10.0" right="10.0" />
                                 </VBox.margin>
-                                <Label text="%SECONDARY_SCORING" style="-fx-font-weight: bold;" />
-                                <Label text="%PRIMARY_SCORING_BEATORAJA" />
+                                <Label text="%PRIMARY_SCORING" style="-fx-font-weight: bold;" />
+                                <ComboBox fx:id="primaryScoringRule" maxWidth="Infinity" />
+                                <Label text="%SECONDARY_SCORING" />
                                 <VBox fx:id="secondaryScoringRules" spacing="4.0" />
                             </VBox>
                             <HBox prefHeight="18.0" prefWidth="703.0">

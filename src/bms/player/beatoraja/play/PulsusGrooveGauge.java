@@ -8,8 +8,26 @@ import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 
 /** Pulsus's three BMS gauges. Other beatoraja gauge choices keep their existing behavior. */
 final class PulsusGrooveGauge extends AbstractGrooveGauge {
+	private final boolean primaryOnly;
+	@Override
+	void selectAutoShiftGauge(bms.player.beatoraja.PlayerConfig config, boolean bestClear) {
+		if (!primaryOnly) { super.selectAutoShiftGauge(config, bestClear); return; }
+		int limit = bestClear ? HARD : config.getGauge();
+		int bottom = Math.min(getType(), Math.max(EASY, config.getBottomShiftableGauge()));
+		for (int candidate : new int[]{HARD, NORMAL, EASY}) {
+			if (candidate <= limit && candidate >= bottom && isAutoShiftCandidate(candidate)) {
+				setType(candidate);
+				return;
+			}
+		}
+		setType(bottom);
+	}
 	PulsusGrooveGauge(BMSModel model, int type, BMSPlayerRule.ChartParameters source) {
+		this(model, type, source, false);
+	}
+	PulsusGrooveGauge(BMSModel model, int type, BMSPlayerRule.ChartParameters source, boolean primaryOnly) {
 		super(type, createGauges(model, source));
+		this.primaryOnly = primaryOnly;
 	}
 
 	@Override

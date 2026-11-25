@@ -88,28 +88,51 @@ public final class PlayConfigurationViewTest {
         var mode = (ComboBox<?>) loader.getNamespace().get("playconfig");
         var bundle = loader.getResources();
         if (tabContent.getChildren().indexOf(section) >= tabContent.getChildren().indexOf(mode.getParent())
-                || !((Label) section.getChildren().get(0)).getText().equals(bundle.getString("SECONDARY_SCORING"))
-                || !((Label) section.getChildren().get(1)).getText().contains("beatoraja")
+                || !((Label) section.getChildren().get(0)).getText().equals(bundle.getString("PRIMARY_SCORING"))
+                || !(section.getChildren().get(1) instanceof ComboBox<?>)
                 || !group.getChildren().stream().map(javafx.scene.Node::getId).toList().equals(
-                        List.of("secondaryScoring-lr2", "secondaryScoring-pulsus", "secondaryScoring-raindrop", "secondaryScoring-bemuse")))
+                        java.util.Arrays.stream(bms.player.beatoraja.play.SecondaryScoringRule.values())
+                                .filter(rule -> rule != bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA)
+                                .map(rule -> "secondaryScoring-" + rule.id()).toList()))
             throw new AssertionError("Scoring settings must list the supported secondary rules: " + locale);
         var lr2 = (CheckBox) group.getChildren().get(0);
         var bemuse = (CheckBox) group.getChildren().get(3);
+        var angolmois = (CheckBox) group.lookup("#secondaryScoring-angolmois");
+        if (angolmois == null || !angolmois.getText().contains("1 ms"))
+            throw new AssertionError("Angolmois frame period must be visible: " + locale);
         view.updateSecondaryScoring(player);
         if (group.getChildren().stream().anyMatch(node -> ((CheckBox) node).isSelected()))
             throw new AssertionError("All secondary rules are opt-in");
         lr2.setSelected(true);
         bemuse.setSelected(true);
+        angolmois.setSelected(true);
         view.commitSecondaryScoring(player);
-        if (!List.of(player.getSecondaryScoringRuleIds()).equals(List.of("lr2", "bemuse"))) throw new AssertionError("Store stable IDs");
+        if (!List.of(player.getSecondaryScoringRuleIds()).equals(List.of("lr2", "bemuse", "angolmois"))) throw new AssertionError("Store stable IDs");
         view.updateSecondaryScoring(new PlayerConfig());
         if (lr2.isSelected()) throw new AssertionError("Switching profiles must not inherit a previous selection");
         view.updateSecondaryScoring(player);
-        if (!lr2.isSelected() || !bemuse.isSelected()) throw new AssertionError("Restore the player's selections");
+        if (!lr2.isSelected() || !bemuse.isSelected() || !angolmois.isSelected()) throw new AssertionError("Restore the player's selections");
         lr2.setSelected(false);
         bemuse.setSelected(false);
+        angolmois.setSelected(false);
         view.commitSecondaryScoring(player);
         if (player.getSecondaryScoringRuleIds().length != 0) throw new AssertionError("Unchecking turns off secondary scoring");
+        @SuppressWarnings("unchecked")
+        var primary = (ComboBox<bms.player.beatoraja.play.SecondaryScoringRule>) loader.getNamespace().get("primaryScoringRule");
+        if (primary.getValue() != bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA
+                || group.lookup("#secondaryScoring-beatoraja") != null)
+            throw new AssertionError("beatoraja defaults to primary and has no secondary checkbox");
+        primary.setValue(bms.player.beatoraja.play.SecondaryScoringRule.ANGOLMOIS);
+        if (group.lookup("#secondaryScoring-angolmois") != null
+                || player.getPrimaryScoringRule(bms.model.Mode.BEAT_7K) != bms.player.beatoraja.play.SecondaryScoringRule.ANGOLMOIS)
+            throw new AssertionError("Primary selection is persisted and excluded from additional scoring");
+        view.updateSecondaryScoring(new PlayerConfig());
+        if (primary.getValue() != bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA)
+            throw new AssertionError("New profiles default to beatoraja");
+        view.updateSecondaryScoring(player);
+        if (primary.getValue() != bms.player.beatoraja.play.SecondaryScoringRule.ANGOLMOIS)
+            throw new AssertionError("Restore configured primary");
+        primary.setValue(bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA);
     }
 
     private static void verifyControllerBackendSwitch(PlayConfigurationView view, FXMLLoader loader,

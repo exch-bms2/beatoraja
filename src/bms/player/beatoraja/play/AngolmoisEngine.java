@@ -15,6 +15,7 @@ final class AngolmoisEngine {
         final int lane, type;
         final double value;
         boolean consumed;
+		bms.model.Note note;
 
         ChartObject(double position, int lane, int type, double value) {
             this.position = position;
@@ -23,6 +24,13 @@ final class AngolmoisEngine {
             this.value = value;
         }
     }
+
+    interface Listener {
+        void judge(ChartObject object, int grade, double signedMs, long frameUs, boolean vanish);
+        void release(ChartObject object);
+        void sound(ChartObject object);
+    }
+    Listener listener;
 
     record Input(int key, boolean down, long us, long order) {
         long frameUs() { return Math.max(0, (us + FRAME_US - 1) / FRAME_US * FRAME_US); }
@@ -46,7 +54,11 @@ final class AngolmoisEngine {
     boolean failed;
 
     AngolmoisEngine(ChartObject[] source, double initialBpm, double[] measureLengths, int rank) {
-        objects = Arrays.stream(source).map(o -> new ChartObject(o.position, o.lane, o.type, o.value))
+        objects = Arrays.stream(source).map(o -> {
+                    var copy = new ChartObject(o.position, o.lane, o.type, o.value);
+                    copy.note = o.note;
+                    return copy;
+                })
                 .sorted(Comparator.comparingDouble((ChartObject o) -> o.position).thenComparingInt(o -> o.type))
                 .toArray(ChartObject[]::new);
         lengths = measureLengths.clone();
@@ -126,6 +138,7 @@ final class AngolmoisEngine {
             if (o.lane >= BGM || o.consumed || o.type >= HIDDEN
                     || (o.type == END && through[o.lane] == 0)) continue;
             grade(0, 0, 0, false);
+            notifyJudge(o, 0, -gap, o.type != END);
             if (o.type != END) passed++;
             through[o.lane] = 0;
         }
@@ -140,6 +153,7 @@ final class AngolmoisEngine {
                 return;
             }
             grade(0, 0, (int) o.value, false);
+            notifyJudge(o, 0, -1, false);
         }
         gauge = Math.min(512, gauge);
     }
@@ -156,12 +170,25 @@ final class AngolmoisEngine {
                 if (end == objects.length) throw new IllegalStateException("Unpaired Angolmois LN");
                 double gap = milliseconds(objects[end].position - line) * length(line) * factor;
                 if (-144 < gap && gap < 144) objects[end].consumed = true;
-                else grade(0, 0, 0, gap >= 0);
+                else {
+                    grade(0, 0, 0, gap >= 0);
+                    notifyJudge(objects[end], 0, gap, false);
+                }
+                if (listener != null) listener.release(objects[end]);
             }
             return;
         }
         // SDL's keyboard mappings count multiple physical keys per lane. Both scratch keys share a lane.
         if (held[lane]++ != 0 || objects.length == 0) return;
+        if (listener != null) {
+            int soundFuture = current;
+            while (soundFuture < objects.length && !(objects[soundFuture].lane == lane && objects[soundFuture].type <= HIDDEN)) soundFuture++;
+            int soundPast = current - 1;
+            while (soundPast >= 0 && !(objects[soundPast].lane == lane && objects[soundPast].type <= HIDDEN)) soundPast--;
+            double soundDistance = soundPast >= 0 ? line - objects[soundPast].position : Double.MAX_VALUE;
+            if (soundFuture < objects.length && soundDistance > objects[soundFuture].position - line) soundPast = soundFuture;
+            if (soundPast >= 0) listener.sound(objects[soundPast]);
+        }
         int future = current;
         while (future < objects.length && !(objects[future].lane == lane && objects[future].type < HIDDEN)) future++;
         int past = current - 1;
@@ -176,8 +203,10 @@ final class AngolmoisEngine {
         if (o.type == HEAD) through[lane] = past + 1;
         o.consumed = true;
         passed++;
-        grade((gap < 14.4 ? 1 : 0) + (gap < 48 ? 1 : 0) + (gap < 84 ? 1 : 0) + 1,
+        int result = (gap < 14.4 ? 1 : 0) + (gap < 48 ? 1 : 0) + (gap < 84 ? 1 : 0) + 1;
+        grade(result,
                 (int) ((1 - gap / 144) * 300), 0, signed >= 0);
+        notifyJudge(o, result, signed, true);
     }
 
     private void grade(int grade, int delta, int damage, boolean early) {
@@ -198,5 +227,9 @@ final class AngolmoisEngine {
 
     boolean settled() {
         return passed == notes && Arrays.stream(through).allMatch(i -> i == 0);
+    }
+
+    private void notifyJudge(ChartObject object, int grade, double signedMs, boolean vanish) {
+        if (listener != null) listener.judge(object, grade, signedMs, nextFrameUs, vanish);
     }
 }

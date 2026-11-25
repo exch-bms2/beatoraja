@@ -97,6 +97,7 @@ public class MusicResult extends AbstractResult {
 		resultChart = createResultChart(resource.getSongdata(), resource.getBMSModel());
 		prepareLevelReview();
 		loadSkin(SkinType.RESULT);
+		updateScoreRuleNotice();
 	}
 
 	void prepareScoreDisplay() {
@@ -110,6 +111,7 @@ public class MusicResult extends AbstractResult {
 		}
 		alternateScores = resource.getAlternateResultScores().stream()
 				.filter(candidate -> Objects.equals(candidate.score().getSha256(), model.getSHA256()))
+				.filter(candidate -> !candidate.ruleId().equals(resource.getPrimaryScoringSelection().effective().id()))
 				.map(SecondaryScoreDisplay::new).toList();
 	}
 
@@ -123,7 +125,36 @@ public class MusicResult extends AbstractResult {
 
 	public boolean isShowingLr2Score() {
 		var display = secondaryDisplay();
-		return display != null && SecondaryScoringRule.LR2.id().equals(display.result.ruleId());
+		return display != null ? SecondaryScoringRule.LR2.id().equals(display.result.ruleId())
+				: resource.getPrimaryScoringSelection().effective() == SecondaryScoringRule.LR2;
+	}
+
+	public String getDisplayScoringRuleName() {
+		var display = secondaryDisplay();
+		return display != null ? display.result.ruleName() : resource.getPrimaryScoringSelection().effective().displayName();
+	}
+
+	public String getPrimaryScoringDetails() {
+		var selection = resource.getPrimaryScoringSelection();
+		return selection.requested().displayName() + " → " + selection.effective().displayName()
+				+ (selection.reason().isEmpty() ? "" : " (" + selection.reason() + ")");
+	}
+
+	public String getDisplayScoringSummary() {
+		String[] gauges = {"ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD", "CLASS", "EX-CLASS", "EX-HARD CLASS"};
+		int gauge = getGaugeType();
+		String notice = (isShowingSecondaryScore() ? "Secondary: " : "Primary: ") + getDisplayScoringRuleName()
+				+ " / " + (gauge >= 0 && gauge < gauges.length ? gauges[gauge] : "GAUGE");
+		var score = getDisplayScore();
+		if (score != null && score.getNativeScore() >= 0) notice += " / SCORE " + score.getNativeScore() + " / " + score.getNativeMaxScore();
+		return notice;
+	}
+
+	private void updateScoreRuleNotice() {
+		var renderer = main.getMessageRenderer();
+		if (renderer == null) return;
+		clearScoreRuleNotice();
+		scoreRuleNotice = renderer.addMessage(getDisplayScoringSummary(), Color.CYAN, 1);
 	}
 
 	private SecondaryScoreDisplay secondaryDisplay() {
@@ -159,6 +190,7 @@ public class MusicResult extends AbstractResult {
 		} else {
 			gaugeType = next;
 		}
+		updateScoreRuleNotice();
 	}
 
 	public ScoreDataProperty getPrimaryScoreDataProperty() {
@@ -215,34 +247,60 @@ public class MusicResult extends AbstractResult {
 	public LevelReviewTarget getEditableLevelReview() {
 		return state != STATE_IR_PROCESSING && !timer.isTimerOn(TIMER_FADEOUT) ? levelReviewTarget : null;
 	}
+
+	/** IR always uses the independently judged beatoraja result and its own previous best. */
+	record IRScoreSelection(ScoreData score, ScoreData previousBest, boolean completed) {
+		boolean shouldSend(int policy) {
+			return switch (policy) {
+				case IRConfig.IR_SEND_COMPLETE_SONG -> completed;
+				case IRConfig.IR_SEND_UPDATE_SCORE -> score.getExscore() > previousBest.getExscore()
+						|| score.getClear() > previousBest.getClear() || score.getCombo() > previousBest.getCombo()
+						|| score.getMinbp() < previousBest.getMinbp();
+				default -> true;
+			};
+		}
+	}
+
+	IRScoreSelection selectIRScore() {
+		ScoreData score = getNewScore();
+		ScoreData previous = oldscore;
+		FloatArray[] gauges = resource.getGauge();
+		int gauge = resource.getGrooveGauge().getType();
+		if (!resource.getPrimaryScoringSelection().isStandard()) {
+			var standard = resource.getAlternateResultScores().stream()
+					.filter(candidate -> SecondaryScoringRule.BEATORAJA.id().equals(candidate.ruleId()))
+					.filter(candidate -> candidate.score() != null && Objects.equals(candidate.score().getSha256(), resource.getBMSModel().getSHA256()))
+					.findFirst().orElse(null);
+			if (standard == null) return null;
+			score = standard.score();
+			previous = standard.previousBest();
+			gauges = standard.gaugeHistory() != null ? standard.gaugeHistory().values() : null;
+			gauge = score.getGauge();
+		}
+		if (score == null) return null;
+		FloatArray history = gauges != null && gauge >= 0 && gauge < gauges.length ? gauges[gauge] : null;
+		return new IRScoreSelection(score, previous != null ? previous : new ScoreData(),
+				history != null && history.size > 0 && history.peek() > 0);
+	}
 	
 	public void prepare() {
 		state = STATE_OFFLINE;
 		final ScoreData newscore = getNewScore();
+		final IRScoreSelection irScore = selectIRScore();
 
-		ranking = resource.getRankingData() != null && resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
+		ranking = resource.getRankingData() != null
+				&& resource.getCourseBMSModels() == null ? resource.getRankingData() : new RankingData();
 		rankingOffset = 0;
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 		final IRStatus[] ir = main.getIRStatus();
-		if (ir.length > 0 && resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
+		if (ir.length > 0 && resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY && irScore != null) {
 			state = STATE_IR_PROCESSING;
 			
         	for(IRStatus irc : ir) {
-    			boolean send = resource.isUpdateScore();
-    			switch(irc.config.getIrsend()) {
-	    			case IRConfig.IR_SEND_ALWAYS -> {}
-	    			case IRConfig.IR_SEND_COMPLETE_SONG -> {
-	    				FloatArray gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
-	    				send &= gauge.get(gauge.size - 1) > 0.0;
-	    			}
-	    			case IRConfig.IR_SEND_UPDATE_SCORE -> {
-	    				send &= (newscore.getExscore() > oldscore.getExscore() || newscore.getClear() > oldscore.getClear()
-	    						|| newscore.getCombo() > oldscore.getCombo() || newscore.getMinbp() < oldscore.getMinbp());
-	    			}
-    			}
+				boolean send = resource.isUpdateScore() && irScore.shouldSend(irc.config.getIrsend());
     			
     			if(send) {
-					irSendStatus.add(new IRSendStatus(irc.connection, resultChart, newscore));
+					irSendStatus.add(new IRSendStatus(irc.connection, resultChart, irScore.score()));
     			}
         	}
 			
@@ -275,7 +333,8 @@ public class MusicResult extends AbstractResult {
 					try {
 						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, resultChart);
 						if(response.isSucceeded()) {
-							ranking.updateScore(ir[0].player, main.getRivalDataAccessor(), response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
+								ranking.updateScore(ir[0].player, main.getRivalDataAccessor(), response.getData(),
+										irScore.score().getExscore() > irScore.previousBest().getExscore() ? irScore.score() : irScore.previousBest());
 							rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
 							Logger.getGlobal().info("IRからのスコア取得成功 : " + response.getMessage());
 						} else {
@@ -419,18 +478,7 @@ public class MusicResult extends AbstractResult {
 			if (time > getSkin().getInput()) {
 				if (switchPressed) {
 					scoreDisplayIndex = (scoreDisplayIndex + 1) % (alternateScores.size() + 1);
-					var renderer = main.getMessageRenderer();
-					if (renderer != null) {
-						if (scoreRuleNotice != null) scoreRuleNotice.stop();
-						var display = secondaryDisplay();
-						String notice = display != null ? display.result.ruleName() : "beatoraja";
-						if (display != null && display.result.score().getNativeScore() >= 0) {
-							var nativeScore = display.result.score();
-							notice += " SCORE " + nativeScore.getNativeScore() + " / " + nativeScore.getNativeMaxScore();
-						}
-						scoreRuleNotice = renderer.addMessage(notice,
-								1_500, Color.CYAN, 1);
-					}
+					updateScoreRuleNotice();
 				}
 				boolean ok = false;
 				for (int i = 0; i < property.getAssignLength(); i++) {
@@ -497,6 +545,42 @@ public class MusicResult extends AbstractResult {
 				resource.getCourseScoreData()
 						.setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
 				resource.getCourseScoreData().setClear(Failed.id);
+			}
+			return;
+		}
+		if (!resource.getPrimaryScoringSelection().isStandard() && resource.getCourseBMSModels() == null) {
+			var data = main.getPlayDataAccessor();
+			var model = resource.getBMSModel();
+			int mode = model.containsUndefinedLongNote() ? model.getLntype() : 0;
+			var rule = resource.getPrimaryScoringSelection().effective();
+			var previous = data.readRuleBest(rule, model.getSHA256(), mode);
+			oldscore = previous != null ? previous : new ScoreData();
+			getPrimaryScoreDataProperty().setTargetScore(oldscore.getExscore(), 0, newscore.getNotes());
+			getPrimaryScoreDataProperty().update(newscore);
+			if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
+				var counts = new ArrayList<Integer>(12);
+				for (int i = 0; i < 6; i++) { counts.add(newscore.getJudgeCount(i, true)); counts.add(newscore.getJudgeCount(i, false)); }
+				data.writeRuleAttempt(rule, new PlayDataAccessor.ScoreAttempt(model.getSHA256(), mode,
+						newscore.getClear() == Failed.id ? PlayDataAccessor.ScoreOutcome.FAILED : PlayDataAccessor.ScoreOutcome.FINISHED,
+						newscore.getNotes(), newscore.getPassnotes(), newscore.getCombo(), newscore.getMinbp(),
+						ClearType.getClearTypeByID(newscore.getClear()), resource.getGrooveGauge().getType(),
+						resource.getGrooveGauge().getValue(), counts, newscore.getNativeScore(), newscore.getNativeMaxScore()), resource.isUpdateScore());
+				for (var alternate : resource.getAlternateResultScores()) {
+					if (alternate.ruleId().equals(SecondaryScoringRule.BEATORAJA.id())) {
+						alternate.score().setPlaytime(newscore.getPlaytime());
+						alternate.score().setOption(newscore.getOption());
+						alternate.score().setSeed(newscore.getSeed());
+						alternate.score().setDeviceType(newscore.getDeviceType());
+						alternate.score().setSkin(newscore.getSkin());
+						alternate.score().setAssist(newscore.getAssist());
+						alternate.score().setJudgeAlgorithm(bms.player.beatoraja.play.JudgeAlgorithm.valueOf(
+								resource.getPlayerConfig().getPlayConfig(model.getMode()).getPlayconfig().getJudgetype()));
+						if (alternate.score().getClear() != Failed.id && resource.getAssist() > 0) {
+							alternate.score().setClear(resource.getAssist() == 1 ? LightAssistEasy.id : AssistEasy.id);
+						}
+						data.writeScoreData(alternate.score(), model, resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
+					}
+				}
 			}
 			return;
 		}
@@ -636,7 +720,8 @@ public class MusicResult extends AbstractResult {
 	}
 
 	public int getTotalNotes() {
-		return resource.getBMSModel().getTotalNotes();
+		var score = getDisplayScore();
+		return score != null ? score.getNotes() : resource.getBMSModel().getTotalNotes();
 	}
 
 	public ScoreData getNewScore() {

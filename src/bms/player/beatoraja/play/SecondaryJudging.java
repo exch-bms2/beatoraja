@@ -51,6 +51,10 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 		return new SecondaryJudging(player, model, resource, endUs, startGauge, BMSPlayerRule.LunaticRave2);
 	}
 
+	static SecondaryJudging createBeatoraja(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int gauge) {
+		return new SecondaryJudging(player, model, resource, endUs, gauge, null);
+	}
+
 	static SecondaryJudging createTimingProfile(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs,
 			SecondaryScoringRule rule) {
 		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY

@@ -70,6 +70,12 @@ public final class PlayerResource {
 	 */
 	private ScoreData score;
 	private List<AlternateResultScore> alternateResultScores = List.of();
+	private bms.player.beatoraja.play.PrimaryScoringSelection primaryScoringSelection;
+
+	public bms.player.beatoraja.play.PrimaryScoringSelection getPrimaryScoringSelection() {
+		return primaryScoringSelection != null ? primaryScoringSelection : bms.player.beatoraja.play.PrimaryScoringSelection.standard();
+	}
+	public void setPrimaryScoringSelection(bms.player.beatoraja.play.PrimaryScoringSelection selection) { primaryScoringSelection = selection; }
 	/**
 	 * ライバルスコア
 	 */
@@ -150,6 +156,7 @@ public final class PlayerResource {
 	}
 
 	public void clear() {
+		primaryScoringSelection = null;
 		course = null;
 		courseindex = 0;
 		cscore = null;
@@ -168,6 +175,7 @@ public final class PlayerResource {
 	}
 
 	public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
+		primaryScoringSelection = null;
 		alternateResultScores = List.of();
 		// TODO play mode, リプレイデータでの読み込み分岐をここで行う
 		this.mode = mode;

@@ -21,6 +21,16 @@ import javafx.scene.control.SpinnerValueFactory;
 /** Tests FXML constant resolution and validation boundaries without starting a GUI. */
 public final class ConfigurationRangeTest {
     public static void main(String[] args) throws Exception {
+        for (var locale : new java.util.Locale[]{java.util.Locale.ROOT, java.util.Locale.JAPAN,
+                java.util.Locale.FRANCE, java.util.Locale.forLanguageTag("es-ES"),
+                java.util.Locale.forLanguageTag("pt-PT"), java.util.Locale.forLanguageTag("nb-NO")}) {
+            var resources = java.util.ResourceBundle.getBundle("resources.UIResources", locale);
+            for (var rule : bms.player.beatoraja.play.SecondaryScoringRule.values()) {
+                if (resources.getString("SECONDARY_SCORING_" + rule.name()).isBlank()) {
+                    throw new AssertionError("Missing secondary scoring label: " + rule + " / " + locale);
+                }
+            }
+        }
         check("Audio", "audiobuffer", AudioConfig.class, "deviceBufferSize", "DEVICE_BUFFER_SIZE");
         check("Audio", "audiosim", AudioConfig.class, "deviceSimultaneousSources", "DEVICE_SIMULTANEOUS_SOURCES");
         check("Video", "maxFps", Config.class, "maxFramePerSecond", "MAX_FPS");
@@ -39,7 +49,7 @@ public final class ConfigurationRangeTest {
         check("MusicSelect", "scrolldurationlow", Config.class, "scrolldurationlow", "SCROLL_DURATION_LOW");
         check("MusicSelect", "analogTicksPerScroll", Config.class, "analogTicksPerScroll", "ANALOG_TICKS_PER_SCROLL");
         check("Stream", "maxRequestCount", PlayerConfig.class, "maxRequestCount", "MAX_REQUEST_COUNT");
-        System.out.println("ConfigurationRangeTest passed (16 ranges)");
+        System.out.println("ConfigurationRangeTest passed (16 ranges, all secondary scoring labels)");
     }
 
     private static void check(String view, String id, Class<?> owner, String property, String constant) throws Exception {

@@ -57,6 +57,9 @@ public final class JudgeManager extends AbstractJudgeManager {
 	}
 
 	@Override
+	boolean usesChartJudgeRank() { return timingProfile == null; }
+
+	@Override
 	BMSPlayerRule ruleFor(Mode mode) {
 		return timingProfile != null ? timingProfile : BMSPlayerRule.getBMSPlayerRule(mode);
 	}

@@ -59,14 +59,24 @@ final class SecondaryJudgingGroup {
 	}
 
 	static SecondaryJudgingGroup create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
+		return create(player, model, resource, endUs, resource.getPlayerConfig().getGauge());
+	}
+
+	static SecondaryJudgingGroup create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int beatorajaGauge) {
 		var ids = resource.getPlayerConfig().getSecondaryScoringRuleIds();
-		if (ids.length == 0) return null;
+		var selected = new java.util.LinkedHashSet<String>(java.util.Arrays.asList(ids));
+		var primary = resource.getPrimaryScoringSelection();
+		selected.remove(primary.requested().id());
+		selected.remove(primary.effective().id());
+		if (!primary.isStandard()) selected.add(SecondaryScoringRule.BEATORAJA.id());
+		if (selected.isEmpty()) return null;
 		var entries = new ArrayList<Entry>(ids.length);
-		for (String id : ids) {
+		for (String id : selected) {
 			var rule = SecondaryScoringRule.byId(id);
 			if (rule == null) continue;
 			try {
 				Run run = switch (rule) {
+					case BEATORAJA -> SecondaryJudging.createBeatoraja(player, model, resource, endUs, beatorajaGauge);
 					case LR2 -> SecondaryJudging.create(player, model, resource, endUs);
 					case ANGOLMOIS -> AngolmoisSecondary.create(player, model, resource, endUs);
 					case PULSUS, RAINDROP, BEMUSE -> SecondaryJudging.createTimingProfile(player, model, resource, endUs, rule);

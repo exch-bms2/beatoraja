@@ -386,7 +386,7 @@ public final class KeyboardJudgeCompatibilityTest {
         TestKeyInput input;
         AbstractJudgeManager judge;
         private TestPlayer() { super(null, null); }
-        @Override public void update(int judge, long time) { gauge.update(judge); }
+        @Override public void update(int judge, long time) { gauge.updateJudgment(judge, this.judge.lastJudgmentDelta()); }
         @Override public LaneProperty getLaneProperty() { return lanes; }
         @Override public AbstractGrooveGauge getGauge() { return gauge; }
         @Override public KeyInputProccessor getKeyinput() { return input; }

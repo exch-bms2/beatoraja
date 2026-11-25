@@ -224,6 +224,8 @@ public class StringPropertyFactory {
 	}
 	
 	public enum StringType {
+		scoring_rule(2050, state -> state instanceof MusicResult result ? result.getDisplayScoringSummary() : ""),
+		primary_scoring_details(2051, state -> state instanceof MusicResult result ? result.getPrimaryScoringDetails() : ""),
 		
 		rival(1, (state) -> {
 			if (state instanceof MusicSelector selector) {

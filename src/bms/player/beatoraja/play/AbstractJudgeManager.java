@@ -100,8 +100,14 @@ public abstract class AbstractJudgeManager {
 	}
 
 	static AbstractJudgeManager create(BMSPlayer main, BMSPlayerRule rule) {
-		return rule == BMSPlayerRule.LunaticRave2 ? new LunaticRave2JudgeManager(main) : new JudgeManager(main);
+		if (rule == BMSPlayerRule.LunaticRave2) return new LunaticRave2JudgeManager(main);
+		if (rule == BMSPlayerRule.Angolmois) return new AngolmoisJudgeManager(main);
+		if (rule == BMSPlayerRule.Pulsus) return new JudgeManager(main, null, rule,
+				PulsusNoteRules.forRank(main.resource.getChartRuleParameters().rank()));
+		if (rule == BMSPlayerRule.Raindrop || rule == BMSPlayerRule.Bemuse) return new JudgeManager(main, null, rule, null);
+		return new JudgeManager(main);
 	}
+	boolean usesChartJudgeRank() { return !isHeadless(); }
 
 	public final void init(BMSModel model, PlayerResource resource) {
 		final Mode orgmode = resource.getOriginalMode();
@@ -137,12 +143,12 @@ public abstract class AbstractJudgeManager {
 		auto_presstime = new long[keyassign.length];
 		Arrays.fill(auto_presstime, Long.MIN_VALUE);
 		states = initLanes(lanes, model.getLanes());
-		final int judgerank = isHeadless() ? 100 : model.getJudgerank();
+		final int judgerank = usesChartJudgeRank() ? model.getJudgerank() : 100;
 		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] keyJudgeWindowRate = !isHeadless() && config.isCustomJudge()
+		final int[] keyJudgeWindowRate = usesChartJudgeRank() && config.isCustomJudge()
 				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
-		final int[] scratchJudgeWindowRate = !isHeadless() && config.isCustomJudge()
+		final int[] scratchJudgeWindowRate = usesChartJudgeRank() && config.isCustomJudge()
 				? new int[]{config.getScratchJudgeWindowRatePerfectGreat(), config.getScratchJudgeWindowRateGreat(), config.getScratchJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
@@ -185,8 +191,12 @@ public abstract class AbstractJudgeManager {
 		final BMSPlayerInputProcessor input = main.main.getInputProcessor();
 		final JudgeEventQueue queue = input.getJudgeEventQueue();
 		queue.drain(eventBatch);
-		if (secondary != null && secondary.isRunning() && this instanceof JudgeManager) {
-			updateFifo(mtime, input, queue, secondary);
+		if (secondary != null && secondary.isRunning()) {
+			for (int key = 0; key < keyassign.length; key++) {
+				if (!queue.isQueued(key) && keyassign[key] >= 0 && input.getKeyChangedTime(key) != Long.MIN_VALUE)
+					secondary.addLegacyEvent(key, input.getKeyChangedTime(key), input.getKeyState(key));
+			}
+			processInput(mtime, input, queue);
 			secondary.advance(mtime, eventBatch, queue.isOverflowed());
 		} else {
 			processInput(mtime, input, queue);
@@ -281,6 +291,9 @@ public abstract class AbstractJudgeManager {
 	boolean keepsCombo(Note note, int judge) {
 		return combocond[judge];
 	}
+	boolean incrementsCombo(Note note, int judge) { return keepsCombo(note, judge) && judge < 5; }
+	private long lastJudgmentDelta;
+	final long lastJudgmentDelta() { return lastJudgmentDelta; }
 
 	final void updateMicro(LaneState state, Note n, long mtime, int judge, long mfast, boolean judgeVanish,
 			boolean playGuideSE) {
@@ -305,7 +318,7 @@ public abstract class AbstractJudgeManager {
 		}
 
 		boolean keepCombo = keepsCombo(n, judge);
-		if (keepCombo && judge < 5) {
+		if (incrementsCombo(n, judge)) {
 			combo++;
 			score.setCombo(Math.max(score.getCombo(), combo));
 			coursecombo++;
@@ -351,6 +364,7 @@ public abstract class AbstractJudgeManager {
 			splitJudgements[slot] = new DisplayJudgement(judge + 1, (int) (mfast / 1000));
 			main.timer.setTimerOn(TIMER_JUDGE_1P_KEYS + slot);
 		}
+		lastJudgmentDelta = mfast;
 		main.update(judge, mtime / 1000);
 		if (playGuideSE) {
 			keysound.play(judge, mfast >= 0);

@@ -30,9 +30,6 @@ public enum BMSPlayerRule {
 	Angolmois(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
 ;
 
-    // Experimental opt-in: change to LunaticRave2 and rebuild to compare locally.
-    static final BMSPlayerRule SINGLE_SONG_RULE = Default;
-
     /** Source values captured before the standard rule normalizes RANK and TOTAL. */
     public record ChartParameters(int rank, double total) {
         public static ChartParameters fromBms(BMSModel model) {

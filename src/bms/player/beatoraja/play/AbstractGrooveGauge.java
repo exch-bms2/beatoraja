@@ -30,6 +30,8 @@ public abstract class AbstractGrooveGauge {
 	}
 
 	static AbstractGrooveGauge create(BMSModel model, int type, PlayerResource resource, BMSPlayerRule rule) {
+		if (rule == BMSPlayerRule.Pulsus) return new PulsusGrooveGauge(model, type, resource.getChartRuleParameters(), true);
+		if (rule == BMSPlayerRule.Angolmois) return new AngolmoisGrooveGauge();
 		return rule == BMSPlayerRule.LunaticRave2
 				? new LunaticRave2GrooveGauge(model, type, resource)
 				: GrooveGauge.create(model, type, resource);

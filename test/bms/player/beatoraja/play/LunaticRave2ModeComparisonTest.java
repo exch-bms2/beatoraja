@@ -235,9 +235,8 @@ public final class LunaticRave2ModeComparisonTest {
             var parameters = BMSPlayerRule.ChartParameters.fromBms(model);
             check(BMSPlayerRule.select(rule, model, chart.mode(), BMSPlayerMode.PLAY, false, gauge, parameters) == rule,
                     chart + " eligible chart");
-            check(BMSPlayerRule.select(BMSPlayerRule.SINGLE_SONG_RULE, model, chart.mode(), BMSPlayerMode.PLAY,
-                    false, gauge, parameters) == (BMSPlayerRule.SINGLE_SONG_RULE == LunaticRave2
-                    ? LunaticRave2 : BMSPlayerRule.getBMSPlayerRule(chart.mode())), chart + " source switch");
+            check(new bms.player.beatoraja.PlayerConfig().getPrimaryScoringRule(chart.mode()) == SecondaryScoringRule.BEATORAJA,
+                    chart + " existing profiles default to beatoraja");
             BMSPlayerRule.validate(model);
             return new KeyboardJudgeCompatibilityTest.Fixture(model, queued, rule, parameters, gauge);
         }

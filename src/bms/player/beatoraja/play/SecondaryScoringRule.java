@@ -6,7 +6,8 @@ public enum SecondaryScoringRule {
 	PULSUS("pulsus", "Pulsus", BMSPlayerRule.Pulsus),
 	RAINDROP("raindrop", "raindrop", BMSPlayerRule.Raindrop),
 	BEMUSE("bemuse", "Bemuse", BMSPlayerRule.Bemuse),
-	ANGOLMOIS("angolmois", "Angolmois (1 ms)", BMSPlayerRule.Angolmois);
+	ANGOLMOIS("angolmois", "Angolmois (1 ms)", BMSPlayerRule.Angolmois),
+	BEATORAJA("beatoraja", "beatoraja", BMSPlayerRule.Default);
 
 	private final String id;
 	private final String displayName;
@@ -22,6 +23,7 @@ public enum SecondaryScoringRule {
 	public String displayName() { return displayName; }
 	public BMSPlayerRule scoreRule() { return scoreRule; }
 	public String databaseSuffix() { return "_" + id; }
+	@Override public String toString() { return displayName; }
 
 	public static SecondaryScoringRule byId(String id) {
 		for (var rule : values()) if (rule.id.equals(id)) return rule;

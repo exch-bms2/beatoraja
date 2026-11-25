@@ -57,6 +57,7 @@ public final class PlayerConfig {
 
 	private String id;
 	private String[] secondaryScoringRuleIds = new String[0];
+	private HashMap<String, String> primaryScoringRuleIds = new HashMap<>();
 	// Keep the existing JSON field and unmodified key codes for older profiles.
 	private HashMap<String, Integer> selectShortcuts = new HashMap<>();
     /**
@@ -1036,11 +1037,22 @@ public final class PlayerConfig {
 		return secondaryScoringRuleIds.clone();
 	}
 
+	public SecondaryScoringRule getPrimaryScoringRule(Mode mode) {
+		var rule = primaryScoringRuleIds != null && mode != null ? SecondaryScoringRule.byId(primaryScoringRuleIds.get(mode.name())) : null;
+		return rule != null ? rule : SecondaryScoringRule.BEATORAJA;
+	}
+
+	public void setPrimaryScoringRule(Mode mode, SecondaryScoringRule rule) {
+		if (mode == null) return;
+		if (primaryScoringRuleIds == null) primaryScoringRuleIds = new HashMap<>();
+		primaryScoringRuleIds.put(mode.name(), (rule != null ? rule : SecondaryScoringRule.BEATORAJA).id());
+	}
+
 	public void setSecondaryScoringRuleIds(String[] ids) {
 		var rules = new LinkedHashSet<String>();
 		if (ids != null) for (String id : ids) {
 			var rule = SecondaryScoringRule.byId(id);
-			if (rule != null) rules.add(rule.id());
+			if (rule != null && rule != SecondaryScoringRule.BEATORAJA) rules.add(rule.id());
 		}
 		secondaryScoringRuleIds = rules.toArray(String[]::new);
 	}
