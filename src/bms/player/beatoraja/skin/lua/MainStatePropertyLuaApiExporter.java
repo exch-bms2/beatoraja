@@ -22,10 +22,10 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 
 	private static final long TIMER_OFF_VALUE = Long.MIN_VALUE;
 	private final MainState state;
-	private final Map<String, BooleanProperty> booleanPropertiesByName = new HashMap<>();
-	private final Map<String, IntegerProperty> integerPropertiesByName = new HashMap<>();
-	private final Map<String, FloatProperty> floatPropertiesByName = new HashMap<>();
-	private final Map<String, StringProperty> stringPropertiesByName = new HashMap<>();
+	private final PropertyNameCache<BooleanProperty> booleanPropertiesByName = new PropertyNameCache<>();
+	private final PropertyNameCache<IntegerProperty> integerPropertiesByName = new PropertyNameCache<>();
+	private final PropertyNameCache<FloatProperty> floatPropertiesByName = new PropertyNameCache<>();
+	private final PropertyNameCache<StringProperty> stringPropertiesByName = new PropertyNameCache<>();
 
 	MainStatePropertyLuaApiExporter(MainState state) {
 		this.state = state;
@@ -141,16 +141,12 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	}
 
 	private static <T> T getProperty(LuaValue value, IntFunction<T> byId, Function<String, T> byName,
-			Map<String, T> namedProperties) {
+			PropertyNameCache<T> namedProperties) {
 		if (value.isnumber()) {
 			return byId.apply(value.toint());
 		}
 		if (value.isstring()) {
-			String name = value.tojstring();
-			if (!namedProperties.containsKey(name)) {
-				namedProperties.put(name, byName.apply(name));
-			}
-			return namedProperties.get(name);
+			return namedProperties.resolve(value, byName);
 		}
 		return null;
 	}
