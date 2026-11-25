@@ -214,7 +214,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		@Override
 		public LuaValue call(LuaValue value) {
 			SkinObject.SkinOffset offset = state.getOffsetValue(value.toint());
-			LuaTable offsetTable = new LuaTable();
+			LuaTable offsetTable = new LuaTable(0, 6);
 			offsetTable.set("x", offset.x);
 			offsetTable.set("y", offset.y);
 			offsetTable.set("w", offset.w);
