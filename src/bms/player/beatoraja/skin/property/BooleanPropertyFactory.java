@@ -25,6 +25,8 @@ public class BooleanPropertyFactory {
 	private static final int ID_LENGTH = 65536;
 	private static final BooleanProperty[] pcache = new BooleanProperty[ID_LENGTH];
 	private static final BooleanProperty[] npcache = new BooleanProperty[ID_LENGTH];
+	// Positive and negated forms are both absent when the underlying ID is unknown.
+	private static final boolean[] missingIds = new boolean[ID_LENGTH];
 	
 	public static BooleanProperty getBooleanProperty(int optionid) {
 		final int id = Math.abs(optionid);
@@ -37,6 +39,7 @@ public class BooleanPropertyFactory {
 		if(optionid < 0 && npcache[id] != null) {
 			return npcache[id];
 		}
+		if (missingIds[id]) return null;
 		BooleanProperty result = BooleanPropertyPattern.get(id);
 		for(BooleanType t : BooleanType.values()) {
 			if(result == null && t.id == id) {
@@ -64,6 +67,7 @@ public class BooleanPropertyFactory {
 			}
 		}
 
+		if (result == null) missingIds[id] = true;
 		return result;
 	}
 
