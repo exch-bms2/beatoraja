@@ -29,4 +29,13 @@ public interface TimerProperty {
 	default int getTimerId() {
 		return Integer.MIN_VALUE;
 	}
+
+	/**
+	 * True only if the timer is off in this frame and finding that out changes no timer state.
+	 * A skin object is hidden by an off timer whatever its draw conditions say, so it may
+	 * then skip evaluating them. Conservative by default.
+	 */
+	default boolean isDefinitelyOff(MainState state) {
+		return false;
+	}
 }

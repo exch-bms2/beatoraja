@@ -24,6 +24,12 @@ public class TimerUtility {
 		table.set("new_passive_timer", this.new new_passive_timer());
 	}
 
+	/** A timer function whose off state can be checked without changing any state. */
+	abstract static class ProbeableTimer extends ZeroArgFunction {
+		/** True only if this timer is off now and calling it would change nothing. */
+		abstract boolean isDefinitelyOff();
+	}
+
 	/**
 	 * タイマーの経過時間を取得する
 	 * arg luaValue: タイマーの値 (タイマーIDではない)
@@ -72,10 +78,15 @@ public class TimerUtility {
 		@Override
 		public LuaValue call(LuaValue timerId) {
 			final int id = timerId.toint();
-			return new OneArgFunction() {
+			return new ProbeableTimer() {
 				@Override
-				public LuaValue call(LuaValue luaValue) {
+				public LuaValue call() {
 					return LuaNumber.valueOf(state.timer.getMicroTimer(id));
+				}
+
+				@Override
+				public boolean isDefinitelyOff() {
+					return !state.timer.isTimerOn(id);
 				}
 			};
 		}
@@ -92,7 +103,8 @@ public class TimerUtility {
 			LuaFunction f = func.checkfunction();
 			State observerState = new State();
 			observerState.timerValue = Long.MIN_VALUE;
-			return new ZeroArgFunction() {
+			final boolean probeSafe = LuaSideEffects.isStoreFree(f);
+			return new ProbeableTimer() {
 				@Override
 				public LuaValue call() {
 					boolean on = f.call().toboolean();
@@ -102,6 +114,12 @@ public class TimerUtility {
 						observerState.timerValue = Long.MIN_VALUE;
 					}
 					return LuaNumber.valueOf(observerState.timerValue);
+				}
+
+				@Override
+				public boolean isDefinitelyOff() {
+					// Off now and the observed value false: call() would leave the state as it is.
+					return probeSafe && observerState.timerValue == Long.MIN_VALUE && !f.call().toboolean();
 				}
 			};
 		}
@@ -126,10 +144,15 @@ public class TimerUtility {
 			State s = new State();
 			s.timerValue = Long.MIN_VALUE;
 			LuaTable table = new LuaTable();
-			table.set("timer", new ZeroArgFunction() {
+			table.set("timer", new ProbeableTimer() {
 				@Override
 				public LuaValue call() {
 					return LuaNumber.valueOf(s.timerValue);
+				}
+
+				@Override
+				public boolean isDefinitelyOff() {
+					return s.timerValue == Long.MIN_VALUE;
 				}
 			});
 			table.set("turn_on", new ZeroArgFunction() {

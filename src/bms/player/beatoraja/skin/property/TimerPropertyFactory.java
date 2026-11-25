@@ -37,6 +37,11 @@ public class TimerPropertyFactory {
 			public int getTimerId() {
 				return timerId;
 			}
+
+			@Override
+			public boolean isDefinitelyOff(MainState state) {
+				return !state.timer.isTimerOn(timerId);
+			}
 		};
 	}
 }

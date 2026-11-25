@@ -12,7 +12,7 @@ done | head -n1)
 if [ -z "$pid" ]; then echo "beatoraja game process not found (jcmd -l)" >&2; exit 1; fi
 mkdir -p "$(dirname "$out")"
 abs="$(cd "$(dirname "$out")" && pwd)/$(basename "$out")"
-"$jcmd" "$pid" JFR.start name=luaprofile settings=profile duration="${seconds}s" filename="$abs"
+"$jcmd" "$pid" JFR.start name=luaprofile settings="${JFR_SETTINGS:-profile}" duration="${seconds}s" filename="$abs"
 echo "recording pid $pid for ${seconds}s -> $abs"
 sleep "$seconds"; sleep 2
 echo "done: python3 scripts/jfr-hot.py \"$abs\""

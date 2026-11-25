@@ -30,11 +30,11 @@ import org.luaj.vm2.LuaFunction;
 public final class LuaCallDiagnostics {
 	enum Mode { COUNT, TIME, ALLOC }
 
+	/** Which Lua VM jar is on the classpath, so A/B reports cannot be mixed up. Before INSTANCE: its constructor logs it. */
+	static final String VM = vmDescription();
 	private static final LuaCallDiagnostics INSTANCE = create();
 	private static final int MAX_FRAME_SAMPLES = 300_000;
 	private static final int TOP_SITES = 40;
-	/** Which Lua VM jar is on the classpath, so A/B reports cannot be mixed up. */
-	static final String VM = vmDescription();
 
 	private static String vmDescription() {
 		String location;
