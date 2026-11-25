@@ -200,11 +200,13 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	}
 
 	private class TextFunction extends OneArgFunction {
+		private final LuaTextCache textCache = new LuaTextCache();
+
 		@Override
 		public LuaValue call(LuaValue luaValue) {
 			StringProperty property = getStringProperty(luaValue);
 			String text = property != null ? property.get(state) : null;
-			return LuaString.valueOf(text != null ? text : "");
+			return textCache.encode(property, text);
 		}
 	}
 
