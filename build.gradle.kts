@@ -388,7 +388,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.lua.LuaCallDiagnosticsTest",
     "bms.player.beatoraja.skin.lua.SkipDrawWhenTimerOffTest",
     "bms.player.beatoraja.skin.lua.PropertyNameCacheTest",
-    "bms.player.beatoraja.skin.property.StringPropertyLookupTest"
+    "bms.player.beatoraja.skin.property.StringPropertyLookupTest",
+    "bms.player.beatoraja.skin.property.PropertyIdCacheTest"
 )
 val regressionTasks = regressionClasses.map { className ->
     tasks.register<JavaExec>("regression${className.substringAfterLast('.')}") {

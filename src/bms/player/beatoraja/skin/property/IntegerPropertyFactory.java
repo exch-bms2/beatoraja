@@ -31,6 +31,9 @@ public class IntegerPropertyFactory {
 	private static final int ID_LENGTH = 65536;
 	private static final IntegerProperty[] vcache = new IntegerProperty[ID_LENGTH];
 	private static final IntegerProperty[] icache = new IntegerProperty[ID_LENGTH];
+	// The factories have a fixed ID set. Remember misses without adding work to cache hits.
+	private static final boolean[] missingValues = new boolean[ID_LENGTH];
+	private static final boolean[] missingImages = new boolean[ID_LENGTH];
 	
 	public static IntegerProperty getIntegerProperty(int optionid) {
 		if(optionid < 0 || optionid >= ID_LENGTH) {
@@ -39,12 +42,14 @@ public class IntegerPropertyFactory {
 		if(vcache[optionid] != null) {
 			return vcache[optionid];
 		}
+		if (missingValues[optionid]) return null;
 		IntegerProperty result = IntegerPropertyPattern.get(PropertyScope.VALUE, optionid);
 		if (result == null) {
 			result = ValueType.getProperty(optionid);
 		}
 		
 		vcache[optionid] = result;
+		if (result == null) missingValues[optionid] = true;
 		return result;
 	}
 	
@@ -938,6 +943,7 @@ public class IntegerPropertyFactory {
 		if(icache[optionid] != null) {
 			return icache[optionid];
 		}
+		if (missingImages[optionid]) return null;
 		IntegerProperty result = null;
 
 		if ((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
@@ -971,6 +977,7 @@ public class IntegerPropertyFactory {
 		}
 
 		icache[optionid] = result;
+		if (result == null) missingImages[optionid] = true;
 		return result;
 	}
 	
