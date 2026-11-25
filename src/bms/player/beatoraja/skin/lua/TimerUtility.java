@@ -81,7 +81,7 @@ public class TimerUtility {
 			return new ProbeableTimer() {
 				@Override
 				public LuaValue call() {
-					return LuaNumber.valueOf(state.timer.getMicroTimer(id));
+					return LuaTimerValue.valueOf(state.timer.getMicroTimer(id));
 				}
 
 				@Override
@@ -113,7 +113,7 @@ public class TimerUtility {
 					} else if (!on && observerState.timerValue != Long.MIN_VALUE) {
 						observerState.timerValue = Long.MIN_VALUE;
 					}
-					return LuaNumber.valueOf(observerState.timerValue);
+					return LuaTimerValue.valueOf(observerState.timerValue);
 				}
 
 				@Override
@@ -147,7 +147,7 @@ public class TimerUtility {
 			table.set("timer", new ProbeableTimer() {
 				@Override
 				public LuaValue call() {
-					return LuaNumber.valueOf(s.timerValue);
+					return LuaTimerValue.valueOf(s.timerValue);
 				}
 
 				@Override

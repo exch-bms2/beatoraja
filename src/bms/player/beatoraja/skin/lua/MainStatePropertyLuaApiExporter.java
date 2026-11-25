@@ -226,7 +226,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	private class TimerFunction extends OneArgFunction {
 		@Override
 		public LuaValue call(LuaValue value) {
-			return LuaNumber.valueOf(state.timer.getMicroTimer(value.toint()));
+			return LuaTimerValue.valueOf(state.timer.getMicroTimer(value.toint()));
 		}
 	}
 
