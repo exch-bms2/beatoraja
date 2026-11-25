@@ -45,7 +45,10 @@ public final class DesktopLauncher {
             }
             return;
         }
-        if (Boolean.getBoolean(GAME_PROCESS)) StartupDiagnostics.gameEntry();
+        if (Boolean.getBoolean(GAME_PROCESS)) {
+            StartupDiagnostics.gameEntry();
+            bms.player.beatoraja.skin.SkinLoadRecording.startIfRequested();
+        }
         MainLoader.main(args);
     }
 

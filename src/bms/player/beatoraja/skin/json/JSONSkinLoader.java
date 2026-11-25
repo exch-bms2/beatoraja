@@ -44,11 +44,15 @@ public class JSONSkinLoader extends SkinLoader {
 	protected ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
 	protected JsonSkinSerializer serializer;
+
+	private SkinImagePrefetcher prefetcher;
 	
 	protected static class SourceData {
 		public final String path;
 		public boolean loaded = false;
 		public Object data;
+		/** Resolved once: a wildcard path picks a random file, and prefetch and load must agree. */
+		File file;
 		
 		public SourceData(String path) {
 			this.path = path;
@@ -214,7 +218,9 @@ public class JSONSkinLoader extends SkinLoader {
 	public Skin load(Path p, SkinType type, SkinConfig.Property property) {
 		serializer = new JsonSkinSerializer(lua, path -> getPath(path, filemap));
 		Skin skin = null;
+		var headerPhase = SkinLoadEvents.begin("header");
 		SkinHeader header = loadHeader(p);
+		SkinLoadEvents.end(headerPhase, p.toString());
 		if(header == null) {
 			if (lua != null) lua.dispose();
 			return null;
@@ -240,7 +246,9 @@ public class JSONSkinLoader extends SkinLoader {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
 
+			var parse = SkinLoadEvents.begin("json-parse");
 			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
+			SkinLoadEvents.end(parse, p.toString());
 			skin = loadJsonSkin(header, sk, type, property, p);
 		} catch (FileNotFoundException e) {
 			Logger.getGlobal().severe("JSONスキンファイルが見つかりません : " + p.toString());
@@ -315,6 +323,7 @@ public class JSONSkinLoader extends SkinLoader {
 			for(JsonSkin.Source source : sk.source) {
 				sourceMap.put(source.id, new SourceData(source.path));
 			}
+			startImagePrefetch(p);
 
 			for (JsonSkin.Destination dst : sk.destination) {
 				SkinObject obj = null;
@@ -392,8 +401,54 @@ public class JSONSkinLoader extends SkinLoader {
 			return null;
 		} finally {
 			loadingSkin = null;
+			if (prefetcher != null) {
+				prefetcher.awaitAll();
+				prefetcher = null;
+			}
 		}
 		return skin;
+	}
+
+	/** Starts decoding, on worker threads, the images that destinations can reach. */
+	private void startImagePrefetch(Path p) {
+		var phase = SkinLoadEvents.begin("prefetch-start");
+		final List<String> paths = new ArrayList<>();
+		for (String srcid : JsonSkinSourceReferences.collect(sk)) {
+			final SourceData data = sourceMap.get(srcid);
+			if (data == null || data.path == null) {
+				continue;
+			}
+			final File file = resolveSourceFile(data, p);
+			if (!isMovie(file)) {
+				paths.add(file.getPath());
+			}
+		}
+		prefetcher = SkinImagePrefetcher.start(paths, usecim);
+		SkinLoadEvents.end(phase, null, prefetcher.size());
+	}
+
+	File resolveSourceFile(SourceData data, Path p) {
+		if (data.file == null) {
+			data.file = getPath(p.getParent().toString() + "/" + data.path, filemap);
+		}
+		return data.file;
+	}
+
+	private static boolean isMovie(File file) {
+		final String name = file.getName().toLowerCase(Locale.ROOT);
+		for (String mov : VideoFormat.getAllExtensions()) {
+			if (name.endsWith(mov)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Waits for the prefetched decode of this image, if any, before it is turned into a texture. */
+	void awaitPrefetch(String path) {
+		if (prefetcher != null) {
+			prefetcher.await(path);
+		}
 	}
 
 	SkinFontSource getFontSource(String fontPath, String[] fallbackFontPaths) {
@@ -505,7 +560,7 @@ public class JSONSkinLoader extends SkinLoader {
 		if(data.loaded) {
 			return data.data;
 		}
-		final File imagefile = getPath(p.getParent().toString() + "/" + data.path, filemap);
+		final File imagefile = resolveSourceFile(data, p);
 		if (imagefile.exists()) {
 			boolean isMovie = false;
 			 for (String mov : VideoFormat.getAllExtensions()) {
@@ -534,6 +589,7 @@ public class JSONSkinLoader extends SkinLoader {
 	}
 
 	private Texture getTexture(String path) {
+		awaitPrefetch(path);
 		return getTexture(path, usecim);
 	}
 }

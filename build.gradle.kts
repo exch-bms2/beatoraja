@@ -180,6 +180,12 @@ tasks.named<JavaExec>("run") {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
     }
     providers.gradleProperty("luaDiagnostics").orNull?.let { systemProperty("beatoraja.luaDiagnostics", it) }
+    providers.gradleProperty("skinImageDecodeThreads").orNull?.let {
+        systemProperty("beatoraja.skinImageDecodeThreads", it)
+    }
+    providers.gradleProperty("skinLoadJfr").orNull?.let {
+        systemProperty("beatoraja.skinLoadJfr", file(it).absolutePath)
+    }
     providers.gradleProperty("skipDrawWhenTimerOff").orNull?.let {
         systemProperty("beatoraja.skin.skipDrawWhenTimerOff", it)
     }
@@ -360,6 +366,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.skin.json.JSONSkinResourceLifecycleTest",
     "bms.player.beatoraja.skin.json.JSONSkinLoaderTest",
     "bms.player.beatoraja.skin.json.SkinFontSourceCacheTest",
+    "bms.player.beatoraja.skin.json.JsonSkinSourceReferencesTest",
     "bms.player.beatoraja.input.mouse.SkinMouseInputTest",
     "bms.player.beatoraja.input.controller.JInputControllerCompatibilityTest",
     "bms.player.beatoraja.input.controller.JInputQueueRecoveryTest",
@@ -397,6 +404,16 @@ val regressionTasks = regressionClasses.map { className ->
             providers.gradleProperty("nanasi1552Observations").orNull?.let { args("--observations", it) }
         }
     }
+}
+// Skin image decode throughput by worker count (no GL): -PbenchArgs="threads=1,2,4,8 rounds=5 list1.txt list2.txt"
+tasks.register<JavaExec>("skinImageDecodeBenchmark") {
+    group = "verification"
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("bms.player.beatoraja.skin.SkinImageDecodeBenchmark")
+    workingDir(projectDir)
+    systemProperty("java.awt.headless", "true")
+    args((providers.gradleProperty("benchArgs").orNull ?: "").split(" ").filter { it.isNotBlank() })
 }
 tasks.register<JavaExec>("exportNanasi1552Fixtures") {
     group = "verification"

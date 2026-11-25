@@ -115,10 +115,26 @@ public abstract class SkinLoader {
     }
 
     private static Skin load(MainState state, SkinType skinType, SkinConfig sc, boolean ageCache) {
-        final PlayerResource resource = state.resource;
         if (sc == null || !sc.validate()) {
             return null;
         }
+        final SkinLoadEvents.Load event = new SkinLoadEvents.Load();
+        event.begin();
+        final Skin skin = loadUntimed(state, skinType, sc, ageCache);
+        event.end();
+        if (event.shouldCommit()) {
+            event.skinType = String.valueOf(skinType);
+            event.path = sc.getPath();
+            String p = sc.getPath();
+            event.format = p.endsWith(".json") ? "json" : p.endsWith(".luaskin") ? "lua" : "lr2";
+            event.success = skin != null;
+            event.commit();
+        }
+        return skin;
+    }
+
+    private static Skin loadUntimed(MainState state, SkinType skinType, SkinConfig sc, boolean ageCache) {
+        final PlayerResource resource = state.resource;
         try {
             Skin skin;
             if (sc.getPath().endsWith(".json")) {
@@ -136,7 +152,11 @@ public abstract class SkinLoader {
                 skin = dloader.loadSkin(state, header, loader.getOption());
             }
             applyNotesOffsetCenter(skin, sc.getProperties());
-            if (ageCache) SkinLoader.resource.disposeOld();
+            if (ageCache) {
+                var phase = SkinLoadEvents.begin("dispose-old");
+                SkinLoader.resource.disposeOld();
+                SkinLoadEvents.end(phase, null);
+            }
             return skin;
         } catch (Throwable e) {
             e.printStackTrace();
@@ -208,12 +228,17 @@ public abstract class SkinLoader {
     }
 
     public static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
+        var decode = SkinLoadEvents.begin("pixmap-load");
         Pixmap pixmap = loadPixmap(capturePixmapLoadContext(usecim), path);
+        SkinLoadEvents.end(decode, path, pixmap != null ? (long) pixmap.getWidth() * pixmap.getHeight() * 4 : 0);
         if (pixmap == null) {
             return null;
         }
         try {
-            return new Texture(pixmap, useMipMaps);
+            var upload = SkinLoadEvents.begin("texture-upload");
+            Texture texture = new Texture(pixmap, useMipMaps);
+            SkinLoadEvents.end(upload, path, (long) pixmap.getWidth() * pixmap.getHeight() * 4);
+            return texture;
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -241,12 +266,18 @@ public abstract class SkinLoader {
     static Pixmap loadPixmap(PixmapLoadContext context, String path) {
         final PixmapResourcePool resource = context.resource;
         if (resource.exists(path)) {
-            return resource.getPixmap(path);
+            var hit = SkinLoadEvents.begin("pixmap-pool-hit");
+            Pixmap pooled = resource.getPixmap(path);
+            SkinLoadEvents.end(hit, path);
+            return pooled;
         }
         try {
             boolean usePixmapCache = context.allowCim && !path.toLowerCase(Locale.ROOT).endsWith(".webp");
             if (!usePixmapCache) {
-                return resource.getPixmap(path);
+                var decode = SkinLoadEvents.begin("image-decode");
+                Pixmap pixmap = resource.getPixmap(path);
+                SkinLoadEvents.end(decode, path);
+                return pixmap;
             }
             long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
             int dot = path.lastIndexOf('.');
@@ -256,9 +287,14 @@ public abstract class SkinLoader {
                 return resource.getPixmap(cim);
             }
             if (Files.exists(Paths.get(cim))) {
-                return resource.getPixmap(cim);
+                var cimRead = SkinLoadEvents.begin("cim-read");
+                Pixmap cached = resource.getPixmap(cim);
+                SkinLoadEvents.end(cimRead, cim);
+                return cached;
             }
+            var decode = SkinLoadEvents.begin("image-decode");
             Pixmap pixmap = resource.getPixmap(path);
+            SkinLoadEvents.end(decode, path);
             if (pixmap == null) {
                 return null;
             }
@@ -276,7 +312,9 @@ public abstract class SkinLoader {
                     e.printStackTrace();
                 }
             }
+            var cimWrite = SkinLoadEvents.begin("cim-write");
             PixmapIO.writeCIM(Gdx.files.local(cim), pixmap);
+            SkinLoadEvents.end(cimWrite, cim);
             return pixmap;
         } catch (Throwable e) {
             e.printStackTrace();

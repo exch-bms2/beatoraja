@@ -573,7 +573,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		if(data.loaded) {
 			return (data.data instanceof Texture) ? (Texture)data.data : null;
 		}
-		final File imagefile = SkinLoader.getPath(p.getParent().toString() + "/" + data.path, loader.filemap);
+		final File imagefile = loader.resolveSourceFile(data, p);
 		if (imagefile.exists()) {
 			data.data = getTexture(imagefile.getPath());
 			loader.registerResource((Texture) data.data);
@@ -623,6 +623,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 	}
 
 	protected Texture getTexture(String path) {
+		loader.awaitPrefetch(path);
 		return SkinLoader.getTexture(path, loader.usecim);
 	}
 
@@ -718,7 +719,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 			return null;
 		}
 		
-		return SkinLoader.getPath(p.getParent().toString() + "/" + data.path, loader.filemap);
+		return loader.resolveSourceFile(data, p);
 	}
 
 	protected void setDestination(Skin skin, SkinObject obj, JsonSkin.Destination dst) {

@@ -60,8 +60,12 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		SkinHeader header = null;
 		try {
 			lua.setDirectory(p.getParent());
+			var exec = SkinLoadEvents.begin("lua-exec");
 			LuaValue value = lua.execFile(p);
+			SkinLoadEvents.end(exec, p.toString());
+			var convert = SkinLoadEvents.begin("lua-convert");
 			sk = fromLuaValue(JsonSkin.Skin.class, value);
+			SkinLoadEvents.end(convert, null);
 			header = loadJsonSkinHeader(sk, p);
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -77,7 +81,9 @@ public class LuaSkinLoader extends JSONSkinLoader {
 	@Override
 	public Skin load(Path p, SkinType type, SkinConfig.Property property) {
 		Skin skin = null;
+		var headerPhase = SkinLoadEvents.begin("header");
 		SkinHeader header = loadHeader(p);
+		SkinLoadEvents.end(headerPhase, p.toString());
 		if(header == null) {
 			lua.dispose();
 			return null;
@@ -94,8 +100,12 @@ public class LuaSkinLoader extends JSONSkinLoader {
 			lua.exportSkinProperty(header, property, (String path) -> {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
+			var exec = SkinLoadEvents.begin("lua-exec");
 			LuaValue value = lua.execFile(p);
+			SkinLoadEvents.end(exec, p.toString());
+			var convert = SkinLoadEvents.begin("lua-convert");
 			sk = fromLuaValue(JsonSkin.Skin.class, value);
+			SkinLoadEvents.end(convert, null);
 			skin = loadJsonSkin(header, sk, type, property, p);
 		} catch (Throwable e) {
 			e.printStackTrace();
