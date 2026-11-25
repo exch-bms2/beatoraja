@@ -153,6 +153,19 @@ public class StringPropertyFactory {
 						? player.getPracticeConfiguration().getVisibleItemValue(index) : "",
 				new NamePattern("practice_item", "_value"), new NamePattern("practice_item_value", ""));
 
+		private static final StringPropertyPattern[] PATTERNS = values();
+		private static final IntMap<StringProperty> BY_ID = new IntMap<>();
+
+		static {
+			// Preserve declaration-order precedence if ranges overlap.
+			for (StringPropertyPattern pattern : PATTERNS) {
+				for (int index = 0; index < pattern.properties.length; index++) {
+					int id = pattern.firstId + index;
+					if (!BY_ID.containsKey(id)) BY_ID.put(id, pattern.properties[index]);
+				}
+			}
+		}
+
 		private final int firstId;
 		private final StringProperty[] properties;
 		private final NamePattern[] namePatterns;
@@ -166,11 +179,6 @@ public class StringPropertyFactory {
 			this.namePatterns = namePatterns;
 		}
 
-		private StringProperty getById(int id) {
-			int index = id - firstId;
-			return index >= 0 && index < properties.length ? properties[index] : null;
-		}
-
 		private StringProperty getByName(String name) {
 			for (NamePattern namePattern : namePatterns) {
 				int index = namePattern.getIndex(name);
@@ -182,17 +190,11 @@ public class StringPropertyFactory {
 		}
 
 		private static StringProperty get(int id) {
-			for (StringPropertyPattern pattern : values()) {
-				StringProperty property = pattern.getById(id);
-				if (property != null) {
-					return property;
-				}
-			}
-			return null;
+			return BY_ID.get(id);
 		}
 
 		private static StringProperty get(String name) {
-			for (StringPropertyPattern pattern : values()) {
+			for (StringPropertyPattern pattern : PATTERNS) {
 				StringProperty property = pattern.getByName(name);
 				if (property != null) {
 					return property;
