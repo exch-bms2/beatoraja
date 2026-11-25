@@ -69,6 +69,17 @@ public abstract class SkinObject extends DisposableObject {
 	 */
 	private int[] dstop = new int[0];
 	private BooleanProperty[] dstdraw = new BooleanProperty[0];
+
+	/**
+	 * An object whose timer is definitely off is hidden whatever its draw conditions return,
+	 * so side-effect free conditions are not evaluated then. This saves Lua calls for closed
+	 * skin menus. On by default; {@code -Dbeatoraja.skin.skipDrawWhenTimerOff=false} restores
+	 * evaluating every condition (see docs/skip-draw-when-timer-off.md).
+	 */
+	static final boolean SKIP_DRAW_WHEN_TIMER_OFF =
+			!"false".equalsIgnoreCase(System.getProperty("beatoraja.skin.skipDrawWhenTimerOff"));
+	private BooleanProperty[] skippableChecked;
+	private boolean drawSkippable;
 	/**
 	 * 描画条件のマウス範囲
 	 */
@@ -564,6 +575,17 @@ public abstract class SkinObject extends DisposableObject {
 		this.index = 0;
 	}
 	
+	private boolean isDrawSkippable() {
+		BooleanProperty[] conditions = dstdraw;
+		if (skippableChecked != conditions) {
+			boolean skippable = true;
+			for (BooleanProperty c : conditions) skippable &= c.hasNoSideEffects();
+			drawSkippable = skippable;
+			skippableChecked = conditions;
+		}
+		return drawSkippable;
+	}
+
 	public boolean validate() {
 		return getAllDestination().length > 0;
 	}
@@ -579,6 +601,12 @@ public abstract class SkinObject extends DisposableObject {
 	}
 
 	public void prepare(long time, MainState state, float offsetX, float offsetY) {
+		if (SKIP_DRAW_WHEN_TIMER_OFF && dstdraw.length > 0 && dsttimer != null && isDrawSkippable()
+				&& dsttimer.isDefinitelyOff(state)) {
+			// Same outcome as evaluating the conditions: prepareRegion would hide it for the off timer.
+			this.draw = false;
+			return;
+		}
 		for (BooleanProperty draw : dstdraw) {
 			if(!draw.get(state)) {
 				this.draw = false;

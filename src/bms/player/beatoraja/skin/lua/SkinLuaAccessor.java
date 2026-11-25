@@ -681,10 +681,16 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	}
 
 	private BooleanProperty loadBooleanProperty(LuaFunction function, LuaCallDiagnostics.Site site) {
+		final boolean storeFree = LuaSideEffects.isStoreFree(function);
 		return new BooleanProperty() {
 			@Override
 			public boolean isStatic(MainState state) {
 				return false;
+			}
+
+			@Override
+			public boolean hasNoSideEffects() {
+				return storeFree;
 			}
 
 			@Override
@@ -841,7 +847,22 @@ public class SkinLuaAccessor implements com.badlogic.gdx.utils.Disposable {
 	}
 
 	private TimerProperty loadTimerProperty(LuaFunction timerFunction, LuaCallDiagnostics.Site site) {
+		final TimerUtility.ProbeableTimer probe = timerFunction instanceof TimerUtility.ProbeableTimer p ? p : null;
 		return new TimerProperty() {
+			@Override
+			public boolean isDefinitelyOff(MainState state) {
+				if (probe == null) return false;
+				final long luaDiagnostics = LuaCallDiagnostics.begin(site);
+				try {
+					return probe.isDefinitelyOff();
+				} catch (RuntimeException e) {
+					// Let the normal evaluation report the error.
+					return false;
+				} finally {
+					LuaCallDiagnostics.end(site, luaDiagnostics);
+				}
+			}
+
 			@Override
 			public long getMicro(MainState state) {
 				try {

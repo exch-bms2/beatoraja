@@ -180,6 +180,9 @@ tasks.named<JavaExec>("run") {
         systemProperty("beatoraja.inputDiagnostics.intervalMillis", it)
     }
     providers.gradleProperty("luaDiagnostics").orNull?.let { systemProperty("beatoraja.luaDiagnostics", it) }
+    providers.gradleProperty("skipDrawWhenTimerOff").orNull?.let {
+        systemProperty("beatoraja.skin.skipDrawWhenTimerOff", it)
+    }
     providers.gradleProperty("luaDiagnosticsWarmupMillis").orNull?.let {
         systemProperty("beatoraja.luaDiagnostics.warmupMillis", it)
     }
@@ -373,7 +376,8 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.song.archive.ZipSongArchiveTest",
     "bms.player.beatoraja.song.archive.SongArchiveDepthTest",
     "bms.player.beatoraja.song.archive.RarSongArchiveTest",
-    "bms.player.beatoraja.skin.lua.LuaCallDiagnosticsTest"
+    "bms.player.beatoraja.skin.lua.LuaCallDiagnosticsTest",
+    "bms.player.beatoraja.skin.lua.SkipDrawWhenTimerOffTest"
 )
 val regressionTasks = regressionClasses.map { className ->
     tasks.register<JavaExec>("regression${className.substringAfterLast('.')}") {
