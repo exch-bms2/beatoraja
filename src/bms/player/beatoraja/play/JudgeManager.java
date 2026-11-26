@@ -107,8 +107,9 @@ public final class JudgeManager extends AbstractJudgeManager {
 		final PlayerConfig config = resource.getPlayerConfig();
 		guideSEAtLNStart = config.isGuideSEAtLNStart();
 		final long[] nmjudge = rule.getJudgeWindow(NoteType.NOTE, judgerank, keyJudgeWindowRate);
-		nreleasemargin = usesChartJudgeRank() && config.isCustomJudge()
-				? rule.longnoteMargin * config.getLongnoteMarginRate() / 100L : rule.longnoteMargin;
+		final PlayerConfig scoringConfig = resource.getScoringConfig();
+		nreleasemargin = usesChartJudgeRank() && scoringConfig.isCustomJudge()
+				? rule.longnoteMargin * scoringConfig.getLongnoteMarginRate() / 100L : rule.longnoteMargin;
 		final long[] smjudge = rule.getJudgeWindow(NoteType.SCRATCH, judgerank, scratchJudgeWindowRate);
 		sreleasemargin = rule.longscratchMargin;
 		mjudgestart = mjudgeend = 0;

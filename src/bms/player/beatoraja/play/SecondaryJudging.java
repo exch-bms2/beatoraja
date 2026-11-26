@@ -43,7 +43,7 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	private Outcome outcome = Outcome.RUNNING;
 
 	static SecondaryJudging create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
-		var config = resource.getPlayerConfig();
+		var config = resource.getScoringConfig();
 		int startGauge = LunaticRave2GrooveGauge.mapBeatorajaGauge(config.getGauge());
 		if (BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model,
 				resource.getOriginalMode(), resource.getPlayMode(), resource.getCourseBMSModels() != null,
@@ -61,12 +61,12 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 			SecondaryScoringRule rule) {
 		if (resource.getPlayMode() == null || resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY
 				|| resource.getCourseBMSModels() != null) return null;
-		return new SecondaryJudging(player, model, resource, endUs, resource.getPlayerConfig().getGauge(), rule.scoreRule());
+		return new SecondaryJudging(player, model, resource, endUs, resource.getScoringConfig().getGauge(), rule.scoreRule());
 	}
 
 	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int startGauge,
 			BMSPlayerRule rule) {
-		config = resource.getPlayerConfig();
+		config = resource.getScoringConfig();
 		this.resource = resource;
 		timingRuleId = rule == null ? SecondaryScoringRule.BEATORAJA.id()
 				: java.util.Arrays.stream(SecondaryScoringRule.values()).filter(candidate -> candidate.scoreRule() == rule)

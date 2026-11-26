@@ -48,6 +48,11 @@ public final class PlayerResource {
 
 	private Config config;
 	private PlayerConfig pconfig;
+	private PlayerConfig scoringConfig;
+	public PlayerConfig getScoringConfig() { return scoringConfig != null ? scoringConfig : pconfig; }
+	public void setScoringSettings(ReplayData.ScoringSettings settings, int gauge) {
+		scoringConfig = settings != null ? settings.toPlayerConfig(gauge) : null;
+	}
 	private PlaySide playSide = PlaySide.P1;
 
 	public void setPlaySide(PlaySide side) {
@@ -176,6 +181,7 @@ public final class PlayerResource {
 	}
 
 	public void clear() {
+		scoringConfig = null;
 		primaryScoringSelection = null;
 		scoringEligibility = null;
 		scoringTimings = null;

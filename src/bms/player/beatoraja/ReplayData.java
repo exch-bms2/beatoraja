@@ -61,6 +61,41 @@ public final class ReplayData implements Validatable {
 	public long scoringFrameUs;
 	/** Null in legacy replays, which did not record these chart modifiers. */
 	public ChartModifiers chartModifiers;
+	/** Null in older replays, which use the current scoring settings for compatibility. */
+	public ScoringSettings scoringSettings;
+
+	public static final class ScoringSettings {
+		public boolean customJudge;
+		public int keyPerfectGreat = 100, keyGreat = 100, keyGood = 100;
+		public int scratchPerfectGreat = 100, scratchGreat = 100, scratchGood = 100;
+		public int longnoteMargin = 100;
+		public int gaugeAutoShift, bottomShiftableGauge;
+
+		public static ScoringSettings capture(PlayerConfig config) {
+			var settings = new ScoringSettings();
+			settings.customJudge = config.isCustomJudge();
+			settings.keyPerfectGreat = config.getKeyJudgeWindowRatePerfectGreat();
+			settings.keyGreat = config.getKeyJudgeWindowRateGreat(); settings.keyGood = config.getKeyJudgeWindowRateGood();
+			settings.scratchPerfectGreat = config.getScratchJudgeWindowRatePerfectGreat();
+			settings.scratchGreat = config.getScratchJudgeWindowRateGreat(); settings.scratchGood = config.getScratchJudgeWindowRateGood();
+			settings.longnoteMargin = config.getLongnoteMarginRate();
+			settings.gaugeAutoShift = config.getGaugeAutoShift(); settings.bottomShiftableGauge = config.getBottomShiftableGauge();
+			return settings;
+		}
+
+		/** A separate config limits restoration to scoring options and leaves the user profile intact. */
+		public PlayerConfig toPlayerConfig(int gauge) {
+			var config = new PlayerConfig(); config.setGauge(gauge);
+			config.setCustomJudge(customJudge);
+			config.setKeyJudgeWindowRatePerfectGreat(keyPerfectGreat);
+			config.setKeyJudgeWindowRateGreat(keyGreat); config.setKeyJudgeWindowRateGood(keyGood);
+			config.setScratchJudgeWindowRatePerfectGreat(scratchPerfectGreat);
+			config.setScratchJudgeWindowRateGreat(scratchGreat); config.setScratchJudgeWindowRateGood(scratchGood);
+			config.setLongnoteMarginRate(longnoteMargin);
+			config.setGaugeAutoShift(gaugeAutoShift); config.setBottomShiftableGauge(bottomShiftableGauge);
+			return config;
+		}
+	}
 
 	public static final class ChartModifiers {
 		public long seed;

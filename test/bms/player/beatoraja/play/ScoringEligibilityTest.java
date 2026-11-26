@@ -13,7 +13,7 @@ public final class ScoringEligibilityTest {
             check(policy.updateScore() == (rule != SecondaryScoringRule.BEATORAJA), "Only the rule using expanded windows is ineligible: " + rule);
             check(policy.assist() == (rule == SecondaryScoringRule.BEATORAJA ? 2 : 0), "Assist labels follow the rule actually used");
             check(!ScoringEligibility.resolve(rule, config, false, 1, true).updateScore(), "Shared chart assists still block every rule");
-            check(ScoringEligibility.resolve(rule, config, true, 0, false).updateScore(), "Replay does not inherit current expansion eligibility");
+            check(ScoringEligibility.resolve(rule, config, true, 0, false).updateScore(), "Practice omits custom expansion eligibility");
         }
         config.setKeyJudgeWindowRatePerfectGreat(100); config.setLongnoteMarginRate(150);
         check(!ScoringEligibility.resolve(SecondaryScoringRule.BEATORAJA, config, true, 0, true).updateScore()

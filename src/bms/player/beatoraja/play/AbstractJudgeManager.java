@@ -158,7 +158,7 @@ public abstract class AbstractJudgeManager {
 		Arrays.fill(auto_presstime, Long.MIN_VALUE);
 		states = initLanes(lanes, model.getLanes());
 		final int judgerank = usesChartJudgeRank() ? model.getJudgerank() : 100;
-		final PlayerConfig config = resource.getPlayerConfig();
+		final PlayerConfig config = resource.getScoringConfig();
 		final int[] keyJudgeWindowRate = usesChartJudgeRank() && config.isCustomJudge()
 				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
 				: new int[]{100, 100, 100};

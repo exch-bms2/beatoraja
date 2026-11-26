@@ -332,9 +332,10 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("Primary scoring: " + selection.requested().id() + " -> " + selection.effective().id()
 				+ (selection.reason().isEmpty() ? "" : " (" + selection.reason() + ")"));
 		playRule = selection.isStandard() ? BMSPlayerRule.getBMSPlayerRule(model.getMode()) : selection.effective().scoreRule();
+		prepareScoringSettings(config);
 		for (var rule : SecondaryScoringRule.values()) resource.setScoringEligibility(rule,
-				ScoringEligibility.resolve(rule, config, score, assist,
-						autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY));
+				ScoringEligibility.resolve(rule, resource.getScoringConfig(), score, assist,
+						autoplay.mode != BMSPlayerMode.Mode.PRACTICE));
 		var eligibility = resource.getScoringEligibility(selection.effective());
 		assist = eligibility.assist();
 		score = eligibility.updateScore();
@@ -357,6 +358,13 @@ public class BMSPlayer extends MainState {
 		playinfo.doubleoption = source.doubleoption;
 		playinfo.rand = source.rand;
 		playinfo.chartModifiers = source.chartModifiers;
+	}
+
+	private void prepareScoringSettings(PlayerConfig config) {
+		playinfo.scoringSettings = replay != null && replay.scoringSettings != null
+				? replay.scoringSettings : ReplayData.ScoringSettings.capture(config);
+		resource.setScoringSettings(resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE ? null : playinfo.scoringSettings,
+				replay != null ? replay.gauge : config.getGauge());
 	}
 
 	/** Conversion follows the saved chart after the original key-mode lane shuffle. */
@@ -672,7 +680,7 @@ public class BMSPlayer extends MainState {
 					}
 					timer.switchTimer(TIMER_GAUGE_MAX_1P, p.gauge.getGauge().isMax());
 					
-					if (updateGaugeAutoShift(p.gauge, config, gaugeFailed)) {
+					if (updateGaugeAutoShift(p.gauge, resource.getScoringConfig(), gaugeFailed)) {
 						state = STATE_FAILED;
 						playTimeTracker.stop(micronow, timer.getNowMicroTime(TIMER_PLAY));
 						timer.setTimerOn(TIMER_FAILED);
@@ -1045,6 +1053,7 @@ public class BMSPlayer extends MainState {
 		replay.primaryScoringFallbackReason = resource.getPrimaryScoringSelection().reason();
 		replay.scoringFrameUs = playRule == BMSPlayerRule.Angolmois ? AngolmoisEngine.FRAME_US : 0;
 		replay.chartModifiers = playinfo.chartModifiers;
+		replay.scoringSettings = playinfo.scoringSettings;
 		replay.sevenToNinePattern = playinfo.sevenToNinePattern;
 		replay.sevenToNineType = playinfo.sevenToNineType;
 		replay.sevenToNineHranThresholdBPM = playinfo.sevenToNineHranThresholdBPM;
