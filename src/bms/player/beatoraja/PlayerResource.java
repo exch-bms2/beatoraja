@@ -328,7 +328,12 @@ public final class PlayerResource {
 	}
 
 	public record AlternateResultScore(String ruleId, String ruleName, ScoreData score, ScoreData previousBest,
-			GaugeHistory gaugeHistory) {}
+			GaugeHistory gaugeHistory, boolean completed) {
+		public AlternateResultScore(String ruleId, String ruleName, ScoreData score, ScoreData previousBest, GaugeHistory gaugeHistory) {
+			this(ruleId, ruleName, score, previousBest, gaugeHistory,
+					score != null && score.getNotes() > 0 && score.getPassnotes() == score.getNotes());
+		}
+	}
 
 	/** Samples transferred to the result screen after the judgment thread has stopped. */
 	public record GaugeHistory(AbstractGrooveGauge gauge, FloatArray[] values, LongArray timesUs, long durationUs) {}

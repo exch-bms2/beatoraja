@@ -221,6 +221,8 @@ public final class MusicResultScoreDisplayTest {
         check(result.getDisplayScoringSummary().contains("SCORE 1234 / 2000"), "Native score and maximum remain visible");
         check(result.getDisplayScoringSummary().contains(" / NORMAL") && !result.getDisplayScoringSummary().contains("ASSIST EASY"),
                 "Angolmois internal gauge slot zero is labeled as native NORMAL");
+        check(IntegerPropertyFactory.getImageIndexProperty(40).get(result) == NORMAL
+                && !BooleanPropertyFactory.getBooleanProperty(1046).get(result), "Native gauge skin properties do not signal ASSIST EASY or EX gauge");
         check(score.get(result) == 1234 && IntegerPropertyFactory.getIntegerProperty(NUMBER_MAXSCORE).get(result) == 2000
                 && result.getScoreDataProperty().getRateInt() == 61
                 && BooleanPropertyFactory.getBooleanProperty(OPTION_UPDATE_SCORE).get(result)
@@ -230,6 +232,37 @@ public final class MusicResultScoreDisplayTest {
                 "F7 native display uses native score/rate/update, scoring notes, own duration and hides incompatible targets");
         press(result, keyboard, states);
         check(result.getDisplayScore() == selectedPrimary, "No duplicate selected primary in F7 cycle");
+        var constructor = Class.forName("bms.player.beatoraja.play.AngolmoisGrooveGauge").getDeclaredConstructor();
+        constructor.setAccessible(true);
+        var angGauge = (bms.player.beatoraja.play.AbstractGrooveGauge) constructor.newInstance();
+        angGauge.setValue(35);
+        resource.setGrooveGauge(angGauge);
+        resource.setGauge(new FloatArray[]{FloatArray.with(35), FloatArray.with(35), FloatArray.with(35)});
+        resource.setScoreData(third);
+        resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
+                bms.player.beatoraja.play.SecondaryScoringRule.ANGOLMOIS, bms.player.beatoraja.play.SecondaryScoringRule.ANGOLMOIS, ""));
+        primaryGauge.setType(HARD);
+        resource.setAlternateResultScores(List.of(new PlayerResource.AlternateResultScore("beatoraja", "beatoraja", primary, primaryBest,
+                new PlayerResource.GaugeHistory(primaryGauge, primaryHistory, new LongArray(new long[]{0, 1}), 1))));
+        result.gaugeType = NORMAL;
+        result.prepareScoreDisplay();
+        var particles = new bms.player.beatoraja.play.SkinGauge(new com.badlogic.gdx.graphics.g2d.TextureRegion[][]{
+                new com.badlogic.gdx.graphics.g2d.TextureRegion[36]}, 0, 0, 50, 0, 0, 100);
+        particles.setDestination(0, 0, 0, 100, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0);
+        particles.prepare(1000, result);
+        var valueField = particles.getClass().getDeclaredField("value"); valueField.setAccessible(true);
+        var borderField = particles.getClass().getDeclaredField("border"); borderField.setAccessible(true);
+        check(valueField.getFloat(particles) == 35, "Gauge particles initially use Angolmois samples");
+        input.setKeyState(5, true, 10); result.input(); input.setKeyState(5, false, 11);
+        check(result.getGaugeType() == NORMAL, "Angolmois exposes only its actual NORMAL gauge");
+        press(result, keyboard, states);
+        particles.prepare(1000, result);
+        check(result.getGaugeType() == HARD && valueField.getFloat(particles) == 81 && borderField.getFloat(particles) == 0,
+                "F7 gauge particles switch to beatoraja HARD history and border without indexing the Angolmois bank");
+        press(result, keyboard, states);
+        particles.prepare(1000, result);
+        check(valueField.getFloat(particles) == 35 && result.getGaugeType() == NORMAL, "Gauge particles restore native primary");
+        resource.setGrooveGauge(primaryGauge); primaryGauge.setType(NORMAL); resource.setGauge(primaryHistory);
         resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
                 bms.player.beatoraja.play.SecondaryScoringRule.LR2, bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA, "Unsupported gauge"));
         resource.setScoreData(primary);

@@ -1091,7 +1091,7 @@ public class BMSPlayer extends MainState {
 					score.setRule(rule == SecondaryScoringRule.BEATORAJA
 							? BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()) : rule.scoreRule());
 					display.add(new PlayerResource.AlternateResultScore(rule.id(), rule.displayName(),
-							score, previous, secondary.gaugeHistory()));
+							score, previous, secondary.gaugeHistory(), secondary.outcome() == SecondaryJudgingGroup.Outcome.FINISHED));
 				}
 				if (rule != SecondaryScoringRule.BEATORAJA) data.writeRuleAttempt(rule, attempt, resource.isUpdateScore());
 			} catch (IllegalArgumentException e) {

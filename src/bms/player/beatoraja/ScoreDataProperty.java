@@ -66,7 +66,7 @@ public class ScoreDataProperty {
         final int exscore = score != null ? score.getRuleScore() : 0;
         final int totalnotes = score != null ? score.getNotes() : 0;
         final int maximum = score != null ? score.getRuleMaxScore() : 0;
-        final double progressMaximum = totalnotes == 0 ? 0 : (double) maximum * notes / totalnotes;
+        final double progressMaximum = score != null ? score.getRuleProgressMaximum(notes) : 0;
         if(totalnotes > 0) {
             switch (score.getPlaymode()) {
                 case BEAT_5K:
@@ -120,7 +120,7 @@ public class ScoreDataProperty {
             }
             nowbestscorerate = maximum == 0 ? 0 : (float) nowbestscore / maximum;
         } else {
-            nowbestscore = totalnotes == 0 ? 0 : (int) ((long) bestscore * notes / totalnotes);
+            nowbestscore = maximum == 0 ? 0 : (int) (bestscore * progressMaximum / maximum);
             nowbestscorerate = maximum == 0 ? 0 : (float) nowbestscore / maximum;
         }
         if (useRivalGhost) {
@@ -129,7 +129,7 @@ public class ScoreDataProperty {
             }
             nowrivalscorerate = maximum == 0 ? 0 : (float) nowrivalscore / maximum;
         } else {
-            nowrivalscore = totalnotes == 0 ? 0 : (int) ((long) rivalscore * notes / totalnotes);
+            nowrivalscore = maximum == 0 ? 0 : (int) (rivalscore * progressMaximum / maximum);
             nowrivalscorerate = maximum == 0 ? 0 : (float) nowrivalscore / maximum;
         }
         previousNotes = notes;

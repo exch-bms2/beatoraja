@@ -165,7 +165,7 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 		return new Judgment(outcome, passed, score.getExscore(), score.getCombo(),
 				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(),
 				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs), -1, -1,
-				new bms.player.beatoraja.PlayDataAccessor.ScoreMetadata(score));
+				new bms.player.beatoraja.PlayDataAccessor.ScoreMetadata(score), gauge.isTypeChanged());
 	}
 
 	private void sampleGauge(long timeUs) {

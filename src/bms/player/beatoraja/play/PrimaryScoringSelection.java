@@ -9,6 +9,23 @@ import bms.player.beatoraja.ReplayData;
 
 /** Frozen before play. The effective rule owns note consumption, sound, gauges and closure for the whole song. */
 public record PrimaryScoringSelection(SecondaryScoringRule requested, SecondaryScoringRule effective, String reason) {
+    public record ScoringInfo(int notes, int maximumScore) {}
+
+    public static ScoringInfo scoringInfo(SecondaryScoringRule effective, BMSModel model) throws java.io.IOException {
+        if (effective == SecondaryScoringRule.ANGOLMOIS) {
+            var engine = AngolmoisChart.create(model);
+            return new ScoringInfo(engine.notes, engine.maxScore);
+        }
+        int notes = model.getTotalNotes();
+        if (effective == SecondaryScoringRule.PULSUS) {
+            notes = 0;
+            for (var timeline : model.getAllTimeLines()) for (int lane = 0; lane < model.getMode().key; lane++) {
+                var note = timeline.getNote(lane);
+                if (note instanceof bms.model.NormalNote || note instanceof LongNote) notes++;
+            }
+        }
+        return new ScoringInfo(notes, notes * 2);
+    }
     public static PrimaryScoringSelection standard() {
         return new PrimaryScoringSelection(SecondaryScoringRule.BEATORAJA, SecondaryScoringRule.BEATORAJA, "");
     }

@@ -77,7 +77,8 @@ public class MusicResult extends AbstractResult {
 
 		SecondaryScoreDisplay(PlayerResource.AlternateResultScore result) {
 			this.result = result;
-			gaugeType = result.score().getGauge();
+			gaugeType = result.gaugeHistory() != null && result.gaugeHistory().gauge() != null
+					? result.gaugeHistory().gauge().getType() : result.score().getGauge();
 			previousBest = result.previousBest() != null ? result.previousBest() : new ScoreData();
 			properties.setTargetScore(previousBest.getRuleScore(), null, 0, null, result.score().getNotes(), result.score().getRuleMaxScore());
 			properties.update(result.score());
@@ -195,6 +196,14 @@ public class MusicResult extends AbstractResult {
 		var display = secondaryDisplay();
 		return display != null ? display.result.gaugeHistory() : null;
 	}
+	@Override public bms.player.beatoraja.play.AbstractGrooveGauge getDisplayGauge() {
+		var history = getDisplayGaugeHistory();
+		return history != null ? history.gauge() : super.getDisplayGauge();
+	}
+	@Override public FloatArray[] getDisplayGaugeSamples() {
+		var history = getDisplayGaugeHistory();
+		return history != null ? history.values() : super.getDisplayGaugeSamples();
+	}
 
 	@Override
 	public int getGaugeType() {
@@ -210,6 +219,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	private void changeGaugeGraph() {
+		if (currentTimingRuleId().equals(SecondaryScoringRule.ANGOLMOIS.id())) return;
 		int type = getGaugeType();
 		int next = type >= GrooveGauge.ASSISTEASY && type <= GrooveGauge.HAZARD
 				? (type + 1) % 6 : (type - 5) % 3 + 6;
@@ -218,7 +228,7 @@ public class MusicResult extends AbstractResult {
 			var history = display.result.gaugeHistory();
 			if (history != null) display.gaugeType = next < history.values().length ? next : 0;
 		} else {
-			gaugeType = next;
+			gaugeType = next < getDisplayGaugeSamples().length ? next : 0;
 		}
 		updateScoreRuleNotice();
 	}
@@ -301,6 +311,7 @@ public class MusicResult extends AbstractResult {
 		ScoreData previous = oldscore;
 		FloatArray[] gauges = resource.getGauge();
 		int gauge = resource.getGrooveGauge().getType();
+		boolean completed = true;
 		if (!resource.getPrimaryScoringSelection().isStandard()) {
 			var standard = resource.getAlternateResultScores().stream()
 					.filter(candidate -> SecondaryScoringRule.BEATORAJA.id().equals(candidate.ruleId()))
@@ -310,12 +321,14 @@ public class MusicResult extends AbstractResult {
 			score = standard.score();
 			previous = standard.previousBest();
 			gauges = standard.gaugeHistory() != null ? standard.gaugeHistory().values() : null;
-			gauge = score.getGauge();
+			gauge = standard.gaugeHistory() != null && standard.gaugeHistory().gauge() != null
+					? standard.gaugeHistory().gauge().getType() : score.getGauge();
+			completed = standard.completed();
 		}
 		if (score == null) return null;
 		FloatArray history = gauges != null && gauge >= 0 && gauge < gauges.length ? gauges[gauge] : null;
 		return new IRScoreSelection(score, previous != null ? previous : new ScoreData(),
-				history != null && history.size > 0 && history.peek() > 0);
+				completed && history != null && history.size > 0 && history.peek() > 0);
 	}
 	
 	public void prepare() {
@@ -600,7 +613,7 @@ public class MusicResult extends AbstractResult {
 				data.writeRuleAttempt(rule, new PlayDataAccessor.ScoreAttempt(model.getSHA256(), mode,
 						newscore.getClear() == Failed.id ? PlayDataAccessor.ScoreOutcome.FAILED : PlayDataAccessor.ScoreOutcome.FINISHED,
 						newscore.getNotes(), newscore.getPassnotes(), newscore.getCombo(), newscore.getMinbp(),
-						ClearType.getClearTypeByID(newscore.getClear()), resource.getGrooveGauge().getType(),
+						ClearType.getClearTypeByID(newscore.getClear()), newscore.getGauge(),
 						resource.getGrooveGauge().getValue(), counts, newscore.getNativeScore(), newscore.getNativeMaxScore()).withMetadata(newscore), resource.isUpdateScore());
 				for (var alternate : resource.getAlternateResultScores()) {
 					if (alternate.ruleId().equals(SecondaryScoringRule.BEATORAJA.id())) {

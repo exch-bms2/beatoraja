@@ -106,16 +106,17 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
         details.setTotalDuration(duration);
         details.setAvgjudge(engine.notes > 0 ? duration / engine.notes : Long.MAX_VALUE);
         details.setRule(BMSPlayerRule.Angolmois);
+        details.setRuleProgressMaxima(engine.progressMaxima);
         details.setJudgeAlgorithm(JudgeAlgorithm.Lowest);
         return new Judgment(outcome, engine.passed,
                 (counts.get(0) + counts.get(1)) * 2 + counts.get(2) + counts.get(3), engine.maxCombo,
-                counts, 0, engine.gauge * 100f / 512, engine.notes, misses + engine.notes - engine.passed, clear,
-                new PlayerResource.GaugeHistory(gauge, new FloatArray[]{values}, times, endUs), engine.score, engine.maxScore,
+                counts, AbstractGrooveGauge.NORMAL, engine.gauge * 100f / 512, engine.notes, misses + engine.notes - engine.passed, clear,
+                new PlayerResource.GaugeHistory(gauge, new FloatArray[]{values, values, values}, times, endUs), engine.score, engine.maxScore,
                 new bms.player.beatoraja.PlayDataAccessor.ScoreMetadata(details));
     }
 
     private static final class DisplayGauge extends AbstractGrooveGauge {
-        DisplayGauge(int raw, boolean failed) { super(0, new Gauge[]{new Value(raw, failed)}); }
+        DisplayGauge(int raw, boolean failed) { super(NORMAL, new Gauge[]{new Value(raw, failed), new Value(raw, failed), new Value(raw, failed)}); }
         private static final class Value extends Gauge {
             private final boolean failed;
             Value(int raw, boolean failed) {

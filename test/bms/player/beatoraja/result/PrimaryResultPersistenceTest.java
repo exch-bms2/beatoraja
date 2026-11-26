@@ -72,6 +72,16 @@ public final class PrimaryResultPersistenceTest {
         check(irScore.score() == standard && irScore.previousBest() == previousStandard, "IR selects beatoraja and its pre-save best");
         check(irScore.shouldSend(IRConfig.IR_SEND_ALWAYS), "Always-send policy");
         check(irScore.shouldSend(IRConfig.IR_SEND_COMPLETE_SONG), "Completion uses beatoraja gauge even when primary gauge is empty");
+        resource.setAlternateResultScores(List.of(new PlayerResource.AlternateResultScore("beatoraja", "beatoraja", standard, previousStandard,
+                alternate.gaugeHistory(), false)));
+        check(!result.selectIRScore().shouldSend(IRConfig.IR_SEND_COMPLETE_SONG)
+                && result.selectIRScore().shouldSend(IRConfig.IR_SEND_ALWAYS), "Interrupted beatoraja run with remaining gauge is not complete");
+        standard.setGauge(-1);
+        var shifted = new PlayerResource.AlternateResultScore("beatoraja", "beatoraja", standard, previousStandard,
+                new PlayerResource.GaugeHistory(resource.getGrooveGauge(), standardGauge, null, 0), true);
+        resource.setAlternateResultScores(List.of(shifted));
+        check(result.selectIRScore().shouldSend(IRConfig.IR_SEND_COMPLETE_SONG) && result.selectIRScore().score().getGauge() == -1,
+                "GAS completion uses the real gauge history while preserving the IR marker");
         check(!irScore.shouldSend(IRConfig.IR_SEND_UPDATE_SCORE), "Primary score improvement does not qualify as beatoraja improvement");
         previousStandard.setEgr(1);
         check(irScore.shouldSend(IRConfig.IR_SEND_UPDATE_SCORE), "Beatoraja improvement qualifies against its own best");
@@ -91,7 +101,7 @@ public final class PrimaryResultPersistenceTest {
         check(new MusicResult.IRSendStatus(connection, new IRChartData(new SongData()), irScore.score()).send(), "IR queue sends selected score");
         check(submitted[0].getExscore() == 2 && submitted[0].rule == BMSPlayerRule.Beatoraja_7
                 && submitted[0].option == 3 && submitted[0].seed == 12345 && submitted[0].playtime == 9000
-                && submitted[0].avgjudge == 18000,
+                && submitted[0].avgjudge == 18000 && submitted[0].gauge == -1,
                 "IR payload contains only beatoraja judgments with actual play metadata");
         resource.setAlternateResultScores(List.of());
         check(result.selectIRScore() == null, "Missing beatoraja result never substitutes native primary score");

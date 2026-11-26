@@ -109,6 +109,37 @@ public final class PrimaryScoringTest {
         f.input.setKeyState(6, false, 3_000_000); f.judge.update(3_000_001);
         check(((BMSPlayer) f.player).isNoteEnd() && f.judge.getScoreData().getExscore() == 4, "Pulsus hold tail completes its own note count");
         check(f.judge.getTimingData().timings().length == 2, "Pulsus timing distribution includes both judged hold endpoints");
+        var angModel = model();
+        parameters = BMSPlayerRule.ChartParameters.fromBms(angModel); BMSPlayerRule.validate(angModel);
+        f = new KeyboardJudgeCompatibilityTest.Fixture(angModel, true, BMSPlayerRule.Angolmois, parameters, NORMAL);
+        f.input.setKeyState(6, true, 2_000_000); f.judge.update(2_000_001);
+        var property = new ScoreDataProperty();
+        property.setTargetScore(750, null, 750, null, 2, 750);
+        property.update(f.judge.getScoreData(), 1);
+        check(f.judge.getScoreData().getRuleScore() == 300 && property.getNowRateInt() == 100
+                && property.getNowBestScore() == 300 && property.getNowRivalScore() == 300,
+                "Angolmois perfect first note uses its actual prefix maximum for rates and comparison graphs");
+        var controller = bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate(MainController.class);
+        var pendingResource = f.resource;
+        var pendingModel = angModel;
+        var pendingReplay = new ReplayData();
+        var pendingTarget = new ScoreData();
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(controller, MainController.class, "resource", pendingResource);
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(pendingResource, PlayerResource.class, "model", pendingModel);
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(pendingResource, PlayerResource.class, "replay", pendingReplay);
+        pendingResource.setPrimaryScoringSelection(PrimaryScoringSelection.standard());
+        pendingResource.setTargetScoreData(pendingTarget);
+        var request = new TargetProperty.PendingTarget(controller, pendingResource, pendingModel, pendingReplay, pendingTarget);
+        int[] applied = {0};
+        check(request.apply(() -> applied[0]++), "Current IR target response applies");
+        pendingResource.setPrimaryScoringSelection(new PrimaryScoringSelection(SecondaryScoringRule.ANGOLMOIS, SecondaryScoringRule.ANGOLMOIS, ""));
+        check(!request.apply(() -> applied[0]++), "Late beatoraja response cannot update a native primary");
+        pendingResource.setPrimaryScoringSelection(PrimaryScoringSelection.standard());
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(pendingResource, PlayerResource.class, "replay", new ReplayData());
+        check(!request.apply(() -> applied[0]++), "A new play of the same chart rejects old IR responses");
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(pendingResource, PlayerResource.class, "replay", pendingReplay);
+        pendingResource.setTargetScoreData(new ScoreData());
+        check(!request.apply(() -> applied[0]++) && applied[0] == 1, "Replacing a target rejects the previous response");
         System.out.println("PrimaryScoringTest passed (profile, real primary engines, independent beatoraja, fallback, deduplication)");
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }

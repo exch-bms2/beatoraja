@@ -132,9 +132,12 @@ public class IntegerPropertyFactory {
 		volume_background(59, (state) -> ((int)(state.resource.getConfig().getAudioConfig().getBgvolume() * 100))),
 
 		score(NUMBER_SCORE, createScoreProperty()),
-		maxscore(NUMBER_MAXSCORE, (state) -> (state.getScoreDataProperty().getScoreData() != null
-				? state.getScoreDataProperty().getScoreData().getRuleMaxScore()
-				: 0)),
+		maxscore(NUMBER_MAXSCORE, (state) -> {
+			var score = state.getScoreDataProperty().getScoreData();
+			if (score != null) return score.getRuleMaxScore();
+			var info = state instanceof MusicSelector selector ? selector.getSelectedScoringInfo() : null;
+			return info != null ? info.maximumScore() : 0;
+		}),
 		totalnotes(NUMBER_TOTALNOTES, createTotalNotesProperty()),
 		maxcombo(NUMBER_MAXCOMBO, createMaxComboProperty()),
 		misscount(NUMBER_MISSCOUNT, createMissCountProperty()),
@@ -581,6 +584,8 @@ public class IntegerPropertyFactory {
 				if (state instanceof BMSPlayer player) return player.getJudgeManager().getScoreData().getNotes();
 				if (state instanceof MusicSelector && state.getScoreDataProperty().getScoreData() != null)
 					return state.getScoreDataProperty().getScoreData().getNotes();
+				if (state instanceof MusicSelector selector && selector.getSelectedScoringInfo() != null)
+					return selector.getSelectedScoringInfo().notes();
 				if(state instanceof CourseResult) {
 					int notes = 0;
 					for (BMSModel model : state.main.getPlayerResource().getCourseBMSModels()) {

@@ -88,15 +88,18 @@ public final class PlayDataAccessor {
 	/** Immutable performance metadata, kept separate from aggregated best judgments. */
 	public record ScoreMetadata(long avgjudge, long totalDuration, long playtime, int option, long seed, int assist,
 			bms.player.beatoraja.input.BMSPlayerInputDevice.Type deviceType,
-			bms.player.beatoraja.play.JudgeAlgorithm judgeAlgorithm, BMSPlayerRule rule, String skin, String ghost, Mode playmode) {
+			bms.player.beatoraja.play.JudgeAlgorithm judgeAlgorithm, BMSPlayerRule rule, String skin, String ghost, Mode playmode, int[] progressMaxima) {
+		public ScoreMetadata { progressMaxima = progressMaxima != null ? progressMaxima.clone() : null; }
+		@Override public int[] progressMaxima() { return progressMaxima != null ? progressMaxima.clone() : null; }
 		public ScoreMetadata(ScoreData score) {
 			this(score.getAvgjudge(), score.getTotalDuration(), score.getPlaytime(), score.getOption(), score.getSeed(),
-					score.getAssist(), score.getDeviceType(), score.getJudgeAlgorithm(), score.getRule(), score.getSkin(), score.getGhost(), score.getPlaymode());
+					score.getAssist(), score.getDeviceType(), score.getJudgeAlgorithm(), score.getRule(), score.getSkin(), score.getGhost(), score.getPlaymode(), score.getRuleProgressMaxima());
 		}
 		void apply(ScoreData score) {
 			score.setAvgjudge(avgjudge); score.setTotalDuration(totalDuration); score.setPlaytime(playtime);
 			score.setOption(option); score.setSeed(seed); score.setAssist(assist); score.setDeviceType(deviceType);
 			score.setJudgeAlgorithm(judgeAlgorithm); score.setRule(rule); score.setSkin(skin); score.setGhost(ghost);
+			score.setRuleProgressMaxima(progressMaxima);
 		}
 	}
 

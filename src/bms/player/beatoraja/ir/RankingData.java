@@ -69,6 +69,10 @@ public class RankingData {
 	private long lastUpdateTime;
 	
 	public void load(final MainState mainstate, Object song) {
+		load(mainstate, song, mainstate.getScoreDataProperty().getScoreData());
+	}
+
+	public void load(final MainState mainstate, Object song, ScoreData localScore) {
 		if(!(song instanceof SongData || song instanceof CourseData)) {
 			return;
 		}		
@@ -82,7 +86,7 @@ public class RankingData {
 		        response = ir[0].connection.getCoursePlayData(null, new IRCourseData((CourseData) song, mainstate.main.getPlayerConfig().getLnmode()));
 	        }
 	        if(response.isSucceeded()) {
-	        	updateScore(ir[0].player, mainstate.main.getRivalDataAccessor(), response.getData(), mainstate.getScoreDataProperty().getScoreData());
+				updateScore(ir[0].player, mainstate.main.getRivalDataAccessor(), response.getData(), localScore);
 	            Logger.getGlobal().fine("IRからのスコア取得成功 : " + response.getMessage());
 				state = FINISH;
 	        } else {

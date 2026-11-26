@@ -209,9 +209,11 @@ public abstract class AbstractResult extends MainState {
 	public int getGaugeType() {
 		return gaugeType;
 	}
+	public bms.player.beatoraja.play.AbstractGrooveGauge getDisplayGauge() { return resource.getGrooveGauge(); }
+	public com.badlogic.gdx.utils.FloatArray[] getDisplayGaugeSamples() { return resource.getGauge(); }
 
 	public float getDisplayGaugeValue() {
-		var values = resource.getGauge()[getGaugeType()];
+		var values = getDisplayGaugeSamples()[getGaugeType()];
 		return values.get(values.size - 1);
 	}
 	

@@ -99,8 +99,8 @@ public final class SkinGauge extends SkinObject {
 		AbstractGrooveGauge gauge = null;
 		if(state instanceof BMSPlayer player) {
 			gauge = player.getGauge();
-		} else if(state instanceof AbstractResult) {
-			gauge = state.resource.getGrooveGauge();
+		} else if(state instanceof AbstractResult result) {
+			gauge = result.getDisplayGauge();
 		}
 		if (gauge == null) {
 			draw = false;
@@ -158,8 +158,8 @@ public final class SkinGauge extends SkinObject {
 		if(state instanceof AbstractResult) {
 			PlayerResource resource = state.resource;
 			FloatArray gaugeTransition;
-			if(state instanceof MusicResult) {
-				gaugeTransition = resource.getGauge()[type];
+			if(state instanceof MusicResult result) {
+				gaugeTransition = result.getDisplayGaugeSamples()[type];
 			} else {
 				gaugeTransition = resource.getCourseGauge().get(resource.getCourseGauge().size - 1)[type];
 			}

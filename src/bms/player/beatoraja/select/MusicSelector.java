@@ -159,6 +159,10 @@ public final class MusicSelector extends MainState {
 		return !(getSelectedBar() instanceof SongBar song) || !(scorecache instanceof PrimaryScoreDataCache cache)
 				|| cache.usesStandardRule(song.getSongData(), config.getLnmode());
 	}
+	public bms.player.beatoraja.play.PrimaryScoringSelection.ScoringInfo getSelectedScoringInfo() {
+		return getSelectedBar() instanceof SongBar song && scorecache instanceof PrimaryScoreDataCache cache
+				? cache.scoringInfo(song.getSongData(), config.getLnmode()) : null;
+	}
 
 	public void create() {
 		boolean initial = firstCreation;

@@ -90,6 +90,13 @@ public final class ScoreData implements Validatable {
 	public void setNativeMaxScore(int value) { nativeMaxScore = value; }
 	public int getRuleScore() { return nativeScore >= 0 ? nativeScore : getExscore(); }
 	public int getRuleMaxScore() { return nativeMaxScore >= 0 ? nativeMaxScore : notes * 2; }
+	private transient int[] ruleProgressMaxima;
+	public void setRuleProgressMaxima(int[] values) { ruleProgressMaxima = values != null ? values.clone() : null; }
+	public int[] getRuleProgressMaxima() { return ruleProgressMaxima != null ? ruleProgressMaxima.clone() : null; }
+	public double getRuleProgressMaximum(int passed) {
+		if (ruleProgressMaxima != null) return ruleProgressMaxima[Math.max(0, Math.min(passed, ruleProgressMaxima.length - 1))];
+		return notes > 0 ? (double) getRuleMaxScore() * passed / notes : 0;
+	}
 	
 	private int passnotes = 0;
 	

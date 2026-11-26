@@ -13,10 +13,40 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     private final PlayDataAccessor data;
     private final PlayerConfig config;
     private final Map<String, SecondaryScoringRule> effectiveRules = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, PrimaryScoringSelection.ScoringInfo> scoringInfos = new java.util.concurrent.ConcurrentHashMap<>();
 
     public boolean usesStandardRule(SongData song, int lnmode) { return effectiveRule(song, lnmode) == SecondaryScoringRule.BEATORAJA; }
 
-    @Override public void clear() { super.clear(); effectiveRules.clear(); }
+    @Override public void clear() { super.clear(); effectiveRules.clear(); scoringInfos.clear(); }
+
+    public PrimaryScoringSelection.ScoringInfo scoringInfo(SongData song, int lnmode) {
+        return scoringInfos.computeIfAbsent(cacheKey(song) + ":" + lnmode, key -> {
+            var rule = effectiveRule(song, lnmode);
+            if (rule == SecondaryScoringRule.BEATORAJA || rule == SecondaryScoringRule.LR2 && config.getLongnoteMode() == 0)
+                return new PrimaryScoringSelection.ScoringInfo(song.getNotes(), song.getNotes() * 2);
+            try {
+                var model = loadModel(song, lnmode);
+                return model != null ? PrimaryScoringSelection.scoringInfo(rule, model) : null;
+            } catch (java.io.IOException | RuntimeException e) { return null; }
+        });
+    }
+
+    private BMSModel loadModel(SongData song, int lnmode) {
+        BMSModel model;
+        if (song.getPath() == null) model = song.getBMSModel();
+        else {
+            var file = SongResources.fromPath(Path.of(song.getPath()));
+            var source = new ChartSource() {
+                public String location() { return file.displayPath(); }
+                public java.io.InputStream openStream() throws java.io.IOException { return file.openStream(); }
+            };
+            var decoder = ChartDecoder.getDecoder(source);
+            model = decoder != null ? decoder.decode(new ChartInformation(source, lnmode, null)) : null;
+        }
+        if (model != null && config.getLongnoteMode() > 0)
+            new bms.player.beatoraja.pattern.LongNoteModifier(config.getLongnoteMode() - 1, config.getLongnoteRate()).modify(model);
+        return model;
+    }
 
     public PrimaryScoreDataCache(PlayDataAccessor data, PlayerConfig config) { this.data = data; this.config = config; }
 
@@ -62,19 +92,7 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
             return keys && supportedGauge && ordinaryLn && bms ? requested : SecondaryScoringRule.BEATORAJA;
         }
         try {
-            BMSModel model;
-            if (song.getPath() == null) model = song.getBMSModel();
-            else {
-                var file = SongResources.fromPath(Path.of(song.getPath()));
-                var source = new ChartSource() {
-                    public String location() { return file.displayPath(); }
-                    public java.io.InputStream openStream() throws java.io.IOException { return file.openStream(); }
-                };
-                var decoder = ChartDecoder.getDecoder(source);
-                model = decoder != null ? decoder.decode(new ChartInformation(source, lnmode, null)) : null;
-            }
-            if (model != null && config.getLongnoteMode() > 0)
-                new bms.player.beatoraja.pattern.LongNoteModifier(config.getLongnoteMode() - 1, config.getLongnoteRate()).modify(model);
+            BMSModel model = loadModel(song, lnmode);
             return model != null ? PrimaryScoringSelection.preview(requested, model, config.getGauge()).effective()
                     : SecondaryScoringRule.BEATORAJA;
         } catch (RuntimeException e) {

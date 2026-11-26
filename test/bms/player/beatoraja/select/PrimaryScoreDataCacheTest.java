@@ -44,6 +44,26 @@ public final class PrimaryScoreDataCacheTest {
         check(cache.readScoreData(song, 0).getClear() == ClearType.Easy.id, "Timing-only primary falls back in selection");
         player.setPrimaryScoringRule(Mode.BEAT_7K, SecondaryScoringRule.PULSUS);
         check(cache.readScoreData(song, 0) == null, "Unplayed selected rule never borrows beatoraja best");
+        var holdFile = directory.resolve("hold.bme");
+        Files.writeString(holdFile, "#PLAYER 1\n#BPM 120\n#RANK 2\n#TOTAL 400\n#WAV01 tap.wav\n#00159:0101\n#00219:01\n");
+        var hold = new SongData(ChartDecoder.getDecoder(holdFile).decode(new ChartInformation(holdFile, 0, null)), false);
+        check(cache.readScoreData(hold, 0) == null && cache.scoringInfo(hold, 0).notes() == 3
+                && cache.scoringInfo(hold, 0).maximumScore() == 6, "Unplayed Pulsus LN chart has scoring notes and maximum without a best");
+        var selector = bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate(MusicSelector.class);
+        var manager = bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate(BarManager.class);
+        manager.currentsongs = new bms.player.beatoraja.select.bar.Bar[]{new bms.player.beatoraja.select.bar.SongBar(hold)};
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MusicSelector.class, "manager", manager);
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MusicSelector.class, "config", player);
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MusicSelector.class, "scorecache", cache);
+        bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MainState.class, "score", new ScoreDataProperty());
+        check(bms.player.beatoraja.skin.property.IntegerPropertyFactory.getIntegerProperty(bms.player.beatoraja.skin.SkinProperty.NUMBER_TOTALNOTES).get(selector) == 3
+                && bms.player.beatoraja.skin.property.IntegerPropertyFactory.getIntegerProperty(bms.player.beatoraja.skin.SkinProperty.NUMBER_MAXSCORE).get(selector) == 6,
+                "Selection skin properties use chart scoring metadata when no best exists");
+        player.setPrimaryScoringRule(Mode.BEAT_7K, SecondaryScoringRule.ANGOLMOIS);
+        check(cache.scoringInfo(hold, 0).notes() == 2 && cache.scoringInfo(hold, 0).maximumScore() == 750,
+                "Unplayed Angolmois maximum follows native scoring");
+        player.setGauge(AbstractGrooveGauge.EXHARD);
+        check(cache.scoringInfo(hold, 0).maximumScore() == 4, "Unplayed scoring metadata follows beatoraja fallback");
         System.out.println("PrimaryScoreDataCacheTest passed (lamps, personal bests, bulk/cache switching and fallback)");
     }
     private static void check(boolean value, String message) { if (!value) throw new AssertionError(message); }

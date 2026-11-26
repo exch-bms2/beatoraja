@@ -20,6 +20,20 @@ import bms.player.beatoraja.select.ScoreDataCache;
  */
 public abstract class TargetProperty {
 
+    /** A response may only update the exact play and target that requested it. */
+    record PendingTarget(MainController main, bms.player.beatoraja.PlayerResource resource, bms.model.BMSModel model,
+            bms.player.beatoraja.ReplayData replay, ScoreData target) {
+        boolean active() {
+            return main.getPlayerResource() == resource && resource.getBMSModel() == model && resource.getReplayData() == replay
+                    && resource.getTargetScoreData() == target && resource.getPrimaryScoringSelection().isStandard();
+        }
+        boolean apply(Runnable update) {
+            if (!active()) return false;
+            update.run();
+            return true;
+        }
+    }
+
     public static boolean isTargetAvailable(bms.player.beatoraja.MainState state) {
         if (state instanceof bms.player.beatoraja.select.MusicSelector selector)
             return selector.getRival() != null && selector.canCompareRival();
@@ -391,82 +405,63 @@ class InternetRankingTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
-        if (!main.getPlayerResource().getPrimaryScoringSelection().isStandard()) return null;
-    	final RankingData ranking = main.getPlayerResource().getRankingData();
-    	if(ranking == null) {
-			targetScore.setPlayer("NO DATA");
-			targetScore.setOption(0);
-			return targetScore;    		
-    	}
-    	
-    	if(ranking.getState() == RankingData.FINISH) {
-    		if(ranking.getTotalPlayer() > 0) {
-    			final int index = getTargetRank(main, ranking);
-    			final IRScoreData irScore = ranking.getScore(index);
-    			final int targetscore = irScore.getExscore();
-    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
-        		targetScore.setEpg(targetscore / 2);
-        		targetScore.setEgr(targetscore % 2);
-				targetScore.setOption(irScore.option);
-    		} else {
-    			targetScore.setPlayer("NO DATA");
-    			targetScore.setOption(0);
-    		}
-    		return targetScore;
-    	}
-		Thread irprocess = new Thread(() -> {
-    		ranking.load(main.getCurrentState(), main.getPlayerResource().getSongdata());
-			while(ranking.getState() == RankingData.NONE  || ranking.getState() == RankingData.ACCESS) {
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-				}
-			}
-	    	if(ranking.getState() == RankingData.FINISH) {
-	    		if(ranking.getTotalPlayer() > 0) {
-	    			final int index = getTargetRank(main, ranking);
-	    			final IRScoreData irScore = ranking.getScore(index);
-	    			final int targetscore = irScore.getExscore();
-	    			targetScore.setPlayer(irScore.player.length() > 0 ? irScore.player : "YOU");
-	        		targetScore.setEpg(targetscore / 2);
-	        		targetScore.setEgr(targetscore % 2);
-	    			targetScore.setOption(irScore.option);
-	    		} else {
-	    			targetScore.setPlayer("NO DATA");
-	    			targetScore.setOption(0);
-	    		}
-	    		
-				main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());	    		
-	    	}
-		});
-		irprocess.start();
+        var resource = main.getPlayerResource();
+        if (!resource.getPrimaryScoringSelection().isStandard()) return null;
+        final RankingData ranking = resource.getRankingData();
+        targetScore.setPlayer("NO DATA");
+        targetScore.setOption(0);
+        if (ranking == null) return targetScore;
+        var best = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(), main.getPlayerConfig().getLnmode());
+        final int localBest = best != null ? best.getExscore() : 0;
+        if (ranking.getState() == RankingData.FINISH) {
+            fillTarget(ranking, localBest);
+            return targetScore;
+        }
+        var request = new PendingTarget(main, resource, resource.getBMSModel(), resource.getReplayData(), targetScore);
+        final var owner = main.getCurrentState();
+        final var song = resource.getSongdata();
+        Thread irprocess = new Thread(() -> {
+            ranking.load(owner, song, best);
+            while (ranking.getState() == RankingData.NONE || ranking.getState() == RankingData.ACCESS) {
+                if (resource.getBMSModel() != request.model() || resource.getReplayData() != request.replay()) return;
+                try { Thread.sleep(500); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); return; }
+            }
+            if (ranking.getState() != RankingData.FINISH) return;
+            Runnable apply = () -> request.apply(() -> {
+                fillTarget(ranking, localBest);
+                main.getCurrentState().getScoreDataProperty().updateTargetScore(targetScore.getExscore());
+            });
+            if (com.badlogic.gdx.Gdx.app != null) com.badlogic.gdx.Gdx.app.postRunnable(apply);
+            else apply.run();
+        }, "IR-target");
+        irprocess.start();
         return targetScore;
     }
-    
-    private int getTargetRank(MainController main, RankingData ranking) {
-        ScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
-                , main.getPlayerConfig().getLnmode());
-        final int nowscore = now != null ? now.getExscore() : 0;
-		switch(target) {
-		case NEXT:
-			// n位上のプレイヤー
-			for(int i = 0;i  < ranking.getTotalPlayer(); i++) {
-				if(ranking.getScore(i).getExscore() <= nowscore) { 
-					return Math.max(i - value , 0);
-				}
-			}
-			return 0;
-			
-		case RANK:
-			// n位のプレイヤー
-			return Math.min(ranking.getTotalPlayer(), value) - 1;
-		case RANKRATE:
-			// 上位n％のプレイヤー
-			return ranking.getTotalPlayer() * value / 100;
-		}
-    	return 0;
+
+    private void fillTarget(RankingData ranking, int localBest) {
+        if (ranking.getTotalPlayer() == 0) return;
+        var irScore = ranking.getScore(getTargetRank(localBest, ranking));
+        targetScore.setPlayer(irScore.player.isEmpty() ? "YOU" : irScore.player);
+        targetScore.setEpg(irScore.getExscore() / 2);
+        targetScore.setEgr(irScore.getExscore() % 2);
+        targetScore.setOption(irScore.option);
     }
-    
+
+    private int getTargetRank(int nowscore, RankingData ranking) {
+        return switch (target) {
+            case NEXT -> {
+                int rank = 0;
+                for (int i = 0; i < ranking.getTotalPlayer(); i++) {
+                    if (ranking.getScore(i).getExscore() <= nowscore) { rank = Math.max(i - value, 0); break; }
+                }
+                yield rank;
+            }
+            case RANK -> Math.min(ranking.getTotalPlayer(), value) - 1;
+            case RANKRATE -> ranking.getTotalPlayer() * value / 100;
+        };
+    }
+
     public static TargetProperty getTargetProperty(String id) {
     	if(id.startsWith("IR_NEXT_")) {
     		try {

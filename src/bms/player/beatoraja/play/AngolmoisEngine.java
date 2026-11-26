@@ -39,6 +39,7 @@ final class AngolmoisEngine {
 
     final ChartObject[] objects;
     final int notes, maxScore;
+    final int[] progressMaxima;
     final long originDelayUs;
     final int[] counts = new int[12];
     private final double[] lengths;
@@ -67,7 +68,11 @@ final class AngolmoisEngine {
         factor = 1.5 - Math.min(rank, 5) * .25;
         notes = (int) Arrays.stream(objects).filter(o -> o.lane < BGM && (o.type == HEAD || o.type == NOTE)).count();
         int maximum = 0;
-        for (int i = 0; i < notes; i++) maximum += (int) (300 * (1 + 1.0 * i / notes));
+        progressMaxima = new int[notes + 1];
+        for (int i = 0; i < notes; i++) {
+            maximum += (int) (300 * (1 + 1.0 * i / notes));
+            progressMaxima[i + 1] = maximum;
+        }
         maxScore = maximum;
         // C inserts a leading measure only when a scoring note occurs before measure 1.
         base = Arrays.stream(objects).anyMatch(o -> o.lane < BGM && (o.type == HEAD || o.type == NOTE)

@@ -28,6 +28,7 @@ final class AngolmoisJudgeManager extends AbstractJudgeManager implements Angolm
     @Override void initRule(BMSModel model, PlayerResource resource, JudgeProperty rule, int rank, int[] keys, int[] scratch) {
         getScoreData().setNativeScore(0);
         getScoreData().setNativeMaxScore(engine.maxScore);
+        getScoreData().setRuleProgressMaxima(engine.progressMaxima);
         offsetUs = engine.originDelayUs - resource.getMarginTime() * 1000;
         engine.listener = this;
     }

@@ -179,6 +179,10 @@ public final class SecondaryJudgingTest {
                 "independent secondary gauge selection");
         checkGaugeHistory(result, autoShift == GAUGEAUTOSHIFT_NONE ? 801_000 : END);
         var local = result.toLocalAttempt(primary.model);
+        check(local.gauge() == (result.gaugeChanged() ? -1 : result.gaugeType()), "Recorded GAS marker is separate from the display gauge slot");
+        if (autoShift == GAUGEAUTOSHIFT_SURVIVAL_TO_GROOVE)
+            check(result.gaugeChanged() && local.gauge() == -1 && result.gaugeHistory().gauge().getType() == NORMAL,
+                    "Actual HARD-to-NORMAL shift keeps its GAS marker and usable NORMAL history");
         check(local.exscore() == result.exScore() && local.mode() == 0 && local.notes() == 3
                         && local.judgeCounts().get(10) == 1,
                 "the local record uses the secondary judgments and played chart identity");
