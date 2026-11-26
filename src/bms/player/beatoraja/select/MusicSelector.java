@@ -166,6 +166,22 @@ public final class MusicSelector extends MainState {
 		return getSelectedBar() instanceof SongBar song && scorecache instanceof PrimaryScoreDataCache cache
 				? cache.scoringInfo(song.getSongData(), config.getLnmode()) : null;
 	}
+	/** Courses use beatoraja; non-playable selections have no scoring rule. */
+	public bms.player.beatoraja.play.SecondaryScoringRule getSelectedPrimaryScoringRule(boolean configured) {
+		var selected = getSelectedBar();
+		if (selected instanceof SongBar song && song.existsSong()) {
+			if (!configured && scorecache instanceof PrimaryScoreDataCache cache)
+				return cache.effectiveRule(song.getSongData(), config.getLnmode());
+			if (configured) {
+				var mode = java.util.Arrays.stream(bms.model.Mode.values())
+						.filter(value -> value.id == song.getSongData().getMode()).findFirst().orElse(null);
+				return config.getPrimaryScoringRule(mode);
+			}
+			return bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA;
+		}
+		return selected instanceof GradeBar || selected instanceof RandomCourseBar
+				? bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA : null;
+	}
 
 	public void create() {
 		boolean initial = firstCreation;

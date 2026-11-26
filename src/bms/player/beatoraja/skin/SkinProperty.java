@@ -251,6 +251,11 @@ public class SkinProperty {
 	public static final int STRING_TABLE_LEVEL = 1002;
 	public static final int STRING_TABLE_FULL = 1003;
 	public static final int STRING_VERSION = 1010;
+	public static final int STRING_PRIMARY_SCORING_RULE = 1011;
+	public static final int STRING_DISPLAY_SCORING_RULE = 1012;
+	public static final int STRING_CONFIGURED_PRIMARY_SCORING_RULE = 1013;
+	public static final int STRING_SCORING_RULE = 1014;
+	public static final int STRING_PRIMARY_SCORING_DETAILS = 1015;
 	public static final int STRING_IR_NAME = 1020;
 	public static final int STRING_IR_USER_NAME = 1021;
 	public static final int STRING_SONG_HASH_MD5 = 1030;

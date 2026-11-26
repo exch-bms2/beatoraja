@@ -225,9 +225,26 @@ public class StringPropertyFactory {
 		}
 	}
 	
+	private static String scoringRuleName(MainState state, boolean configured) {
+		bms.player.beatoraja.play.SecondaryScoringRule rule;
+		if (state instanceof MusicSelector selector) {
+			rule = selector.getSelectedPrimaryScoringRule(configured);
+		} else if (state instanceof BMSPlayer || state instanceof MusicResult || state instanceof CourseResult) {
+			var selection = state.resource.getPrimaryScoringSelection();
+			rule = configured ? selection.requested() : selection.effective();
+		} else {
+			return "";
+		}
+		return rule != null ? rule.displayName() : "";
+	}
+
 	public enum StringType {
-		scoring_rule(2050, state -> state instanceof MusicResult result ? result.getDisplayScoringSummary() : ""),
-		primary_scoring_details(2051, state -> state instanceof MusicResult result ? result.getPrimaryScoringDetails() : ""),
+		primary_scoring_rule(STRING_PRIMARY_SCORING_RULE, state -> scoringRuleName(state, false)),
+		display_scoring_rule(STRING_DISPLAY_SCORING_RULE, state -> state instanceof MusicResult result
+				? result.getDisplayScoringRuleName() : scoringRuleName(state, false)),
+		configured_primary_scoring_rule(STRING_CONFIGURED_PRIMARY_SCORING_RULE, state -> scoringRuleName(state, true)),
+		scoring_rule(STRING_SCORING_RULE, state -> state instanceof MusicResult result ? result.getDisplayScoringSummary() : ""),
+		primary_scoring_details(STRING_PRIMARY_SCORING_DETAILS, state -> state instanceof MusicResult result ? result.getPrimaryScoringDetails() : ""),
 		
 		rival(1, (state) -> {
 			if (state instanceof MusicSelector selector) {

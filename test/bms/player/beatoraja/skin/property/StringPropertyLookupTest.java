@@ -6,6 +6,11 @@ import java.lang.reflect.Method;
 /** Compare indexed lookup with the previous declaration-order search, including gaps and aliases. */
 public final class StringPropertyLookupTest {
     public static void main(String[] args) throws Exception {
+        String[] scoringNames = {"primary_scoring_rule", "display_scoring_rule", "configured_primary_scoring_rule", "scoring_rule", "primary_scoring_details"};
+        for (int i = 0; i < scoringNames.length; i++)
+            check(StringPropertyFactory.getStringProperty(1011 + i) == StringPropertyFactory.getStringProperty(scoringNames[i]), "Scoring string ID/name " + scoringNames[i]);
+        check(StringPropertyFactory.getStringProperty(2050) == null && StringPropertyFactory.getStringProperty(2051) == null,
+                "Unused legacy scoring IDs are removed");
         Class<?> pattern = Class.forName(StringPropertyFactory.class.getName() + "$StringPropertyPattern");
         Object[] patterns = pattern.getEnumConstants();
         Field first = field(pattern, "firstId"), properties = field(pattern, "properties");

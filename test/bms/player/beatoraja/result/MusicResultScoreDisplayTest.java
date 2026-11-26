@@ -243,6 +243,9 @@ public final class MusicResultScoreDisplayTest {
         check(result.getTimingDistribution().getAverage() == 30 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), lr2Area),
                 "Non-beatoraja primary receives its timing distribution despite the separate save path");
         check(result.getAverageDuration() == 12000, "Absolute duration follows native primary");
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1011).get(result).equals("Lunatic Rave 2")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1012).get(result).equals("Lunatic Rave 2"),
+                "Initial result strings expose its actual primary rule");
         press(result, keyboard, states);
         check(result.getDisplayScore() == primary && result.getDisplayScoringRuleName().equals("beatoraja")
                         && result.getDisplayOldScore() == primaryBest && result.getDisplayGaugeValue() == 80,
@@ -250,6 +253,10 @@ public final class MusicResultScoreDisplayTest {
         check(result.getTimingDistribution().getAverage() == -6 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), standardArea),
                 "F7 from a native primary shows the independent beatoraja timing distribution and windows");
         check(result.getAverageDuration() == 23000, "F7 absolute duration uses independent beatoraja statistics");
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1011).get(result).equals("Lunatic Rave 2")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1012).get(result).equals("beatoraja")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(result).equals("Lunatic Rave 2"),
+                "F7 changes only the displayed-rule name and leaves primary/configured names fixed");
         press(result, keyboard, states);
         check(result.getDisplayScoringSummary().contains("SCORE 1234 / 2000"), "Native score and maximum remain visible");
         check(result.getDisplayScoringSummary().contains(" / NORMAL") && !result.getDisplayScoringSummary().contains("ASSIST EASY"),
@@ -304,6 +311,11 @@ public final class MusicResultScoreDisplayTest {
                         && result.getPrimaryScoringDetails().contains("Unsupported gauge"), "Show effective fallback and retain requested-rule details");
         check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty("scoring_rule").get(result)
                         .equals(result.getDisplayScoringSummary()), "Result skin scoring label");
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1011).get(result).equals("beatoraja")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(result).equals("Lunatic Rave 2")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1014).get(result).equals(result.getDisplayScoringSummary())
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1015).get(result).equals(result.getPrimaryScoringDetails()),
+                "Fallback and relocated summary/details strings preserve their distinct meanings");
         resource.setPrimaryScoringSelection(bms.player.beatoraja.play.PrimaryScoringSelection.standard());
 
         set(resource, PlayerResource.class, "course", new BMSModel[]{model});

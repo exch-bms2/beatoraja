@@ -68,6 +68,15 @@ public final class PrimaryScoreDataCacheTest {
         player.setGauge(AbstractGrooveGauge.EXHARD);
         check(selector.canCompareRival(holdBar), "Fallback bar can show the compatible beatoraja rival lamp");
         player.setGauge(AbstractGrooveGauge.NORMAL);
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1011).get(selector).equals("Pulsus")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1012).get(selector).equals("Pulsus")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(selector).equals("Pulsus"),
+                "Selection strings expose the planned primary, displayed rule and configured rule");
+        player.setGauge(AbstractGrooveGauge.EXHARD);
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1011).get(selector).equals("beatoraja")
+                && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(selector).equals("Pulsus"),
+                "Selection rule names follow the same fallback as the score cache");
+        player.setGauge(AbstractGrooveGauge.NORMAL);
         check(bms.player.beatoraja.skin.property.IntegerPropertyFactory.getIntegerProperty(bms.player.beatoraja.skin.SkinProperty.NUMBER_TOTALNOTES).get(selector) == 3
                 && bms.player.beatoraja.skin.property.IntegerPropertyFactory.getIntegerProperty(bms.player.beatoraja.skin.SkinProperty.NUMBER_MAXSCORE).get(selector) == 6,
                 "Selection skin properties use chart scoring metadata when no best exists");

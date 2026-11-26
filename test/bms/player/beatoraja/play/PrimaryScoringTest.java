@@ -39,6 +39,10 @@ public final class PrimaryScoringTest {
             f = new KeyboardJudgeCompatibilityTest.Fixture(chart, true, selected.isStandard()
                     ? BMSPlayerRule.Beatoraja_7 : selected.effective().scoreRule(), parameters, NORMAL);
             f.resource.setPrimaryScoringSelection(selected);
+            check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1011).get(f.player).equals(selected.effective().displayName())
+                    && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty("display_scoring_rule").get(f.player).equals(selected.effective().displayName())
+                    && bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(f.player).equals(selected.requested().displayName()),
+                    "Play rule strings use the frozen selection, including fallback: " + rule);
             var hitError = new bms.player.beatoraja.skin.SkinHitErrorVisualizer(301, 150, 1, 1, 1, 0,
                     "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", .5f, 100, 0, 0);
             hitError.setDestination(0, 0, 0, 301, 100, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0);
