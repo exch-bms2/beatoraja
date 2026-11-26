@@ -1,8 +1,5 @@
 package bms.player.beatoraja.select.bar;
 
-import java.io.File;
-
-import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.select.MusicSelector;
 
 /**
@@ -38,14 +35,19 @@ public class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-    	final MainController main = selector.main;
-        return SongBar.toSongBarArray(main.getSongDatabase().getSongDatas(sql,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/score.db"
-        		,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
+        return SongBar.toSongBarArray(querySongs());
     }
 
     public void updateFolderStatus() {
-    	final MainController main = selector.main;
-        updateFolderStatus(main.getSongDatabase().getSongDatas(sql,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/score.db"
-        		,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
+        updateFolderStatus(querySongs());
+    }
+
+    private bms.player.beatoraja.song.SongData[] querySongs() {
+        var main = selector.main;
+        String info = main.getInfoDatabase() != null ? "songinfo.db" : null;
+        if (selector.getScoreDataCache() instanceof bms.player.beatoraja.select.PrimaryScoreDataCache cache)
+            return cache.querySongs(main.getSongDatabase(), sql, info);
+        var paths = main.getPlayDataAccessor().scoreQueryPaths(bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA);
+        return main.getSongDatabase().getSongDatas(sql, paths.score(), paths.scorelog(), info);
     }
 }

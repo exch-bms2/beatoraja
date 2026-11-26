@@ -51,6 +51,8 @@ public final class PrimaryResultPersistenceTest {
         save.invoke(result);
         var best = data.readRuleBest(SecondaryScoringRule.ANGOLMOIS, model.getSHA256(), 0);
         check(best != null && best.getNativeScore() == 700 && best.getNativeMaxScore() == 750 && best.getExscore() == 3, "Actual primary goes to its own rule store");
+        check(best.getTrophy().indexOf(ScoreData.SongTrophy.GROOVE.character) >= 0
+                && primary.getTrophy().equals(best.getTrophy()), "Primary trophy is both persisted and exposed to result skins");
         check(data.readScoreData(model, 0).getExscore() == 2, "Canonical database contains only independent beatoraja scoring");
         check(best.getAvgjudge() == 12000 && best.getOption() == 3 && best.getSeed() == 12345
                 && data.readScoreData(model, 0).getAvgjudge() == 18000, "Each score store preserves its own timing statistics and options");

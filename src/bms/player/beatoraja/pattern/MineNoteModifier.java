@@ -9,6 +9,8 @@ public class MineNoteModifier extends PatternModifier {
 	private Mode mode = Mode.REMOVE;
 
 	private int damage = 10;
+	private java.util.Random random;
+	public MineNoteModifier(int mode, long seed) { this(mode); random = new java.util.Random(seed); }
 
 	public MineNoteModifier() {
 	}
@@ -51,7 +53,7 @@ public class MineNoteModifier extends PatternModifier {
 					if(blank[key]) {
 						switch (mode) {
 							case ADD_RANDOM -> {
-								if(Math.random() > 0.9) {
+								if((random != null ? random.nextDouble() : Math.random()) > 0.9) {
 									tl.setNote(key, new MineNote(-1, damage));
 								}
 							}

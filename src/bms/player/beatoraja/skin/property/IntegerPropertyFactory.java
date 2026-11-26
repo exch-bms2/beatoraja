@@ -133,10 +133,11 @@ public class IntegerPropertyFactory {
 
 		score(NUMBER_SCORE, createScoreProperty()),
 		maxscore(NUMBER_MAXSCORE, (state) -> {
+			var info = state instanceof MusicSelector selector ? selector.getSelectedScoringInfo() : null;
+			if (info != null) return info.maximumScore();
 			var score = state.getScoreDataProperty().getScoreData();
 			if (score != null) return score.getRuleMaxScore();
-			var info = state instanceof MusicSelector selector ? selector.getSelectedScoringInfo() : null;
-			return info != null ? info.maximumScore() : 0;
+			return 0;
 		}),
 		totalnotes(NUMBER_TOTALNOTES, createTotalNotesProperty()),
 		maxcombo(NUMBER_MAXCOMBO, createMaxComboProperty()),
@@ -582,10 +583,10 @@ public class IntegerPropertyFactory {
 			return (state) -> {
 				if (state instanceof MusicResult result) return result.getTotalNotes();
 				if (state instanceof BMSPlayer player) return player.getJudgeManager().getScoreData().getNotes();
-				if (state instanceof MusicSelector && state.getScoreDataProperty().getScoreData() != null)
-					return state.getScoreDataProperty().getScoreData().getNotes();
 				if (state instanceof MusicSelector selector && selector.getSelectedScoringInfo() != null)
 					return selector.getSelectedScoringInfo().notes();
+				if (state instanceof MusicSelector && state.getScoreDataProperty().getScoreData() != null)
+					return state.getScoreDataProperty().getScoreData().getNotes();
 				if(state instanceof CourseResult) {
 					int notes = 0;
 					for (BMSModel model : state.main.getPlayerResource().getCourseBMSModels()) {
@@ -1223,6 +1224,7 @@ public class IntegerPropertyFactory {
 		}),
 		
 		option_target1_1p(61, (state) -> {
+			if (!TargetProperty.isTargetAvailable(state)) return Integer.MIN_VALUE;
 			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult)
 					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
 			if(rival != null && rival.getOption() >= 0) {
@@ -1231,6 +1233,7 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 		option_target1_2p(62, (state) -> {
+			if (!TargetProperty.isTargetAvailable(state)) return Integer.MIN_VALUE;
 			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult)
 					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
 			if(rival != null && rival.getOption() >= 0) {
@@ -1239,6 +1242,7 @@ public class IntegerPropertyFactory {
 			return Integer.MIN_VALUE;
 		}),
 		option_target1_dp(63, (state) -> {
+			if (!TargetProperty.isTargetAvailable(state)) return Integer.MIN_VALUE;
 			final ScoreData rival = (state instanceof BMSPlayer || state instanceof AbstractResult)
 					? state.main.getPlayerResource().getTargetScoreData() : state.getScoreDataProperty().getRivalScoreData();
 			if(rival != null && rival.getOption() >= 0) {

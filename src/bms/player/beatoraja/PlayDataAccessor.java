@@ -84,6 +84,19 @@ public final class PlayDataAccessor {
 	}
 
 	public enum ScoreOutcome { FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
+	public record ScoreQueryPaths(String score, String scorelog) {}
+	public synchronized ScoreQueryPaths scoreQueryPaths(SecondaryScoringRule rule) {
+		if (rule != SecondaryScoringRule.BEATORAJA) {
+			try { getRuleScores(rule, true); }
+			catch (SQLException | ClassNotFoundException e) {
+				Logger.getGlobal().log(Level.WARNING, "Could not prepare score query for " + rule.id(), e);
+				return null;
+			}
+		}
+		String suffix = rule == SecondaryScoringRule.BEATORAJA ? "" : rule.databaseSuffix();
+		var profile = Path.of(playerpath, player);
+		return new ScoreQueryPaths(profile.resolve("score" + suffix + ".db").toString(), profile.resolve("scorelog" + suffix + ".db").toString());
+	}
 
 	/** Immutable performance metadata, kept separate from aggregated best judgments. */
 	public record ScoreMetadata(long avgjudge, long totalDuration, long playtime, int option, long seed, int assist,
@@ -340,49 +353,8 @@ public final class PlayDataAccessor {
 
 		ScoreLog log = updateScore(score, newscore, hash, updateScore);
 		
-		Set<SongTrophy> l = new HashSet<SongTrophy>();
-		for(char c : score.getTrophy() != null ? score.getTrophy().toCharArray() : new char[0]) {
-			SongTrophy trophy = SongTrophy.getTrophy(c);
-			if(trophy != null) {
-				l.add(trophy);
-			}
-		}
-
-		Set<SongTrophy> newTrophies = new HashSet<SongTrophy>();
-		// クリアトロフィー
-		int clear = newscore.getClear();
-		if(newscore.getGauge() != -1) {			
-			if(clear >= Hard.id){
-				if(clear == ExHard.id) {
-					newTrophies.add(SongTrophy.EXHARD);
-				}
-				newTrophies.add(SongTrophy.HARD);
-			} else {
-				if(clear >= Normal.id) {
-					newTrophies.add(SongTrophy.GROOVE);
-				}
-				newTrophies.add(SongTrophy.EASY);
-			}
-		}
-			
-		// オプショントロフィー
-		// TODO FLIPの扱いは？
-		final SongTrophy[] optionTrophy = {SongTrophy.NORMAL,SongTrophy.MIRROR,SongTrophy.RANDOM, SongTrophy.R_RANDOM
-				,SongTrophy.S_RANDOM, SongTrophy.SPIRAL, SongTrophy.H_RANDOM, SongTrophy.ALL_SCR, SongTrophy.EX_RANDOM
-				,SongTrophy.EX_S_RANDOM};
-			
-		if(clear >= Easy.id) {
-			newTrophies.add(optionTrophy[Math.max(newscore.getOption() % 10, (newscore.getOption() / 10) % 10)]);
-		}
-
-		// newscore のトロフィーをマージ
-		l.addAll(newTrophies);
-		
-		StringBuilder sb = new StringBuilder();
-		for(SongTrophy trophy : l) {
-			sb.append(trophy.character);
-		}
-		score.setTrophy(sb.toString());
+		Set<SongTrophy> newTrophies = ScoreTrophies.forAttempt(newscore);
+		score.setTrophy(ScoreTrophies.merge(score.getTrophy(), newTrophies));
 
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);

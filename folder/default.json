@@ -62,31 +62,31 @@
 	"folder":[
 		{
 			"name":"RANK AAA",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 88.88"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 88.88"
 		},
 		{
 			"name":"RANK AA",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 88.88"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 77.77 AND (score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) < 88.88"
 		},
 		{
 			"name":"RANK A",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 77.77"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 66.66 AND (score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) < 77.77"
 		},
 		{
 			"name":"RANK B",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 55.55 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 66.66"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 55.55 AND (score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) < 66.66"
 		},
 		{
 			"name":"RANK C",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 44.44 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 55.55"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 44.44 AND (score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) < 55.55"
 		},
 		{
 			"name":"RANK D",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 33.33 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 44.44"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 33.33 AND (score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) < 44.44"
 		},
 		{
 			"name":"RANK E",
-			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 22.22 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 33.33"
+			"sql":"(score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) >= 22.22 AND (score.rule_score * 100.0 / NULLIF(score.rule_max_score, 0)) < 33.33"
 		}
 	]
 },

@@ -21,6 +21,10 @@ public class ScrollSpeedModifier extends PatternModifier {
      * 変更するスクロール幅
      */
     private double rate = 0.5;
+    private java.util.Random random;
+    public ScrollSpeedModifier(int mode, int section, double rate, long seed) {
+        this(mode, section, rate); random = new java.util.Random(seed);
+    }
     
     public ScrollSpeedModifier() {
     }
@@ -56,7 +60,7 @@ public class ScrollSpeedModifier extends PatternModifier {
                 if(tl.getSectionLine()) {
                 	sectioncount++;
                 	if(section == sectioncount) {
-                        current = base * (1.0 + Math.random() * rate * 2 - rate);
+                        current = base * (1.0 + (random != null ? random.nextDouble() : Math.random()) * rate * 2 - rate);
                         sectioncount = 0;
                 	}
                 }

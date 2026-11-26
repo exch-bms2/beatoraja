@@ -35,6 +35,7 @@ public abstract class TargetProperty {
     }
 
     public static boolean isTargetAvailable(bms.player.beatoraja.MainState state) {
+        if (state == null) return false;
         if (state instanceof bms.player.beatoraja.select.MusicSelector selector)
             return selector.getRival() != null && selector.canCompareRival();
         return state.resource.getTargetScoreData() != null

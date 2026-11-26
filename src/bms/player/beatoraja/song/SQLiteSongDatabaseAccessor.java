@@ -342,9 +342,63 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 	}
 
 	public SongData[] getSongDatas(String sql, String score, String scorelog, String info) {
-		try (Statement stmt = qr.getDataSource().getConnection().createStatement()) {
-			stmt.execute("ATTACH DATABASE '" + score + "' as scoredb");
-			stmt.execute("ATTACH DATABASE '" + scorelog + "' as scorelogdb");
+		return querySongDatas(sql, score, scorelog, info, null);
+	}
+
+	@Override public SongData[] getSongDatasForScoring(String sql, String score, String scorelog, String info, int lnmode) {
+		return querySongDatas(sql, score, scorelog, info, Math.max(0, Math.min(2, lnmode)));
+	}
+
+	private SongData[] querySongDatas(String sql, String score, String scorelog, String info, Integer lnmode) {
+		return querySongDatas(sql, score, scorelog, info, lnmode, null, null);
+	}
+
+	@Override public SongData[] getSongDatasForScoring(String sql, List<ScoringSource> sources, Map<String, String> rules, String info, int lnmode) {
+		if (sources.isEmpty()) return SongData.EMPTY;
+		return querySongDatas(sql, sources.get(0).score(), sources.get(0).scorelog(), info, Math.max(0, Math.min(2, lnmode)), sources, rules);
+	}
+
+	private SongData[] querySongDatas(String sql, String score, String scorelog, String info, Integer lnmode,
+			List<ScoringSource> sources, Map<String, String> rules) {
+		try (Connection connection = qr.getDataSource().getConnection(); Statement stmt = connection.createStatement()) {
+			stmt.execute("ATTACH DATABASE '" + score.replace("'", "''") + "' as scoredb");
+			stmt.execute("ATTACH DATABASE '" + scorelog.replace("'", "''") + "' as scorelogdb");
+			if (sources != null) {
+				stmt.execute("CREATE TEMP TABLE primary_rules (sha256 TEXT PRIMARY KEY, rule TEXT NOT NULL)");
+				try (var insert = connection.prepareStatement("INSERT INTO primary_rules VALUES (?, ?)")) {
+					for (var entry : rules.entrySet()) { insert.setString(1, entry.getKey()); insert.setString(2, entry.getValue()); insert.addBatch(); }
+					insert.executeBatch();
+				}
+				var scores = new ArrayList<String>();
+				var logs = new ArrayList<String>();
+				for (int i = 0; i < sources.size(); i++) {
+					var source = sources.get(i);
+					String scoreSchema = i == 0 ? "scoredb" : "rule_score" + i;
+					String logSchema = i == 0 ? "scorelogdb" : "rule_log" + i;
+					if (i > 0) {
+						stmt.execute("ATTACH DATABASE '" + source.score().replace("'", "''") + "' AS " + scoreSchema);
+						stmt.execute("ATTACH DATABASE '" + source.scorelog().replace("'", "''") + "' AS " + logSchema);
+					}
+					String filter = " JOIN primary_rules r ON r.sha256 = s.sha256 AND r.rule = '" + source.rule().replace("'", "''")
+							+ "' WHERE s.mode = CASE WHEN EXISTS (SELECT 1 FROM main.song c WHERE c.sha256 = s.sha256 AND (c.feature & "
+							+ SongData.FEATURE_UNDEFINEDLN + ") != 0) THEN " + lnmode + " ELSE 0 END";
+					String ex = "(s.epg * 2 + s.lpg * 2 + s.egr + s.lgr)";
+					String nativeJoin = source.rule().equals("beatoraja") ? "" : " LEFT JOIN " + scoreSchema + ".native_score n ON n.sha256 = s.sha256 AND n.mode = s.mode";
+					String points = source.rule().equals("beatoraja") ? ex : "COALESCE(n.native_score, " + ex + ")";
+					String maximum = source.rule().equals("beatoraja") ? "s.notes * 2" : "COALESCE(n.native_max_score, s.notes * 2)";
+					scores.add("SELECT s.*, " + points + " AS rule_score, " + maximum + " AS rule_max_score FROM " + scoreSchema + ".score s" + nativeJoin + filter);
+					logs.add("SELECT s.* FROM " + logSchema + ".scorelog s" + filter);
+				}
+				stmt.execute("CREATE TEMP VIEW score AS " + String.join(" UNION ALL ", scores));
+				stmt.execute("CREATE TEMP VIEW scorelog AS " + String.join(" UNION ALL ", logs));
+			} else if (lnmode != null) {
+				for (String table : new String[]{"score", "scorelog"}) {
+					String schema = table.equals("score") ? "scoredb" : "scorelogdb";
+					stmt.execute("CREATE TEMP VIEW " + table + " AS SELECT s.* FROM " + schema + "." + table
+							+ " s WHERE s.mode = CASE WHEN EXISTS (SELECT 1 FROM main.song c WHERE c.sha256 = s.sha256 AND (c.feature & "
+							+ SongData.FEATURE_UNDEFINEDLN + ") != 0) THEN " + lnmode + " ELSE 0 END");
+				}
+			}
 			if (reviewpath != null && reviewpath.length() > 0) {
 				stmt.execute("ATTACH DATABASE '" + reviewpath + "' as reviewdb");
 			}
@@ -360,7 +414,6 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				ResultSet rs = stmt.executeQuery(s);
 				m = songhandler.handle(rs);
 //				System.out.println(s + " -> result : " + m.size());
-				stmt.execute("DETACH DATABASE infodb");
 			} else {
 				String s = "SELECT DISTINCT md5, song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,song.level AS level,difficulty,"
 						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length, charthash"
@@ -368,11 +421,6 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 				ResultSet rs = stmt.executeQuery(s);
 				m = songhandler.handle(rs);
 			}
-			if (reviewpath != null && reviewpath.length() > 0) {
-				stmt.execute("DETACH DATABASE reviewdb");
-			}
-			stmt.execute("DETACH DATABASE scorelogdb");				
-			stmt.execute("DETACH DATABASE scoredb");
 			return toSongDataArray(m);
 		} catch(Throwable e) {
 			e.printStackTrace();			
@@ -394,6 +442,11 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 		}
 
 		return SongData.EMPTY;
+	}
+
+	@Override public SongData[] getAllSongDatas() {
+		try { return toSongDataArray(qr.query("SELECT * FROM song GROUP BY sha256", songhandler)); }
+		catch (SQLException e) { throw new IllegalStateException("Could not read scoring query chart metadata", e); }
 	}
 	
 	/**

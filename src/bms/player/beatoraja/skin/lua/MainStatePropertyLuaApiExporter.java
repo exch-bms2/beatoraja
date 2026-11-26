@@ -76,8 +76,10 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 		table.set("exscore", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getNowEXScore())));
 		table.set("rate_best", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getNowBestScoreRate())));
 		table.set("exscore_best", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getBestScore())));
-		table.set("rate_rival", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getRivalScoreRate())));
-		table.set("exscore_rival", zeroArg(() -> LuaDouble.valueOf(state.getScoreDataProperty().getRivalScore())));
+		table.set("rate_rival", zeroArg(() -> bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state)
+				? LuaDouble.valueOf(state.getScoreDataProperty().getRivalScoreRate()) : LuaValue.NIL));
+		table.set("exscore_rival", zeroArg(() -> bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state)
+				? LuaDouble.valueOf(state.getScoreDataProperty().getRivalScore()) : LuaValue.NIL));
 		table.set("volume_sys", zeroArg(() -> LuaDouble.valueOf(state.main.getConfig().getAudioConfig().getSystemvolume())));
 		table.set("volume_key", zeroArg(() -> LuaDouble.valueOf(state.main.getConfig().getAudioConfig().getKeyvolume())));
 		table.set("volume_bg", zeroArg(() -> LuaDouble.valueOf(state.main.getConfig().getAudioConfig().getBgvolume())));
@@ -127,6 +129,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	}
 
 	private LuaValue getGauge() {
+		if (state instanceof bms.player.beatoraja.result.AbstractResult result) return LuaDouble.valueOf(result.getDisplayGaugeValue());
 		if(state instanceof BMSPlayer player) {
 			return LuaDouble.valueOf(player.getGauge().getValue());
 		}
@@ -134,6 +137,7 @@ final class MainStatePropertyLuaApiExporter implements LuaApiExporter {
 	}
 
 	private LuaValue getGaugeType() {
+		if (state instanceof bms.player.beatoraja.result.AbstractResult result) return LuaInteger.valueOf(result.getGaugeType());
 		if(state instanceof BMSPlayer player) {
 			return LuaDouble.valueOf(player.getGauge().getType());
 		}

@@ -251,6 +251,12 @@ public final class PlayerResource {
 		if (model == null) {
 			return null;
 		}
+		if ((!forPlay || mode != null && mode.mode != BMSPlayerMode.Mode.REPLAY) && info.selectedRandoms == null) {
+			var plan = pconfig.getChartScoringPlan(model.getSHA256());
+			plan.adopt(model);
+			model = plan.decode(decoder, info);
+			if (model == null) return null;
+		}
 
 		if (forPlay && decoder instanceof BMSDecoder) chartRuleParameters = BMSPlayerRule.ChartParameters.fromBms(model);
 		marginTime = BMSModelUtils.setStartNoteTime(model, 1000);

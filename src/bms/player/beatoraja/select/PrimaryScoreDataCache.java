@@ -15,6 +15,25 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     private final Map<String, SecondaryScoringRule> effectiveRules = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, PrimaryScoringSelection.ScoringInfo> scoringInfos = new java.util.concurrent.ConcurrentHashMap<>();
 
+    /** One effective score/log view preserves global SQL ordering, limits and per-song fallback. */
+    public SongData[] querySongs(SongDatabaseAccessor database, String sql, String info) {
+        var rules = java.util.EnumSet.of(SecondaryScoringRule.BEATORAJA);
+        for (var mode : bms.model.Mode.values()) rules.add(config.getPrimaryScoringRule(mode));
+        var sources = new java.util.ArrayList<SongDatabaseAccessor.ScoringSource>();
+        var ordered = new java.util.ArrayList<SecondaryScoringRule>();
+        ordered.add(SecondaryScoringRule.BEATORAJA);
+        rules.remove(SecondaryScoringRule.BEATORAJA);
+        ordered.addAll(rules);
+        for (var rule : ordered) {
+            if (rule == SecondaryScoringRule.RAINDROP || rule == SecondaryScoringRule.BEMUSE) continue;
+            var paths = data.scoreQueryPaths(rule);
+            if (paths != null) sources.add(new SongDatabaseAccessor.ScoringSource(rule.id(), paths.score(), paths.scorelog()));
+        }
+        var applied = new java.util.HashMap<String, String>();
+        for (var song : database.getAllSongDatas()) applied.put(song.getSha256(), effectiveRule(song, config.getLnmode()).id());
+        return database.getSongDatasForScoring(sql, sources, applied, info, config.getLnmode());
+    }
+
     public boolean usesStandardRule(SongData song, int lnmode) { return effectiveRule(song, lnmode) == SecondaryScoringRule.BEATORAJA; }
 
     @Override public void clear() { super.clear(); effectiveRules.clear(); scoringInfos.clear(); }
@@ -22,7 +41,8 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     public PrimaryScoringSelection.ScoringInfo scoringInfo(SongData song, int lnmode) {
         return scoringInfos.computeIfAbsent(cacheKey(song) + ":" + lnmode, key -> {
             var rule = effectiveRule(song, lnmode);
-            if (rule == SecondaryScoringRule.BEATORAJA || rule == SecondaryScoringRule.LR2 && config.getLongnoteMode() == 0)
+            if ((rule == SecondaryScoringRule.BEATORAJA || rule == SecondaryScoringRule.LR2)
+                    && config.getLongnoteMode() == 0 && config.getExtranoteDepth() == 0 && !song.hasRandomSequence())
                 return new PrimaryScoringSelection.ScoringInfo(song.getNotes(), song.getNotes() * 2);
             try {
                 var model = loadModel(song, lnmode);
@@ -33,7 +53,14 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
 
     private BMSModel loadModel(SongData song, int lnmode) {
         BMSModel model;
-        if (song.getPath() == null) model = song.getBMSModel();
+        if (song.getPath() == null) {
+            var original = song.getBMSModel();
+            var info = original != null ? original.getChartInformation() : null;
+            if (info == null) return config.getLongnoteMode() == 0 ? original : null;
+            var decoder = info.source != null ? ChartDecoder.getDecoder(info.source) : ChartDecoder.getDecoder(info.path);
+            var input = info.source != null ? new ChartInformation(info.source, lnmode, null) : new ChartInformation(info.path, lnmode, null);
+            model = decoder != null ? config.getChartScoringPlan(song.getSha256()).decode(decoder, input) : null;
+        }
         else {
             var file = SongResources.fromPath(Path.of(song.getPath()));
             var source = new ChartSource() {
@@ -41,10 +68,13 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
                 public java.io.InputStream openStream() throws java.io.IOException { return file.openStream(); }
             };
             var decoder = ChartDecoder.getDecoder(source);
-            model = decoder != null ? decoder.decode(new ChartInformation(source, lnmode, null)) : null;
+            model = decoder != null ? config.getChartScoringPlan(song.getSha256()).decode(decoder, new ChartInformation(source, lnmode, null)) : null;
         }
-        if (model != null && config.getLongnoteMode() > 0)
-            new bms.player.beatoraja.pattern.LongNoteModifier(config.getLongnoteMode() - 1, config.getLongnoteRate()).modify(model);
+        if (model != null) {
+            bms.model.BMSModelUtils.setStartNoteTime(model, 1000);
+            BMSPlayerRule.validate(model);
+            for (var modifier : config.getChartScoringPlan(song.getSha256()).modifiers(config)) modifier.modify(model);
+        }
         return model;
     }
 
@@ -56,7 +86,7 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
 
     int selectionContext() {
         int key = Objects.hash(config.getGauge(), config.getLnmode(), config.getSevenToNinePattern(), config.getDoubleoption(),
-                config.getLongnoteMode(), config.getLongnoteRate());
+                config.getLongnoteMode(), config.getLongnoteRate(), modifierContext());
         for (var mode : Mode.values()) key = 31 * key + config.getPrimaryScoringRule(mode).ordinal();
         return key;
     }
@@ -64,7 +94,12 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     @Override protected String cacheKey(SongData song) {
         return song.getSha256() + ":" + config.getPrimaryScoringRule(mode(song)).id() + ":" + config.getGauge()
                 + ":" + config.getSevenToNinePattern() + ":" + config.getDoubleoption() + ":" + config.getLongnoteMode()
-                + ":" + config.getLongnoteRate();
+                + ":" + config.getLongnoteRate() + ":" + modifierContext() + ":" + config.getChartScoringPlan(song.getSha256()).seed();
+    }
+
+    private int modifierContext() {
+        return Objects.hash(config.getScrollMode(), config.getScrollSection(), config.getScrollRate(), config.getMineMode(),
+                config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch());
     }
 
     SecondaryScoringRule effectiveRule(SongData song, int lnmode) {
@@ -80,7 +115,7 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
                 || config.getDoubleoption() >= 2 && (mode == Mode.BEAT_5K || mode == Mode.BEAT_7K || mode == Mode.KEYBOARD_24K))
             return SecondaryScoringRule.BEATORAJA;
         // Ordinary LR2/Pulsus eligibility is fully described by indexed chart features. Avoid decoding every song in a folder.
-        if (config.getLongnoteMode() == 0 && (requested == SecondaryScoringRule.LR2 || requested == SecondaryScoringRule.PULSUS)) {
+        if (config.getLongnoteMode() == 0 && !song.hasRandomSequence() && (requested == SecondaryScoringRule.LR2 || requested == SecondaryScoringRule.PULSUS)) {
             boolean keys = requested == SecondaryScoringRule.PULSUS ? mode == Mode.BEAT_7K
                     : mode == Mode.BEAT_5K || mode == Mode.BEAT_7K || mode == Mode.POPN_9K || mode == Mode.BEAT_10K || mode == Mode.BEAT_14K;
             int gauge = config.getGauge();

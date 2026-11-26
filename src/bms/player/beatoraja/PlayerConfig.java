@@ -31,6 +31,12 @@ import com.badlogic.gdx.utils.SerializationException;
  * @author exch
  */
 public final class PlayerConfig {
+	private transient java.util.concurrent.ConcurrentHashMap<String, bms.player.beatoraja.play.ChartScoringPlan> chartScoringPlans = new java.util.concurrent.ConcurrentHashMap<>();
+	public bms.player.beatoraja.play.ChartScoringPlan getChartScoringPlan(String chart) {
+		if (chartScoringPlans == null) chartScoringPlans = new java.util.concurrent.ConcurrentHashMap<>();
+		return chartScoringPlans.computeIfAbsent(chart, key -> new bms.player.beatoraja.play.ChartScoringPlan());
+	}
+	public void refreshChartScoringPlan(String chart) { if (chartScoringPlans != null) chartScoringPlans.remove(chart); }
 	public static final int MISS_LAYER_DURATION_MIN = 0;
 	public static final int MISS_LAYER_DURATION_MAX = 5000;
 	public static final int HRAN_THRESHOLD_BPM_MIN = 1;

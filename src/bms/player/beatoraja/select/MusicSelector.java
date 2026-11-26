@@ -173,11 +173,13 @@ public final class MusicSelector extends MainState {
 		showNoteGraph = false;
 		resource.setPlayerData(main.getPlayDataAccessor().readPlayerData());
 		if (playedsong != null) {
+			config.refreshChartScoringPlan(playedsong.getSha256());
 			scorecache.update(playedsong, config.getLnmode());
 			playedsong = null;
 		}
 		if (playedcourse != null) {
 			for (SongData sd : playedcourse.getSong()) {
+				config.refreshChartScoringPlan(sd.getSha256());
 				scorecache.update(sd, config.getLnmode());
 			}
 			playedcourse = null;

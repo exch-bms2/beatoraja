@@ -12,6 +12,12 @@ public class LongNoteModifier extends PatternModifier {
 	private Mode mode = Mode.REMOVE;
 
 	private double rate = 1.0;
+	private java.util.Random random;
+	private double nextDouble() { return random != null ? random.nextDouble() : Math.random(); }
+	public LongNoteModifier(int mode, double rate, long seed) {
+		this(mode, rate);
+		random = new java.util.Random(seed);
+	}
 
 	public LongNoteModifier() {
 	}
@@ -28,7 +34,7 @@ public class LongNoteModifier extends PatternModifier {
 			AssistLevel assist = AssistLevel.NONE;
 			for (TimeLine tl : model.getAllTimeLines()) {
 				for(int lane = 0;lane < model.getMode().key;lane++) {
-					if(tl.getNote(lane) instanceof LongNote ln && Math.random() < rate) {
+					if(tl.getNote(lane) instanceof LongNote ln && nextDouble() < rate) {
 						tl.setNote(lane, ln.isEnd() ? null : new NormalNote(ln.getWav()));
 						assist = AssistLevel.ASSIST;
 					}
@@ -43,12 +49,12 @@ public class LongNoteModifier extends PatternModifier {
 			TimeLine[] tls = model.getAllTimeLines();
 			for (int i = 0;i < tls.length - 1;i++) {
 				for(int lane = 0;lane < model.getMode().key;lane++) {
-					if(tls[i].getNote(lane) instanceof NormalNote && !tls[i + 1].existNote(lane) && Math.random() < rate) {
+					if(tls[i].getNote(lane) instanceof NormalNote && !tls[i + 1].existNote(lane) && nextDouble() < rate) {
 						int lntype = switch(mode) {
 							case ADD_LN -> LongNote.TYPE_LONGNOTE;
 							case ADD_CN -> LongNote.TYPE_CHARGENOTE;
 							case ADD_HCN -> LongNote.TYPE_HELLCHARGENOTE;
-							case ADD_ALL -> (int) (Math.random() * 3 + 1);
+							case ADD_ALL -> (int) (nextDouble() * 3 + 1);
 							default -> LongNote.TYPE_UNDEFINED;
 						};
 

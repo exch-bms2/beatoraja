@@ -124,6 +124,9 @@ final class RuleScoreStore {
 			}
 			best.setNotes(score.getNotes());
 			var diff = PlayDataAccessor.updateScore(best, score, score.getSha256(), true);
+			var trophies = ScoreTrophies.forAttempt(score);
+			best.setTrophy(ScoreTrophies.merge(best.getTrophy(), trophies));
+			score.setTrophy(ScoreTrophies.merge(null, trophies));
 			best.setPlaycount(best.getPlaycount() + 1);
 			if (score.getClear() > ClearType.Failed.id) best.setClearcount(best.getClearcount() + 1);
 			best.setDate(Math.max(best.getDate(), date));

@@ -608,6 +608,7 @@ public class MusicResult extends AbstractResult {
 					newscore.getNotes(), newscore.getRuleMaxScore());
 			getPrimaryScoreDataProperty().update(newscore);
 			if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
+				newscore.setTrophy(ScoreTrophies.merge(null, resource.isUpdateScore() ? ScoreTrophies.forAttempt(newscore) : Set.of()));
 				var counts = new ArrayList<Integer>(12);
 				for (int i = 0; i < 6; i++) { counts.add(newscore.getJudgeCount(i, true)); counts.add(newscore.getJudgeCount(i, false)); }
 				data.writeRuleAttempt(rule, new PlayDataAccessor.ScoreAttempt(model.getSHA256(), mode,

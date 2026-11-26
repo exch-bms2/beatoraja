@@ -222,19 +222,7 @@ public class BMSPlayer extends MainState {
 			}
 
 			Array<PatternModifier> mods = new Array<PatternModifier>();
-
-			if(config.getScrollMode() > 0) {
-				mods.add(new ScrollSpeedModifier(config.getScrollMode() - 1, config.getScrollSection(), config.getScrollRate()));
-			}
-			if(config.getLongnoteMode() > 0) {
-				mods.add(new LongNoteModifier(config.getLongnoteMode() - 1, config.getLongnoteRate()));
-			}
-			if(config.getMineMode() > 0) {
-				mods.add(new MineNoteModifier(config.getMineMode() - 1));
-			}
-			if(config.getExtranoteDepth() > 0) {
-				mods.add(new ExtraNoteModifier(config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch()));
-			}
+			for (var modifier : config.getChartScoringPlan(model.getSHA256()).modifiers(config)) mods.add(modifier);
 
 			for(PatternModifier mod : mods) {
 				mod.modify(model);
@@ -1083,6 +1071,9 @@ public class BMSPlayer extends MainState {
 				var attempt = secondary.toLocalAttempt(model);
 				var score = attempt.toScoreData(model.getMode());
 				fillSharedScoreMetadata(score);
+				score.setTrophy(ScoreTrophies.merge(null, resource.isUpdateScore()
+						&& (secondary.outcome() == SecondaryJudgingGroup.Outcome.FINISHED || secondary.outcome() == SecondaryJudgingGroup.Outcome.FAILED)
+						? ScoreTrophies.forAttempt(score) : Set.of()));
 				attempt = attempt.withMetadata(score);
 				if (secondary.outcome() != SecondaryJudgingGroup.Outcome.ERROR
 						&& secondary.outcome() != SecondaryJudgingGroup.Outcome.INPUT_LOST) {

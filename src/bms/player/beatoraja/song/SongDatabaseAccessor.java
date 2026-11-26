@@ -6,6 +6,7 @@ package bms.player.beatoraja.song;
  * @author exch
  */
 public interface SongDatabaseAccessor {
+	default SongData[] getAllSongDatas() { return getSongDatasByText(""); }
 
 	/**
 	 * 楽曲を取得する
@@ -41,6 +42,18 @@ public interface SongDatabaseAccessor {
 	 * @return
 	 */
 	public SongData[] getSongDatas(String sql, String score, String scorelog, String info);
+	default SongData[] getSongDatasForScoring(String sql, String score, String scorelog, String info, int lnmode) {
+		return getSongDatas(sql, score, scorelog, info);
+	}
+	record ScoringSource(String rule, String score, String scorelog) {}
+	default SongData[] getSongDatasForScoring(String sql, java.util.List<ScoringSource> sources,
+			java.util.Map<String, String> rules, String info, int lnmode) {
+		var results = new java.util.LinkedHashMap<String, SongData>();
+		for (var source : sources) for (var song : getSongDatasForScoring(sql, source.score(), source.scorelog(), info, lnmode)) {
+			if (source.rule().equals(rules.get(song.getSha256()))) results.put(song.getSha256() + song.getPath(), song);
+		}
+		return results.values().toArray(SongData[]::new);
+	}
 
 	public void setSongDatas(SongData[] songs);
 
