@@ -966,6 +966,15 @@ public class BMSPlayer extends MainState {
 	public ScoreData createScoreData() {
 		return createScoreData(0);
 	}
+	private static boolean hasJudgedNotes(ScoreData score) {
+		return score != null && score.getJudgeCount(0) + score.getJudgeCount(1)
+				+ score.getJudgeCount(2) + score.getJudgeCount(3) > 0;
+	}
+	private boolean hasIndependentBeatorajaJudgments() {
+		return !resource.getPrimaryScoringSelection().isStandard() && resource.getAlternateResultScores().stream()
+				.anyMatch(result -> result.ruleId().equals(SecondaryScoringRule.BEATORAJA.id())
+						&& result.score() != null && Objects.equals(result.score().getSha256(), model.getSHA256()) && hasJudgedNotes(result.score()));
+	}
 
 	public ScoreData createScoreData(int player) {
 		final AbstractJudgeManager judge = players[player].judge;
@@ -975,7 +984,7 @@ public class BMSPlayer extends MainState {
 		resource.setScoringTiming(resource.getPrimaryScoringSelection().effective().id(), judge.getTimingData());
 		score.setPlaytime(playTimeTracker.getPlaytime());
 		if (resource.getCourseBMSModels() == null
-				&& (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0)) {
+				&& !hasJudgedNotes(score) && !hasIndependentBeatorajaJudgments()) {
 			return null;
 		}
 

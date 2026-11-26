@@ -47,6 +47,10 @@ public interface SongDatabaseAccessor {
 	}
 	record ScoringSource(String rule, String score, String scorelog) {}
 	default SongData[] getSongDatasForScoring(String sql, java.util.List<ScoringSource> sources,
+			java.util.Map<String, String> rules, java.util.Map<String, Integer> modes, String info, int lnmode) {
+		return getSongDatasForScoring(sql, sources, rules, info, lnmode);
+	}
+	default SongData[] getSongDatasForScoring(String sql, java.util.List<ScoringSource> sources,
 			java.util.Map<String, String> rules, String info, int lnmode) {
 		var results = new java.util.LinkedHashMap<String, SongData>();
 		for (var source : sources) for (var song : getSongDatasForScoring(sql, source.score(), source.scorelog(), info, lnmode)) {

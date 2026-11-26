@@ -360,13 +360,28 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 
 	private SongData[] querySongDatas(String sql, String score, String scorelog, String info, Integer lnmode,
 			List<ScoringSource> sources, Map<String, String> rules) {
+		return querySongDatas(sql, score, scorelog, info, lnmode, sources, rules, null);
+	}
+
+	@Override public SongData[] getSongDatasForScoring(String sql, List<ScoringSource> sources, Map<String, String> rules,
+			Map<String, Integer> modes, String info, int lnmode) {
+		if (sources.isEmpty()) return SongData.EMPTY;
+		return querySongDatas(sql, sources.get(0).score(), sources.get(0).scorelog(), info,
+				Math.max(0, Math.min(2, lnmode)), sources, rules, modes);
+	}
+
+	private SongData[] querySongDatas(String sql, String score, String scorelog, String info, Integer lnmode,
+			List<ScoringSource> sources, Map<String, String> rules, Map<String, Integer> modes) {
 		try (Connection connection = qr.getDataSource().getConnection(); Statement stmt = connection.createStatement()) {
 			stmt.execute("ATTACH DATABASE '" + score.replace("'", "''") + "' as scoredb");
 			stmt.execute("ATTACH DATABASE '" + scorelog.replace("'", "''") + "' as scorelogdb");
 			if (sources != null) {
-				stmt.execute("CREATE TEMP TABLE primary_rules (sha256 TEXT PRIMARY KEY, rule TEXT NOT NULL)");
-				try (var insert = connection.prepareStatement("INSERT INTO primary_rules VALUES (?, ?)")) {
-					for (var entry : rules.entrySet()) { insert.setString(1, entry.getKey()); insert.setString(2, entry.getValue()); insert.addBatch(); }
+				stmt.execute("CREATE TEMP TABLE primary_rules (sha256 TEXT PRIMARY KEY, rule TEXT NOT NULL, mode INTEGER)");
+				try (var insert = connection.prepareStatement("INSERT INTO primary_rules VALUES (?, ?, ?)")) {
+					for (var entry : rules.entrySet()) {
+						insert.setString(1, entry.getKey()); insert.setString(2, entry.getValue());
+						insert.setObject(3, modes != null ? modes.get(entry.getKey()) : null); insert.addBatch();
+					}
 					insert.executeBatch();
 				}
 				var scores = new ArrayList<String>();
@@ -380,8 +395,8 @@ public class SQLiteSongDatabaseAccessor extends SQLiteDatabaseAccessor implement
 						stmt.execute("ATTACH DATABASE '" + source.scorelog().replace("'", "''") + "' AS " + logSchema);
 					}
 					String filter = " JOIN primary_rules r ON r.sha256 = s.sha256 AND r.rule = '" + source.rule().replace("'", "''")
-							+ "' WHERE s.mode = CASE WHEN EXISTS (SELECT 1 FROM main.song c WHERE c.sha256 = s.sha256 AND (c.feature & "
-							+ SongData.FEATURE_UNDEFINEDLN + ") != 0) THEN " + lnmode + " ELSE 0 END";
+							+ "' WHERE s.mode = COALESCE(r.mode, CASE WHEN EXISTS (SELECT 1 FROM main.song c WHERE c.sha256 = s.sha256 AND (c.feature & "
+							+ SongData.FEATURE_UNDEFINEDLN + ") != 0) THEN " + lnmode + " ELSE 0 END)";
 					String ex = "(s.epg * 2 + s.lpg * 2 + s.egr + s.lgr)";
 					String nativeJoin = source.rule().equals("beatoraja") ? "" : " LEFT JOIN " + scoreSchema + ".native_score n ON n.sha256 = s.sha256 AND n.mode = s.mode";
 					String points = source.rule().equals("beatoraja") ? ex : "COALESCE(n.native_score, " + ex + ")";

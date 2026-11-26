@@ -24,6 +24,11 @@ import bms.player.beatoraja.song.*;
  * @author exch
  */
 public final class BarRenderer {
+	/** Keep the player's lamp even when a rival cannot be compared or one image bank is absent. */
+	static SkinImage getPlayerLamp(SkinBar skin, int clear, boolean rivalSelected) {
+		SkinImage preferred = rivalSelected ? skin.getPlayerLamp(clear) : skin.getLamp(clear);
+		return preferred != null ? preferred : rivalSelected ? skin.getLamp(clear) : skin.getPlayerLamp(clear);
+	}
 
 	private final MusicSelector select;
 
@@ -322,19 +327,12 @@ public final class BarRenderer {
 				continue;
 			}
 			// lamp
+			final SkinImage playerLamp = getPlayerLamp(baro, ba.sd.getLamp(true), select.getRival() != null);
+			if (playerLamp != null) playerLamp.draw(sprite, ba.x, ba.y);
 			if(select.getRival() != null && select.canCompareRival(ba.sd)) {
-				final SkinImage playerLamp = baro.getPlayerLamp(ba.sd.getLamp(true));
-				if (playerLamp != null) {
-					playerLamp.draw(sprite, ba.x, ba.y);
-				}
 				final SkinImage rivalLamp = baro.getRivalLamp(ba.sd.getLamp(false));
 				if (rivalLamp != null) {
 					rivalLamp.draw(sprite, ba.x, ba.y);
-				}
-			} else {
-				final SkinImage lamp = baro.getLamp(ba.sd.getLamp(true));
-				if (lamp != null) {
-					lamp.draw(sprite, ba.x, ba.y);
 				}
 			}
 		}

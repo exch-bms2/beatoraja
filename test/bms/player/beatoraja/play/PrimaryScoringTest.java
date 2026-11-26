@@ -80,6 +80,15 @@ public final class PrimaryScoringTest {
             }
             f.resource.setPlayMode(BMSPlayerMode.PRACTICE);
             check(PrimaryScoringSelection.resolve(rule, chart, f.resource, NORMAL).isStandard(), "Practice fallback");
+            f.resource.setPlayMode(BMSPlayerMode.PLAY);
+            bms.player.beatoraja.input.KeyboardQueueTestSupport.set(f.resource, PlayerResource.class, "course", new BMSModel[]{chart});
+            f.resource.setPrimaryScoringSelection(PrimaryScoringSelection.resolve(rule, chart, f.resource, NORMAL));
+            check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(f.player).equals("beatoraja"),
+                    "Course play configured-rule name matches its fixed beatoraja selection");
+            var courseResult = bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate(bms.player.beatoraja.result.CourseResult.class);
+            bms.player.beatoraja.input.KeyboardQueueTestSupport.set(courseResult, MainState.class, "resource", f.resource);
+            check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(courseResult).equals("beatoraja"),
+                    "Final course result retains the same configured-rule name");
         }
         var dp = new BMSDecoder().decode(("#PLAYER 3\n#BPM 120\n#RANK 2\n#TOTAL 400\n#WAV01 tap.wav\n#00119:01\n#00129:01\n")
                 .getBytes(StandardCharsets.UTF_8), "primary-dp.bme", false, new int[0]);

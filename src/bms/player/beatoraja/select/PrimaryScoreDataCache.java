@@ -14,6 +14,7 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     private final PlayerConfig config;
     private final Map<String, SecondaryScoringRule> effectiveRules = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, PrimaryScoringSelection.ScoringInfo> scoringInfos = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Integer> scoringModes = new java.util.concurrent.ConcurrentHashMap<>();
 
     /** One effective score/log view preserves global SQL ordering, limits and per-song fallback. */
     public SongData[] querySongs(SongDatabaseAccessor database, String sql, String info) {
@@ -30,13 +31,32 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
             if (paths != null) sources.add(new SongDatabaseAccessor.ScoringSource(rule.id(), paths.score(), paths.scorelog()));
         }
         var applied = new java.util.HashMap<String, String>();
-        for (var song : database.getAllSongDatas()) applied.put(song.getSha256(), effectiveRule(song, config.getLnmode()).id());
-        return database.getSongDatasForScoring(sql, sources, applied, info, config.getLnmode());
+        var modes = new java.util.HashMap<String, Integer>();
+        for (var song : database.getAllSongDatas()) {
+            applied.put(song.getSha256(), effectiveRule(song, config.getLnmode()).id());
+            modes.put(song.getSha256(), scoringMode(song, config.getLnmode()));
+        }
+        return database.getSongDatasForScoring(sql, sources, applied, modes, info, config.getLnmode());
     }
 
     public boolean usesStandardRule(SongData song, int lnmode) { return effectiveRule(song, lnmode) == SecondaryScoringRule.BEATORAJA; }
 
-    @Override public void clear() { super.clear(); effectiveRules.clear(); scoringInfos.clear(); }
+    @Override public void clear() { super.clear(); effectiveRules.clear(); scoringInfos.clear(); scoringModes.clear(); }
+
+    private boolean needsPlannedMode(SongData song) { return song.hasRandomSequence() || config.getLongnoteMode() > 0; }
+
+    int scoringMode(SongData song, int lnmode) {
+        if (!needsPlannedMode(song)) return song.hasUndefinedLongNote() ? lnmode : 0;
+        return scoringModes.computeIfAbsent(cacheKey(song, lnmode), key -> {
+            try {
+                var model = loadModel(song, lnmode);
+                if (model != null) return model.containsUndefinedLongNote() ? model.getLntype() : 0;
+            } catch (RuntimeException ignored) { /* Keep indexed metadata when the chart cannot be previewed. */ }
+            return song.hasUndefinedLongNote() ? lnmode : 0;
+        });
+    }
+
+    @Override protected String cacheKey(SongData song, int lnmode) { return cacheKey(song) + ":" + lnmode; }
 
     public PrimaryScoringSelection.ScoringInfo scoringInfo(SongData song, int lnmode) {
         return scoringInfos.computeIfAbsent(cacheKey(song) + ":" + lnmode, key -> {
@@ -136,9 +156,10 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     }
 
     private ScoreData read(SongData song, int lnmode, SecondaryScoringRule rule) {
+        int mode = scoringMode(song, lnmode);
         return rule == SecondaryScoringRule.BEATORAJA
-                ? data.readScoreData(song.getSha256(), song.hasUndefinedLongNote(), lnmode)
-                : data.readRuleBest(rule, song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
+                ? data.readScoreData(song.getSha256(), true, mode)
+                : data.readRuleBest(rule, song.getSha256(), mode);
     }
 
     @Override protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
@@ -149,7 +170,7 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
         var standard = new ArrayList<SongData>();
         for (var song : songs) {
             var rule = effectiveRule(song, lnmode);
-            if (rule == SecondaryScoringRule.BEATORAJA) standard.add(song);
+            if (rule == SecondaryScoringRule.BEATORAJA && !needsPlannedMode(song)) standard.add(song);
             else collector.collect(song, read(song, lnmode, rule));
         }
         if (!standard.isEmpty()) data.readScoreDatas(collector, standard.toArray(SongData[]::new), lnmode);

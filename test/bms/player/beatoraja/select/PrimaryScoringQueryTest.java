@@ -57,7 +57,52 @@ public final class PrimaryScoringQueryTest {
         player.setLnmode(0);
         check(cache.querySongs(songs, "song.sha256 = '" + ln.getSHA256() + "' AND score.clear = 6", null).length == 0,
                 "Other LN-mode records do not leak into native queries");
+        verifyBranchModes(directory, data, songs, player);
         System.out.println("PrimaryScoringQueryTest passed (effective SQL views, global ordering, updates, unplayed, native ranks and trophies)");
+    }
+    private static void verifyBranchModes(Path directory, PlayDataAccessor data, SQLiteSongDatabaseAccessor songs, PlayerConfig player) throws Exception {
+        var file = directory.resolve("branch-mode.bme");
+        Files.writeString(file, "#TITLE Branch mode\n#PLAYER 1\n#BPM 120\n#RANK 2\n#TOTAL 400\n#WAV01 a.wav\n#RANDOM 2\n#IF 1\n#00159:0101\n#ENDIF\n#IF 2\n#00119:01\n#ENDIF\n#ENDRANDOM\n#00219:01\n");
+        var hold = ChartDecoder.getDecoder(file).decode(new ChartInformation(file, 1, new int[]{1}));
+        var taps = ChartDecoder.getDecoder(file).decode(new ChartInformation(file, 1, new int[]{2}));
+        writeCanonical(data, taps, 1, 0, ClearType.Easy);
+        var standardHold = new ScoreData(Mode.BEAT_7K); standardHold.setSha256(hold.getSHA256()); standardHold.setNotes(3);
+        standardHold.setEpg(3); standardHold.setClear(ClearType.Hard.id); standardHold.setGauge(AbstractGrooveGauge.HARD);
+        data.writeScoreData(standardHold, hold, 1, true);
+        data.writeRuleAttempt(SecondaryScoringRule.LR2, attempt(taps, ClearType.Normal, 0, 2, -1, -1), true);
+        player.setPrimaryScoringRule(Mode.BEAT_7K, SecondaryScoringRule.LR2); player.setGauge(AbstractGrooveGauge.NORMAL); player.setLnmode(1);
+        for (int indexedBranch : new int[]{1, 2}) {
+            var indexed = ChartDecoder.getDecoder(file).decode(new ChartInformation(file, 0, new int[]{indexedBranch}));
+            var song = new SongData(indexed, false); songs.setSongDatas(new SongData[]{song});
+            player.refreshChartScoringPlan(song.getSha256());
+            player.getChartScoringPlan(song.getSha256()).adopt(indexedBranch == 1 ? taps : hold);
+            var cache = new PrimaryScoreDataCache(data, player);
+            int expected = indexedBranch == 1 ? ClearType.Normal.id : ClearType.Hard.id;
+            check(cache.readScoreData(song, 1).getClear() == expected, "Single read follows planned branch LN identity");
+            cache.clear();
+            cache.readScoreDatas((s, score) -> check(score != null && score.getClear() == expected,
+                    "Bulk read follows branch LN identity for native and beatoraja fallback"), new SongData[]{song}, 1);
+            var condition = "song.sha256 = '" + song.getSha256() + "' AND ";
+            var matches = cache.querySongs(songs, condition + "score.clear = " + expected, null);
+            var registered = Arrays.stream(songs.getAllSongDatas()).filter(s -> s.getSha256().equals(song.getSha256())).findFirst().orElseThrow();
+            check(matches.length == 1, "SQL score view follows planned LN identity: indexed=" + indexedBranch
+                    + ", expected clear=" + expected + ", mode=" + cache.scoringMode(registered, 1)
+                    + ", rule=" + cache.effectiveRule(registered, 1) + ", matches=" + matches.length);
+            check(cache.querySongs(songs, condition + "scorelog.clear = " + expected, null).length == 1,
+                    "SQL update history follows the same planned LN identity");
+            if (indexedBranch == 2) {
+                check(cache.readScoreData(song, 0).getClear() == ClearType.Normal.id
+                        && cache.readScoreData(song, 1).getClear() == ClearType.Hard.id,
+                        "Explicit LN modes do not alias in the cache when the indexed branch had no LN");
+                player.setLongnoteMode(1); player.setLongnoteRate(1);
+                check(cache.readScoreData(song, 1).getClear() == ClearType.Normal.id,
+                        "LN removal uses the modified chart's mode-zero native record");
+                player.setPrimaryScoringRule(Mode.BEAT_7K, SecondaryScoringRule.BEATORAJA);
+                check(cache.readScoreData(song, 1).getClear() == ClearType.Easy.id,
+                        "LN removal also uses the modified chart's beatoraja record");
+                player.setLongnoteMode(0); player.setPrimaryScoringRule(Mode.BEAT_7K, SecondaryScoringRule.LR2);
+            }
+        }
     }
     private static BMSModel chart(Path directory, String title, String lane) throws Exception {
         var file = directory.resolve(title + ".bme");

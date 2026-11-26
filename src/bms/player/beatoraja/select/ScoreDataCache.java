@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.*;
 public abstract class ScoreDataCache {
 
     protected String cacheKey(SongData song) { return song.getSha256(); }
+    protected String cacheKey(SongData song, int lnmode) { return cacheKey(song); }
 
     // TODO ResourcePoolベースに移行する
 
@@ -36,11 +37,11 @@ public abstract class ScoreDataCache {
      */
     public ScoreData readScoreData(SongData song, int lnmode) {
         final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
-        if (scorecache[cacheindex].containsKey(cacheKey(song))) {
-            return scorecache[cacheindex].get(cacheKey(song));
+        if (scorecache[cacheindex].containsKey(cacheKey(song, lnmode))) {
+            return scorecache[cacheindex].get(cacheKey(song, lnmode));
         }
         ScoreData score = readScoreDatasFromSource(song, lnmode);
-        scorecache[cacheindex].put(cacheKey(song), score);
+        scorecache[cacheindex].put(cacheKey(song, lnmode), score);
         return score;
     }
 
@@ -56,8 +57,8 @@ public abstract class ScoreDataCache {
         for (SongData song : songs) {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
 
-            if (scorecache[cacheindex].containsKey(cacheKey(song))) {
-                collector.collect(song, scorecache[cacheindex].get(cacheKey(song)));
+            if (scorecache[cacheindex].containsKey(cacheKey(song, lnmode))) {
+                collector.collect(song, scorecache[cacheindex].get(cacheKey(song, lnmode)));
             } else {
             	if(noscore == null) {
             		noscore = new Array<SongData>();
@@ -74,7 +75,7 @@ public abstract class ScoreDataCache {
 
         final ScoreDataCollector cachecollector = (song, score) -> {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
-            scorecache[cacheindex].put(cacheKey(song), score);
+            scorecache[cacheindex].put(cacheKey(song, lnmode), score);
         	collector.collect(song, score);
         };
         readScoreDatasFromSource(cachecollector, noscores, lnmode);
@@ -82,7 +83,7 @@ public abstract class ScoreDataCache {
 
     boolean existsScoreDataCache(SongData song, int lnmode) {
         final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
-        return scorecache[cacheindex].containsKey(cacheKey(song));
+        return scorecache[cacheindex].containsKey(cacheKey(song, lnmode));
     }
 
     public void clear() {
@@ -94,7 +95,7 @@ public abstract class ScoreDataCache {
     public void update(SongData song, int lnmode) {
         final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
         ScoreData score = readScoreDatasFromSource(song, lnmode);
-        scorecache[cacheindex].put(cacheKey(song), score);
+        scorecache[cacheindex].put(cacheKey(song, lnmode), score);
     }
 
     protected abstract ScoreData readScoreDatasFromSource(SongData songs, int lnmode);

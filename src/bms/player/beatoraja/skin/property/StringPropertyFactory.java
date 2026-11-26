@@ -230,6 +230,9 @@ public class StringPropertyFactory {
 		if (state instanceof MusicSelector selector) {
 			rule = selector.getSelectedPrimaryScoringRule(configured);
 		} else if (state instanceof BMSPlayer || state instanceof MusicResult || state instanceof CourseResult) {
+			// Courses have a fixed rule rather than a per-key-mode primary setting.
+			if (state instanceof CourseResult || state.resource.getCourseBMSModels() != null)
+				return bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA.displayName();
 			var selection = state.resource.getPrimaryScoringSelection();
 			rule = configured ? selection.requested() : selection.effective();
 		} else {

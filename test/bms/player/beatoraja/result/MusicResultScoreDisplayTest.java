@@ -319,6 +319,10 @@ public final class MusicResultScoreDisplayTest {
         resource.setPrimaryScoringSelection(bms.player.beatoraja.play.PrimaryScoringSelection.standard());
 
         set(resource, PlayerResource.class, "course", new BMSModel[]{model});
+        resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
+                bms.player.beatoraja.play.SecondaryScoringRule.LR2, bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA, "Single-song play only"));
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(result).equals("beatoraja"),
+                "Course result configured-rule name agrees with course selection");
         result.prepareScoreDisplay();
         press(result, keyboard, states);
         check(!result.canSwitchScoreDisplay() && !result.isShowingLr2Score(), "a course is not switchable");

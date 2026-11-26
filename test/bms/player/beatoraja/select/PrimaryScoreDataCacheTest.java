@@ -85,6 +85,20 @@ public final class PrimaryScoreDataCacheTest {
                 "Unplayed Angolmois maximum follows native scoring");
         player.setGauge(AbstractGrooveGauge.EXHARD);
         check(cache.scoringInfo(hold, 0).maximumScore() == 4, "Unplayed scoring metadata follows beatoraja fallback");
+        manager.currentsongs = new bms.player.beatoraja.select.bar.Bar[]{new bms.player.beatoraja.select.bar.GradeBar(new CourseData())};
+        check(bms.player.beatoraja.skin.property.StringPropertyFactory.getStringProperty(1013).get(selector).equals("beatoraja"),
+                "Course selection shows its fixed beatoraja configuration");
+        var skin = new SkinBar(0);
+        var ownLamp = bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate(bms.player.beatoraja.skin.SkinImage.class);
+        skin.setPlayerLamp(ClearType.Normal.id, ownLamp);
+        check(BarRenderer.getPlayerLamp(skin, ClearType.Normal.id, true) == ownLamp
+                && BarRenderer.getPlayerLamp(skin, ClearType.Normal.id, false) == ownLamp,
+                "Own lamp remains available with a rival-only image bank, regardless of rival visibility");
+        var normalLamp = bms.player.beatoraja.input.KeyboardQueueTestSupport.allocate(bms.player.beatoraja.skin.SkinImage.class);
+        skin.setLamp(ClearType.Normal.id, normalLamp);
+        check(BarRenderer.getPlayerLamp(skin, ClearType.Normal.id, true) == ownLamp
+                && BarRenderer.getPlayerLamp(skin, ClearType.Normal.id, false) == normalLamp,
+                "Each layout retains its player lamp when both image banks exist");
         System.out.println("PrimaryScoreDataCacheTest passed (lamps, personal bests, bulk/cache switching and fallback)");
     }
     private static void check(boolean value, String message) { if (!value) throw new AssertionError(message); }
