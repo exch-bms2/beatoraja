@@ -689,11 +689,14 @@ public class BooleanPropertyFactory {
 			return (score != null && score.getClear() == Failed.id) || (cscore != null && cscore.getClear() == Failed.id);
 		})),
 		result_1pwin(352,DrawProperty.TYPE_NO_STATIC,
-				(state) -> (state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore())),
+				(state) -> bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state)
+						&& state.getScoreDataProperty().getNowEXScore() > state.getScoreDataProperty().getRivalScore()),
 		result_2pwin(353,DrawProperty.TYPE_NO_STATIC,
-				(state) -> (state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore())),
+				(state) -> bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state)
+						&& state.getScoreDataProperty().getNowEXScore() < state.getScoreDataProperty().getRivalScore()),
 		result_draw(354,DrawProperty.TYPE_NO_STATIC,
-				(state) -> (state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore())),
+				(state) -> bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state)
+						&& state.getScoreDataProperty().getNowEXScore() == state.getScoreDataProperty().getRivalScore()),
 
 		ir_offline(50, DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length == 0)),
 		ir_online(51, DrawProperty.TYPE_STATIC_ALL, (state) -> (state.main.getIRStatus().length > 0)),

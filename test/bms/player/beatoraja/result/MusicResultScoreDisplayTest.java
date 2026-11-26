@@ -32,6 +32,7 @@ public final class MusicResultScoreDisplayTest {
     public static void main(String[] args) throws Exception {
         var previousInput = Gdx.input;
         try {
+            verifyWinLossDraw();
             verifyGaugeCycles();
             for (var mode : new Mode[]{Mode.BEAT_5K, Mode.BEAT_7K, Mode.POPN_9K, Mode.BEAT_10K, Mode.BEAT_14K}) {
                 verify(mode);
@@ -40,6 +41,41 @@ public final class MusicResultScoreDisplayTest {
             Gdx.input = previousInput;
         }
         System.out.println("MusicResultScoreDisplayTest passed (F7, graph switching and primary isolation in all supported modes)");
+    }
+
+    private static void verifyWinLossDraw() throws Exception {
+        var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
+        resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
+                bms.player.beatoraja.play.SecondaryScoringRule.LR2,
+                bms.player.beatoraja.play.SecondaryScoringRule.LR2, ""));
+        var main = KeyboardQueueTestSupport.allocate(MainController.class);
+        set(main, MainController.class, "resource", resource);
+        var result = new MusicResult(main);
+        var score = score(Mode.BEAT_7K, 5, ClearType.Normal, BMSPlayerRule.LunaticRave2);
+        result.getPrimaryScoreDataProperty().update(score);
+        for (int target : new int[]{0, 10, 20}) {
+            result.getPrimaryScoreDataProperty().setTargetScore(0, target, 100);
+            checkWinLossDraw(result, false, false, false, "Missing compatible target suppresses every outcome");
+        }
+        score.setEpg(0);
+        result.getPrimaryScoreDataProperty().update(score);
+        result.getPrimaryScoreDataProperty().setTargetScore(0, 0, 100);
+        checkWinLossDraw(result, false, false, false, "Missing target does not turn a zero score into a draw");
+
+        score.setEpg(5);
+        result.getPrimaryScoreDataProperty().update(score);
+        resource.setTargetScoreData(score);
+        for (int target : new int[]{0, 10, 20}) {
+            result.getPrimaryScoreDataProperty().setTargetScore(0, target, 100);
+            checkWinLossDraw(result, target < 10, target > 10, target == 10,
+                    "A compatible primary target preserves win/loss/draw comparisons");
+        }
+    }
+
+    private static void checkWinLossDraw(MusicResult result, boolean win, boolean loss, boolean draw, String message) {
+        check(BooleanPropertyFactory.getBooleanProperty(352).get(result) == win
+                && BooleanPropertyFactory.getBooleanProperty(353).get(result) == loss
+                && BooleanPropertyFactory.getBooleanProperty(354).get(result) == draw, message);
     }
 
     private static void verifyGaugeCycles() throws Exception {
@@ -115,6 +151,7 @@ public final class MusicResultScoreDisplayTest {
         result.gaugeType = NORMAL;
         result.getPrimaryScoreDataProperty().setTargetScore(primaryBest.getExscore(), 170, 100);
         result.getPrimaryScoreDataProperty().update(primary);
+        resource.setTargetScoreData(score(mode, 85, ClearType.Normal, rule));
         var states = new boolean[256];
         Gdx.input = (Input) Proxy.newProxyInstance(Input.class.getClassLoader(), new Class<?>[]{Input.class},
                 (proxy, method, args) -> "isKeyPressed".equals(method.getName()) && states[(int) args[0]]);
@@ -149,7 +186,9 @@ public final class MusicResultScoreDisplayTest {
         check(graph.updateGraphData(result) && gaugeNumber.get(result) == 80, "primary gauge data");
         check(score.get(result) == 190 && rank.get(result) && !rank.isStatic(result),
                 "primary is initially shown, rank destinations remain dynamic");
+        checkWinLossDraw(result, true, false, false, "Primary view compares against its compatible target");
         press(result, keyboard, states);
+        checkWinLossDraw(result, false, false, false, "F7 suppresses all outcomes for a different scoring rule");
         timingGraph.prepare(0, result);
         check(result.getTimingDistribution().getAverage() == 30 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), lr2Area)
                         && timingField.get(timingGraph) != initialDistribution,
@@ -188,6 +227,7 @@ public final class MusicResultScoreDisplayTest {
         press(result, keyboard, states);
         check(!result.isShowingLr2Score() && score.get(result) == 190 && rank.get(result),
                 "a second press restores the primary view");
+        checkWinLossDraw(result, true, false, false, "Returning from F7 restores primary target comparison");
         timingGraph.prepare(0, result);
         check(timingField.get(timingGraph) == initialDistribution && result.getTimingDistribution().getAverage() == -6,
                 "F7 restores primary timing graph without mixing samples");
