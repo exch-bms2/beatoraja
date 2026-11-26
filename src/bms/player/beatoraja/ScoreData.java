@@ -578,8 +578,9 @@ public final class ScoreData implements Validatable {
 			setSeed(newscore.getSeed());
 			update = true;
 		}
-		if (updateScore && (getRuleScore() < newscore.getRuleScore()
+		if (updateScore && (notes <= 0 || getRuleScore() < newscore.getRuleScore()
 				|| nativeScore < 0 && newscore.getNativeScore() >= 0)) {
+			setNotes(newscore.getNotes());
 			setNativeScore(newscore.getNativeScore());
 			setNativeMaxScore(newscore.getNativeMaxScore());
 			setEpg(newscore.getEpg());

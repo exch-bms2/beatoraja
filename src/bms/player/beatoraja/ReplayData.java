@@ -85,6 +85,9 @@ public final class ReplayData implements Validatable {
 	 * 7to9配置
 	 */
 	public int sevenToNinePattern = 0;
+	/** Null in legacy replays, which only recorded the conversion pattern. */
+	public Integer sevenToNineType;
+	public Integer sevenToNineHranThresholdBPM;
 	/**
 	 * 譜面オプション
 	 */

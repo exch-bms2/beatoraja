@@ -16,6 +16,7 @@ public final class ChartModifierReplayTest {
             Files.writeString(file, "#PLAYER 1\n#BPM 120\n#RANK 2\n#TOTAL 400\n#WAV01 a.wav\n"
                     + "#RANDOM 2\n#IF 1\n#00119:01000100\n#ENDIF\n#IF 2\n#00119:00010001\n#ENDIF\n#ENDRANDOM\n"
                     + "#00219:01000100\n#00319:01\n#00101:00010001\n#00401:01\n");
+            verifySevenToNine(file);
             for (int lnMode : new int[]{2, 3, 5}) for (long seed : new long[]{0, 4096}) {
                 var config = new PlayerConfig(); config.setLongnoteMode(lnMode); config.setLongnoteRate(.5);
                 config.setScrollMode(2); config.setScrollSection(1); config.setScrollRate(.7);
@@ -73,6 +74,47 @@ public final class ChartModifierReplayTest {
             }
         } finally { Files.deleteIfExists(file); }
         System.out.println("ChartModifierReplayTest passed (JSON, branch/modifier restoration, profile isolation, real judge scores/gauges and legacy replays)");
+    }
+
+    private static void verifySevenToNine(Path file) throws Exception {
+        var factory = BMSPlayer.class.getDeclaredMethod("sevenToNineModifier", PlayerConfig.class, ReplayData.class);
+        factory.setAccessible(true);
+        for (int pattern : new int[]{0, 1, 6}) for (int type : new int[]{0, 1, 2}) {
+            var config = new PlayerConfig(); config.setSevenToNinePattern(pattern); config.setSevenToNineType(type); config.setHranThresholdBPM(180);
+            var chart = decode(file, new int[]{1});
+            var player = KeyboardQueueTestSupport.allocate(BMSPlayer.class); var info = new ReplayData();
+            set(player, BMSPlayer.class, "model", chart); set(player, BMSPlayer.class, "playinfo", info);
+            var convert = (bms.player.beatoraja.pattern.ModeModifier) factory.invoke(player, config, null);
+            bms.player.beatoraja.pattern.PatternModifier.create(1, 0, chart.getMode(), config).modify(chart);
+            if (convert != null) convert.modify(chart);
+            var saved = new Json().fromJson(ReplayData.class, new Json().toJson(info));
+            check(saved.sevenToNinePattern == pattern && saved.sevenToNineType == type && saved.sevenToNineHranThresholdBPM == 180,
+                    "Replay records the conversion pattern, scratch behavior and threshold");
+            config.setSevenToNinePattern(pattern == 0 ? 6 : 0); config.setSevenToNineType((type + 1) % 3); config.setHranThresholdBPM(300);
+            var reproduced = decode(file, new int[]{1});
+            set(player, BMSPlayer.class, "model", reproduced); set(player, BMSPlayer.class, "playinfo", new ReplayData());
+            var replayConvert = (bms.player.beatoraja.pattern.ModeModifier) factory.invoke(player, config, saved);
+            bms.player.beatoraja.pattern.PatternModifier.create(1, 0, reproduced.getMode(), config).modify(reproduced);
+            if (replayConvert != null) replayConvert.modify(reproduced);
+            check(chart.getMode() == reproduced.getMode() && fingerprint(chart).equals(fingerprint(reproduced)),
+                    "Replay uses saved conversion after the original-mode lane shuffle");
+            check(config.getSevenToNinePattern() == (pattern == 0 ? 6 : 0) && config.getHranThresholdBPM() == 300,
+                    "Replay conversion does not mutate the player profile");
+            if (pattern == 0) {
+                var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
+                set(resource, PlayerResource.class, "orgmode", Mode.BEAT_7K);
+                set(resource, PlayerResource.class, "chartRuleParameters", BMSPlayerRule.ChartParameters.fromBms(reproduced));
+                resource.setPlayMode(BMSPlayerMode.REPLAY_1);
+                saved.primaryScoringRuleId = "lr2"; saved.gauge = AbstractGrooveGauge.NORMAL;
+                check(PrimaryScoringSelection.resolveReplay(saved, reproduced, resource).effective() == SecondaryScoringRule.LR2,
+                        "Current 7-to-9 setting cannot force a native 7KEY replay to fall back");
+            }
+        }
+        var legacy = new Json().fromJson(ReplayData.class, "{sevenToNinePattern:0}");
+        var config = new PlayerConfig(); config.setSevenToNinePattern(6);
+        var player = KeyboardQueueTestSupport.allocate(BMSPlayer.class);
+        set(player, BMSPlayer.class, "model", decode(file, new int[]{1})); set(player, BMSPlayer.class, "playinfo", new ReplayData());
+        check(factory.invoke(player, config, legacy) == null, "Legacy 7KEY replay also ignores current conversion setting");
     }
 
     private static ReplayData apply(BMSModel model, PlayerConfig config, ReplayData replay, BMSPlayerMode mode) throws Exception {

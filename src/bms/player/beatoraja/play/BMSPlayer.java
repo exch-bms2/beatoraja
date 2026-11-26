@@ -61,6 +61,7 @@ public class BMSPlayer extends MainState {
 	 * リプレイデータ
 	 */
 	private ReplayData replay = null;
+	private ReplayData chartReplay;
 
 	private int playspeed = 100;
 
@@ -251,9 +252,6 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("前回プレイ時の譜面再現");
 			}
 			if (rd != null) {
-				if(rd.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
-					model.setMode(Mode.POPN_9K);
-				}
 				playinfo.randomoption = rd.randomoption;
 				playinfo.randomoptionseed = rd.randomoptionseed;
 				playinfo.randomoption2 = rd.randomoption2;
@@ -289,11 +287,8 @@ public class BMSPlayer extends MainState {
 			mods.add(pm);
 			Logger.getGlobal().info("譜面オプション(1P) :  " + playinfo.randomoption + ", Seed : " + playinfo.randomoptionseed);
 
-			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
-				//7to9
-				ModeModifier mod = new ModeModifier(Mode.BEAT_7K, Mode.POPN_9K, config);
-				mods.add(mod);
-			}
+			var conversion = sevenToNineModifier(config, rd != null ? rd : chartReplay);
+			if (conversion != null) mods.add(conversion);
 
 			int[][] patternArray = new int[model.getMode().player][];
 
@@ -354,6 +349,7 @@ public class BMSPlayer extends MainState {
 
 	/** Replay modifiers are restored without changing the user's current configuration. */
 	private void restoreReplayChart(ReplayData source) {
+		chartReplay = source;
 		playinfo.randomoption = source.randomoption;
 		playinfo.randomoptionseed = source.randomoptionseed;
 		playinfo.randomoption2 = source.randomoption2;
@@ -361,6 +357,20 @@ public class BMSPlayer extends MainState {
 		playinfo.doubleoption = source.doubleoption;
 		playinfo.rand = source.rand;
 		playinfo.chartModifiers = source.chartModifiers;
+	}
+
+	/** Conversion follows the saved chart after the original key-mode lane shuffle. */
+	private ModeModifier sevenToNineModifier(PlayerConfig config, ReplayData saved) {
+		playinfo.sevenToNinePattern = saved != null ? saved.sevenToNinePattern : config.getSevenToNinePattern();
+		playinfo.sevenToNineType = saved != null && saved.sevenToNineType != null ? saved.sevenToNineType : config.getSevenToNineType();
+		playinfo.sevenToNineHranThresholdBPM = saved != null && saved.sevenToNineHranThresholdBPM != null
+				? saved.sevenToNineHranThresholdBPM : config.getHranThresholdBPM();
+		if (playinfo.sevenToNinePattern == 0 || model.getMode() != Mode.BEAT_7K) return null;
+		var conversion = new PlayerConfig();
+		conversion.setSevenToNinePattern(playinfo.sevenToNinePattern);
+		conversion.setSevenToNineType(playinfo.sevenToNineType);
+		conversion.setHranThresholdBPM(playinfo.sevenToNineHranThresholdBPM);
+		return new ModeModifier(Mode.BEAT_7K, Mode.POPN_9K, conversion);
 	}
 
 	private void applyChartModifiers(BMSPlayerMode mode, PlayerConfig config) {
@@ -1035,7 +1045,9 @@ public class BMSPlayer extends MainState {
 		replay.primaryScoringFallbackReason = resource.getPrimaryScoringSelection().reason();
 		replay.scoringFrameUs = playRule == BMSPlayerRule.Angolmois ? AngolmoisEngine.FRAME_US : 0;
 		replay.chartModifiers = playinfo.chartModifiers;
-		replay.sevenToNinePattern = config.getSevenToNinePattern();
+		replay.sevenToNinePattern = playinfo.sevenToNinePattern;
+		replay.sevenToNineType = playinfo.sevenToNineType;
+		replay.sevenToNineHranThresholdBPM = playinfo.sevenToNineHranThresholdBPM;
 		replay.randomoption = playinfo.randomoption;
 		replay.randomoptionseed = playinfo.randomoptionseed;
 		replay.randomoption2 = playinfo.randomoption2;

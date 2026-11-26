@@ -343,15 +343,13 @@ public final class PlayDataAccessor {
 			score.setMode(model.containsUndefinedLongNote() ? lnmode : 0);
 		}
 		score.setSha256(hash);
-		if (updateScore) {
-			score.setNotes(model.getTotalNotes());
-		}
 
 		if (newscore.getClear() > Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 
 		ScoreLog log = updateScore(score, newscore, hash, updateScore);
+		if (score.getNotes() <= 0) score.setNotes(model.getTotalNotes());
 		
 		Set<SongTrophy> newTrophies = ScoreTrophies.forAttempt(newscore);
 		score.setTrophy(ScoreTrophies.merge(score.getTrophy(), newTrophies));
@@ -472,13 +470,13 @@ public final class PlayDataAccessor {
 			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 		}
 		score.setSha256(hash);
-		score.setNotes(totalnotes);
 
 		if (newscore.getClear() != Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 		
 		ScoreLog log = updateScore(score, newscore, hash, updateScore);
+		if (score.getNotes() <= 0) score.setNotes(totalnotes);
 
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);

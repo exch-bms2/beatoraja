@@ -122,7 +122,6 @@ final class RuleScoreStore {
 				best.setSha256(score.getSha256());
 				best.setMode(score.getMode());
 			}
-			best.setNotes(score.getNotes());
 			var diff = PlayDataAccessor.updateScore(best, score, score.getSha256(), true);
 			var trophies = ScoreTrophies.forAttempt(score);
 			best.setTrophy(ScoreTrophies.merge(best.getTrophy(), trophies));
