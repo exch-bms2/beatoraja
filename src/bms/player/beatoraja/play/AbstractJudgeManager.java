@@ -83,6 +83,13 @@ public abstract class AbstractJudgeManager {
 		return area;
 	}
 	public PlayerResource.TimingData getTimingData() { return new PlayerResource.TimingData(timingHistory.toArray(), getTimingJudgeArea()); }
+	public void completeScoreStatistics() {
+		long total = 0;
+		for (int i = 0; i < ghostJudge.length; i++) total += ghostJudge[i] < 4 ? ghostDuration[i] : 1_000_000;
+		score.setTotalDuration(total);
+		score.setAvgjudge(ghostJudge.length > 0 ? total / ghostJudge.length : Long.MAX_VALUE);
+		score.encodeGhost(ghostJudge);
+	}
 	private long[] microrecentJudges = new long[100];
 	/**
 	 * 判定差時間のヘッド

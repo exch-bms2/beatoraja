@@ -25,6 +25,10 @@ public final class PrimaryResultPersistenceTest {
         var primary = score(model, 1, 1, BMSPlayerRule.Angolmois);
         primary.setNativeScore(700); primary.setNativeMaxScore(750);
         primary.setOption(3); primary.setSeed(12345); primary.setPlaytime(9000);
+        primary.setAvgjudge(12000); primary.setTotalDuration(24000);
+        primary.setJudgeAlgorithm(JudgeAlgorithm.Lowest); primary.setSkin("fixture");
+        primary.setDeviceType(bms.player.beatoraja.input.BMSPlayerInputDevice.Type.KEYBOARD);
+        standard.setAvgjudge(18000); standard.setTotalDuration(36000);
         var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
         set(resource, PlayerResource.class, "model", model);
         set(resource, PlayerResource.class, "pconfig", new PlayerConfig());
@@ -41,12 +45,28 @@ public final class PrimaryResultPersistenceTest {
         var main = KeyboardQueueTestSupport.allocate(MainController.class);
         set(main, MainController.class, "resource", resource);
         set(main, MainController.class, "playdata", data);
+        set(main, MainController.class, "player", resource.getPlayerConfig());
         var result = new MusicResult(main);
         var save = MusicResult.class.getDeclaredMethod("updateScoreDatabase"); save.setAccessible(true);
         save.invoke(result);
         var best = data.readRuleBest(SecondaryScoringRule.ANGOLMOIS, model.getSHA256(), 0);
         check(best != null && best.getNativeScore() == 700 && best.getNativeMaxScore() == 750 && best.getExscore() == 3, "Actual primary goes to its own rule store");
         check(data.readScoreData(model, 0).getExscore() == 2, "Canonical database contains only independent beatoraja scoring");
+        check(best.getAvgjudge() == 12000 && best.getOption() == 3 && best.getSeed() == 12345
+                && data.readScoreData(model, 0).getAvgjudge() == 18000, "Each score store preserves its own timing statistics and options");
+        try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + directory.resolve("test/scoredatalog_angolmois.db"));
+                var rows = connection.createStatement().executeQuery("SELECT avgjudge, total_duration, playtime, option, seed, judge_algorithm, scoring_rule, skin FROM scoredatalog")) {
+            check(rows.next() && rows.getLong(1) == 12000 && rows.getLong(2) == 24000 && rows.getLong(3) == 9000
+                    && rows.getInt(4) == 3 && rows.getLong(5) == 12345 && rows.getString(6).equals("Lowest")
+                    && rows.getString(7).equals("Angolmois") && rows.getString(8).equals("fixture"), "Rule history preserves immutable performance metadata");
+        }
+        check(TargetProperty.getTargetProperty("MAX").getTarget(main, primary).getRuleScore() == 750, "Native maximum target");
+        check(TargetProperty.getTargetProperty("RATE_50").getTarget(main, primary).getRuleScore() == 375, "Native rate target");
+        check(TargetProperty.getTargetProperty("RANK_NEXT").getTarget(main, primary).getRuleScore() == 723, "Next rank uses the native best and maximum");
+        check(TargetProperty.getTargetProperty("IR_RANK_1").getTarget(main, primary) == null
+                && TargetProperty.getTargetProperty("RIVAL_1").getTarget(main, primary) == null, "Unsupported external-rule targets are disabled");
+        var pulsus = new ScoreData(model.getMode()); pulsus.setNotes(4);
+        check(TargetProperty.getTargetProperty("MAX").getTarget(main, pulsus).getRuleScore() == 8, "Pulsus target counts both LN endpoints");
         check(result.getDisplayScoringSummary().startsWith("Primary: Angolmois") && result.getDisplayScoringSummary().contains("700 / 750"), "Primary native result summary");
         var irScore = result.selectIRScore();
         check(irScore.score() == standard && irScore.previousBest() == previousStandard, "IR selects beatoraja and its pre-save best");
@@ -70,7 +90,8 @@ public final class PrimaryResultPersistenceTest {
         };
         check(new MusicResult.IRSendStatus(connection, new IRChartData(new SongData()), irScore.score()).send(), "IR queue sends selected score");
         check(submitted[0].getExscore() == 2 && submitted[0].rule == BMSPlayerRule.Beatoraja_7
-                && submitted[0].option == 3 && submitted[0].seed == 12345 && submitted[0].playtime == 9000,
+                && submitted[0].option == 3 && submitted[0].seed == 12345 && submitted[0].playtime == 9000
+                && submitted[0].avgjudge == 18000,
                 "IR payload contains only beatoraja judgments with actual play metadata");
         resource.setAlternateResultScores(List.of());
         check(result.selectIRScore() == null, "Missing beatoraja result never substitutes native primary score");

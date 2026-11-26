@@ -465,13 +465,15 @@ public class BMSPlayer extends MainState {
 			state = STATE_PRACTICE;
 		} else {
 			
-			if(resource.getRivalScoreData() == null || resource.getCourseBMSModels() != null) {
-				ScoreData targetScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main);
+			if(resource.getRivalScoreData() == null || resource.getCourseBMSModels() != null || !resource.getPrimaryScoringSelection().isStandard()) {
+				ScoreData targetScore = TargetProperty.getTargetProperty(config.getTargetid()).getTarget(main, judge.getScoreData());
 				resource.setTargetScoreData(targetScore);
 			} else {
 				resource.setTargetScoreData(resource.getRivalScoreData());
 			}
-			getScoreDataProperty().setTargetScore(score.getExscore(), score.decodeGhost(), resource.getTargetScoreData() != null ? resource.getTargetScoreData().getExscore() : 0 , null, judge.getScoreData().getNotes());
+			getScoreDataProperty().setTargetScore(score.getRuleScore(), score.decodeGhost(),
+					resource.getTargetScoreData() != null ? resource.getTargetScoreData().getRuleScore() : 0, null,
+					judge.getScoreData().getNotes(), judge.getScoreData().getRuleMaxScore());
 		}
 	}
 
@@ -1042,30 +1044,22 @@ public class BMSPlayer extends MainState {
 		score.setPassnotes(judge.getPastNotes());
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + score.getNotes() - judge.getPastNotes());
 		
-		long count = 0;
-		long avgduration = 0;
-		final int lanes = model.getMode().key;
-		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < lanes; i++) {
-				Note n = tl.getNote(i);
-				if (n instanceof NormalNote || n instanceof LongNote ln && (playRule == BMSPlayerRule.Pulsus
-						|| !(((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-						|| ln.getType() == LongNote.TYPE_LONGNOTE) && ln.isEnd()))) {
-					int state = n.getState();
-					long time = n.getMicroPlayTime();
-					avgduration += state >= 1 && state <= 4 ? Math.abs(time) : 1000000;
-					count++;
-//					System.out.println(time);
-				}
-			}
-		}
-		score.setTotalDuration(avgduration);
-		score.setAvgjudge(count > 0 ? avgduration / count : Long.MAX_VALUE);
-//		System.out.println(avgduration + " / " + count + " = " + score.getAvgjudge());
+		judge.completeScoreStatistics();
 
+		fillSharedScoreMetadata(score);
+		return score;
+	}
+
+	private void fillSharedScoreMetadata(ScoreData score) {
+		score.setPlaytime(playTimeTracker.getPlaytime());
+		score.setOption(playinfo.randomoption + (model.getMode().player == 2
+				? playinfo.randomoption2 * 10 + playinfo.doubleoption * 100 : 0));
+		score.setSeed((model.getMode().player == 2 ? playinfo.randomoption2seed * 65536 * 256 : 0) + playinfo.randomoptionseed);
+		score.setAssist(assist);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		score.setSkin(getSkin().header.getName());
-		return score;
+		if (score.getClear() != ClearType.Failed.id && assist > 0)
+			score.setClear(assist == 1 ? ClearType.LightAssistEasy.id : ClearType.AssistEasy.id);
 	}
 
 	private void notifyObsPlayEnd() {
@@ -1087,11 +1081,13 @@ public class BMSPlayer extends MainState {
 			try {
 				var data = main.getPlayDataAccessor();
 				var attempt = secondary.toLocalAttempt(model);
+				var score = attempt.toScoreData(model.getMode());
+				fillSharedScoreMetadata(score);
+				attempt = attempt.withMetadata(score);
 				if (secondary.outcome() != SecondaryJudgingGroup.Outcome.ERROR
 						&& secondary.outcome() != SecondaryJudgingGroup.Outcome.INPUT_LOST) {
 					var previous = rule == SecondaryScoringRule.BEATORAJA ? data.readScoreData(model, resource.getPlayerConfig().getLnmode())
 							: data.readRuleBest(rule, attempt.sha256(), attempt.mode());
-					var score = attempt.toScoreData(model.getMode());
 					score.setRule(rule == SecondaryScoringRule.BEATORAJA
 							? BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()) : rule.scoreRule());
 					display.add(new PlayerResource.AlternateResultScore(rule.id(), rule.displayName(),
@@ -1234,8 +1230,9 @@ public class BMSPlayer extends MainState {
 		timer.switchTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
 		timer.switchTimer(TIMER_SCORE_AA, getScoreDataProperty().qualifyRank(21));
 		timer.switchTimer(TIMER_SCORE_AAA, getScoreDataProperty().qualifyRank(24));
-		timer.switchTimer(TIMER_SCORE_BEST, judgem.getScoreData().getExscore() >= getScoreDataProperty().getBestScore());
-		timer.switchTimer(TIMER_SCORE_TARGET, judgem.getScoreData().getExscore() >= getScoreDataProperty().getRivalScore());
+		timer.switchTimer(TIMER_SCORE_BEST, judgem.getScoreData().getRuleScore() >= getScoreDataProperty().getBestScore());
+		timer.switchTimer(TIMER_SCORE_TARGET, resource.getTargetScoreData() != null
+				&& judgem.getScoreData().getRuleScore() >= getScoreDataProperty().getRivalScore());
 
 		((PlaySkin)getSkin()).pomyu.PMcharaJudge = judge + 1;
 	}

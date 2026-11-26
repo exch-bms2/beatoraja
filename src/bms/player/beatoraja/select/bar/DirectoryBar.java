@@ -135,7 +135,7 @@ public abstract class DirectoryBar extends Bar {
 				lamps[score.getClear()]++;
 
 				if (score.getNotes() != 0) {
-					int rank = score.getExscore() * 27 / (score.getNotes() * 2);
+					int rank = score.getRuleMaxScore() > 0 ? (int) ((long) score.getRuleScore() * 27 / score.getRuleMaxScore()) : 0;
 					ranks[rank < 28 ? rank : 27]++;
 				} else {
 					ranks[0]++;

@@ -20,6 +20,13 @@ import bms.player.beatoraja.select.ScoreDataCache;
  */
 public abstract class TargetProperty {
 
+    public static boolean isTargetAvailable(bms.player.beatoraja.MainState state) {
+        if (state instanceof bms.player.beatoraja.select.MusicSelector selector)
+            return selector.getRival() != null && selector.canCompareRival();
+        return state.resource.getTargetScoreData() != null
+                && !(state instanceof bms.player.beatoraja.result.MusicResult result && result.isShowingSecondaryScore());
+    }
+
 	/**
 	 * Target ID
 	 */
@@ -29,6 +36,24 @@ public abstract class TargetProperty {
      * ターゲットスコア
      */
     protected final ScoreData targetScore = new ScoreData();
+    protected ScoreData scoring;
+
+    public ScoreData getTarget(MainController main, ScoreData scoring) {
+        this.scoring = scoring;
+        return getTarget(main);
+    }
+
+    protected int maximum(MainController main) {
+        return scoring != null ? scoring.getRuleMaxScore() : main.getPlayerResource().getBMSModel().getTotalNotes() * 2;
+    }
+
+    protected void assignTarget(int value, MainController main) {
+        targetScore.setNotes(scoring != null ? scoring.getNotes() : main.getPlayerResource().getBMSModel().getTotalNotes());
+        targetScore.setEpg(value / 2); targetScore.setEgr(value % 2);
+        if (scoring != null && scoring.getNativeScore() >= 0) {
+            targetScore.setNativeScore(value); targetScore.setNativeMaxScore(scoring.getRuleMaxScore());
+        }
+    }
     
     private static String[] targets = new String[0];
     private static String[] targetNames =  new String[0];
@@ -106,10 +131,9 @@ class StaticTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
-    	int rivalscore = (int)Math.ceil(main.getPlayerResource().getBMSModel().getTotalNotes() * 2 * rate / 100f);
+        int rivalscore = (int)Math.ceil(maximum(main) * rate / 100f);
 		targetScore.setPlayer(getName(main));
-		targetScore.setEpg(rivalscore / 2);
-		targetScore.setEgr(rivalscore % 2);
+		assignTarget(rivalscore, main);
         return targetScore;
     }
     
@@ -186,6 +210,7 @@ class RivalTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
+        if (!main.getPlayerResource().getPrimaryScoringSelection().isStandard()) return null;
     	final PlayerInformation info = main.getRivalDataAccessor().getRivalInformation(index);
     	final ScoreDataCache cache = main.getRivalDataAccessor().getRivalScoreDataCache(index);
     	
@@ -311,10 +336,14 @@ class NextRankTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
-        ScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
-                , main.getPlayerConfig().getLnmode());
-        final int nowscore = now != null ? now.getExscore() : 0;
-        final int max = main.getPlayerResource().getBMSModel().getTotalNotes() * 2;
+        var resource = main.getPlayerResource();
+        var model = resource.getBMSModel();
+        ScoreData now = resource.getPrimaryScoringSelection().isStandard()
+                ? main.getPlayDataAccessor().readScoreData(model, main.getPlayerConfig().getLnmode())
+                : main.getPlayDataAccessor().readRuleBest(resource.getPrimaryScoringSelection().effective(), model.getSHA256(),
+                        model.containsUndefinedLongNote() ? model.getLntype() : 0);
+        final int nowscore = now != null ? now.getRuleScore() : 0;
+        final int max = maximum(main);
         int targetscore = max;
         for(int i = 15;i < 27;i++) {
             int target = (int)Math.ceil(max * i / 27f);
@@ -324,8 +353,7 @@ class NextRankTargetProperty extends TargetProperty {
             }
         }
 		targetScore.setPlayer(getName(main));
-		targetScore.setEpg(targetscore / 2);
-		targetScore.setEgr(targetscore % 2);
+		assignTarget(targetscore, main);
         return targetScore;
 
     }
@@ -363,6 +391,7 @@ class InternetRankingTargetProperty extends TargetProperty {
 
     @Override
     public ScoreData getTarget(MainController main) {
+        if (!main.getPlayerResource().getPrimaryScoringSelection().isStandard()) return null;
     	final RankingData ranking = main.getPlayerResource().getRankingData();
     	if(ranking == null) {
 			targetScore.setPlayer("NO DATA");

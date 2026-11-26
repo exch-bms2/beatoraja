@@ -26,6 +26,8 @@ final class AngolmoisJudgeManager extends AbstractJudgeManager implements Angolm
         return lanes;
     }
     @Override void initRule(BMSModel model, PlayerResource resource, JudgeProperty rule, int rank, int[] keys, int[] scratch) {
+        getScoreData().setNativeScore(0);
+        getScoreData().setNativeMaxScore(engine.maxScore);
         offsetUs = engine.originDelayUs - resource.getMarginTime() * 1000;
         engine.listener = this;
     }
@@ -63,6 +65,7 @@ final class AngolmoisJudgeManager extends AbstractJudgeManager implements Angolm
     @Override ClearType getCompletedComboClear() { return gauge().isQualified() ? ClearType.Normal : ClearType.Failed; }
     @Override public void judge(AngolmoisEngine.ChartObject object, int grade, double signedMs, long frameUs, boolean vanish) {
         if (object.note == null) return;
+        getScoreData().setNativeScore(engine.score);
         var lane = lanes[object.lane];
         if (object.type == AngolmoisEngine.HEAD && grade != 0) lane.processing = (LongNote) object.note;
         if (grade == 0) lane.processing = null;

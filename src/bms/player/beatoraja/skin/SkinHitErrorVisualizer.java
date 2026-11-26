@@ -88,9 +88,10 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		}
 		super.prepare(time, state);
 		final PlayerResource resource = state.resource;
-		if(resource.getBMSModel() != model) {
+		int[] currentArea = ((BMSPlayer) state).getJudgeManager().getTimingJudgeArea();
+		if(resource.getBMSModel() != model || !java.util.Arrays.equals(judgeArea, currentArea)) {
 			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);
+			judgeArea = currentArea;
 			currentindex = -1;
 			ema = 0L;
 		}
@@ -194,27 +195,6 @@ public final class SkinHitErrorVisualizer extends SkinObject {
 		currentindex = index;
 	}
 
-	static int[] getJudgeArea(PlayerResource resource) {
-		// TODO JudgeManagerと重複した処理
-		BMSModel model = resource.getBMSModel();
-		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
-
-		final int judgerank = model.getJudgerank();
-		final PlayerConfig config = resource.getPlayerConfig();
-		final int[] judgeWindowRate = config.isCustomJudge()
-				? new int[]{config.getKeyJudgeWindowRatePerfectGreat(), config.getKeyJudgeWindowRateGreat(), config.getKeyJudgeWindowRateGood()}
-				: new int[]{100, 100, 100};
-				
-		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
-			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-				judgeWindowRate[1] = judgeWindowRate[2] = 0;
-			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-				judgeWindowRate[2] = 0;
-			}
-		}
-
-		return rule.getNoteJudge(judgerank, judgeWindowRate);
-	}
 
 	@Override
 	public void dispose() {

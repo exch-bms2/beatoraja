@@ -231,18 +231,23 @@ public class StringPropertyFactory {
 		
 		rival(1, (state) -> {
 			if (state instanceof MusicSelector selector) {
+				if (!selector.canCompareRival()) return "";
 				final PlayerInformation rival = selector.getRival();
 				return rival != null ? rival.getName() : "";
 			} else {
+				if ((state instanceof BMSPlayer || state instanceof AbstractResult) && !TargetProperty.isTargetAvailable(state)) return "";
 				final ScoreData rival = state.resource.getTargetScoreData();
 				return rival != null ? rival.getPlayer() : "";
 			}
 		}),
 		player(2, (state) -> (state.resource.getPlayerConfig().getName())),
 		target(3, (state) -> {
-			if (state instanceof MusicSelector) {
+			if (state instanceof MusicSelector selector) {
+				String id = state.resource.getPlayerConfig().getTargetid();
+				if (!selector.canCompareRival() && (id.startsWith("IR_") || id.startsWith("RIVAL_"))) return "";
 				return TargetProperty.getTargetName(state.resource.getPlayerConfig().getTargetid());					
 			} else {
+				if ((state instanceof BMSPlayer || state instanceof AbstractResult) && !TargetProperty.isTargetAvailable(state)) return "";
 				final ScoreData target = state.resource.getTargetScoreData();
 				return target != null ? target.getPlayer() : "";
 			}

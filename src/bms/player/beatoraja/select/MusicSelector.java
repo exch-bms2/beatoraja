@@ -155,6 +155,10 @@ public final class MusicSelector extends MainState {
 	public ScoreDataCache getRivalScoreDataCache() {
 		return rivalcache;
 	}
+	public boolean canCompareRival() {
+		return !(getSelectedBar() instanceof SongBar song) || !(scorecache instanceof PrimaryScoreDataCache cache)
+				|| cache.usesStandardRule(song.getSongData(), config.getLnmode());
+	}
 
 	public void create() {
 		boolean initial = firstCreation;

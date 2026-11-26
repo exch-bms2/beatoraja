@@ -72,6 +72,9 @@ public class ScoreDataLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 		try {
 			migrateLegacyPrimaryKey();
 			this.validate(qr);
+			validate(qr, new Table(TABLE_NAME, new Column("playtime", "INTEGER"), new Column("total_duration", "INTEGER"),
+					new Column("assist", "INTEGER"), new Column("device_type", "TEXT"), new Column("judge_algorithm", "TEXT"),
+					new Column("scoring_rule", "TEXT"), new Column("skin", "TEXT")));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -86,6 +89,7 @@ public class ScoreDataLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 			con.setAutoCommit(false);
 			for (ScoreData score : scores) {
 				this.insert(qr, con, TABLE_NAME, score);
+				writeMetadata(con, "main", score);
 			}
 			con.commit();
 		} catch (Exception e) {
@@ -103,12 +107,22 @@ public class ScoreDataLogDatabaseAccessor extends SQLiteDatabaseAccessor {
 	void setScoreDataLog(Connection connection, ScoreData score, PlayDataAccessor.ScoreAttempt attempt,
 			boolean eligible) throws SQLException {
 		insert(qr, connection, "history", TABLE_NAME, score);
+		writeMetadata(connection, "history", score);
 		qr.update(connection, """
 				UPDATE history.scoredatalog SET outcome = ?, best_eligible = ?, passed = ?, gauge = ?, gauge_value = ?,
 				native_score = ?, native_max_score = ?
 				WHERE rowid = last_insert_rowid()
 				""", attempt.outcome().name(), eligible ? 1 : 0, attempt.passed(), attempt.gauge(), attempt.gaugeValue(),
 				attempt.nativeScore(), attempt.nativeMaxScore());
+	}
+
+	private void writeMetadata(Connection connection, String schema, ScoreData score) throws SQLException {
+		qr.update(connection, "UPDATE " + schema + ".scoredatalog SET playtime = ?, total_duration = ?, assist = ?,"
+				+ " device_type = ?, judge_algorithm = ?, scoring_rule = ?, skin = ? WHERE rowid = last_insert_rowid()",
+				score.getPlaytime(), score.getTotalDuration(), score.getAssist(),
+				score.getDeviceType() != null ? score.getDeviceType().name() : null,
+				score.getJudgeAlgorithm() != null ? score.getJudgeAlgorithm().name() : null,
+				score.getRule() != null ? score.getRule().name() : null, score.getSkin());
 	}
 
 	private void migrateLegacyPrimaryKey() throws SQLException {

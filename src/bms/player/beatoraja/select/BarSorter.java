@@ -157,8 +157,8 @@ public enum BarSorter {
 			return -1;
 		}
 		return Float.compare(
-				(float) o1.getScore().getExscore() / n1,
-				(float) o2.getScore().getExscore() / n2
+				o1.getScore().getRuleMaxScore() > 0 ? (float) o1.getScore().getRuleScore() / o1.getScore().getRuleMaxScore() : 0,
+				o2.getScore().getRuleMaxScore() > 0 ? (float) o2.getScore().getRuleScore() / o2.getScore().getRuleMaxScore() : 0
 		);
 	}),
 	/**

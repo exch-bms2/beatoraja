@@ -27,6 +27,9 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 
 public class IntegerPropertyFactory {
+	private static int targetNumber(MainState state, int value) {
+		return TargetProperty.isTargetAvailable(state) ? value : Integer.MIN_VALUE;
+	}
 
 	private static final int ID_LENGTH = 65536;
 	private static final IntegerProperty[] vcache = new IntegerProperty[ID_LENGTH];
@@ -130,7 +133,7 @@ public class IntegerPropertyFactory {
 
 		score(NUMBER_SCORE, createScoreProperty()),
 		maxscore(NUMBER_MAXSCORE, (state) -> (state.getScoreDataProperty().getScoreData() != null
-				? state.getScoreDataProperty().getScoreData().getNotes() * 2
+				? state.getScoreDataProperty().getScoreData().getRuleMaxScore()
 				: 0)),
 		totalnotes(NUMBER_TOTALNOTES, createTotalNotesProperty()),
 		maxcombo(NUMBER_MAXCOMBO, createMaxComboProperty()),
@@ -191,21 +194,21 @@ public class IntegerPropertyFactory {
 		diff_exscore(NUMBER_DIFF_EXSCORE, createDiffRivalScoreProperty()),
 		total_rate(NUMBER_TOTAL_RATE, createTotalRateProperty()),
 		total_rate_afterdot(NUMBER_TOTAL_RATE_AFTERDOT, createTotalRateAfterDotProperty()),
-		target_score(NUMBER_TARGET_SCORE, (state) -> (state.getScoreDataProperty().getRivalScore())),
-		target_score_rate(NUMBER_TARGET_SCORE_RATE, (state) -> (state.getScoreDataProperty().getRivalRateInt())),
-		target_score_rate_afterdot(NUMBER_TARGET_SCORE_RATE_AFTERDOT, (state) -> (state.getScoreDataProperty().getRivalRateAfterDot())),
+		target_score(NUMBER_TARGET_SCORE, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalScore())),
+		target_score_rate(NUMBER_TARGET_SCORE_RATE, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalRateInt())),
+		target_score_rate_afterdot(NUMBER_TARGET_SCORE_RATE_AFTERDOT, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalRateAfterDot())),
 		diff_exscore2(NUMBER_DIFF_EXSCORE2, createDiffRivalScoreProperty()),
-		target_total_rate(NUMBER_TARGET_TOTAL_RATE, (state) -> (state.getScoreDataProperty().getRivalRateInt())),
-		target_total_rate_afterdot(NUMBER_TARGET_TOTAL_RATE_AFTERDOT, (state) -> (state.getScoreDataProperty().getRivalRateAfterDot())),
+		target_total_rate(NUMBER_TARGET_TOTAL_RATE, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalRateInt())),
+		target_total_rate_afterdot(NUMBER_TARGET_TOTAL_RATE_AFTERDOT, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalRateAfterDot())),
 		highscore(NUMBER_HIGHSCORE, createHighScoreProperty()),
-		target_score2(NUMBER_TARGET_SCORE2, (state) -> (state.getScoreDataProperty().getRivalScore())),
+		target_score2(NUMBER_TARGET_SCORE2, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalScore())),
 		diff_highscore(NUMBER_DIFF_HIGHSCORE, createDiffHighScoreProperty()),
 		diff_targetscore(NUMBER_DIFF_TARGETSCORE, createDiffRivalScoreProperty()),
 		diff_nextrank(NUMBER_DIFF_NEXTRANK, (state) -> (state.getScoreDataProperty().getNextRank())),
 		score_rate2(NUMBER_SCORE_RATE2, createTotalRateProperty()),
 		score_rate_afterdot2(NUMBER_SCORE_RATE_AFTERDOT2, createTotalRateAfterDotProperty()),
-		target_score_rate2(NUMBER_TARGET_SCORE_RATE2, (state) -> (state.getScoreDataProperty().getRivalRateInt())),
-		target_score_rate_afterdot2(NUMBER_TARGET_SCORE_RATE_AFTERDOT2, (state) -> (state.getScoreDataProperty().getRivalRateAfterDot())),
+		target_score_rate2(NUMBER_TARGET_SCORE_RATE2, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalRateInt())),
+		target_score_rate_afterdot2(NUMBER_TARGET_SCORE_RATE_AFTERDOT2, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalRateAfterDot())),
 		nowbpm(160, (state) -> (state instanceof BMSPlayer player ? (int)player.getLanerender().getNowBPM() : Integer.MIN_VALUE)),
 		playtime_minute(161, (state) -> ((int) (((int) (state.timer.isTimerOn(TIMER_PLAY) ? state.timer.getNowTime(TIMER_PLAY) : 0)) / 60000))),
 		playtime_second(162, (state) -> ((((int) (state.timer.isTimerOn(TIMER_PLAY) ? state.timer.getNowTime(TIMER_PLAY) : 0)) / 1000) % 60)),
@@ -290,7 +293,7 @@ public class IntegerPropertyFactory {
 		lastplay_hour(247, createLastPlayDateProperty(Calendar.HOUR_OF_DAY)),
 		lastplay_minute(248, createLastPlayDateProperty(Calendar.MINUTE)),
 		lastplay_second(249, createLastPlayDateProperty(Calendar.SECOND)),
-		rival_score(NUMBER_RIVAL_SCORE, (state) -> (state.getScoreDataProperty().getRivalScore())),
+		rival_score(NUMBER_RIVAL_SCORE, (state) -> targetNumber(state, state.getScoreDataProperty().getRivalScore())),
 		folder_totalsongs(NUMBER_FOLDER_TOTALSONGS, new FolderTotalClearCountProperty(new int[]{0,1,2,3,4,5,6,7,8,9,10})),
 		hispeed(NUMBER_HISPEED, createHispeedProperty(false, false)),
 		hispeed_afterdot(NUMBER_HISPEED_AFTERDOT, createHispeedProperty(false, true)),
@@ -414,13 +417,15 @@ public class IntegerPropertyFactory {
 
 		duration_average(372, (state) -> {
 			if (state instanceof AbstractResult) {
-				return (int) (((AbstractResult) state).getAverageDuration() / 1000);
+				long duration = ((AbstractResult) state).getAverageDuration();
+				return duration == Long.MAX_VALUE ? Integer.MIN_VALUE : (int) (duration / 1000);
 			}
 			return Integer.MIN_VALUE;
 		}),
 		duration_average_afterdot(373, (state) -> {
 			if (state instanceof AbstractResult) {
-				return (int) ((((AbstractResult) state).getAverageDuration() / 10) % 100);
+				long duration = ((AbstractResult) state).getAverageDuration();
+				return duration == Long.MAX_VALUE ? Integer.MIN_VALUE : (int) ((duration / 10) % 100);
 			}
 			return Integer.MIN_VALUE;
 		}),
@@ -572,6 +577,10 @@ public class IntegerPropertyFactory {
 
 		private static IntegerProperty createTotalNotesProperty() {
 			return (state) -> {
+				if (state instanceof MusicResult result) return result.getTotalNotes();
+				if (state instanceof BMSPlayer player) return player.getJudgeManager().getScoreData().getNotes();
+				if (state instanceof MusicSelector && state.getScoreDataProperty().getScoreData() != null)
+					return state.getScoreDataProperty().getScoreData().getNotes();
 				if(state instanceof CourseResult) {
 					int notes = 0;
 					for (BMSModel model : state.main.getPlayerResource().getCourseBMSModels()) {
@@ -618,7 +627,7 @@ public class IntegerPropertyFactory {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
 					final ScoreData score = ((AbstractResult) state).getDisplayScore();
-					return score != null ? score.getExscore() : Integer.MIN_VALUE;
+					return score != null ? score.getRuleScore() : Integer.MIN_VALUE;
 				}
 				return state.getScoreDataProperty().getScoreData() != null
 						? state.getScoreDataProperty().getNowEXScore()
@@ -629,7 +638,7 @@ public class IntegerPropertyFactory {
 		private static IntegerProperty createHighScoreProperty() {
 			return (state) -> {
 				if (state instanceof AbstractResult) {
-					return ((AbstractResult) state).getDisplayOldScore().getExscore();
+					return ((AbstractResult) state).getDisplayOldScore().getRuleScore();
 				}
 				return state.getScoreDataProperty().getBestScore();
 			};
@@ -712,7 +721,7 @@ public class IntegerPropertyFactory {
 		}
 
 		private static IntegerProperty createDiffRivalScoreProperty() {
-			return (state) -> (state.getScoreDataProperty().getNowEXScore()
+			return (state) -> targetNumber(state, state.getScoreDataProperty().getNowEXScore()
 					- state.getScoreDataProperty().getNowRivalScore());
 		}
 

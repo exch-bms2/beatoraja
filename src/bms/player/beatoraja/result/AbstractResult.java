@@ -167,7 +167,7 @@ public abstract class AbstractResult extends MainState {
 			@Override
 			public boolean isQualified(ScoreData oldscore, ScoreData newscore) {
 				return newscore.getClear() > oldscore.getClear() || newscore.getCombo() > oldscore.getCombo() ||
-						newscore.getMinbp() < oldscore.getMinbp() || newscore.getExscore() > oldscore.getExscore();
+						newscore.getMinbp() < oldscore.getMinbp() || newscore.getRuleScore() > oldscore.getRuleScore();
 			}
 		},
 		/**

@@ -24,6 +24,8 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
     private long lastUs;
     private PlayerResource resource;
     private final com.badlogic.gdx.utils.IntArray timingHistory = new com.badlogic.gdx.utils.IntArray();
+    private long totalDuration;
+    private int timedNotes;
 
     static AngolmoisSecondary create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
         if (model.getMode() != Mode.BEAT_7K || resource.getOriginalMode() != Mode.BEAT_7K
@@ -46,6 +48,10 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
         engine.listener = new AngolmoisEngine.Listener() {
             @Override public void judge(AngolmoisEngine.ChartObject object, int grade, double signedMs, long frameUs, boolean vanish) {
                 if (grade > 0) timingHistory.add((int) signedMs);
+                if (vanish) {
+                    totalDuration += grade > 0 ? Math.abs((long) (signedMs * 1000)) : 1_000_000;
+                    timedNotes++;
+                }
             }
             @Override public void release(AngolmoisEngine.ChartObject object) {}
             @Override public void sound(AngolmoisEngine.ChartObject object) {}
@@ -95,10 +101,17 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
         int misses = engine.counts[6] + engine.counts[7] + engine.counts[8] + engine.counts[9];
         var clear = outcome == Outcome.FINISHED && engine.gauge >= 150 ? ClearType.Normal : ClearType.Failed;
         var gauge = new DisplayGauge(engine.gauge, engine.failed);
+        var details = new bms.player.beatoraja.ScoreData(Mode.BEAT_7K);
+        long duration = totalDuration + Math.max(0, engine.notes - timedNotes) * 1_000_000L;
+        details.setTotalDuration(duration);
+        details.setAvgjudge(engine.notes > 0 ? duration / engine.notes : Long.MAX_VALUE);
+        details.setRule(BMSPlayerRule.Angolmois);
+        details.setJudgeAlgorithm(JudgeAlgorithm.Lowest);
         return new Judgment(outcome, engine.passed,
                 (counts.get(0) + counts.get(1)) * 2 + counts.get(2) + counts.get(3), engine.maxCombo,
                 counts, 0, engine.gauge * 100f / 512, engine.notes, misses + engine.notes - engine.passed, clear,
-                new PlayerResource.GaugeHistory(gauge, new FloatArray[]{values}, times, endUs), engine.score, engine.maxScore);
+                new PlayerResource.GaugeHistory(gauge, new FloatArray[]{values}, times, endUs), engine.score, engine.maxScore,
+                new bms.player.beatoraja.PlayDataAccessor.ScoreMetadata(details));
     }
 
     private static final class DisplayGauge extends AbstractGrooveGauge {

@@ -85,10 +85,34 @@ public final class PlayDataAccessor {
 
 	public enum ScoreOutcome { FINISHED, FAILED, INTERRUPTED, INPUT_LOST, ERROR }
 
+	/** Immutable performance metadata, kept separate from aggregated best judgments. */
+	public record ScoreMetadata(long avgjudge, long totalDuration, long playtime, int option, long seed, int assist,
+			bms.player.beatoraja.input.BMSPlayerInputDevice.Type deviceType,
+			bms.player.beatoraja.play.JudgeAlgorithm judgeAlgorithm, BMSPlayerRule rule, String skin, String ghost, Mode playmode) {
+		public ScoreMetadata(ScoreData score) {
+			this(score.getAvgjudge(), score.getTotalDuration(), score.getPlaytime(), score.getOption(), score.getSeed(),
+					score.getAssist(), score.getDeviceType(), score.getJudgeAlgorithm(), score.getRule(), score.getSkin(), score.getGhost(), score.getPlaymode());
+		}
+		void apply(ScoreData score) {
+			score.setAvgjudge(avgjudge); score.setTotalDuration(totalDuration); score.setPlaytime(playtime);
+			score.setOption(option); score.setSeed(seed); score.setAssist(assist); score.setDeviceType(deviceType);
+			score.setJudgeAlgorithm(judgeAlgorithm); score.setRule(rule); score.setSkin(skin); score.setGhost(ghost);
+		}
+	}
+
 	/** One rule's actual judgments, not an aggregate personal best. */
 	public record ScoreAttempt(String sha256, int mode, ScoreOutcome outcome, int notes, int passed,
 			int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts,
-			int nativeScore, int nativeMaxScore) {
+			int nativeScore, int nativeMaxScore, ScoreMetadata metadata) {
+		public ScoreAttempt(String sha256, int mode, ScoreOutcome outcome, int notes, int passed,
+				int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts,
+				int nativeScore, int nativeMaxScore) {
+			this(sha256, mode, outcome, notes, passed, combo, minbp, clear, gauge, gaugeValue, judgeCounts, nativeScore, nativeMaxScore, null);
+		}
+		public ScoreAttempt withMetadata(ScoreData score) {
+			return new ScoreAttempt(sha256, mode, outcome, notes, passed, combo, minbp, ClearType.getClearTypeByID(score.getClear()), gauge, gaugeValue, judgeCounts,
+					nativeScore, nativeMaxScore, new ScoreMetadata(score));
+		}
 		public ScoreAttempt(String sha256, int mode, ScoreOutcome outcome, int notes, int passed,
 				int combo, int minbp, ClearType clear, int gauge, float gaugeValue, List<Integer> judgeCounts) {
 			this(sha256, mode, outcome, notes, passed, combo, minbp, clear, gauge, gaugeValue, judgeCounts, -1, -1);
@@ -107,7 +131,8 @@ public final class PlayDataAccessor {
 		}
 
 		public ScoreData toScoreData(Mode playMode) {
-			var score = new ScoreData(playMode);
+			var score = new ScoreData(playMode != null ? playMode : metadata != null ? metadata.playmode() : null);
+			if (metadata != null) metadata.apply(score);
 			score.setSha256(sha256);
 			score.setMode(mode);
 			score.setNotes(notes);

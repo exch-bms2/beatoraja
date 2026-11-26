@@ -158,9 +158,8 @@ public class FloatPropertyFactory {
 				final Bar selected = selector.getBarManager().getSelected();
 				if (selected instanceof SongBar songbar) {
 					ScoreData score = selected.getScore();
-					return score != null
-							? ((float) scoreValue.applyAsInt(score)) / songbar.getSongData().getNotes() / (divideSongNotesByTwo ? 2 : 1)
-							: 0;
+					int maximum = score == null ? 0 : divideSongNotesByTwo ? score.getRuleMaxScore() : score.getNotes();
+					return maximum > 0 ? (float) scoreValue.applyAsInt(score) / maximum : 0;
 				}
 				if (selected instanceof GradeBar gradebar) {
 					ScoreData score = selected.getScore();
@@ -169,7 +168,8 @@ public class FloatPropertyFactory {
 					for (SongData songData : gradebar.getSongDatas()) {
 						notes += songData.getNotes();
 					}
-					return ((float) scoreValue.applyAsInt(score)) / notes;
+					int maximum = divideSongNotesByTwo ? score.getRuleMaxScore() : notes;
+					return maximum > 0 ? (float) scoreValue.applyAsInt(score) / maximum : 0;
 				}
 			}
 			return 0;
@@ -298,15 +298,15 @@ public class FloatPropertyFactory {
 		scorerate_final(111, (state) -> (state.getScoreDataProperty().getNowRate())),
 		bestscorerate_now(112, (state) -> (state.getScoreDataProperty().getNowBestScoreRate())),
 		bestscorerate(113, (state) -> (state.getScoreDataProperty().getBestScoreRate())),
-		targetscorerate_now(114, (state) -> (state.getScoreDataProperty().getNowRivalScoreRate())),
-		targetscorerate(115, (state) -> (state.getScoreDataProperty().getRivalScoreRate())),
+		targetscorerate_now(114, (state) -> (bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state) ? state.getScoreDataProperty().getNowRivalScoreRate() : 0)),
+		targetscorerate(115, (state) -> (bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state) ? state.getScoreDataProperty().getRivalScoreRate() : 0)),
 		rate_pgreat(140, createJudgeRate(0)),
 		rate_great(141, createJudgeRate(1)),
 		rate_good(142, createJudgeRate(2)),
 		rate_bad(143, createJudgeRate(3)),
 		rate_poor(144, createJudgeRate(4)),
 		rate_maxcombo(145, createSelectedScoreRate(ScoreData::getCombo, false)),
-		rate_exscore(147, createSelectedScoreRate(ScoreData::getExscore, true)),
+		rate_exscore(147, createSelectedScoreRate(ScoreData::getRuleScore, true)),
 		;
 		
 		private final int id;
@@ -431,7 +431,7 @@ public class FloatPropertyFactory {
 			return Float.MIN_VALUE;
 		}),
 		best_rate(183, state -> state.getScoreDataProperty().getBestScoreRate()),
-		rival_rate(122, state -> state.getScoreDataProperty().getRivalScoreRate()),
+		rival_rate(122, state -> bms.player.beatoraja.play.TargetProperty.isTargetAvailable(state) ? state.getScoreDataProperty().getRivalScoreRate() : 0),
 		target_rate(135, FloatType.rival_rate.property),
 		target_rate2(157, FloatType.rival_rate.property),
 

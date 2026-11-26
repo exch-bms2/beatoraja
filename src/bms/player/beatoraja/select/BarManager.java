@@ -708,7 +708,10 @@ public final class BarManager {
 					if (bar.getScore() == null) {
 						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
-					if (rival != null && bar.getRivalScore() == null) {
+					boolean compatible = !(select.getScoreDataCache() instanceof PrimaryScoreDataCache cache)
+							|| cache.usesStandardRule(sd, config.getLnmode());
+					if (!compatible) bar.setRivalScore(null);
+					if (compatible && rival != null && bar.getRivalScore() == null) {
 						final ScoreData rivalScore = rival.readScoreData(sd, config.getLnmode());
 						if(rivalScore != null) {
 							rivalScore.setPlayer(rivalName);							

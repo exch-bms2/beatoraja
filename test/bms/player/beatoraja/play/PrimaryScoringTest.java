@@ -24,6 +24,10 @@ public final class PrimaryScoringTest {
                 && restored.getPrimaryScoringRule(Mode.BEAT_14K) == SecondaryScoringRule.PULSUS, "Mode-specific profile round trip");
         config.setSecondaryScoringRuleIds(new String[]{"beatoraja", "lr2", "lr2"});
         check(Arrays.equals(config.getSecondaryScoringRuleIds(), new String[]{"lr2"}), "beatoraja is implicit");
+        var oldNative = new ScoreData(); oldNative.setNativeScore(500); oldNative.setEpg(10);
+        var newNative = new ScoreData(); newNative.setNativeScore(600); newNative.setEpg(5);
+        check(bms.player.beatoraja.result.AbstractResult.ReplayAutoSaveConstraint.ANYONE_UPDATE.isQualified(oldNative, newNative),
+                "Any-update replay saving honors native-only improvement");
         for (var rule : SecondaryScoringRule.values()) {
             var chart = model();
             var parameters = BMSPlayerRule.ChartParameters.fromBms(chart);
@@ -35,6 +39,12 @@ public final class PrimaryScoringTest {
             f = new KeyboardJudgeCompatibilityTest.Fixture(chart, true, selected.isStandard()
                     ? BMSPlayerRule.Beatoraja_7 : selected.effective().scoreRule(), parameters, NORMAL);
             f.resource.setPrimaryScoringSelection(selected);
+            var hitError = new bms.player.beatoraja.skin.SkinHitErrorVisualizer(301, 150, 1, 1, 1, 0,
+                    "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", .5f, 100, 0, 0);
+            hitError.setDestination(0, 0, 0, 301, 100, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0);
+            hitError.prepare(0, f.player);
+            var areaField = hitError.getClass().getDeclaredField("judgeArea"); areaField.setAccessible(true);
+            check(Arrays.equals((int[]) areaField.get(hitError), f.judge.getTimingJudgeArea()), "Hit-error colors use active judge windows: " + rule);
             f.playerConfig.setSecondaryScoringRuleIds(new String[]{rule.id(), "lr2"});
             var group = SecondaryJudgingGroup.create(f.player, chart, f.resource, 6_000_000);
             f.input.setKeyState(6, true, 2_017_000);
@@ -54,6 +64,8 @@ public final class PrimaryScoringTest {
                         && timing.judgeArea()[1] != f.judge.getTimingJudgeArea()[1], "Independent beatoraja timing snapshot: " + rule);
                 check(results.stream().noneMatch(r -> r.rule() == rule), "No duplicate primary run");
                 var standard = results.stream().filter(r -> r.rule() == SecondaryScoringRule.BEATORAJA).findFirst().orElseThrow().judgment();
+                check(standard.metadata().avgjudge() == 508500 && standard.metadata().totalDuration() == 1017000,
+                        "Independent beatoraja statistics include its own hit and unplayed note: " + rule);
                 check(standard.judgeCounts().get(0) + standard.judgeCounts().get(1) == 0
                         && standard.judgeCounts().get(2) + standard.judgeCounts().get(3) == 1,
                         "Always-on beatoraja retains its own RANK 2 judgment: " + rule);

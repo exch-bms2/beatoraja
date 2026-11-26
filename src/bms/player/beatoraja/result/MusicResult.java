@@ -79,7 +79,7 @@ public class MusicResult extends AbstractResult {
 			this.result = result;
 			gaugeType = result.score().getGauge();
 			previousBest = result.previousBest() != null ? result.previousBest() : new ScoreData();
-			properties.setTargetScore(previousBest.getExscore(), 0, result.score().getNotes());
+			properties.setTargetScore(previousBest.getRuleScore(), null, 0, null, result.score().getNotes(), result.score().getRuleMaxScore());
 			properties.update(result.score());
 		}
 	}
@@ -172,8 +172,9 @@ public class MusicResult extends AbstractResult {
 	public String getDisplayScoringSummary() {
 		String[] gauges = {"ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD", "CLASS", "EX-CLASS", "EX-HARD CLASS"};
 		int gauge = getGaugeType();
-		String notice = (isShowingSecondaryScore() ? "Secondary: " : "Primary: ") + getDisplayScoringRuleName()
-				+ " / " + (gauge >= 0 && gauge < gauges.length ? gauges[gauge] : "GAUGE");
+		String gaugeName = currentTimingRuleId().equals(SecondaryScoringRule.ANGOLMOIS.id()) ? "NORMAL"
+				: gauge >= 0 && gauge < gauges.length ? gauges[gauge] : "GAUGE";
+		String notice = (isShowingSecondaryScore() ? "Secondary: " : "Primary: ") + getDisplayScoringRuleName() + " / " + gaugeName;
 		var score = getDisplayScore();
 		if (score != null && score.getNativeScore() >= 0) notice += " / SCORE " + score.getNativeScore() + " / " + score.getNativeMaxScore();
 		return notice;
@@ -236,6 +237,11 @@ public class MusicResult extends AbstractResult {
 	public ScoreData getDisplayScore() {
 		var display = secondaryDisplay();
 		return display != null ? display.result.score() : getNewScore();
+	}
+
+	@Override public long getAverageDuration() {
+		var score = getDisplayScore();
+		return score != null ? score.getAvgjudge() : Long.MAX_VALUE;
 	}
 
 	@Override
@@ -584,7 +590,9 @@ public class MusicResult extends AbstractResult {
 			var rule = resource.getPrimaryScoringSelection().effective();
 			var previous = data.readRuleBest(rule, model.getSHA256(), mode);
 			oldscore = previous != null ? previous : new ScoreData();
-			getPrimaryScoreDataProperty().setTargetScore(oldscore.getExscore(), 0, newscore.getNotes());
+			getPrimaryScoreDataProperty().setTargetScore(oldscore.getRuleScore(), null,
+					resource.getTargetScoreData() != null ? resource.getTargetScoreData().getRuleScore() : 0, null,
+					newscore.getNotes(), newscore.getRuleMaxScore());
 			getPrimaryScoreDataProperty().update(newscore);
 			if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
 				var counts = new ArrayList<Integer>(12);
@@ -593,7 +601,7 @@ public class MusicResult extends AbstractResult {
 						newscore.getClear() == Failed.id ? PlayDataAccessor.ScoreOutcome.FAILED : PlayDataAccessor.ScoreOutcome.FINISHED,
 						newscore.getNotes(), newscore.getPassnotes(), newscore.getCombo(), newscore.getMinbp(),
 						ClearType.getClearTypeByID(newscore.getClear()), resource.getGrooveGauge().getType(),
-						resource.getGrooveGauge().getValue(), counts, newscore.getNativeScore(), newscore.getNativeMaxScore()), resource.isUpdateScore());
+						resource.getGrooveGauge().getValue(), counts, newscore.getNativeScore(), newscore.getNativeMaxScore()).withMetadata(newscore), resource.isUpdateScore());
 				for (var alternate : resource.getAlternateResultScores()) {
 					if (alternate.ruleId().equals(SecondaryScoringRule.BEATORAJA.id())) {
 						alternate.score().setPlaytime(newscore.getPlaytime());

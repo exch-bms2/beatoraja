@@ -189,28 +189,45 @@ public final class MusicResultScoreDisplayTest {
         check(result.getGaugeType() == HARD, "Alternate gauge selection stays independent across multiple rules");
 
         var selectedPrimary = score(mode, 35, ClearType.Normal, BMSPlayerRule.LunaticRave2);
+        selectedPrimary.setAvgjudge(12000);
+        primary.setAvgjudge(23000);
         primary.setGauge(NORMAL);
         resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(
                 bms.player.beatoraja.play.SecondaryScoringRule.LR2, bms.player.beatoraja.play.SecondaryScoringRule.LR2, ""));
         resource.setScoreData(selectedPrimary);
         third.setNativeScore(1234); third.setNativeMaxScore(2000);
+        third.setAvgjudge(6000); third.setNotes(120);
+        third.setGauge(0);
+        var nativeBest = score(mode, 80, ClearType.Easy, BMSPlayerRule.Angolmois);
+        nativeBest.setNativeScore(1200); nativeBest.setNativeMaxScore(2000);
         resource.setAlternateResultScores(List.of(lr2,
                 new PlayerResource.AlternateResultScore("beatoraja", "beatoraja", primary, primaryBest,
                         new PlayerResource.GaugeHistory(primaryGauge, primaryHistory, new LongArray(new long[]{0, 1_000_000}), 4_000_000)),
-                new PlayerResource.AlternateResultScore("fixture", "Fixture", third, null, thirdHistory)));
+                new PlayerResource.AlternateResultScore("angolmois", "Angolmois", third, nativeBest, thirdHistory)));
         result.prepareScoreDisplay();
         check(result.isShowingLr2Score() && result.getDisplayScore() == selectedPrimary
                         && result.getDisplayScoringSummary().startsWith("Primary: Lunatic Rave 2"), "Configured primary is the initial result");
         check(result.getTimingDistribution().getAverage() == 30 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), lr2Area),
                 "Non-beatoraja primary receives its timing distribution despite the separate save path");
+        check(result.getAverageDuration() == 12000, "Absolute duration follows native primary");
         press(result, keyboard, states);
         check(result.getDisplayScore() == primary && result.getDisplayScoringRuleName().equals("beatoraja")
                         && result.getDisplayOldScore() == primaryBest && result.getDisplayGaugeValue() == 80,
                 "F7 exposes independently calculated beatoraja with its own best and gauge");
         check(result.getTimingDistribution().getAverage() == -6 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), standardArea),
                 "F7 from a native primary shows the independent beatoraja timing distribution and windows");
+        check(result.getAverageDuration() == 23000, "F7 absolute duration uses independent beatoraja statistics");
         press(result, keyboard, states);
         check(result.getDisplayScoringSummary().contains("SCORE 1234 / 2000"), "Native score and maximum remain visible");
+        check(result.getDisplayScoringSummary().contains(" / NORMAL") && !result.getDisplayScoringSummary().contains("ASSIST EASY"),
+                "Angolmois internal gauge slot zero is labeled as native NORMAL");
+        check(score.get(result) == 1234 && IntegerPropertyFactory.getIntegerProperty(NUMBER_MAXSCORE).get(result) == 2000
+                && result.getScoreDataProperty().getRateInt() == 61
+                && BooleanPropertyFactory.getBooleanProperty(OPTION_UPDATE_SCORE).get(result)
+                && IntegerPropertyFactory.getIntegerProperty(NUMBER_TOTALNOTES).get(result) == 120
+                && IntegerPropertyFactory.getIntegerProperty(372).get(result) == 6
+                && IntegerPropertyFactory.getIntegerProperty(NUMBER_TARGET_SCORE).get(result) == Integer.MIN_VALUE,
+                "F7 native display uses native score/rate/update, scoring notes, own duration and hides incompatible targets");
         press(result, keyboard, states);
         check(result.getDisplayScore() == selectedPrimary, "No duplicate selected primary in F7 cycle");
         resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(

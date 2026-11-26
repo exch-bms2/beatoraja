@@ -89,6 +89,7 @@ public final class ScoreData implements Validatable {
 	public int getNativeMaxScore() { return nativeMaxScore; }
 	public void setNativeMaxScore(int value) { nativeMaxScore = value; }
 	public int getRuleScore() { return nativeScore >= 0 ? nativeScore : getExscore(); }
+	public int getRuleMaxScore() { return nativeMaxScore >= 0 ? nativeMaxScore : notes * 2; }
 	
 	private int passnotes = 0;
 	

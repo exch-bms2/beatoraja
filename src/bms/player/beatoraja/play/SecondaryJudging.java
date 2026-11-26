@@ -145,6 +145,7 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	}
 
 	public Judgment finish(boolean primaryFinished) {
+		judge.completeScoreStatistics();
 		resource.setScoringTiming(timingRuleId, judge.getTimingData());
 		var score = judge.getScoreData();
 		int passed = judge.getPastNotes();
@@ -163,7 +164,8 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 				+ score.getNotes() - passed;
 		return new Judgment(outcome, passed, score.getExscore(), score.getCombo(),
 				List.copyOf(counts), gauge.getType(), gauge.getValue(), score.getNotes(), minbp, clearType(),
-				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs));
+				new GaugeHistory(gauge, gaugeSamples, gaugeTimesUs, endUs), -1, -1,
+				new bms.player.beatoraja.PlayDataAccessor.ScoreMetadata(score));
 	}
 
 	private void sampleGauge(long timeUs) {

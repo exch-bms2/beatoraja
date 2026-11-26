@@ -12,6 +12,11 @@ import java.util.*;
 public final class PrimaryScoreDataCache extends ScoreDataCache {
     private final PlayDataAccessor data;
     private final PlayerConfig config;
+    private final Map<String, SecondaryScoringRule> effectiveRules = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public boolean usesStandardRule(SongData song, int lnmode) { return effectiveRule(song, lnmode) == SecondaryScoringRule.BEATORAJA; }
+
+    @Override public void clear() { super.clear(); effectiveRules.clear(); }
 
     public PrimaryScoreDataCache(PlayDataAccessor data, PlayerConfig config) { this.data = data; this.config = config; }
 
@@ -33,6 +38,10 @@ public final class PrimaryScoreDataCache extends ScoreDataCache {
     }
 
     SecondaryScoringRule effectiveRule(SongData song, int lnmode) {
+        return effectiveRules.computeIfAbsent(cacheKey(song) + ":" + lnmode, key -> computeEffectiveRule(song, lnmode));
+    }
+
+    private SecondaryScoringRule computeEffectiveRule(SongData song, int lnmode) {
         var requested = config.getPrimaryScoringRule(mode(song));
         if (requested == SecondaryScoringRule.BEATORAJA) return requested;
         var mode = mode(song);
