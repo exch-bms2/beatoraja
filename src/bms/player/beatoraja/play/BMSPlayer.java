@@ -361,6 +361,14 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void prepareScoringSettings(PlayerConfig config) {
+		String algorithm = config.getPlayConfig(resource.getOriginalMode()).getPlayconfig().getJudgetype();
+		if (replay != null) {
+			if (replay.judgeAlgorithm != null) algorithm = replay.judgeAlgorithm;
+			else if (replay.config != null) algorithm = replay.config.getJudgetype();
+		}
+		playinfo.judgeAlgorithm = algorithm;
+		resource.setScoringJudgeAlgorithm(resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE
+				? null : JudgeAlgorithm.valueOf(algorithm));
 		playinfo.scoringSettings = replay != null && replay.scoringSettings != null
 				? replay.scoringSettings : ReplayData.ScoringSettings.capture(config);
 		resource.setScoringSettings(resource.getPlayMode().mode == BMSPlayerMode.Mode.PRACTICE ? null : playinfo.scoringSettings,
@@ -1054,6 +1062,7 @@ public class BMSPlayer extends MainState {
 		replay.scoringFrameUs = playRule == BMSPlayerRule.Angolmois ? AngolmoisEngine.FRAME_US : 0;
 		replay.chartModifiers = playinfo.chartModifiers;
 		replay.scoringSettings = playinfo.scoringSettings;
+		replay.judgeAlgorithm = playinfo.judgeAlgorithm;
 		replay.sevenToNinePattern = playinfo.sevenToNinePattern;
 		replay.sevenToNineType = playinfo.sevenToNineType;
 		replay.sevenToNineHranThresholdBPM = playinfo.sevenToNineHranThresholdBPM;

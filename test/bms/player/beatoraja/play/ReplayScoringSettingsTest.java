@@ -17,7 +17,58 @@ public final class ReplayScoringSettingsTest {
                     PlayerConfig.GAUGEAUTOSHIFT_SELECT_TO_UNDER}) verify(rule, shift);
         }
         verifyLegacy();
+        verifyJudgeAlgorithms();
         System.out.println("ReplayScoringSettingsTest passed (JSON, custom key/scratch windows, PMS LN margin, native GAS traces, independent beatoraja and profile isolation)");
+    }
+
+    private static void verifyJudgeAlgorithms() throws Exception {
+        for (var rule : new BMSPlayerRule[]{BMSPlayerRule.Beatoraja_7, BMSPlayerRule.LunaticRave2}) {
+            for (var algorithm : JudgeAlgorithm.values()) {
+                var recorded = algorithmFixture(rule);
+                recorded.playerConfig.getPlayConfig(Mode.BEAT_7K).getPlayconfig().setJudgetype(algorithm.name());
+                var info = prepare(recorded, null);
+                var expected = algorithmOutcome(recorded);
+                if (rule == BMSPlayerRule.Beatoraja_7 && algorithm == JudgeAlgorithm.Lowest)
+                    check(recorded.judge.getJudgeCount(2) == 1 && recorded.judge.getJudgeCount(0) == 0,
+                            "Lowest reproduces the originally reported GOOD instead of the later note's PG");
+                var saved = new ReplayData(); saved.gauge = rule == BMSPlayerRule.Beatoraja_7 ? AbstractGrooveGauge.EXHARD : AbstractGrooveGauge.NORMAL;
+                saved.judgeAlgorithm = info.judgeAlgorithm; saved.scoringSettings = info.scoringSettings;
+                saved.config = new PlayConfig(); saved.config.setJudgetype(algorithm == JudgeAlgorithm.Duration ? "Lowest" : "Duration");
+                var restored = new Json().fromJson(ReplayData.class, new Json().toJson(saved));
+                var replayed = algorithmFixture(rule); replayed.resource.setPlayMode(BMSPlayerMode.REPLAY_1);
+                String current = saved.config.getJudgetype();
+                replayed.playerConfig.getPlayConfig(Mode.BEAT_7K).getPlayconfig().setJudgetype(current);
+                prepare(replayed, restored);
+                check(algorithmOutcome(replayed).equals(expected), "Explicit saved algorithm restores primary and independent beatoraja judgments: " + rule + "/" + algorithm);
+                check(replayed.playerConfig.getPlayConfig(Mode.BEAT_7K).getPlayconfig().getJudgetype().equals(current),
+                        "Restoring the algorithm leaves the current profile untouched");
+                restored.judgeAlgorithm = null; restored.config.setJudgetype(algorithm.name());
+                var legacy = algorithmFixture(rule); legacy.resource.setPlayMode(BMSPlayerMode.REPLAY_1);
+                legacy.playerConfig.getPlayConfig(Mode.BEAT_7K).getPlayconfig().setJudgetype(current);
+                prepare(legacy, restored);
+                check(algorithmOutcome(legacy).equals(expected), "Older replays restore config.judgetype: " + rule + "/" + algorithm);
+            }
+        }
+    }
+
+    private static KeyboardJudgeCompatibilityTest.Fixture algorithmFixture(BMSPlayerRule rule) throws Exception {
+        var model = new BMSDecoder().decode(("#PLAYER 1\n#BPM 120\n#RANK 2\n#TOTAL 100\n#WAV01 a.wav\n#00119:0101" + "00".repeat(18) + "\n")
+                .getBytes(StandardCharsets.UTF_8), "replay-algorithm.bme", false, new int[0]);
+        var parameters = BMSPlayerRule.ChartParameters.fromBms(model); BMSPlayerRule.validate(model);
+        return new KeyboardJudgeCompatibilityTest.Fixture(model, true, rule, parameters,
+                rule == BMSPlayerRule.Beatoraja_7 ? AbstractGrooveGauge.EXHARD : AbstractGrooveGauge.NORMAL);
+    }
+
+    private static String algorithmOutcome(KeyboardJudgeCompatibilityTest.Fixture fixture) {
+        fixture.judge.init(fixture.model, fixture.resource);
+        var independent = SecondaryJudging.createBeatoraja(fixture.player, fixture.model, fixture.resource, 4_000_000,
+                fixture.resource.getScoringConfig().getGauge());
+        var group = new SecondaryJudgingGroup(List.of(new SecondaryJudgingGroup.Entry(SecondaryScoringRule.BEATORAJA, independent)));
+        fixture.input.setKeyState(6, true, 2_090_000); fixture.judge.update(2_090_001, group);
+        var standard = group.finish(true).get(0).judgment();
+        var result = new StringBuilder(fixture.judge.getScoreData().getJudgeAlgorithm().name());
+        for (int j = 0; j < 6; j++) result.append(':').append(fixture.judge.getJudgeCount(j));
+        return result + "/" + standard.judgeCounts() + "/" + standard.metadata().judgeAlgorithm();
     }
 
     private static void verify(BMSPlayerRule rule, int shift) throws Exception {

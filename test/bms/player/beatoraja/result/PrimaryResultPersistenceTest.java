@@ -29,6 +29,7 @@ public final class PrimaryResultPersistenceTest {
         primary.setJudgeAlgorithm(JudgeAlgorithm.Lowest); primary.setSkin("fixture");
         primary.setDeviceType(bms.player.beatoraja.input.BMSPlayerInputDevice.Type.KEYBOARD);
         standard.setAvgjudge(18000); standard.setTotalDuration(36000);
+        standard.setJudgeAlgorithm(JudgeAlgorithm.Duration);
         var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
         set(resource, PlayerResource.class, "model", model);
         set(resource, PlayerResource.class, "pconfig", new PlayerConfig());
@@ -102,6 +103,7 @@ public final class PrimaryResultPersistenceTest {
         };
         check(new MusicResult.IRSendStatus(connection, new IRChartData(new SongData()), irScore.score()).send(), "IR queue sends selected score");
         check(submitted[0].getExscore() == 2 && submitted[0].rule == BMSPlayerRule.Beatoraja_7
+                && submitted[0].judgeAlgorithm == JudgeAlgorithm.Duration
                 && submitted[0].option == 3 && submitted[0].seed == 12345 && submitted[0].playtime == 9000
                 && submitted[0].avgjudge == 18000 && submitted[0].gauge == -1,
                 "IR payload contains only beatoraja judgments with actual play metadata");

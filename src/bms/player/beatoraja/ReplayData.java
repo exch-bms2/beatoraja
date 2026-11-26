@@ -59,6 +59,8 @@ public final class ReplayData implements Validatable {
 	public String primaryScoringFallbackReason;
 	public int scoringRuleVersion = 1;
 	public long scoringFrameUs;
+	/** Actual beatoraja note-selection algorithm; older replays use config.judgetype. */
+	public String judgeAlgorithm;
 	/** Null in legacy replays, which did not record these chart modifiers. */
 	public ChartModifiers chartModifiers;
 	/** Null in older replays, which use the current scoring settings for compatibility. */

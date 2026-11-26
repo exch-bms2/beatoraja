@@ -641,8 +641,8 @@ public class MusicResult extends AbstractResult {
 						alternate.score().setSkin(newscore.getSkin());
 						var eligibility = resource.getScoringEligibility(SecondaryScoringRule.BEATORAJA);
 						alternate.score().setAssist(eligibility.assist());
-						alternate.score().setJudgeAlgorithm(bms.player.beatoraja.play.JudgeAlgorithm.valueOf(
-								resource.getPlayerConfig().getPlayConfig(model.getMode()).getPlayconfig().getJudgetype()));
+						if (alternate.score().getJudgeAlgorithm() == null)
+							alternate.score().setJudgeAlgorithm(resource.getScoringJudgeAlgorithm());
 						if (alternate.score().getClear() != Failed.id && eligibility.assist() > 0) {
 							alternate.score().setClear(eligibility.assist() == 1 ? LightAssistEasy.id : AssistEasy.id);
 						}

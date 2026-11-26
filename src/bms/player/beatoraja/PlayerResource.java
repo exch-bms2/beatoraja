@@ -49,6 +49,12 @@ public final class PlayerResource {
 	private Config config;
 	private PlayerConfig pconfig;
 	private PlayerConfig scoringConfig;
+	private bms.player.beatoraja.play.JudgeAlgorithm scoringJudgeAlgorithm;
+	public bms.player.beatoraja.play.JudgeAlgorithm getScoringJudgeAlgorithm() {
+		return scoringJudgeAlgorithm != null ? scoringJudgeAlgorithm : bms.player.beatoraja.play.JudgeAlgorithm.valueOf(
+				pconfig.getPlayConfig(orgmode != null ? orgmode : model.getMode()).getPlayconfig().getJudgetype());
+	}
+	public void setScoringJudgeAlgorithm(bms.player.beatoraja.play.JudgeAlgorithm algorithm) { scoringJudgeAlgorithm = algorithm; }
 	public PlayerConfig getScoringConfig() { return scoringConfig != null ? scoringConfig : pconfig; }
 	public void setScoringSettings(ReplayData.ScoringSettings settings, int gauge) {
 		scoringConfig = settings != null ? settings.toPlayerConfig(gauge) : null;
@@ -181,6 +187,7 @@ public final class PlayerResource {
 	}
 
 	public void clear() {
+		scoringJudgeAlgorithm = null;
 		scoringConfig = null;
 		primaryScoringSelection = null;
 		scoringEligibility = null;

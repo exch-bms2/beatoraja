@@ -84,8 +84,7 @@ public final class JudgeManager extends AbstractJudgeManager {
 
 	@Override
 	JudgeAlgorithm judgeAlgorithm(PlayerResource resource) {
-		return JudgeAlgorithm.valueOf(resource.getPlayerConfig().getPlayConfig(resource.getOriginalMode())
-				.getPlayconfig().getJudgetype());
+		return resource.getScoringJudgeAlgorithm();
 	}
 
 	@Override
