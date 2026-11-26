@@ -21,6 +21,7 @@ final class LunaticRave2JudgeManager extends AbstractJudgeManager {
 	private volatile boolean lr2DpFailed;
 	private Lr2Lane[] states;
 	private LunaticRave2Rules rules;
+	@Override public int[] getTimingJudgeArea() { return rules.judgeArea(); }
 
 	LunaticRave2JudgeManager(BMSPlayer main) {
 		super(main);

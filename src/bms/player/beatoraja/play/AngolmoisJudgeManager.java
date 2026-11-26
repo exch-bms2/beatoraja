@@ -12,6 +12,7 @@ final class AngolmoisJudgeManager extends AbstractJudgeManager implements Angolm
     private long offsetUs;
 
     AngolmoisJudgeManager(BMSPlayer player) { super(player); }
+    @Override public int[] getTimingJudgeArea() { return AngolmoisEngine.judgeArea(); }
     @Override BMSPlayerRule ruleFor(Mode mode) { return BMSPlayerRule.Angolmois; }
     @Override JudgeAlgorithm judgeAlgorithm(PlayerResource resource) { return JudgeAlgorithm.Lowest; }
     @Override int scoringNoteCount(BMSModel model) {

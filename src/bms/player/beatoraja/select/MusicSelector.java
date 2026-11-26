@@ -14,7 +14,6 @@ import com.badlogic.gdx.utils.*;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SongPreview;
-import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.keyboard.KeyboardShortcut;
 
@@ -89,6 +88,7 @@ public final class MusicSelector extends MainState {
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
+	private int scoringContext;
 	private ScoreDataCache rivalcache;
 	
 	private RankingData currentir;
@@ -119,17 +119,8 @@ public final class MusicSelector extends MainState {
 
 		final PlayDataAccessor pda = main.getPlayDataAccessor();
 
-		scorecache = new ScoreDataCache() {
-			@Override
-			protected ScoreData readScoreDatasFromSource(SongData song, int lnmode) {
-				return pda.readScoreData(song.getSha256(), song.hasUndefinedLongNote(), lnmode);
-			}
-
-			@Override
-			protected void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode) {
-				pda.readScoreDatas(collector, songs, lnmode);
-			}
-		};
+			scorecache = new PrimaryScoreDataCache(pda, main.getPlayerConfig());
+			scoringContext = ((PrimaryScoreDataCache) scorecache).selectionContext();
 		
 		try (var timing = StartupDiagnostics.measure(StartupDiagnostics.Step.SELECT_BAR_INIT)) {
 			bar = new BarRenderer(this, manager);
@@ -213,6 +204,11 @@ public final class MusicSelector extends MainState {
 	}
 
 	public void render() {
+		int context = ((PrimaryScoreDataCache) scorecache).selectionContext();
+		if (context != scoringContext) {
+			scoringContext = context;
+			manager.updateBar();
+		}
 		manager.updateIRTables();
 		final Bar current = manager.getSelected();
         if(timer.getNowTime() > getSkin().getInput()){

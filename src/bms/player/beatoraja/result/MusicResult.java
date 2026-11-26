@@ -40,6 +40,34 @@ public class MusicResult extends AbstractResult {
 	private List<SecondaryScoreDisplay> alternateScores = List.of();
 	private int scoreDisplayIndex;
 	private MessageRenderer.Message scoreRuleNotice;
+	private final Map<PlayerResource.TimingData, TimingDistribution> scoringDistributions = new IdentityHashMap<>();
+	private final TimingDistribution emptyTimingDistribution = emptyTimingDistribution();
+	private TimingDistribution emptyTimingDistribution() {
+		var distribution = new TimingDistribution(distRange);
+		distribution.init();
+		return distribution;
+	}
+
+	@Override public TimingDistribution getTimingDistribution() {
+		var timing = resource.getScoringTiming(currentTimingRuleId());
+		if (timing == null) return isShowingSecondaryScore() || !resource.getPrimaryScoringSelection().isStandard()
+				? emptyTimingDistribution : super.getTimingDistribution();
+		return scoringDistributions.computeIfAbsent(timing, data -> {
+			var distribution = new TimingDistribution(distRange);
+			distribution.init();
+			for (int value : data.timings()) distribution.add(value);
+			distribution.statisticValueCalcuate();
+			return distribution;
+		});
+	}
+	private String currentTimingRuleId() {
+		var display = secondaryDisplay();
+		return display != null ? display.result.ruleId() : resource.getPrimaryScoringSelection().effective().id();
+	}
+	public int[] getDisplayTimingJudgeArea() {
+		var timing = resource.getScoringTiming(currentTimingRuleId());
+		return timing != null ? timing.judgeArea() : bms.player.beatoraja.skin.SkinTimingVisualizer.getJudgeArea(resource);
+	}
 
 	private static final class SecondaryScoreDisplay {
 		final PlayerResource.AlternateResultScore result;
@@ -101,6 +129,7 @@ public class MusicResult extends AbstractResult {
 	}
 
 	void prepareScoreDisplay() {
+		scoringDistributions.clear();
 		scoreDisplayIndex = 0;
 		alternateScores = List.of();
 		var model = resource.getBMSModel();

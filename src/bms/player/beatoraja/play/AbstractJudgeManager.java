@@ -76,6 +76,13 @@ public abstract class AbstractJudgeManager {
 	 * 直近100ノーツの判定差時間
 	 */
 	private long[] recentJudges = new long[100];
+	private final com.badlogic.gdx.utils.IntArray timingHistory = new com.badlogic.gdx.utils.IntArray();
+	public int[] getTimingJudgeArea() {
+		int[] area = new int[10];
+		for (int i = 0; i < area.length; i++) area[i] = (int) (window.getTime(JudgeProperty.NoteType.NOTE, i / 2, i % 2 == 1) / 1000);
+		return area;
+	}
+	public PlayerResource.TimingData getTimingData() { return new PlayerResource.TimingData(timingHistory.toArray(), getTimingJudgeArea()); }
 	private long[] microrecentJudges = new long[100];
 	/**
 	 * 判定差時間のヘッド
@@ -171,6 +178,7 @@ public abstract class AbstractJudgeManager {
 		}
 
 		Arrays.fill(recentJudges, Long.MIN_VALUE);
+		timingHistory.clear();
 		this.recentJudgesIndex = 0;
 	}
 	abstract BMSPlayerRule ruleFor(Mode mode);
@@ -312,6 +320,7 @@ public abstract class AbstractJudgeManager {
 		score.addJudgeCount(judge, mfast >= 0, 1);
 
 		if (judge < 4) {
+			timingHistory.add((int) (mfast / 1000));
 			recentJudgesIndex = (recentJudgesIndex + 1) % recentJudges.length;
 			recentJudges[recentJudgesIndex] = mfast / 1000;
 			microrecentJudges[recentJudgesIndex] = mfast;

@@ -58,6 +58,11 @@ public final class JudgeManager extends AbstractJudgeManager {
 
 	@Override
 	boolean usesChartJudgeRank() { return timingProfile == null; }
+	@Override public int[] getTimingJudgeArea() {
+		if (pulsusRules == null) return super.getTimingJudgeArea();
+		int pg = pulsusRules.perfectGreatUs() / 1000, gr = pulsusRules.greatUs() / 1000, gd = pulsusRules.goodUs() / 1000;
+		return new int[]{-pg, pg, -gr, gr, -gd, gd, -200, 200, -200, 1000};
+	}
 
 	@Override
 	BMSPlayerRule ruleFor(Mode mode) {

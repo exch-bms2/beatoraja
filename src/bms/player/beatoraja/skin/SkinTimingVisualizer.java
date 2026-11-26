@@ -83,9 +83,10 @@ public final class SkinTimingVisualizer extends SkinObject {
 		index = ((BMSPlayer)state).getJudgeManager().getRecentJudgesIndex();
 		recent = ((BMSPlayer)state).getJudgeManager().getRecentJudges();
 
-		if(resource.getBMSModel() != model) {
+		int[] currentArea = ((BMSPlayer) state).getJudgeManager().getTimingJudgeArea();
+		if(resource.getBMSModel() != model || !java.util.Arrays.equals(judgeArea, currentArea)) {
 			model = resource.getBMSModel();
-			judgeArea = getJudgeArea(resource);
+			judgeArea = currentArea;
 			Optional.ofNullable(backtex).ifPresent(t -> t.getTexture().dispose());
 
 			// BMSModel毎に背景テクスチャ生成
@@ -150,7 +151,9 @@ public final class SkinTimingVisualizer extends SkinObject {
 		}
 	}
 
-	static int[] getJudgeArea(PlayerResource resource) {
+	public static int[] getJudgeArea(PlayerResource resource) {
+		var timing = resource.getScoringTiming(resource.getPrimaryScoringSelection().effective().id());
+		if (timing != null) return timing.judgeArea();
 		BMSModel model = resource.getBMSModel();
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
 

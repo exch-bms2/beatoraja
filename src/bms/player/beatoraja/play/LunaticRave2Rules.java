@@ -24,6 +24,11 @@ final class LunaticRave2Rules {
         return timeMs * 1_000 - noteUs > lateWindowMs * 1_000L;
     }
 
+    int[] judgeArea() {
+        return new int[]{-hitWindows[0], hitWindows[0], -hitWindows[1], hitWindows[1],
+                -hitWindows[2], hitWindows[2], -BAD_MS, BAD_MS, -BAD_MS, EMPTY_POOR_MS};
+    }
+
     long missAtMs(long noteUs, boolean longNoteHead) {
         return noteUs / 1_000 + (longNoteHead ? hitWindows[2] : BAD_MS) + 1;
     }

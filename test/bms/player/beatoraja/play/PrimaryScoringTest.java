@@ -41,9 +41,17 @@ public final class PrimaryScoringTest {
             f.judge.update(2_018_001, group);
             check(chart.getAllTimeLines()[1].getNote(6).getState() != 0, "Primary consumes actual notes: " + rule);
             if (rule == SecondaryScoringRule.LR2) check(f.judge.getJudgeCount(0) == 1, "LR2 real primary window");
+            check(f.judge.getTimingData().timings().length == 1, "Primary timing captures actual judgments: " + rule);
+            if (rule == SecondaryScoringRule.LR2 || rule == SecondaryScoringRule.PULSUS)
+                check(f.judge.getTimingJudgeArea()[1] == 18, "Native RANK 2 timing background: " + rule);
+            if (rule == SecondaryScoringRule.ANGOLMOIS)
+                check(f.judge.getTimingJudgeArea()[1] == 14, "Angolmois uses its scaled timing coordinate");
             if (rule == SecondaryScoringRule.ANGOLMOIS) check(f.judge.getScoreData().getNativeScore() > 0, "Angolmois live native score");
             if (!selected.isStandard()) {
                 var results = group.finish(false);
+                var timing = f.resource.getScoringTiming("beatoraja");
+                check(timing != null && timing.timings().length == 1 && timing.timings()[0] == -17
+                        && timing.judgeArea()[1] != f.judge.getTimingJudgeArea()[1], "Independent beatoraja timing snapshot: " + rule);
                 check(results.stream().noneMatch(r -> r.rule() == rule), "No duplicate primary run");
                 var standard = results.stream().filter(r -> r.rule() == SecondaryScoringRule.BEATORAJA).findFirst().orElseThrow().judgment();
                 check(standard.judgeCounts().get(0) + standard.judgeCounts().get(1) == 0
@@ -88,6 +96,7 @@ public final class PrimaryScoringTest {
         check(!((BMSPlayer) f.player).isNoteEnd(), "Pulsus hold head must not finish the song");
         f.input.setKeyState(6, false, 3_000_000); f.judge.update(3_000_001);
         check(((BMSPlayer) f.player).isNoteEnd() && f.judge.getScoreData().getExscore() == 4, "Pulsus hold tail completes its own note count");
+        check(f.judge.getTimingData().timings().length == 2, "Pulsus timing distribution includes both judged hold endpoints");
         System.out.println("PrimaryScoringTest passed (profile, real primary engines, independent beatoraja, fallback, deduplication)");
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }

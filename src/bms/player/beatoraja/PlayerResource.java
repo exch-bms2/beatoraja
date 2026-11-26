@@ -70,6 +70,17 @@ public final class PlayerResource {
 	 */
 	private ScoreData score;
 	private List<AlternateResultScore> alternateResultScores = List.of();
+	private java.util.Map<String, TimingData> scoringTimings;
+	public record TimingData(int[] timings, int[] judgeArea) {
+		public TimingData { timings = timings.clone(); judgeArea = judgeArea.clone(); }
+		@Override public int[] timings() { return timings.clone(); }
+		@Override public int[] judgeArea() { return judgeArea.clone(); }
+	}
+	public void setScoringTiming(String rule, TimingData timing) {
+		if (scoringTimings == null) scoringTimings = new java.util.HashMap<>();
+		scoringTimings.put(rule, timing);
+	}
+	public TimingData getScoringTiming(String rule) { return scoringTimings != null ? scoringTimings.get(rule) : null; }
 	private bms.player.beatoraja.play.PrimaryScoringSelection primaryScoringSelection;
 
 	public bms.player.beatoraja.play.PrimaryScoringSelection getPrimaryScoringSelection() {
@@ -157,6 +168,7 @@ public final class PlayerResource {
 
 	public void clear() {
 		primaryScoringSelection = null;
+		scoringTimings = null;
 		course = null;
 		courseindex = 0;
 		cscore = null;
@@ -175,6 +187,7 @@ public final class PlayerResource {
 	}
 
 	public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
+		scoringTimings = null;
 		primaryScoringSelection = null;
 		alternateResultScores = List.of();
 		// TODO play mode, リプレイデータでの読み込み分岐をここで行う

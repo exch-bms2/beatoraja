@@ -31,18 +31,31 @@ public record PrimaryScoringSelection(SecondaryScoringRule requested, SecondaryS
     }
 
     static PrimaryScoringSelection resolve(SecondaryScoringRule requested, BMSModel model, PlayerResource resource, int gauge) {
+        return resolve(requested, model, resource.getOriginalMode(), resource.getPlayMode(),
+                resource.getCourseBMSModels() != null, gauge, resource.getChartRuleParameters());
+    }
+
+    /** Selection preview uses the same eligibility checks as play, before chart normalization. */
+    public static PrimaryScoringSelection preview(SecondaryScoringRule requested, BMSModel model, int gauge) {
+        return resolve(requested, model, model.getMode(), BMSPlayerMode.PLAY, false, gauge,
+                model.getPath() != null && model.getPath().toLowerCase(java.util.Locale.ROOT).endsWith(".bmson")
+                        ? null : BMSPlayerRule.ChartParameters.fromBms(model));
+    }
+
+    private static PrimaryScoringSelection resolve(SecondaryScoringRule requested, BMSModel model, Mode originalMode,
+            BMSPlayerMode playMode, boolean course, int gauge, BMSPlayerRule.ChartParameters parameters) {
         if (requested == null || requested == SecondaryScoringRule.BEATORAJA) return standard();
-        if (resource.getPlayMode() == null || resource.getCourseBMSModels() != null
-                || (resource.getPlayMode().mode != BMSPlayerMode.Mode.PLAY && resource.getPlayMode().mode != BMSPlayerMode.Mode.REPLAY)) {
+        if (playMode == null || course
+                || (playMode.mode != BMSPlayerMode.Mode.PLAY && playMode.mode != BMSPlayerMode.Mode.REPLAY)) {
             return fallback(requested, "Single-song play only");
         }
-        if (model.getMode() != resource.getOriginalMode()) return fallback(requested, "Converted key mode");
+        if (model.getMode() != originalMode) return fallback(requested, "Converted key mode");
         if (requested == SecondaryScoringRule.RAINDROP || requested == SecondaryScoringRule.BEMUSE) {
             return fallback(requested, "Timing-only profile; dedicated gauge system is not implemented");
         }
         if (requested == SecondaryScoringRule.LR2) {
-            boolean eligible = BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model, resource.getOriginalMode(),
-                    BMSPlayerMode.PLAY, false, gauge, resource.getChartRuleParameters()) == BMSPlayerRule.LunaticRave2;
+            boolean eligible = BMSPlayerRule.select(BMSPlayerRule.LunaticRave2, model, originalMode,
+                    BMSPlayerMode.PLAY, false, gauge, parameters) == BMSPlayerRule.LunaticRave2;
             return eligible ? selected(requested) : fallback(requested, "Unsupported gauge, key mode or LN format");
         }
         if (model.getMode() != Mode.BEAT_7K) return fallback(requested, "7 KEY only");

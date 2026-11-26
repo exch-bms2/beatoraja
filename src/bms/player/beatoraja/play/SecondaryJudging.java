@@ -28,6 +28,8 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	private static final long GAUGE_INTERVAL_US = 500_000;
 
 	private final AbstractJudgeManager judge;
+	private final PlayerResource resource;
+	private final String timingRuleId;
 	private final AbstractGrooveGauge gauge;
 	private final PlayerConfig config;
 	private final long endUs;
@@ -65,6 +67,10 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	private SecondaryJudging(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs, int startGauge,
 			BMSPlayerRule rule) {
 		config = resource.getPlayerConfig();
+		this.resource = resource;
+		timingRuleId = rule == null ? SecondaryScoringRule.BEATORAJA.id()
+				: java.util.Arrays.stream(SecondaryScoringRule.values()).filter(candidate -> candidate.scoreRule() == rule)
+						.findFirst().orElseThrow().id();
 		this.endUs = endUs;
 		var chart = copyChart(model);
 		if (rule == BMSPlayerRule.LunaticRave2) {
@@ -139,6 +145,7 @@ final class SecondaryJudging implements SecondaryJudgingGroup.Run {
 	}
 
 	public Judgment finish(boolean primaryFinished) {
+		resource.setScoringTiming(timingRuleId, judge.getTimingData());
 		var score = judge.getScoreData();
 		int passed = judge.getPastNotes();
 		if (isRunning()) {

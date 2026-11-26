@@ -978,6 +978,7 @@ public class BMSPlayer extends MainState {
 		final AbstractGrooveGauge gauge = players[player].gauge;
 		final PlayerConfig config = resource.getPlayerConfig();
 		ScoreData score = judge.getScoreData();
+		resource.setScoringTiming(resource.getPrimaryScoringSelection().effective().id(), judge.getTimingData());
 		score.setPlaytime(playTimeTracker.getPlaytime());
 		if (resource.getCourseBMSModels() == null
 				&& (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0)) {

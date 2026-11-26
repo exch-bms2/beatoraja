@@ -32,6 +32,8 @@ public class SkinTimingDistributionGraph extends SkinObject {
 	private final Color devColor;
 
 	private MusicResult state;
+	private TimingDistribution distribution;
+	private int[] judgeArea;
 
 	public SkinTimingDistributionGraph(int width, int lineWidth,
 			String graphColor, String averageColor, String devColor, String PGColor, String GRColor, String GDColor, String BDColor,
@@ -61,6 +63,15 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			return;
 		}
 		this.state = (MusicResult) state;
+		TimingDistribution current = this.state.getTimingDistribution();
+		int[] currentArea = this.state.getDisplayTimingJudgeArea();
+		if (current != distribution || !java.util.Arrays.equals(currentArea, judgeArea)) {
+			Optional.ofNullable(tex).ifPresent(t -> t.getTexture().dispose());
+			tex = null;
+			max = 10;
+			distribution = current;
+			judgeArea = currentArea;
+		}
 		super.prepare(time, state);
 		
 	}
@@ -68,10 +79,9 @@ public class SkinTimingDistributionGraph extends SkinObject {
 	public void draw(SkinObjectRenderer sprite) {
 		// Texture生成は一度だけ
 		if (tex == null) {
-			TimingDistribution td = state.getTimingDistribution();
+			TimingDistribution td = distribution;
 			int[] dist = td.getTimingDistribution();
 			final int center = td.getArrayCenter();
-			int[] judgeArea = SkinTimingVisualizer.getJudgeArea(state.resource);
 
 			for (int d : dist) {
 				if (max < d) {

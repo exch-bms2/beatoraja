@@ -98,14 +98,30 @@ public final class MusicResultScoreDisplayTest {
         press(result, keyboard, states);
         check(!result.isShowingLr2Score() && rank.isStatic(result), "unavailable without a secondary result");
         var lr2 = new PlayerResource.AlternateResultScore("lr2", "Lunatic Rave 2", secondary, secondaryBest, timedHistory);
+        int[] standardArea = {-15, 15, -30, 30, -60, 60, -100, 100, -150, 150};
+        int[] lr2Area = {-18, 18, -40, 40, -100, 100, -200, 200, -200, 1000};
+        resource.setScoringTiming("beatoraja", new PlayerResource.TimingData(new int[]{-12, -12, 6}, standardArea));
+        resource.setScoringTiming("lr2", new PlayerResource.TimingData(new int[]{20, 40}, lr2Area));
         resource.setAlternateResultScores(List.of(lr2));
         result.prepareScoreDisplay();
         var graph = new SkinGaugeGraphObject();
+        var timingGraph = new bms.player.beatoraja.skin.SkinTimingDistributionGraph(301, 1,
+                "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", "FFFFFFFF", 1, 1);
+        timingGraph.setDestination(0, 0, 0, 301, 100, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0);
+        timingGraph.prepare(0, result);
+        check(result.getTimingDistribution().getAverage() == -6 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), standardArea),
+                "Initial timing distribution and judge area belong to primary");
+        var timingField = timingGraph.getClass().getDeclaredField("distribution"); timingField.setAccessible(true);
+        var initialDistribution = timingField.get(timingGraph);
         var gaugeNumber = FloatPropertyFactory.getFloatProperty("groovegauge_1p");
         check(graph.updateGraphData(result) && gaugeNumber.get(result) == 80, "primary gauge data");
         check(score.get(result) == 190 && rank.get(result) && !rank.isStatic(result),
                 "primary is initially shown, rank destinations remain dynamic");
         press(result, keyboard, states);
+        timingGraph.prepare(0, result);
+        check(result.getTimingDistribution().getAverage() == 30 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), lr2Area)
+                        && timingField.get(timingGraph) != initialDistribution,
+                "F7 switches signed distribution, statistics and judge-area graph cache");
         check(result.getDisplayGaugeHistory() == timedHistory && result.getGaugeType() == NORMAL
                         && gaugeNumber.get(result) == 40 && graph.updateGraphData(result) && !graph.updateGraphData(result),
                 "F7 invalidates the graph even when both views use NORMAL");
@@ -139,6 +155,9 @@ public final class MusicResultScoreDisplayTest {
         press(result, keyboard, states);
         check(!result.isShowingLr2Score() && score.get(result) == 190 && rank.get(result),
                 "a second press restores the primary view");
+        timingGraph.prepare(0, result);
+        check(timingField.get(timingGraph) == initialDistribution && result.getTimingDistribution().getAverage() == -6,
+                "F7 restores primary timing graph without mixing samples");
         check(result.getGaugeType() == NORMAL && graph.updateGraphData(result) && gaugeNumber.get(result) == 80
                         && resource.getGrooveGauge() == primaryGauge && resource.getGauge() == primaryHistory,
                 "primary graph and gauge remain untouched");
@@ -182,10 +201,14 @@ public final class MusicResultScoreDisplayTest {
         result.prepareScoreDisplay();
         check(result.isShowingLr2Score() && result.getDisplayScore() == selectedPrimary
                         && result.getDisplayScoringSummary().startsWith("Primary: Lunatic Rave 2"), "Configured primary is the initial result");
+        check(result.getTimingDistribution().getAverage() == 30 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), lr2Area),
+                "Non-beatoraja primary receives its timing distribution despite the separate save path");
         press(result, keyboard, states);
         check(result.getDisplayScore() == primary && result.getDisplayScoringRuleName().equals("beatoraja")
                         && result.getDisplayOldScore() == primaryBest && result.getDisplayGaugeValue() == 80,
                 "F7 exposes independently calculated beatoraja with its own best and gauge");
+        check(result.getTimingDistribution().getAverage() == -6 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), standardArea),
+                "F7 from a native primary shows the independent beatoraja timing distribution and windows");
         press(result, keyboard, states);
         check(result.getDisplayScoringSummary().contains("SCORE 1234 / 2000"), "Native score and maximum remain visible");
         press(result, keyboard, states);

@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 
 /** C Angolmois 2.0 alpha 3 (625f843), with SDL polls replaced by fixed 1 ms frames. */
 final class AngolmoisEngine {
+    static int[] judgeArea() { return new int[]{-14, 14, -47, 47, -83, 83, -143, 143, -143, 143}; }
     static final long FRAME_US = 1_000;
     static final int END = 0, HEAD = 1, NOTE = 2, HIDDEN = 3, MINE = 4;
     static final int BGM = 72, BGA = 73, BPM = 74, STOP = 75;

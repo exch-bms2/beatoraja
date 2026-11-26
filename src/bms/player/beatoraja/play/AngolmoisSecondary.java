@@ -22,6 +22,8 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
     private final LongArray times = new LongArray();
     private Outcome outcome = Outcome.RUNNING;
     private long lastUs;
+    private PlayerResource resource;
+    private final com.badlogic.gdx.utils.IntArray timingHistory = new com.badlogic.gdx.utils.IntArray();
 
     static AngolmoisSecondary create(BMSPlayer player, BMSModel model, PlayerResource resource, long endUs) {
         if (model.getMode() != Mode.BEAT_7K || resource.getOriginalMode() != Mode.BEAT_7K
@@ -30,8 +32,10 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
         try {
             var engine = AngolmoisChart.create(model);
             if (engine.notes == 0) return null;
-            return new AngolmoisSecondary(engine, endUs, engine.originDelayUs - resource.getMarginTime() * 1_000,
+            var run = new AngolmoisSecondary(engine, endUs, engine.originDelayUs - resource.getMarginTime() * 1_000,
                     player.getLaneProperty().getKeyLaneAssign());
+            run.resource = resource;
+            return run;
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not read Angolmois chart", e);
         }
@@ -39,6 +43,13 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
 
     AngolmoisSecondary(AngolmoisEngine engine, long endUs, long offsetUs, int[] lanes) {
         this.engine = engine;
+        engine.listener = new AngolmoisEngine.Listener() {
+            @Override public void judge(AngolmoisEngine.ChartObject object, int grade, double signedMs, long frameUs, boolean vanish) {
+                if (grade > 0) timingHistory.add((int) signedMs);
+            }
+            @Override public void release(AngolmoisEngine.ChartObject object) {}
+            @Override public void sound(AngolmoisEngine.ChartObject object) {}
+        };
         this.endUs = endUs;
         this.offsetUs = offsetUs;
         this.lanes = lanes.clone();
@@ -75,6 +86,8 @@ final class AngolmoisSecondary implements SecondaryJudgingGroup.Run {
     }
 
     @Override public Judgment finish(boolean primaryFinished) {
+        if (resource != null) resource.setScoringTiming(SecondaryScoringRule.ANGOLMOIS.id(),
+                new PlayerResource.TimingData(timingHistory.toArray(), AngolmoisEngine.judgeArea()));
         if (isRunning()) outcome = primaryFinished && engine.settled() ? Outcome.FINISHED : Outcome.INTERRUPTED;
         sample(lastUs);
         var counts = new ArrayList<Integer>(12);
