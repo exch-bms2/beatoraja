@@ -400,13 +400,13 @@ public class BooleanPropertyFactory {
 				}),
 		disable_save_score(OPTION_DISABLE_SAVE_SCORE, DrawProperty.TYPE_NO_STATIC,
 				// TODO select, decide時の実装
-				(state) -> (!state.main.getPlayerResource().isUpdateScore())),
+				(state) -> (!(state instanceof MusicResult result ? result.isDisplayScoreUpdateAllowed() : state.resource.isUpdateScore()))),
 		enable_save_score(OPTION_ENABLE_SAVE_SCORE, DrawProperty.TYPE_NO_STATIC,
 				// TODO select, decide時の実装
-				(state) -> (state.main.getPlayerResource().isUpdateScore())),
+				(state) -> (state instanceof MusicResult result ? result.isDisplayScoreUpdateAllowed() : state.resource.isUpdateScore())),
 		no_save_clear(OPTION_NO_SAVE_CLEAR, DrawProperty.TYPE_NO_STATIC,
 				// TODO 未実装
-				(state) -> (state.main.getPlayerResource().isUpdateScore())),
+				(state) -> (state instanceof MusicResult result ? result.isDisplayScoreUpdateAllowed() : state.resource.isUpdateScore())),
 
 			bgaoff(40, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, state -> (!state.resource.getBMSResource().isBGAOn())),
 			bgaon(41, DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT, state -> (state.resource.getBMSResource().isBGAOn())),

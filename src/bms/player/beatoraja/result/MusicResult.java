@@ -64,6 +64,10 @@ public class MusicResult extends AbstractResult {
 		var display = secondaryDisplay();
 		return display != null ? display.result.ruleId() : resource.getPrimaryScoringSelection().effective().id();
 	}
+	public boolean isDisplayScoreUpdateAllowed() {
+		var rule = SecondaryScoringRule.byId(currentTimingRuleId());
+		return rule != null ? resource.getScoringEligibility(rule).updateScore() : resource.isUpdateScore();
+	}
 	public int[] getDisplayTimingJudgeArea() {
 		var timing = resource.getScoringTiming(currentTimingRuleId());
 		return timing != null ? timing.judgeArea() : bms.player.beatoraja.skin.SkinTimingVisualizer.getJudgeArea(resource);
@@ -313,6 +317,11 @@ public class MusicResult extends AbstractResult {
 		}
 	}
 
+	boolean shouldSendIRScore(IRScoreSelection score, int policy) {
+		return score != null && resource.getScoringEligibility(SecondaryScoringRule.BEATORAJA).updateScore()
+				&& score.shouldSend(policy);
+	}
+
 	IRScoreSelection selectIRScore() {
 		ScoreData score = getNewScore();
 		ScoreData previous = oldscore;
@@ -352,7 +361,7 @@ public class MusicResult extends AbstractResult {
 			state = STATE_IR_PROCESSING;
 			
         	for(IRStatus irc : ir) {
-				boolean send = resource.isUpdateScore() && irScore.shouldSend(irc.config.getIrsend());
+				boolean send = shouldSendIRScore(irScore, irc.config.getIrsend());
     			
     			if(send) {
 					irSendStatus.add(new IRSendStatus(irc.connection, resultChart, irScore.score()));
@@ -630,13 +639,14 @@ public class MusicResult extends AbstractResult {
 						alternate.score().setSeed(newscore.getSeed());
 						alternate.score().setDeviceType(newscore.getDeviceType());
 						alternate.score().setSkin(newscore.getSkin());
-						alternate.score().setAssist(newscore.getAssist());
+						var eligibility = resource.getScoringEligibility(SecondaryScoringRule.BEATORAJA);
+						alternate.score().setAssist(eligibility.assist());
 						alternate.score().setJudgeAlgorithm(bms.player.beatoraja.play.JudgeAlgorithm.valueOf(
 								resource.getPlayerConfig().getPlayConfig(model.getMode()).getPlayconfig().getJudgetype()));
-						if (alternate.score().getClear() != Failed.id && resource.getAssist() > 0) {
-							alternate.score().setClear(resource.getAssist() == 1 ? LightAssistEasy.id : AssistEasy.id);
+						if (alternate.score().getClear() != Failed.id && eligibility.assist() > 0) {
+							alternate.score().setClear(eligibility.assist() == 1 ? LightAssistEasy.id : AssistEasy.id);
 						}
-						data.writeScoreData(alternate.score(), model, resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
+						data.writeScoreData(alternate.score(), model, resource.getPlayerConfig().getLnmode(), eligibility.updateScore());
 					}
 				}
 			}

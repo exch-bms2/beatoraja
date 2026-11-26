@@ -113,6 +113,25 @@ public final class PrimaryResultPersistenceTest {
         primary.setNativeScore(740);
         save.invoke(result);
         check(data.readRuleBest(SecondaryScoringRule.ANGOLMOIS, model.getSHA256(), 0).getNativeScore() == 700, "Replay is read-only");
+        resource.setPlayMode(BMSPlayerMode.PLAY);
+        var player = resource.getPlayerConfig(); player.setCustomJudge(true); player.setKeyJudgeWindowRatePerfectGreat(150);
+        resource.setScoringEligibility(SecondaryScoringRule.ANGOLMOIS,
+                ScoringEligibility.resolve(SecondaryScoringRule.ANGOLMOIS, player, true, 0, true));
+        resource.setScoringEligibility(SecondaryScoringRule.BEATORAJA,
+                ScoringEligibility.resolve(SecondaryScoringRule.BEATORAJA, player, true, 0, true));
+        primary.setNativeScore(740); standard.setEpg(2); standard.setEgr(0);
+        save.invoke(result);
+        check(data.readRuleBest(SecondaryScoringRule.ANGOLMOIS, model.getSHA256(), 0).getNativeScore() == 740
+                && data.readScoreData(model, 0).getExscore() == 2, "Valid native best is saved while expanded beatoraja judgments do not update its best");
+        check(primary.getAssist() == 0 && standard.getAssist() == 2 && standard.getClear() == ClearType.AssistEasy.id,
+                "Beatoraja assist metadata does not contaminate the native primary");
+        check(!result.shouldSendIRScore(result.selectIRScore(), IRConfig.IR_SEND_ALWAYS), "Invalid beatoraja score blocks IR even when native primary is eligible");
+        check(result.isDisplayScoreUpdateAllowed(), "Primary save eligibility remains visible");
+        result.prepareScoreDisplay();
+        set(result, MusicResult.class, "scoreDisplayIndex", 1);
+        check(!result.isDisplayScoreUpdateAllowed()
+                && bms.player.beatoraja.skin.property.BooleanPropertyFactory.getBooleanProperty(
+                        bms.player.beatoraja.skin.SkinProperty.OPTION_DISABLE_SAVE_SCORE).get(result), "F7 exposes the beatoraja save restriction");
         System.out.println("PrimaryResultPersistenceTest passed (native primary/canonical beatoraja separation, IR payload/policies and replay)");
     }
     private static ScoreData score(BMSModel model, int pg, int gr, BMSPlayerRule rule) {

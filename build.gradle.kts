@@ -316,6 +316,7 @@ val regressionClasses = listOf(
     "bms.player.beatoraja.play.LunaticRave2ComparisonTest",
     "bms.player.beatoraja.play.AngolmoisComparisonTest",
     "bms.player.beatoraja.play.PrimaryScoringTest",
+    "bms.player.beatoraja.play.ScoringEligibilityTest",
     "bms.player.beatoraja.select.PrimaryScoreDataCacheTest",
     "bms.player.beatoraja.select.PrimaryScoringQueryTest",
     "bms.player.beatoraja.play.ChartScoringPlanTest",

@@ -101,6 +101,15 @@ public final class PlayerResource {
 	 * スコア更新するかどうか
 	 */
 	private boolean updateScore = true;
+	private java.util.Map<bms.player.beatoraja.play.SecondaryScoringRule, bms.player.beatoraja.play.ScoringEligibility> scoringEligibility;
+	public void setScoringEligibility(bms.player.beatoraja.play.SecondaryScoringRule rule, bms.player.beatoraja.play.ScoringEligibility eligibility) {
+		if (scoringEligibility == null) scoringEligibility = new java.util.EnumMap<>(bms.player.beatoraja.play.SecondaryScoringRule.class);
+		scoringEligibility.put(rule, eligibility);
+	}
+	public bms.player.beatoraja.play.ScoringEligibility getScoringEligibility(bms.player.beatoraja.play.SecondaryScoringRule rule) {
+		var value = scoringEligibility != null ? scoringEligibility.get(rule) : null;
+		return value != null ? value : new bms.player.beatoraja.play.ScoringEligibility(updateScore, assist);
+	}
 	private boolean updateCourseScore = true;
 	private AbstractGrooveGauge grooveGauge;
 	/**
@@ -168,6 +177,7 @@ public final class PlayerResource {
 
 	public void clear() {
 		primaryScoringSelection = null;
+		scoringEligibility = null;
 		scoringTimings = null;
 		course = null;
 		courseindex = 0;

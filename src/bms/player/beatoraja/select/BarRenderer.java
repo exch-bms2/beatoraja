@@ -322,7 +322,7 @@ public final class BarRenderer {
 				continue;
 			}
 			// lamp
-			if(select.getRival() != null) {
+			if(select.getRival() != null && select.canCompareRival(ba.sd)) {
 				final SkinImage playerLamp = baro.getPlayerLamp(ba.sd.getLamp(true));
 				if (playerLamp != null) {
 					playerLamp.draw(sprite, ba.x, ba.y);

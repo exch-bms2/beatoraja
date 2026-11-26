@@ -56,6 +56,18 @@ public final class PrimaryScoreDataCacheTest {
         bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MusicSelector.class, "config", player);
         bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MusicSelector.class, "scorecache", cache);
         bms.player.beatoraja.input.KeyboardQueueTestSupport.set(selector, MainState.class, "score", new ScoreDataProperty());
+        var holdBar = manager.currentsongs[0];
+        var holdBest = new ScoreData(Mode.BEAT_7K); holdBest.setNotes(3); holdBest.setEpg(3); holdBar.setScore(holdBest);
+        check(bms.player.beatoraja.skin.property.FloatPropertyFactory.getFloatProperty(140).get(selector) == 1,
+                "Selection PG rate uses Pulsus scoring endpoints instead of the indexed chart count");
+        holdBest.setNotes(0);
+        check(bms.player.beatoraja.skin.property.FloatPropertyFactory.getFloatProperty(140).get(selector) == 0,
+                "Empty score produces a finite zero judge rate");
+        holdBar.setScore(null);
+        check(!selector.canCompareRival(holdBar), "Native-rule bar cannot show a beatoraja rival lamp");
+        player.setGauge(AbstractGrooveGauge.EXHARD);
+        check(selector.canCompareRival(holdBar), "Fallback bar can show the compatible beatoraja rival lamp");
+        player.setGauge(AbstractGrooveGauge.NORMAL);
         check(bms.player.beatoraja.skin.property.IntegerPropertyFactory.getIntegerProperty(bms.player.beatoraja.skin.SkinProperty.NUMBER_TOTALNOTES).get(selector) == 3
                 && bms.player.beatoraja.skin.property.IntegerPropertyFactory.getIntegerProperty(bms.player.beatoraja.skin.SkinProperty.NUMBER_MAXSCORE).get(selector) == 6,
                 "Selection skin properties use chart scoring metadata when no best exists");

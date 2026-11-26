@@ -105,12 +105,7 @@ public class BMSPlayer extends MainState {
 
 		if(resource.getChartOption() != null) {
 			ReplayData chartOption = resource.getChartOption();
-			playinfo.randomoption = chartOption.randomoption;
-			playinfo.randomoptionseed = chartOption.randomoptionseed;
-			playinfo.randomoption2 = chartOption.randomoption2;
-			playinfo.randomoption2seed = chartOption.randomoption2seed;
-			playinfo.doubleoption = chartOption.doubleoption;
-			playinfo.rand = chartOption.rand;
+			restoreReplayChart(chartOption);
 			Logger.getGlobal().info("譜面再現 : op1 - " + playinfo.randomoption + " seed1 - " + playinfo.randomoptionseed
 					 + " op2 - " + playinfo.randomoption2 + " seed2 - " + playinfo.randomoption2seed + " opdp - "+ playinfo.doubleoption
 					 + " random - " + Arrays.toString(playinfo.rand));
@@ -149,12 +144,7 @@ public class BMSPlayer extends MainState {
 					if(main.getInputProcessor().getKeyState(1)) {
 						//保存された譜面オプション/Random Seedから譜面再現
 						Logger.getGlobal().info("リプレイ再現モード : 譜面");
-						playinfo.randomoption = replay.randomoption;
-						playinfo.randomoptionseed = replay.randomoptionseed;
-						playinfo.randomoption2 = replay.randomoption2;
-						playinfo.randomoption2seed = replay.randomoption2seed;
-						playinfo.doubleoption = replay.doubleoption;
-						playinfo.rand = replay.rand;
+						restoreReplayChart(replay);
 						isReplayPatternPlay = true;
 					} else if(main.getInputProcessor().getKeyState(2)) {
 						//保存された譜面オプションログから譜面オプション再現
@@ -212,14 +202,6 @@ public class BMSPlayer extends MainState {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
 				assist = Math.max(assist, 1);
-				score = false;
-			}
-
-			if (config.isCustomJudge() &&
-					(config.getKeyJudgeWindowRatePerfectGreat() > 100 || config.getKeyJudgeWindowRateGreat() > 100 || config.getKeyJudgeWindowRateGood() > 100
-					|| config.getScratchJudgeWindowRatePerfectGreat() > 100 || config.getScratchJudgeWindowRateGreat() > 100 || config.getScratchJudgeWindowRateGood() > 100
-					|| config.getLongnoteMarginRate() > 100)) {
-				assist = Math.max(assist, 2);
 				score = false;
 			}
 
@@ -355,6 +337,12 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("Primary scoring: " + selection.requested().id() + " -> " + selection.effective().id()
 				+ (selection.reason().isEmpty() ? "" : " (" + selection.reason() + ")"));
 		playRule = selection.isStandard() ? BMSPlayerRule.getBMSPlayerRule(model.getMode()) : selection.effective().scoreRule();
+		for (var rule : SecondaryScoringRule.values()) resource.setScoringEligibility(rule,
+				ScoringEligibility.resolve(rule, config, score, assist,
+						autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY));
+		var eligibility = resource.getScoringEligibility(selection.effective());
+		assist = eligibility.assist();
+		score = eligibility.updateScore();
 		Logger.getGlobal().info("アシストレベル : " + assist + " - スコア保存 : " + score);
 
 		resource.setUpdateScore(score);
@@ -365,10 +353,20 @@ public class BMSPlayer extends MainState {
 	}
 
 	/** Replay modifiers are restored without changing the user's current configuration. */
+	private void restoreReplayChart(ReplayData source) {
+		playinfo.randomoption = source.randomoption;
+		playinfo.randomoptionseed = source.randomoptionseed;
+		playinfo.randomoption2 = source.randomoption2;
+		playinfo.randomoption2seed = source.randomoption2seed;
+		playinfo.doubleoption = source.doubleoption;
+		playinfo.rand = source.rand;
+		playinfo.chartModifiers = source.chartModifiers;
+	}
+
 	private void applyChartModifiers(BMSPlayerMode mode, PlayerConfig config) {
 		if (mode.mode == BMSPlayerMode.Mode.PRACTICE) return;
-		playinfo.chartModifiers = replay != null ? replay.chartModifiers
-				: config.getChartScoringPlan(model.getSHA256()).snapshot(config);
+		playinfo.chartModifiers = replay != null ? replay.chartModifiers : playinfo.chartModifiers != null
+				? playinfo.chartModifiers : config.getChartScoringPlan(model.getSHA256()).snapshot(config);
 		for (var modifier : ChartScoringPlan.modifiers(playinfo.chartModifiers)) {
 			modifier.modify(model);
 			if (modifier.getAssistLevel() != PatternModifier.AssistLevel.NONE)
@@ -1046,15 +1044,18 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void fillSharedScoreMetadata(ScoreData score) {
+		fillSharedScoreMetadata(score, assist);
+	}
+	private void fillSharedScoreMetadata(ScoreData score, int scoringAssist) {
 		score.setPlaytime(playTimeTracker.getPlaytime());
 		score.setOption(playinfo.randomoption + (model.getMode().player == 2
 				? playinfo.randomoption2 * 10 + playinfo.doubleoption * 100 : 0));
 		score.setSeed((model.getMode().player == 2 ? playinfo.randomoption2seed * 65536 * 256 : 0) + playinfo.randomoptionseed);
-		score.setAssist(assist);
+		score.setAssist(scoringAssist);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		score.setSkin(getSkin().header.getName());
-		if (score.getClear() != ClearType.Failed.id && assist > 0)
-			score.setClear(assist == 1 ? ClearType.LightAssistEasy.id : ClearType.AssistEasy.id);
+		if (score.getClear() != ClearType.Failed.id && scoringAssist > 0)
+			score.setClear(scoringAssist == 1 ? ClearType.LightAssistEasy.id : ClearType.AssistEasy.id);
 	}
 
 	private void notifyObsPlayEnd() {
@@ -1077,8 +1078,9 @@ public class BMSPlayer extends MainState {
 				var data = main.getPlayDataAccessor();
 				var attempt = secondary.toLocalAttempt(model);
 				var score = attempt.toScoreData(model.getMode());
-				fillSharedScoreMetadata(score);
-				score.setTrophy(ScoreTrophies.merge(null, resource.isUpdateScore()
+				var eligibility = resource.getScoringEligibility(rule);
+				fillSharedScoreMetadata(score, eligibility.assist());
+				score.setTrophy(ScoreTrophies.merge(null, eligibility.updateScore()
 						&& (secondary.outcome() == SecondaryJudgingGroup.Outcome.FINISHED || secondary.outcome() == SecondaryJudgingGroup.Outcome.FAILED)
 						? ScoreTrophies.forAttempt(score) : Set.of()));
 				attempt = attempt.withMetadata(score);
@@ -1091,7 +1093,7 @@ public class BMSPlayer extends MainState {
 					display.add(new PlayerResource.AlternateResultScore(rule.id(), rule.displayName(),
 							score, previous, secondary.gaugeHistory(), secondary.outcome() == SecondaryJudgingGroup.Outcome.FINISHED));
 				}
-				if (rule != SecondaryScoringRule.BEATORAJA) data.writeRuleAttempt(rule, attempt, resource.isUpdateScore());
+				if (rule != SecondaryScoringRule.BEATORAJA) data.writeRuleAttempt(rule, attempt, eligibility.updateScore());
 			} catch (IllegalArgumentException e) {
 				Logger.getGlobal().warning("Could not save the local " + rule.displayName() + " score: " + e.getMessage());
 			}

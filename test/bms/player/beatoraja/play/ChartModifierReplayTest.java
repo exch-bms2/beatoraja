@@ -35,6 +35,16 @@ public final class ChartModifierReplayTest {
                 var reproduced = decode(file, saved.rand);
                 apply(reproduced, config, saved, BMSPlayerMode.REPLAY_1);
                 check(fingerprint(original).equals(fingerprint(reproduced)), "Replay restores notes, LN types, mines and scroll without current options");
+                var chartPlay = decode(file, saved.rand);
+                var chartPlayer = KeyboardQueueTestSupport.allocate(BMSPlayer.class);
+                var chartInfo = new ReplayData();
+                set(chartPlayer, BMSPlayer.class, "model", chartPlay); set(chartPlayer, BMSPlayer.class, "playinfo", chartInfo);
+                var restore = BMSPlayer.class.getDeclaredMethod("restoreReplayChart", ReplayData.class); restore.setAccessible(true);
+                restore.invoke(chartPlayer, saved);
+                var modify = BMSPlayer.class.getDeclaredMethod("applyChartModifiers", BMSPlayerMode.class, PlayerConfig.class); modify.setAccessible(true);
+                modify.invoke(chartPlayer, BMSPlayerMode.PLAY, config);
+                check(fingerprint(original).equals(fingerprint(chartPlay)) && chartInfo.chartModifiers.seed == seed
+                        && Arrays.equals(chartInfo.rand, saved.rand), "Chart-reproduction normal play retains saved modifiers, seed and branches");
                 check(config.getLongnoteMode() == 0 && config.getMineMode() == 0 && config.getScrollMode() == 0
                         && config.getExtranoteDepth() == 0, "Playback does not overwrite the user profile");
                 for (var requested : new SecondaryScoringRule[]{SecondaryScoringRule.LR2, SecondaryScoringRule.PULSUS, SecondaryScoringRule.ANGOLMOIS}) {

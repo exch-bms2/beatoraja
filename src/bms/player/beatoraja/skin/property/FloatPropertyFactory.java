@@ -544,7 +544,7 @@ public class FloatPropertyFactory {
 				final Bar selected = ((MusicSelector) state).getBarManager().getSelected();
 				if (selected instanceof SongBar) {
 					ScoreData score = selected.getScore();
-					return score != null ? ((float) (score.getJudgeCount(judge))) / ((SongBar) selected).getSongData().getNotes() : 0;
+					return score != null && score.getNotes() > 0 ? (float) score.getJudgeCount(judge) / score.getNotes() : 0;
 				}
 				if (selected instanceof GradeBar) {
 					ScoreData score = selected.getScore();
