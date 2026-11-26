@@ -34,11 +34,17 @@ public final class ScoringLuaApiTest {
         result.getPrimaryScoreDataProperty().setTargetScore(600, null, 750, null, 2, 750);
         result.getPrimaryScoreDataProperty().update(nativeScore);
         var prepare = MusicResult.class.getDeclaredMethod("prepareScoreDisplay"); prepare.setAccessible(true); prepare.invoke(result);
+        resource.setScoringTiming("angolmois", new PlayerResource.TimingData(new int[]{12, 24}, new int[10]));
+        resource.setScoringTiming("beatoraja", new PlayerResource.TimingData(new int[]{-12, -6}, new int[10]));
         var api = new LuaTable(); new MainStatePropertyLuaApiExporter(result).export(api);
+        check(api.get("float_number").call(org.luaj.vm2.LuaValue.valueOf("timing_average")).todouble() == 18,
+                "Lua float timing mean uses actual native samples");
         check(api.get("gauge").call().todouble() == 30 && api.get("gauge_type").call().toint() == 2, "Lua result gauge follows native primary");
         check(api.get("exscore").call().toint() == 700 && api.get("exscore_rival").call().toint() == 750
                 && IntegerPropertyFactory.getImageIndexProperty(61).get(result) == 3, "Compatible primary target remains visible");
         set(result, MusicResult.class, "scoreDisplayIndex", 1);
+        check(api.get("float_number").call(org.luaj.vm2.LuaValue.valueOf(374)).todouble() == -9,
+                "Lua float timing mean follows F7 to independent beatoraja samples");
         check(api.get("gauge").call().todouble() == 90 && api.get("gauge_type").call().toint() == 3
                 && api.get("exscore").call().toint() == 2, "Lua result gauge and score follow F7");
         check(api.get("rate_rival").call().isnil() && api.get("exscore_rival").call().isnil()

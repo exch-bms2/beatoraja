@@ -13,14 +13,30 @@ public final class ChartScoringPlan {
     public long seed() { return seed; }
 
     public java.util.List<bms.player.beatoraja.pattern.PatternModifier> modifiers(bms.player.beatoraja.PlayerConfig config) {
+        return modifiers(snapshot(config));
+    }
+
+    public bms.player.beatoraja.ReplayData.ChartModifiers snapshot(bms.player.beatoraja.PlayerConfig config) {
+        var settings = new bms.player.beatoraja.ReplayData.ChartModifiers();
+        settings.seed = seed;
+        settings.scrollMode = config.getScrollMode(); settings.scrollSection = config.getScrollSection();
+        settings.scrollRate = config.getScrollRate(); settings.longnoteMode = config.getLongnoteMode();
+        settings.longnoteRate = config.getLongnoteRate(); settings.mineMode = config.getMineMode();
+        settings.extranoteType = config.getExtranoteType(); settings.extranoteDepth = config.getExtranoteDepth();
+        settings.extranoteScratch = config.isExtranoteScratch();
+        return settings;
+    }
+
+    public static java.util.List<bms.player.beatoraja.pattern.PatternModifier> modifiers(bms.player.beatoraja.ReplayData.ChartModifiers settings) {
         var mods = new java.util.ArrayList<bms.player.beatoraja.pattern.PatternModifier>();
-        if (config.getScrollMode() > 0) mods.add(new bms.player.beatoraja.pattern.ScrollSpeedModifier(
-                config.getScrollMode() - 1, config.getScrollSection(), config.getScrollRate(), seed ^ 0x5343524f4c4cL));
-        if (config.getLongnoteMode() > 0) mods.add(new bms.player.beatoraja.pattern.LongNoteModifier(
-                config.getLongnoteMode() - 1, config.getLongnoteRate(), seed));
-        if (config.getMineMode() > 0) mods.add(new bms.player.beatoraja.pattern.MineNoteModifier(config.getMineMode() - 1, seed ^ 0x4d494e45L));
-        if (config.getExtranoteDepth() > 0) mods.add(new bms.player.beatoraja.pattern.ExtraNoteModifier(
-                config.getExtranoteType(), config.getExtranoteDepth(), config.isExtranoteScratch()));
+        if (settings == null) return mods;
+        if (settings.scrollMode > 0) mods.add(new bms.player.beatoraja.pattern.ScrollSpeedModifier(
+                settings.scrollMode - 1, settings.scrollSection, settings.scrollRate, settings.seed ^ 0x5343524f4c4cL));
+        if (settings.longnoteMode > 0) mods.add(new bms.player.beatoraja.pattern.LongNoteModifier(
+                settings.longnoteMode - 1, settings.longnoteRate, settings.seed));
+        if (settings.mineMode > 0) mods.add(new bms.player.beatoraja.pattern.MineNoteModifier(settings.mineMode - 1, settings.seed ^ 0x4d494e45L));
+        if (settings.extranoteDepth > 0) mods.add(new bms.player.beatoraja.pattern.ExtraNoteModifier(
+                settings.extranoteType, settings.extranoteDepth, settings.extranoteScratch));
         return mods;
     }
 

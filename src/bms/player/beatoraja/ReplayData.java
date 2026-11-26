@@ -59,6 +59,15 @@ public final class ReplayData implements Validatable {
 	public String primaryScoringFallbackReason;
 	public int scoringRuleVersion = 1;
 	public long scoringFrameUs;
+	/** Null in legacy replays, which did not record these chart modifiers. */
+	public ChartModifiers chartModifiers;
+
+	public static final class ChartModifiers {
+		public long seed;
+		public int scrollMode, scrollSection, longnoteMode, mineMode, extranoteType, extranoteDepth;
+		public double scrollRate, longnoteRate;
+		public boolean extranoteScratch;
+	}
 	/**
 	 * 譜面オプションによる変更ログ。旧データとの互換性維持用
 	 */

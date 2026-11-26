@@ -32,6 +32,7 @@ public final class MusicResultScoreDisplayTest {
     public static void main(String[] args) throws Exception {
         var previousInput = Gdx.input;
         try {
+            verifyGaugeCycles();
             for (var mode : new Mode[]{Mode.BEAT_5K, Mode.BEAT_7K, Mode.POPN_9K, Mode.BEAT_10K, Mode.BEAT_14K}) {
                 verify(mode);
             }
@@ -39,6 +40,36 @@ public final class MusicResultScoreDisplayTest {
             Gdx.input = previousInput;
         }
         System.out.println("MusicResultScoreDisplayTest passed (F7, graph switching and primary isolation in all supported modes)");
+    }
+
+    private static void verifyGaugeCycles() throws Exception {
+        var resource = KeyboardQueueTestSupport.allocate(PlayerResource.class);
+        var model = new BMSModel(); model.setMode(Mode.BEAT_7K); model.setTotal(120);
+        var gauge = new GrooveGauge(model, NORMAL, GaugeProperty.SEVENKEYS);
+        resource.setGrooveGauge(gauge); resource.setGauge(gaugeSamples(gauge, 80));
+        var main = KeyboardQueueTestSupport.allocate(MainController.class);
+        set(main, MainController.class, "resource", resource);
+        var result = new MusicResult(main);
+        var change = MusicResult.class.getDeclaredMethod("changeGaugeGraph"); change.setAccessible(true);
+        var rules = new bms.player.beatoraja.play.SecondaryScoringRule[]{
+                bms.player.beatoraja.play.SecondaryScoringRule.LR2,
+                bms.player.beatoraja.play.SecondaryScoringRule.PULSUS,
+                bms.player.beatoraja.play.SecondaryScoringRule.ANGOLMOIS,
+                bms.player.beatoraja.play.SecondaryScoringRule.BEATORAJA};
+        int[][] expected = {{3, 5, 1, 2}, {3, 1, 2}, {2}, {3, 4, 5, 0, 1, 2}};
+        for (int i = 0; i < rules.length; i++) {
+            var rule = rules[i];
+            resource.setPrimaryScoringSelection(new bms.player.beatoraja.play.PrimaryScoringSelection(rule, rule, ""));
+            result.gaugeType = NORMAL;
+            for (int type : expected[i]) {
+                change.invoke(result);
+                check(result.getGaugeType() == type, "Gauge cycle stays within " + rule + " graphs");
+            }
+        }
+        result.gaugeType = 6;
+        change.invoke(result); check(result.getGaugeType() == 7, "beatoraja course gauge cycle is preserved");
+        change.invoke(result); check(result.getGaugeType() == 8, "beatoraja course EX-HARD is preserved");
+        change.invoke(result); check(result.getGaugeType() == 6, "beatoraja course gauges wrap");
     }
 
     private static void verify(Mode mode) throws Exception {
@@ -111,6 +142,7 @@ public final class MusicResultScoreDisplayTest {
         timingGraph.prepare(0, result);
         check(result.getTimingDistribution().getAverage() == -6 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), standardArea),
                 "Initial timing distribution and judge area belong to primary");
+        check(FloatPropertyFactory.getFloatProperty(374).get(result) == -6, "Float timing mean uses signed primary samples in ms");
         var timingField = timingGraph.getClass().getDeclaredField("distribution"); timingField.setAccessible(true);
         var initialDistribution = timingField.get(timingGraph);
         var gaugeNumber = FloatPropertyFactory.getFloatProperty("groovegauge_1p");
@@ -122,6 +154,7 @@ public final class MusicResultScoreDisplayTest {
         check(result.getTimingDistribution().getAverage() == 30 && java.util.Arrays.equals(result.getDisplayTimingJudgeArea(), lr2Area)
                         && timingField.get(timingGraph) != initialDistribution,
                 "F7 switches signed distribution, statistics and judge-area graph cache");
+        check(FloatPropertyFactory.getFloatProperty("timing_average").get(result) == 30, "Float timing mean follows F7 samples in ms");
         check(result.getDisplayGaugeHistory() == timedHistory && result.getGaugeType() == NORMAL
                         && gaugeNumber.get(result) == 40 && graph.updateGraphData(result) && !graph.updateGraphData(result),
                 "F7 invalidates the graph even when both views use NORMAL");

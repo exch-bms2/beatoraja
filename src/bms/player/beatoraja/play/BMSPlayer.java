@@ -206,6 +206,8 @@ public class BMSPlayer extends MainState {
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 
+		if (autoplay.mode == BMSPlayerMode.Mode.REPLAY) applyChartModifiers(autoplay, config);
+
 		if (autoplay.mode == BMSPlayerMode.Mode.PLAY || autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
@@ -221,16 +223,8 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 
-			Array<PatternModifier> mods = new Array<PatternModifier>();
-			for (var modifier : config.getChartScoringPlan(model.getSHA256()).modifiers(config)) mods.add(modifier);
-
-			for(PatternModifier mod : mods) {
-				mod.modify(model);
-				if(mod.getAssistLevel() != PatternModifier.AssistLevel.NONE) {
-					assist = Math.max(assist, mod.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
-					score = false;
-				}
-			}
+			applyChartModifiers(autoplay, config);
+			if (assist > 0) score = false;
 
 			if (playinfo.doubleoption >= 2) {
 				if(model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K) {
@@ -368,6 +362,18 @@ public class BMSPlayer extends MainState {
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.getSongdata().setBMSModel(model);
 		resource.getSongdata().setDifficulty(difficulty);
+	}
+
+	/** Replay modifiers are restored without changing the user's current configuration. */
+	private void applyChartModifiers(BMSPlayerMode mode, PlayerConfig config) {
+		if (mode.mode == BMSPlayerMode.Mode.PRACTICE) return;
+		playinfo.chartModifiers = replay != null ? replay.chartModifiers
+				: config.getChartScoringPlan(model.getSHA256()).snapshot(config);
+		for (var modifier : ChartScoringPlan.modifiers(playinfo.chartModifiers)) {
+			modifier.modify(model);
+			if (modifier.getAssistLevel() != PatternModifier.AssistLevel.NONE)
+				assist = Math.max(assist, modifier.getAssistLevel() == PatternModifier.AssistLevel.ASSIST ? 2 : 1);
+		}
 	}
 
 	public SkinType getSkinType() {
@@ -1021,6 +1027,7 @@ public class BMSPlayer extends MainState {
 		replay.requestedPrimaryScoringRuleId = resource.getPrimaryScoringSelection().requested().id();
 		replay.primaryScoringFallbackReason = resource.getPrimaryScoringSelection().reason();
 		replay.scoringFrameUs = playRule == BMSPlayerRule.Angolmois ? AngolmoisEngine.FRAME_US : 0;
+		replay.chartModifiers = playinfo.chartModifiers;
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
 		replay.randomoption = playinfo.randomoption;
 		replay.randomoptionseed = playinfo.randomoptionseed;

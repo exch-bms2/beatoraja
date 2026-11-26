@@ -106,7 +106,9 @@ public final class DiscordWebhook {
                 + StringPropertyFactory.getStringProperty(STRING_FULLTITLE).get(result)).strip();
         int end = title.offsetByCodePoints(0, Math.min(256, title.codePointCount(0, title.length())));
         return scoreCard(title.isEmpty() ? "beatoraja" : title.substring(0, end),
-                scoreDescription(score, result.getOldScore(),
+                "**Scoring Rule:** " + (result instanceof MusicResult music
+                        ? music.resource.getPrimaryScoringSelection().effective().displayName() : "beatoraja") + "\n"
+                + scoreDescription(score, result.getOldScore(),
                         result instanceof MusicResult musicResult
                                 ? ScreenShotExporter.getRankTypeName(musicResult.getPrimaryScoreDataProperty())
                                 : ScreenShotExporter.getRankTypeName(result),
@@ -127,14 +129,16 @@ public final class DiscordWebhook {
     static String scoreDescription(ScoreData score, ScoreData oldScore, String rank, String clear,
                                    int irRank, int irTotal, int oldIrRank) {
         boolean hasPrevious = oldScore != null && oldScore.getClear() != ClearType.NoPlay.id;
-        int exScore = score.getExscore();
+        int points = score.getRuleScore();
         int badPoor = badPoor(score);
-        String rate = score.getNotes() > 0 ? String.format(Locale.ROOT, " (%.2f%%)", exScore * 50.0 / score.getNotes()) : "";
+        String rate = score.getRuleMaxScore() > 0 ? String.format(Locale.ROOT, " (%.2f%%)", points * 100.0 / score.getRuleMaxScore()) : "";
         String description = "**Clear:** " + clear + "\n**DJ Level:** " + rank + rate + "\n"
-                + "**EX Score:** " + exScore + (hasPrevious ? difference(exScore, oldScore.getExscore()) : "")
+                + (score.getNativeScore() >= 0 ? "**Score:** " : "**EX Score:** ") + points
+                + (score.getNativeScore() >= 0 ? "/" + score.getRuleMaxScore() : "")
+                + (hasPrevious ? difference(points, oldScore.getRuleScore()) : "")
                 + "\n**BAD/POOR:** " + badPoor + (hasPrevious ? difference(badPoor, badPoor(oldScore)) : "");
         if (irRank > 0 && irTotal > 0) {
-            description += "\n**IR Rank:** " + irRank + "/" + irTotal + (oldIrRank > 0 ? difference(irRank, oldIrRank) : "");
+            description += "\n**IR Rank (beatoraja):** " + irRank + "/" + irTotal + (oldIrRank > 0 ? difference(irRank, oldIrRank) : "");
         }
         return description;
     }

@@ -53,6 +53,14 @@ public final class DiscordWebhookTest {
         String first = DiscordWebhook.scoreDescription(score, null, "AAA", "HARD CLEAR", 0, 0, 0);
         check(!first.contains("IR Rank") && !first.contains("(+"), "First play and unavailable IR");
 
+        var nativeScore = new ScoreData(); nativeScore.setNotes(2); nativeScore.setEpg(1);
+        nativeScore.setNativeScore(700); nativeScore.setNativeMaxScore(750);
+        var nativeBest = new ScoreData(); nativeBest.setClear(ClearType.Normal.id); nativeBest.setNativeScore(650);
+        String nativeDescription = DiscordWebhook.scoreDescription(nativeScore, nativeBest, "AAA", "NORMAL", 3, 20, 5);
+        check(nativeDescription.contains("AAA (93.33%)") && nativeDescription.contains("**Score:** 700/750 (+50)")
+                && !nativeDescription.contains("**EX Score:") && nativeDescription.contains("IR Rank (beatoraja)"),
+                "Native cards use native points, maximum, rate and improvement; IR rank identifies its separate rule");
+
         var reader = new JsonReader();
         var imageOnly = reader.parse(DiscordWebhook.payload(config, null));
         check(!imageOnly.has("embeds") && imageOnly.get("allowed_mentions").get("parse").size == 0, "Image only and mentions disabled");

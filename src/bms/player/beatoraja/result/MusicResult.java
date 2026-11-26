@@ -219,10 +219,17 @@ public class MusicResult extends AbstractResult {
 	}
 
 	private void changeGaugeGraph() {
-		if (currentTimingRuleId().equals(SecondaryScoringRule.ANGOLMOIS.id())) return;
+		var rule = SecondaryScoringRule.byId(currentTimingRuleId());
+		if (rule == SecondaryScoringRule.ANGOLMOIS) return;
 		int type = getGaugeType();
-		int next = type >= GrooveGauge.ASSISTEASY && type <= GrooveGauge.HAZARD
-				? (type + 1) % 6 : (type - 5) % 3 + 6;
+		int next = type;
+		int length = getDisplayGaugeSamples().length;
+		for (int i = 0; i < 6; i++) {
+			next = next >= GrooveGauge.ASSISTEASY && next <= GrooveGauge.HAZARD
+					? (next + 1) % 6 : (next - 5) % 3 + 6;
+			if (next < length && (rule == null || rule.supportsGaugeGraph(next))) break;
+		}
+		if (next >= length || rule != null && !rule.supportsGaugeGraph(next)) return;
 		var display = secondaryDisplay();
 		if (display != null) {
 			var history = display.result.gaugeHistory();

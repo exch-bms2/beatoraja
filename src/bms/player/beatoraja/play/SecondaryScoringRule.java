@@ -23,6 +23,16 @@ public enum SecondaryScoringRule {
 	public String displayName() { return displayName; }
 	public BMSPlayerRule scoreRule() { return scoreRule; }
 	public String databaseSuffix() { return "_" + id; }
+	/** Gauges whose result graphs are calculated by this rule. */
+	public boolean supportsGaugeGraph(int gauge) {
+		return switch (this) {
+			case LR2 -> gauge == AbstractGrooveGauge.EASY || gauge == AbstractGrooveGauge.NORMAL
+					|| gauge == AbstractGrooveGauge.HARD || gauge == AbstractGrooveGauge.HAZARD;
+			case PULSUS -> gauge == AbstractGrooveGauge.EASY || gauge == AbstractGrooveGauge.NORMAL || gauge == AbstractGrooveGauge.HARD;
+			case ANGOLMOIS -> gauge == AbstractGrooveGauge.NORMAL;
+			default -> gauge >= 0 && gauge < 9;
+		};
+	}
 	@Override public String toString() { return displayName; }
 
 	public static SecondaryScoringRule byId(String id) {

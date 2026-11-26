@@ -350,7 +350,7 @@ public class FloatPropertyFactory {
 		}),
 		timing_average(374, (state) ->{
 			if (state instanceof AbstractResult) {
-				return ((AbstractResult) state).getTimingDistribution().getArrayCenter() / 1000.0f;
+				return ((AbstractResult) state).getTimingDistribution().getAverage();
 			}
 			return Float.MIN_VALUE;
 		}),
